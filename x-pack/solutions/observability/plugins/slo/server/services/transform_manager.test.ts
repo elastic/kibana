@@ -218,6 +218,102 @@ describe('TransformManager', () => {
       ).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('GetVersion', () => {
+    it('handles inexistant transforms', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockRejectedValue({
+        meta: { body: { error: { type: 'resource_not_found_exception' } } },
+      });
+
+      const version = await transformManager.getVersion('inexistant');
+
+      expect(version).toBe(undefined);
+    });
+
+    it('handles transform without meta version', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockResolvedValue({
+        count: 1,
+        transforms: [
+          {
+            dest: { index: 'irrelevant' },
+            source: { index: 'irrelevant' },
+            id: 'slo-id-1',
+            // No _meta version
+            _meta: {
+              other: 'field',
+            },
+          },
+        ],
+      });
+
+      const version = await transformManager.getVersion('slo-id-1');
+
+      expect(version).toBe(undefined);
+    });
+
+    it('handles transform with version specified', async () => {
+      // @ts-ignore defining only a subset of the possible SLI
+      const generators: Record<IndicatorTypes, TransformGenerator> = {
+        'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
+          spaceId,
+          dataViewsService,
+          false
+        ),
+      };
+      const transformManager = new DefaultTransformManager(
+        generators,
+        scopedClusterClientMock,
+        loggerMock
+      );
+
+      scopedClusterClientMock.asSecondaryAuthUser.transform.getTransform.mockResolvedValue({
+        count: 1,
+        transforms: [
+          {
+            dest: { index: 'irrelevant' },
+            source: { index: 'irrelevant' },
+            id: 'slo-id-1',
+            // No _meta version
+            _meta: {
+              version: 3.4,
+            },
+          },
+        ],
+      });
+
+      const version = await transformManager.getVersion('slo-id-1');
+
+      expect(version).toBe(3.4);
+    });
+  });
 });
 
 class DummyTransformGenerator extends TransformGenerator {

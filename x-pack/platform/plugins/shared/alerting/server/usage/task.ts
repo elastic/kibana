@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import {
   getTotalCountAggregations,
@@ -26,7 +27,6 @@ import {
 import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -171,6 +171,10 @@ export function telemetryTaskRunner(
                 count_rules_by_execution_status:
                   totalCountAggregations.count_rules_by_execution_status,
                 count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                count_rules_with_elasticagent_tag:
+                  totalCountAggregations.count_rules_with_elasticagent_tag,
+                count_rules_with_elasticagent_tag_by_type:
+                  totalCountAggregations.count_rules_with_elasticagent_tag_by_type,
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
@@ -180,6 +184,8 @@ export function telemetryTaskRunner(
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:
                   totalCountAggregations.count_rules_with_investigation_guide,
+                count_rules_with_api_key_created_by_user:
+                  totalCountAggregations.count_rules_with_api_key_created_by_user,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:

@@ -243,4 +243,47 @@
             | LIMIT 100
         </esql>
     </example>
+
+    <example>
+        <natural-language>
+            Detect change points in CPU usage over the past week
+        </natural-language>
+        <esql>
+            FROM metrics-*
+            | WHERE @timestamp > NOW() - 7 days
+            | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1 hour)
+            | CHANGE_POINT avg_cpu ON @timestamp
+            | WHERE type IS NOT NULL
+            | KEEP @timestamp, avg_cpu, type, pvalue
+        </esql>
+    </example>
+
+    <example>
+        <natural-language>
+            Find when response times had significant changes in the API logs
+        </natural-language>
+        <esql>
+            FROM api-logs
+            | WHERE @timestamp > NOW() - 30 days
+            | STATS avg_response_time = AVG(response_time_ms) BY BUCKET(@timestamp, 1 day)
+            | CHANGE_POINT avg_response_time
+            | WHERE type IS NOT NULL
+            | SORT @timestamp DESC
+            | KEEP @timestamp, avg_response_time, type, pvalue
+        </esql>
+    </example>
+
+    <example>
+        <natural-language>
+            Detect spikes and dips in daily sales revenue
+        </natural-language>
+        <esql>
+            FROM sales
+            | STATS daily_revenue = SUM(amount) BY date = BUCKET(order_date, 1 day)
+            | CHANGE_POINT daily_revenue ON date AS change_type, significance
+            | WHERE change_type IS NOT NULL
+            | KEEP date, daily_revenue, change_type, significance
+            | SORT date
+        </esql>
+    </example>
 </examples>

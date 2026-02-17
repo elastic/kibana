@@ -10,11 +10,8 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { LensInspector } from '../../../lens_inspector_service';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
-
 import type {
+  TypedLensSerializedState,
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
@@ -24,7 +21,16 @@ import type {
   StateSetter,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+  LensInspector,
+} from '@kbn/lens-common';
+import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
+
+export interface TextBasedQueryState {
+  /** Whether the query has errors from the last run attempt */
+  hasErrors: boolean;
+  /** Whether the query has been modified but not yet submitted */
+  isQueryPendingSubmit: boolean;
+}
 
 export interface LensConfigPanelBaseProps {
   framePublicAPI: FramePublicAPI;
@@ -45,8 +51,9 @@ export interface LensConfigPanelBaseProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+  /** Callback to report text-based query state changes */
+  onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
 
 export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {
@@ -84,7 +91,6 @@ export interface LayerPanelProps extends LensConfigPanelBaseProps {
   onRemoveLayer: (layerId: string) => void;
   onCloneLayer: () => void;
   onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
-  registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
   toggleFullscreen: () => void;
   onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
   onChangeIndexPattern: (args: {

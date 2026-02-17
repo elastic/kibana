@@ -6,14 +6,18 @@
  */
 
 export type { AuthenticationServiceStart } from './authentication_service';
+export type { ClientAuthentication } from './client_authentication';
 
 export type {
-  APIKeysService as APIKeys,
+  NativeAPIKeysType,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  UiamAPIKeysType,
 } from '@kbn/core-security-server';
 
 export {

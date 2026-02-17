@@ -10,9 +10,32 @@
 import type { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
 /**
+ * Configuration schema for the OTLP exporter (gRPC or HTTP).
+ */
+export interface OTLPExportConfig {
+  /**
+   * The URL for OTLP receiver endpoint.
+   */
+  url: string;
+  /**
+   * Optional headers for authentication or metadata.
+   */
+  headers?: Record<string, string>;
+  /**
+   * The delay in milliseconds before the exporter sends another
+   * batch of spans.
+   */
+  scheduled_delay: number;
+}
+
+/**
  * Allowed configurations for OTLP tracing exporters
  */
-export type TracingExporterConfig = InferenceTracingExportConfig;
+export type TracingExporterConfig =
+  | InferenceTracingExportConfig
+  | { grpc: OTLPExportConfig }
+  | { http: OTLPExportConfig };
+
 /**
  * Configuration for OpenTelemetry tracing
  */

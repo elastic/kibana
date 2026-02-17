@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -101,16 +101,18 @@ export async function getServiceAgent({
     return {};
   }
 
-  const event = unflattenKnownApmEventFields(hit.fields);
+  const event = accessKnownApmEventFields(hit.fields);
 
-  const { agent, service, cloud, telemetry } = event;
-  const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
+  const serverlessType = getServerlessTypeFromCloudData(
+    event[CLOUD_PROVIDER],
+    event[CLOUD_SERVICE_NAME]
+  );
 
   return {
-    agentName: agent?.name,
-    telemetrySdkName: telemetry?.sdk?.name,
-    telemetrySdkLanguage: telemetry?.sdk?.language,
-    runtimeName: service?.runtime?.name,
+    agentName: event[AGENT_NAME],
+    telemetrySdkName: event[TELEMETRY_SDK_NAME],
+    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    runtimeName: event[SERVICE_RUNTIME_NAME],
     serverlessType,
   };
 }

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Filter, FilterMeta, FilterStateStore } from './types';
+import type { Filter, FilterMeta } from './types';
 import { FILTERS } from './types';
 
 /** @public */

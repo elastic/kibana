@@ -10,16 +10,18 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import type { LastValueIndexPatternColumn } from './last_value';
+import type {
+  LastValueIndexPatternColumn,
+  FormBasedLayer,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import { lastValueOperation } from '.';
-import type { FormBasedLayer } from '../../types';
-import type { TermsIndexPatternColumn } from './terms';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
@@ -32,7 +34,7 @@ const defaultProps = {
   uiSettings: uiSettingsMock,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,

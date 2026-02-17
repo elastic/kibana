@@ -10,6 +10,7 @@
 import React from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataPublicPluginStart } from './shared_imports';
@@ -22,10 +23,11 @@ interface Dependencies {
   core: CoreStart;
   searchClient: DataPublicPluginStart['search']['search'];
   dataViews: DataViewsServicePublic;
+  cps?: CPSPluginStart;
 }
 
 export const getEditorOpener =
-  ({ core, searchClient, dataViews }: Dependencies) =>
+  ({ core, searchClient, dataViews, cps }: Dependencies) =>
   (options: DataViewEditorProps): CloseEditor => {
     const { uiSettings, overlays, docLinks, notifications, http, application } = core;
     const { Provider: KibanaReactContextProvider } =
@@ -38,6 +40,7 @@ export const getEditorOpener =
         dataViews,
         overlays,
         searchClient,
+        cps,
       });
 
     let overlayRef: OverlayRef | null = null;
@@ -92,10 +95,6 @@ export const getEditorOpener =
         {
           hideCloseButton: true,
           size: 'l',
-          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps: {
-            style: 'z-index: 1004', // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-          },
           'aria-labelledby': 'dataViewEditorFlyoutTitle',
         }
       );

@@ -24,8 +24,12 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import type { LensAppState } from '../../../state_management';
-import type { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
+import type {
+  LensAppState,
+  FramePublicAPI,
+  Visualization,
+  VisualizationConfigProps,
+} from '@kbn/lens-common';
 import { LayerPanel } from './layer_panel';
 import type { LayerPanelProps } from './types';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
@@ -84,7 +88,7 @@ interface RenderLayerPanelOptions {
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
-  let mockDatasource = createMockDatasource('testDatasource');
+  let mockDatasource = createMockDatasource('formBased');
 
   function getDefaultProps(): LayerPanelProps {
     return {
@@ -109,7 +113,6 @@ describe('LayerPanel', () => {
       onRemoveDimension: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      registerNewLayerRef: jest.fn(),
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
@@ -140,7 +143,7 @@ describe('LayerPanel', () => {
                 testVis: mockVisualization,
               }}
               datasourceMap={{
-                testDatasource: mockDatasource,
+                formBased: mockDatasource,
               }}
             >
               {children}
@@ -165,29 +168,6 @@ describe('LayerPanel', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('layer reset and remove', () => {
-    it('should show the reset button when single layer', async () => {
-      renderLayerPanel();
-      expect(screen.getByRole('button', { name: /clear layer/i })).toBeInTheDocument();
-    });
-
-    it('should show the delete button when single layer', async () => {
-      renderLayerPanel({
-        propsOverrides: { isOnlyLayer: false },
-      });
-      expect(screen.getByRole('button', { name: /delete layer/i })).toBeInTheDocument();
-    });
-
-    it('should call the clear callback when resetting layer', async () => {
-      const cb = jest.fn();
-      renderLayerPanel({
-        propsOverrides: { onRemoveLayer: cb },
-      });
-      await userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
-      expect(cb).toHaveBeenCalled();
-    });
   });
 
   describe('single group', () => {
@@ -617,7 +597,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lns-indexPattern-dimensionContainerBack'));
 
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
-      expect(updateDatasource).toHaveBeenCalledWith('testDatasource', { newState: {} });
+      expect(updateDatasource).toHaveBeenCalledWith('formBased', { newState: {} });
     });
 
     it('should display the fake final accessor if present in the group config', async () => {

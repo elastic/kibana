@@ -6,11 +6,7 @@
  */
 
 import { sanitizeRequest, getRequestWithStreamOption, getAxiosOptions } from './utils';
-import {
-  DEFAULT_OPENAI_MODEL,
-  OpenAiProviderType,
-  OPENAI_CHAT_URL,
-} from '../../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType, OPENAI_CHAT_URL } from '@kbn/connector-schemas/openai';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,
@@ -50,18 +46,18 @@ describe('Utils', () => {
     });
 
     it('calls openai_utils sanitizeRequest when provider is OpenAi', () => {
-      sanitizeRequest(OpenAiProviderType.OpenAi, OPENAI_CHAT_URL, bodyString, DEFAULT_OPENAI_MODEL);
+      sanitizeRequest(OpenAiProviderType.OpenAi, OPENAI_CHAT_URL, bodyString, DEFAULT_MODEL);
       expect(mockOpenAiSanitizeRequest).toHaveBeenCalledWith(
         OPENAI_CHAT_URL,
         bodyString,
-        DEFAULT_OPENAI_MODEL
+        DEFAULT_MODEL
       );
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
       expect(mockOtherOpenAiSanitizeRequest).not.toHaveBeenCalled();
     });
 
     it('calls other_openai_utils sanitizeRequest when provider is Other OpenAi', () => {
-      sanitizeRequest(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, DEFAULT_OPENAI_MODEL);
+      sanitizeRequest(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, DEFAULT_MODEL);
       expect(mockOtherOpenAiSanitizeRequest).toHaveBeenCalledWith(bodyString);
       expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
@@ -97,14 +93,14 @@ describe('Utils', () => {
         OPENAI_CHAT_URL,
         bodyString,
         true,
-        DEFAULT_OPENAI_MODEL
+        DEFAULT_MODEL
       );
 
       expect(mockOpenAiGetRequestWithStreamOption).toHaveBeenCalledWith(
         OPENAI_CHAT_URL,
         bodyString,
         true,
-        DEFAULT_OPENAI_MODEL
+        DEFAULT_MODEL
       );
       expect(mockAzureAiGetRequestWithStreamOption).not.toHaveBeenCalled();
       expect(mockOtherOpenAiGetRequestWithStreamOption).not.toHaveBeenCalled();

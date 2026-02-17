@@ -48,7 +48,6 @@ export interface ElasticsearchClientConfig {
   serviceAccountToken?: string;
   hosts: string[];
   keepAlive?: boolean;
-  pingTimeout?: Duration | number;
   requestTimeout?: Duration | number;
   caFingerprint?: string;
   ssl?: ElasticsearchClientSslConfig;

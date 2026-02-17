@@ -90,7 +90,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.exports.clickExportTopNavButton();
         await (await testSubjects.find('scheduleExport')).click();
-        await testSubjects.existOrFail('exportItemDetailsFlyout');
+        await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
 
         await retry.try(async () => {
           await (await testSubjects.find('scheduleExportSubmitButton')).click();
@@ -113,13 +113,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('allows user to view schedule config in flyout', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
         await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
-        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportViewConfig-"]`);
+        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportEditConfig-"]`);
 
         await viewConfigButton.click();
 
-        await testSubjects.existOrFail('scheduledReportFlyout');
+        await testSubjects.existOrFail('editScheduledReportFlyout');
         await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('scheduledReportFlyout');
+        await testSubjects.missingOrFail('editScheduledReportFlyout');
       });
 
       it('allows user to disable schedule', async () => {

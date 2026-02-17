@@ -15,8 +15,8 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
           aria-controls="generated-id"
           aria-selected="true"
           class="euiTab euiTab-isSelected emotion-euiTab-selected"
-          data-test-subj="docViewerTab-function"
-          id="kbn_doc_viewer_tab_function"
+          data-test-subj="docViewerTab-view1"
+          id="kbn_doc_viewer_tab_view1"
           role="tab"
           tabindex="0"
           type="button"
@@ -24,15 +24,15 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
           <span
             class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
           >
-            Render function
+            Render 1
           </span>
         </button>
         <button
           aria-controls="generated-id"
           aria-selected="false"
           class="euiTab emotion-euiTab"
-          data-test-subj="docViewerTab-component"
-          id="kbn_doc_viewer_tab_component"
+          data-test-subj="docViewerTab-view2"
+          id="kbn_doc_viewer_tab_view2"
           role="tab"
           tabindex="-1"
           type="button"
@@ -40,7 +40,7 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
           <span
             class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
           >
-            React component
+            Render 2
           </span>
         </button>
         <button
@@ -61,7 +61,7 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
         </button>
       </div>
       <div
-        aria-labelledby="kbn_doc_viewer_tab_function"
+        aria-labelledby="kbn_doc_viewer_tab_view1"
         id="generated-id"
         role="tabpanel"
       />

@@ -60,6 +60,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 true,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -77,6 +78,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 true,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -94,6 +96,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               true,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-1",
           },
           "state": Object {
@@ -132,6 +135,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 false,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {},
@@ -147,6 +151,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               false,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-1",
           },
           "state": Object {},
@@ -191,6 +196,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 true,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -209,6 +215,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 true,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -227,6 +234,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               true,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-1",
           },
           "state": Object {
@@ -270,6 +278,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 true,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {},
@@ -285,6 +294,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               true,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-1",
           },
           "state": Object {},
@@ -321,6 +331,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 false,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {},
@@ -369,6 +380,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
             "meta": Object {
               "flappingHistory": Array [],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -382,6 +394,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
                 false,
               ],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-2",
             },
             "state": Object {},
@@ -394,6 +407,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
             "meta": Object {
               "flappingHistory": Array [],
               "maintenanceWindowIds": Array [],
+              "maintenanceWindowNames": Array [],
               "uuid": "uuid-1",
             },
             "state": Object {
@@ -409,6 +423,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
           "meta": Object {
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-1",
           },
           "state": Object {
@@ -422,6 +437,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               false,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-2",
           },
           "state": Object {},
@@ -437,6 +453,7 @@ describe('setFlappingHistoryAndTrackedAlerts', () => {
               false,
             ],
             "maintenanceWindowIds": Array [],
+            "maintenanceWindowNames": Array [],
             "uuid": "uuid-3",
           },
           "state": Object {},

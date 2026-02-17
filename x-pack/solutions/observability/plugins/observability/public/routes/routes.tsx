@@ -24,6 +24,7 @@ import {
   ANNOTATIONS_PATH,
   CASES_PATH,
   CREATE_RULE_PATH,
+  CREATE_RULE_FROM_TEMPLATE_PATH,
   EDIT_RULE_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
@@ -143,6 +144,13 @@ const routes = {
   [RULE_DETAIL_PATH]: {
     handler: () => {
       return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [CREATE_RULE_FROM_TEMPLATE_PATH]: {
+    handler: () => {
+      return <RulePage />;
     },
     params: {},
     exact: true,

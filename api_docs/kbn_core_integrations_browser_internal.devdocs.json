@@ -12,6 +12,8 @@
         "label": "IntegrationsServiceSetupDeps",
         "description": [],
         "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,6 +28,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/integrations/browser-internal/src/integrations_service.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

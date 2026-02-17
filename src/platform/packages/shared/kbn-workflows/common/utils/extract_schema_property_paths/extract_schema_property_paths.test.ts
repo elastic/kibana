@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { extractSchemaPropertyPaths } from './extract_schema_property_paths';
 
 describe('extractSchemaPropertyPaths', () => {
@@ -22,9 +22,9 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'name', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'age', type: ZodFirstPartyTypeKind.ZodNumber },
-        { path: 'active', type: ZodFirstPartyTypeKind.ZodBoolean },
+        { path: 'name', type: 'string' },
+        { path: 'age', type: 'number' },
+        { path: 'active', type: 'boolean' },
       ]);
     });
 
@@ -49,16 +49,16 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'user', type: ZodFirstPartyTypeKind.ZodObject },
-        { path: 'user.profile', type: ZodFirstPartyTypeKind.ZodObject },
-        { path: 'user.profile.firstName', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'user.profile.lastName', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'user.settings', type: ZodFirstPartyTypeKind.ZodObject },
-        { path: 'user.settings.theme', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'user.settings.notifications', type: ZodFirstPartyTypeKind.ZodBoolean },
-        { path: 'metadata', type: ZodFirstPartyTypeKind.ZodObject },
-        { path: 'metadata.createdAt', type: ZodFirstPartyTypeKind.ZodDate },
-        { path: 'metadata.version', type: ZodFirstPartyTypeKind.ZodNumber },
+        { path: 'user', type: 'object' },
+        { path: 'user.profile', type: 'object' },
+        { path: 'user.profile.firstName', type: 'string' },
+        { path: 'user.profile.lastName', type: 'string' },
+        { path: 'user.settings', type: 'object' },
+        { path: 'user.settings.theme', type: 'string' },
+        { path: 'user.settings.notifications', type: 'boolean' },
+        { path: 'metadata', type: 'object' },
+        { path: 'metadata.createdAt', type: 'date' },
+        { path: 'metadata.version', type: 'number' },
       ]);
     });
   });
@@ -73,8 +73,8 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'required', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'optional', type: ZodFirstPartyTypeKind.ZodOptional },
+        { path: 'required', type: 'string' },
+        { path: 'optional', type: 'optional' },
       ]);
     });
 
@@ -87,8 +87,8 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'required', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'nullable', type: ZodFirstPartyTypeKind.ZodNullable },
+        { path: 'required', type: 'string' },
+        { path: 'nullable', type: 'nullable' },
       ]);
     });
 
@@ -105,9 +105,9 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'user', type: ZodFirstPartyTypeKind.ZodOptional },
-        { path: 'user.name', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'user.email', type: ZodFirstPartyTypeKind.ZodString },
+        { path: 'user', type: 'optional' },
+        { path: 'user.name', type: 'string' },
+        { path: 'user.email', type: 'string' },
       ]);
     });
   });
@@ -127,9 +127,9 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'steps', type: ZodFirstPartyTypeKind.ZodRecord },
-        { path: 'steps.output', type: ZodFirstPartyTypeKind.ZodOptional },
-        { path: 'steps.error', type: ZodFirstPartyTypeKind.ZodOptional },
+        { path: 'steps', type: 'record' },
+        { path: 'steps.output', type: 'optional' },
+        { path: 'steps.error', type: 'optional' },
       ]);
     });
 
@@ -140,7 +140,7 @@ describe('extractSchemaPropertyPaths', () => {
 
       const result = extractSchemaPropertyPaths(schema);
 
-      expect(result).toEqual([{ path: 'config', type: ZodFirstPartyTypeKind.ZodRecord }]);
+      expect(result).toEqual([{ path: 'config', type: 'record' }]);
     });
   });
 
@@ -159,8 +159,8 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'tags', type: ZodFirstPartyTypeKind.ZodArray },
-        { path: 'items', type: ZodFirstPartyTypeKind.ZodArray },
+        { path: 'tags', type: 'array' },
+        { path: 'items', type: 'array' },
       ]);
     });
   });
@@ -197,48 +197,48 @@ describe('extractSchemaPropertyPaths', () => {
 
       const result = extractSchemaPropertyPaths(schema);
 
-      expect(result).toContainEqual({ path: 'event', type: ZodFirstPartyTypeKind.ZodOptional });
-      expect(result).toContainEqual({ path: 'inputs', type: ZodFirstPartyTypeKind.ZodOptional });
-      expect(result).toContainEqual({ path: 'execution', type: ZodFirstPartyTypeKind.ZodObject });
+      expect(result).toContainEqual({ path: 'event', type: 'optional' });
+      expect(result).toContainEqual({ path: 'inputs', type: 'optional' });
+      expect(result).toContainEqual({ path: 'execution', type: 'object' });
       expect(result).toContainEqual({
         path: 'execution.id',
-        type: ZodFirstPartyTypeKind.ZodString,
+        type: 'string',
       });
       expect(result).toContainEqual({
         path: 'execution.status',
-        type: ZodFirstPartyTypeKind.ZodString,
+        type: 'string',
       });
-      expect(result).toContainEqual({ path: 'workflow', type: ZodFirstPartyTypeKind.ZodObject });
+      expect(result).toContainEqual({ path: 'workflow', type: 'object' });
       expect(result).toContainEqual({
         path: 'workflow.id',
-        type: ZodFirstPartyTypeKind.ZodString,
+        type: 'string',
       });
       expect(result).toContainEqual({
         path: 'workflow.name',
-        type: ZodFirstPartyTypeKind.ZodString,
+        type: 'string',
       });
-      expect(result).toContainEqual({ path: 'steps', type: ZodFirstPartyTypeKind.ZodRecord });
+      expect(result).toContainEqual({ path: 'steps', type: 'record' });
       expect(result).toContainEqual({
         path: 'steps.output',
-        type: ZodFirstPartyTypeKind.ZodOptional,
+        type: 'optional',
       });
       expect(result).toContainEqual({
         path: 'steps.error',
-        type: ZodFirstPartyTypeKind.ZodOptional,
+        type: 'optional',
       });
-      expect(result).toContainEqual({ path: 'foreach', type: ZodFirstPartyTypeKind.ZodOptional });
+      expect(result).toContainEqual({ path: 'foreach', type: 'optional' });
       expect(result).toContainEqual({
         path: 'foreach.items',
-        type: ZodFirstPartyTypeKind.ZodArray,
+        type: 'array',
       });
       expect(result).toContainEqual({
         path: 'foreach.index',
-        type: ZodFirstPartyTypeKind.ZodNumber,
+        type: 'number',
       });
-      expect(result).toContainEqual({ path: 'foreach.item', type: ZodFirstPartyTypeKind.ZodAny });
+      expect(result).toContainEqual({ path: 'foreach.item', type: 'any' });
       expect(result).toContainEqual({
         path: 'foreach.total',
-        type: ZodFirstPartyTypeKind.ZodNumber,
+        type: 'number',
       });
     });
   });
@@ -291,17 +291,17 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'str', type: ZodFirstPartyTypeKind.ZodString },
-        { path: 'num', type: ZodFirstPartyTypeKind.ZodNumber },
-        { path: 'bool', type: ZodFirstPartyTypeKind.ZodBoolean },
-        { path: 'date', type: ZodFirstPartyTypeKind.ZodDate },
-        { path: 'bigint', type: ZodFirstPartyTypeKind.ZodBigInt },
-        { path: 'any', type: ZodFirstPartyTypeKind.ZodAny },
-        { path: 'unknown', type: ZodFirstPartyTypeKind.ZodUnknown },
-        { path: 'nullType', type: ZodFirstPartyTypeKind.ZodNull },
-        { path: 'undefinedType', type: ZodFirstPartyTypeKind.ZodUndefined },
-        { path: 'voidType', type: ZodFirstPartyTypeKind.ZodVoid },
-        { path: 'never', type: ZodFirstPartyTypeKind.ZodNever },
+        { path: 'str', type: 'string' },
+        { path: 'num', type: 'number' },
+        { path: 'bool', type: 'boolean' },
+        { path: 'date', type: 'date' },
+        { path: 'bigint', type: 'bigint' },
+        { path: 'any', type: 'any' },
+        { path: 'unknown', type: 'unknown' },
+        { path: 'nullType', type: 'null' },
+        { path: 'undefinedType', type: 'undefined' },
+        { path: 'voidType', type: 'void' },
+        { path: 'never', type: 'never' },
       ]);
     });
 
@@ -314,8 +314,8 @@ describe('extractSchemaPropertyPaths', () => {
       const result = extractSchemaPropertyPaths(schema);
 
       expect(result).toEqual([
-        { path: 'literal', type: ZodFirstPartyTypeKind.ZodLiteral },
-        { path: 'enum', type: ZodFirstPartyTypeKind.ZodEnum },
+        { path: 'literal', type: 'literal' },
+        { path: 'enum', type: 'enum' },
       ]);
     });
 
@@ -326,7 +326,7 @@ describe('extractSchemaPropertyPaths', () => {
 
       const result = extractSchemaPropertyPaths(schema);
 
-      expect(result).toEqual([{ path: 'union', type: ZodFirstPartyTypeKind.ZodUnion }]);
+      expect(result).toEqual([{ path: 'union', type: 'union' }]);
     });
   });
 });

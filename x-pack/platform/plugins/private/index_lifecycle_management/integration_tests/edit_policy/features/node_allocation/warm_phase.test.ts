@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../../helpers';
-import type { NodeAllocationTestBed } from './warm_phase.helpers';
-import { setupWarmPhaseNodeAllocation } from './warm_phase.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../../helpers/setup_environment';
+import { renderEditPolicy } from '../../../helpers/render_edit_policy';
+import { createTogglePhaseAction } from '../../../helpers/actions/toggle_phase_action';
+import { createNodeAllocationActions } from '../../../helpers/actions/node_allocation_actions';
 
 describe('<EditPolicy /> node allocation in the warm phase', () => {
-  let testBed: NodeAllocationTestBed;
-  const { httpSetup, setDelayResponse, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  const setup = async () => {
-    await act(async () => {
-      testBed = await setupWarmPhaseNodeAllocation(httpSetup);
-    });
-  };
-
-  beforeEach(async () => {
+  beforeEach(() => {
     httpRequestsMockHelpers.setLoadPolicies([]);
     httpRequestsMockHelpers.setListNodes({
       nodesByRoles: { data: ['node1'] },
@@ -38,11 +32,6 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
     httpRequestsMockHelpers.setNodesDetails('attribute:true', [
       { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
     ]);
-
-    await setup();
-
-    const { component } = testBed;
-    component.update();
   });
 
   test(`doesn't offer allocation guidance when node with deprecated "data" role exists`, async () => {
@@ -51,43 +40,54 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       nodesByRoles: { data: ['test'] },
       isUsingDeprecatedDataRoleConfig: false,
     });
-    await setup();
-    const { actions, component } = testBed;
 
-    component.update();
-    await actions.togglePhase();
+    renderEditPolicy(httpSetup);
+    await screen.findByTestId('savePolicyButton');
 
+    const togglePhase = createTogglePhaseAction();
+    await togglePhase('warm');
+
+    await screen.findByTestId('warm-phase');
+
+    const actions = createNodeAllocationActions('warm');
     expect(actions.isAllocationLoading()).toBeFalsy();
     expect(actions.hasDefaultAllocationBehaviorNotice()).toBeFalsy();
   });
 
   describe('when using node attributes', () => {
     test('shows spinner for node attributes input when loading', async () => {
-      // We don't want the request to resolve immediately.
-      setDelayResponse(true);
+      renderEditPolicy(httpSetup);
+      await screen.findByTestId('savePolicyButton');
 
-      const { actions } = testBed;
-      await actions.togglePhase();
+      const togglePhase = createTogglePhaseAction();
+      const actions = createNodeAllocationActions('warm');
+
+      // Override HTTP mock to freeze the node details request
+      httpSetup.get.mockImplementationOnce(() => new Promise(() => {}));
+
+      await togglePhase('warm');
 
       expect(actions.isAllocationLoading()).toBeTruthy();
       expect(actions.hasDataTierAllocationControls()).toBeTruthy();
       expect(actions.hasNodeAttributesSelect()).toBeFalsy();
 
-      // No notices will be shown.
       expect(actions.hasDefaultToDataTiersNotice()).toBeFalsy();
       expect(actions.hasWillUseFallbackTierUsingNodeAttributesNotice()).toBeFalsy();
       expect(actions.hasDefaultToDataNodesNotice()).toBeFalsy();
       expect(actions.hasNoTiersAvailableUsingNodeAttributesNotice()).toBeFalsy();
-
-      // Reset delayed response status
-      setDelayResponse(false);
     });
 
     describe('and some are defined', () => {
       test('shows the node attributes input', async () => {
-        const { actions } = testBed;
-        await actions.togglePhase();
+        renderEditPolicy(httpSetup);
+        await screen.findByTestId('savePolicyButton');
 
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        const actions = createNodeAllocationActions('warm');
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
         expect(actions.hasDefaultAllocationBehaviorNotice()).toBeFalsy();
@@ -96,9 +96,15 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
       });
 
       test('shows view node attributes link when an attribute is selected and shows flyout when clicked', async () => {
-        const { actions } = testBed;
-        await actions.togglePhase();
+        renderEditPolicy(httpSetup);
+        await screen.findByTestId('savePolicyButton');
 
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        const actions = createNodeAllocationActions('warm');
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
         expect(actions.hasDefaultAllocationBehaviorNotice()).toBeFalsy();
@@ -115,14 +121,19 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
 
     describe('and none are defined', () => {
       const commonSetupAndBaselineAssertions = async () => {
-        await setup();
-        const { actions, component } = testBed;
-        component.update();
-        await actions.togglePhase();
+        renderEditPolicy(httpSetup);
+        await screen.findByTestId('savePolicyButton');
 
+        const togglePhase = createTogglePhaseAction();
+        await togglePhase('warm');
+
+        await screen.findByTestId('warm-phase');
+
+        const actions = createNodeAllocationActions('warm');
         expect(actions.isAllocationLoading()).toBeFalsy();
         await actions.setDataAllocation('node_attrs');
         expect(actions.hasNodeAttributesSelect()).toBeFalsy();
+        return actions;
       };
 
       test('and data tiers are available, shows DefaultToDataTiersNotice', async () => {
@@ -132,8 +143,7 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const actions = await commonSetupAndBaselineAssertions();
         expect(actions.hasDefaultToDataTiersNotice()).toBeTruthy();
       });
 
@@ -144,8 +154,7 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const actions = await commonSetupAndBaselineAssertions();
         expect(actions.hasWillUseFallbackTierUsingNodeAttributesNotice()).toBeTruthy();
       });
 
@@ -156,8 +165,7 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
           isUsingDeprecatedDataRoleConfig: true,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const actions = await commonSetupAndBaselineAssertions();
         expect(actions.hasDefaultToDataNodesNotice()).toBeTruthy();
       });
 
@@ -169,8 +177,7 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
           isUsingDeprecatedDataRoleConfig: false,
         });
 
-        await commonSetupAndBaselineAssertions();
-        const { actions } = testBed;
+        const actions = await commonSetupAndBaselineAssertions();
         expect(actions.hasNoTiersAvailableUsingNodeAttributesNotice()).toBeTruthy();
       });
     });
@@ -184,12 +191,15 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
         isUsingDeprecatedDataRoleConfig: false,
       });
 
-      await setup();
-      const { actions, component } = testBed;
+      renderEditPolicy(httpSetup);
+      await screen.findByTestId('savePolicyButton');
 
-      component.update();
-      await actions.togglePhase();
+      const togglePhase = createTogglePhaseAction();
+      await togglePhase('warm');
 
+      await screen.findByTestId('warm-phase');
+
+      const actions = createNodeAllocationActions('warm');
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasNoTiersAvailableNotice()).toBeTruthy();
     });
@@ -201,12 +211,15 @@ describe('<EditPolicy /> node allocation in the warm phase', () => {
         isUsingDeprecatedDataRoleConfig: false,
       });
 
-      await setup();
-      const { actions, component } = testBed;
+      renderEditPolicy(httpSetup);
+      await screen.findByTestId('savePolicyButton');
 
-      component.update();
-      await actions.togglePhase();
+      const togglePhase = createTogglePhaseAction();
+      await togglePhase('warm');
 
+      await screen.findByTestId('warm-phase');
+
+      const actions = createNodeAllocationActions('warm');
       expect(actions.isAllocationLoading()).toBeFalsy();
       expect(actions.hasWillUseFallbackTierNotice()).toBeTruthy();
       expect(actions.getWillUseFallbackTierNoticeText()).toContain(

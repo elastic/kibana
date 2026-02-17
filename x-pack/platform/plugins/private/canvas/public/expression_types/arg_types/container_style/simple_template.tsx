@@ -42,6 +42,7 @@ SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
 SimpleTemplate.propTypes = {
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,
   }),

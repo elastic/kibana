@@ -11,10 +11,10 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { DEFAULT_LAYER_ID } from '../constants';
 import {
   addLayerColumn,
   addLayerFormulaColumns,

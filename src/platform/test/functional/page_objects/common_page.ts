@@ -55,12 +55,6 @@ export class CommonPageObject extends FtrService {
     for (const key of tourStorageKeys) {
       await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
     }
-
-    const OTHER_TOUR_STORAGE_ENTRIES = [['solutionNavigationTour:completed', 'true']];
-
-    for (const [key, value] of OTHER_TOUR_STORAGE_ENTRIES) {
-      await this.browser.setLocalStorageItem(key, value);
-    }
   }
 
   /**
@@ -277,6 +271,7 @@ export class CommonPageObject extends FtrService {
       disableWelcomePrompt = true,
       insertTimestamp = true,
       retryOnFatalError = true,
+      skipUrlValidation = false,
     } = {}
   ) {
     let appUrl: string;
@@ -340,6 +335,9 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        if (skipUrlValidation) {
+          return currentUrl;
+        }
         const decodedAppUrl = decodeURIComponent(appUrl);
         const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
@@ -366,15 +364,17 @@ export class CommonPageObject extends FtrService {
         return currentUrl;
       });
 
-      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
-        const currentUrl = await this.browser.getCurrentUrl();
-        this.log.debug('in navigateTo url = ' + currentUrl);
-        if (lastUrl !== currentUrl) {
-          lastUrl = currentUrl;
-          throw new Error('URL changed, waiting for it to settle');
-        }
-      });
+      if (!skipUrlValidation) {
+        await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+          await this.sleep(501);
+          const currentUrl = await this.browser.getCurrentUrl();
+          this.log.debug('in navigateTo url = ' + currentUrl);
+          if (lastUrl !== currentUrl) {
+            lastUrl = currentUrl;
+            throw new Error('URL changed, waiting for it to settle');
+          }
+        });
+      }
     });
   }
 
@@ -481,7 +481,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForTopNavToBeVisible() {
     await this.retry.try(async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       if (!isNavVisible) {
         throw new Error('Local nav not visible yet');
       }

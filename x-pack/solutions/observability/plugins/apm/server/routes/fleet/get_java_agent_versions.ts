@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-
 const mavenJavaAgentUrl =
   'https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/maven-metadata.xml';
 

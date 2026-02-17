@@ -19,6 +19,8 @@ import { loggedOutApp } from './logged_out';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { overwrittenSessionApp } from './overwritten_session';
+import { resetSessionApp } from './reset_session';
+import { unauthenticatedApp } from './unauthenticated';
 import type { AuthenticatedUser } from '../../common';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
@@ -51,6 +53,8 @@ export class AuthenticationService {
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });
     overwrittenSessionApp.create({ application, authc: { getCurrentUser }, getStartServices });
+    resetSessionApp.create({ application, getStartServices, http });
+    unauthenticatedApp.create({ application, getStartServices, http });
 
     return { getCurrentUser, areAPIKeysEnabled };
   }

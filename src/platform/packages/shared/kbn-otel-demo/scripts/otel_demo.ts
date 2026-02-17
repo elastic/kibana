@@ -1,0 +1,166 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { run } from '@kbn/dev-cli-runner';
+import chalk from 'chalk';
+import { ensureOtelDemo, patchScenarios } from '../src/ensure_otel_demo';
+import type { DemoType } from '../src/types';
+import {
+  listAvailableDemos,
+  getDemoConfig,
+  getDemoScenarios,
+  getScenarioById,
+} from '../src/demo_registry';
+
+run(
+  ({ log, addCleanupTask, flags }) => {
+    const demoType = (flags.demo as DemoType | undefined) || 'otel-demo';
+
+    // Validate demo type
+    const availableDemos = listAvailableDemos();
+    if (!availableDemos.includes(demoType)) {
+      throw new Error(
+        `Unknown demo type: ${demoType}. Available: ${availableDemos.join(
+          ', '
+        )}\nUse --list-demos to see details.`
+      );
+    }
+
+    const demoConfig = getDemoConfig(demoType);
+    const demoScenarios = getDemoScenarios(demoType);
+
+    // Handle --list-demos
+    if (flags['list-demos']) {
+      log.info('Available demo environments:');
+      log.info('');
+      for (const type of availableDemos) {
+        const config = getDemoConfig(type);
+        log.info(`  ${type.padEnd(20)} - ${config.displayName}`);
+        log.info(`    ${chalk.dim(config.description)}`);
+        log.info(`    ${chalk.dim('Versions: ' + config.availableVersions.join(', '))}`);
+        log.info('');
+      }
+      return Promise.resolve();
+    }
+
+    // Handle --list-scenarios
+    if (flags['list-scenarios']) {
+      log.info(`Failure scenarios for ${demoConfig.displayName}:`);
+      log.info('');
+      log.info('DRAMATIC (service-breaking):');
+      demoScenarios
+        .filter((s) => s.category === 'dramatic')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
+      log.info('');
+      log.info('SUBTLE (degraded performance/observability):');
+      demoScenarios
+        .filter((s) => s.category === 'subtle')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
+      return Promise.resolve();
+    }
+
+    const controller = new AbortController();
+
+    addCleanupTask(() => {
+      controller.abort();
+    });
+
+    const configPath = flags.config ? String(flags.config) : undefined;
+    const logsIndex = flags['logs-index'] ? String(flags['logs-index']) : 'logs';
+    const version = flags.version ? String(flags.version) : undefined;
+    const teardown = Boolean(flags.teardown);
+    const patch = Boolean(flags.patch);
+    const reset = Boolean(flags.reset);
+
+    // Parse scenario flags
+    const scenarioIds: string[] = [];
+    if (flags.scenario) {
+      const scenarios = Array.isArray(flags.scenario) ? flags.scenario : [flags.scenario];
+      for (const id of scenarios) {
+        const scenario = getScenarioById(demoType, String(id));
+        if (!scenario) {
+          throw new Error(
+            `Unknown scenario: ${id}. Use --list-scenarios to see available scenarios for ${demoType}.`
+          );
+        }
+        scenarioIds.push(String(id));
+      }
+    }
+
+    // Handle --patch or --reset (apply/remove scenarios on running cluster)
+    if (patch || reset) {
+      return patchScenarios({
+        log,
+        demoType,
+        scenarioIds: reset ? [] : scenarioIds,
+        reset,
+      }).catch((error) => {
+        throw new Error('Failed to patch scenarios', { cause: error });
+      });
+    }
+
+    return ensureOtelDemo({
+      log,
+      signal: controller.signal,
+      demoType,
+      configPath,
+      logsIndex,
+      version,
+      teardown,
+      scenarioIds,
+    }).catch((error) => {
+      throw new Error(`Failed to manage ${demoConfig.displayName}`, { cause: error });
+    });
+  },
+  {
+    description: `
+      Deploy demo microservices applications to Kubernetes (minikube) with logs
+      automatically collected and sent to Elasticsearch via OpenTelemetry Collector.
+      
+      Supports multiple demo environments:
+        - otel-demo: OpenTelemetry Demo (default)
+        - online-boutique: Google Online Boutique
+      
+      Reads Elasticsearch connection details from kibana.dev.yml and supports
+      failure scenario injection for testing observability.
+    `,
+    flags: {
+      string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
+      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset'],
+      alias: {
+        c: 'config',
+        s: 'scenario',
+        p: 'patch',
+        r: 'reset',
+        d: 'demo',
+        v: 'version',
+      },
+      default: {
+        demo: 'otel-demo',
+        'logs-index': 'logs',
+      },
+      help: `
+        --demo, -d         Demo environment to run (otel-demo, online-boutique)
+        --version, -v      Demo version (defaults to demo's defaultVersion)
+        --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
+        --logs-index       Index name for logs (defaults to "logs")
+        --list-demos       List all available demo environments
+        --list-scenarios   List failure scenarios for selected demo
+        --scenario, -s     Apply a failure scenario (can be repeated for multiple scenarios)
+        --patch, -p        Patch scenarios onto running cluster (no redeploy)
+        --reset, -r        Reset all scenarios to defaults (no redeploy)
+        --teardown         Stop and remove demo deployment
+      `,
+    },
+  }
+);

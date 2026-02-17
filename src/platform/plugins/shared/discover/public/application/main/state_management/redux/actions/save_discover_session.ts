@@ -66,6 +66,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     >();
 
     let nextSelectedTabId = state.tabs.unsafeCurrentId;
+    const selectedTab = currentTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId);
 
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
@@ -90,10 +91,15 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           updatedTab = cloneDeep(
             fromTabStateToSavedObjectTab({
               tab,
-              timeRestore: newTimeRestore,
+              overridenTimeRestore: newTimeRestore,
               services,
             })
           );
+          if (newTimeRestore && !updatedTab.timeRange && selectedTab?.globalState.timeRange) {
+            // assign the current time range of the selected tab if time restore is enabled and no time range was set yet for this tab
+            updatedTab.timeRange = selectedTab.globalState.timeRange;
+            updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
+          }
         }
 
         if (newCopyOnSave) {

@@ -24,6 +24,7 @@ describe('parseUrlParams', () => {
         "assignees": Array [],
         "category": Array [],
         "customFields": Object {},
+        "from": "now-30d",
         "page": 1,
         "perPage": 10,
         "search": "",
@@ -32,6 +33,7 @@ describe('parseUrlParams', () => {
         "sortOrder": "desc",
         "status": Array [],
         "tags": Array [],
+        "to": "now",
       }
     `);
   });

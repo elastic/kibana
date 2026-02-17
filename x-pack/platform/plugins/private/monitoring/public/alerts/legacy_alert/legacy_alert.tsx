@@ -7,6 +7,17 @@
 
 import React from 'react';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { getDescriptionFields as genericGetDescriptionFields } from '../get_description_fields';
+import {
+  RULE_CLUSTER_HEALTH,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_KIBANA_VERSION_MISMATCH,
+  RULE_LICENSE_EXPIRATION,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_NODES_CHANGED,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+} from '../../../common/constants';
 import {
   LEGACY_RULES,
   LEGACY_RULE_DETAILS,
@@ -18,9 +29,23 @@ import { LazyExpression } from './lazy_expression';
 
 const DEFAULT_VALIDATE = () => ({ errors: {} });
 
+const RULES_WITH_DESCRIPTION_FIELDS = [
+  RULE_NODES_CHANGED,
+  RULE_LICENSE_EXPIRATION,
+  RULE_KIBANA_VERSION_MISMATCH,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_CLUSTER_HEALTH,
+];
+
 export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
     const validate = LEGACY_RULE_DETAILS[legacyAlert].validate ?? DEFAULT_VALIDATE;
+    const getDescriptionFields = RULES_WITH_DESCRIPTION_FIELDS.includes(legacyAlert)
+      ? genericGetDescriptionFields
+      : undefined;
     return {
       id: legacyAlert,
       description: LEGACY_RULE_DETAILS[legacyAlert].description,
@@ -39,6 +64,7 @@ export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate,
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+      getDescriptionFields,
     };
   });
 }

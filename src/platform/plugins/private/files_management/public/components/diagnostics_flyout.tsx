@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -50,6 +50,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
       size="s"
       aria-labelledby={titleId}
       data-test-subj="diagnosticsFlyout"
+      session="start"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

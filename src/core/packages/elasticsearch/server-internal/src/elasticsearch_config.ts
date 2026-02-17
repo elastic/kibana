@@ -26,6 +26,8 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
+export const DEFAULT_HEALTH_CHECK_RETRY = 3;
+
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 
 const requestHeadersWhitelistSchemas = [
@@ -155,7 +157,9 @@ export const configSchema = schema.object({
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(schema.duration()),
     startupDelay: schema.duration({ defaultValue: 500 }),
+    retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
@@ -288,6 +292,33 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    if (es.pingTimeout !== undefined) {
+      addDeprecation({
+        configPath: `${fromPath}.pingTimeout`,
+        title: i18n.translate('core.deprecations.elasticsearchPingTimeout.title', {
+          defaultMessage: 'Setting "{pingTimeoutSetting}" is deprecated',
+          values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+        }),
+        level: 'warning',
+        message: i18n.translate('core.deprecations.elasticsearchPingTimeout.message', {
+          defaultMessage:
+            'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
+          values: {
+            pingTimeoutSetting: `${fromPath}.pingTimeout`,
+            requestTimeoutSetting: `${fromPath}.requestTimeout`,
+          },
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchPingTimeout.manualSteps1', {
+              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs.',
+              values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+            }),
+          ],
+        },
+      });
+    }
     return;
   },
 ];
@@ -322,6 +353,14 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  public readonly healthCheckFailureInterval: Duration | undefined;
+  /**
+   * The number of times to retry the health check request
+   */
+  public readonly healthCheckRetry: number;
   /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
@@ -377,11 +416,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * will be sent.
    */
   public readonly requestHeadersWhitelist: string[];
-
-  /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  public readonly pingTimeout: Duration;
 
   /**
    * Timeout after which HTTP request will be aborted and retried.
@@ -464,14 +498,15 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
-    this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;
     this.sniffOnStart = rawConfig.sniffOnStart;
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckFailureInterval = rawConfig.healthCheck.onFailureDelay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
+    this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;

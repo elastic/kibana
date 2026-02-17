@@ -31,9 +31,9 @@ import {
 import type {
   WaterfallSpan,
   WaterfallTransaction,
-  WaterfallError,
 } from '../../../../../../../../common/waterfall/typings';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
+import type { Error } from '@kbn/apm-types';
 
 describe('waterfall_helpers', () => {
   const hits = [
@@ -140,7 +140,7 @@ describe('waterfall_helpers', () => {
         name: 'ruby',
         version: '2',
       },
-    } as WaterfallError,
+    } as Error,
   ];
 
   describe('getWaterfall', () => {

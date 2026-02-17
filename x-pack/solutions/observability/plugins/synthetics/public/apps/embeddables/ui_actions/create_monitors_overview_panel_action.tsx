@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
@@ -46,7 +46,7 @@ export function createMonitorsOverviewPanelAction(
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
-          serializedState: { rawState: initialState },
+          serializedState: initialState,
         });
       } catch (e) {
         return Promise.reject();

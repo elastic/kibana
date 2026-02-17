@@ -14,6 +14,7 @@ import type {
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
+  TemplatesService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { LicensingService } from './licensing';
@@ -44,6 +45,7 @@ export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService & AttachmentServiceOperations>;
 export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
+export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -61,10 +63,13 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     patchCase: jest.fn(),
     patchCases: jest.fn(),
     findCasesGroupedByID: jest.fn(),
+    searchCasesGroupedByID: jest.fn(),
     getCaseStatusStats: jest.fn(),
     executeAggregations: jest.fn(),
     bulkDeleteCaseEntities: jest.fn(),
     getCategories: jest.fn(),
+    getCaseIdsByAttachmentSearch: jest.fn(),
+    searchCases: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -158,7 +163,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
   const service: PublicMethodsOf<AttachmentGetter> = lazyObject({
     get: jest.fn(),
     bulkGet: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
+    getAllDocumentsAttachedToCase: jest.fn(),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
@@ -212,4 +217,19 @@ export const createNotificationServiceMock = (): NotificationServiceMock => {
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as NotificationServiceMock;
+};
+
+export const createTemplatesServiceMock = (): TemplatesServiceMock => {
+  const service: PublicMethodsOf<TemplatesService> = lazyObject({
+    getAllTemplates: jest.fn(),
+    getTemplate: jest.fn(),
+    createTemplate: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
+  });
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as TemplatesServiceMock;
 };

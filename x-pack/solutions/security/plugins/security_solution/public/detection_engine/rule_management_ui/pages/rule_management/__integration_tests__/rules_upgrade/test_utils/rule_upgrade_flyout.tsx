@@ -14,6 +14,8 @@ import type {
   FieldSpec,
 } from '@kbn/data-views-plugin/common';
 import userEvent from '@testing-library/user-event';
+import { initialUserPrivilegesState } from '../../../../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { TIMELINES_URL } from '../../../../../../../../common/constants';
 import { RulesPage } from '../../..';
@@ -34,6 +36,7 @@ import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 jest.mock('../../../../../../../detections/components/user_info');
 jest.mock('../../../../../../../detections/containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../components/rules_table/feature_tour/rules_feature_tour');
+jest.mock('../../../../../../../common/components/user_privileges');
 /** **********************************************/
 
 /**
@@ -48,6 +51,13 @@ export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof rende
   (KibanaServices.get().http.fetch as jest.Mock).mockImplementation((requestedPath) =>
     mockedResponses.get(requestedPath)
   );
+  (useUserPrivileges as jest.Mock).mockReturnValue({
+    ...initialUserPrivilegesState(),
+    rulesPrivileges: {
+      ...initialUserPrivilegesState().rulesPrivileges,
+      rules: { read: true, edit: true },
+    },
+  });
 
   mockKibanaFetchResponse(GET_PREBUILT_RULES_STATUS_URL, {
     stats: {

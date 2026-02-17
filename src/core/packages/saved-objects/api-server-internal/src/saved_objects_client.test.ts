@@ -26,6 +26,7 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
+  SavedObjectsSearchOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsClient } from './saved_objects_client';
 import { repositoryMock, savedObjectsPointInTimeFinderMock } from './mocks';
@@ -161,6 +162,18 @@ describe('SavedObjectsClient', () => {
     const result = await client.find(options);
 
     expect(mockRepository.find).toHaveBeenCalledWith(options);
+    expect(result).toBe(returnValue);
+  });
+
+  test(`#search`, async () => {
+    const returnValue: any = Symbol();
+    mockRepository.search.mockResolvedValueOnce(returnValue);
+    const client = new SavedObjectsClient(mockRepository);
+
+    const options = {} as SavedObjectsSearchOptions;
+    const result = await client.search(options);
+
+    expect(mockRepository.search).toHaveBeenCalledWith(options);
     expect(result).toBe(returnValue);
   });
 

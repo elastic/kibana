@@ -127,7 +127,10 @@ export default function ({ getService }: FtrProviderContext) {
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
           const objects = body.saved_objects;
-          expect(objects.map((obj: any) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+          expect(objects.map((obj: any) => obj.id).sort()).to.eql([
+            'only-ref-1',
+            'ref-1-and-ref-2',
+          ]);
         });
       });
 

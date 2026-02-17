@@ -18,10 +18,10 @@ import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { visit } from '../../../../tasks/navigation';
 import {
-  selectMigrationConnector,
   goToTranslatedDashboardsPageFromOnboarding,
   openReprocessDialog,
   reprocessDashboards,
+  selectMigrationConnector,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
@@ -29,20 +29,10 @@ import { role } from '../common/role';
 let bedrockConnectorId: string | null = null;
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/242870
+describe.skip(
   'Dashboard Migrations - Translated Dashboards Page',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automaticDashboardsMigration',
-          ])}`,
-        ],
-      },
-    },
-  },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
 
   () => {
     before(() => {

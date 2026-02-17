@@ -10,7 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
@@ -174,10 +173,6 @@ const useTypesFilterInitialState = ({
   agentTypes,
   types,
 }: GetTypesFilterInitialStateArguments): FilterItems => {
-  const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsMSDefenderEndpointEnabled'
-  );
-
   const getFilterOptions = useCallback(
     ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
       key,
@@ -210,14 +205,7 @@ const useTypesFilterInitialState = ({
         label: FILTER_NAMES.agentTypes,
         isGroupLabel: true,
       },
-      ...RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => {
-        switch (agentType) {
-          case 'microsoft_defender_endpoint':
-            return isMicrosoftDefenderEnabled;
-          default:
-            return true;
-        }
-      }).map((type) =>
+      ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
         getFilterOptions({
           key: type,
           label: getAgentTypeName(type),
@@ -334,6 +322,9 @@ export const useActionsLogFilter = ({
             return false;
           }
           if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
+            return false;
+          }
+          if (commandName === 'memory-dump' && !featureFlags.responseActionsEndpointMemoryDump) {
             return false;
           }
 

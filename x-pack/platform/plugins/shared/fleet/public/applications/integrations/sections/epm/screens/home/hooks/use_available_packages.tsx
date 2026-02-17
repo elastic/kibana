@@ -52,6 +52,7 @@ export interface IntegrationsURLParameters {
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -147,7 +148,7 @@ export const useAvailablePackages = ({
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
 

@@ -24,6 +24,8 @@
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -57,6 +61,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +80,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,6 +99,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,6 +134,8 @@
           " | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,6 +158,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,6 +178,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

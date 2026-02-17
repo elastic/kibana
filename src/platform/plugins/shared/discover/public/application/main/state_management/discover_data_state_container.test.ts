@@ -11,10 +11,13 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverInternalStateMock,
+  getDiscoverStateMock,
+} from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
 import { internalStateActions, selectTabRuntimeState } from './redux';
@@ -23,11 +26,15 @@ jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
 }));
 
+jest.mock('../data_fetching/fetch_esql', () => ({
+  fetchEsql: jest.fn().mockResolvedValue({ records: [] }),
+}));
+
 jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
 }));
 
-const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
+const mockFetchDocuments = jest.mocked(fetchDocuments);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
@@ -76,11 +83,17 @@ describe('test getDataStateContainer', () => {
     });
 
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
-    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-      dataSource: stateContainer.appState.get().dataSource,
-      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
-      query: stateContainer.appState.get().query,
-    });
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
+      {
+        dataSource: stateContainer.getCurrentTab().appState.dataSource,
+        dataView: selectTabRuntimeState(
+          stateContainer.runtimeStateManager,
+          stateContainer.getCurrentTab().id
+        ).currentDataView$.getValue(),
+        query: stateContainer.getCurrentTab().appState.query,
+      },
+      expect.any(Function)
+    );
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
@@ -164,90 +177,270 @@ describe('test getDataStateContainer', () => {
     dataState.refetch$.next('fetch_more');
   });
 
-  it('should update app state from default profile state', async () => {
-    mockFetchDocuments.mockResolvedValue({ records: [] });
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = stateContainer.dataState;
-    const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
+  describe('default profile state', () => {
+    it('should update app state from default profile state', async () => {
+      mockFetchDocuments.mockResolvedValue({ records: [] });
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      const dataState = stateContainer.dataState;
+      const dataUnsub = dataState.subscribe();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
+      const { scopedProfilesManager$ } = selectTabRuntimeState(
+        stateContainer.runtimeStateManager,
+        stateContainer.getCurrentTab().id
+      );
 
-    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-        resetDefaultProfileState: {
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: false,
-        },
-      })
-    );
+      await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+          resetDefaultProfileState: {
+            columns: true,
+            rowHeight: true,
+            breakdownField: true,
+            hideChart: false,
+          },
+        })
+      );
 
-    dataState.data$.totalHits$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: 0,
-    });
-    dataState.refetch$.next(undefined);
+      dataState.data$.totalHits$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: 0,
+      });
+      dataState.refetch$.next(undefined);
 
-    await waitFor(() => {
-      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+        hideChart: false,
+      });
+      expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
+      expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
+      dataUnsub();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+      );
     });
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-      hideChart: false,
+
+    it('should not update app state from default profile state', async () => {
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      const dataState = stateContainer.dataState;
+      const dataUnsub = dataState.subscribe();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
+      const { scopedProfilesManager$ } = selectTabRuntimeState(
+        stateContainer.runtimeStateManager,
+        stateContainer.getCurrentTab().id
+      );
+
+      await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+          resetDefaultProfileState: {
+            columns: false,
+            rowHeight: false,
+            breakdownField: false,
+            hideChart: false,
+          },
+        })
+      );
+      dataState.data$.totalHits$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: 0,
+      });
+      dataState.refetch$.next(undefined);
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+        hideChart: false,
+      });
+      expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
+      expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
+      dataUnsub();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+      );
     });
-    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
-    expect(stateContainer.appState.get().rowHeight).toEqual(3);
-    dataUnsub();
-    appUnsub();
   });
 
-  it('should not update app state from default profile state', async () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = stateContainer.dataState;
-    const dataUnsub = dataState.subscribe();
-    const appUnsub = stateContainer.appState.initAndSync();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
+  describe('cascaded documents', () => {
+    const setup = async ({ featureFlagEnabled = true }: { featureFlagEnabled?: boolean } = {}) => {
+      const services = createDiscoverServicesMock();
 
-    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-        resetDefaultProfileState: {
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
-      })
-    );
-    dataState.data$.totalHits$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: 0,
+      jest
+        .spyOn(services.discoverFeatureFlags, 'getCascadeLayoutEnabled')
+        .mockReturnValue(featureFlagEnabled);
+
+      const toolkit = getDiscoverInternalStateMock({ services });
+
+      await toolkit.initializeTabs();
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            query: {
+              esql: 'FROM test | STATS count() BY colA, colB',
+            },
+          },
+        })
+      );
+
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
+
+      return { toolkit };
+    };
+
+    it('should update available and selected cascade groups after fetching', async () => {
+      const { toolkit } = await setup();
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colA',
+        'colB',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colA',
+      ]);
     });
-    dataState.refetch$.next(undefined);
-    await waitFor(() => {
-      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+
+    it('should not update cascade groups if feature flag is disabled', async () => {
+      const { toolkit } = await setup({ featureFlagEnabled: false });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
     });
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-      hideChart: false,
+
+    it('should reset selected cascade groups when available groups change', async () => {
+      const { toolkit } = await setup();
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colA',
+        'colB',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colA',
+      ]);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            query: {
+              esql: 'FROM test | STATS count() BY colC, colD',
+            },
+          },
+        })
+      );
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colC',
+        'colD',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colC',
+      ]);
     });
-    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
-    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
-    dataUnsub();
-    appUnsub();
+
+    it('should keep selected cascade groups when available groups do not change', async () => {
+      const { toolkit } = await setup();
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colA',
+        'colB',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colA',
+      ]);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            query: {
+              esql: 'FROM test | STATS count() BY colB, colA',
+            },
+          },
+        })
+      );
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colB',
+        'colA',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colA',
+      ]);
+    });
+
+    it('should clear cascade groups when query is not ES|QL', async () => {
+      const { toolkit } = await setup();
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
+        'colA',
+        'colB',
+      ]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([
+        'colA',
+      ]);
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            query: {
+              language: 'kuery',
+              query: 'response:200',
+            },
+          },
+        })
+      );
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
+    });
   });
 });

@@ -52,6 +52,72 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: false,
   },
+  geo_point: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableGeoPointType', {
+      defaultMessage: 'Geo point',
+    }),
+    readonly: false,
+  },
+  integer: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableIntegerType', {
+      defaultMessage: 'Number (integer)',
+    }),
+    readonly: false,
+  },
+  short: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableShortType', {
+      defaultMessage: 'Number (short)',
+    }),
+    readonly: false,
+  },
+  byte: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableByteType', {
+      defaultMessage: 'Number (byte)',
+    }),
+    readonly: false,
+  },
+  float: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFloatType', {
+      defaultMessage: 'Number (float)',
+    }),
+    readonly: false,
+  },
+  half_float: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableHalfFloatType', {
+      defaultMessage: 'Number (half_float)',
+    }),
+    readonly: false,
+  },
+  text: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFullTextType', {
+      defaultMessage: 'Text',
+    }),
+    readonly: false,
+  },
+  wildcard: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableWildcardType', {
+      defaultMessage: 'Wildcard',
+    }),
+    readonly: false,
+  },
+  version: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableVersionType', {
+      defaultMessage: 'Version',
+    }),
+    readonly: false,
+  },
+  unsigned_long: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableUnsignedLongType', {
+      defaultMessage: 'Number (unsigned_long)',
+    }),
+    readonly: false,
+  },
+  date_nanos: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDateNanosType', {
+      defaultMessage: 'Date (nanoseconds)',
+    }),
+    readonly: false,
+  },
   system: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSystemType', {
       defaultMessage: 'System managed',
@@ -84,10 +150,28 @@ export const FIELD_STATUS_MAP = {
   unmapped: {
     color: 'default',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel', {
-      defaultMessage: 'Unmanaged',
+      defaultMessage: 'Unmapped',
     }),
     tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusTooltip', {
       defaultMessage: 'The mapping for this field is not managed by this stream or a parent.',
+    }),
+  },
+  dynamic: {
+    color: 'default',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorDynamicStatusLabel', {
+      defaultMessage: 'Dynamic',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorDynamicStatusTooltip', {
+      defaultMessage: 'The mapping for this field is controlled by the underlying index template.',
+    }),
+  },
+  pending: {
+    color: 'warning',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorPendingStatusLabel', {
+      defaultMessage: 'Pending',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorPendingStatusTooltip', {
+      defaultMessage: 'This field has uncommitted changes.',
     }),
   },
 };
@@ -117,12 +201,17 @@ export const TABLE_COLUMNS = {
   },
   status: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablestatusHeader', {
-      defaultMessage: 'Status',
+      defaultMessage: 'Mapping status',
     }),
   },
   source: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablesourceHeader', {
       defaultMessage: 'Source',
+    }),
+  },
+  result: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableresultHeader', {
+      defaultMessage: 'Simulation result',
     }),
   },
 } as const;

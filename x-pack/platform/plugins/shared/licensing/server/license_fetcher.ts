@@ -8,9 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { createHash } from 'crypto';
 import pRetry from 'p-retry';
-import stringify from 'json-stable-stringify';
 import type { MaybePromise } from '@kbn/utility-types';
-import { isPromise } from '@kbn/std';
+import { isPromise, stableStringify } from '@kbn/std';
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import type {
   ILicense,
@@ -108,8 +107,8 @@ function normalizeServerLicense(
 
 function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
   const features: PublicFeatures = {};
-  for (const [name, feature] of Object.entries(rawFeatures)) {
-    features[name] = {
+  for (const [id, feature] of Object.entries(rawFeatures)) {
+    features[id] = {
       isAvailable: feature.available,
       isEnabled: feature.enabled,
     };
@@ -128,7 +127,7 @@ function sign({
 }) {
   return createHash('sha256')
     .update(
-      stringify({
+      stableStringify({
         license,
         features,
         error,

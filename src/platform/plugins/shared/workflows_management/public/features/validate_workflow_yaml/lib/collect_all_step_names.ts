@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
+import { type Document, isPair, isScalar, visit } from 'yaml';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { StepNameInfo } from '../model/types';
 
-export function collectAllStepNames(yamlDocument: any): StepNameInfo[] {
+export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {
   const stepNames: StepNameInfo[] = [];
 
-  if (!yamlDocument?.contents) return stepNames;
+  if (!yamlDocument?.contents || yamlDocument.errors.length > 0) {
+    return stepNames;
+  }
 
   visit(yamlDocument, {
     Scalar(key, node, ancestors) {

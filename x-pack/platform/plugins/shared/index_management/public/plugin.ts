@@ -46,6 +46,8 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
+import { indexDataEnricher, type IndexDataEnricher } from './services';
+import { indexStatsEnricher } from './index_stats_enricher';
 
 export class IndexMgmtUIPlugin
   implements
@@ -57,6 +59,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -72,11 +75,15 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
+
+  private readonly indexDataEnricher: IndexDataEnricher;
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -94,10 +101,15 @@ export class IndexMgmtUIPlugin
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
+      enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
+
+    const isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
     this.config = {
       isIndexManagementUiEnabled,
+      isServerless,
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
@@ -108,8 +120,11 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
-      enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enforceAdaptiveAllocations: isServerless,
+      enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
+
+    this.indexDataEnricher = indexDataEnricher;
   }
 
   public setup(
@@ -156,8 +171,15 @@ export class IndexMgmtUIPlugin
       })
     );
 
+    this.apiService = new PublicApiService(coreSetup.http);
+
+    // disabled in serverless
+    if (this.config.enableIndexStats) {
+      this.indexDataEnricher.add(indexStatsEnricher);
+    }
+
     return {
-      apiService: new PublicApiService(coreSetup.http),
+      apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
@@ -175,6 +197,9 @@ export class IndexMgmtUIPlugin
         });
       },
       locator: this.locator,
+      indexDataEnricher: {
+        add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
+      },
     };
   }
 
@@ -244,6 +269,7 @@ export class IndexMgmtUIPlugin
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
     });
     return {
+      apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexMappingProps) => {

@@ -23,6 +23,8 @@ jest.doMock('./clients/ui_settings_defaults_client', () => ({
 }));
 
 export const getCoreSettingsMock = jest.fn();
+export const getCoreGlobalSettingsMock = jest.fn();
 jest.doMock('./settings', () => ({
   getCoreSettings: getCoreSettingsMock,
+  getGlobalCoreSettings: getCoreGlobalSettingsMock,
 }));

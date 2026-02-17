@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { VisLabel } from '../../../shared_components';
 import type { GaugeVisualizationState } from '../constants';
 

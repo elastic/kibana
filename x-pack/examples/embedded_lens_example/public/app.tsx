@@ -28,7 +28,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.

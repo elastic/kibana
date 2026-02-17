@@ -4,14 +4,18 @@
 
 ### API Routes
 
-#### GET /internal/cps/projects_tags
+#### POST /internal/cps/projects_tags
 
 Retrieves project tags from Elasticsearch using the `/_project/tags` endpoint.
 
 **Route Details:**
+
 - **Path:** `/internal/cps/projects_tags`
+- **Body (optional):**
+  - `project_routing` (optional): String parameter for project routing
 - **Authorization:** Handled by the scoped Elasticsearch client
 - **Response Format:**
+
 ```typescript
 {
   [key: string]: Record<string, string>;

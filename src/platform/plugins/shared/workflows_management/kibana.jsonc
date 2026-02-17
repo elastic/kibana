@@ -16,6 +16,7 @@
       "taskManager",
       "actions",
       "workflowsExecutionEngine",
+      "workflowsExtensions",
       "features",
       "security",
       "triggersActionsUi",
@@ -26,7 +27,8 @@
       "dataViews",
       "fieldFormats",
       "unifiedSearch",
-      "embeddable"
+      "embeddable",
+      "licensing"
     ],
     "optionalPlugins": [
       "alerting",

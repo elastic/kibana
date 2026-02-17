@@ -43,7 +43,7 @@ export function ImportContentPackFlyout({
   onImport,
   onClose,
 }: {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.all.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
@@ -158,6 +158,9 @@ export function ImportContentPackFlyout({
 
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    aria-label={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
+                      defaultMessage: 'Close',
+                    })}
                     iconType="cross"
                     color="danger"
                     onClick={() => {
@@ -176,7 +179,7 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.available ?? false}
+              significantEventsAvailable={significantEvents?.enabled ?? false}
             />
           </>
         ) : null}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { LineCounter, parseDocument } from 'yaml';
+import { collectAllConnectorIds } from './collect_all_connector_ids';
 
 describe('collectAllConnectorIds', () => {
   it('should return empty array for default steps', () => {

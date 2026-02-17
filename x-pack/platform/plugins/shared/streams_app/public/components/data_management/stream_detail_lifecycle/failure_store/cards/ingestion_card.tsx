@@ -6,95 +6,40 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIconTip } from '@elastic/eui';
-import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
-import { BaseMetricCard } from '../../common/base_metric_card';
-import { formatBytes } from '../../helpers/format_bytes';
+import { BaseIngestionCard } from '../../common/base_ingestion_card';
 import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
-  definition,
+  period,
+  hasPrivileges,
   stats,
   statsError,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  period: 'daily' | 'monthly';
+  hasPrivileges: boolean;
   stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
-  const hasPrivileges = definition.privileges?.manage_failure_store;
+  const isDaily = period === 'daily';
 
-  const title = (
-    <FormattedMessage
-      id="xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title"
-      defaultMessage="Failed ingestion averages {tooltipIcon}"
-      values={{
-        tooltipIcon: (
-          <EuiIconTip
-            type="question"
-            title={i18n.translate(
-              'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltipTitle',
-              {
-                defaultMessage: 'How we calculate failed ingestion averages',
-              }
-            )}
-            content={i18n.translate(
-              'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltip',
-              {
-                defaultMessage:
-                  'Approximate average, calculated by extrapolating the ingestion rate from the failed documents on the selected time range and the average document size.',
-              }
-            )}
-          />
-        ),
-      }}
+  const baseTooltipContent = i18n.translate('xpack.streams.ingestionCard.failureStore.tooltip', {
+    defaultMessage:
+      'Approximate average, calculated by extrapolating the ingestion rate from the failed documents on the selected time range and the average document size{monthlyNote}.',
+    values: { monthlyNote: isDaily ? '' : ', multiplied by 30' },
+  });
+
+  const tooltipContent = <EuiIconTip type="question" content={baseTooltipContent} />;
+
+  return (
+    <BaseIngestionCard
+      period={period}
+      hasPrivileges={hasPrivileges}
+      bytesPerDay={stats?.bytesPerDay}
+      perDayDocs={stats?.perDayDocs}
+      statsError={statsError}
+      tooltipContent={tooltipContent}
+      dataTestSubjPrefix="failureStoreIngestion"
     />
   );
-
-  const metrics = [
-    {
-      data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={hasPrivileges}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
-            { defaultMessage: 'Daily ingestion rate' }
-          )}
-        >
-          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
-        </PrivilegesWarningIconWrapper>
-      ),
-
-      subtitle: i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.dailyAverage',
-        {
-          defaultMessage: 'Daily average',
-        }
-      ),
-      'data-test-subj': 'failureStoreIngestionDaily',
-    },
-    {
-      data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={hasPrivileges}
-          title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
-            { defaultMessage: 'Monthly ingestion rate' }
-          )}
-        >
-          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
-        </PrivilegesWarningIconWrapper>
-      ),
-      subtitle: i18n.translate(
-        'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.monthlyAverage',
-        {
-          defaultMessage: 'Monthly average',
-        }
-      ),
-      'data-test-subj': 'failureStoreIngestionMonthly',
-    },
-  ];
-
-  return <BaseMetricCard title={title} metrics={metrics} />;
 };

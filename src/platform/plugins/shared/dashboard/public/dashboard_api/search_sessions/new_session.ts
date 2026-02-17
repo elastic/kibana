@@ -8,17 +8,36 @@
  */
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, skip, startWith } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { combineLatest, distinctUntilChanged, startWith } from 'rxjs';
+import {
+  apiPublishesSettings,
+  apiPublishesReload,
+  apiPublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../unified_search_manager';
 
 const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
   // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
   state: false,
+};
+
+const onlySectionScopedFiltersChanged = (
+  previous: Filter[] | undefined,
+  current: Filter[] | undefined
+) => {
+  const onlyGlobalFilters = (filters: Filter[]) => {
+    return filters.filter((filter) => {
+      return !Boolean(filter.meta.group); // if group is undefined, then the filters are global
+    });
+  };
+  return compareFilters(
+    onlyGlobalFilters(previous ?? []),
+    onlyGlobalFilters(current ?? []),
+    shouldRefreshFilterCompareOptions
+  );
 };
 
 export function newSession$(api: unknown) {
@@ -28,7 +47,10 @@ export function newSession$(api: unknown) {
     observables.push(
       api.filters$.pipe(
         distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
-          return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
+          return (
+            onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions) ||
+            onlySectionScopedFiltersChanged(previous, current)
+          );
         })
       )
     );
@@ -66,5 +88,5 @@ export function newSession$(api: unknown) {
     observables.push(api.reload$.pipe(startWith(undefined)));
   }
 
-  return combineLatest(observables).pipe(skip(1));
+  return combineLatest(observables);
 }

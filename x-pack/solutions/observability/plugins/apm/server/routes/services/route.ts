@@ -28,6 +28,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -46,6 +47,9 @@ import type { ServicesItemsResponse } from './get_services/get_services_items';
 import { getServicesItems } from './get_services/get_services_items';
 import type { ServiceAlertsResponse } from './get_services/get_service_alerts';
 import { getServicesAlerts } from './get_services/get_service_alerts';
+import type { ServiceSlosResponse } from './get_service_slos';
+import { getServiceSlos } from './get_service_slos';
+import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
@@ -115,11 +119,13 @@ const servicesRoute = createApmServerRoute({
     const savedObjectsClient = (await context.core).savedObjects.client;
 
     const coreStart = await core.start();
-    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+
+    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
         getApmAlertsClient(resources),
+        getApmSloClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
@@ -132,6 +138,7 @@ const servicesRoute = createApmServerRoute({
       mlClient,
       apmEventClient,
       apmAlertsClient,
+      sloClient,
       logger,
       start,
       end,
@@ -906,6 +913,48 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceSlosRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/slos',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      environmentRt,
+      t.type({
+        page: toNumberRt,
+        perPage: toNumberRt,
+      }),
+      t.partial({
+        statusFilters: jsonRt.pipe(t.array(t.string)),
+        kqlQuery: t.string,
+      }),
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm', 'slo_read'] } },
+  async handler(resources): Promise<ServiceSlosResponse> {
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, page, perPage, statusFilters, kqlQuery } = params.query;
+
+    const [sloClient, sloAlertsClient] = await Promise.all([
+      getApmSloClient(resources),
+      getSloAlertsClient(resources),
+    ]);
+
+    return getServiceSlos({
+      sloClient,
+      sloAlertsClient,
+      serviceName,
+      environment,
+      statusFilters,
+      kqlQuery,
+      page,
+      perPage,
+    });
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -924,4 +973,5 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceSlosRoute,
 };

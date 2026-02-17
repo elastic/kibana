@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { createFormToggleAction } from './form_toggle_action';
+import { screen, fireEvent } from '@testing-library/react';
 import { createFormSetValueAction } from './form_set_value_action';
 
 export const createFormToggleAndSetValueAction =
-  (testBed: TestBed, toggleSelector: string, inputSelector: string) => async (value: string) => {
-    const { exists } = testBed;
-    if (!exists(inputSelector)) {
-      await createFormToggleAction(testBed, toggleSelector)();
+  (toggleSelector: string, inputSelector: string) => async (value: string) => {
+    if (!screen.queryByTestId(inputSelector)) {
+      fireEvent.click(screen.getByTestId(toggleSelector));
     }
-    await createFormSetValueAction(testBed, inputSelector)(value);
+    await createFormSetValueAction(inputSelector)(value);
   };

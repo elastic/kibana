@@ -127,6 +127,7 @@ export function ChatBody({
   initialTitle,
   knowledgeBase,
   showLinkToConversationsApp,
+  eisCalloutZIndex,
   onConversationUpdate,
   onToggleFlyoutPositionMode,
   navigateToConversation,
@@ -144,6 +145,7 @@ export function ChatBody({
   initialConversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
+  eisCalloutZIndex?: number;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onConversationDuplicate: (conversation: Conversation) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
@@ -412,13 +414,12 @@ export function ChatBody({
   };
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+  const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
     !!elasticManagedLlm &&
     connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed &&
-    tourCalloutDismissed;
+    !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
@@ -567,6 +568,7 @@ export function ChatBody({
                   }
                   showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                   showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
+                  eisCalloutZIndex={eisCalloutZIndex}
                 />
               ) : (
                 <ChatTimeline
@@ -656,6 +658,7 @@ export function ChatBody({
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
@@ -686,6 +689,7 @@ export function ChatBody({
       >
         {conversation.error ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { isEmpty, sortBy } from 'lodash';
 
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import type { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -785,9 +784,9 @@ export default ({ getService }: FtrProviderContext) => {
 
             // saved objects
             const rspKibana: object = rspBody.kibana;
-            let actualSearches = [];
-            let actualVisualizations = [];
-            let actualDashboards = [];
+            let actualSearches: any[] = [];
+            let actualVisualizations: any[] = [];
+            let actualDashboards: any[] = [];
 
             if (isEmpty(rspKibana) === false) {
               actualSearches = sortBy(rspBody.kibana.search, 'id');
@@ -834,13 +833,12 @@ export default ({ getService }: FtrProviderContext) => {
 
             // model memory limit should be <= 99mb
             const {
-              body: jobsDetails,
-            }: {
               body: {
-                jobs: Job[];
-              };
+                jobs: [jobResponse],
+              },
             } = await ml.api.getAnomalyDetectionJob(job.jobId);
-            const actualModelMemoryLimit = jobsDetails.jobs[0].analysis_limits?.model_memory_limit;
+            const actualModelMemoryLimit = jobResponse.analysis_limits?.model_memory_limit;
+
             expect(actualModelMemoryLimit).to.match(/\d{1,2}mb/);
           }
 
@@ -893,5 +891,181 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     }
+
+    describe('estimate model memory limit', function () {
+      const testModule = testDataListPositive[0]; // Use sample_data_weblogs module
+
+      before(async () => {
+        await esArchiver.loadIfNeeded(testModule.sourceDataArchive);
+        await ml.testResources.createDataViewIfNeeded(
+          testModule.indexPattern.name,
+          testModule.indexPattern.timeField
+        );
+      });
+
+      after(async () => {
+        // Clean up all jobs created in these tests
+        await ml.api.cleanMlIndices();
+        await ml.testResources.deleteDataViewByTitle(testModule.indexPattern.name);
+      });
+
+      it('should setup module with estimateModelMemory true', async () => {
+        const requestBody = {
+          prefix: 'mml_true_',
+          indexPatternName: testModule.indexPattern.name,
+          startDatafeed: false,
+          estimateModelMemory: true,
+        };
+
+        // expected estimated values
+        const expectedMMLs = ['11mb', '11mb', '16mb'];
+
+        const rspBody = await executeSetupModuleRequest(
+          testModule.module,
+          testModule.user,
+          requestBody,
+          200
+        );
+
+        // Verify jobs were created
+        expect(rspBody).to.have.property('jobs');
+        const jobIds = rspBody.jobs.map((job: any) => job.id);
+        expect(jobIds).to.have.length(3);
+
+        // Verify all jobs were created successfully
+        for (let i = 0; i < rspBody.jobs.length; i++) {
+          const job = rspBody.jobs[i];
+          expect(job).to.have.property('success', true);
+
+          // Get job details to verify model memory limit was estimated
+          const {
+            body: {
+              jobs: [jobResponse],
+            },
+          } = await ml.api.getAnomalyDetectionJob(job.id);
+          expect(jobResponse.analysis_limits.model_memory_limit).to.eql(expectedMMLs[i]);
+        }
+      });
+
+      it('should setup module with estimateModelMemory false', async () => {
+        const requestBody = {
+          prefix: 'mml_false_',
+          indexPatternName: testModule.indexPattern.name,
+          startDatafeed: false,
+          estimateModelMemory: false,
+        };
+
+        // expected default values, from module
+        const expectedMMLs = ['10mb', '10mb', '10mb'];
+
+        const rspBody = await executeSetupModuleRequest(
+          testModule.module,
+          testModule.user,
+          requestBody,
+          200
+        );
+
+        // Verify jobs were created
+        expect(rspBody).to.have.property('jobs');
+        const jobIds = rspBody.jobs.map((job: any) => job.id);
+        expect(jobIds).to.have.length(3);
+
+        // Verify all jobs were created successfully
+        for (let i = 0; i < rspBody.jobs.length; i++) {
+          const job = rspBody.jobs[i];
+          expect(job).to.have.property('success', true);
+
+          // Get job details - model memory limit should use module defaults
+          const {
+            body: {
+              jobs: [jobResponse],
+            },
+          } = await ml.api.getAnomalyDetectionJob(job.id);
+          expect(jobResponse.analysis_limits.model_memory_limit).to.eql(expectedMMLs[i]);
+        }
+      });
+
+      it('should setup module with estimateModelMemory undefined (default behavior)', async () => {
+        const requestBody = {
+          prefix: 'mml_undefined_',
+          indexPatternName: testModule.indexPattern.name,
+          startDatafeed: false,
+          // estimateModelMemory not specified - should use default behavior
+        };
+
+        // expected estimated values
+        // estimated values are larger than defaults in module
+        const expectedMMLs = ['11mb', '11mb', '16mb'];
+
+        const rspBody = await executeSetupModuleRequest(
+          testModule.module,
+          testModule.user,
+          requestBody,
+          200
+        );
+
+        // Verify jobs were created
+        expect(rspBody).to.have.property('jobs');
+        const jobIds = rspBody.jobs.map((job: any) => job.id);
+        expect(jobIds).to.have.length(3);
+
+        // Verify all jobs were created successfully
+        for (let i = 0; i < rspBody.jobs.length; i++) {
+          const job = rspBody.jobs[i];
+          expect(job).to.have.property('success', true);
+
+          // Get job details
+          const {
+            body: {
+              jobs: [jobResponse],
+            },
+          } = await ml.api.getAnomalyDetectionJob(job.id);
+          expect(jobResponse.analysis_limits.model_memory_limit).to.eql(expectedMMLs[i]);
+        }
+      });
+
+      it('should preserve larger module model memory limit over estimate', async () => {
+        const requestBody = {
+          prefix: 'mml_preserve_',
+          indexPatternName: testModule.indexPattern.name,
+          startDatafeed: false,
+          estimateModelMemory: true,
+          // Add job overrides to set a large memory limit
+          jobOverrides: [
+            {
+              analysis_limits: {
+                model_memory_limit: '100mb', // Large limit
+              },
+            },
+          ],
+        };
+
+        const expectedMMLs = ['100mb', '100mb', '100mb'];
+
+        const rspBody = await executeSetupModuleRequest(
+          testModule.module,
+          testModule.user,
+          requestBody,
+          200
+        );
+
+        // Verify jobs were created
+        expect(rspBody).to.have.property('jobs');
+
+        // Verify all jobs were created successfully
+        for (let i = 0; i < rspBody.jobs.length; i++) {
+          const job = rspBody.jobs[i];
+          expect(job).to.have.property('success', true);
+
+          // Get job details - verify the large memory limit is preserved
+          const {
+            body: {
+              jobs: [jobResponse],
+            },
+          } = await ml.api.getAnomalyDetectionJob(job.id);
+          expect(jobResponse.analysis_limits.model_memory_limit).to.eql(expectedMMLs[i]);
+        }
+      });
+    });
   });
 };

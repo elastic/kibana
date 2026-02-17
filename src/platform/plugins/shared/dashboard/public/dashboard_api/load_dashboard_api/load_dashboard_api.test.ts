@@ -12,9 +12,12 @@ import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startQueryPerformanceTracking: jest.fn(),
   };
 });
+
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -22,6 +25,18 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
   }
   return {
     ContentInsightsClient: ContentInsightsClientMock,
+  };
+});
+
+jest.mock('../../dashboard_client', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const defaultState = require('../default_dashboard_state');
+  return {
+    dashboardClient: {
+      get: jest.fn().mockResolvedValue({
+        data: { ...defaultState.DEFAULT_DASHBOARD_STATE },
+      }),
+    },
   };
 });
 
@@ -40,21 +55,17 @@ describe('loadDashboardApi', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_content_management_service').getDashboardContentManagementService =
-      () => ({
-        loadDashboardState: () => ({
-          dashboardFound: true,
-          dashboardInput: DEFAULT_DASHBOARD_STATE,
-          references: [],
-        }),
-      });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),
     });
+
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+      {
+        startTime: 12345,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -71,10 +82,7 @@ describe('loadDashboardApi', () => {
       });
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
-      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
-        ...DEFAULT_DASHBOARD_STATE,
-        references: [],
-      });
+      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
     });
 
     test('should overwrite saved object state with unsaved state', async () => {
@@ -88,7 +96,6 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: lastSavedQuery,
       });
     });
@@ -109,8 +116,27 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: queryFromUrl,
+      });
+    });
+  });
+
+  describe('performance monitoring', () => {
+    test('should start performance tracking on load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        DASHBOARD_DURATION_START_MARK,
+        'mark'
+      );
+      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
       });
     });
   });

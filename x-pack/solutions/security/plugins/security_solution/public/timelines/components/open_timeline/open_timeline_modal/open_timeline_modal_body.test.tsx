@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import type { OpenTimelineResult, OpenTimelineProps } from '../types';
@@ -17,20 +16,11 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('OpenTimelineModal', () => {
-  const mockTheme = getMockTheme({
-    eui: {
-      euiColorMediumShade: '#ece',
-      euiBreakpoints: {
-        s: '500px',
-      },
-      euiSizeM: '16px',
-    },
-  });
   const title = 'All Timelines / Open Timelines';
   let mockResults: OpenTimelineResult[];
 
@@ -69,9 +59,9 @@ describe('OpenTimelineModal', () => {
   test('it renders the title row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="open-timeline-modal-title"]').first().exists()).toBe(
@@ -82,9 +72,9 @@ describe('OpenTimelineModal', () => {
   test('it renders the search row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="search-row"]').first().exists()).toBe(true);
@@ -93,9 +83,9 @@ describe('OpenTimelineModal', () => {
   test('it renders the timelines table', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="timelines-table"]').first().exists()).toBe(true);
@@ -108,9 +98,9 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: jest.fn(),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -128,9 +118,9 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -148,9 +138,9 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -168,9 +158,9 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper

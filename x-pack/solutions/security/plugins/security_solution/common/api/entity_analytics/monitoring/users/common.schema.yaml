@@ -15,6 +15,29 @@ components:
             name:
               type: string
               description: The name of the user.
+        entity_analytics_monitoring:
+          type: object
+          description: Entity analytics monitoring configuration for the user
+          properties:
+            labels:
+              type: array
+              description: Array of labels associated with the user
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: The field name for the label
+                  value:
+                    type: string
+                    description: The value of the label
+                  source:
+                    type: string
+                    description: The source where this label was created (api, csv, or index_sync)
+                    enum:
+                      - api
+                      - csv
+                      - index_sync
 
     MonitoredUserUpdateDoc:
       type: object
@@ -77,6 +100,9 @@ components:
             type: object
             properties:
               ingested:
+                type: string
+                format: date-time
+              "@timestamp":
                 type: string
                 format: date-time
           "@timestamp":

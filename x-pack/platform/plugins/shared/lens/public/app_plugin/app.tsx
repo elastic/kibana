@@ -10,15 +10,22 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import type { LensAppProps, LensAppServices } from './types';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  AddUserMessages,
+  EditorFrameInstance,
+  UserMessagesGetter,
+  LensInspector,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { LensAppProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import type { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import type { LensDocument } from '../persistence';
 
-import type { LensAppState } from '../state_management';
 import {
   setState,
   applyChanges,
@@ -31,7 +38,6 @@ import {
   selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import type { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
@@ -60,6 +66,16 @@ export type SaveProps = Simplify<
     panelTimeRange?: TimeRange;
   }
 >;
+
+// Helper to determine if we're coming from a specific dashboard/canvas view (not from library list)
+function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
 
 export function App({
   history,
@@ -441,6 +457,7 @@ export function App({
       >
         <LensTopNavMenu
           initialInput={initialInput}
+          incomingState={incomingState}
           redirectToOrigin={redirectToOrigin}
           getIsByValueMode={getIsByValueMode}
           onAppLeave={onAppLeave}
@@ -478,7 +495,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isLinkedToOriginatingApp
+            isComingFromContainerView(incomingState) || initialContextIsEmbedded
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
@@ -53,11 +53,23 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaSpace: kibanaSpace1,
         });
 
+        const mockSchedule = getSimpleAttackDiscoverySchedule();
+        const { name, enabled, schedule: mockInterval, actions, params } = mockSchedule;
         expect(schedule).toEqual(
           expect.objectContaining({
-            ...getSimpleAttackDiscoverySchedule(),
-            createdBy: secOnlySpacesAll.username,
-            updatedBy: secOnlySpacesAll.username,
+            actions,
+            created_by: secOnlySpacesAll.username,
+            enabled,
+            name,
+            params: expect.objectContaining({
+              alerts_index_pattern: params.alerts_index_pattern,
+              api_config: params.api_config,
+              end: params.end,
+              size: params.size,
+              start: params.start,
+            }),
+            schedule: mockInterval,
+            updated_by: secOnlySpacesAll.username,
           })
         );
 
@@ -79,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
           })
         );
       });
@@ -97,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
           })
         );
       });
@@ -116,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
           })
         );
       });

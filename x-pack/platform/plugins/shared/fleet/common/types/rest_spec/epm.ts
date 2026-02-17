@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf, schema } from '@kbn/config-schema';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageSpecIcon } from '../models/package_spec';
@@ -264,3 +264,18 @@ export interface RollbackPackageResponse {
   success: boolean;
   version: string;
 }
+export const RollbackAvailableCheckResponseSchema = schema.object({
+  reason: schema.maybe(schema.string()),
+  isAvailable: schema.boolean(),
+});
+
+export type RollbackAvailableCheckResponse = TypeOf<typeof RollbackAvailableCheckResponseSchema>;
+
+export const BulkRollbackAvailableCheckResponseSchema = schema.recordOf(
+  schema.string(),
+  RollbackAvailableCheckResponseSchema
+);
+
+export type BulkRollbackAvailableCheckResponse = TypeOf<
+  typeof BulkRollbackAvailableCheckResponseSchema
+>;

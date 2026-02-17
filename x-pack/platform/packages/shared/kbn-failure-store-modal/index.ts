@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FailureStoreModal } from './src';
+export { FailureStoreModal, type FailureStoreFormData } from './src';

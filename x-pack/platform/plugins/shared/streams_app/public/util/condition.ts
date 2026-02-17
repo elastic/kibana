@@ -17,8 +17,12 @@ import {
   getFilterOperator,
   getFilterValue,
   isAlwaysCondition,
+  isArrayOperator,
+  isCondition,
   isFilterConditionObject,
 } from '@kbn/streamlang';
+
+export { isArrayOperator };
 
 import { cloneDeep, isEqual, isPlainObject } from 'lodash';
 
@@ -43,7 +47,14 @@ export function emptyEqualsToAlways(condition: Condition) {
   return condition;
 }
 
-const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'range'>, string[]> = {
+export function undefinedToAlways(condition: Condition | undefined) {
+  if (!condition) {
+    return ALWAYS_CONDITION;
+  }
+  return condition;
+}
+
+const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<OperatorKeys, string[]> = {
   // Allow both string and boolean for eq/neq so that boolean shorthand (e.g. "equals true") can rendered in UI
   eq: ['string', 'boolean'],
   neq: ['string', 'boolean'],
@@ -56,6 +67,9 @@ const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'rang
   startsWith: ['string'],
   endsWith: ['string'],
   exists: ['boolean'],
+
+  range: ['object'],
+  includes: ['string'],
 };
 
 function isOperatorUiSupported(
@@ -109,3 +123,28 @@ export function isShorthandBooleanFilterCondition(
 export function conditionNeedsValueField(condition: FilterCondition): boolean {
   return !isShorthandBooleanFilterCondition(condition);
 }
+
+/**
+ * Get the field name from a filter condition.
+ * @param condition condition to extract field name from
+ * @returns field name or undefined if not a filter condition
+ */
+export const getFilterConditionField = (condition: Condition) => {
+  return isCondition(condition) && alwaysToEmptyEquals(condition)
+    ? isPlainObject(condition) && isFilterConditionObject(condition)
+      ? condition.field
+      : undefined
+    : undefined;
+};
+
+/**
+ * Get the operator from a filter condition.
+ * @param condition condition to extract operator from
+ * @returns operator or undefined if not a filter condition
+ */
+export const getFilterConditionOperator = (condition: Condition): OperatorKeys | undefined => {
+  if (isCondition(condition) && isPlainObject(condition) && isFilterConditionObject(condition)) {
+    return getFilterOperator(condition as FilterCondition);
+  }
+  return undefined;
+};

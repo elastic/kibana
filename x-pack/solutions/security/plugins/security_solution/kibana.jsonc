@@ -19,6 +19,7 @@
       "alerting",
       "cases",
       "cloud",
+      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -32,6 +33,7 @@
       "fieldFormats",
       "inference",
       "inspector",
+      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -44,6 +46,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -61,6 +64,8 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share",
+      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -76,7 +81,9 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -87,10 +94,18 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Data generator episode fixtures are large vendored artifacts intended for dev/testing only.
+      // Keep them out of distributable builds.
+      "**/scripts/data/episodes/**"
     ]
   }
 }

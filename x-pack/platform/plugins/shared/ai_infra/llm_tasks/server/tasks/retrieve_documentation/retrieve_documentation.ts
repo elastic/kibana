@@ -29,6 +29,7 @@ export const retrieveDocumentation =
     searchTerm,
     connectorId,
     products,
+    resourceTypes,
     functionCalling,
     inferenceId,
     max = MAX_DOCUMENTS_DEFAULT,
@@ -64,6 +65,7 @@ export const retrieveDocumentation =
       const { results } = await searchDocAPI({
         query: searchTerm,
         products,
+        ...(resourceTypes ? { resourceTypes } : {}),
         max,
         highlights,
         inferenceId,

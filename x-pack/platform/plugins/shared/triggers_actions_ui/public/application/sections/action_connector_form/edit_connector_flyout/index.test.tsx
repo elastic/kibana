@@ -757,5 +757,63 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
       expect(getByTestId('executeActionButton')).toBeDisabled();
     });
+
+    it('should not disable the test tab', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
+      expect(screen.queryByTestId('testConnectorTab')).toBeEnabled();
+    });
+  });
+});
+
+describe('is spec connector', () => {
+  let appMockRenderer: AppMockRenderer;
+  const onClose = jest.fn();
+  const onConnectorUpdated = jest.fn();
+
+  const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+    actionConnectorFields: lazy(() => import('../connector_mock')),
+    source: 'spec',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+  });
+
+  const actionTypeRegistry = actionTypeRegistryMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    actionTypeRegistry.has.mockReturnValue(true);
+    actionTypeRegistry.get.mockReturnValue(actionTypeModel);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.coreStart.application.capabilities = {
+      ...appMockRenderer.coreStart.application.capabilities,
+      actions: { save: true, show: true, execute: true },
+    };
+    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
+    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
+  });
+
+  it('should not render the test tab', async () => {
+    const { getByTestId } = appMockRenderer.render(
+      <EditConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        connector={connector}
+        onConnectorUpdated={onConnectorUpdated}
+      />
+    );
+
+    expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
+    expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
   });
 });

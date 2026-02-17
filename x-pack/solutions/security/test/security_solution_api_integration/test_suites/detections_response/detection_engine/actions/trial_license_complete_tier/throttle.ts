@@ -18,18 +18,18 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
+import {
   getWebHookAction,
   getRuleWithWebHookAction,
   getSimpleRule,
   fetchRule,
   updateRule,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 

@@ -28,6 +28,8 @@
           "\n"
         ],
         "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,6 +80,8 @@
               "(path: \"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\", method: string, props?: string[] | undefined, schema?: object | undefined) => Promise<any>"
             ],
             "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -88,6 +96,8 @@
                   "\"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\""
                 ],
                 "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+                "lineNumber": 101,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -103,6 +113,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+                "lineNumber": 102,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -118,6 +130,8 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -133,6 +147,8 @@
                   "object | undefined"
                 ],
                 "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -153,6 +169,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

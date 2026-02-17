@@ -8,4 +8,3 @@
 export { transformGetAllConnectorsResponse } from './transform_connectors_response/latest';
 
 export { transformGetAllConnectorsResponse as transformGetAllConnectorsResponseV1 } from './transform_connectors_response/v1';
-export { transformGetAllConnectorsResponse as transformGetAllConnectorsResponseV2 } from './transform_connectors_response/v2';

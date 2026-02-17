@@ -17,7 +17,6 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
@@ -72,8 +71,6 @@ export const getAttackDiscoveryGenerationsRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
           const spaceId = (await context.elasticAssistant).getSpaceId();
           const { query } = request;

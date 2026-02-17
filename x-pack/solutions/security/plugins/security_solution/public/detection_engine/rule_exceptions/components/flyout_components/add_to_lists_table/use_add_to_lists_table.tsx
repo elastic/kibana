@@ -20,6 +20,7 @@ import type {
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getExceptionItemsReferences } from '../../../../../exceptions/api';
 import * as i18n from './translations';
@@ -48,6 +49,7 @@ export const useAddToSharedListTable = ({
 }: ExceptionsAddToListsComponentProps) => {
   const [listsToDisplay, setListsToDisplay] = useState<ExceptionListRuleReferencesSchema[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
 
   const listsToFetch = useMemo(() => {
     return showAllSharedLists ? [] : sharedExceptionLists;
@@ -67,15 +69,17 @@ export const useAddToSharedListTable = ({
   const getReferences = useCallback(async () => {
     try {
       setIsLoading(true);
-      return getExceptionItemsReferences(
-        (!listsToFetch.length
-          ? [{ namespace_type: 'single' }]
-          : listsToFetch) as ExceptionListSchema[]
-      );
+      return canReadExceptions
+        ? getExceptionItemsReferences(
+            (!listsToFetch.length
+              ? [{ namespace_type: 'single' }]
+              : listsToFetch) as ExceptionListSchema[]
+          )
+        : {};
     } catch (err) {
       setError(i18n.REFERENCES_FETCH_ERROR);
     }
-  }, [listsToFetch]);
+  }, [canReadExceptions, listsToFetch]);
 
   const fillListsToDisplay = useCallback(async () => {
     const result = (await getReferences()) as RuleReferences;

@@ -2,9 +2,1632 @@
   "id": "@kbn/search-api-panels",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.CodeBox",
+        "type": "Function",
+        "tags": [],
+        "label": "CodeBox",
+        "description": [],
+        "signature": [
+          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: CodeBoxProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.CodeBox.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  consoleTitle,\n  showTopBar = true,\n}",
+            "description": [],
+            "signature": [
+              "CodeBoxProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
+            "lineNumber": 51,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisCloudConnectPromoCallout",
+        "description": [],
+        "signature": [
+          "({ promoId, isSelfManaged, navigateToApp, direction, addSpacer, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisCloudConnectPromoCalloutProps",
+            "text": "EisCloudConnectPromoCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  promoId,\n  isSelfManaged,\n  navigateToApp,\n  direction,\n  addSpacer,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisCloudConnectPromoCalloutProps",
+                "text": "EisCloudConnectPromoCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 33,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoTour",
+        "type": "Function",
+        "tags": [],
+        "label": "EisCloudConnectPromoTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, navigateToApp, promoId, isSelfManaged, isReady, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisCloudConnectPromoTourProps",
+            "text": "EisCloudConnectPromoTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  navigateToApp,\n  promoId,\n  isSelfManaged,\n  isReady = true,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisCloudConnectPromoTourProps",
+                "text": "EisCloudConnectPromoTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 63,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisPromotionalCallout",
+        "description": [],
+        "signature": [
+          "({ ctaLink, promoId, isCloudEnabled, direction, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisPromotionalCalloutProps",
+            "text": "EisPromotionalCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  direction,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisPromotionalCalloutProps",
+                "text": "EisPromotionalCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 35,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalTour",
+        "type": "Function",
+        "tags": [],
+        "label": "EisPromotionalTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisPromotionalTourProps",
+            "text": "EisPromotionalTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisPromotionalTourProps",
+                "text": "EisPromotionalTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 35,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisUpdateCallout",
+        "description": [],
+        "signature": [
+          "({ ctaLink, promoId, shouldShowEisUpdateCallout, handleOnClick, direction, hasUpdatePrivileges, addSpacer, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisUpdateCalloutProps",
+            "text": "EisUpdateCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ctaLink,\n  promoId,\n  shouldShowEisUpdateCallout,\n  handleOnClick,\n  direction,\n  hasUpdatePrivileges,\n  addSpacer,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisUpdateCalloutProps",
+                "text": "EisUpdateCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 60,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.getConsoleRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "getConsoleRequest",
+        "description": [],
+        "signature": [
+          "(code: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ", args?: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.LanguageDefinitionSnippetArguments",
+            "text": "LanguageDefinitionSnippetArguments"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.getConsoleRequest.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.getConsoleRequest.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.LanguageDefinitionSnippetArguments",
+                "text": "LanguageDefinitionSnippetArguments"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.getLanguageDefinitionCodeSnippet",
+        "type": "Function",
+        "tags": [],
+        "label": "getLanguageDefinitionCodeSnippet",
+        "description": [],
+        "signature": [
+          "(language: Partial<",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ">, key: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ", args: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.LanguageDefinitionSnippetArguments",
+            "text": "LanguageDefinitionSnippetArguments"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.LanguageDefinition",
+                "text": "LanguageDefinition"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.LanguageDefinitionSnippetArguments",
+                "text": "LanguageDefinitionSnippetArguments"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.GithubLink",
+        "type": "Function",
+        "tags": [],
+        "label": "GithubLink",
+        "description": [],
+        "signature": [
+          "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: { assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.GithubLink.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ assetBasePath, label, href, 'aria-label': ariaLabel }",
+            "description": [],
+            "signature": [
+              "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
+            "lineNumber": 19,
+            "columnNumber": 7,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.InferenceCostsTransparencyTour",
+        "type": "Function",
+        "tags": [],
+        "label": "InferenceCostsTransparencyTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, isReady, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.InferenceCostsTransparencyTourProps",
+            "text": "InferenceCostsTransparencyTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "lineNumber": 57,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  isReady = true,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.InferenceCostsTransparencyTourProps",
+                "text": "InferenceCostsTransparencyTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 57,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisCloudConnectPromoCalloutProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.isSelfManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSelfManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.navigateToApp",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToApp",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.addSpacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "addSpacer",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoTourProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "EisCloudConnectPromoTourProps",
+        "description": [
+          "\nProps for the EisCloudConnectPromoTour component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.navigateToApp",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToApp",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.isSelfManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSelfManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.isReady",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReady",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisPromotionalCalloutProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalTourProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisPromotionalTourProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCalloutProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "EisUpdateCalloutProps",
+        "description": [
+          "\nProps for the EisUpdateCallout component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.shouldShowEisUpdateCallout",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldShowEisUpdateCallout",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.handleOnClick",
+            "type": "Function",
+            "tags": [],
+            "label": "handleOnClick",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.hasUpdatePrivileges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdatePrivileges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.addSpacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "addSpacer",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.InferenceCostsTransparencyTourProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "InferenceCostsTransparencyTourProps",
+        "description": [
+          "\nProps for the InferenceCostsTransparencyTour component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.isReady",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReady",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.InferenceCostsTransparencyTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.LanguageDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "LanguageDefinition",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.Languages",
+                "text": "Languages"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.iconType",
+            "type": "string",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.docLink",
+            "type": "string",
+            "tags": [],
+            "label": "docLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.configureClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "configureClient",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.ingestData",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestData",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.ingestDataIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestDataIndex",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.installClient",
+            "type": "string",
+            "tags": [],
+            "label": "installClient",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.buildSearchQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buildSearchQuery",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.testConnection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "testConnection",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.advancedConfig",
+            "type": "string",
+            "tags": [],
+            "label": "advancedConfig",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.apiReference",
+            "type": "string",
+            "tags": [],
+            "label": "apiReference",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.basicConfig",
+            "type": "string",
+            "tags": [],
+            "label": "basicConfig",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.github",
+            "type": "Object",
+            "tags": [],
+            "label": "github",
+            "description": [],
+            "signature": [
+              "{ link: string; label: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinition.languageStyling",
+            "type": "string",
+            "tags": [],
+            "label": "languageStyling",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.LanguageDefinitionSnippetArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "LanguageDefinitionSnippetArguments",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.apiKey",
+            "type": "string",
+            "tags": [],
+            "label": "apiKey",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.ingestPipeline",
+            "type": "string",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
+            "type": "Object",
+            "tags": [],
+            "label": "extraIngestDocumentValues",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.SearchApiPanelsServicesContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchApiPanelsServicesContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.SearchApiPanelsServicesContext.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.SearchApiPanelsServicesContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.Languages",
+        "type": "Enum",
+        "tags": [],
+        "label": "Languages",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   },
@@ -18,592 +1641,9 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.CodeBox",
-        "type": "Function",
-        "tags": [],
-        "label": "CodeBox",
-        "description": [],
-        "signature": [
-          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: CodeBoxProps) => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.CodeBox.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  consoleTitle,\n  showTopBar = true,\n}",
-            "description": [],
-            "signature": [
-              "CodeBoxProps"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/code_box.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.getConsoleRequest",
-        "type": "Function",
-        "tags": [],
-        "label": "getConsoleRequest",
-        "description": [],
-        "signature": [
-          "(code: keyof ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
-            "text": "LanguageDefinition"
-          },
-          ", args?: ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinitionSnippetArguments",
-            "text": "LanguageDefinitionSnippetArguments"
-          },
-          " | undefined) => string | undefined"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getConsoleRequest.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "code",
-            "description": [],
-            "signature": [
-              "keyof ",
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
-                "text": "LanguageDefinition"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getConsoleRequest.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "args",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinitionSnippetArguments",
-                "text": "LanguageDefinitionSnippetArguments"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.getLanguageDefinitionCodeSnippet",
-        "type": "Function",
-        "tags": [],
-        "label": "getLanguageDefinitionCodeSnippet",
-        "description": [],
-        "signature": [
-          "(language: Partial<",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
-            "text": "LanguageDefinition"
-          },
-          ">, key: keyof ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
-            "text": "LanguageDefinition"
-          },
-          ", args: ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinitionSnippetArguments",
-            "text": "LanguageDefinitionSnippetArguments"
-          },
-          ") => string"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "language",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
-                "text": "LanguageDefinition"
-              },
-              ">"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "keyof ",
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
-                "text": "LanguageDefinition"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "args",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinitionSnippetArguments",
-                "text": "LanguageDefinitionSnippetArguments"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.GithubLink",
-        "type": "Function",
-        "tags": [],
-        "label": "GithubLink",
-        "description": [],
-        "signature": [
-          "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: { assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }) => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.GithubLink.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ assetBasePath, label, href, 'aria-label': ariaLabel }",
-            "description": [],
-            "signature": [
-              "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/components/github_link.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.LanguageDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "LanguageDefinition",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.id",
-            "type": "Enum",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.Languages",
-                "text": "Languages"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.iconType",
-            "type": "string",
-            "tags": [],
-            "label": "iconType",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.docLink",
-            "type": "string",
-            "tags": [],
-            "label": "docLink",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.configureClient",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "configureClient",
-            "description": [],
-            "signature": [
-              "CodeSnippet | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.ingestData",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ingestData",
-            "description": [],
-            "signature": [
-              "CodeSnippet | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.ingestDataIndex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ingestDataIndex",
-            "description": [],
-            "signature": [
-              "CodeSnippet | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.installClient",
-            "type": "string",
-            "tags": [],
-            "label": "installClient",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.buildSearchQuery",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "buildSearchQuery",
-            "description": [],
-            "signature": [
-              "CodeSnippet | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.testConnection",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "testConnection",
-            "description": [],
-            "signature": [
-              "CodeSnippet | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.advancedConfig",
-            "type": "string",
-            "tags": [],
-            "label": "advancedConfig",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.apiReference",
-            "type": "string",
-            "tags": [],
-            "label": "apiReference",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.basicConfig",
-            "type": "string",
-            "tags": [],
-            "label": "basicConfig",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.github",
-            "type": "Object",
-            "tags": [],
-            "label": "github",
-            "description": [],
-            "signature": [
-              "{ link: string; label: string; } | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.languageStyling",
-            "type": "string",
-            "tags": [],
-            "label": "languageStyling",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.LanguageDefinitionSnippetArguments",
-        "type": "Interface",
-        "tags": [],
-        "label": "LanguageDefinitionSnippetArguments",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.url",
-            "type": "string",
-            "tags": [],
-            "label": "url",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.apiKey",
-            "type": "string",
-            "tags": [],
-            "label": "apiKey",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.indexName",
-            "type": "string",
-            "tags": [],
-            "label": "indexName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.cloudId",
-            "type": "string",
-            "tags": [],
-            "label": "cloudId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.ingestPipeline",
-            "type": "string",
-            "tags": [],
-            "label": "ingestPipeline",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
-            "type": "Object",
-            "tags": [],
-            "label": "extraIngestDocumentValues",
-            "description": [],
-            "signature": [
-              "Record<string, boolean> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.Languages",
-        "type": "Enum",
-        "tags": [],
-        "label": "Languages",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [],
     "objects": []
   }

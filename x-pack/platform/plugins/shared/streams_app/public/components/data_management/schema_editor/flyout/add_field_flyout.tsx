@@ -28,10 +28,10 @@ import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useController, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
 import { mapKeys } from 'lodash';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import { useBoolean } from '@kbn/react-hooks';
+import type { FieldMetadata } from '@kbn/fields-metadata-plugin/common/fields_metadata/models/field_metadata';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
 import { useSchemaEditorContext } from '../schema_editor_context';
@@ -252,6 +252,7 @@ export const FieldNameSelector = () => {
 };
 
 export const FieldTypeSelector = () => {
+  const { stream } = useSchemaEditorContext();
   const { field, fieldState } = useController<SchemaField, 'type'>({
     name: 'type',
     rules: {
@@ -260,6 +261,8 @@ export const FieldTypeSelector = () => {
       }),
     },
   });
+
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
 
   return (
     <EuiFormRow
@@ -273,7 +276,11 @@ export const FieldTypeSelector = () => {
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
     >
-      <FieldTypeSelectorComponent value={field.value} onChange={field.onChange} />
+      <FieldTypeSelectorComponent
+        value={field.value}
+        onChange={field.onChange}
+        streamType={streamType}
+      />
     </EuiFormRow>
   );
 };

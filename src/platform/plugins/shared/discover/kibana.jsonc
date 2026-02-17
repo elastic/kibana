@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/discover-plugin",
-  "owner": [
-    "@elastic/kibana-data-discovery"
-  ],
+  "owner": ["@elastic/kibana-data-discovery"],
   "group": "platform",
   "visibility": "shared",
   "description": "This plugin contains the Discover application and the saved search embeddable.",
@@ -51,17 +49,16 @@
       "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
-      "metricsExperience"
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
       "savedObjects",
-      "controls",
+      "presentationPanel",
+      "esql"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

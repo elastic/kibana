@@ -54,6 +54,7 @@ FontPicker.propTypes = {
   /** Function to execute when a Font is selected. */
   onSelect: PropTypes.func,
   /** Initial value of the Font Picker. */
+  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };
 

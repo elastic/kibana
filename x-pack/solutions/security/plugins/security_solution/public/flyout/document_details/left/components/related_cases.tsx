@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
@@ -111,7 +112,13 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
         items={data}
         columns={columns}
         pagination={true}
-        message={
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.correlations.relatedCasesCaption',
+          {
+            defaultMessage: 'Related cases',
+          }
+        )}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"
             defaultMessage="No related cases."

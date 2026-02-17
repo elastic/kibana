@@ -91,9 +91,11 @@ describe('Endpoint fields', () => {
     (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
       getEndpointAuthzInitialStateMock()
     );
+  });
 
-    // @ts-expect-error write to readonly property
-    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   afterAll(() => {
@@ -142,14 +144,6 @@ describe('Endpoint fields', () => {
     });
 
     describe('when space awareness feature is enabled', () => {
-      beforeEach(() => {
-        // @ts-expect-error write to readonly property
-        endpointAppContextService.experimentalFeatures = {
-          ...endpointAppContextService.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: true,
-        };
-      });
-
       it('should use space-aware index pattern when feature flag is enabled', async () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
@@ -387,6 +381,11 @@ describe('Endpoint fields', () => {
         );
       }).rejects.toThrowError('Invalid indices request invalid, invalid2');
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('without right privileges', () => {

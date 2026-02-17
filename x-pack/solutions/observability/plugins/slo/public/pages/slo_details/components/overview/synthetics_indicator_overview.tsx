@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
@@ -50,7 +50,11 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
 
   return (
     <DefinitionItem
-      title={MONITOR_LABEL}
+      title={
+        <EuiText size="s">
+          <strong>{MONITOR_LABEL}</strong>
+        </EuiText>
+      }
       subtitle={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
           {name && (

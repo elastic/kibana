@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
@@ -67,6 +67,10 @@ export const FilterGroupContextMenu = () => {
           // & display an appropriate message
           dataViewId: dataViewId ?? '',
           ...control,
+          displaySettings: {
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.displaySettings,
+            ...control.displaySettings,
+          },
         },
         String(counter)
       );

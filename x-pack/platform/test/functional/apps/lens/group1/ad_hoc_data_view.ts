@@ -85,7 +85,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -95,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
     });
 
     it('should allow adding and using a field', async () => {
@@ -111,9 +115,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.dragFieldToWorkspace('runtimefield');
       });
       await lens.waitForVisualization();
-      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 5 values of runtimefield');
+      expect(await lens.getDatatableHeaderText(0)).to.equal('Top 9 values of runtimefield');
       expect(await lens.getDatatableCellText(0, 0)).to.eql('abc');
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
     });
 
     it('should allow switching to another data view and back', async () => {

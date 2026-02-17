@@ -95,10 +95,27 @@ describe('PackagePolicyAgentsCell', () => {
       });
     });
 
+    test('it should display only count policy is managed', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 0,
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByText('0')).toBeInTheDocument();
+      });
+    });
+
     test('it should not display help popover if count is > 0 and hasHelpPopover=true', async () => {
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
             agents: 999,
           } as AgentPolicy,
@@ -136,6 +153,7 @@ describe('PackagePolicyAgentsCell', () => {
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
             agents: 999,
             is_managed: true,
@@ -163,6 +181,7 @@ describe('PackagePolicyAgentsCell', () => {
       const utils = renderCell({
         agentPolicies: [
           {
+            id: 'policy-1',
             name: 'test Policy 1',
           } as AgentPolicy,
         ],
@@ -180,14 +199,32 @@ describe('PackagePolicyAgentsCell', () => {
       });
     });
 
-    test('it should display agent count sum and popover if agent count > 0', async () => {
+    test('it should display only count policy is managed', async () => {
       const utils = renderCell({
         agentPolicies: [
           {
             name: 'test Policy 1',
+            agents: 0,
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByText('0')).toBeInTheDocument();
+      });
+    });
+
+    test('it should display agent count sum and popover if agent count > 0', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            id: 'policy-1',
+            name: 'test Policy 1',
             agents: 100,
           } as AgentPolicy,
           {
+            id: 'policy-2',
             name: 'test Policy 2',
             agents: 200,
           } as AgentPolicy,

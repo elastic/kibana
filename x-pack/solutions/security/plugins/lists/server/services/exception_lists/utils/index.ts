@@ -43,7 +43,6 @@ export const transformSavedObjectToExceptionList = ({
   const {
     version: _version,
     attributes: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       created_at,
       created_by,
       description,
@@ -57,7 +56,6 @@ export const transformSavedObjectToExceptionList = ({
       type,
       updated_by,
       version,
-      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,
@@ -143,7 +141,6 @@ export const transformSavedObjectToExceptionListItem = ({
   const {
     version: _version,
     attributes: {
-      /* eslint-disable @typescript-eslint/naming-convention */
       comments,
       created_at,
       created_by,
@@ -159,7 +156,6 @@ export const transformSavedObjectToExceptionListItem = ({
       tie_breaker_id,
       type,
       updated_by,
-      /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
     updated_at: updatedAt,

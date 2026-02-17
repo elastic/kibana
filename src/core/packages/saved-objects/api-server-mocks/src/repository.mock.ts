@@ -21,6 +21,7 @@ const create = () => {
     delete: jest.fn(),
     bulkGet: jest.fn(),
     find: jest.fn(),
+    search: jest.fn(),
     get: jest.fn(),
     closePointInTime: jest.fn(),
     createPointInTimeFinder: jest.fn(),
@@ -35,6 +36,8 @@ const create = () => {
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
     asScopedToNamespace: jest.fn().mockImplementation(create),
+    changeOwnership: jest.fn(),
+    changeAccessMode: jest.fn(),
   });
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({

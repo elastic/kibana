@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocView, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useState, useRef, useMemo, useLayoutEffect } from 'react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
@@ -47,7 +47,7 @@ function orderObjectKeys(obj: unknown): unknown {
 
 export const DOC_VIEW_DIFF_ID = 'doc_view_diff';
 
-export const docViewDiff = {
+export const docViewDiff: DocView = {
   id: DOC_VIEW_DIFF_ID,
   title: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.docViews.diff.diffTitle',
@@ -56,7 +56,7 @@ export const docViewDiff = {
     }
   ),
   order: 15,
-  component: JsonDiffViewer,
+  render: (props) => <JsonDiffViewer {...props} />,
 };
 
 function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) {

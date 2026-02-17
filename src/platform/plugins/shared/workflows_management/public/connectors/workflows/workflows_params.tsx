@@ -8,43 +8,32 @@
  */
 
 import {
-  EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHighlight,
-  EuiIcon,
-  EuiInputPopover,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSelectable,
-  EuiText,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { WorkflowListDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useState } from 'react';
-import * as i18n from './translations';
+import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
 
-interface WorkflowOption {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  tags: string[];
-  label: string;
-  disabled?: boolean;
-  checked?: 'on' | 'off';
-  prepend?: React.ReactNode;
-  append?: React.ReactNode;
-  data?: {
-    secondaryContent?: string;
-  };
-  [key: string]: any;
-}
+const RUN_PER_ALERT_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.label',
+  {
+    defaultMessage: 'Run per alert',
+  }
+);
+
+const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.helpText',
+  {
+    defaultMessage: 'If enabled, it will be separate workflow for each alert detected',
+  }
+);
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
@@ -52,33 +41,31 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   index,
   errors,
 }) => {
-  const { workflowId } = actionParams.subActionParams ?? {};
-  const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [selectedWorkflowDisabledError, setSelectedWorkflowDisabledError] = useState<string | null>(
-    null
-  );
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const [isSearching, setIsSearching] = useState(true);
-  const { http, application } = useKibana().services;
+  const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
 
-  // Custom render function for workflow options
-  const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    return (
-      <>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        {option.secondaryContent && (
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>
-              <EuiHighlight search={searchValue}>{option.secondaryContent}</EuiHighlight>
-            </small>
-          </EuiText>
-        )}
-      </>
-    );
-  }, []);
+  const handleWorkflowChange = useCallback(
+    (newWorkflowId: string) => {
+      editAction(
+        'subActionParams',
+        { ...actionParams.subActionParams, workflowId: newWorkflowId },
+        index
+      );
+    },
+    [editAction, index, actionParams.subActionParams]
+  );
+
+  const handleRunPerAlertChange = useCallback(
+    (runPerAlert: boolean) => {
+      // When switch is ON (runPerAlert = true), summaryMode should be false (run per alert)
+      // When switch is OFF (runPerAlert = false), summaryMode should be true (summary mode)
+      editAction(
+        'subActionParams',
+        { ...actionParams.subActionParams, summaryMode: !runPerAlert },
+        index
+      );
+    },
+    [editAction, index, actionParams.subActionParams]
+  );
 
   // Ensure proper initialization of action parameters
   useEffect(() => {
@@ -86,319 +73,62 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       editAction('subAction', 'run', index);
     }
     if (!actionParams?.subActionParams) {
-      editAction('subActionParams', { workflowId: '' }, index);
+      editAction('subActionParams', { workflowId: '', summaryMode: true }, index);
+    } else if (actionParams.subActionParams.summaryMode === undefined) {
+      // Ensure summaryMode defaults to true for backward compatibility
+      editAction('subActionParams', { ...actionParams.subActionParams, summaryMode: true }, index);
     }
   }, [actionParams, editAction, index]);
-
-  const editSubActionParams = useCallback(
-    (key: string, value: unknown) => {
-      const oldParams = actionParams.subActionParams ?? {};
-      const updatedParams = { ...oldParams, [key]: value };
-      editAction('subActionParams', updatedParams, index);
-    },
-    [actionParams.subActionParams, editAction, index]
-  );
-
-  const onWorkflowChange = useCallback(
-    (newOptions: WorkflowOption[], event: any, changedOption: WorkflowOption) => {
-      setWorkflows(newOptions);
-      setIsPopoverOpen(false);
-
-      if (changedOption.checked === 'on') {
-        editSubActionParams('workflowId', changedOption.id);
-        setInputValue(changedOption.name);
-        setIsSearching(false);
-        // Clear the disabled workflow error when a new workflow is selected
-        setSelectedWorkflowDisabledError(null);
-      } else {
-        editSubActionParams('workflowId', '');
-        setInputValue('');
-        setIsSearching(true);
-        // Clear the disabled workflow error when selection is cleared
-        setSelectedWorkflowDisabledError(null);
-      }
-    },
-    [editSubActionParams]
-  );
-
-  const handlePopoverClose = useCallback(() => {
-    setIsPopoverOpen(false);
-
-    // If the user cleared the input but didn't select anything new,
-    // revert to the currently selected workflow
-    if (workflowId && workflows.length > 0 && isSearching) {
-      const selectedWorkflow = workflows.find((w) => w.id === workflowId);
-      if (selectedWorkflow) {
-        setInputValue(selectedWorkflow.name);
-        setIsSearching(false);
-      }
-    }
-  }, [workflowId, workflows, isSearching]);
-
-  const handleCreateNewWorkflow = useCallback(() => {
-    const url = application?.getUrlForApp
-      ? application.getUrlForApp('workflows')
-      : '/app/workflows';
-    window.open(url, '_blank');
-  }, [application]);
-
-  const handleOpenWorkflow = useCallback(
-    (workflowIdToOpen: string, event: React.MouseEvent | React.KeyboardEvent) => {
-      // Prevent the click from selecting the workflow option
-      event.stopPropagation();
-      event.preventDefault();
-      event.nativeEvent.stopImmediatePropagation();
-
-      const url = application?.getUrlForApp
-        ? application.getUrlForApp('workflows', { path: `/${workflowIdToOpen}` })
-        : `/app/workflows/${workflowIdToOpen}`;
-      window.open(url, '_blank');
-    },
-    [application]
-  );
-
-  // Fetch workflows from internal Kibana API
-  useEffect(() => {
-    const fetchWorkflows = async () => {
-      if (!http) {
-        return;
-      }
-
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await http.post('/api/workflows/search', {
-          body: JSON.stringify({
-            limit: 1000,
-            page: 1,
-            query: '',
-          }),
-        });
-        const workflowsMap = response as WorkflowListDto;
-
-        // Check if the currently selected workflow is disabled
-        let hasSelectedWorkflowDisabled = false;
-
-        const workflowOptionsWithSortInfo = workflowsMap.results.map((workflow) => {
-          // TODO: remove this once we have a way to disable workflows
-          const isDisabled = !workflow.enabled;
-          const isSelected = workflow.id === workflowId;
-          const wasSelectedButNowDisabled = isSelected && isDisabled;
-          const hasAlertTriggerType = (workflow.definition?.triggers ?? []).some(
-            (trigger) => trigger.type === 'alert'
-          );
-
-          // Track if selected workflow is disabled
-          if (wasSelectedButNowDisabled) {
-            hasSelectedWorkflowDisabled = true;
-          }
-
-          // Determine what to show in prepend
-          let prependElement;
-          if (wasSelectedButNowDisabled) {
-            // Show warning icon for previously selected but now disabled workflows
-            prependElement = (
-              <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
-            );
-          } else if (isDisabled) {
-            // Show disabled badge for disabled workflows
-            prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
-          }
-
-          // Create tags badges if workflow has tags
-          const workflowTags = workflow.definition?.tags || [];
-          const tagsElement =
-            workflowTags.length > 0 ? (
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {workflowTags.map((tag: string, tagIndex: number) => (
-                  <EuiFlexItem grow={false} key={tagIndex}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : undefined;
-
-          // Create the append element with tags and workflow link
-          const appendElement = (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {tagsElement && <EuiFlexItem grow={false}>{tagsElement}</EuiFlexItem>}
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="popout"
-                  aria-label={i18n.OPEN_WORKFLOW_LINK}
-                  title={i18n.OPEN_WORKFLOW_LINK}
-                  size="s"
-                  color="text"
-                  style={{ flexShrink: 0 }}
-                  onMouseDown={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                  }}
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                    handleOpenWorkflow(workflow.id, event);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-
-          return {
-            workflowOption: {
-              id: workflow.id,
-              name: workflow.name,
-              description: workflow.description,
-              enabled: workflow.enabled,
-              tags: workflowTags,
-              label: workflow.name,
-              disabled: isDisabled,
-              checked: isSelected ? 'on' : undefined,
-              prepend: prependElement,
-              append: appendElement,
-              data: {
-                secondaryContent: workflow.description,
-              },
-            } as WorkflowOption,
-            hasAlertTriggerType,
-          };
-        });
-
-        // Sort workflows by hasAlertTriggerType: if they have an alert trigger type, they should be at the top
-        const sortedWorkflowOptionsWithInfo = workflowOptionsWithSortInfo.sort((a, b) => {
-          if (a.hasAlertTriggerType && !b.hasAlertTriggerType) return -1;
-          if (!a.hasAlertTriggerType && b.hasAlertTriggerType) return 1;
-          return 0;
-        });
-
-        // Extract just the workflow options for the component
-        const workflowOptions = sortedWorkflowOptionsWithInfo.map((item) => item.workflowOption);
-
-        // Set error state if selected workflow is disabled
-        if (hasSelectedWorkflowDisabled) {
-          setSelectedWorkflowDisabledError(i18n.SELECTED_WORKFLOW_DISABLED_ERROR);
-        } else {
-          setSelectedWorkflowDisabledError(null);
-        }
-
-        setWorkflows(workflowOptions);
-      } catch (error) {
-        setLoadError(i18n.FAILED_TO_LOAD_WORKFLOWS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchWorkflows();
-  }, [http, workflowId, handleOpenWorkflow]);
-
-  // Update input value when workflowId changes
-  useEffect(() => {
-    if (workflowId && workflows.length > 0) {
-      const selectedWorkflow = workflows.find((w) => w.id === workflowId);
-      if (selectedWorkflow) {
-        setInputValue(selectedWorkflow.name);
-        setIsSearching(false);
-      }
-    } else {
-      setInputValue('');
-      setIsSearching(true);
-    }
-  }, [workflowId, workflows]);
-
-  const workflowOptions =
-    workflows.length > 0
-      ? workflows
-      : [
-          {
-            id: '',
-            name: i18n.NO_WORKFLOWS_AVAILABLE,
-            description: '',
-            status: '',
-            label: i18n.NO_WORKFLOWS_AVAILABLE,
-            disabled: true,
-          },
-        ];
 
   const errorMessages = errors['subActionParams.workflowId'];
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
   const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
 
-  // Prioritize selected workflow disabled error over validation errors
-  const displayError = selectedWorkflowDisabledError || validationError;
-  const helpText = loadError || (isLoading ? i18n.LOADING_WORKFLOWS : undefined);
+  // When summaryMode is false, runPerAlert is true (switch ON)
+  // When summaryMode is true, runPerAlert is false (switch OFF)
+  const runPerAlert = !summaryMode;
 
   return (
-    <EuiFormRow
-      label={i18n.WORKFLOW_ID_LABEL}
-      labelAppend={
-        <EuiLink onClick={handleCreateNewWorkflow} external>
-          {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
-        </EuiLink>
-      }
-      helpText={helpText}
-      error={displayError}
-      isInvalid={!!displayError}
-      fullWidth
-    >
-      {isLoading ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        <EuiSelectable
-          aria-label="Select workflow"
-          options={workflowOptions as any}
-          onChange={onWorkflowChange as any}
-          singleSelection
-          searchable
-          searchProps={{
-            value: inputValue,
-            onChange: (value) => {
-              setInputValue(value);
-              setIsSearching(true);
-            },
-            onKeyDown: (event) => {
-              if (event.key === 'Tab') return handlePopoverClose();
-              if (event.key === 'Escape') return handlePopoverClose();
-              if (event.key !== 'Escape') return setIsPopoverOpen(true);
-            },
-            onClick: () => setIsPopoverOpen(true),
-            onFocus: () => setIsPopoverOpen(true),
-            placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
-          }}
-          isPreFiltered={isSearching ? false : { highlightSearch: false }}
-          data-test-subj="workflowIdSelect"
-          listProps={{
-            rowHeight: 60, // Increased height to accommodate secondary content and tags
-            showIcons: false,
-            css: {
-              // Hide the badge when the option is focused
-              // This should be configurable in EUI, but it's not :(
-              '.euiSelectableListItem__onFocusBadge': {
-                display: 'none',
-              },
-            },
-          }}
-          renderOption={renderWorkflowOption}
-        >
-          {(list, search) => (
-            <EuiInputPopover
-              closePopover={handlePopoverClose}
-              disableFocusTrap
-              closeOnScroll
-              isOpen={isPopoverOpen}
-              input={search!}
-              panelPaddingSize="none"
-              fullWidth
-            >
-              {list}
-            </EuiInputPopover>
-          )}
-        </EuiSelectable>
-      )}
-    </EuiFormRow>
+    <>
+      <WorkflowSelectorWithProvider
+        selectedWorkflowId={workflowId}
+        onWorkflowChange={handleWorkflowChange}
+        config={{
+          sortFunction: (workflows) =>
+            workflows.sort((a, b) => {
+              const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
+              const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
+              if (aHasAlert && !bHasAlert) return -1;
+              if (!aHasAlert && bHasAlert) return 1;
+              return 0;
+            }),
+        }}
+        error={validationError}
+      />
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.stackConnectors.components.workflows.executionMode.label', {
+                defaultMessage: 'Action frequency',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={RUN_PER_ALERT_HELP_TEXT} position="right" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSwitch
+          label={RUN_PER_ALERT_LABEL}
+          checked={runPerAlert}
+          onChange={(e) => handleRunPerAlertChange(e.target.checked)}
+          data-test-subj="workflow-run-per-alert-switch"
+        />
+      </EuiFormRow>
+    </>
   );
 };
 

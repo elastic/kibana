@@ -198,7 +198,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
         data-test-subj="mlCalendarEventsTable"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >
@@ -216,6 +216,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -249,6 +250,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -283,6 +285,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -354,7 +357,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -635,7 +638,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         data-test-subj="mlCalendarEventsTable"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >
@@ -653,6 +656,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -686,6 +690,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -720,6 +725,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
                   <button
                     class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -791,7 +797,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

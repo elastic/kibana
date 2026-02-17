@@ -33,7 +33,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import { countDownTest, withSpaceUrl } from '../../config/services/detections_response';
+import { countDownTest, withSpaceUrl } from '@kbn/detections-response-ftr-services';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -104,7 +104,6 @@ export const createExceptionListsIndex = async (
 export const removeListServerGeneratedProperties = (
   list: Partial<ListSchema>
 ): Partial<ListSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
   return props;
 };
@@ -116,7 +115,6 @@ export const removeListServerGeneratedProperties = (
 export const removeListItemServerGeneratedProperties = (
   list: Partial<ListItemSchema>
 ): Partial<ListItemSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
   return props;
 };
@@ -128,7 +126,6 @@ export const removeListItemServerGeneratedProperties = (
 export const removeExceptionListItemServerGeneratedProperties = (
   list: Partial<ExceptionListItemSchema>
 ): Partial<ExceptionListItemSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
 };
@@ -140,7 +137,6 @@ export const removeExceptionListItemServerGeneratedProperties = (
 export const removeExceptionListServerGeneratedProperties = (
   list: Partial<ExceptionListSchema>
 ): Partial<ExceptionListSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
 };

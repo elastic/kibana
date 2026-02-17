@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 interface CreateIndexOptions {
   esClient: ElasticsearchClient;
@@ -42,7 +42,7 @@ export const createIndexWithMappings = async ({
       mappings,
     });
 
-    logger?.info(`Successfully created index ${indexName}`);
+    logger?.debug(`Successfully created index ${indexName}`);
   } catch (error) {
     // If the index already exists, we can ignore the error
     if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {

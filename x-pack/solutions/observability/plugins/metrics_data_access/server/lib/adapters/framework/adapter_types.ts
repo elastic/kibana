@@ -22,9 +22,8 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
-import type { MetricsDataPluginSetup } from '../../../types';
+import type { MetricsDataPluginSetup } from '../../../plugin';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingServerSetup;
@@ -32,7 +31,6 @@ export interface InfraServerPluginSetupDeps {
   home: HomeServerPluginSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  observability: ObservabilityPluginSetup;
   share: SharePluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;

@@ -68,6 +68,11 @@ export interface FleetConfigType {
     agentPolicySchemaUpgradeBatchSize?: number;
     uninstallTokenVerificationBatchSize?: number;
   };
+  startupOptimization?: {
+    deferPackageBumpInstallVersion?: boolean;
+    maxConcurrentPackageOperations?: number;
+    packageUpgradeBatchSize?: number;
+  };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
@@ -113,6 +118,14 @@ export interface FleetConfigType {
   hideDashboards?: boolean;
   integrationRollbackTTL?: string;
   installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    maxRevisions: number;
+    interval: string;
+    maxPoliciesPerRun: number;
+  };
+  versionSpecificPolicyAssignment?: {
+    taskInterval?: string;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

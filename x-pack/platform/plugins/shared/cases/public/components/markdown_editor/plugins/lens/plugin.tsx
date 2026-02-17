@@ -37,7 +37,7 @@ import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
-import { convertToAbsoluteTimeRange } from '../../../visualizations/actions/convert_to_absolute_time_range';
+import { convertToAbsoluteTimeRange } from '../../../attachments/lens/actions/convert_to_absolute_time_range';
 
 const DEFAULT_TIMERANGE: TimeRange = {
   from: 'now-7d',
@@ -253,7 +253,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       (pkg) => pkg.type === 'lens'
     ) as LensIncomingEmbeddablePackage;
 
-    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.rawState?.attributes) {
+    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.attributes) {
       const lensTime = timefilter.getTime();
       const newTimeRange =
         lensTime?.from && lensTime?.to
@@ -268,7 +268,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment?.position) {
         handleUpdate(
-          lensEmbeddablePackage.serializedState.rawState.attributes,
+          lensEmbeddablePackage.serializedState.attributes,
           newTimeRange,
           draftComment.position
         );
@@ -276,7 +276,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       }
 
       if (draftComment) {
-        handleAdd(lensEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
+        handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);

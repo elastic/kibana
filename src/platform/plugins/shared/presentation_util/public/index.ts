@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { PresentationUtilPlugin } from './plugin';
 
 export type { PresentationLabsService } from './services/presentation_labs_service';
@@ -16,7 +15,6 @@ export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from '.
 export type { SaveModalDashboardProps } from './components/types';
 
 export {
-  LazyExpressionInput,
   LazyLabsBeakerButton,
   LazyLabsFlyout,
   LazyDashboardPicker,
@@ -25,29 +23,13 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
-  type DashboardDrilldownOptions,
-  DashboardDrilldownOptionsComponent,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from './components';
 
-export type {
-  ExpressionInputEditorRef,
-  ExpressionInputProps,
-  OnExpressionInputEditorDidMount,
-} from './components/types';
-
-/**
- * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
- * the Monaco Editor to understand the functions and their arguments.
- *
- * This function is async in order to move the logic to an async chunk.
- *
- * @param expressionFunctions A set of Expression Functions to use in the ExpressionInput.
- */
-export const registerExpressionsLanguage = async (expressionFunctions: ExpressionFunction[]) => {
-  const languages = await import('./components/expression_input/language');
-  return languages.registerExpressionsLanguage(expressionFunctions);
-};
+export {
+  PanelPlacementStrategy,
+  type PanelSettings,
+  type PanelResizeSettings,
+} from './registries/panel_placement';
 
 export function plugin() {
   return new PresentationUtilPlugin();

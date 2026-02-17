@@ -47,7 +47,11 @@ test('returns zeroed telemetry data when there are no saved objects', () => {
 test('returns expected telemetry data from saved objects', () => {
   const statsCollector = new MapStatsCollector();
   mapSavedObjects.forEach((savedObject) => {
-    statsCollector.push(transformMapAttributesOut(savedObject.attributes, savedObject.references));
+    statsCollector.push(
+      transformMapAttributesOut(savedObject.attributes, (targetName: string) =>
+        savedObject.references.find(({ name }) => name === targetName)
+      )
+    );
   });
   const stats = statsCollector.getStats() as any;
   delete stats.timeCaptured;

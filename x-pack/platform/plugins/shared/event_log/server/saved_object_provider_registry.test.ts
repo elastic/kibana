@@ -48,7 +48,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       expect(await registry.getProvidersClient(request)('alert', [alert.id])).toMatchObject(alert);
 
-      expect(provider).toHaveBeenCalledWith(request);
+      expect(provider).toHaveBeenCalledWith(request, undefined);
       expect(getter).toHaveBeenCalledWith([{ id: alert.id, type: 'alert' }]);
     });
 
@@ -76,7 +76,63 @@ describe('SavedObjectProviderRegistry', () => {
       );
 
       expect(getter).toHaveBeenCalledWith([{ id: action.id, type: 'action' }]);
-      expect(defaultProvider).toHaveBeenCalledWith(request);
+      expect(defaultProvider).toHaveBeenCalledWith(request, undefined);
+    });
+  });
+
+  describe('getProvidersClientWithRequestInSpace()', () => {
+    test('should pass spaceId to the registered provider', async () => {
+      const registry = new SavedObjectProviderRegistry();
+      registry.registerDefaultProvider(jest.fn());
+
+      const getter = jest.fn();
+      const provider = jest.fn().mockReturnValue(getter);
+      registry.registerProvider('alert', provider);
+
+      const request = fakeRequest();
+      const alert = {
+        id: uuidv4(),
+      };
+
+      getter.mockResolvedValue(alert);
+
+      expect(
+        await registry.getProvidersClientWithRequestInSpace(request, 'custom-space')('alert', [
+          alert.id,
+        ])
+      ).toMatchObject(alert);
+
+      expect(provider).toHaveBeenCalledWith(request, 'custom-space');
+      expect(getter).toHaveBeenCalledWith([{ id: alert.id, type: 'alert' }]);
+    });
+
+    test('should pass spaceId to the default provider for unregistered types', async () => {
+      const registry = new SavedObjectProviderRegistry();
+      const defaultProvider = jest.fn();
+      registry.registerDefaultProvider(defaultProvider);
+
+      registry.registerProvider('alert', jest.fn().mockReturnValue(jest.fn()));
+
+      const request = fakeRequest();
+      const action = {
+        id: uuidv4(),
+        type: 'action',
+        attributes: {},
+        references: [],
+      };
+
+      const getter = jest.fn();
+      defaultProvider.mockReturnValue(getter);
+      getter.mockResolvedValue(action);
+
+      expect(
+        await registry.getProvidersClientWithRequestInSpace(request, 'custom-space')('action', [
+          action.id,
+        ])
+      ).toMatchObject(action);
+
+      expect(getter).toHaveBeenCalledWith([{ id: action.id, type: 'action' }]);
+      expect(defaultProvider).toHaveBeenCalledWith(request, 'custom-space');
     });
   });
 });

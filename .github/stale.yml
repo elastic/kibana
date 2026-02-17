@@ -8,7 +8,7 @@ daysUntilStale: 180
 daysUntilClose: false
 
 # Only issues or pull requests with all of these labels are check if stale. Defaults to `[]` (disabled)
-onlyLabels: ['Team:obs-ux-infra_services']
+onlyLabels: ['Team:obs-presentation']
 
 # Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
 exemptLabels: ['technical debt', 'prevent stale']

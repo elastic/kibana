@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function slackTest({ getService }: FtrProviderContext) {
@@ -70,8 +71,59 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
+            message: `error validating connector type secrets: Field \"token\": Required`,
+          });
+        });
+    });
+
+    it('should create a slack connector with allowedChannels name only', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
+          config: {
+            allowedChannels: [
+              {
+                name: '#general',
+              },
+            ],
+          },
+          secrets: {
+            token: 'some token',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction.config.allowedChannels).to.eql([{ name: '#general' }]);
+    });
+
+    it('should respond with a 400 Bad Request when creating a slack action with allowedChannels but name is missing', async () => {
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
+          config: {
+            allowedChannels: [
+              {
+                id: '#general-1',
+              },
+            ],
+          },
+          secrets: {
+            token: 'some token',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
             message:
-              'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
+              'error validating connector type config: Field "allowedChannels.0.name": Required',
           });
         });
     });

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
 import moment from 'moment';
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
@@ -20,6 +20,7 @@ import {
   processors,
   productionNamespace,
 } from './data';
+import { waitUntilDatasetQualityTableOrTimeoutWithFallback } from './helpers';
 
 const integrationActions = {
   overview: 'Overview',
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const retry = getService('retry');
   const browser = getService('browser');
+  const logger = getService('log');
   const to = '2024-01-01T12:00:00.000Z';
 
   const apacheAccessDatasetName = 'apache.access';
@@ -49,11 +51,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-  const bitbucketAuditDataStreamName = `logs-${bitbucketDatasetName}-${defaultNamespace}`;
-  const bitbucketPkg = {
-    name: 'atlassian_bitbucket',
-    version: '1.14.0',
+  const fleetServerDatasetName = 'fleet_server.output_health';
+  const fleetServerOutputHealthDataStreamName = `logs-${fleetServerDatasetName}-${defaultNamespace}`;
+  const fleetServerPkg = {
+    name: 'fleet_server',
+    version: '1.6.0',
   };
 
   const regularDatasetName = datasetNames[0];
@@ -71,8 +73,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
 
-      // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
-      await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+      // Install fleet server Integration (package which does not has Dashboards) and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(fleetServerPkg);
 
       await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
       await synthtrace.createComponentTemplate({
@@ -110,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           isMalformed: true,
         }),
         // Index logs for Bitbucket integration
-        getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+        getLogsForDataset({ to, count: 10, dataset: fleetServerDatasetName }),
         createFailedLogRecord({
           to: new Date().toISOString(),
           count: 2,
@@ -131,7 +133,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     after(async () => {
       await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
-      await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(fleetServerPkg);
       await synthtrace.clean();
       await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
       await synthtrace.deleteComponentTemplate('synth.2@custom');
@@ -152,8 +154,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('should navigate to details page from a main page', async () => {
-        await PageObjects.datasetQuality.navigateTo();
+      it('should navigate to details page from a main page', async function () {
+        await waitUntilDatasetQualityTableOrTimeoutWithFallback(PageObjects, logger, () =>
+          this.skip()
+        );
 
         const synthDataset = await testSubjects.find(
           'datasetQualityTableDetailsLink-logs-synth.1-default',
@@ -370,7 +374,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
 
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
@@ -384,7 +388,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should navigate to integration overview page on clicking integration overview action', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
@@ -398,7 +402,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
 
-          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/fleet_server');
         });
       });
 

@@ -7,6 +7,7 @@
 
 import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponse } from './v1';
+import { backfillInitiator } from '../../../../../common/constants';
 
 describe('transformBackfillToBackfillResponse', () => {
   const mockBackfillResult: Backfill = {
@@ -14,6 +15,7 @@ describe('transformBackfillToBackfillResponse', () => {
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
     enabled: true,
+    initiator: backfillInitiator.USER,
     rule: {
       name: 'my rule name',
       tags: ['foo'],
@@ -46,6 +48,7 @@ describe('transformBackfillToBackfillResponse', () => {
         created_at: '2024-01-30T00:00:00.000Z',
         duration: '12h',
         enabled: true,
+        initiator: backfillInitiator.USER,
         rule: {
           name: 'my rule name',
           tags: ['foo'],

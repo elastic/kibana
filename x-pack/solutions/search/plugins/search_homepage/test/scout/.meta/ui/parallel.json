@@ -1,0 +1,358 @@
+{
+  "lastModified": "2026-02-07T18:16:04.629Z",
+  "sha1": "56e1d3ba196cdafb74fe057fa1c8174dd77beaed",
+  "tests": [
+    {
+      "id": "1c8c85aed319853-a4c7c49ef896953",
+      "title": "Homepage - Admin API keys button should be enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 24,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-ab69ce47467029e",
+      "title": "Homepage - Admin Should open connection details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-2982e3d66e6e02d",
+      "title": "Homepage - Admin Should create API key through the modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-d8d6fb775952a63",
+      "title": "Homepage - Admin should have embedded dev console that can be toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 56,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-939cf10bf16d67f",
+      "title": "Homepage - Admin should show Elasticsearch endpoint with copy functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-1a22aaf73f8f833",
+      "title": "Homepage - Admin should show checkmark feedback when copy button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 89,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-b4f1cbc943741b1",
+      "title": "Homepage - Admin navigation cards should navigate to correct places",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 105,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-0eb16b3f96901e9",
+      "title": "Homepage - Admin should display Getting Started banner with title and button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-0580067ff5bcfd8",
+      "title": "Homepage - Admin Get started button should navigate to getting started page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 146,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-447286b9bdfaee7",
+      "title": "Homepage - Admin should display all body links with external documentation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 155,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-cd20c7648c01376",
+      "title": "Homepage - Admin body links should have external target attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "1c8c85aed319853-59e30e1c3b44243",
+      "title": "Homepage - Admin body links should navigate to correct URLs when clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 182,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-14fe8224ffdaafd",
+      "title": "Homepage - Viewer should not be able to see manage button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 24,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-2f0b6f5b90d58d5",
+      "title": "Homepage - Viewer Navigation cards should navigate to correct places",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-84e53ec73bf118c",
+      "title": "Homepage - Viewer Get started banner should move user back to getting started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-0a32eeb2ede6fbb",
+      "title": "Homepage - Viewer API keys button should be disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-b6457ecf33dfae4",
+      "title": "Homepage - Viewer should have embedded dev console that can be toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-dec0774fb6407be",
+      "title": "Homepage - Viewer should show Elasticsearch endpoint with copy functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-41a9dd0d03aad59",
+      "title": "Homepage - Viewer should show checkmark feedback when copy button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 110,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-0dbfc61246106ec",
+      "title": "Homepage - Viewer should display all body links with external documentation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 126,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-4de42b8dbe40a91",
+      "title": "Homepage - Viewer body links should have external target attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 143,
+        "column": 9
+      }
+    },
+    {
+      "id": "03e83e549838106-5e1de212dd5bdf1",
+      "title": "Homepage - Viewer body links should navigate to correct URLs when clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 153,
+        "column": 9
+      }
+    }
+  ]
+}

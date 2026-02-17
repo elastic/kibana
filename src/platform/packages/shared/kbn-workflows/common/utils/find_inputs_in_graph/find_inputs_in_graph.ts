@@ -11,6 +11,22 @@ import type { AtomicGraphNode, EnterForeachNode, EnterIfNode, WorkflowGraph } fr
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
 import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
+function scanValueForVariablesRecursively(value: unknown): string[] {
+  if (typeof value === 'string') {
+    return extractTemplateVariables(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => scanValueForVariablesRecursively(item));
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value as object).flatMap((v) => scanValueForVariablesRecursively(v));
+  }
+
+  return [];
+}
+
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
   const nodes = workflowGraph.topologicalOrder.map((nodeId) => workflowGraph.getNode(nodeId));
@@ -34,27 +50,29 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
       const foreachInput = (node as EnterForeachNode).configuration.foreach;
       let shouldInclude = true;
 
-      try {
-        shouldInclude = !Array.isArray(JSON.parse(foreachInput));
-      } catch {
-        // If parsing fails, keep it as a string
+      if (typeof foreachInput === 'string') {
+        try {
+          shouldInclude = !Array.isArray(JSON.parse(foreachInput));
+        } catch {
+          // If parsing fails, keep it as a string
+        }
       }
 
       if (shouldInclude) {
-        stepInputs.push((node as EnterForeachNode).configuration.foreach);
-        stepInputsKey = enterForeachNode.stepId;
-      }
-    }
-    if ((node as AtomicGraphNode).type === 'atomic') {
-      const atomicNode = node as AtomicGraphNode;
-      stepInputsKey = atomicNode.stepId;
-      Object.values(atomicNode.configuration.with).forEach((input) => {
-        if (typeof input !== 'string') {
-          return;
+        // Extract template variables from the foreach expression (e.g., "{{ inputs.people }}" -> "inputs.people")
+        const foreachVariables = scanValueForVariablesRecursively(foreachInput);
+        if (foreachVariables.length > 0) {
+          stepInputs.push(...foreachVariables);
         }
 
-        extractTemplateVariables(input).forEach((variable) => stepInputs.push(variable));
-      });
+        stepInputsKey = enterForeachNode.stepId;
+      }
+    } else {
+      // We try to scan the whole node, because otherwise, we would need a special case for each node type such as http, kibana, elasticsearch, etc
+      // Not good, most likely and other nodes will need to be subset of atomic node, or something else
+      const genericNode = node as AtomicGraphNode;
+      stepInputsKey = genericNode.stepId;
+      stepInputs.push(...scanValueForVariablesRecursively(genericNode));
     }
 
     if (isInForeach) {

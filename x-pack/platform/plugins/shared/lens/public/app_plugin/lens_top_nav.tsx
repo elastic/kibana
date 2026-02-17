@@ -23,10 +23,10 @@ import { euiBreakpoint } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { LensAppState, LensAppServices } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../common/constants';
-import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
-import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,
@@ -309,6 +309,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -344,7 +345,6 @@ export const LensTopNavMenu = ({
 
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -580,9 +580,14 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
+    const isComingFromDashboardView =
+      incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/');
+
     const showSaveAndReturn =
       !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      Boolean(isComingFromDashboardView || initialContextIsEmbedded);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -798,7 +803,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -850,11 +855,11 @@ export const LensTopNavMenu = ({
         },
       },
     });
-    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+    return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
     initialInput?.savedObjectId,
-    isLinkedToOriginatingApp,
+    incomingState,
     initialContextIsEmbedded,
     activeData,
     isSaveable,

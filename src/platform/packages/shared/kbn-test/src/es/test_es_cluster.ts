@@ -76,9 +76,15 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath' | 'uiam'
   >;
   esJavaOpts?: string;
+  /**
+   * Controls how much of Elasticsearch stdout is forwarded to the `ToolingLog`.
+   *
+   * Defaults to `'warn'`.
+   */
+  esStdoutLogLevel?: 'all' | 'info' | 'warn' | 'error' | 'silent';
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
    * has an expiration date. If you are using a `dataArchive` with your tests,
@@ -178,6 +184,7 @@ export function createTestEsCluster<
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
     esJavaOpts,
+    esStdoutLogLevel,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
     transportPort,
@@ -305,6 +312,7 @@ export function createTestEsCluster<
             password: config.password,
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
+            esStdoutLogLevel,
             // If we have multiple nodes, we shouldn't try setting up the native realm
             // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.

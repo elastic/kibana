@@ -29,8 +29,9 @@ import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
+import { FieldResultBadge } from './field_result';
 import type { TControls } from './hooks/use_controls';
-import type { SchemaField } from './types';
+import type { SchemaField, SchemaEditorField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
@@ -48,7 +49,7 @@ export function FieldsTable({
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
-  stream: Streams.ingest.all.Definition;
+  stream: Streams.all.Definition;
   withTableActions: boolean;
   withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
   selectedFields: string[];
@@ -127,7 +128,7 @@ export function FieldsTable({
 const createCellRenderer =
   (
     fields: SchemaField[],
-    stream: Streams.ingest.all.Definition
+    stream: Streams.all.Definition
   ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
@@ -174,16 +175,26 @@ const createCellRenderer =
     }
 
     if (columnId === 'status') {
-      return <FieldStatusBadge status={status} />;
+      const editorField = field as SchemaEditorField;
+      const streamType = getStreamTypeFromDefinition(stream);
+      return (
+        <FieldStatusBadge
+          status={status}
+          uncommitted={editorField.uncommitted}
+          streamType={streamType}
+        />
+      );
     }
 
-    if (columnId === 'source') {
-      if (field.streamSource) {
-        return <>{field.streamSource}</>;
+    if (columnId === 'result') {
+      const editorField = field as SchemaEditorField;
+      if (editorField.result) {
+        return <FieldResultBadge result={editorField.result} />;
       }
       return EMPTY_CONTENT;
     }
 
+    // @ts-expect-error upgrade typescript v5.9.3
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
 

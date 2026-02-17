@@ -268,7 +268,7 @@ describe('useLensAttributes', () => {
     ]);
   });
 
-  it('should not set splitAccessor if stackByField is undefined', () => {
+  it('should not set splitAccessors if stackByField is undefined', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -281,7 +281,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessor: undefined }),
+          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessors: undefined }),
         ]),
       })
     );

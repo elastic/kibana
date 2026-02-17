@@ -19,11 +19,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -66,6 +65,7 @@ import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/tran
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
+import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 
 const SectionHeader = styled(EuiTitle)`
@@ -113,12 +113,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
-  const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-    [euiTheme.levels.flyout]
-  );
-
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -369,7 +363,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       switch (listType) {
         case ExceptionListTypeEnum.ENDPOINT: {
           return setInitialExceptionItems(
-            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+            defaultEndpointExceptionItems(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              exceptionItemName,
+              alertData
+            )
           );
         }
         case ExceptionListTypeEnum.RULE_DEFAULT: {
@@ -496,6 +494,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     prefix: 'exceptionFlyoutTitle',
   });
 
+  const flyoutAriaLabel = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? headerI18n.ADD_ENDPOINT_EXCEPTION
+      : headerI18n.CREATE_RULE_EXCEPTION;
+  }, [listType]);
+
   const confirmModal = useMemo(() => {
     const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
@@ -519,9 +523,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
-      aria-labelledby={exceptionFlyoutTitleId}
-      // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-      maskProps={maskProps}
+      aria-label={flyoutAriaLabel}
     >
       <ExceptionFlyoutHeader
         listType={listType}

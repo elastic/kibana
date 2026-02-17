@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiSuperSelectProps } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
+import { useGrokCollection } from '@kbn/grok-ui';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
 import { configDrivenProcessors } from './config_driven';
-import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useGetStreamEnrichmentState,
+  useInteractiveModeSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
@@ -30,9 +35,7 @@ interface TAvailableProcessor {
 
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 
-export const ProcessorTypeSelector = ({
-  disabled = false,
-}: Pick<EuiSuperSelectProps, 'disabled'>) => {
+export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean }) => {
   const { core } = useKibana();
   const getEnrichmentState = useGetStreamEnrichmentState();
 
@@ -47,18 +50,50 @@ export const ProcessorTypeSelector = ({
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
-  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
+    const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
+      isStepUnderEdit(stepRef.getSnapshot())
+    );
+    return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
+  });
 
-  const handleChange = (type: ProcessorType) => {
+  const { grokCollection } = useGrokCollection();
+
+  // To make it possible to clear the selection to enter a new value,
+  // keep track of local empty state. As soon as field.value is set, switch back to highlighting
+  // the selected option.
+  const [localEmpty, setLocalEmpty] = React.useState(false);
+
+  useEffect(() => {
+    if (field.value) {
+      setLocalEmpty(false);
+    }
+  }, [field.value]);
+
+  const handleChange = (selectedOptions: Array<EuiComboBoxOptionOption<ProcessorType>>) => {
+    if (selectedOptions.length === 0) {
+      setLocalEmpty(true);
+      return;
+    }
+    const type = selectedOptions[0].value!;
     const formState = getDefaultFormStateByType(
       type,
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection }
+      { grokCollection: grokCollection! }
     );
     reset(formState);
   };
 
-  const selectorOptions = React.useMemo(() => getProcessorTypeSelectorOptions(isWired), [isWired]);
+  const groupedOptions = useMemo(
+    () => getProcessorTypeSelectorOptions(isWired, isWithinWhereBlock),
+    [isWired, isWithinWhereBlock]
+  );
+
+  const selectedOptions = useMemo(() => {
+    const allOptions = groupedOptions.flatMap((group) => group.options);
+    const selected = allOptions.find((opt) => opt.value === field.value);
+    return selected ? [selected] : [];
+  }, [field.value, groupedOptions]);
 
   return (
     <EuiFormRow
@@ -67,16 +102,22 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks, isWired)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isWired, isWithinWhereBlock)(processorType)}
     >
-      <EuiSuperSelect
+      <EuiComboBox
         data-test-subj="streamsAppProcessorTypeSelector"
-        disabled={disabled}
-        options={selectorOptions}
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
+          { defaultMessage: 'Processor' }
+        )}
+        isDisabled={disabled}
+        options={groupedOptions}
         isInvalid={fieldState.invalid}
-        valueOfSelected={field.value}
+        selectedOptions={localEmpty ? [] : selectedOptions}
         onChange={handleChange}
         fullWidth
+        singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
@@ -86,7 +127,10 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors> = (isWired) => ({
+const getAvailableProcessors: (
+  isWired: boolean,
+  isWithinWhereBlock?: boolean
+) => Partial<TAvailableProcessors> = (isWired, isWithinWhereBlock = false) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -145,6 +189,37 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
       />
     ),
   },
+  convert: {
+    type: 'convert' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertInputDisplay',
+      {
+        defaultMessage: 'Convert',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
+          defaultMessage="{convertLink}. For example, you can convert a string to an long."
+          values={{
+            convertLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsConvertLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.convert}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                  defaultMessage: 'Converts a field to a different data type',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   set: {
     type: 'set' as const,
     inputDisplay: i18n.translate(
@@ -176,6 +251,274 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
       );
     },
   },
+  replace: {
+    type: 'replace' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceInputDisplay',
+      {
+        defaultMessage: 'Replace',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceHelpText"
+          defaultMessage="{replaceLink} that match a regular expression pattern with a replacement string."
+          values={{
+            replaceLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsReplaceLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.gsub}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.replaceLinkLabel', {
+                  defaultMessage: 'Replaces parts of a string field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  redact: {
+    type: 'redact' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactInputDisplay',
+      {
+        defaultMessage: 'Redact',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.redactHelpText"
+          defaultMessage="{redactLink} Uses Grok patterns to identify and mask sensitive information like IP addresses, emails, and other PII."
+          values={{
+            redactLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRedactLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.redact}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.redactLinkLabel', {
+                  defaultMessage: 'Masks sensitive data in a field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  drop_document: {
+    type: 'drop_document' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.dropInputDisplay',
+      {
+        defaultMessage: 'Drop document',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dropHelpText"
+          defaultMessage="{dropLink} This is useful to prevent the document from getting indexed based on some condition."
+          values={{
+            dropLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsDropLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.drop}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
+                  defaultMessage: 'Drops the document without raising any errors.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  math: {
+    type: 'math' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.mathInputDisplay',
+      {
+        defaultMessage: 'Math',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          values={{
+            example: (
+              <>
+                <EuiCode>bytes / duration </EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  uppercase: {
+    type: 'uppercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseInputDisplay',
+      {
+        defaultMessage: 'Uppercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseHelpText"
+          defaultMessage="{uppercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            uppercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsUppercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.uppercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.uppercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its uppercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  lowercase: {
+    type: 'lowercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseInputDisplay',
+      {
+        defaultMessage: 'Lowercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseHelpText"
+          defaultMessage="{lowercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            lowercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsLowercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.lowercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.lowercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its lowercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  trim: {
+    type: 'trim' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimInputDisplay',
+      {
+        defaultMessage: 'Trim',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.trimHelpText"
+          defaultMessage="{trimLink} If the field is an array of strings, all members of the array will be trimmed."
+          values={{
+            trimLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsTrimLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.trim}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
+                  defaultMessage: 'Trims whitespace from field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  concat: {
+    type: 'concat' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatInputDisplay',
+      {
+        defaultMessage: 'Concat',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.concatHelpText"
+          defaultMessage="Join field values and text into a single string and write it to a target field."
+        />
+      );
+    },
+  },
+  join: {
+    type: 'join' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.joinInputDisplay',
+      {
+        defaultMessage: 'Join',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.joinHelpText"
+          defaultMessage="{joinLink} into a single field by inserting a delimiter (for example: {example1} or {example2}) between the field values."
+          values={{
+            joinLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsJoinLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.join}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.joinLinkLabel', {
+                  defaultMessage: 'Join multiple fields',
+                })}
+              </EuiLink>
+            ),
+            example1: (
+              <>
+                <EuiCode>,</EuiCode>
+              </>
+            ),
+            example2: (
+              <>
+                <EuiCode>|</EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -191,15 +534,126 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
           ),
         },
       }),
+  // Remove remove_by_prefix from available processors when inside a where block
+  ...(isWithinWhereBlock
+    ? {
+        remove_by_prefix: undefined,
+      }
+    : {}),
 });
 
+const PROCESSOR_GROUP_MAP: Record<
+  ProcessorType,
+  'remove' | 'extract' | 'convert' | 'set' | 'other'
+> = {
+  remove: 'remove',
+  remove_by_prefix: 'remove',
+  drop_document: 'remove',
+  grok: 'extract',
+  dissect: 'extract',
+  convert: 'convert',
+  date: 'convert',
+  replace: 'convert',
+  redact: 'convert',
+  append: 'set',
+  set: 'set',
+  rename: 'set',
+  math: 'set',
+  manual_ingest_pipeline: 'other',
+  uppercase: 'set',
+  lowercase: 'set',
+  trim: 'set',
+  join: 'set',
+  concat: 'set',
+};
+
 const getProcessorDescription =
-  (docLinks: DocLinksStart, isWired: boolean) => (type: ProcessorType) => {
-    return getAvailableProcessors(isWired)[type]?.getDocUrl(docLinks);
+  (docLinks: DocLinksStart, isWired: boolean, isWithinWhereBlock?: boolean) =>
+  (type: ProcessorType) => {
+    return getAvailableProcessors(isWired, isWithinWhereBlock)[type]?.getDocUrl(docLinks);
   };
 
-const getProcessorTypeSelectorOptions = (isWired: boolean) =>
-  Object.values(getAvailableProcessors(isWired)).map(({ type, inputDisplay }) => ({
-    value: type,
-    inputDisplay,
-  }));
+const getProcessorTypeSelectorOptions = (
+  isWired: boolean,
+  isWithinWhereBlock?: boolean
+): Array<{
+  label: string;
+  options: Array<EuiComboBoxOptionOption<ProcessorType>>;
+}> => {
+  const availableProcessors = getAvailableProcessors(isWired, isWithinWhereBlock);
+
+  // Define processor groups
+  const groups = {
+    remove: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    extract: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    convert: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    set: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    other: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+  };
+
+  // Categorize processors into groups using lookup map
+  Object.values(availableProcessors)
+    .filter((processor) => processor !== undefined)
+    .forEach(({ type, inputDisplay }) => {
+      const option = { label: inputDisplay, value: type };
+      const groupKey = PROCESSOR_GROUP_MAP[type] || 'other';
+      groups[groupKey].push(option);
+    });
+
+  const result: Array<{
+    label: string;
+    options: Array<EuiComboBoxOptionOption<ProcessorType>>;
+  }> = [];
+
+  if (groups.remove.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeGroup',
+        { defaultMessage: 'Remove' }
+      ),
+      options: groups.remove,
+    });
+  }
+
+  if (groups.extract.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.extractGroup',
+        { defaultMessage: 'Extract' }
+      ),
+      options: groups.extract,
+    });
+  }
+
+  if (groups.convert.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertGroup',
+        { defaultMessage: 'Convert' }
+      ),
+      options: groups.convert,
+    });
+  }
+
+  if (groups.set.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.setGroup',
+        { defaultMessage: 'Set' }
+      ),
+      options: groups.set,
+    });
+  }
+
+  if (groups.other.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.otherGroup',
+        { defaultMessage: 'Other' }
+      ),
+      options: groups.other,
+    });
+  }
+
+  return result;
+};

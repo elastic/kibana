@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, type ObjectType, type Props } from '@kbn/config-schema';
+import { schema, type Props } from '@kbn/config-schema';
 import {
   countMetricOperationSchema,
   uniqueCountMetricOperationSchema,
@@ -31,6 +31,42 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 
+export const legendSizeSchema = schema.maybe(
+  schema.oneOf(
+    [
+      schema.literal('auto'),
+      schema.literal('small'),
+      schema.literal('medium'),
+      schema.literal('large'),
+      schema.literal('xlarge'),
+    ],
+    {
+      meta: { id: 'legendSize', description: 'Legend size: auto, small, medium, large, or xlarge' },
+    }
+  )
+);
+
+function mergeWithSimpleMetrics<T extends Props>(baseSchema: T) {
+  return schema.oneOf([
+    countMetricOperationSchema.extends(baseSchema),
+    uniqueCountMetricOperationSchema.extends(baseSchema),
+    metricOperationSchema.extends(baseSchema),
+    sumMetricOperationSchema.extends(baseSchema),
+    lastValueOperationSchema.extends(baseSchema),
+    percentileOperationSchema.extends(baseSchema),
+    percentileRanksOperationSchema.extends(baseSchema),
+  ]);
+}
+
+function mergeWithRefrenceBasedMetrics<T extends Props>(baseSchema: T) {
+  return schema.oneOf([
+    differencesOperationSchema.extends(baseSchema),
+    movingAverageOperationSchema.extends(baseSchema),
+    cumulativeSumOperationSchema.extends(baseSchema),
+    counterRateOperationSchema.extends(baseSchema),
+  ]);
+}
+
 /**
  * Best to not use dynamic schema building logic
  * so the possible combinations are declared here explicitly:
@@ -40,86 +76,58 @@ import {
  * - bucket operations
  */
 
-export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(
-  baseSchema: ObjectType<T>
-) {
+export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
   return schema.oneOf([
     // oneOf allows only 12 items
     // so break down metrics based on the type: field-based, reference-based, formula-like
-    schema.oneOf([
-      schema.allOf([baseSchema, countMetricOperationSchema]),
-      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([baseSchema, metricOperationSchema]),
-      schema.allOf([baseSchema, sumMetricOperationSchema]),
-      schema.allOf([baseSchema, lastValueOperationSchema]),
-      schema.allOf([baseSchema, percentileOperationSchema]),
-      schema.allOf([baseSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([schema.allOf([baseSchema, formulaOperationDefinitionSchema])]),
+    mergeWithSimpleMetrics(baseSchema),
+    formulaOperationDefinitionSchema.extends(baseSchema),
   ]);
 }
 
 export function mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps<T extends Props>(
-  baseSchema: ObjectType<T>
+  baseSchema: T
 ) {
   return schema.oneOf([
     // oneOf allows only 12 items
     // so break down metrics based on the type: field-based, reference-based, formula-like
-    schema.oneOf([
-      schema.allOf([baseSchema, countMetricOperationSchema]),
-      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([baseSchema, metricOperationSchema]),
-      schema.allOf([baseSchema, sumMetricOperationSchema]),
-      schema.allOf([baseSchema, lastValueOperationSchema]),
-      schema.allOf([baseSchema, percentileOperationSchema]),
-      schema.allOf([baseSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([baseSchema, differencesOperationSchema]),
-      schema.allOf([baseSchema, movingAverageOperationSchema]),
-      schema.allOf([baseSchema, cumulativeSumOperationSchema]),
-      schema.allOf([baseSchema, counterRateOperationSchema]),
-    ]),
-    schema.oneOf([schema.allOf([baseSchema, formulaOperationDefinitionSchema])]),
+    mergeWithSimpleMetrics(baseSchema),
+    mergeWithRefrenceBasedMetrics(baseSchema),
+    formulaOperationDefinitionSchema.extends(baseSchema),
   ]);
 }
 
 export function mergeAllMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps<T extends Props>(
-  baseSchema: ObjectType<T>
+  baseSchema: T
 ) {
   return schema.oneOf([
     // oneOf allows only 12 items
     // so break down metrics based on the type: field-based, reference-based, formula-like
-    schema.oneOf([
-      schema.allOf([baseSchema, countMetricOperationSchema]),
-      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([baseSchema, metricOperationSchema]),
-      schema.allOf([baseSchema, sumMetricOperationSchema]),
-      schema.allOf([baseSchema, lastValueOperationSchema]),
-      schema.allOf([baseSchema, percentileOperationSchema]),
-      schema.allOf([baseSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([baseSchema, differencesOperationSchema]),
-      schema.allOf([baseSchema, movingAverageOperationSchema]),
-      schema.allOf([baseSchema, cumulativeSumOperationSchema]),
-      schema.allOf([baseSchema, counterRateOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([baseSchema, staticOperationDefinitionSchema]),
-      schema.allOf([baseSchema, formulaOperationDefinitionSchema]),
-    ]),
+    mergeWithSimpleMetrics(baseSchema),
+    mergeWithRefrenceBasedMetrics(baseSchema),
+    staticOperationDefinitionSchema.extends(baseSchema),
+    formulaOperationDefinitionSchema.extends(baseSchema),
   ]);
 }
 
-export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(
-  baseSchema: ObjectType<T>
+export function mergeAllMetricsWithChartDimensionSchemaWithStaticOps<T extends Props>(
+  baseSchema: T
 ) {
   return schema.oneOf([
-    schema.allOf([baseSchema, bucketDateHistogramOperationSchema]),
-    schema.allOf([baseSchema, bucketTermsOperationSchema]),
-    schema.allOf([baseSchema, bucketHistogramOperationSchema]),
-    schema.allOf([baseSchema, bucketRangesOperationSchema]),
-    schema.allOf([baseSchema, bucketFiltersOperationSchema]),
+    // oneOf allows only 12 items
+    // so break down metrics based on the type: field-based, reference-based, formula-like
+    mergeWithSimpleMetrics(baseSchema),
+    staticOperationDefinitionSchema.extends(baseSchema),
+    formulaOperationDefinitionSchema.extends(baseSchema),
+  ]);
+}
+
+export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(baseSchema: T) {
+  return schema.oneOf([
+    bucketDateHistogramOperationSchema.extends(baseSchema),
+    bucketTermsOperationSchema.extends(baseSchema),
+    bucketHistogramOperationSchema.extends(baseSchema),
+    bucketRangesOperationSchema.extends(baseSchema),
+    bucketFiltersOperationSchema.extends(baseSchema),
   ]);
 }

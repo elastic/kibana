@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { getDefaultFormStateByType } from './utils';
-import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import { GrokCollection } from '@kbn/grok-ui';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, convertUIStepsToDSL } from '@kbn/streamlang';
+import type { Streams } from '@kbn/streams-schema';
+import { type FieldDefinition, type FlattenRecord } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import { buildUpsertStreamRequestPayload, getDefaultFormStateByType } from './utils';
 
 let grokCollection: GrokCollection;
 
@@ -40,11 +42,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -70,11 +71,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -103,11 +103,10 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
     });
 
@@ -136,12 +135,140 @@ describe('utils', () => {
         where: ALWAYS_CONDITION,
       });
 
-      if ('patterns' in result) {
-        expect(result.patterns[0]).toBeInstanceOf(DraftGrokExpression);
-        expect(result.patterns[0].getExpression()).toEqual('');
+      if (result.action === 'grok') {
+        expect(result.patterns[0]).toEqual({ value: '' });
       } else {
-        throw new Error('Result does not contain patterns');
+        throw new Error('Result is not a grok processor');
       }
+    });
+  });
+
+  describe('buildUpsertStreamRequestPayload()', () => {
+    const mockSteps: StreamlangStepWithUIAttributes[] = [
+      {
+        customIdentifier: 'set-1',
+        parentId: null,
+        action: 'set',
+        to: 'event.outcome',
+        value: 'processed',
+      },
+      {
+        customIdentifier: 'append-1',
+        parentId: null,
+        action: 'append',
+        to: 'tags',
+        value: ['streams'],
+      },
+    ];
+
+    it('builds payload for wired stream definitions and replaces wired fields', () => {
+      const wiredDefinition = createWiredDefinition();
+      const updatedFields: FieldDefinition = {
+        message: { type: 'match_only_text' },
+      };
+
+      const result = buildUpsertStreamRequestPayload(
+        wiredDefinition,
+        convertUIStepsToDSL(mockSteps),
+        updatedFields
+      );
+
+      expect(result).toEqual({
+        ingest: {
+          ...wiredDefinition.stream.ingest,
+          processing: convertUIStepsToDSL(mockSteps),
+          wired: {
+            ...wiredDefinition.stream.ingest.wired,
+            fields: updatedFields,
+          },
+        },
+      });
+    });
+
+    it('builds payload for classic stream definitions and replaces field overrides', () => {
+      const classicDefinition = createClassicDefinition();
+      const overrides: FieldDefinition = {
+        severity: { type: 'keyword' },
+      };
+
+      const result = buildUpsertStreamRequestPayload(
+        classicDefinition,
+        convertUIStepsToDSL(mockSteps),
+        overrides
+      );
+
+      expect(result).toEqual({
+        ingest: {
+          ...classicDefinition.stream.ingest,
+          processing: convertUIStepsToDSL(mockSteps),
+          classic: {
+            ...classicDefinition.stream.ingest.classic,
+            field_overrides: overrides,
+          },
+        },
+      });
+    });
+
+    const createPrivileges = () => ({
+      manage: true,
+      monitor: true,
+      view_index_metadata: true,
+      lifecycle: true,
+      simulate: true,
+      text_structure: true,
+      read_failure_store: true,
+      manage_failure_store: true,
+    });
+
+    const createWiredDefinition = (): Streams.WiredStream.GetResponse => ({
+      dashboards: [],
+      rules: [],
+      queries: [],
+      privileges: createPrivileges(),
+      inherited_fields: {},
+      effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'ancestor' },
+      effective_settings: {},
+      stream: {
+        name: 'wired-stream',
+        description: 'A wired stream',
+        updated_at: new Date().toISOString(),
+        ingest: {
+          lifecycle: { dsl: { data_retention: '1d' } },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: {
+            fields: { '@timestamp': { type: 'date' } },
+            routing: [],
+          },
+          failure_store: { disabled: {} },
+        },
+      },
+      effective_failure_store: { disabled: {}, from: 'parent' },
+    });
+
+    const createClassicDefinition = (): Streams.ClassicStream.GetResponse => ({
+      dashboards: [],
+      rules: [],
+      queries: [],
+      privileges: createPrivileges(),
+      data_stream_exists: true,
+      effective_lifecycle: { inherit: {} },
+      effective_settings: {},
+      stream: {
+        name: 'classic-stream',
+        description: 'A classic stream',
+        updated_at: new Date().toISOString(),
+        ingest: {
+          lifecycle: { dsl: { data_retention: '1d' } },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: {
+            field_overrides: { '@timestamp': { type: 'date' } },
+          },
+          failure_store: { disabled: {} },
+        },
+      },
+      effective_failure_store: { disabled: {} },
     });
   });
 });

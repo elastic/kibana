@@ -11,35 +11,47 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
-import { emptySloList, sloList } from '../../data/slo/slo';
+import {
+  emptySloDefinitionList,
+  emptySloList,
+  sloDefinitionList,
+  sloList,
+} from '../../data/slo/slo';
 import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
+import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
-import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
+
+const mockHistoryReplace = jest.fn();
+const mockHistoryPush = jest.fn();
+const mockUseHistory = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useHistory: () => mockUseHistory(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
+jest.mock('../../hooks/use_fetch_slo_definitions');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
@@ -47,12 +59,14 @@ jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('./components/slo_list_search_bar');
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
@@ -159,6 +173,17 @@ const mockKibana = () => {
 describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHistoryReplace.mockClear();
+    mockHistoryPush.mockClear();
+    mockUseHistory.mockReturnValue({
+      replace: mockHistoryReplace,
+      push: mockHistoryPush,
+      createHref: (location: any) => {
+        if (typeof location === 'string') return location;
+        return location.pathname || '/';
+      },
+      location: { pathname: '/slos', search: '', hash: '', state: undefined },
+    });
     mockKibana();
     useGetSettingsMock.mockReturnValue({
       isLoading: false,
@@ -181,6 +206,11 @@ describe('SLOs Page', () => {
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
+      useFetchSloDefinitionsMock.mockReturnValue({
+        isLoading: false,
+        data: emptySloDefinitionList,
+      });
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
@@ -189,13 +219,13 @@ describe('SLOs Page', () => {
       });
     });
 
-    it('navigates to the SLOs Welcome Page', async () => {
+    it('redirects to the SLOs Welcome Page', async () => {
       await act(async () => {
         render(<SlosPage />);
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
     });
   });
@@ -205,7 +235,11 @@ describe('SLOs Page', () => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     });
 
-    it('navigates to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
+    it('redirects to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({
+        isLoading: false,
+        data: emptySloDefinitionList,
+      });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -217,11 +251,12 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
     });
 
-    it('navigates to the SLOs Welcome Page when the user has not the request read permissions', async () => {
+    it('redirects to the SLOs Welcome Page when the user does not have the required read permissions', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -237,11 +272,12 @@ describe('SLOs Page', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
     });
 
     it('should have a create new SLO button', async () => {
+      useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -257,6 +293,7 @@ describe('SLOs Page', () => {
 
     describe('when API has returned results', () => {
       it('renders the SLO list with SLO items', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -269,7 +306,9 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
 
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('sloListViewButton'));
+        });
 
         expect(screen.queryByTestId('slosPage')).toBeTruthy();
         expect(screen.queryByTestId('sloList')).toBeTruthy();
@@ -278,6 +317,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows editing an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -289,9 +329,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
 
-        (await screen.findByLabelText('All actions, row 1')).click();
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          (await screen.findByLabelText('All actions, row 1')).click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -299,12 +344,15 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         expect(mockNavigate).toBeCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
       });
 
       it('allows creating a new rule for an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -316,8 +364,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -325,7 +379,7 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        act(() => {
+        await act(async () => {
           button.click();
         });
 
@@ -333,6 +387,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows managing rules for an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -344,8 +399,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -353,12 +414,15 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         expect(mockLocator).toBeCalled();
       });
 
       it('allows deleting an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -371,8 +435,14 @@ describe('SLOs Page', () => {
         });
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -380,11 +450,13 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        act(() => {
+        await act(async () => {
           button.click();
         });
 
-        screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
+        await act(async () => {
+          screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
+        });
 
         expect(mockDeleteSlo).toBeCalledWith({
           id: sloList.results.at(0)?.id,
@@ -393,6 +465,7 @@ describe('SLOs Page', () => {
       });
 
       it('allows cloning an SLO', async () => {
+        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -405,8 +478,14 @@ describe('SLOs Page', () => {
         });
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -414,7 +493,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         await waitFor(() => {
           const slo = sloList.results.at(0);

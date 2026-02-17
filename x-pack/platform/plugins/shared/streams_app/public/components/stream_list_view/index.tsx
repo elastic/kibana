@@ -5,39 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGroup,
-  useEuiTheme,
   EuiButton,
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiLoadingElastic,
-  EuiSpacer,
   EuiButtonEmpty,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import type { OverlayRef } from '@kbn/core/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { StreamsTreeTable } from './tree_table';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
-import { GroupStreamsCards } from './group_streams_cards';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { useTimefilter } from '../../hooks/use_timefilter';
 import { FeedbackButton } from '../feedback_button';
-import { AssetImage } from '../asset_image';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { WelcomeTourCallout } from '../streams_tour';
+import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
+import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
+import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { StreamsTreeTable } from './tree_table';
+import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -45,11 +41,13 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, getClassicStatus },
       },
     },
     core,
   } = context;
+  const { onPageReady } = usePerformanceContext();
+  const router = useStreamsAppRouter();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -65,33 +63,67 @@ export function StreamListView() {
   );
 
   const {
-    features: { groupStreams },
+    ui: { manage: canManageStreamsKibana },
+    features: { significantEventsDiscovery, queryStreams },
   } = useStreamsPrivileges();
 
-  const overlayRef = React.useRef<OverlayRef | null>(null);
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(getFormattedError(error), {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
+
+  const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
+    const allStreams = streamsListFetch.value?.streams ?? [];
+    const classicStreams = allStreams.filter(
+      (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
+    );
+    return {
+      hasClassicStreams: classicStreams.length > 0,
+      firstClassicStreamName: classicStreams[0]?.stream?.name,
+    };
+  }, [streamsListFetch.value?.streams]);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
+      const streams = streamsListFetch.value.streams ?? [];
+      const classicStreamsCount = streams.filter((item) =>
+        Streams.ClassicStream.Definition.is(item.stream)
+      ).length;
+      const wiredStreamsCount = streams.filter((item) =>
+        Streams.WiredStream.Definition.is(item.stream)
+      ).length;
+
+      onPageReady({
+        customMetrics: {
+          key1: 'total_streams_count',
+          value1: streams.length,
+          key2: 'classic_streams_count',
+          value2: classicStreamsCount,
+          key3: 'wired_streams_count',
+          value3: wiredStreamsCount,
+        },
+      });
+    }
+  }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
-
-  function openGroupStreamModificationFlyout() {
-    overlayRef.current?.close();
-    overlayRef.current = core.overlays.openFlyout(
-      toMountPoint(
-        <StreamsAppContextProvider context={context}>
-          <GroupStreamModificationFlyout
-            client={streamsRepositoryClient}
-            streamsList={streamsListFetch.value?.streams}
-            refresh={() => {
-              streamsListFetch.refresh();
-              overlayRef.current?.close();
-            }}
-            notifications={core.notifications}
-          />
-        </StreamsAppContextProvider>,
-        core
-      ),
-      { size: 's' }
-    );
-  }
+  const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
+    React.useState(false);
 
   return (
     <>
@@ -114,15 +146,20 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
+            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
-                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
-                    defaultMessage: 'Create Group stream',
+                <EuiButton
+                  href={router.link('/_discovery')}
+                  iconType="crosshairs"
+                  data-test-subj="streamsSignificantEventsDiscoveryButton"
+                >
+                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
+                    defaultMessage: 'SigEvents Discovery',
                   })}
                 </EuiButton>
               </EuiFlexItem>
             )}
+            <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
@@ -137,7 +174,22 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <FeedbackButton />
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                size="s"
+                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+              >
+                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                  defaultMessage: 'Create classic stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            {queryStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
       />
@@ -157,18 +209,15 @@ export function StreamListView() {
           <StreamsListEmptyPrompt />
         ) : (
           <>
-            <WelcomePanel />
+            <WelcomeTourCallout
+              hasClassicStreams={hasClassicStreams}
+              firstClassicStreamName={firstClassicStreamName}
+            />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
             />
-            {groupStreams?.enabled && (
-              <>
-                <EuiSpacer size="l" />
-                <GroupStreamsCards streams={streamsListFetch.value?.streams} />
-              </>
-            )}
           </>
         )}
       </StreamsAppPageTemplate.Body>
@@ -178,85 +227,9 @@ export function StreamListView() {
           refreshStreams={streamsListFetch.refresh}
         />
       )}
-    </>
-  );
-}
-
-function WelcomePanel() {
-  const {
-    core: { docLinks },
-  } = useKibana();
-  const [isDismissed, setIsDismissed] = useLocalStorage('streamsWelcomePanelDismissed', false);
-
-  if (isDismissed) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AssetImage type="yourPreviewWillAppearHere" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
-                      defaultMessage: 'Welcome to Streams',
-                    })}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
-                    defaultMessage:
-                      'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="primary"
-                      size="s"
-                      href={docLinks.links.observability.logsStreams}
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                        defaultMessage: 'Go to docs',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      color="text"
-                      size="s"
-                      onClick={() => setIsDismissed(true)}
-                      aria-label={i18n.translate(
-                        'xpack.streams.streamsListView.dismissWelcomeButtonLabel',
-                        {
-                          defaultMessage: 'Dismiss welcome panel',
-                        }
-                      )}
-                    >
-                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                        defaultMessage: 'Hide this',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="l" />
+      {isClassicStreamCreationFlyoutOpen && (
+        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
+      )}
     </>
   );
 }

@@ -9,8 +9,13 @@ import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import type { LensAppProps, LensAppServices } from './types';
-import type { LensDocument } from '../persistence';
+import type { LensAppProps } from './types';
+import type {
+  LensDocument,
+  LensAppServices,
+  LensAppState,
+  VisualizeEditorContext,
+} from '@kbn/lens-common';
 import {
   visualizationMap,
   datasourceMap,
@@ -28,7 +33,6 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
-import type { LensAppState } from '../state_management';
 import { setState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensSerializedState } from '..';
@@ -36,7 +40,6 @@ import { createMockedField, createMockedIndexPattern } from '../datasources/form
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
@@ -181,10 +184,11 @@ describe('Lens App', () => {
           state: {
             visState: true,
           },
+          selectedLayerId: null,
         },
-        activeDatasourceId: 'testDatasource',
+        activeDatasourceId: 'formBased',
         datasourceStates: {
-          testDatasource: {
+          formBased: {
             isLoading: false,
             state: { datasourceState: true },
           },
@@ -221,9 +225,9 @@ describe('Lens App', () => {
           query: preloadedState.query,
           filters: preloadedState.filters,
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: preloadedState.datasourceStates.testDatasource.state,
+              state: preloadedState.datasourceStates.formBased.state,
             },
           },
         })
@@ -239,16 +243,21 @@ describe('Lens App', () => {
     });
 
     it('sets breadcrumbs when the document title changes', async () => {
+      // Override the default mock to ensure no originating app
+      services.getOriginatingAppName = jest.fn(() => undefined);
       const { lensStore } = await renderApp();
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedCreateBreadcrumbs = [
         {
-          text: 'Visualize library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'Dashboards',
+          href: '/testbasepath/app/dashboards#/',
           onClick: expect.anything(),
         },
         { text: 'Create' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedCreateBreadcrumbs, {
+        project: { value: expectedCreateBreadcrumbs, absolute: true },
+      });
 
       await act(async () => {
         await lensStore.dispatch(
@@ -258,14 +267,17 @@ describe('Lens App', () => {
         );
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedSavedBreadcrumbs = [
         {
-          text: 'Visualize library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'Dashboards',
+          href: '/testbasepath/app/dashboards#/',
           onClick: expect.anything(),
         },
         { text: 'Daaaaaaadaumching!' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedSavedBreadcrumbs, {
+        project: { value: expectedSavedBreadcrumbs, absolute: true },
+      });
     });
 
     it('sets originatingApp breadcrumb when the document title changes', async () => {
@@ -275,14 +287,16 @@ describe('Lens App', () => {
         preloadedState: { isLinkedToOriginatingApp: false },
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedOriginCreateBreadcrumbs = [
         {
-          text: 'Visualize library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'The Coolest Container Ever Made',
           onClick: expect.anything(),
         },
         { text: 'Create' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedOriginCreateBreadcrumbs, {
+        project: { value: expectedOriginCreateBreadcrumbs, absolute: true },
+      });
 
       await act(async () => {
         await rerender({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
@@ -294,14 +308,16 @@ describe('Lens App', () => {
         );
       });
 
-      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      const expectedOriginSavedBreadcrumbs = [
         {
-          text: 'Visualize library',
-          href: '/testbasepath/app/visualize#/',
+          text: 'The Coolest Container Ever Made',
           onClick: expect.anything(),
         },
         { text: 'Daaaaaaadaumching!' },
-      ]);
+      ];
+      expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith(expectedOriginSavedBreadcrumbs, {
+        project: { value: expectedOriginSavedBreadcrumbs, absolute: true },
+      });
     });
 
     it('sets serverless breadcrumbs when the document title changes when serverless service is available', async () => {
@@ -348,8 +364,8 @@ describe('Lens App', () => {
       await renderApp({
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isTimeBased: jest.fn((_state, _indexPatterns) => true),
           },
         },
@@ -369,8 +385,8 @@ describe('Lens App', () => {
       await renderApp({
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isTimeBased: jest.fn((_state, _indexPatterns) => false),
           },
         },
@@ -516,7 +532,10 @@ describe('Lens App', () => {
         };
 
         if (comesFromDashboard) {
-          props.incomingState = { originatingApp: 'dashboards' };
+          props.incomingState = {
+            originatingApp: 'dashboards',
+            originatingPath: '#/view/123',
+          };
         }
 
         const { lensStore } = await renderApp({
@@ -568,6 +587,7 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save to library buttons in create by value mode with originating app', async () => {
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
           valueInput: {
             id: 'whatchaGonnaDoWith',
             attributes: {
@@ -591,6 +611,7 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
         };
         props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
         await renderApp({
@@ -786,6 +807,7 @@ describe('Lens App', () => {
 
         props.incomingState = {
           originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
         };
 
         await renderApp({
@@ -1313,6 +1335,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1332,6 +1355,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1378,6 +1402,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1396,7 +1421,7 @@ describe('Lens App', () => {
           state: {
             ...localDoc.state,
             datasourceStates: {
-              testDatasource: 'datasource',
+              formBased: 'datasource',
             },
             visualization: {},
           },
@@ -1406,6 +1431,7 @@ describe('Lens App', () => {
         visualization: {
           activeId: 'testVis',
           state: {},
+          selectedLayerId: null,
         },
       };
 
@@ -1413,8 +1439,8 @@ describe('Lens App', () => {
         preloadedState,
         datasourceMapOverride: {
           ...datasourceMap,
-          testDatasource: {
-            ...datasourceMap.testDatasource,
+          formBased: {
+            ...datasourceMap.formBased,
             isEqual: jest.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
           },
         },

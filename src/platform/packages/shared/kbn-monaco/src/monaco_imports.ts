@@ -20,9 +20,11 @@ import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperation
 import 'monaco-editor/esm/vs/editor/contrib/linesOperations/browser/linesOperations.js'; // Needed for enabling shortcuts of removing/joining/moving lines
 import 'monaco-editor/esm/vs/editor/contrib/folding/browser/folding.js'; // Needed for folding
 import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js'; // Needed for suggestions
+import 'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineCompletions.contribution.js'; // Needed for inline completions
 import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
+import 'monaco-editor/esm/vs/editor/contrib/links/browser/links.js'; // Needed for clickable links with Cmd/Ctrl+Click
 
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeAction.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionCommands.js';
@@ -35,6 +37,13 @@ import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment.js'; // Need
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
 import 'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js'; // Needed for enabling custom Monaco context menu
+
+// Register services required by contributions that may be loaded elsewhere (e.g. editor.all).
+// Without these, CodeLensContribution, InlayHintsController, and DropIntoEditorController
+// fail with "depends on UNKNOWN service" when StandaloneServices.initialize() already ran.
+import 'monaco-editor/esm/vs/editor/contrib/codelens/browser/codeLensCache.js';
+import 'monaco-editor/esm/vs/editor/contrib/inlayHints/browser/inlayHintsController.js';
+import 'monaco-editor/esm/vs/editor/common/services/treeViewsDndService.js';
 
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support

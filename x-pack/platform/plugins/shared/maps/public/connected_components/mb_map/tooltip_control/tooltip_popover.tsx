@@ -162,6 +162,7 @@ export class TooltipPopover extends Component<Props, State> {
           transform: `translate(${this.state.x - 13 - offset}px, ${this.state.y - 13}px)`,
         }}
         repositionOnScroll
+        hasArrow={true}
       >
         {this._renderTooltipContent()}
       </EuiPopover>

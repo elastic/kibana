@@ -10,21 +10,15 @@ import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createInvestigationsNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createInvestigationsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.investigations,
-  iconV2: 'inspect',
+  icon: 'inspect',
   title: SecurityLinkGroup[SecurityGroupName.investigations].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       id: SecurityPageName.timelines,
       link: securityLink(SecurityPageName.timelines),
-      renderAs: 'item',
       children: [
         {
           id: SecurityPageName.timelinesTemplates,

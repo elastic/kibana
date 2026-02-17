@@ -14,7 +14,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * Utility method for finding and logging information about a plugin.
  */
 export const getPlugin = (pluginName: string, log: ToolingLog) => {
-  const plugin = findPlugins([pluginName])[0];
+  const plugin = findPlugins({ pluginFilter: [pluginName] }).find((p) => p.id === pluginName);
+  if (!plugin) {
+    log.error(`Plugin ${pluginName} not found`);
+    return null;
+  }
   log.debug('Found plugin:', pluginName);
   return plugin;
 };

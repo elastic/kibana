@@ -21,16 +21,16 @@ type FilterOperator = Extract<OperatorKeys, 'eq' | 'neq' | 'exists'>;
 export type RoutingFilterFn = (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => void;
 
 const getOperator = (value: StringOrNumberOrBoolean, mode: BtnMode): FilterOperator => {
-  if (typeof value === 'boolean') {
+  if (value === undefined) {
     return 'exists';
   }
 
   return mode === '+' ? 'eq' : 'neq';
 };
 
-const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator) => {
-  if (typeof value === 'boolean') {
-    return { exists: value };
+const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator, mode: BtnMode) => {
+  if (value === undefined) {
+    return { exists: mode === '+' ? false : true };
   }
 
   return { [operator]: `${value}` };
@@ -49,14 +49,26 @@ const FilterBtn = ({
   onFilter: RoutingFilterFn;
   mode: BtnMode;
 }) => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const isRuleActive = routingSnapshot.matches({ ready: { creatingNewRule: 'changing' } });
-
-  const currentRule = isRuleActive ? selectCurrentRule(routingSnapshot.context) : {};
+  const isRuleActive = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { creatingNewRule: 'changing' } },
+    })
+  );
+  const currentRule = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { creatingNewRule: 'changing' } },
+    })
+      ? selectCurrentRule(snapshot.context)
+      : {}
+  );
 
   const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
   const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);
-  const condition = getCondition(context[rowIndex][columnId] as StringOrNumberOrBoolean, operator);
+  const condition = getCondition(
+    context[rowIndex][columnId] as StringOrNumberOrBoolean,
+    operator,
+    mode
+  );
 
   const buttonTitle = i18n.translate('xpack.streams.routing.condition.filter', {
     defaultMessage: 'Add routing condition: {operator}',
@@ -64,6 +76,8 @@ const FilterBtn = ({
       operator: operator === 'eq' ? 'equals' : operator === 'neq' ? 'not equals' : 'exists',
     },
   });
+
+  const testSubj = mode === '+' ? 'streamsAppCellActionFilterFor' : 'streamsAppCellActionFilterOut';
 
   return (
     <Component
@@ -82,7 +96,7 @@ const FilterBtn = ({
       iconType={iconType}
       aria-label={buttonTitle}
       title={buttonTitle}
-      data-test-subj="routingConditionFilterForButton"
+      data-test-subj={testSubj}
     />
   );
 };

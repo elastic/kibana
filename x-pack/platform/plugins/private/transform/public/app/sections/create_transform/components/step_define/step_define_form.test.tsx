@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -25,7 +25,7 @@ import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('../../../../app_dependencies');
 
@@ -75,7 +75,7 @@ describe('Transform: <DefinePivotForm />', () => {
     const services = {
       ...startMock,
       data: dataPluginMock.createStartContract(),
-      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       appName: 'the-test-app',
       storage: createMockStorage(),
     };

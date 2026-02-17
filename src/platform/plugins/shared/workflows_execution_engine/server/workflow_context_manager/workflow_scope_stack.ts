@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { StackFrame } from '@kbn/workflows';
 
 export interface ScopeData {

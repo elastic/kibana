@@ -7,7 +7,7 @@
 
 import { Gap } from '.'; // Adjust this import path as needed
 import { gapStatus } from '../../../../common/constants'; // Adjust as needed
-import type { Interval, StringInterval } from '../types'; // Adjust as needed
+import type { Interval, StringInterval } from '../../../application/gaps/types/intervals'; // Adjust as needed
 
 // Helper function to create Interval objects from ISO strings
 function toInterval(gte: string, lte: string): Interval {
@@ -223,5 +223,73 @@ describe('Gap Class Tests', () => {
     };
     const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, internalFields });
     expect(gap.internalFields).toEqual(internalFields);
+  });
+
+  describe('incrementFailedAutoFillAttempts', () => {
+    it('should initialize failedAutoFillAttempts to 0 when not provided', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+      expect(gap.failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should use provided failedAutoFillAttempts value during initialization', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 5,
+      });
+      expect(gap.failedAutoFillAttempts).toBe(5);
+    });
+
+    it('should increment failedAutoFillAttempts from not provided during initialization to 1', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(1);
+    });
+
+    it('should increment failedAutoFillAttempts multiple times', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(1);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(2);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(3);
+    });
+
+    it('should increment failedAutoFillAttempts when initialized with non-zero value', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 10,
+      });
+      expect(gap.failedAutoFillAttempts).toBe(10);
+
+      gap.incrementFailedAutoFillAttempts();
+      expect(gap.failedAutoFillAttempts).toBe(11);
+    });
+
+    it('should include failedAutoFillAttempts in toObject() output', () => {
+      const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange });
+
+      gap.incrementFailedAutoFillAttempts();
+
+      const esObject = gap.toObject();
+      expect(esObject.failed_auto_fill_attempts).toBe(1);
+    });
+
+    it('should persist failedAutoFillAttempts value in toObject() when initialized', () => {
+      const gap = new Gap({
+        ruleId: 'some-rule-id',
+        range: baseRange,
+        failedAutoFillAttempts: 7,
+      });
+
+      const esObject = gap.toObject();
+      expect(esObject.failed_auto_fill_attempts).toBe(7);
+    });
   });
 });

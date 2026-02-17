@@ -113,15 +113,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('Elasticsearch streams is enabled too', async () => {
-            const response = await esClient.transport.request({
+            type StreamsStatusResponse = {
+              logs: { enabled: boolean } & Record<string, unknown>;
+            } & Record<string, unknown>;
+
+            const response = await esClient.transport.request<StreamsStatusResponse>({
               method: 'GET',
               path: '/_streams/status',
             });
-            expect(response).to.eql({
-              logs: {
-                enabled: true,
-              },
-            });
+            // Elasticsearch may return additional status keys (e.g. `logs.ecs`, `logs.otel`).
+            expect(response).to.have.property('logs');
+            expect(response.logs).to.have.property('enabled', true);
           });
         }
 
@@ -246,6 +248,61 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
       });
 
+      it('fails to fork logs when stream name contains uppercase characters', async () => {
+        const body = {
+          stream: {
+            name: 'logs.Nginx',
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it('fails to fork logs with empty stream name', async () => {
+        const body = {
+          stream: {
+            name: 'logs.', // empty child stream name
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name must not be empty.'
+        );
+      });
+
+      it('fails to fork logs with stream name that is over the 200 character limit', async () => {
+        const body = {
+          stream: {
+            // child stream is 201 chars
+            name: 'logs.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem',
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
+        );
+      });
+
       it('Index an Nginx access log message, should goto logs.nginx', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -347,6 +404,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 ],
               },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -510,6 +568,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -555,6 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 routing: [],
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -666,6 +726,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               settings: {},
               wired: { fields, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -679,6 +740,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               settings: {},
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -711,6 +773,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 processing: { steps: [] },
                 settings: {},
                 wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
               },
             },
           },
@@ -728,6 +791,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               settings: {},
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         };

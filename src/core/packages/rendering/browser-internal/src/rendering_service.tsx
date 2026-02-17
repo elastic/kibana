@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, pairwise, startWith } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -26,13 +26,10 @@ import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
-import {
-  getSideNavVersion,
-  getLayoutVersion,
-  getLayoutDebugFlag,
-} from '@kbn/core-chrome-layout-feature-flags';
+import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
-import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
+import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
+import type { CoreEnv } from '@kbn/core-base-browser-internal';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -40,6 +37,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -60,7 +59,7 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  * Renders all Core UI in a single React tree.
  *
  * @internalRemarks Currently this only renders Chrome UI. Notifications and
- * Overlays UI should be moved here as well.
+ * Overlays UI should be moved here as well (https://github.com/elastic/kibana/issues/247820).
  *
  * @internal
  */
@@ -87,31 +86,18 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = getLayoutVersion(featureFlags);
+    const { featureFlags } = renderCoreDeps;
     const debugLayout = getLayoutDebugFlag(featureFlags);
-    const projectSideNavVersion = getSideNavVersion(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
 
-    const body = document.querySelector('body')!;
-    chrome
-      .getBodyClasses$()
-      .pipe(startWith<string[]>([]), pairwise())
-      .subscribe(([previousClasses, newClasses]) => {
-        body.classList.remove(...previousClasses);
-        body.classList.add(...newClasses);
-      });
-
-    const layout: LayoutService =
-      layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
-        : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
+    const layout: LayoutService = new GridLayout(renderCoreDeps, { debug: debugLayout });
 
     const Layout = layout.getComponent();
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>,
       targetDomElement
@@ -139,6 +125,8 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
+        coreEnv={deps.coreEnv}
+        chrome={deps.chrome}
       >
         {children}
       </KibanaRenderContextProvider>

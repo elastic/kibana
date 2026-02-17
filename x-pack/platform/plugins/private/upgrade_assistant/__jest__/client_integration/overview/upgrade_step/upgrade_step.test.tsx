@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { setupEnvironment } from '../../helpers';
-import type { OverviewTestBed } from '../overview.helpers';
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { setupOverviewPage } from '../overview.helpers';
 
 const DEPLOYMENT_URL = 'https://cloud.elastic.co./deployments/bfdad4ef99a24212a06d387593686d63';
 
 describe('Overview - Upgrade Step', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
@@ -27,7 +27,7 @@ describe('Overview - Upgrade Step', () => {
     });
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -36,11 +36,9 @@ describe('Overview - Upgrade Step', () => {
 
   describe('On-prem', () => {
     test('Shows link to setup upgrade docs', async () => {
-      testBed = await setupOverviewPage(httpSetup);
-      const { exists } = testBed;
-
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-      expect(exists('upgradeSetupCloudLink')).toBe(false);
+      await setupOverviewPage(httpSetup);
+      expect(screen.getByTestId('upgradeSetupDocsLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('upgradeSetupCloudLink')).not.toBeInTheDocument();
     });
   });
 
@@ -51,17 +49,12 @@ describe('Overview - Upgrade Step', () => {
         details: 'Ready for upgrade',
       });
 
-      testBed = await setupCloudOverviewPage();
-      const { exists, find, component } = testBed;
-      component.update();
+      await setupCloudOverviewPage();
 
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-      expect(exists('upgradeSetupCloudLink')).toBe(true);
-
-      expect(find('upgradeSetupCloudLink').props().disabled).toBeFalsy();
-      expect(find('upgradeSetupCloudLink').props().href).toBe(
-        `${DEPLOYMENT_URL}?show_upgrade=true`
-      );
+      expect(screen.getByTestId('upgradeSetupDocsLink')).toBeInTheDocument();
+      const cloudLink = screen.getByTestId('upgradeSetupCloudLink');
+      expect(cloudLink).toBeInTheDocument();
+      expect(cloudLink.getAttribute('href')).toBe(`${DEPLOYMENT_URL}?show_upgrade=true`);
     });
 
     test('When not ready for upgrade, the CTA button is disabled', async () => {
@@ -70,14 +63,12 @@ describe('Overview - Upgrade Step', () => {
         details: 'Resolve critical deprecations first',
       });
 
-      testBed = await setupCloudOverviewPage();
-      const { exists, find, component } = testBed;
-      component.update();
+      await setupCloudOverviewPage();
 
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-      expect(exists('upgradeSetupCloudLink')).toBe(true);
-
-      expect(find('upgradeSetupCloudLink').props().disabled).toBe(true);
+      expect(screen.getByTestId('upgradeSetupDocsLink')).toBeInTheDocument();
+      const cloudLink = screen.getByTestId('upgradeSetupCloudLink');
+      expect(cloudLink).toBeInTheDocument();
+      expect(cloudLink).toBeDisabled();
     });
 
     test('An error callout is displayed, if status check failed', async () => {
@@ -86,23 +77,21 @@ describe('Overview - Upgrade Step', () => {
         message: 'Status check failed',
       });
 
-      testBed = await setupCloudOverviewPage();
-      const { exists, component } = testBed;
-      component.update();
+      await setupCloudOverviewPage();
 
-      expect(exists('upgradeSetupDocsLink')).toBe(false);
-      expect(exists('upgradeSetupCloudLink')).toBe(false);
-      expect(exists('upgradeStatusErrorCallout')).toBe(true);
+      expect(screen.queryByTestId('upgradeSetupDocsLink')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('upgradeSetupCloudLink')).not.toBeInTheDocument();
+      expect(screen.getByTestId('upgradeStatusErrorCallout')).toBeInTheDocument();
     });
 
     test('The CTA button displays loading indicator', async () => {
       setDelayResponse(true);
-      testBed = await setupCloudOverviewPage();
-      const { exists, find } = testBed;
+      await setupCloudOverviewPage();
 
-      expect(exists('upgradeSetupDocsLink')).toBe(true);
-      expect(exists('upgradeSetupCloudLink')).toBe(true);
-      expect(find('upgradeSetupCloudLink').childAt(0).props().isLoading).toBe(true);
+      expect(screen.getByTestId('upgradeSetupDocsLink')).toBeInTheDocument();
+      expect(screen.getByTestId('upgradeSetupCloudLink')).toHaveTextContent(
+        'Loading upgrade status'
+      );
     });
   });
 });

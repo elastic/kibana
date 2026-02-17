@@ -47,6 +47,23 @@ const userRiskScore: UserRiskScore = {
           timestamp: '2021-08-19T18:55:59.000Z',
         },
       ],
+      modifiers: [
+        {
+          type: 'asset_criticality',
+          contribution: 5,
+          metadata: {
+            criticality_level: 'high_impact',
+          },
+        },
+        {
+          type: 'watchlist',
+          subtype: 'privmon',
+          contribution: 5,
+          metadata: {
+            is_privileged_user: true,
+          },
+        },
+      ],
     },
   },
   alertsCount: 0,
@@ -79,6 +96,23 @@ const hostRiskScore: HostRiskScore = {
           description: 'Alert from Rule: My rule',
           risk_score: 30,
           timestamp: '2021-08-19T18:55:59.000Z',
+        },
+      ],
+      modifiers: [
+        {
+          type: 'asset_criticality',
+          contribution: 5,
+          metadata: {
+            criticality_level: 'high_impact',
+          },
+        },
+        {
+          type: 'watchlist',
+          subtype: 'privmon',
+          contribution: 5,
+          metadata: {
+            is_privileged_user: true,
+          },
         },
       ],
     },

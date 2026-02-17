@@ -11,6 +11,8 @@ import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysoluti
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import {
   removeExceptionListServerGeneratedProperties,
   removeExceptionListItemServerGeneratedProperties,
@@ -21,6 +23,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA export_exception_list_route', () => {
@@ -184,6 +187,77 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(removeExceptionListItemServerGeneratedProperties(item)).to.not.contain(
           removeExceptionListItemServerGeneratedProperties(itemBody)
         );
+      });
+
+      describe('@skipInServerless with read rules and all exceptions role', () => {
+        const role = ROLES.rules_read_exceptions_all;
+
+        beforeEach(async () => {
+          await deleteAndReCreateUserRole(getService, role);
+        });
+
+        it('should export a single list with a list id', async () => {
+          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+          const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+          const { body } = await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateExceptionListMinimalSchemaMock())
+            .expect(200);
+
+          await supertest
+            .post(EXCEPTION_LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateExceptionListItemMinimalSchemaMock())
+            .expect(200);
+
+          await restrictedApis
+            .exportExceptionList({
+              query: {
+                id: body.id,
+                list_id: body.list_id,
+                namespace_type: 'single',
+                include_expired_exceptions: 'true',
+              },
+            })
+            .expect(200);
+        });
+      });
+      describe('@skipInServerless with read rules and read exceptions role', () => {
+        const role = ROLES.rules_read_exceptions_read;
+
+        beforeEach(async () => {
+          await deleteAndReCreateUserRole(getService, role);
+        });
+
+        it('should export a single list with a list id', async () => {
+          const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
+          const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+          const { body } = await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateExceptionListMinimalSchemaMock())
+            .expect(200);
+
+          await supertest
+            .post(EXCEPTION_LIST_ITEM_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getCreateExceptionListItemMinimalSchemaMock())
+            .expect(200);
+
+          await restrictedApis
+            .exportExceptionList({
+              query: {
+                id: body.id,
+                list_id: body.list_id,
+                namespace_type: 'single',
+                include_expired_exceptions: 'true',
+              },
+            })
+            .expect(200);
+        });
       });
     });
   });

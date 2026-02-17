@@ -9,7 +9,7 @@
 
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { TableVisParams } from '../common';
 
 export interface ColumnWidthData {

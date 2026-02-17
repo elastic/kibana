@@ -32,6 +32,8 @@
           "(privilegeId: string) => string"
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "lineNumber": 39,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
           "(privilegeId: string) => boolean"
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/security/authorization_core_common/src/privileges/minimal_privileges.ts",
+            "lineNumber": 30,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

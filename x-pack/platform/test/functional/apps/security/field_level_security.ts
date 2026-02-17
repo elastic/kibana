@@ -125,6 +125,62 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData).not.to.contain('ssn');
     });
 
+    it('should support case-sensitive fields', async function () {
+      await PageObjects.security.forceLogout();
+      await PageObjects.security.login();
+      await PageObjects.settings.navigateTo();
+      await PageObjects.security.clickElasticsearchRoles();
+      await PageObjects.security.addRole('a_casesenstive_fields_role', {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['flstest'],
+              privileges: ['read', 'view_index_metadata'],
+              field_security: {
+                grant: ['customer_*', 'Customer_*'],
+                except: ['customer_region', 'Customer_region'],
+              },
+            },
+          ],
+        },
+      });
+
+      await PageObjects.common.sleep(1000);
+
+      const roleDef = await security.role.get('a_casesenstive_fields_role');
+      expect(roleDef).to.eql({
+        _transform_error: [],
+        _unrecognized_applications: [],
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            {
+              allow_restricted_indices: false,
+              field_security: {
+                except: ['customer_region', 'Customer_region'],
+                grant: ['customer_*', 'Customer_*'],
+              },
+              names: ['flstest'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: ['all'],
+            feature: {},
+            spaces: ['*'],
+          },
+        ],
+        metadata: {},
+        name: 'a_casesenstive_fields_role',
+        transient_metadata: {
+          enabled: true,
+        },
+      });
+    });
+
     after(async function () {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();

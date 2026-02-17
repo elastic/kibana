@@ -23,10 +23,18 @@ const mockCaseData = {
       updatedAt: '2024-12-02',
     },
     {
+      typeKey: 'type1',
+      value: 'Host1',
+      description: null,
+      id: '6d44e478-3b35-4c48-929a-b22e98bfe179',
+      createdAt: '2024-12-02',
+      updatedAt: '2024-12-02',
+    },
+    {
       typeKey: 'unknown-type',
       value: '127.0.0.1',
       description: null,
-      id: '6d44e478-3b35-4c48-929a-b22e98bfe178',
+      id: '6d44e478-3b35-4c48-929a-b22e98bfe180',
       createdAt: '2024-12-02',
       updatedAt: '2024-12-02',
     },
@@ -72,6 +80,14 @@ describe('useCaseObservables', () => {
           createdAt: '2024-12-02',
           updatedAt: '2024-12-02',
         },
+        {
+          typeKey: 'type1',
+          value: 'Host1',
+          description: null,
+          id: '6d44e478-3b35-4c48-929a-b22e98bfe179',
+          createdAt: '2024-12-02',
+          updatedAt: '2024-12-02',
+        },
       ],
       isLoading: false,
     });
@@ -90,5 +106,42 @@ describe('useCaseObservables', () => {
         OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeKey)
       )
     );
+  });
+
+  it('filters observables by searchTerm when provided', () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: { observableTypes: [{ key: 'type1' }] },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useCaseObservables(mockCaseData, 'host'));
+
+    expect(result.current).toEqual({
+      observables: [
+        {
+          typeKey: 'type1',
+          value: 'Host1',
+          description: null,
+          id: '6d44e478-3b35-4c48-929a-b22e98bfe179',
+          createdAt: '2024-12-02',
+          updatedAt: '2024-12-02',
+        },
+      ],
+      isLoading: false,
+    });
+  });
+
+  it('returns empty array when searchTerm does not match any observable values', () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: { observableTypes: [{ key: 'type1' }] },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useCaseObservables(mockCaseData, 'nonexistent'));
+
+    expect(result.current).toEqual({
+      observables: [],
+      isLoading: false,
+    });
   });
 });

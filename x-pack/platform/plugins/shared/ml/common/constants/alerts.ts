@@ -15,6 +15,7 @@ import {
   AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 import type { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
@@ -102,6 +103,11 @@ export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomaly_score` as cons
 export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.is_interim` as const;
 export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.top_records` as const;
 export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.top_influencers` as const;
+export const ANOMALY_RESULT_TYPE_SCORE_FIELDS = {
+  [ML_ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
+  [ML_ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
+  [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
+} as const;
 
 // Anomaly detection health rule type fields
 export const ALERT_MML_RESULTS = `${ML_ALERT_NAMESPACE}.mml_results` as const;

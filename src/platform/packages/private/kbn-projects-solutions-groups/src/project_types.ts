@@ -22,7 +22,7 @@ export const KIBANA_SEARCH_PROJECT = 'es' as const;
 /**
  * Constant for the Kibana Workplace AI serverless project type.
  */
-export const KIBANA_WORKPLACE_AI_PROJECT = 'workplace_ai' as const;
+export const KIBANA_WORKPLACE_AI_PROJECT = 'workplaceai' as const;
 
 /**
  * A list of all Kibana serverless project types.

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -47,6 +47,10 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -79,10 +83,20 @@ export const EditPackagePolicyPage = memo(() => {
     'package-policy-edit'
   );
 
+  // Parse the 'from' query parameter to determine navigation after save
+  const { search } = useLocation();
+  const qs = new URLSearchParams(search);
+  const fromQs = qs.get('from');
+  let from: EditPackagePolicyFrom | undefined;
+  if (fromQs === 'installed-integrations') {
+    from = 'installed-integrations';
+  }
+
   return (
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
       policyId={policyId}
+      from={from}
       // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
@@ -136,6 +150,14 @@ export const EditPackagePolicyForm = memo<{
         : false,
     [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
   );
+
+  // Derive var_group_selections from policy for edit mode
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -244,7 +266,11 @@ export const EditPackagePolicyForm = memo<{
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
+  //  if `from === 'installed-integrations'` then it links back to the Installed Integrations tab
   const cancelUrl = useMemo((): string => {
+    if (from === 'installed-integrations') {
+      return getHref('integrations_installed', {});
+    }
     return from === 'package-edit' && packageInfo
       ? getHref('integration_details_policies', {
           pkgkey: pkgKeyFromPackageInfo(packageInfo!),
@@ -254,6 +280,9 @@ export const EditPackagePolicyForm = memo<{
       : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
+    if (from === 'installed-integrations') {
+      return getHref('integrations_installed', {});
+    }
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
       packageInfo
       ? getHref('integration_details_policies', {
@@ -419,6 +448,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
             />
           )}
 
@@ -431,6 +461,8 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isAgentlessSelected={hasAgentlessAgentPolicy}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -458,16 +490,18 @@ export const EditPackagePolicyForm = memo<{
       ) : null,
     [
       agentPolicies,
+      extensionView,
+      formState,
+      handleExtensionViewOnChange,
+      hasAgentlessAgentPolicy,
+      originalPackagePolicy,
       packageInfo,
       packagePolicy,
-      updatePackagePolicy,
-      validationResults,
-      formState,
-      originalPackagePolicy,
-      extensionView,
-      handleExtensionViewOnChange,
       selectedTab,
       tabsViews,
+      updatePackagePolicy,
+      validationResults,
+      varGroupSelections,
     ]
   );
 
@@ -688,6 +722,8 @@ const Breadcrumb = memo<{
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
+  } else if (from === 'installed-integrations') {
+    breadcrumb = <InstalledIntegrationsBreadcrumb policyName={packagePolicyName} />;
   }
 
   return breadcrumb;
@@ -726,3 +762,10 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };
+
+const InstalledIntegrationsBreadcrumb = memo<{
+  policyName: string;
+}>(({ policyName }) => {
+  useIntegrationsBreadcrumbs('integration_policy_edit_from_installed', { policyName });
+  return null;
+});

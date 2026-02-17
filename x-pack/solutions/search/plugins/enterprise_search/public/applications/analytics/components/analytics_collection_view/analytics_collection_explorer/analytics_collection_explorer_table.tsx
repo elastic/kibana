@@ -281,6 +281,17 @@ export const AnalyticsCollectionExplorerTable = () => {
   );
   const { items, isLoading, pageIndex, pageSize, search, selectedTable, sorting, totalItemsCount } =
     useValues(AnalyticsCollectionExploreTableLogic);
+  const selectedTab =
+    selectedTable === null ? undefined : tabs.find(({ id }) => id === selectedTable);
+  const tableCaption = selectedTab
+    ? i18n.translate(
+        'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.tableCaption',
+        {
+          defaultMessage: 'Table of {tabName} results',
+          values: { tabName: selectedTab.name },
+        }
+      )
+    : '';
   let table = selectedTable !== null && (tableSettings[selectedTable] as TableSetting);
   if (table) {
     table = {
@@ -374,6 +385,7 @@ export const AnalyticsCollectionExplorerTable = () => {
           <EuiHorizontalRule margin="none" />
 
           <EuiBasicTable
+            tableCaption={tableCaption}
             columns={table.columns}
             itemId={selectedTable || undefined}
             items={items}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -17,7 +17,9 @@ import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
 
-const user = userEvent.setup();
+// EUI context menus keep inactive panels mounted with `pointer-events: none`,
+// which can cause user-event to throw when interacting with menu items.
+const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
@@ -103,6 +105,8 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableProjectLevelRetentionChecks: true,
       enableSemanticText: false,
       enforceAdaptiveAllocations: false,
+      enableFailureStoreRetentionDisabling: true,
+      isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
     setBreadcrumbs: jest.fn(),
@@ -172,9 +176,27 @@ const openContextMenu = async () => {
   await user.click(btns[btns.length - 1]);
 };
 
+const closeActionsMenuIfOpen = async () => {
+  // Some tests open the popover just to assert menu items exist. Close it so it doesn't
+  // leak popover state across tests (late async updates can cause act() warnings).
+  if (!document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')) return;
+
+  const btns = screen.getAllByTestId('indexActionsContextMenuButton');
+  await user.click(btns[btns.length - 1]);
+  await waitFor(() => {
+    expect(
+      document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')
+    ).toBeNull();
+  });
+};
+
 describe('IndexActionsContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await closeActionsMenuIfOpen();
   });
 
   describe('WHEN rendering the component', () => {
@@ -183,7 +205,7 @@ describe('IndexActionsContextMenu', () => {
         const props = getBaseProps();
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/index options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toBeInTheDocument();
         expect(button).toHaveTextContent(/manage index/i);
       });
@@ -244,7 +266,7 @@ describe('IndexActionsContextMenu', () => {
 
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/indices options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toHaveTextContent(/manage \d+ indices/i);
       });
     });
@@ -279,7 +301,8 @@ describe('IndexActionsContextMenu', () => {
         renderWithProviders(<IndexActionsContextMenu {...closed} />);
 
         await openContextMenu();
-        const openBtn = await screen.findByTestId('openIndexMenuButton');
+        const menu = await screen.findByTestId('indexContextMenu');
+        const openBtn = await within(menu).findByTestId('openIndexMenuButton');
 
         await user.click(openBtn);
 
@@ -386,15 +409,18 @@ describe('IndexActionsContextMenu', () => {
         );
 
         await openContextMenu();
-        const overviewBtn = await screen.findByText(/show index overview/i);
+        const menu = await screen.findByTestId('indexContextMenu');
+        const overviewBtn = await within(menu).findByText(/show index overview/i);
         await user.click(overviewBtn);
 
         await openContextMenu();
-        const settingsBtn = await screen.findByText(/show index settings/i);
+        const menu2 = await screen.findByTestId('indexContextMenu');
+        const settingsBtn = await within(menu2).findByText(/show index settings/i);
         await user.click(settingsBtn);
 
         await openContextMenu();
-        const mappingBtn = await screen.findByText(/show index mapping/i);
+        const menu3 = await screen.findByTestId('indexContextMenu');
+        const mappingBtn = await within(menu3).findByText(/show index mapping/i);
         await user.click(mappingBtn);
 
         expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);

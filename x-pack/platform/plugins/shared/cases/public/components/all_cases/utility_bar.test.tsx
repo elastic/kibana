@@ -11,13 +11,11 @@ import React from 'react';
 
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import {
-  createTestQueryClient,
   noCasesPermissions,
   onlyDeleteCasesPermission,
   renderWithTestingProviders,
   writeCasesPermissions,
 } from '../../common/mock';
-import { casesQueriesKeys } from '../../containers/constants';
 import { basicCase } from '../../containers/mock';
 import { CasesTableUtilityBar } from './utility_bar';
 import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
@@ -61,10 +59,8 @@ describe('Severity form field', () => {
     expect(await screen.findByText('Showing 5 of 5 cases')).toBeInTheDocument();
     expect(await screen.findByText('Selected 1 case')).toBeInTheDocument();
     expect(await screen.findByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
-    expect(await screen.findByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
   });
 
   it('renders showing cases correctly', async () => {
@@ -145,25 +141,6 @@ describe('Severity form field', () => {
     await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
-  });
-
-  it('refresh correctly', async () => {
-    const queryClient = createTestQueryClient();
-    renderWithTestingProviders(<CasesTableUtilityBar {...props} />, {
-      wrapperProps: { queryClient },
-    });
-
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
-
-    await userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
-
-    await waitFor(() => {
-      expect(deselectCases).toHaveBeenCalled();
-    });
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
   });
 
   it('does not show the bulk actions without update & delete permissions', async () => {

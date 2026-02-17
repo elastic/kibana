@@ -23,6 +23,7 @@ describe('transformConnectorTypesResponse', () => {
         is_system_action_type: true,
         sub_feature: 'endpointSecurity',
         is_deprecated: false,
+        allow_multiple_system_actions: true,
       },
       {
         id: 'actionType2Id',
@@ -49,6 +50,7 @@ describe('transformConnectorTypesResponse', () => {
         isSystemActionType: true,
         subFeature: 'endpointSecurity',
         isDeprecated: false,
+        allowMultipleSystemActions: true,
       },
       {
         id: 'actionType2Id',

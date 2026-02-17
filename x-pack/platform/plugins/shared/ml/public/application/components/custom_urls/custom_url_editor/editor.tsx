@@ -242,8 +242,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.attributes.title };
+  const dashboardOptions = dashboards.map(({ id, data }) => {
+    return { value: id, text: data.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {
@@ -283,12 +283,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h4>
+        <h2>
           <FormattedMessage
             id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
             defaultMessage="Create new custom URL"
           />
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiForm className="ml-edit-url-form" data-test-subj="mlJobCustomUrlForm">

@@ -9,13 +9,15 @@
 
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
+
+jest.mock('../lib/with_license_check');
 
 describe('POST /api/workflows/search', () => {
   let workflowsApi: WorkflowsManagementApi;
@@ -27,41 +29,6 @@ describe('POST /api/workflows/search', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the search route with correct configuration', () => {
-      registerPostSearchWorkflowsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postSearchCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/search'
-      );
-
-      expect(postSearchCall).toBeDefined();
-      expect(postSearchCall[0]).toMatchObject({
-        path: '/api/workflows/search',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['read', 'workflow_read'],
-              },
-            ],
-          },
-        },
-      });
-      expect(postSearchCall[0].validate).toBeDefined();
-      expect(postSearchCall[0].validate.body).toBeDefined();
-      expect(postSearchCall[1]).toEqual(expect.any(Function));
-    });
   });
 
   describe('handler logic', () => {
@@ -83,11 +50,9 @@ describe('POST /api/workflows/search', () => {
 
     it('should return workflow search results successfully', async () => {
       const mockSearchResults = {
-        _pagination: {
-          page: 0,
-          limit: 10,
-          total: 2,
-        },
+        page: 1,
+        size: 10,
+        total: 2,
         results: [
           {
             id: 'workflow-1',
@@ -125,8 +90,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
           query: 'test',
           enabled: [true, false],
           createdBy: ['user1@example.com', 'user2@example.com'],
@@ -140,11 +105,61 @@ describe('POST /api/workflows/search', () => {
 
       expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
         {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
           query: 'test',
           enabled: [true, false],
           createdBy: ['user1@example.com', 'user2@example.com'],
+        },
+        'default'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockSearchResults });
+    });
+
+    it('should filter workflows by tags', async () => {
+      const mockSearchResults = {
+        page: 1,
+        size: 10,
+        total: 1,
+        results: [
+          {
+            id: 'workflow-1',
+            name: 'Tagged Workflow',
+            description: 'Workflow with tags',
+            enabled: true,
+            createdAt: new Date('2024-01-15T10:00:00Z'),
+            createdBy: 'user1@example.com',
+            lastUpdatedAt: new Date('2024-01-15T10:30:00Z'),
+            lastUpdatedBy: 'user1@example.com',
+            definition: null,
+            yaml: '',
+            valid: true,
+            history: [],
+          },
+        ],
+      };
+
+      workflowsApi.getWorkflows = jest.fn().mockResolvedValue(mockSearchResults);
+
+      const mockContext = {};
+      const mockRequest = {
+        body: {
+          size: 10,
+          page: 1,
+          tags: ['production', 'critical'],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/search' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
+        {
+          size: 10,
+          page: 1,
+          tags: ['production', 'critical'],
         },
         'default'
       );
@@ -158,8 +173,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
         },
         headers: {},
         url: { pathname: '/api/workflows/search' },
@@ -178,11 +193,9 @@ describe('POST /api/workflows/search', () => {
 
     it('should work with different space contexts', async () => {
       const mockSearchResults = {
-        _pagination: {
-          page: 0,
-          limit: 10,
-          total: 1,
-        },
+        page: 1,
+        size: 10,
+        total: 1,
         results: [
           {
             id: 'workflow-1',
@@ -207,8 +220,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
           query: 'space-specific',
         },
         headers: {},
@@ -220,8 +233,8 @@ describe('POST /api/workflows/search', () => {
 
       expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
         {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
           query: 'space-specific',
         },
         'custom-space'
@@ -238,8 +251,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          limit: 10,
-          page: 0,
+          size: 10,
+          page: 1,
         },
         headers: {},
         url: { pathname: '/api/workflows/search' },

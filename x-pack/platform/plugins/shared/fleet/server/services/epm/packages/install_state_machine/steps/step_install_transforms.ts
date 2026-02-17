@@ -14,14 +14,7 @@ import { cleanupTransforms } from '../../remove';
 import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallTransforms(context: InstallContext) {
-  const {
-    packageInstallContext,
-    esClient,
-    savedObjectsClient,
-    logger,
-    force,
-    authorizationHeader,
-  } = context;
+  const { packageInstallContext, esClient, savedObjectsClient, logger, force, request } = context;
   let esReferences = context.esReferences ?? [];
 
   ({ esReferences } = await withPackageSpan('Install transforms', () =>
@@ -32,7 +25,7 @@ export async function stepInstallTransforms(context: InstallContext) {
       logger,
       esReferences,
       force,
-      authorizationHeader,
+      request,
     })
   ));
   return { esReferences };

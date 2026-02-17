@@ -22,12 +22,89 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
+import type { SloTabId } from '@kbn/deeplinks-observability';
+import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import type { SloTabId } from '../../../pages/slo_details/components/slo_details';
-import { OVERVIEW_TAB_ID, SloDetails } from '../../../pages/slo_details/components/slo_details';
+import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
+
+export interface SloOverviewDetailsContentProps {
+  slo: SLOWithSummaryResponse;
+  initialTabId?: SloTabId;
+}
+
+export function SloOverviewDetailsContent({
+  slo,
+  initialTabId = OVERVIEW_TAB_ID,
+}: SloOverviewDetailsContentProps) {
+  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+
+  const { tabs } = useSloDetailsTabs({
+    slo,
+    isAutoRefreshing: false,
+    selectedTabId,
+    setSelectedTabId,
+  });
+
+  return (
+    <>
+      <HeaderTitle slo={slo} isLoading={false} />
+      <EuiTabs>
+        {tabs.map(({ id, label, ...tab }) => (
+          <EuiTab key={id} {...tab} isSelected={id === selectedTabId}>
+            {label}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} />
+    </>
+  );
+}
+
+export interface SloOverviewDetailsFlyoutFooterProps {
+  slo: SLOWithSummaryResponse;
+  onClose: () => void;
+}
+
+export function SloOverviewDetailsFlyoutFooter({
+  slo,
+  onClose,
+}: SloOverviewDetailsFlyoutFooterProps) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+    uiSettings,
+  } = useKibana().services;
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiButton data-test-subj="o11ySloOverviewDetailsCloseButton" onClick={onClose}>
+          {i18n.translate('xpack.slo.sloOverviewDetails.button.closeLabel', {
+            defaultMessage: 'Close',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          onClick={() => {
+            const { sloDetailsUrl } = getSloFormattedSummary(slo, uiSettings, basePath);
+            navigateToUrl(sloDetailsUrl);
+          }}
+          data-test-subj="o11ySloOverviewDetailsDetailsButton"
+        >
+          {i18n.translate('xpack.slo.sloOverviewDetails.button.detailsLabel', {
+            defaultMessage: 'Details',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 export function SloOverviewDetails({
   slo,
@@ -36,12 +113,6 @@ export function SloOverviewDetails({
   slo: SLOWithSummaryResponse | null;
   setSelectedSlo: (slo: SLOWithSummaryResponse | null) => void;
 }) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-    uiSettings,
-  } = useKibana().services;
-
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloOverviewFlyout',
   });
@@ -49,15 +120,6 @@ export function SloOverviewDetails({
   const onClose = () => {
     setSelectedSlo(null);
   };
-
-  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(OVERVIEW_TAB_ID);
-
-  const { tabs } = useSloDetailsTabs({
-    slo,
-    isAutoRefreshing: false,
-    selectedTabId,
-    setSelectedTabId,
-  });
 
   if (!slo) {
     return null;
@@ -76,46 +138,10 @@ export function SloOverviewDetails({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <HeaderTitle slo={slo} isLoading={false} />
-        <EuiTabs>
-          {tabs.map((tab, index) => (
-            <EuiTab
-              key={index}
-              onClick={'onClick' in tab ? tab.onClick : undefined}
-              isSelected={tab.id === selectedTabId}
-              append={'append' in tab ? tab.append : null}
-            >
-              {tab.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiSpacer size="m" />
-        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} />
+        <SloOverviewDetailsContent slo={slo} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="o11ySloOverviewDetailsCloseButton" onClick={onClose}>
-              {i18n.translate('xpack.slo.sloOverviewDetails.button.closeLabel', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => {
-                const { sloDetailsUrl } = getSloFormattedSummary(slo!, uiSettings, basePath);
-                navigateToUrl(sloDetailsUrl);
-              }}
-              data-test-subj="o11ySloOverviewDetailsDetailsButton"
-            >
-              {i18n.translate('xpack.slo.sloOverviewDetails.button.detailsLabel', {
-                defaultMessage: 'Details',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

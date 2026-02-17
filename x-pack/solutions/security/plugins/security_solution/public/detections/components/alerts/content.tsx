@@ -120,9 +120,7 @@ export const AlertsPageContent = memo(
         ref={containerElement}
       >
         <EuiWindowEvent event="resize" handler={noop} />
-        <SearchBarSection
-          dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
-        />
+        <SearchBarSection dataView={dataView} sourcererDataViewSpec={oldSourcererDataViewSpec} />
         <SecuritySolutionPageWrapper
           noPadding={globalFullScreen}
           data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
@@ -136,6 +134,7 @@ export const AlertsPageContent = memo(
             <FiltersSection
               assignees={assignees}
               dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+              pageFilters={pageFilters}
               setStatusFilter={setStatusFilter}
               setPageFilters={setPageFilters}
               setPageFilterHandler={setPageFilterHandler}

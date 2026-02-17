@@ -11,12 +11,6 @@ import type { ThemeName, ThemeTag } from '@kbn/core-ui-settings-common';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 export const getThemeTag = ({ name, darkMode }: { name: string; darkMode: boolean }) => {
-  // Amsterdam theme is called `v8` internally
-  // and should be kept this way for compatibility reasons.
-  if (name === 'amsterdam') {
-    name = 'v8';
-  }
-
   return `${name}${darkMode ? 'dark' : 'light'}`;
 };
 

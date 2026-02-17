@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: Create script schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library:
+    post:
+      summary: Create script
+      operationId: EndpointScriptLibraryCreateScript
+      description: Create a new script entry by uploading a script file
+      x-codegen-enabled: false
+      x-labels: []
+#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+#      x-labels: [ ess, serverless ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateScriptRouteRequestBody'
+            examples:
+              CreateScriptEntry:
+                summary: Create a script entry
+                value:
+                  name: Collect host data
+                  platform: [ linux, macos ]
+                  file: ./collect_host_data.sh
+                  description: Collects host data for investigation
+                  instructions: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  requiresInput: false
+
+      responses:
+        '200':
+          description: Action request was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+
+components:
+  x-codegen-enabled: false
+  schemas:
+    CreateScriptRouteRequestBody:
+      type: object
+      required:
+        - name
+        - platform
+        - file
+      properties:
+        name:
+          type: string
+          description: Name of the script
+        platform:
+          type: array
+          description: Platforms supported by the the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptPlatform'
+        file:
+          type: object
+          format: binary
+          description: The script file upload
+        tags:
+          type: array
+          description: Tags to categorize the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptTags'
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+          description: Example usage of the script
+        requiresInput:
+          type: boolean
+          description: Whether the script requires input arguments
+        pathToExecutable:
+          type: string
+          description: >
+            Used only for when the uploaded script is an archive (.zip file for example).
+            This property defines the relative path to the file included in the archive that should be executed
+            once its contents are extracted. The path should be relative to the root of the archive.
+          example: ./bin/script.sh
+
+
+
+

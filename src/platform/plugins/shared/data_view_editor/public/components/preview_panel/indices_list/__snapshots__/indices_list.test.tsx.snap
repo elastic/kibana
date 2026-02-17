@@ -1,697 +1,180 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`IndicesList should change pages 1`] = `
-<div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 1,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
-      >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList should change per page 1`] = `
-<div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 1,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
-      >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPagination
-        activePage={0}
-        aria-label="Indices list pagination"
-        onPageClick={[Function]}
-        pageCount={2}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList should highlight fully when an exact match 1`] = `
-<div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          <span>
-            <strong>
-              logs
-            </strong>
-            tash
-          </span>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          <strong>
-            some_logs
-          </strong>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
-      >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList should highlight the query in the matches 1`] = `
-<div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          <span>
-            <strong>
-              ki
-            </strong>
-            bana
-          </span>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          <strong>
-            es
-          </strong>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
-      >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
+  <table
+    class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
+    id="generated-id_indices-list-table"
+    tabindex="-1"
   >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
+    <tbody>
+      <tr
+        class="euiTableRow emotion-euiTableRow-desktop"
+        data-test-subj="indicesListTableRow"
       >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
+        <td
+          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+        >
+          <div
+            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
           >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
-      >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList updating props should render all new indices 1`] = `
-<div>
-  <EuiTable
-    responsiveBreakpoint={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="2"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="3"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="4"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="5"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="6"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="7"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="8"
-      >
-        <EuiTableRowCell>
-          kibana
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="9"
-      >
-        <EuiTableRowCell>
-          es
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
+            <span
+              class="euiTableCellContent__text"
+            >
+              kibana
+            </span>
+          </div>
+        </td>
+        <td
+          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+        >
+          <div
+            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
           >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
+            <span
+              class="euiTableCellContent__text"
             />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
+          </div>
+        </td>
+      </tr>
+      <tr
+        class="euiTableRow emotion-euiTableRow-desktop"
+        data-test-subj="indicesListTableRow"
       >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+        <td
+          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+        >
+          <div
+            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          >
+            <span
+              class="euiTableCellContent__text"
+            >
+              es
+            </span>
+          </div>
+        </td>
+        <td
+          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+        >
+          <div
+            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          >
+            <span
+              class="euiTableCellContent__text"
+            />
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiPagination
-        activePage={0}
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+      >
+        <button
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+          data-test-subj="tablePaginationPopoverButton"
+          type="button"
+        >
+          <span
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+          >
+            <span
+              class="eui-textTruncate euiButtonEmpty__text"
+            >
+              Rows per page
+              : 
+              10
+            </span>
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <nav
         aria-label="Indices list pagination"
-        onPageClick={[Function]}
-        pageCount={2}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+        class="euiPagination emotion-euiPagination"
+      >
+        <span
+          aria-atomic="true"
+          aria-relevant="additions text"
+          class="emotion-euiScreenReaderOnly"
+          role="status"
+        >
+          Page 1 of 1
+        </span>
+        <button
+          aria-label="Previous page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-previous"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowLeft"
+          />
+        </button>
+        <ul
+          class="euiPagination__list emotion-euiPagination__list"
+        >
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-controls="generated-id_indices-list-table"
+              aria-current="page"
+              aria-label="Page 1 of 1"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+              data-test-subj="pagination-button-0"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+        <button
+          aria-label="Next page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-next"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </nav>
+    </div>
+  </div>
 </div>
 `;

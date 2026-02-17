@@ -31,5 +31,6 @@ export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => (
 
 ShapePicker.propTypes = {
   onChange: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   shapes: PropTypes.object.isRequired,
 };

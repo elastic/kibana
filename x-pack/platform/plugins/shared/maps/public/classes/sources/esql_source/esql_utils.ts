@@ -10,7 +10,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import { getESQLAdHocDataview, getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
-import { getData, getIndexPatternService } from '../../../kibana_services';
+import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
 
 // ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
 // ES_GEO_FIELD_TYPE.GEO_POINT is a field type from an Elasticsearch index mapping
@@ -49,7 +49,11 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 }
 
 export async function getESQLMeta(esql: string) {
-  const adhocDataView = await getESQLAdHocDataview(esql, getIndexPatternService());
+  const adhocDataView = await getESQLAdHocDataview({
+    dataViewsService: getIndexPatternService(),
+    query: esql,
+    http: getHttp(),
+  });
   return {
     columns: await getESQLQueryColumnsRaw({
       esqlQuery: esql,
@@ -59,28 +63,6 @@ export async function getESQLMeta(esql: string) {
     adhocDataViewId: adhocDataView.id!,
     ...getFields(adhocDataView),
   };
-}
-
-/*
- * Map column.type to field type
- * Supported column types https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-limitations.html#_supported_types
- */
-export function getFieldType(column: ESQLColumn) {
-  switch (column.type) {
-    case 'boolean':
-    case 'date':
-    case 'ip':
-    case 'keyword':
-    case 'text':
-      return 'string';
-    case 'double':
-    case 'int':
-    case 'long':
-    case 'unsigned_long':
-      return 'number';
-    default:
-      return undefined;
-  }
 }
 
 export function getFields(dataView: DataView) {

@@ -8,7 +8,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
@@ -18,7 +18,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Redirect } from 'react-router-dom';
 
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
@@ -34,6 +34,7 @@ import {
   createDashboardEditUrl,
   createDashboardListingFilterUrl,
 } from '../utils/urls';
+import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -61,7 +62,6 @@ export async function mountApp({
     createKbnUrlStateStorage({
       history,
       useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(coreServices.notifications.toasts),
     });
 
   const redirect = (redirectTo: RedirectToProps) => {
@@ -96,6 +96,13 @@ export async function mountApp({
   const renderDashboard = (
     routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
   ) => {
+    // If we are loading the dashboard app and going directly to a dashboard,
+    // the mark will already be set in the mount method. Otherwise, we are coming
+    // from the listing page or another dashboard, so we need to set the mark here.
+    if (performance.getEntriesByName('dashboard_duration_start', 'mark').length === 0) {
+      performance.mark(DASHBOARD_DURATION_START_MARK);
+    }
+
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
@@ -112,7 +119,12 @@ export async function mountApp({
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: RouteComponentProps<{ activeTab?: string }>) => {
+    // clear the dashboard duration start mark set during mounting because we
+    // went to the listing page instead of a dashboard view
+    performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
@@ -157,7 +169,11 @@ export async function mountApp({
               ]}
               render={renderDashboard}
             />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route
+              exact
+              path={[LANDING_PAGE_PATH, `${LANDING_PAGE_PATH}/:activeTab`]}
+              render={renderListingPage}
+            />
             <Route exact path="/">
               <Redirect to={LANDING_PAGE_PATH} />
             </Route>

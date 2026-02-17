@@ -36,18 +36,18 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'scan',
   'runscript',
   'cancel',
+  'memory-dump',
 ] as const;
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
-  'isolate',
-  'kill-process',
-  'suspend-process',
-];
+export type EnabledAutomatedResponseActionsCommands = Extract<
+  ResponseActionsApiCommandNames,
+  'isolate' | 'kill-process' | 'suspend-process'
+>;
 
-export type EnabledAutomatedResponseActionsCommands =
-  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: EnabledAutomatedResponseActionsCommands[] =
+  ['isolate', 'kill-process', 'suspend-process'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -63,6 +63,8 @@ export const ENDPOINT_CAPABILITIES = [
   'scan',
   'runscript',
   'cancel',
+  'memdump_process',
+  'memdump_kernel',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -79,6 +81,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'get-file',
   'execute',
+  'memory-dump',
   'upload',
   'scan',
   'runscript',
@@ -113,6 +116,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
+  'memory-dump': 'writeExecuteOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -129,6 +133,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   scan: 'scan',
   runscript: 'runscript',
   cancel: 'cancel',
+  'memory-dump': 'memory-dump',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -145,22 +150,24 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   scan: 'scan',
   runscript: 'runscript',
   cancel: 'cancel',
+  'memory-dump': 'memory-dump',
 });
 
-export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
-  Record<ConsoleResponseActionCommands, EndpointCapabilities>
+export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = deepFreeze<
+  Record<ConsoleResponseActionCommands, EndpointCapabilities[]>
 >({
-  isolate: 'isolation',
-  release: 'isolation',
-  execute: 'execute',
-  'get-file': 'get_file',
-  processes: 'running_processes',
-  'kill-process': 'kill_process',
-  'suspend-process': 'suspend_process',
-  upload: 'upload_file',
-  scan: 'scan',
-  runscript: 'runscript',
-  cancel: 'cancel',
+  isolate: ['isolation'],
+  release: ['isolation'],
+  execute: ['execute'],
+  'get-file': ['get_file'],
+  processes: ['running_processes'],
+  'kill-process': ['kill_process'],
+  'suspend-process': ['suspend_process'],
+  upload: ['upload_file'],
+  scan: ['scan'],
+  runscript: ['runscript'],
+  cancel: ['cancel'],
+  'memory-dump': ['memdump_process', 'memdump_kernel'],
 });
 
 /**
@@ -180,6 +187,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
   cancel: 'canCancelAction', // Cancel uses specific cancel permission
+  'memory-dump': 'canWriteExecuteOperations',
 });
 
 /**
@@ -200,6 +208,7 @@ export const CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.fre
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
   cancel: 'canCancelAction',
+  'memory-dump': 'canWriteExecuteOperations',
 });
 
 // 4 hrs in seconds

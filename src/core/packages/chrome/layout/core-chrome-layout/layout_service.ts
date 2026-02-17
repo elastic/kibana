@@ -11,7 +11,6 @@ import type React from 'react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { LayoutProjectSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
@@ -21,7 +20,6 @@ export interface LayoutServiceStartDeps {
 
 export interface LayoutServiceParams {
   debug?: boolean;
-  projectSideNavVersion?: LayoutProjectSideNavVersion;
 }
 
 /**

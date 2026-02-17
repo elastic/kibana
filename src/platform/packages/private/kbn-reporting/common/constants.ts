@@ -13,6 +13,7 @@ import {
   DASHBOARD_APP_LOCATOR,
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
+  AI_VALUE_REPORT_LOCATOR,
 } from '@kbn/deeplinks-analytics';
 import type { LicenseType } from '@kbn/licensing-types';
 
@@ -50,6 +51,12 @@ export const SCHEDULED_REPORT_VALID_LICENSES: LicenseType[] = [
   LICENSE_TYPE_ENTERPRISE,
 ];
 
+export const REPORTING_FEATURE_ID = 'Reporting';
+
+export const EXPORT_TYPE_SINGLE = 'single' as const;
+export const EXPORT_TYPE_SCHEDULED = 'scheduled' as const;
+export const REPORTING_EXPORT_TYPES = [EXPORT_TYPE_SINGLE, EXPORT_TYPE_SCHEDULED];
+
 /*
  * Notifications
  */
@@ -68,6 +75,7 @@ export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
   DASHBOARD_APP_LOCATOR,
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
+  AI_VALUE_REPORT_LOCATOR,
 ];
 
 // Redirection URL used to load app state for screenshotting

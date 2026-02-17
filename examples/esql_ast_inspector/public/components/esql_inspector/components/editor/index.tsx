@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { Walker } from '@kbn/esql-ast';
+import { Walker } from '@kbn/esql-language';
 import { EsqlEditor } from '../../../esql_editor/esql_editor';
 import { useEsqlInspector } from '../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
@@ -37,8 +37,8 @@ export const Editor: React.FC = () => {
           <span
             style={{
               display: 'inline-block',
-              margin: -4,
-              padding: 4,
+              margin: -2,
+              padding: 2,
               borderRadius: 4,
               background: 'rgb(190, 237, 224)',
             }}
@@ -62,8 +62,8 @@ export const Editor: React.FC = () => {
             <span
               style={{
                 display: 'inline-block',
-                margin: -4,
-                padding: 4,
+                margin: -2,
+                padding: 2,
                 borderRadius: 4,
                 background: 'rgb(255, 243, 191)',
               }}
@@ -91,8 +91,8 @@ export const Editor: React.FC = () => {
         <span
           style={{
             display: 'inline-block',
-            margin: -4,
-            padding: 4,
+            margin: -2,
+            padding: 2,
             borderRadius: 4,
             background: 'rgb(255, 243, 191)',
           }}

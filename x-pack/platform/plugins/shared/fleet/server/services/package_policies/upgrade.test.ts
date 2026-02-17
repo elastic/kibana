@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackagePolicyAssetsMap } from '../../../common/types';
 
-import { createPackagePolicyMock } from '../../../common/mocks';
+import { createPackagePolicyMock, createAgentPolicyMock } from '../../../common/mocks';
 
 import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 
@@ -394,7 +394,17 @@ describe('Upgrade', () => {
             type: 'abcd',
             references: [],
             version: '0.9.0',
-            attributes: { ...createPackagePolicyMock(), id, name: id },
+            attributes: {
+              ...createPackagePolicyMock(),
+              id,
+              name: id,
+              ...{
+                package: {
+                  name: 'endpoint',
+                  version: '1.0.0',
+                },
+              },
+            },
           })),
         })
       );
@@ -435,6 +445,9 @@ describe('Upgrade', () => {
       appContextService.stop();
     });
     it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
+      mockAgentPolicyService.get.mockResolvedValue({
+        ...createAgentPolicyMock({ space_ids: ['test'] }),
+      });
       soClient.bulkGet.mockImplementation((objects) =>
         Promise.resolve({
           saved_objects: objects.map(({ id }) => ({

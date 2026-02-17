@@ -11,11 +11,11 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiPublishesDescription,
   apiPublishesTitle,
   apiPublishesSavedObjectId,
+  apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
@@ -55,17 +55,13 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
             function serializeState() {
               if (savedObjectId !== undefined) {
                 return {
-                  rawState: {
-                    savedObjectId,
-                  },
+                  savedObjectId,
                 };
               }
 
               return {
-                rawState: {
-                  layout,
-                  links: serializeResolvedLinks(links ?? []),
-                },
+                layout,
+                links: serializeResolvedLinks(links ?? []),
               };
             }
 
@@ -78,6 +74,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       },
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
+        isResizable: false,
       },
     });
   },

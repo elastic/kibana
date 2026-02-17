@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { compact, uniq } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { compactMap } from '../../../utils/compact_map';
 
 export function getApmIndexPatterns(indices: string[]) {
-  return uniq(indices.flatMap((index): string[] => index.split(',')));
+  return Array.from(new Set(indices.flatMap((index): string[] => index.split(','))));
 }
 
 export async function getIndicesAndIngestPipelines({
@@ -35,12 +35,12 @@ export async function getIndicesAndIngestPipelines({
     ignore_unavailable: true,
   });
 
-  const pipelineIds = compact(
-    uniq(Object.values(indices).map((index) => index.settings?.index?.default_pipeline))
-  ).join(',');
+  const pipelineIds = Array.from(
+    new Set(compactMap(Object.values(indices), (index) => index.settings?.index?.default_pipeline))
+  );
 
   const ingestPipelines = await esClient.ingest.getPipeline({
-    id: pipelineIds,
+    id: pipelineIds.join(','),
     filter_path: ['*.processors.grok.field', '*.processors.grok.patterns'],
   });
 

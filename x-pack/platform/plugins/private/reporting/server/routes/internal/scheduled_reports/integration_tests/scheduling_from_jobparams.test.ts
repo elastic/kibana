@@ -108,7 +108,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     eventTracker = new EventTracker(mockCoreSetup.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    mockExportTypesRegistry = new ExportTypesRegistry();
+    mockExportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     mockExportTypesRegistry.register(mockPdfExportType);
 
     soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
@@ -182,7 +182,17 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `)
       );
   });
 
@@ -203,7 +213,8 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           "[request body.schedule.rrule]: types that failed validation:
           - [request body.schedule.rrule.0.freq]: expected value to equal [1]
           - [request body.schedule.rrule.1.freq]: expected value to equal [2]
-          - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]
+          - [request body.schedule.rrule.3.freq]: expected value to equal [4]"
         `)
       );
   });
@@ -225,7 +236,8 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           "[request body.schedule.rrule]: types that failed validation:
           - [request body.schedule.rrule.0.dtstart]: Invalid date: 2025-06-23T14:1719.765Z
           - [request body.schedule.rrule.1.freq]: expected value to equal [2]
-          - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]
+          - [request body.schedule.rrule.3.freq]: expected value to equal [4]"
         `)
       );
   });
@@ -248,8 +260,8 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(
-          `"[request body.notification.email.to]: could not parse array value from json input"`
+        expect(body.message).toEqual(
+          `[request body.notification.email]: types that failed validation:\n- [request body.notification.email.0.to]: could not parse array value from json input\n- [request body.notification.email.1]: expected value to equal [null]`
         )
       );
   });
@@ -272,8 +284,8 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(
-          `"[request body.notification.email]: At least one email address is required"`
+        expect(body.message).toEqual(
+          `[request body.notification.email]: types that failed validation:\n- [request body.notification.email.0]: At least one email address is required\n- [request body.notification.email.1]: expected value to equal [null]`
         )
       );
   });
@@ -352,7 +364,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
         notification: {
@@ -372,7 +384,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             payload: {
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',

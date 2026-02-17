@@ -9,7 +9,6 @@
 
 import { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useSavedSearch } from '../state_management/discover_state_provider';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useFiltersValidation } from './use_filters_validation';
 import { useIsEsqlMode } from './use_is_esql_mode';
@@ -18,7 +17,6 @@ import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export const useAdHocDataViews = () => {
   const dataView = useCurrentDataView();
-  const savedSearch = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
   const { filterManager, toastNotifications, trackUiMetric } = useDiscoverServices();
 
@@ -31,5 +29,5 @@ export const useAdHocDataViews = () => {
   /**
    * Takes care of checking data view id references in filters
    */
-  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
+  useFiltersValidation({ dataView, filterManager, toastNotifications });
 };

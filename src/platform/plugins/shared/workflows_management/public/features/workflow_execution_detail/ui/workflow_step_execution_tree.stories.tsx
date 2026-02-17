@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { Meta, StoryObj } from '@storybook/react';
-import type { SafeParseReturnType } from '@kbn/zod';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
@@ -94,8 +92,9 @@ steps:
     with:
       message: '--------------------------'
 `;
-const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data as WorkflowYaml;
+const result = parseYamlToJSONWithoutValidation(yaml);
+// @ts-expect-error -- it's a storybook story, we don't need to type it
+const definition = result.json as WorkflowYaml;
 
 // export interface WorkflowExecutionDto {
 //   spaceId: string;
@@ -122,6 +121,8 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -129,6 +130,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       stepExecutions: [
         {
           stepId: 'analysis',
+          stepType: 'inference.completion',
           topologicalIndex: 0,
           status: ExecutionStatus.PENDING,
           startedAt: '2025-09-02T20:43:57.466Z',
@@ -145,12 +147,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             input:
               '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
           },
-          completedAt: '2025-09-02T20:44:01.245Z',
+          finishedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
           scopeStack: [],
         },
         {
           stepId: 'debug_ai_response',
+          stepType: 'console',
           topologicalIndex: 1,
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-09-02T20:44:02.142Z',
@@ -167,12 +170,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             message:
               '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
           },
-          completedAt: '2025-09-02T20:44:02.167Z',
+          finishedAt: '2025-09-02T20:44:02.167Z',
           executionTimeMs: 25,
           scopeStack: [],
         },
         {
           stepId: 'print-enter-dash',
+          stepType: 'slack',
           topologicalIndex: 2,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:03.171Z',
@@ -187,12 +191,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '-------------------hellow-------',
           },
-          completedAt: '2025-09-02T20:44:03.627Z',
+          finishedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
           scopeStack: [],
         },
         {
           stepId: 'foreachstep',
+          stepType: 'foreach',
           topologicalIndex: 4,
           status: ExecutionStatus.SKIPPED,
           startedAt: '2025-09-02T20:44:05.233Z',
@@ -227,12 +232,13 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
               },
             ],
           },
-          completedAt: '2025-09-02T20:44:14.522Z',
+          finishedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
           scopeStack: [],
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING_FOR_INPUT,
           startedAt: '2025-09-02T20:44:12.598Z',
@@ -247,7 +253,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:12.694Z',
+          finishedAt: '2025-09-02T20:44:12.694Z',
           executionTimeMs: 96,
           scopeStack: [
             {
@@ -258,6 +264,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING,
           startedAt: '2025-09-02T20:44:10.456Z',
@@ -272,7 +279,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:10.491Z',
+          finishedAt: '2025-09-02T20:44:10.491Z',
           executionTimeMs: 35,
           scopeStack: [
             {
@@ -283,6 +290,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:08.396Z',
@@ -297,7 +305,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:08.423Z',
+          finishedAt: '2025-09-02T20:44:08.423Z',
           executionTimeMs: 27,
           scopeStack: [
             {
@@ -308,6 +316,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.FAILED,
           startedAt: '2025-09-02T20:44:06.265Z',
@@ -322,7 +331,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:06.293Z',
+          finishedAt: '2025-09-02T20:44:06.293Z',
           executionTimeMs: 28,
           scopeStack: [
             {
@@ -333,6 +342,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:13.480Z',
@@ -347,7 +357,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:13.895Z',
+          finishedAt: '2025-09-02T20:44:13.895Z',
           executionTimeMs: 415,
           scopeStack: [
             {
@@ -358,6 +368,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:11.422Z',
@@ -372,7 +383,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:11.823Z',
+          finishedAt: '2025-09-02T20:44:11.823Z',
           executionTimeMs: 401,
           scopeStack: [
             {
@@ -383,6 +394,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:09.363Z',
@@ -397,7 +409,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:09.756Z',
+          finishedAt: '2025-09-02T20:44:09.756Z',
           executionTimeMs: 393,
           scopeStack: [
             {
@@ -408,6 +420,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:07.300Z',
@@ -422,7 +435,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:07.692Z',
+          finishedAt: '2025-09-02T20:44:07.692Z',
           executionTimeMs: 392,
           scopeStack: [
             {
@@ -433,6 +446,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'print-exit-dash',
+          stepType: 'slack',
           topologicalIndex: 8,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:15.553Z',
@@ -447,7 +461,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '--------------------------',
           },
-          completedAt: '2025-09-02T20:44:15.945Z',
+          finishedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
           scopeStack: [],
         },
@@ -474,7 +488,6 @@ export const Empty = {
 
 export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: true,
     error: null,
     selectedId: null,
   },
@@ -482,7 +495,6 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -491,6 +503,8 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.RUNNING,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -503,7 +517,6 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
 
 export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -512,6 +525,8 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      error: null,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -523,7 +538,6 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
   },

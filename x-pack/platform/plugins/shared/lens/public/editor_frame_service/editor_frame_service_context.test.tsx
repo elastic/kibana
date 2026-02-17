@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditorFrameServiceProvider, useEditorFrameService } from './editor_frame_service_context';
-import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from '../types';
+import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from '@kbn/lens-common';
 
 describe('EditorFrameServiceContext', () => {
   const mockVisualizationMap: VisualizationMap = {
@@ -16,7 +16,7 @@ describe('EditorFrameServiceContext', () => {
   };
 
   const mockDatasourceMap: DatasourceMap = {
-    testDatasource: {} as Datasource,
+    formBased: {} as Datasource,
   };
 
   function TestComponent() {

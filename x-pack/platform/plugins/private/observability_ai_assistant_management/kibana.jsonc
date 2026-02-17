@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-management-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-ai-team",
   "group": "platform",
   "visibility": "private",
   "plugin": {

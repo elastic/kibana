@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { FormBasedLayer } from '../../types';
-import { documentField } from '../../document_field';
-import type { IndexPatternMap, OperationMetadata } from '../../../../types';
 import type {
+  IndexPatternMap,
+  OperationMetadata,
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '../../operations';
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { documentField } from '../../document_field';
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../../id_generator');
 

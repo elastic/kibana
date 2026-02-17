@@ -2,7 +2,59 @@
   "id": "aiAssistantManagementSelection",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIAgentConfirmationModal",
+        "type": "Function",
+        "tags": [],
+        "label": "AIAgentConfirmationModal",
+        "description": [],
+        "signature": [
+          "({ onConfirm, onCancel, docLinks, }: ",
+          {
+            "pluginId": "@kbn/ai-agent-confirmation-modal",
+            "scope": "public",
+            "docId": "kibKbnAiAgentConfirmationModalPluginApi",
+            "section": "def-public.AIAgentConfirmationModalProps",
+            "text": "AIAgentConfirmationModalProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiAssistantManagementSelection",
+            "id": "def-public.AIAgentConfirmationModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onConfirm,\n  onCancel,\n  docLinks,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-agent-confirmation-modal",
+                "scope": "public",
+                "docId": "kibKbnAiAgentConfirmationModalPluginApi",
+                "section": "def-public.AIAgentConfirmationModalProps",
+                "text": "AIAgentConfirmationModalProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 28,
+            "columnNumber": 83,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [
       {
@@ -13,12 +65,91 @@
         "label": "AIAssistantType",
         "description": [],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIChatExperience",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIChatExperience",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.AIExperienceSelection",
+        "type": "Type",
+        "tags": [],
+        "label": "AIExperienceSelection",
+        "description": [
+          "\nUnion type representing all possible AI Experience selections.\nCan be a classic assistant type (Observability, Security, etc.) or the AI Agent experience."
+        ],
+        "signature": [
+          "AIAssistantType",
+          " | ",
+          {
+            "pluginId": "@kbn/ai-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnAiAssistantCommonPluginApi",
+            "section": "def-common.AIChatExperience",
+            "text": "AIChatExperience"
+          },
+          ".Agent"
+        ],
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredAIAssistantType\""
+        ],
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiAssistantManagementSelection",
+        "id": "def-public.PREFERRED_CHAT_EXPERIENCE_SETTING_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "PREFERRED_CHAT_EXPERIENCE_SETTING_KEY",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredChatExperience\""
+        ],
+        "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "aiAssistantManagementSelection",
@@ -28,6 +159,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 35,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -42,6 +175,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -59,6 +194,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -71,11 +208,19 @@
           "description": [],
           "signature": [
             "Observable",
-            "<{ assistant: ",
-            "AIAssistantType",
-            "; }>"
+            "<",
+            {
+              "pluginId": "aiAssistantManagementSelection",
+              "scope": "public",
+              "docId": "kibAiAssistantManagementSelectionPluginApi",
+              "section": "def-public.AIExperienceSelection",
+              "text": "AIExperienceSelection"
+            },
+            ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -90,6 +235,8 @@
             "() => void"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],

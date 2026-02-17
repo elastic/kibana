@@ -21,6 +21,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
+import { getUserInfo } from '../../lib/get_user_info';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -49,7 +50,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       },
       async (context, request, response) => {
         const [coreStartServices] = await osqueryContext.getStartServices();
-        const coreContext = await context.core;
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
@@ -113,13 +113,18 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         try {
-          const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+          const currentUser = await getUserInfo({
+            request,
+            security: osqueryContext.security,
+            logger: osqueryContext.logFactory.get('liveQuery'),
+          });
+          const username = currentUser?.username ?? undefined;
           const space = await osqueryContext.service.getActiveSpace(request);
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
             {
-              metadata: { currentUser },
+              metadata: { currentUser: username },
               alertData,
               space,
             }

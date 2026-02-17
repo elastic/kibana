@@ -48,7 +48,7 @@ export const DateTimezoneField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateTimezoneHelpText"
-          defaultMessage="The timezone to use when parsing the date. Supports template snippets. Defaults to {timezone}"
+          defaultMessage="The timezone to use when parsing the date. Defaults to {timezone}."
           values={{ timezone: <EuiCode>UTC</EuiCode> }}
         />
       }
@@ -72,7 +72,7 @@ export const DateLocaleField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateLocaleHelpText"
-          defaultMessage="The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets. Defaults to {locale}."
+          defaultMessage="The locale to use when parsing the date, relevant when parsing month names or week days. Defaults to {locale}."
           values={{ locale: <EuiCode>ENGLISH</EuiCode> }}
         />
       }

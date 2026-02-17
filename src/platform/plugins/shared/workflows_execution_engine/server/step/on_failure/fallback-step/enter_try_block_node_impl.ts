@@ -8,9 +8,9 @@
  */
 
 import type { EnterTryBlockNode } from '@kbn/workflows/graph';
-import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
 export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
@@ -19,19 +19,19 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
+  public run(): void {
+    this.stepExecutionRuntime.startStep();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 
-  async catchError(): Promise<void> {
+  catchError(): void {
     this.stepExecutionRuntime.stepLogger.logError(
       'Error caught by the OnFailure zone. Redirecting to the fallback path'
     );
     const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
 
     if (!stepState.isFallbackExecuted) {
-      await this.stepExecutionRuntime.setCurrentStepState({
+      this.stepExecutionRuntime.setCurrentStepState({
         ...stepState,
         isFallbackExecuted: true,
         error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node

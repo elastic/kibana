@@ -10,7 +10,6 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AuthType, WebhookMethods } from '../../../common/auth/constants';
 import { getAxiosConfig } from './get_axios_config';
 import type { GetAxiosConfigParams, GetAxiosConfigResponse } from './get_axios_config';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -19,6 +18,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { promiseResult } from '../lib/result_type';
 import sinon from 'sinon';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { AuthType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
@@ -156,5 +156,35 @@ describe('getAxiosConfig', () => {
     expect(((await getAxiosConfig(params))[1] as Error).message).toBe(
       'Unable to retrieve/refresh the access token: Failed to retrieve access token'
     );
+  });
+
+  it('should not return an error if secrets are undefined', async () => {
+    const config = await getAxiosConfig({
+      ...params,
+      config: {
+        ...params.config,
+        authType: undefined,
+        hasAuth: false,
+      },
+      // @ts-expect-error: should not happen but it does with very old SOs
+      secrets: undefined,
+    });
+
+    expect(config[1]).toBeNull();
+  });
+
+  it('should not return an error if secrets are null', async () => {
+    const config = await getAxiosConfig({
+      ...params,
+      config: {
+        ...params.config,
+        authType: undefined,
+        hasAuth: false,
+      },
+      // @ts-expect-error: should not happen but it does with very old SOs
+      secrets: null,
+    });
+
+    expect(config[1]).toBeNull();
   });
 });

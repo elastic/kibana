@@ -10,9 +10,9 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SAVED_OBJECT_TYPES } from '../../../common';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { CasesConnectorRunParamsSchema } from './schema';
+import { ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
@@ -24,8 +24,8 @@ import {
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
-import { fullJitterBackoffFactory } from '../../common/retry_service';
 import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
+import { getSavedObjectsTypes } from '../../../common';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -67,7 +67,7 @@ export class CasesConnector extends SubActionConnector<
     this.registerSubAction({
       name: CASES_CONNECTOR_SUB_ACTION.RUN,
       method: 'run',
-      schema: CasesConnectorRunParamsSchema,
+      schema: ZCasesConnectorRunParamsSchema,
     });
   }
 
@@ -109,7 +109,7 @@ export class CasesConnector extends SubActionConnector<
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
-        [...SAVED_OBJECT_TYPES, CASE_RULES_SAVED_OBJECT]
+        [...getSavedObjectsTypes(), CASE_RULES_SAVED_OBJECT]
       );
 
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);

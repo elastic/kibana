@@ -47,7 +47,7 @@ export const buildIndexPatternsByEngine = async (
   dataViewsService: DataViewsService
 ) => {
   const patterns = await buildIndexPatterns(space, appClient, dataViewsService, entityType);
-  patterns.push(getEntitiesResetIndexName(entityType, space));
+  patterns.push(getEntitiesResetIndexName(entityType, space).concat('*'));
   patterns.push(...getEntityUpdatesIndexPatterns(space, entityType));
   return patterns;
 };

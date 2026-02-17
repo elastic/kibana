@@ -137,4 +137,34 @@ describe('buildGapsFilter', () => {
       );
     });
   });
+
+  describe('failedAutoFillAttemptsLessThan filter', () => {
+    it('should build filter with failedAutoFillAttemptsLessThan when value provided', () => {
+      expect(buildGapsFilter({ failedAutoFillAttemptsLessThan: 3 })).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          '(NOT kibana.alert.rule.gap.failed_auto_fill_attempts:* OR ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts:*  AND ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts < 3)'
+      );
+    });
+
+    it('should not add failedAutoFillAttemptsLessThan filter when undefined', () => {
+      expect(buildGapsFilter({ failedAutoFillAttemptsLessThan: undefined })).toBe(BASE_GAPS_FILTER);
+    });
+
+    it('should build filter combining failedAutoFillAttemptsLessThan with other filters', () => {
+      expect(
+        buildGapsFilter({
+          statuses: [gapStatus.UNFILLED],
+          failedAutoFillAttemptsLessThan: 10,
+        })
+      ).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          '(kibana.alert.rule.gap.status : unfilled) AND ' +
+          '(NOT kibana.alert.rule.gap.failed_auto_fill_attempts:* OR ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts:*  AND ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts < 10)'
+      );
+    });
+  });
 });

@@ -10,41 +10,32 @@
 import type { YAMLMap } from 'yaml';
 import { isMap, isScalar } from 'yaml';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
-import { isEnhancedInternalConnector } from '@kbn/workflows';
+import type { InternalConnectorContract } from '@kbn/workflows';
+import { buildElasticsearchRequest, isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
-import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
-import type {
-  ActionContext,
-  ActionInfo,
-  ConnectorExamples,
-  HoverContext,
-} from '../monaco_providers/provider_interfaces';
+import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+
+interface ElasticsearchRequestInfo {
+  method: string;
+  url: string;
+  data?: string[];
+}
 
 /**
  * Monaco connector handler for Elasticsearch APIs
- * Provides Monaco editor extensions (hover, actions, etc.) for Elasticsearch connector types
+ * Provides hover information for Elasticsearch connector types
  */
 export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHandler {
-  private readonly http?: HttpSetup;
-  private readonly notifications?: NotificationsStart;
-  // private readonly esHost?: string;
-  // private readonly kibanaHost?: string;
-
   constructor(
     options: {
       http?: HttpSetup;
       notifications?: NotificationsStart;
-      // esHost?: string;
-      // kibanaHost?: string;
     } = {}
   ) {
     super('ElasticsearchMonacoConnectorHandler', 100, ['elasticsearch.']);
-    this.http = options.http;
-    this.notifications = options.notifications;
-    // this.esHost = options.esHost;
-    // this.kibanaHost = options.kibanaHost;
   }
 
   /**
@@ -60,10 +51,16 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
 
       // Get Elasticsearch request information
       const withParams = this.extractWithParams(stepContext.stepNode);
-      const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
+      const requestInfo = this.getElasticsearchRequestInfo(connectorType, withParams);
+
+      // Get connector contract
+      const connector = this.getConnectorContract(connectorType);
+      if (!connector) {
+        return null;
+      }
 
       // Get documentation URL from connector definition
-      const documentationUrl = this.getDocumentationUrl(connectorType);
+      const documentationUrl = this.getDocumentationUrl(connector);
 
       // Generate console format
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
@@ -72,13 +69,13 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       const content = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
-        `**Description**: Execute ${requestInfo.method} request to ${requestInfo.url}`,
+        this.getDescription(connector, requestInfo),
         '',
         documentationUrl
-          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **[View API Documentation](${documentationUrl})** - Opens in new tab`
+          ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`
           : '',
         documentationUrl ? '' : '',
-        `### <span style="text-shadow: 0 0 4px rgba(0,200,0,0.4); opacity: 0.8;">⚡</span> Console Format`,
+        `**Console Format**`,
         '```http',
         consoleFormat,
         '```',
@@ -95,31 +92,6 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
       return null;
     }
-  }
-
-  /**
-   * Generate floating action buttons for Elasticsearch connectors
-   */
-  async generateActions(context: ActionContext): Promise<ActionInfo[]> {
-    const actions: ActionInfo[] = [];
-
-    // Add "Copy as Console" action if we have the necessary services
-    if (this.http && this.notifications) {
-      actions.push(
-        this.createActionInfo(
-          'copy-as-console',
-          'Copy as Console',
-          () => this.copyAsConsole(context),
-          {
-            icon: 'copy',
-            tooltip: 'Copy this step as Console command',
-            priority: 10,
-          }
-        )
-      );
-    }
-
-    return actions;
   }
 
   /**
@@ -231,67 +203,55 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
   }
 
   /**
-   * Generate console format for the request
+   * Get Elasticsearch request info using the shared buildRequestFromConnector utility
    */
-  private generateConsoleFormat(
-    requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, unknown>
-  ): string {
-    const lines = [`${requestInfo.method} ${requestInfo.url}`];
+  private getElasticsearchRequestInfo(
+    stepType: string,
+    withParams?: Record<string, unknown>
+  ): ElasticsearchRequestInfo {
+    const { method, path, body } = buildElasticsearchRequest(stepType, withParams || {});
 
-    if (requestInfo.data && requestInfo.data.length > 0) {
-      lines.push(...requestInfo.data);
-    }
-
-    return lines.join('\n');
+    return {
+      method,
+      url: decodeURIComponent(path),
+      data: body ? [JSON.stringify(body, null, 2)] : undefined,
+    };
   }
 
-  /**
-   * Copy step as Console command
-   */
-  private async copyAsConsole(context: ActionContext): Promise<void> {
-    try {
-      const { connectorType, stepContext } = context;
-      if (!stepContext) return;
-
-      const withParams = this.extractWithParams(stepContext.stepNode);
-      const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
-      const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
-
-      await navigator.clipboard.writeText(consoleFormat);
-
-      if (this.notifications) {
-        this.notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Console command copied successfully',
-        });
-      }
-    } catch (error) {
-      // console.error('ElasticsearchMonacoConnectorHandler: Error copying as console', error);
-      if (this.notifications) {
-        this.notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy',
-        });
-      }
+  private getConnectorContract(connectorType: string): InternalConnectorContract | null {
+    const allConnectors = getAllConnectors();
+    if (!allConnectors) {
+      return null;
     }
+    const connector = allConnectors.find((c) => c.type === connectorType);
+    if (!connector || !isInternalConnector(connector)) {
+      return null;
+    }
+    return connector;
+  }
+
+  private getDescription(
+    connector: InternalConnectorContract,
+    requestInfo: ElasticsearchRequestInfo
+  ): string | null {
+    if (connector.description) {
+      // Remove "Documentation: " from the description as we add it manually to hover content
+      return connector.description.replace(/Documentation: .*$/, '');
+    }
+    return i18n.translate('xpack.workflows.monaco.elasticsearch.connector.fallbackDescription', {
+      defaultMessage: 'Execute {{method}} request to {{path}}',
+      values: {
+        method: requestInfo.method,
+        path: requestInfo.url,
+      },
+    });
   }
 
   /**
    * Get documentation URL for the connector type
    */
-  private getDocumentationUrl(connectorType: string): string | null {
+  private getDocumentationUrl(connector: InternalConnectorContract): string | null {
     try {
-      const allConnectors = getAllConnectors();
-      if (!allConnectors) {
-        return null;
-      }
-
-      const connector = allConnectors.find((c) => c.type === connectorType);
-
-      if (!connector || !isEnhancedInternalConnector(connector)) {
-        return null;
-      }
-
       if (connector.documentation) {
         // Similar to Console, replace version placeholders with current version
         let docUrl = connector.documentation;
@@ -307,5 +267,21 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // console.warn('ElasticsearchMonacoConnectorHandler: Error getting documentation URL', error);
       return null;
     }
+  }
+
+  /**
+   * Generate console format for the request
+   */
+  private generateConsoleFormat(
+    requestInfo: { method: string; url: string; data?: string[] },
+    withParams: Record<string, unknown>
+  ): string {
+    const lines = [`${requestInfo.method} ${requestInfo.url}`];
+
+    if (requestInfo.data && requestInfo.data.length > 0) {
+      lines.push(...requestInfo.data);
+    }
+
+    return lines.join('\n');
   }
 }

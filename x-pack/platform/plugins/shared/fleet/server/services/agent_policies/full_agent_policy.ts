@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
@@ -79,7 +77,7 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -114,7 +112,7 @@ export async function getFullAgentPolicy(
     fleetServerHost,
     monitoringOutput,
     downloadSource,
-    downloadSourceProxyUri,
+    downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -157,12 +155,15 @@ export async function getFullAgentPolicy(
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
-    agentPolicy.global_data_tags
+    agentPolicy.global_data_tags,
+    options?.agentVersion,
+    soClient,
+    agentPolicy.has_agent_version_conditions
   );
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput, packageInfoCache);
   }
 
   const inputs = agentInputs
@@ -228,7 +229,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -278,7 +279,8 @@ export async function getFullAgentPolicy(
     const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
     dataPermissionsByOutputId[outputId] = {
       _elastic_agent_checks: {
@@ -577,7 +579,6 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -600,7 +601,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
       compression_level,
@@ -608,7 +608,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -812,7 +811,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -834,16 +832,15 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
-  downloadSourceProxyUri: string | null
+  downloadSourceProxy: FleetProxy | undefined
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
-    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
   };
+
   if (downloadSource?.ssl) {
     config.ssl = {
       ...(downloadSource.ssl?.certificate_authorities && {
@@ -858,15 +855,82 @@ export function getBinarySourceSettings(
         }),
     };
   }
-  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
+
+  if (downloadSource?.auth) {
+    const authConfig: FullAgentPolicyDownload['auth'] = {};
+    if (downloadSource.auth.username) {
+      authConfig.username = downloadSource.auth.username;
+    }
+    if (
+      downloadSource.auth.password &&
+      typeof downloadSource?.secrets?.auth?.password !== 'object'
+    ) {
+      authConfig.password = downloadSource.auth.password;
+    }
+    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = downloadSource.auth.api_key;
+    }
+    // Filter out empty headers (both key and value are empty)
+    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
+      const filteredHeaders = downloadSource.auth.headers.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+      if (filteredHeaders.length > 0) {
+        authConfig.headers = filteredHeaders;
+      }
+    }
+    if (Object.keys(authConfig).length > 0) {
+      config.auth = authConfig;
+    }
+  }
+
   if (downloadSource?.secrets) {
-    config.secrets = {
-      ssl: {
-        ...(downloadSource.secrets?.ssl?.key && {
-          key: downloadSource.secrets.ssl.key,
-        }),
-      },
+    const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
+
+    if (downloadSource.secrets?.ssl?.key) {
+      secretsConfig.ssl = {
+        key: downloadSource.secrets.ssl.key,
+      };
+    }
+
+    if (downloadSource.secrets?.auth) {
+      const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
+      if (typeof downloadSource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      }
+      if (typeof downloadSource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      }
+      if (Object.keys(authSecretsConfig).length > 0) {
+        secretsConfig.auth = authSecretsConfig;
+      }
+    }
+
+    if (Object.keys(secretsConfig).length > 0) {
+      config.secrets = secretsConfig;
+    }
+  }
+
+  if (downloadSourceProxy) {
+    if (downloadSourceProxy.url) {
+      config.proxy_url = downloadSourceProxy.url;
+    }
+    if (downloadSourceProxy.proxy_headers) {
+      config.proxy_headers = downloadSourceProxy.proxy_headers;
+    }
+    // if the proxy is configured, get the ssl settings from it
+    config.ssl = {
+      ...(downloadSourceProxy?.certificate_authorities && {
+        certificate_authorities: [downloadSourceProxy.certificate_authorities],
+      }),
+      ...(downloadSourceProxy?.certificate && {
+        certificate: downloadSourceProxy.certificate,
+      }),
+      ...(downloadSourceProxy?.certificate_key && {
+        key: downloadSourceProxy?.certificate_key,
+      }),
     };
   }
+
   return config;
 }

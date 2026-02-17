@@ -19,3 +19,24 @@ export const MAX_ATTRIBUTES_ERROR = (length: number) =>
     values: { length },
     defaultMessage: 'A maximum of {length} additional fields can be defined at a time.',
   });
+
+export const CARD_TABLE_FIELD_COLUMN_NAME = i18n.translate(
+  'xpack.cases.connectors.connectorCard.table.propertyColumnName',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const CARD_TABLE_VALUE_COLUMN_NAME = i18n.translate(
+  'xpack.cases.connectors.connectorCard.table.valueColumnName',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const CARD_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.connectors.connectorCard.table.caption',
+  {
+    defaultMessage: 'Connector fields table',
+  }
+);

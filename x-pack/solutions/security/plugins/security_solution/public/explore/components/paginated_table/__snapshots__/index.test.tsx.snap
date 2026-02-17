@@ -143,6 +143,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                           </span>
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               color="subdued"
@@ -191,7 +192,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         data-test-subj="paginated-basic-table"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >
@@ -389,7 +390,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         </table>
       </div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+        class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"

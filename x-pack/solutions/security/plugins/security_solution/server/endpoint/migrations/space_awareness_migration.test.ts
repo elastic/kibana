@@ -31,7 +31,7 @@ import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_gener
 import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/types';
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -44,8 +44,6 @@ describe('Space awareness migration', () => {
 
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     migrationsState = {
       [ARTIFACTS_MIGRATION_REF_DATA_ID]: {
         id: ARTIFACTS_MIGRATION_REF_DATA_ID,
@@ -80,15 +78,6 @@ describe('Space awareness migration', () => {
     refDataMock.update.mockImplementation(async (id, data) => {
       return data;
     });
-  });
-
-  it('should do nothing if feature flag is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-
-    await expect(migrateEndpointDataToSupportSpaces(endpointServiceMock)).resolves.toBeUndefined();
-    expect(endpointServiceMock.getInternalFleetServices).not.toHaveBeenCalled();
-    expect(endpointServiceMock.getInternalEsClient).not.toHaveBeenCalled();
   });
 
   describe('for Artifacts', () => {
@@ -184,7 +173,7 @@ describe('Space awareness migration', () => {
     });
 
     it('should add the global artifact tag to endpoint exceptions', async () => {
-      findExceptionsResultData[0].list_id = ENDPOINT_LIST_ID;
+      findExceptionsResultData[0].list_id = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
       findExceptionsResultData[0].tags = [];
 
       await expect(

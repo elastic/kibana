@@ -12,6 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [require.resolve('./tests')],
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     servers: xPackAPITestsConfig.get('servers'),
     services: xPackAPITestsConfig.get('services'),
     junit: {
@@ -29,6 +30,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--logging.loggers[0].appenders=${JSON.stringify(['default'])}`,
         `--xpack.fleet.autoUpgrades.taskInterval=30s`,
         `--xpack.fleet.autoUpgrades.retryDelays=${JSON.stringify(['1m'])}`,
+        `--xpack.fleet.versionSpecificPolicyAssignment.taskInterval=30s`,
+        `--xpack.fleet.enableExperimental=${JSON.stringify(['enableVersionSpecificPolicies'])}`,
       ],
     },
   };

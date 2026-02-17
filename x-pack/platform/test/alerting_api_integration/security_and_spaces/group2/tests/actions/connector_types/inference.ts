@@ -148,7 +148,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
+                'error validating connector type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });
@@ -169,7 +169,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
+                'error validating connector type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -193,7 +193,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring OpenAI action: Error: error validating url: target url "http://genAi.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -213,7 +213,7 @@ export default function InferenceConnectorTest({ getService }: FtrProviderContex
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+                'error validating connector type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
       });

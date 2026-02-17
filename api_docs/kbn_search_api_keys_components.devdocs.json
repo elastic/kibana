@@ -14,6 +14,8 @@
           "({ onCancel, onSuccess, }: ApiKeyFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "ApiKeyFlyoutWrapperProps"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+            "lineNumber": 19,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -47,6 +51,8 @@
           "({ hasTitle }: ApiKeyFormProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +67,8 @@
               "ApiKeyFormProps"
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
+            "lineNumber": 30,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,6 +88,8 @@
           "() => UseSearchApiKeyParams"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/hooks/use_search_api_key.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -97,6 +107,8 @@
         "label": "Status",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

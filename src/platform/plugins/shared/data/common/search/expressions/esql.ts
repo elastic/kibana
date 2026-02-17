@@ -21,12 +21,18 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+  isComputedColumn,
+  getQuerySummary,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
-import { buildEsQuery, type Filter } from '@kbn/es-query';
+import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
@@ -54,10 +60,6 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // timezone?: string;
   timeField?: string;
   locale?: string;
 
@@ -111,15 +113,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'An ES|QL query.',
         }),
       },
-      // timezone: {
-      //   aliases: ['tz'],
-      //   types: ['string'],
-      //   default: 'UTC',
-      //   help: i18n.translate('data.search.esql.timezone.help', {
-      //     defaultMessage:
-      //       'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
-      //   }),
-      // },
       timeField: {
         aliases: ['timeField'],
         types: ['string'],
@@ -163,14 +156,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      {
-        query,
-        /* timezone, */ timeField,
-        locale,
-        titleForInspector,
-        descriptionForInspector,
-        ignoreGlobalFilters,
-      },
+      { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
@@ -191,17 +177,18 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           // and the query is not set with ?? in the query, we should set it
           // https://github.com/elastic/elasticsearch/pull/122459
           const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
+          const esQueryConfigs = getEsQueryConfig(
+            uiSettings as Parameters<typeof getEsQueryConfig>[0]
+          );
           const params: ESQLSearchParams = {
             query: fixedQuery,
-            // time_zone: timezone,
+            time_zone: esQueryConfigs.dateFormatTZ
+              ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
+              : 'UTC',
             locale,
             include_execution_metadata: true,
           };
           if (input) {
-            const esQueryConfigs = getEsQueryConfig(
-              uiSettings as Parameters<typeof getEsQueryConfig>[0]
-            );
-
             const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {
@@ -272,7 +259,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
+            {
+              abortSignal,
+              strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+              sessionId: getSearchSessionId(),
+              projectRouting: input?.projectRouting,
+            }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -319,6 +311,21 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         }),
                       },
                     }),
+                    ...(rawResponse &&
+                      'documents_found' in rawResponse && {
+                        documentsProcessed: {
+                          label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
+                            defaultMessage: 'Documents processed',
+                          }),
+                          value: rawResponse.documents_found,
+                          description: i18n.translate(
+                            'data.search.es_search.documentsProcessedDescription',
+                            {
+                              defaultMessage: 'The number of documents processed by the query.',
+                            }
+                          ),
+                        },
+                      }),
                   })
                   .json(params)
                   .ok({ json: { rawResponse }, requestParams });
@@ -358,8 +365,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             ? []
             : body.values;
 
+          // Get query summary to identify computed columns
+          const querySummary = getQuerySummary(query);
+
           const allColumns =
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
@@ -389,6 +398,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
+                isComputedColumn: isComputedColumn(name, querySummary),
               };
             }) ?? [];
 

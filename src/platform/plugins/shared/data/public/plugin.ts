@@ -31,7 +31,6 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
-import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import type { NowProviderInternalContract } from './now_provider';
 import { NowProvider } from './now_provider';
@@ -94,8 +93,6 @@ export class DataPublicPlugin
       nowProvider: this.nowProvider,
     });
 
-    uiActions.registerTrigger(applyFilterTrigger);
-
     inspector.registerView(
       getTableViewDescription(() => ({
         uiActions: startServices().plugins.uiActions,
@@ -138,7 +135,15 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: DataStartDependencies
+    {
+      uiActions,
+      fieldFormats,
+      dataViews,
+      inspector,
+      screenshotMode,
+      share,
+      cps,
+    }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, overlays } = core;
     setOverlays(overlays);
@@ -158,6 +163,7 @@ export class DataPublicPlugin
       screenshotMode,
       share,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
+      cps,
     });
     setSearchService(search);
 

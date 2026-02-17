@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EMPTY } from 'rxjs';
+import type {
+  AgentsServiceStartContract,
+  AttachmentServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/agent-builder-browser';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  ConversationFlyoutRef,
+} from './types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
+
+const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
+  return {};
+};
+
+export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContract>;
+export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
+export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
+
+export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
+  agents: AgentsServiceStartContractMock;
+  attachments: AttachmentServiceStartContractMock;
+  tools: ToolServiceStartContractMock;
+};
+
+const createAgentStartMock = (): AgentsServiceStartContractMock => {
+  return {
+    list: jest.fn(),
+  };
+};
+
+const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
+  return {
+    addAttachmentType: jest.fn(),
+    getAttachmentUiDefinition: jest.fn(),
+  };
+};
+
+const createToolStartMock = (): ToolServiceStartContractMock => {
+  return {
+    get: jest.fn(),
+    list: jest.fn(),
+    execute: jest.fn(),
+  };
+};
+
+const createStartContractMock = (): AgentBuilderPluginStartMock => {
+  return {
+    agents: createAgentStartMock(),
+    attachments: createAttachmentStartMock(),
+    tools: createToolStartMock(),
+    events: {
+      chat$: EMPTY,
+    },
+    setConversationFlyoutActiveConfig: jest.fn(),
+    clearConversationFlyoutActiveConfig: jest.fn(),
+    toggleConversationFlyout: jest.fn(),
+    openConversationFlyout: jest
+      .fn()
+      .mockImplementation((options: OpenConversationFlyoutOptions) => {
+        const mockFlyoutRef: ConversationFlyoutRef = {
+          close: jest.fn(),
+        };
+        return {
+          flyoutRef: mockFlyoutRef,
+        };
+      }),
+  };
+};
+
+export const agentBuilderMocks = {
+  createSetup: createSetupContractMock,
+  createStart: createStartContractMock,
+};

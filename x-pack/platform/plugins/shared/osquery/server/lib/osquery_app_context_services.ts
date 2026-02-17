@@ -26,6 +26,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
 import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
+import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
@@ -130,6 +131,7 @@ export class OsqueryAppContextService {
 export interface OsqueryAppContext {
   logFactory: LoggerFactory;
   config(): ConfigType;
+  experimentalFeatures: ExperimentalFeatures;
   security: SecurityPluginStart;
   getStartServices: CoreSetup['getStartServices'];
   telemetryEventsSender: TelemetryEventsSender;

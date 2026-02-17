@@ -41,7 +41,7 @@ describe('When on the endpoint exceptions page', () => {
     it('should show the Empty message', async () => {
       render();
       await waitFor(() =>
-        expect(renderResult.getByTestId('endpointExceptionsPage-emptyState')).toBeTruthy()
+        expect(renderResult.getByTestId('endpointExceptionsListPage-emptyState')).toBeTruthy()
       );
     });
   });
@@ -61,7 +61,7 @@ describe('When on the endpoint exceptions page', () => {
 
         await waitFor(() =>
           expect(
-            renderResult.queryByTestId('endpointExceptionsPage-emptyState-addButton')
+            renderResult.queryByTestId('endpointExceptionsListPage-emptyState-addButton')
           ).toBeTruthy()
         );
       });
@@ -80,11 +80,11 @@ describe('When on the endpoint exceptions page', () => {
         render();
 
         await waitFor(() =>
-          expect(renderResult.queryByTestId('endpointExceptionsPage-container')).toBeTruthy()
+          expect(renderResult.queryByTestId('endpointExceptionsListPage-container')).toBeTruthy()
         );
 
         expect(
-          renderResult.queryByTestId('endpointExceptionsPage-emptyState-addButton')
+          renderResult.queryByTestId('endpointExceptionsListPage-emptyState-addButton')
         ).toBeNull();
       });
     });

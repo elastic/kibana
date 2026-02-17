@@ -106,7 +106,7 @@ export const SettingsPage: React.FC = () => {
 
   const cannotEditNotice = canEdit ? null : (
     <>
-      <EuiCallOut title={Translations.settings.editNoticeTitle}>
+      <EuiCallOut announceOnMount title={Translations.settings.editNoticeTitle}>
         {Translations.settings.editNoticeText}
       </EuiCallOut>
       <EuiSpacer size="s" />

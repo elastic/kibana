@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -36,6 +36,7 @@
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/charts-theme",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

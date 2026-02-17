@@ -79,7 +79,8 @@ export class GenerateRequestHandler extends RequestHandler<
     // Schedule the report with Task Manager
     const task = await reporting.scheduleTask(req, report.toReportTaskJSON());
     logger.info(
-      `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
+      `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`,
+      { tags: [report._id] }
     );
 
     // Log the action with event log
@@ -97,10 +98,7 @@ export class GenerateRequestHandler extends RequestHandler<
       reporting.getUsageCounter()
     );
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
     }

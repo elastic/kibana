@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+
 export enum Languages {
   JAVA = 'java',
   JAVASCRIPT = 'javascript',
@@ -49,4 +51,9 @@ export interface LanguageDefinition {
     label: string;
   };
   languageStyling?: string;
+}
+
+export interface SearchApiPanelsServicesContext {
+  application: ApplicationStart;
+  uiSettings: IUiSettingsClient;
 }

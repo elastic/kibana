@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
-  FailureStore,
+  EffectiveFailureStore,
   FailureStoreStatsResponse,
   DataStreamWithFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -25,6 +25,7 @@ import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
@@ -45,7 +46,20 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
-    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
+    return {
+      dsl: {
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
+      },
+    };
   }
 
   if (dataStream.next_generation_managed_by === 'Unmanaged') {
@@ -116,7 +130,8 @@ export async function getUnmanagedElasticsearchAssets({
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
 
   return {
-    ingestPipeline: ingestPipelineId,
+    // Normalize empty string to undefined - empty string is not a valid pipeline reference
+    ingestPipeline: ingestPipelineId || undefined,
     componentTemplates,
     indexTemplate: templateName,
     dataStream: dataStream.name,
@@ -284,19 +299,24 @@ export async function getDataStream({
   return dataStream;
 }
 
-export async function getDefaultRetentionValue({
+export async function getClusterDefaultFailureStoreRetentionValue({
   scopedClusterClient,
+  isServerless,
 }: {
   scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
 }): Promise<string | undefined> {
   let defaultRetention: string | undefined;
   try {
-    const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
-      include_defaults: true,
-    });
-    const persistentDSRetention = persistent?.data_streams?.lifecycle?.retention?.failures_default;
-    const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
-    defaultRetention = persistentDSRetention ?? defaultsDSRetention;
+    if (!isServerless) {
+      const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
+        include_defaults: true,
+      });
+      const persistentDSRetention =
+        persistent?.data_streams?.lifecycle?.retention?.failures_default;
+      const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
+      defaultRetention = persistentDSRetention ?? defaultsDSRetention;
+    }
   } catch (e) {
     if (e.meta?.statusCode === 403) {
       // if user doesn't have permissions to read cluster settings, we just return undefined
@@ -307,35 +327,40 @@ export async function getDefaultRetentionValue({
   return defaultRetention;
 }
 
-export async function getFailureStore({
-  name,
-  scopedClusterClient,
-  isServerless,
+export function getFailureStore({
+  dataStream,
 }: {
-  name: string;
-  scopedClusterClient: IScopedClusterClient;
-  isServerless: boolean;
-}): Promise<FailureStore> {
-  // TODO: remove DataStreamWithFailureStore here and in streams-schema once failure store is added to the IndicesDataStream type
-  const dataStream = (await getDataStream({
-    name,
-    scopedClusterClient,
-  })) as DataStreamWithFailureStore;
+  dataStream: DataStreamWithFailureStore | null;
+}): EffectiveFailureStore {
+  if (!dataStream) {
+    return { disabled: {} };
+  }
 
-  const defaultRetentionPeriod =
-    dataStream.failure_store?.lifecycle?.retention_determined_by === 'default_failures_retention'
-      ? dataStream.failure_store?.lifecycle?.effective_retention
-      : isServerless
-      ? undefined
-      : await getDefaultRetentionValue({ scopedClusterClient });
+  if (dataStream.failure_store?.enabled) {
+    const lifecycle = dataStream.failure_store?.lifecycle;
 
-  return {
-    enabled: !!dataStream.failure_store?.enabled,
-    retentionPeriod: {
-      custom: dataStream.failure_store?.lifecycle?.data_retention,
-      default: defaultRetentionPeriod,
-    },
-  };
+    if (lifecycle?.enabled) {
+      const isDefaultRetention = lifecycle.retention_determined_by === 'default_failures_retention';
+      const dataRetention = isDefaultRetention
+        ? lifecycle.effective_retention
+        : lifecycle.data_retention;
+
+      return {
+        lifecycle: {
+          enabled: {
+            ...(dataRetention ? { data_retention: dataRetention } : {}),
+            is_default_retention: isDefaultRetention,
+          },
+        },
+      };
+    }
+
+    return {
+      lifecycle: { disabled: {} },
+    };
+  }
+
+  return { disabled: {} };
 }
 
 export async function getFailureStoreStats({
@@ -440,37 +465,5 @@ export async function getFailureStoreCreationDate({
     } else {
       throw e;
     }
-  }
-}
-
-export async function updateFailureStore({
-  name,
-  enabled,
-  customRetentionPeriod,
-  scopedClusterClient,
-  isServerless,
-}: {
-  name: string;
-  enabled: boolean;
-  customRetentionPeriod?: string;
-  scopedClusterClient: IScopedClusterClient;
-  isServerless: boolean;
-}): Promise<void> {
-  try {
-    await scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
-      {
-        name,
-        failure_store: {
-          enabled,
-          lifecycle: {
-            data_retention: customRetentionPeriod,
-            ...(isServerless ? {} : { enabled }),
-          },
-        },
-      },
-      { meta: true }
-    );
-  } catch (error) {
-    throw new Error(`Failed to update failure store for stream "${name}": ${error}`);
   }
 }

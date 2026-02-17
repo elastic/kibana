@@ -6,8 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
-import { transformGetAllConnectorsResponseV2 } from './transforms';
+import {
+  getAllConnectorsResponseSchemaV1,
+  type GetAllConnectorsResponseV1,
+} from '../../../../common/routes/connector/response';
+import { transformGetAllConnectorsResponseV1 } from './transforms';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
@@ -26,17 +29,27 @@ export const getAllConnectorsRoute = (
         access: 'public',
         summary: `Get all connectors`,
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
-      validate: {},
+      validate: {
+        request: {},
+        response: {
+          200: {
+            body: () => getAllConnectorsResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
 
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV2(result);
+        const responseBody: GetAllConnectorsResponseV1 =
+          transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
     )

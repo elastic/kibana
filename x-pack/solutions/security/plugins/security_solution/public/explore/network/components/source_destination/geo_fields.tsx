@@ -10,7 +10,7 @@ import { get, uniq } from 'lodash/fp';
 import React from 'react';
 import styled from '@emotion/styled';
 
-import { DefaultDraggable } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { CountryFlag } from './country_flag';
 import type { GeoFieldsProps, SourceDestinationType } from './types';
@@ -89,11 +89,9 @@ const GeoFieldValues = React.memo<{
             ) : null}
 
             <EuiFlexItem grow={false}>
-              <DefaultDraggable
+              <CellActionsRenderer
                 scopeId={scopeId}
-                data-test-subj={fieldName}
                 field={fieldName}
-                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
                 tooltipContent={fieldName}
                 value={value}
               />

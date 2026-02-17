@@ -13,9 +13,18 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./delete_slo'));
     loadTestFile(require.resolve('./get_slo'));
     loadTestFile(require.resolve('./find_slo'));
-    loadTestFile(require.resolve('./find_slo_definition'));
+    loadTestFile(require.resolve('./find_slo_definitions'));
     loadTestFile(require.resolve('./reset_slo'));
     loadTestFile(require.resolve('./update_slo'));
     loadTestFile(require.resolve('./bulk_delete'));
+    loadTestFile(require.resolve('./repair_slo'));
+    loadTestFile(require.resolve('./purge_instances'));
+    loadTestFile(require.resolve('./slo_settings'));
+    loadTestFile(require.resolve('./find_slo_instances'));
+    loadTestFile(require.resolve('./get_slo_template'));
+    loadTestFile(require.resolve('./find_slo_templates'));
+    loadTestFile(require.resolve('./health_scan'));
+    loadTestFile(require.resolve('./search_slo_definitions'));
+    loadTestFile(require.resolve('./get_slo_grouped_stats'));
   });
 }

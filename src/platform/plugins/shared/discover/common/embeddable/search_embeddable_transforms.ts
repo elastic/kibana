@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import { extractTabs } from '@kbn/saved-search-plugin/common';
-import type { SearchEmbeddableSerializedState } from '../../public';
+import type { DrilldownTransforms, EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
+import type { SearchEmbeddableState, StoredSearchEmbeddableState } from './types';
+import { getTransformIn } from './get_transform_in';
+import { getTransformOut } from './get_transform_out';
 
-export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
-  transformOut: (state) => {
-    if (!state.attributes) return state;
-    const attributes = extractTabs(state.attributes);
-    return { ...state, attributes };
-  },
-};
+export function getSearchEmbeddableTransforms(
+  drilldownTransforms: DrilldownTransforms
+): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddableState> {
+  return {
+    transformIn: getTransformIn(drilldownTransforms.transformIn),
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
+  };
+}

@@ -62,7 +62,7 @@ export const secAll: Role = {
     kibana: [
       {
         feature: {
-          siemV4: ['all'],
+          siemV5: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -100,7 +100,7 @@ export const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV4: ['read'],
+          siemV5: ['read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -137,7 +137,7 @@ export const secAllCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV4: ['all'],
+          siemV5: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -174,7 +174,7 @@ export const secAllCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV4: ['all'],
+          siemV5: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -195,6 +195,99 @@ export const secAllCasesNoDeleteUser: User = {
   username: 'sec_all_cases_no_delete_user',
   password: 'password',
   roles: [secAllCasesNoDelete.name],
+};
+
+export const rulesAll: Role = {
+  name: 'rules_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV2: ['all', 'security_solution_exceptions_all'],
+          actions: ['all'],
+          indexPatterns: ['all'],
+          savedObjectManagement: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesAllWithCases: Role = {
+  name: 'rules_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV2: ['all', 'security_solution_exceptions_all'],
+          actions: ['all'],
+          indexPatterns: ['all'],
+          savedObjectManagement: ['all'],
+          securitySolutionCasesV3: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesRead: Role = {
+  name: 'rules_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV2: ['read'],
+          savedObjectManagement: ['all'],
+          indexPatterns: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const rulesAllUser: User = {
+  username: 'rules_all_user',
+  password: 'password',
+  roles: [rulesAll.name],
+};
+
+export const rulesAllWithCasesUser: User = {
+  username: 'rules_all_with_cases_user',
+  password: 'password',
+  roles: [rulesAllWithCases.name],
+};
+
+export const rulesReadUser: User = {
+  username: 'rules_read_user',
+  password: 'password',
+  roles: [rulesRead.name],
 };
 
 const getUserInfo = (user: User): UserInfo => ({

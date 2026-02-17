@@ -96,7 +96,7 @@ export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | nul
       const newSearch = encodeQueryString(urlParams);
 
       if (getQueryStringFromLocation(search) !== newSearch) {
-        history.replace({ search: newSearch });
+        history.replace({ search: newSearch, state: history.location.state });
       }
     },
     [history]

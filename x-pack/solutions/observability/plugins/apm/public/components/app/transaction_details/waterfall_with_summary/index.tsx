@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -24,7 +25,8 @@ import { TransactionTabs } from './transaction_tabs';
 import type { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
-import { OpenInDiscoverButton } from '../../../shared/links/discover_links/open_in_discover_button';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -40,6 +42,11 @@ interface Props<TSample extends {}> {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
+  logsTableConfig?: SavedSearchTableConfig;
+  onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  rangeFrom: string;
+  rangeTo: string;
+  queryParams?: ESQLQueryParams;
 }
 
 export function WaterfallWithSummary<TSample extends {}>({
@@ -56,6 +63,11 @@ export function WaterfallWithSummary<TSample extends {}>({
   showCriticalPath,
   onShowCriticalPathChange,
   selectedSample,
+  logsTableConfig,
+  onLogsTableConfigChange,
+  rangeFrom,
+  rangeTo,
+  queryParams,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -148,7 +160,18 @@ export function WaterfallWithSummary<TSample extends {}>({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <OpenInDiscoverButton dataTestSubj="apmWaterfallOpenInDiscoverButton" />
+                <OpenInDiscover
+                  variant="button"
+                  dataTestSubj="apmWaterfallOpenInDiscoverButton"
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{
+                    ...queryParams,
+                    serviceName,
+                    environment,
+                  }}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
@@ -184,6 +207,8 @@ export function WaterfallWithSummary<TSample extends {}>({
           isLoading={isLoading}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
+          logsTableConfig={logsTableConfig}
+          onLogsTableConfigChange={onLogsTableConfigChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

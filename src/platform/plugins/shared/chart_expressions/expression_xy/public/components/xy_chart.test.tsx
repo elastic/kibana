@@ -72,7 +72,7 @@ import type {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
@@ -1622,7 +1622,7 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
   });
 
-  test('legendAction is not triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
+  test('legendAction is triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
     const { args } = sampleArgs();
 
     const newArgs = {
@@ -1651,7 +1651,7 @@ describe('XYChart component', () => {
     };
     const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
 
-    expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
+    expect(wrapper.find(Settings).first().prop('legendAction')).toBeDefined();
   });
 
   test('legendAction is triggering event on ES|QL charts when unified search is on ES|QL mode', () => {
@@ -2073,7 +2073,7 @@ describe('XYChart component', () => {
         })
       ).toEqual('#FEECDF');
     });
-    test('color is not applied to chart when splitAccessor is defined or when decorations is not configured', () => {
+    test('color is not applied to chart when splitAccessors is defined or when decorations is not configured', () => {
       const newArgs: XYProps = {
         ...args,
         layers: [

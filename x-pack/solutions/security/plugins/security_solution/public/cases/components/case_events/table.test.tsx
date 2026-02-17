@@ -7,13 +7,24 @@
 
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { EventsTableForCases } from './table';
+import {
+  EMPTY_EVENTS_TABLE_FOR_CASES_ID,
+  EventsTableForCases,
+  LOADING_EVENTS_TABLE_FOR_CASES_ID,
+} from './table';
 import { TestProviders } from '../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { searchEvents } from './search_events';
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 
@@ -60,13 +71,25 @@ describe('EventsTableForCases', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+    // renders loading initially
+    expect(screen.getByTestId(LOADING_EVENTS_TABLE_FOR_CASES_ID)).toBeInTheDocument();
 
     // Check if value cells are displayed at all
     await waitFor(() => {
+      expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+
       const cells = screen.getAllByTestId('dataGridRowCell');
 
       expect(cells.length).toBeGreaterThan(2);
+    });
+  });
+
+  it('renders empty state for no events', async () => {
+    jest.mocked(searchEvents).mockResolvedValue([]);
+    render(<EventsTableForCases events={[]} />, { wrapper: TestProviders });
+
+    await waitFor(() => {
+      expect(screen.getByTestId(EMPTY_EVENTS_TABLE_FOR_CASES_ID)).toBeInTheDocument();
     });
   });
 

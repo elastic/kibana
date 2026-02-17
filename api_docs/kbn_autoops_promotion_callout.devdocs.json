@@ -27,25 +27,41 @@
         "label": "AutoOpsPromotionCallout",
         "description": [],
         "signature": [
-          "({ ...overrideCalloutProps }: ",
-          "EuiCallOutProps",
+          "({ learnMoreLink, cloudConnectUrl, onConnectClick, hasCloudConnectPermission, overrideCalloutProps, }: ",
+          {
+            "pluginId": "@kbn/autoops-promotion-callout",
+            "scope": "common",
+            "docId": "kibKbnAutoopsPromotionCalloutPluginApi",
+            "section": "def-common.AutoOpsPromotionCalloutProps",
+            "text": "AutoOpsPromotionCalloutProps"
+          },
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/autoops-promotion-callout",
             "id": "def-common.AutoOpsPromotionCallout.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  ...overrideCalloutProps\n}",
+            "label": "{\n  learnMoreLink,\n  cloudConnectUrl = '/app/cloud_connect',\n  onConnectClick,\n  hasCloudConnectPermission,\n  overrideCalloutProps = {},\n}",
             "description": [],
             "signature": [
-              "EuiCallOutProps"
+              {
+                "pluginId": "@kbn/autoops-promotion-callout",
+                "scope": "common",
+                "docId": "kibKbnAutoopsPromotionCalloutPluginApi",
+                "section": "def-common.AutoOpsPromotionCalloutProps",
+                "text": "AutoOpsPromotionCalloutProps"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 25,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,28 +71,125 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+    "interfaces": [
       {
         "parentPluginId": "@kbn/autoops-promotion-callout",
         "id": "def-common.AutoOpsPromotionCalloutProps",
-        "type": "Type",
+        "type": "Interface",
         "tags": [],
         "label": "AutoOpsPromotionCalloutProps",
         "description": [],
-        "signature": [
-          "CommonProps",
-          " & Omit<React.HTMLAttributes<HTMLDivElement>, \"title\" | \"color\"> & { title?: React.ReactNode; iconType?: ",
-          "IconType",
-          " | undefined; color?: \"success\" | \"warning\" | \"primary\" | \"accent\" | \"danger\" | undefined; size?: \"m\" | \"s\" | undefined; heading?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; onDismiss?: (() => void) | undefined; announceOnMount?: boolean | undefined; }"
-        ],
         "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCalloutProps.learnMoreLink",
+            "type": "string",
+            "tags": [],
+            "label": "learnMoreLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCalloutProps.cloudConnectUrl",
+            "type": "string",
+            "tags": [],
+            "label": "cloudConnectUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCalloutProps.onConnectClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onConnectClick",
+            "description": [],
+            "signature": [
+              "((e: React.MouseEvent<Element, MouseEvent>) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/autoops-promotion-callout",
+                "id": "def-common.AutoOpsPromotionCalloutProps.onConnectClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<Element, MouseEvent>"
+                ],
+                "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+                "lineNumber": 18,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCalloutProps.hasCloudConnectPermission",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasCloudConnectPermission",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCalloutProps.overrideCalloutProps",
+            "type": "Object",
+            "tags": [],
+            "label": "overrideCalloutProps",
+            "description": [],
+            "signature": [
+              "Partial<Omit<",
+              "EuiCallOutProps",
+              ", \"children\" | \"title\" | \"onDismiss\">> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

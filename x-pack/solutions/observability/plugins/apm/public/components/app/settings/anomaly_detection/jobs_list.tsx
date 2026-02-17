@@ -135,7 +135,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
-              <MLManageJobsLink>
+              <MLManageJobsLink dataTestSubj="apmMLManageJobsTextLink">
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {

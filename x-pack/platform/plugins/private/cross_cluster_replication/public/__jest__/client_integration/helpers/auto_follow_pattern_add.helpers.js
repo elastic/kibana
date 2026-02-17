@@ -10,6 +10,10 @@ import { AutoFollowPatternAdd } from '../../../app/sections/auto_follow_pattern_
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+/**
+ * @param {object} [props]
+ * @returns {ReturnType<typeof renderWithRouter>}
+ */
 export const setup = (props = {}) => {
   return renderWithRouter(AutoFollowPatternAdd, {
     store: createCrossClusterReplicationStore(),

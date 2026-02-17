@@ -24,13 +24,12 @@ export const isAgentTypeAndActionSupported = (
 ): boolean => {
   const features = ExperimentalFeaturesService.get();
   const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
-  const isMicrosoftDefenderEndpointEnabled = features.responseActionsMSDefenderEndpointEnabled;
 
   const isAgentTypeSupported =
     agentType === 'endpoint' ||
     agentType === 'sentinel_one' ||
     agentType === 'crowdstrike' ||
-    (agentType === 'microsoft_defender_endpoint' && isMicrosoftDefenderEndpointEnabled);
+    agentType === 'microsoft_defender_endpoint';
 
   let isActionNameSupported: boolean =
     !actionName || isActionSupportedByAgentType(agentType, actionName, actionType);

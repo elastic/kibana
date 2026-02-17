@@ -9,6 +9,12 @@
 
 export * from './components/code_box';
 export * from './components/github_link';
+export * from './components/eis_promotional_tour';
+export * from './components/eis_promotional_callout';
+export * from './components/inference_costs_transparency_tour';
+export * from './components/eis_update_callout';
+export * from './components/eis_ccm_promotional_tour';
+export * from './components/eis_ccm_promotional_callout';
 
 export * from './types';
 export * from './utils';

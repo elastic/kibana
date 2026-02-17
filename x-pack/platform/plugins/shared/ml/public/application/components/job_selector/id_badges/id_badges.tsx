@@ -13,6 +13,7 @@ import type { GroupObj } from '../job_selector';
 import { AnomalyDetectionInfoButton } from '../group_or_job_selector_menu/job_selector_button';
 import type { MlPages } from '../../../../../common/constants/locator';
 import type { MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { ExplorerJob } from '../../../explorer/explorer_utils';
 
 export interface IdBadgesProps {
   limit: number;
@@ -22,7 +23,7 @@ export interface IdBadgesProps {
   showAllBarBadges: boolean;
   page: MlPages;
   onRemoveJobId: (jobOrGroupId: string[]) => void;
-  selectedJobs: MlSummaryJob[];
+  selectedJobs: MlSummaryJob[] | ExplorerJob[];
 }
 
 export function IdBadges({
