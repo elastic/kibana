@@ -15,6 +15,7 @@ import {
   expectedServiceEntities,
   expectedUserEntities,
 } from '../fixtures/entity_extraction_expected';
+import { forceLogExtraction, ingestDoc, searchDocById } from '../fixtures/helpers';
 
 apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -189,5 +190,176 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
+  });
+
+  apiTest('Should properly handle field retention strategies', async ({ apiClient, esClient }) => {
+    // Ingest a document without sub_type
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:00:00Z',
+      user: {
+        id: 'latest-test',
+        name: 'latest-test-name',
+      },
+    });
+
+    const firstExtractionResponse = await forceLogExtraction(
+      apiClient,
+      defaultHeaders,
+      'user',
+      '2026-02-13T10:59:00Z',
+      '2026-02-13T11:01:00Z'
+    );
+    expect(firstExtractionResponse.statusCode).toBe(200);
+    expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
+
+    const beforeSubType = await searchDocById(esClient, 'user:latest-test');
+    expect(beforeSubType.hits.hits).toHaveLength(1);
+    expect(beforeSubType.hits.hits[0]._source).toMatchObject({
+      '@timestamp': '2026-02-13T11:00:00.000Z',
+      'entity.id': 'user:latest-test',
+      'entity.type': 'Identity',
+      'entity.name': 'latest-test-name',
+    });
+
+    // Add sub_type to the document
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:01:00Z',
+      user: {
+        id: 'latest-test',
+        hash: ['hash-1', 'hash-2'],
+        entity: {
+          sub_type: 'Sub Type 1',
+        },
+      },
+    });
+
+    const secondExtractionResponse = await forceLogExtraction(
+      apiClient,
+      defaultHeaders,
+      'user',
+      '2026-02-13T11:00:00Z',
+      '2026-02-13T11:02:00Z'
+    );
+    expect(secondExtractionResponse.statusCode).toBe(200);
+    expect(secondExtractionResponse.body).toMatchObject({ count: 1 });
+
+    const afterSubType = await searchDocById(esClient, 'user:latest-test');
+    expect(afterSubType.hits.hits).toHaveLength(1);
+    expect(afterSubType.hits.hits[0]._source).toMatchObject({
+      '@timestamp': '2026-02-13T11:01:00.000Z',
+      'entity.id': 'user:latest-test',
+      'entity.type': 'Identity',
+      'entity.name': 'latest-test-name',
+      'entity.sub_type': 'Sub Type 1',
+      'user.hash': ['hash-1', 'hash-2'],
+    });
+
+    // Update sub_type in between documents with null values
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:02:01Z',
+      user: {
+        id: 'latest-test',
+        entity: {
+          sub_type: 'Sub Type 2',
+        },
+      },
+    });
+
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:02:02Z',
+      user: {
+        id: 'latest-test',
+        hash: ['hash-3', 'hash-4'],
+        entity: {
+          // no sub_type
+        },
+      },
+    });
+
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:02:03Z',
+      user: {
+        id: 'latest-test',
+        hash: ['hash-1', 'hash-3'], // add duplicated hashes
+        entity: {
+          sub_type: 'Sub Type 3',
+        },
+      },
+    });
+
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:02:04Z',
+      user: {
+        id: 'latest-test',
+        hash: ['hash-5'],
+        entity: {
+          // no sub_type
+        },
+      },
+    });
+
+    const thirdExtractionResponse = await forceLogExtraction(
+      apiClient,
+      defaultHeaders,
+      'user',
+      '2026-02-13T11:01:00Z',
+      '2026-02-13T11:03:00Z'
+    );
+    expect(thirdExtractionResponse.statusCode).toBe(200);
+    expect(thirdExtractionResponse.body).toMatchObject({ count: 1 });
+
+    const updatedSubType = await searchDocById(esClient, 'user:latest-test');
+    expect(updatedSubType.hits.hits).toHaveLength(1);
+    expect(updatedSubType.hits.hits[0]._source).toMatchObject({
+      '@timestamp': '2026-02-13T11:02:04.000Z',
+      'entity.id': 'user:latest-test',
+      'entity.type': 'Identity',
+      'entity.name': 'latest-test-name',
+      'entity.sub_type': 'Sub Type 3',
+      'user.hash': ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'],
+    });
+
+    // Make sure latest is not overwritten from the document if not changed
+    await ingestDoc(esClient, {
+      '@timestamp': '2026-02-13T11:03:00Z',
+      user: {
+        id: 'latest-test',
+        domain: 'example.com',
+        hash: ['hash-6', 'hash-7', 'hash-8', 'hash-9', 'hash-10', 'hash-11'],
+      },
+    });
+
+    const fourthExtractionResponse = await forceLogExtraction(
+      apiClient,
+      defaultHeaders,
+      'user',
+      '2026-02-13T11:02:00Z',
+      '2026-02-13T11:04:00Z'
+    );
+    expect(fourthExtractionResponse.statusCode).toBe(200);
+    expect(fourthExtractionResponse.body).toMatchObject({ count: 1 });
+
+    const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test');
+    expect(updatedLatestDomain.hits.hits).toHaveLength(1);
+    expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
+      '@timestamp': '2026-02-13T11:03:00.000Z',
+      'entity.id': 'user:latest-test',
+      'entity.type': 'Identity',
+      'entity.name': 'latest-test-name',
+      'entity.sub_type': 'Sub Type 3',
+      'user.hash': [
+        'hash-1',
+        'hash-10',
+        'hash-11',
+        'hash-3',
+        'hash-4',
+        'hash-5',
+        'hash-6',
+        'hash-7',
+        'hash-8',
+        'hash-2',
+      ],
+      'user.domain': 'example.com',
+    });
   });
 });

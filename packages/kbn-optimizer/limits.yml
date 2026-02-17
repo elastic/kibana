@@ -11,7 +11,7 @@ pageLoadAssetSize:
   automaticImport: 12162
   automaticImportVTwo: 13752
   banners: 4087
-  canvas: 15142
+  canvas: 14881
   cases: 225900
   charts: 40269
   cloud: 10648
@@ -21,16 +21,17 @@ pageLoadAssetSize:
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
-  cloudSecurityPosture: 19745
+  cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 10786
+  controls: 10300
   core: 556473
   cps: 5930
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
+  dashboardAgent: 5135
   dashboardMarkdown: 4994
   data: 494465
   dataQuality: 11469
@@ -44,16 +45,16 @@ pageLoadAssetSize:
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28131
-  discoverEnhanced: 5660
+  discover: 28284
+  discoverEnhanced: 5517
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 16638
   embeddableAlertsTable: 6524
-  enterpriseSearch: 40244
+  enterpriseSearch: 37566
   entityStore: 71717
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -77,12 +78,12 @@ pageLoadAssetSize:
   fleet: 209495
   genAiSettings: 5663
   globalSearch: 6890
-  globalSearchBar: 26986
+  globalSearchBar: 26330
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
   home: 13091
-  imageEmbeddable: 6668
+  imageEmbeddable: 6325
   indexLifecycleManagement: 29818
   indexManagement: 35522
   inference: 10368
@@ -107,16 +108,16 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 8783
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 6734
-  metricsDataAccess: 44988
+  metricsDataAccess: 44950
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
   navigation: 12376
-  newsfeed: 12371
+  newsfeed: 11369
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 7077
@@ -148,7 +149,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6682
+  searchGettingStarted: 6678
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071
@@ -163,9 +164,9 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
-  serverlessObservability: 19472
+  serverlessObservability: 18343
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 7718
+  serverlessWorkplaceAI: 5078
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -207,6 +208,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52268
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 21318
-  workplaceAIApp: 65731
+  workplaceAIApp: 65547
