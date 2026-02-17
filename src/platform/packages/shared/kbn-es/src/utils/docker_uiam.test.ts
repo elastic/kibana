@@ -37,7 +37,6 @@ jest.mock('../paths', () => ({
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
 }));
 
-
 beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
   jest.resetAllMocks();
