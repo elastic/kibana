@@ -29,16 +29,4 @@ export class Navigation {
   getBreadcrumbByText(text: string) {
     return this.page.locator('.euiBreadcrumb', { hasText: text });
   }
-
-  getFeedbackCallout() {
-    return this.page.testSubj.locator('feedbackSnippetPanel');
-  }
-
-  getFeedbackDismissButton() {
-    return this.page.testSubj.locator('sideNavigationFeedbackPanelDismiss');
-  }
-
-  getFeedbackButtonSurveyLink() {
-    return this.page.testSubj.locator('sideNavigationFeedbackButtonSurveyLink');
-  }
 }

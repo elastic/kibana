@@ -82,23 +82,6 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
   });
 
-  test('renders a feedback callout', async ({ page, pageObjects, browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.navigation.goToSecurity();
-
-    await page.evaluate(() => {
-      localStorage.removeItem('sideNavigationFeedback');
-    });
-    await page.reload();
-
-    await expect(pageObjects.navigation.getFeedbackCallout()).toBeVisible();
-    await pageObjects.navigation.getFeedbackDismissButton().click();
-    await expect(pageObjects.navigation.getFeedbackButtonSurveyLink()).toBeVisible();
-
-    await page.reload();
-    await expect(pageObjects.navigation.getFeedbackButtonSurveyLink()).toBeVisible();
-  });
-
   test('opens panel on legacy management landing page', async ({
     page,
     pageObjects,
