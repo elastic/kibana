@@ -592,9 +592,14 @@ export const interactiveModeMachine = setup({
               {
                 guard: ({ event }) =>
                   event.output.status === TaskStatus.InProgress ||
-                  event.output.status === TaskStatus.NotStarted ||
-                  event.output.status === TaskStatus.BeingCanceled,
+                  event.output.status === TaskStatus.NotStarted,
                 target: 'waitingForCompletion',
+              },
+              {
+                // BeingCanceled: task is being canceled, go to idle without showing loading screen
+                guard: ({ event }) => event.output.status === TaskStatus.BeingCanceled,
+                target: 'idle',
+                actions: [{ type: 'clearSuggestionPollingDeadline' }],
               },
               {
                 target: 'idle',

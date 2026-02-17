@@ -326,4 +326,118 @@ describe('interactive mode pipeline suggestion polling', () => {
 
     actor.stop();
   });
+
+  it('goes to idle state when task is BeingCanceled (no loading screen)', async () => {
+    jest.useFakeTimers();
+
+    // First return InProgress, then BeingCanceled to simulate user canceling
+    let statusCallCount = 0;
+    const getPipelineSuggestionStatusMock = jest.fn(async () => {
+      statusCallCount += 1;
+      if (statusCallCount === 1) {
+        return { status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult;
+      }
+      // After first poll, task is being canceled
+      return { status: TaskStatus.BeingCanceled } as PipelineSuggestionTaskStatusResult;
+    });
+
+    const testMachine = interactiveModeMachine.provide({
+      actors: {
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => ({ type: 'none' as const })),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => getPipelineSuggestionStatusMock()),
+      },
+    });
+
+    const input = {
+      dsl: { steps: [] } as unknown as StreamlangDSL,
+      newStepIds: [],
+      parentRef: createParentRef(),
+      privileges: { manage: true, simulate: true },
+      simulationMode: 'complete' as const,
+      streamName: 'logs-generic-default',
+      grokCollection: {} as GrokCollection,
+    };
+
+    const actor = createActor(testMachine, { input });
+    actor.start();
+
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    actor.send({ type: 'suggestion.generate', connectorId: 'connector-1' });
+
+    // First poll returns InProgress, so we wait
+    await waitForMatch(actor, 'pipelineSuggestion.waitingForCompletion');
+    expect(getPipelineSuggestionStatusMock).toHaveBeenCalledTimes(1);
+
+    // Advance timer to trigger second poll
+    await jest.advanceTimersByTimeAsync(2000);
+    await settleActor();
+    expect(getPipelineSuggestionStatusMock).toHaveBeenCalledTimes(2);
+
+    // When BeingCanceled is detected, machine should go directly to idle (no loading screen)
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+
+    // Verify no more polling happens after going to idle
+    await jest.advanceTimersByTimeAsync(10000);
+    await settleActor();
+    expect(getPipelineSuggestionStatusMock).toHaveBeenCalledTimes(2);
+
+    actor.stop();
+  });
+
+  it('goes to idle state when loading existing suggestion returns being_canceled', async () => {
+    jest.useFakeTimers();
+
+    // loadExistingSuggestion returns being_canceled (task was canceled before page load)
+    const loadExistingSuggestionMock = jest.fn(async () => ({
+      type: 'being_canceled' as const,
+    }));
+
+    const testMachine = interactiveModeMachine.provide({
+      actors: {
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => loadExistingSuggestionMock()),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => ({ status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult)),
+      },
+    });
+
+    const input = {
+      dsl: { steps: [] } as unknown as StreamlangDSL,
+      newStepIds: [],
+      parentRef: createParentRef(),
+      privileges: { manage: true, simulate: true },
+      simulationMode: 'complete' as const,
+      streamName: 'logs-generic-default',
+      grokCollection: {} as GrokCollection,
+    };
+
+    const actor = createActor(testMachine, { input });
+    actor.start();
+
+    // Machine should start in loadingExistingSuggestion, then go to idle when being_canceled
+    // (not waitingForCompletion, which would show loading screen)
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+
+    expect(loadExistingSuggestionMock).toHaveBeenCalledTimes(1);
+
+    actor.stop();
+  });
 });
