@@ -27,6 +27,8 @@ const mockDataView = {
   getFieldByName: (name: string) => ({ id: name }),
   getFormatterForField: (name: string) => ({
     convert: (value: string) => value,
+    convertToReact: () => undefined,
+    hasReactSupport: () => false,
   }),
 } as any;
 
