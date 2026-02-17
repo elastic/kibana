@@ -212,4 +212,33 @@ describe('getContextSchemaWithTemplateLocals', () => {
     const result = getContextSchemaWithTemplateLocals(doc, scalarStart, DynamicStepContextSchema);
     expect(result).toBe(DynamicStepContextSchema);
   });
+
+  it.each([
+    '"a | b"',
+    "'a | b'",
+    "'a | b' | upcase",
+    "'a | b' | json_parse | upcase",
+    "'a | b' | split: '| '",
+  ])('should be resilient to pipe within RHS quoted strings: %s', (expression) => {
+    const templateString = `{% assign x = ${expression} %}{{ x }}`;
+    const scalarStart = 10;
+    // For QUOTE_DOUBLE range[0] is the opening quote; the value starts at scalarStart + 1.
+    const valueEnd = scalarStart + 1 + templateString.length;
+    const nodeEnd = valueEnd + 1; // closing quote
+    mockGetScalarValueAtOffset.mockReturnValue({
+      value: templateString,
+      type: 'QUOTE_DOUBLE',
+      range: [scalarStart, valueEnd, nodeEnd],
+    } as any);
+    // Place the cursor inside the {{ x }} output tag so offsetInTemplate lands
+    // after the assign and the pipe-in-quotes RHS is fully parsed.
+    const offsetInContent = templateString.indexOf('{{ x }}') + 3;
+    const offsetInDoc = scalarStart + 1 + offsetInContent;
+    const doc = {} as Document;
+    const result = getContextSchemaWithTemplateLocals(doc, offsetInDoc, DynamicStepContextSchema);
+    const shape = getShape(result);
+    expect(shape).toHaveProperty('x');
+    expect(shape.x).toBeDefined();
+    expect(shape.x instanceof z.ZodString).toBe(true);
+  });
 });

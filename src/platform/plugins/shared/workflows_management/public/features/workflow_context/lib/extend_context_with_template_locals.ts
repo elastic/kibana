@@ -49,6 +49,22 @@ function isExpressionString(expression: string): boolean {
 }
 
 /**
+ * Matches quoted strings (to skip them) or an unquoted pipe character.
+ * The first two alternatives consume entire quoted strings so the pipe
+ * in the capturing group can only match outside quotes.
+ */
+const QUOTED_OR_PIPE = /"[^"]*"|'[^']*'|(\|)/g;
+
+/**
+ * Strips Liquid filters from a RHS expression by finding the first `|` that is
+ * not inside a quoted string. For example, `"a | b" | upcase` returns `"a | b"`.
+ */
+function stripFilters(rhs: string): string {
+  const firstPipe = Array.from(rhs.matchAll(QUOTED_OR_PIPE)).find((m) => m[1] !== undefined);
+  return firstPipe ? rhs.slice(0, firstPipe.index).trim() : rhs.trim();
+}
+
+/**
  * Infers a Zod schema for an assign RHS when possible. Uses path resolution,
  * number/string literals, or falls back to z.unknown().
  *
@@ -61,7 +77,7 @@ function inferSchemaFromAssignRhs(
   baseSchema: typeof DynamicStepContextSchema,
   rhs: string
 ): z.ZodType {
-  const expression = rhs.split('|')[0]?.trim() ?? rhs.trim();
+  const expression = stripFilters(rhs);
   if (!expression) {
     return z.unknown();
   }
