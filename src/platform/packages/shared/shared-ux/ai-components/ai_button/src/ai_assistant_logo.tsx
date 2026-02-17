@@ -9,15 +9,22 @@
 import React from 'react';
 
 // Kibana-only: hardcoded locally so this icon isn't shared/owned by EUI.
-export const AiAssistantLogo = (svgProps: React.SVGProps<SVGSVGElement>) => (
+interface AiAssistantLogoProps extends React.SVGProps<SVGSVGElement> {
+  title?: string;
+  titleId?: string;
+}
+
+export const AiAssistantLogo = ({ title, titleId, ...svgProps }: AiAssistantLogoProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="100%"
-    height="100%"
+    width={16}
+    height={16}
     viewBox="0 0 16 16"
     fill="none"
+    aria-labelledby={titleId}
     {...svgProps}
   >
+    {title ? <title id={titleId}>{title}</title> : null}
     <path d="M9 7H15V16H9V7Z" fill="currentColor" />
     <path
       d="M1 11.5C1 9.01472 3.01472 7 5.5 7H7V16H5.5C3.01472 16 1 13.9853 1 11.5Z"

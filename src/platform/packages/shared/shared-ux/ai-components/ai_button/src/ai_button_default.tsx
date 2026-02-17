@@ -9,15 +9,14 @@
 
 import React from 'react';
 
-import { AiButtonBase, type AiButtonProps } from './ai_button_base';
+import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
 
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
-
-export type AiButtonDefaultProps = DistributiveOmit<
-  Extract<AiButtonProps, { iconOnly?: false; variant?: 'accent' | 'base' }>,
-  'variant'
+export type AiButtonDefaultProps = Extract<
+  AiButtonBaseProps,
+  { iconOnly?: false; variant?: 'accent' | 'base' }
 >;
 
 export const AiButtonDefault = (props: AiButtonDefaultProps) => {
-  return <AiButtonBase {...props} variant="base" />;
+  const { variant = 'base', ...rest } = props;
+  return <AiButtonBase {...rest} variant={variant} />;
 };

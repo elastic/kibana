@@ -11,6 +11,5 @@ export type { AiButtonProps } from './ai_button/src/ai_button';
 export type { AiButtonVariant } from './ai_button/src/ai_button_base';
 export { AiButton } from './ai_button/src/ai_button';
 export { AiButtonDefault } from './ai_button/src/ai_button_default';
-export { AiButtonAccent } from './ai_button/src/ai_button_accent';
 export { AiButtonEmpty } from './ai_button/src/ai_button_empty';
 export { AiButtonIcon } from './ai_button/src/ai_button_icon';

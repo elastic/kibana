@@ -9,40 +9,43 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { EuiButtonSize } from '@elastic/eui';
+import type { EuiButtonSize, EuiButtonEmptySizes } from '@elastic/eui';
 import { AiButton } from './ai_button';
 import { AiButtonDefault } from './ai_button_default';
-import { AiButtonAccent } from './ai_button_accent';
 import { AiButtonEmpty } from './ai_button_empty';
 import { AiButtonIcon } from './ai_button_icon';
 import type { AiButtonVariant } from './ai_button_base';
 
-interface StoryArgs {
+type AiIconType = 'aiAssistantLogo' | 'sparkles' | 'productAgent';
+
+interface CommonStoryArgs {
   label: string;
-  appName: string;
-  variant: AiButtonVariant;
-  size: EuiButtonSize;
   isDisabled: boolean;
+  icon: AiIconType;
+}
+
+interface StoryArgs extends CommonStoryArgs {
+  variant: AiButtonVariant;
+  size: EuiButtonEmptySizes;
   withIcon: boolean;
   iconOnly: boolean;
-  icon: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
 }
 
-interface ButtonComponentStoryArgs {
-  label: string;
+interface ButtonComponentStoryArgs extends CommonStoryArgs {
   size: EuiButtonSize;
-  isDisabled: boolean;
+  iconSize?: EuiButtonSize;
   withIcon: boolean;
-  icon: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
 }
 
-interface IconComponentStoryArgs {
-  label: string;
-  appName: string;
-  size: EuiButtonSize;
-  isDisabled: boolean;
+interface EmptyComponentStoryArgs extends CommonStoryArgs {
+  size: EuiButtonEmptySizes;
+  iconSize?: EuiButtonSize;
+  withIcon: boolean;
+}
+
+interface IconComponentStoryArgs extends CommonStoryArgs {
+  size: EuiButtonEmptySizes;
   variant: AiButtonVariant;
-  icon: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
 }
 
 export default {
@@ -51,7 +54,6 @@ export default {
     'A wrapper around EuiButton/EuiButtonEmpty/EuiButtonIcon that applies an “AI” gradient background and text.',
   argTypes: {
     label: { control: 'text' },
-    appName: { control: 'text' },
     variant: { control: 'select', options: ['base', 'accent', 'empty', 'outlined'] },
     size: { control: 'select', options: ['xs', 's', 'm'] },
     isDisabled: { control: 'boolean' },
@@ -63,38 +65,51 @@ export default {
 
 export const Default: StoryObj<StoryArgs> = {
   render: (args) => {
-    const { label, appName, variant, size, isDisabled, withIcon, iconOnly, icon } = args;
-    const iconProps = withIcon ? { iconType: icon } : {};
+    const { label, variant, size, isDisabled, withIcon, iconOnly, icon } = args;
 
     if (iconOnly) {
       return (
-        <AiButton
+        <AiButtonIcon
           variant={variant}
           size={size}
           isDisabled={isDisabled}
-          iconOnly
           iconType={icon}
-          appName={appName}
           aria-label={label}
         />
       );
     }
 
+    if (variant === 'empty' || variant === 'outlined') {
+      return (
+        <AiButton
+          variant={variant}
+          size={size}
+          isDisabled={isDisabled}
+          {...(withIcon ? { iconType: icon } : {})}
+        >
+          {label}
+        </AiButton>
+      );
+    }
+
+    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
+
+    if (withIcon) {
+      return (
+        <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled} iconType={icon}>
+          {label}
+        </AiButton>
+      );
+    }
+
     return (
-      <AiButton
-        iconOnly={false}
-        variant={variant}
-        size={size}
-        isDisabled={isDisabled}
-        {...iconProps}
-      >
+      <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled}>
         {label}
       </AiButton>
     );
   },
   args: {
     label: 'AI Assistant',
-    appName: 'AI Assistant',
     variant: 'base',
     size: 's',
     isDisabled: false,
@@ -105,8 +120,12 @@ export const Default: StoryObj<StoryArgs> = {
 };
 
 export const Base: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, isDisabled, withIcon, icon }) => (
-    <AiButtonDefault size={size} isDisabled={isDisabled} {...(withIcon ? { iconType: icon } : {})}>
+  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
+    <AiButtonDefault
+      size={size}
+      isDisabled={isDisabled}
+      {...(withIcon ? { iconType: icon, iconSize } : {})}
+    >
       {label}
     </AiButtonDefault>
   ),
@@ -120,10 +139,15 @@ export const Base: StoryObj<ButtonComponentStoryArgs> = {
 };
 
 export const Accent: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, isDisabled, withIcon, icon }) => (
-    <AiButtonAccent size={size} isDisabled={isDisabled} {...(withIcon ? { iconType: icon } : {})}>
+  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
+    <AiButtonDefault
+      variant="accent"
+      size={size}
+      isDisabled={isDisabled}
+      {...(withIcon ? { iconType: icon, iconSize } : {})}
+    >
       {label}
-    </AiButtonAccent>
+    </AiButtonDefault>
   ),
   args: {
     label: 'AI Assistant',
@@ -134,9 +158,13 @@ export const Accent: StoryObj<ButtonComponentStoryArgs> = {
   },
 };
 
-export const Empty: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, isDisabled, withIcon, icon }) => (
-    <AiButtonEmpty size={size} isDisabled={isDisabled} {...(withIcon ? { iconType: icon } : {})}>
+export const Empty: StoryObj<EmptyComponentStoryArgs> = {
+  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
+    <AiButtonEmpty
+      size={size}
+      isDisabled={isDisabled}
+      {...(withIcon ? { iconType: icon, iconSize } : {})}
+    >
       {label}
     </AiButtonEmpty>
   ),
@@ -150,19 +178,17 @@ export const Empty: StoryObj<ButtonComponentStoryArgs> = {
 };
 
 export const Icon: StoryObj<IconComponentStoryArgs> = {
-  render: ({ label, appName, size, isDisabled, variant, icon }) => (
+  render: ({ label, size, isDisabled, variant, icon }) => (
     <AiButtonIcon
       size={size}
       isDisabled={isDisabled}
       variant={variant}
       iconType={icon}
-      appName={appName}
       aria-label={label}
     />
   ),
   args: {
     label: 'AI Assistant',
-    appName: 'AI Assistant',
     size: 's',
     isDisabled: false,
     variant: 'base',

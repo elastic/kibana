@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 
 import { useAiButtonGradientStyles, useSvgAiGradient } from './use_ai_gradient_styles';
 import { SvgAiGradientDefs } from './svg_ai_gradient_defs';
@@ -50,12 +50,13 @@ type AiButtonIconOnlyProps = DistributiveOmit<
   iconOnly: true;
   display?: never;
   variant?: AiButtonVariant;
-  appName?: string;
   iconType: AiButtonIconType;
   'aria-label': string;
 };
 
 export type AiButtonBaseProps = AiButtonTextProps | AiButtonEmptyProps | AiButtonIconOnlyProps;
+
+const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'm' ? 'm' : 's');
 
 export const AiButtonBase = (props: AiButtonBaseProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
@@ -86,23 +87,19 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
     iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
   if (props.iconOnly === true) {
-    const { iconType, css: userCss, display: _display, appName, ...rest } = props;
-
-    const buttonIcon = (
-      <EuiButtonIcon
-        {...rest}
-        aria-label={props['aria-label'] ?? appName}
-        css={[buttonCss, iconGradientCss, userCss]}
-        iconType={
-          resolvedIconType(iconType) as React.ComponentProps<typeof EuiButtonIcon>['iconType']
-        }
-      />
-    );
+    const { iconType, css: userCss, display: _display, ...rest } = props;
 
     return (
       <>
         {svgGradientDefs}
-        {appName ? <EuiToolTip content={appName}>{buttonIcon}</EuiToolTip> : buttonIcon}
+        <EuiButtonIcon
+          {...rest}
+          css={[buttonCss, iconGradientCss, userCss]}
+          iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
+          iconType={
+            resolvedIconType(iconType) as React.ComponentProps<typeof EuiButtonIcon>['iconType']
+          }
+        />
       </>
     );
   }
@@ -122,6 +119,7 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
         {svgGradientDefs}
         <EuiButtonEmpty
           {...euiButtonEmptyProps}
+          iconSize={euiButtonEmptyProps.iconSize ?? getSyncedIconSize(euiButtonEmptyProps.size)}
           iconType={
             resolvedIconType(iconType) as React.ComponentProps<typeof EuiButtonEmpty>['iconType']
           }
@@ -152,6 +150,7 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
       {svgGradientDefs}
       <EuiButton
         {...euiButtonPropsForEui}
+        iconSize={euiButtonPropsForEui.iconSize ?? getSyncedIconSize(euiButtonPropsForEui.size)}
         iconType={resolvedIconType(iconType) as React.ComponentProps<typeof EuiButton>['iconType']}
         css={[buttonCss, iconGradientCss, buttonUserCss]}
         fill={variant === 'accent'}
