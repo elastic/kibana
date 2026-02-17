@@ -48,6 +48,10 @@ describe('OAuthStateClient', () => {
     (SavedObjectsUtils.generateId as jest.Mock).mockReturnValue('generated-id');
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   describe('create', () => {
     it('creates OAuth state with PKCE parameters', async () => {
       const client = createClient();
