@@ -57,32 +57,45 @@ describe('PlanPanel', () => {
     expect(screen.getByTestId('agentBuilderPlanProgress')).toBeInTheDocument();
   });
 
-  it('shows "Approve & Execute" button when plan is ready and source is planning', () => {
-    const plan = createPlan({ status: 'ready' });
+  it('shows "Approve & Execute" button for draft plans with planning source', () => {
+    const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
     expect(screen.getByTestId('agentBuilderPlanApproveButton')).toBeInTheDocument();
   });
 
-  it('hides "Approve & Execute" button for draft plans', () => {
-    const plan = createPlan({ status: 'draft' });
+  it('hides "Approve & Execute" button for ready plans (already approved)', () => {
+    const plan = createPlan({ status: 'ready', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
   it('hides "Approve & Execute" button for agent-sourced plans', () => {
-    const plan = createPlan({ status: 'ready', source: 'agent' });
+    const plan = createPlan({ status: 'draft', source: 'agent' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
   it('hides "Approve & Execute" button when executing', () => {
-    const plan = createPlan({ status: 'ready' });
+    const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} isExecuting />);
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
+  it('hides "Approve & Execute" button when all items are completed', () => {
+    const plan = createPlan({
+      status: 'draft',
+      source: 'planning',
+      action_items: [
+        { description: 'Step 1', status: 'completed' },
+        { description: 'Step 2', status: 'completed' },
+      ],
+    });
+    render(<PlanPanel plan={plan} {...defaultProps} />);
+    expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
+  });
+
   it('calls onApproveAndExecute when button is clicked', () => {
-    const plan = createPlan({ status: 'ready' });
+    const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
     fireEvent.click(screen.getByTestId('agentBuilderPlanApproveButton'));
     expect(defaultProps.onApproveAndExecute).toHaveBeenCalledTimes(1);
