@@ -18,7 +18,7 @@ import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size'
 import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
-import { selectTabDataViewWhenInitialized, type ReactiveTabRuntimeState } from './runtime_state';
+import { isTabRuntimeStateInitialized, type ReactiveTabRuntimeState } from './runtime_state';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -133,11 +133,9 @@ export const fromTabStateToSavedObjectTab = ({
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
 
-  const dataView = selectTabDataViewWhenInitialized(tabRuntimeState);
-
-  const serializedSearchSource = dataView
+  const serializedSearchSource = isTabRuntimeStateInitialized(tabRuntimeState)
     ? createSearchSource({
-        dataView,
+        dataView: tabRuntimeState?.currentDataView$.getValue(),
         appState: tab.appState,
         globalState: tab.globalState,
         services,

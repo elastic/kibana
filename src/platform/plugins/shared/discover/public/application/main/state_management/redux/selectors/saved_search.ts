@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
@@ -17,32 +16,6 @@ import {
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
-import { createSearchSource } from '../../utils/create_search_source';
-
-export const selectTabSearchSource = (
-  state: DiscoverInternalState,
-  tabId: string,
-  {
-    runtimeStateManager,
-    services,
-  }: {
-    runtimeStateManager: RuntimeStateManager;
-    services: DiscoverServices;
-  }
-): ISearchSource => {
-  const tabState = selectTab(state, tabId);
-  const currentDataView = selectTabRuntimeState(
-    runtimeStateManager,
-    tabId
-  ).currentDataView$.getValue();
-
-  return createSearchSource({
-    dataView: currentDataView,
-    appState: tabState.appState,
-    globalState: tabState.globalState,
-    services,
-  });
-};
 
 export const selectTabSavedSearch = async (
   state: DiscoverInternalState,
@@ -54,7 +27,7 @@ export const selectTabSavedSearch = async (
     runtimeStateManager: RuntimeStateManager;
     services: DiscoverServices;
   }
-): Promise<SavedSearch | undefined> => {
+): Promise<SavedSearch> => {
   const tabState = selectTab(state, tabId);
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
 

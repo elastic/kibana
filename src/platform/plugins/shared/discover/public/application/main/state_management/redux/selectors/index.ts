@@ -15,4 +15,4 @@ export {
   selectIsTabsBarHidden,
 } from './tabs';
 export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';
-export { selectTabSearchSource, selectTabSavedSearch } from './saved_search';
+export { selectTabSavedSearch } from './saved_search';

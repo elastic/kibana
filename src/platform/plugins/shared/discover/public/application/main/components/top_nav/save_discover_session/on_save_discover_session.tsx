@@ -49,10 +49,6 @@ export const onSaveDiscoverSession = async ({
       { runtimeStateManager: state.runtimeStateManager, services }
     );
 
-    if (!savedSearch) {
-      return;
-    }
-
     const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
     const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 

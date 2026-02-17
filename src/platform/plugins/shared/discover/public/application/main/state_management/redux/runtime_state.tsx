@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -19,7 +19,8 @@ import type { ProfilesManager, ScopedProfilesManager } from '../../../../context
 import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { DiscoverServices } from '../../../../build_services';
-import { selectTab, selectTabSearchSource } from './selectors';
+import { selectTab } from './selectors';
+import { createSearchSource } from '../utils/create_search_source';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -117,17 +118,6 @@ export const isTabRuntimeStateInitialized = (
   tabRuntimeState: ReactiveTabRuntimeState | undefined
 ): boolean => Boolean(tabRuntimeState?.stateContainer$.getValue());
 
-/**
- * Gets the data view only for initialized tabs.
- * Returns undefined for non-initialized tabs to avoid returning stale data.
- */
-export const selectTabDataViewWhenInitialized = (
-  tabRuntimeState: ReactiveTabRuntimeState | undefined
-): DataView | undefined =>
-  isTabRuntimeStateInitialized(tabRuntimeState)
-    ? tabRuntimeState?.currentDataView$.getValue()
-    : undefined;
-
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,
   dataViewId: string
@@ -148,9 +138,14 @@ export const selectTabRuntimeInternalState = (
     return undefined;
   }
 
-  const state = stateContainer.internalState.getState();
-  const { dataRequestParams } = selectTab(state, tabId);
-  const searchSource = selectTabSearchSource(state, tabId, { runtimeStateManager, services });
+  const tabState = selectTab(stateContainer.internalState.getState(), tabId);
+  const { dataRequestParams, appState, globalState } = tabState;
+  const searchSource = createSearchSource({
+    dataView: tabRuntimeState.currentDataView$.getValue(),
+    appState,
+    globalState,
+    services,
+  });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),

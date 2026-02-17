@@ -41,8 +41,9 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import { internalStateActions, selectTabRuntimeState, selectTabSearchSource } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -266,7 +267,14 @@ export function getDataStateContainer({
             subscription.unsubscribe();
           }
 
-          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+          const tabState = getCurrentTab();
+          const {
+            id: currentTabId,
+            resetDefaultProfileState,
+            dataRequestParams,
+            appState,
+            globalState,
+          } = tabState;
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -283,8 +291,10 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
-          const searchSource = selectTabSearchSource(internalState.getState(), currentTabId, {
-            runtimeStateManager,
+          const searchSource = createSearchSource({
+            dataView: currentDataView$.getValue(),
+            appState,
+            globalState,
             services,
           });
 
