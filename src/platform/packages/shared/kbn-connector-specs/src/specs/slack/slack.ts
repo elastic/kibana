@@ -379,20 +379,15 @@ function formatSlackApiErrorMessage(params: {
   responseData?: unknown;
   responseHeaders?: unknown;
 }) {
-  const { action, responseData, responseHeaders } = params;
+  const { action, responseData } = params;
   const { error: slackError, needed, provided } = getSlackErrorFields(responseData);
   const error = slackError ?? 'unknown_error';
 
-  // Slack frequently returns these headers on Web API responses; they’re the most reliable way
-  // to understand which scopes a token actually has vs. what an endpoint requires.
-  const accepted = getHeader(responseHeaders, 'x-accepted-oauth-scopes');
-  const scopes = getHeader(responseHeaders, 'x-oauth-scopes');
-
   const extras: string[] = [];
+  // Be careful about echoing back scope details in user-facing errors. We include only the minimum
+  // Slack-provided hints that help diagnose the failure without exposing token scope inventories.
   if (needed) extras.push(`needed=${needed}`);
   if (provided) extras.push(`provided=${provided}`);
-  if (accepted) extras.push(`acceptedScopes=${accepted}`);
-  if (scopes) extras.push(`tokenScopes=${scopes}`);
 
   return extras.length > 0
     ? `Slack ${action} error: ${error} (${extras.join(', ')})`
