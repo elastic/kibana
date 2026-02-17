@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilterStateStore } from '@kbn/es-query';
+import { storedFilterSchema } from '@kbn/es-query-server';
 import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
@@ -164,34 +164,7 @@ export const rawRuleAlertsFilterSchema = schema.object({
   query: schema.maybe(
     schema.object({
       kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.object({
-            alias: schema.maybe(schema.nullable(schema.string())),
-            disabled: schema.maybe(schema.boolean()),
-            negate: schema.maybe(schema.boolean()),
-            controlledBy: schema.maybe(schema.string()),
-            group: schema.maybe(schema.string()),
-            index: schema.maybe(schema.string()),
-            isMultiIndex: schema.maybe(schema.boolean()),
-            type: schema.maybe(schema.string()),
-            key: schema.maybe(schema.string()),
-            params: schema.maybe(schema.any()),
-            value: schema.maybe(schema.string()),
-            field: schema.maybe(schema.string()),
-            relation: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')])),
-          }),
-          $state: schema.maybe(
-            schema.object({
-              store: schema.oneOf([
-                schema.literal(FilterStateStore.APP_STATE), // change
-                schema.literal(FilterStateStore.GLOBAL_STATE), // change
-              ]),
-            })
-          ),
-        })
-      ),
+      filters: schema.arrayOf(storedFilterSchema),
       dsl: schema.string(), // change
     })
   ),

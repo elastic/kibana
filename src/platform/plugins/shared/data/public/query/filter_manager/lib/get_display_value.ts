@@ -66,9 +66,17 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
 
   if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
     return getPhraseDisplayValue(filter, valueFormatter, fieldType);
-  } else if (isPhrasesFilter(filter)) {
+  }
+
+  if (isPhrasesFilter(filter)) {
     return getPhrasesDisplayValue(filter, valueFormatter);
-  } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
+  }
+
+  if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {
     return getRangeDisplayValue(filter, valueFormatter);
-  } else return filter.meta.value ?? '';
+  }
+
+  return filter.meta.value && typeof filter.meta.value === 'object'
+    ? JSON.stringify(filter.meta.value)
+    : filter.meta.value ?? '';
 }
