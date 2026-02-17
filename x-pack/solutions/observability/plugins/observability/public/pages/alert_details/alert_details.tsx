@@ -121,7 +121,7 @@ export function AlertDetails() {
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const ruleName = alertDetail?.formatted.fields[ALERT_RULE_NAME];
-  const ruleTypeTitle = alertDetail
+  const ruleTypeBreached = alertDetail
     ? getAlertSubtitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
     : undefined;
 
@@ -200,12 +200,12 @@ export function AlertDetails() {
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
             alertId: alertUuid,
-            ...(ruleTypeTitle && {
+            ...(ruleTypeBreached && {
               attachmentLabel: i18n.translate(
                 'xpack.observability.alertDetails.alertAttachmentLabel',
                 {
-                  defaultMessage: '{ruleTypeTitle} alert',
-                  values: { ruleTypeTitle },
+                  defaultMessage: '{ruleTypeBreached} alert',
+                  values: { ruleTypeBreached },
                 }
               ),
             }),
@@ -217,7 +217,7 @@ export function AlertDetails() {
     return () => {
       agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [agentBuilder, alertDetail, ruleTypeTitle]);
+  }, [agentBuilder, alertDetail, ruleTypeBreached]);
 
   useBreadcrumbs(
     [
@@ -229,7 +229,7 @@ export function AlertDetails() {
         deepLinkId: 'observability-overview:alerts',
       },
       {
-        text: ruleTypeTitle ?? defaultBreadcrumb,
+        text: ruleTypeBreached ?? defaultBreadcrumb,
       },
     ],
     { serverless }
@@ -321,7 +321,7 @@ export function AlertDetails() {
           {AlertAiInsight && (
             <AlertAiInsight
               alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-              alertTitle={ruleTypeTitle}
+              alertTitle={ruleTypeBreached}
             />
           )}
           {rule && alertDetail.formatted && (
@@ -352,7 +352,7 @@ export function AlertDetails() {
         {AlertAiInsight && (
           <AlertAiInsight
             alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-            alertTitle={ruleTypeTitle}
+            alertTitle={ruleTypeBreached}
           />
         )}
         <EuiSpacer size="l" />
@@ -483,9 +483,7 @@ export function AlertDetails() {
                 </span>
               </EuiToolTip>
               <EuiSpacer size="xs" />
-              {ruleTypeTitle && (
-                <AlertSubtitle alert={alertDetail.formatted} ruleTypeTitle={ruleTypeTitle} />
-              )}
+              <AlertSubtitle alert={alertDetail.formatted} />
             </>
           ) : (
             <EuiLoadingSpinner />

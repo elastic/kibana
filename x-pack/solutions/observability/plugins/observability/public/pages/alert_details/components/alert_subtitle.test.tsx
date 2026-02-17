@@ -30,8 +30,6 @@ const mockKibana = () => {
 };
 
 describe('Alert subtitle', () => {
-  const ruleTypeTitle = 'Log threshold breached';
-
   const renderComponent = (props: AlertSubtitleProps) => {
     return render(<AlertSubtitle {...props} />);
   };
@@ -41,22 +39,16 @@ describe('Alert subtitle', () => {
     mockKibana();
   });
 
-  it('should show the rule type title', async () => {
-    const alertSubtitle = renderComponent({
-      alert,
-      ruleTypeTitle,
-    });
+  it('should show the rule type breached text', async () => {
+    const result = renderComponent({ alert });
 
-    expect(alertSubtitle.queryByText(ruleTypeTitle)).toBeInTheDocument();
+    expect(result.queryByText('Log threshold breached')).toBeInTheDocument();
   });
 
   it('should show a "View rule" link', async () => {
-    const alertSubtitle = renderComponent({
-      alert,
-      ruleTypeTitle,
-    });
+    const result = renderComponent({ alert });
 
-    expect(alertSubtitle.queryByText('View rule')).toBeInTheDocument();
-    expect(alertSubtitle.getByTestId('o11yAlertRuleLink')).toBeInTheDocument();
+    expect(result.queryByText('View rule')).toBeInTheDocument();
+    expect(result.getByTestId('o11yAlertRuleLink')).toBeInTheDocument();
   });
 });
