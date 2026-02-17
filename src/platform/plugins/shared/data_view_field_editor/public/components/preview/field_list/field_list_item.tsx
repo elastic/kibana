@@ -63,8 +63,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage =
-    typeof formattedValue === 'string' && formattedValue.includes('<img');
+  const doesContainImage = typeof formattedValue === 'string' && formattedValue.includes('<img');
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
@@ -136,9 +135,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
     }
 
     if (formattedValue !== undefined) {
-      return withTooltip(
-        <span css={styles.keyAndValueWrapper}>{formattedValue}</span>
-      );
+      return withTooltip(<span css={styles.keyAndValueWrapper}>{formattedValue}</span>);
     }
 
     return withTooltip(<span css={styles.keyAndValueWrapper}>{JSON.stringify(value)}</span>);

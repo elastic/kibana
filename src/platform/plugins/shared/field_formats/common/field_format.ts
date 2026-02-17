@@ -267,5 +267,4 @@ export abstract class FieldFormat {
       return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
     }
   }
-
 }

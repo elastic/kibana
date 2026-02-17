@@ -286,7 +286,9 @@ export class UrlFormat extends FieldFormat {
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
 
         return (
-          <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">  👹
+          <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">
+            {' '}
+            👹
             {linkLabel}
           </a>
         );

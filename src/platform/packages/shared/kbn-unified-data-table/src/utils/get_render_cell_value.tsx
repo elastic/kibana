@@ -217,13 +217,7 @@ function renderPopoverContent({
       <EuiFlexItem>
         <DataTablePopoverCellValue>
           <span>
-            {formatFieldValueReact(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            )}
+            {formatFieldValueReact(row.flattened[columnId], row.raw, fieldFormats, dataView, field)}
           </span>
         </DataTablePopoverCellValue>
       </EuiFlexItem>

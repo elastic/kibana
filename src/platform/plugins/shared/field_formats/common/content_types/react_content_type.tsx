@@ -11,11 +11,7 @@ import React, { createElement } from 'react';
 import type { ReactNode } from 'react';
 import { isFunction } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
-import type {
-  IFieldFormat,
-  ReactContextTypeConvert,
-  FieldFormatsContentType,
-} from '../types';
+import type { IFieldFormat, ReactContextTypeConvert, FieldFormatsContentType } from '../types';
 
 export const REACT_CONTEXT_TYPE: FieldFormatsContentType = 'react';
 
@@ -65,9 +61,7 @@ export const setup = (
   reactContextTypeConvert?: ReactContextTypeConvert
 ): ReactContextTypeConvert => {
   const convert = getConvertFn(format, reactContextTypeConvert);
-  const highlight = (text: string) => (
-    <span className="ffArray__highlight">{text}</span>
-  );
+  const highlight = (text: string) => <span className="ffArray__highlight">{text}</span>;
 
   const recurse: ReactContextTypeConvert = (value, options = {}) => {
     if (!value || !isFunction(value.map)) {
@@ -78,9 +72,7 @@ export const setup = (
       recurse(v, options)
     );
 
-    const useMultiLine = subValues.some(
-      (sub) => typeof sub === 'string' && sub.indexOf('\n') > -1
-    );
+    const useMultiLine = subValues.some((sub) => typeof sub === 'string' && sub.indexOf('\n') > -1);
 
     const result: React.ReactNode[] = [];
     subValues.forEach((sub, idx) => {
@@ -105,8 +97,7 @@ export const setup = (
       return convertedValue;
     }
 
-    const hasNewlines =
-      typeof convertedValue === 'string' && convertedValue.includes('\n');
+    const hasNewlines = typeof convertedValue === 'string' && convertedValue.includes('\n');
 
     if (hasNewlines) {
       return (

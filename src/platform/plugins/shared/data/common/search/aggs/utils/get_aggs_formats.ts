@@ -151,7 +151,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       convert = (val: string, type?: FieldFormatsContentType): string => {
-        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : (type ?? 'text');
+        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
         const params = this._params;
         const format = this.getCachedFormat(
           params as SerializedFieldFormat<{}, SerializableRecord>
@@ -166,16 +166,15 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         return format.convert(val, resolvedType);
       };
-      getConverterFor = (type?: FieldFormatsContentType) =>
-        (val: string) =>
-          this.convert(val, type);
+      getConverterFor = (type?: FieldFormatsContentType) => (val: string) =>
+        this.convert(val, type);
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';
       static hidden = true;
 
       convert = (val: unknown, type?: FieldFormatsContentType): string => {
-        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : (type ?? 'text');
+        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
         const params = this._params;
         const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
           return this.getCachedFormat(fieldParams);
@@ -193,9 +192,8 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
             .join(joinTemplate) ?? ''
         );
       };
-      getConverterFor = (type?: FieldFormatsContentType) =>
-        (val: string) =>
-          this.convert(val, type);
+      getConverterFor = (type?: FieldFormatsContentType) => (val: string) =>
+        this.convert(val, type);
     },
   ];
 }

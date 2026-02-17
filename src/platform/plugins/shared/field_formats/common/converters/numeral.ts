@@ -14,7 +14,11 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { checkForMissingValueReact } from '../content_types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';

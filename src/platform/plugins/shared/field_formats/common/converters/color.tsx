@@ -13,7 +13,11 @@ import ReactDOM from 'react-dom/server';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { checkForMissingValueReact } from '../content_types';
 import { asPrettyString } from '../utils';

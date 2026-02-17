@@ -21,7 +21,7 @@ export function getHighlightReact(
   fieldValue: string | object,
   highlights: string[] | undefined | null
 ): ReactNode {
-  let text = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : fieldValue;
+  const text = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : fieldValue;
 
   if (!highlights || highlights.length === 0) {
     return text;
@@ -30,11 +30,7 @@ export function getHighlightReact(
   // Process each highlight snippet: extract the untagged text and build a mapping
   // of plain text -> segments with <mark> tags
   for (const highlight of highlights) {
-    const untagged = highlight
-      .split(highlightTags.pre)
-      .join('')
-      .split(highlightTags.post)
-      .join('');
+    const untagged = highlight.split(highlightTags.pre).join('').split(highlightTags.post).join('');
 
     // Skip empty/no-op highlights to avoid splitting on an empty string
     if (!untagged) {
@@ -51,9 +47,7 @@ export function getHighlightReact(
       parts.forEach((part, idx) => {
         if (idx > 0) {
           segments.forEach((segment, segIdx) => {
-            result.push(
-              <React.Fragment key={`hl-${idx}-${segIdx}`}>{segment}</React.Fragment>
-            );
+            result.push(<React.Fragment key={`hl-${idx}-${segIdx}`}>{segment}</React.Fragment>);
           });
         }
         if (part) {

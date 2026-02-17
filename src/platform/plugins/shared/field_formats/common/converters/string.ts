@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightHtml, getHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert, ReactContextTypeConvert } from '../types';
+import type {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { checkForMissingValueReact } from '../content_types';
 
