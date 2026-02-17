@@ -103,7 +103,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
                 <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.fleet.cloudConnector.setup.gcp.guide.description"
-                    defaultMessage="Create a reusable service account in your GCP project, then give Elastic its Service Account Email and Audience shown below. You'll need permissions to create service accounts and configure workload identity federation in your GCP project. {learnMore}"
+                    defaultMessage="Create a reusable Service Account in your GCP project, then give Elastic its Service Account email and Audience below. You'll need permissions to create service accounts and configure workload identity federation in your GCP project. {learnMore}"
                     values={{
                       learnMore: (
                         <EuiLink

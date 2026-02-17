@@ -586,24 +586,26 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     } else if (cloudConnector.cloudProvider === 'gcp') {
       // Type assertion is safe here because we perform runtime validation below
       const gcpVars = vars as GcpCloudConnectorVars;
-      // Validate that all required GCP fields have valid values
-      const serviceAccount = gcpVars.service_account?.value;
-      const audience = gcpVars.audience?.value;
-      const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id?.value;
+      // Validate that all required GCP fields have valid values (text or secret reference)
+      // GCP vars arrive as text from the form and are converted to secret references
+      // by extractGcpCloudConnectorSecrets during package policy creation
+      const serviceAccount = gcpVars.service_account;
+      const audience = gcpVars.audience;
+      const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id;
 
-      if (!serviceAccount) {
+      if (!serviceAccount?.value) {
         logger.error(`Package policy must contain valid ${SERVICE_ACCOUNT_VAR_NAME} value`);
         throw new CloudConnectorInvalidVarsError(
           `${SERVICE_ACCOUNT_VAR_NAME} must be a valid string`
         );
       }
 
-      if (!audience) {
+      if (!audience?.value) {
         logger.error(`Package policy must contain valid ${AUDIENCE_VAR_NAME} value`);
         throw new CloudConnectorInvalidVarsError(`${AUDIENCE_VAR_NAME} must be a valid string`);
       }
 
-      if (!gcpCredentials) {
+      if (!gcpCredentials?.value) {
         logger.error(
           `Package policy must contain valid ${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
         );

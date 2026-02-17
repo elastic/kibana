@@ -67,9 +67,27 @@ describe('Cloud Connector Schemas', () => {
       expect(GCP_CREDENTIAL_SCHEMA.provider).toBe('gcp');
     });
 
-    it('should have stub fields for future implementation', () => {
-      expect(GCP_CREDENTIAL_SCHEMA.fields.projectId).toBeDefined();
-      expect(GCP_CREDENTIAL_SCHEMA.fields.serviceAccountKey).toBeDefined();
+    it('should have serviceAccount field with correct keys', () => {
+      const { serviceAccount } = GCP_CREDENTIAL_SCHEMA.fields;
+      expect(serviceAccount.primary).toBe('service_account');
+      expect(serviceAccount.aliases).toContain('gcp.credentials.service_account_email');
+      expect(serviceAccount.isSecret).toBe(true);
+    });
+
+    it('should have audience field with correct keys', () => {
+      const { audience } = GCP_CREDENTIAL_SCHEMA.fields;
+      expect(audience.primary).toBe('audience');
+      expect(audience.aliases).toContain('gcp.credentials.audience');
+      expect(audience.isSecret).toBe(true);
+    });
+
+    it('should have gcpCredentialsCloudConnectorId field with correct keys', () => {
+      const { gcpCredentialsCloudConnectorId } = GCP_CREDENTIAL_SCHEMA.fields;
+      expect(gcpCredentialsCloudConnectorId.primary).toBe('gcp_credentials_cloud_connector_id');
+      expect(gcpCredentialsCloudConnectorId.aliases).toContain(
+        'gcp.credentials.gcp_credentials_cloud_connector_id'
+      );
+      expect(gcpCredentialsCloudConnectorId.isSecret).toBe(true);
     });
   });
 
@@ -135,8 +153,12 @@ describe('Cloud Connector Schemas', () => {
       expect(allVarNames).toContain('azure_credentials_cloud_connector_id');
 
       // GCP vars
-      expect(allVarNames).toContain('project_id');
-      expect(allVarNames).toContain('service_account_key');
+      expect(allVarNames).toContain('service_account');
+      expect(allVarNames).toContain('gcp.credentials.service_account_email');
+      expect(allVarNames).toContain('audience');
+      expect(allVarNames).toContain('gcp.credentials.audience');
+      expect(allVarNames).toContain('gcp_credentials_cloud_connector_id');
+      expect(allVarNames).toContain('gcp.credentials.gcp_credentials_cloud_connector_id');
     });
 
     it('should return a non-empty array', () => {

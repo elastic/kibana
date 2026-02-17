@@ -70,11 +70,12 @@ export interface NormalizedAzureCredentials {
 }
 
 /**
- * Normalized GCP credentials extracted from package policy (stub for future)
+ * Normalized GCP credentials extracted from package policy
  */
 export interface NormalizedGcpCredentials {
-  projectId?: string;
-  serviceAccountKey?: string | { id: string; isSecretRef: boolean };
+  serviceAccount?: string | { id: string; isSecretRef: boolean };
+  audience?: string | { id: string; isSecretRef: boolean };
+  gcpCredentialsCloudConnectorId?: string | { id: string; isSecretRef: boolean };
 }
 
 /**

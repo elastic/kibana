@@ -15,6 +15,7 @@ import type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../../common/types';
 import {
   extractRawCredentialVars,
@@ -54,6 +55,10 @@ export async function extractAndCreateCloudConnectorSecrets(
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
     return await extractAzureCloudConnectorSecrets(packagePolicy, packageInfo, esClient, logger);
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'gcp') {
+    return await extractGcpCloudConnectorSecrets(packagePolicy, packageInfo, esClient, logger);
   }
 }
 
@@ -244,8 +249,120 @@ async function extractAzureCloudConnectorSecrets(
 }
 
 /**
+ * Extracts GCP cloud connector variables and creates secrets
+ * All three GCP fields (service_account, audience, gcp_credentials_cloud_connector_id) are secrets
+ * as defined in the integrations repo manifests.
+ */
+async function extractGcpCloudConnectorSecrets(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<CloudConnectorVars | undefined> {
+  const vars = extractRawCredentialVars(packagePolicy, packageInfo);
+
+  if (!vars) {
+    logger.error('Package policy must contain vars for GCP cloud connector');
+    throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+  }
+
+  const schema = getCredentialSchema('gcp');
+  const serviceAccountKeys = getAllVarKeys(schema.fields.serviceAccount);
+  const audienceKeys = getAllVarKeys(schema.fields.audience);
+  const connectorIdKeys = getAllVarKeys(schema.fields.gcpCredentialsCloudConnectorId);
+
+  const serviceAccountVar = findFirstVarEntry(vars, serviceAccountKeys);
+  const audienceVar = findFirstVarEntry(vars, audienceKeys);
+  const connectorIdVar = findFirstVarEntry(vars, connectorIdKeys);
+
+  if (serviceAccountVar && audienceVar && connectorIdVar) {
+    let serviceAccountWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: serviceAccountVar.value as CloudConnectorSecretReference,
+    };
+    let audienceWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: audienceVar.value as CloudConnectorSecretReference,
+    };
+    let connectorIdWithSecretRef: CloudConnectorSecretVar = {
+      type: 'password',
+      value: connectorIdVar.value as CloudConnectorSecretReference,
+    };
+
+    // Create secrets for fields that are not already secret references
+    const secretsToCreate: string[] = [];
+    const secretFieldTracking: Array<'serviceAccount' | 'audience' | 'connectorId'> = [];
+
+    if (serviceAccountVar.value && !serviceAccountVar.value.isSecretRef) {
+      secretsToCreate.push(serviceAccountVar.value);
+      secretFieldTracking.push('serviceAccount');
+    }
+    if (audienceVar.value && !audienceVar.value.isSecretRef) {
+      secretsToCreate.push(audienceVar.value);
+      secretFieldTracking.push('audience');
+    }
+    if (connectorIdVar.value && !connectorIdVar.value.isSecretRef) {
+      secretsToCreate.push(connectorIdVar.value);
+      secretFieldTracking.push('connectorId');
+    }
+
+    if (secretsToCreate.length > 0) {
+      logger.debug(`Creating ${secretsToCreate.length} secrets for GCP cloud connector`);
+      const secrets = await createSecrets({
+        esClient,
+        values: secretsToCreate,
+      });
+
+      for (let i = 0; i < secretFieldTracking.length; i++) {
+        const secret = secrets[i];
+        if (Array.isArray(secret)) {
+          throw new CloudConnectorInvalidVarsError(
+            `Unexpected array of secrets for GCP ${secretFieldTracking[i]}`
+          );
+        }
+        const secretRef: CloudConnectorSecretVar = {
+          type: 'password',
+          value: {
+            id: secret.id,
+            isSecretRef: true,
+          },
+        };
+
+        if (secretFieldTracking[i] === 'serviceAccount') {
+          serviceAccountWithSecretRef = secretRef;
+        } else if (secretFieldTracking[i] === 'audience') {
+          audienceWithSecretRef = secretRef;
+        } else if (secretFieldTracking[i] === 'connectorId') {
+          connectorIdWithSecretRef = secretRef;
+        }
+      }
+    }
+
+    const gcpCloudConnectorVars: GcpCloudConnectorVars = {
+      service_account: serviceAccountWithSecretRef,
+      audience: audienceWithSecretRef,
+      gcp_credentials_cloud_connector_id: connectorIdWithSecretRef,
+    };
+
+    logger.debug(
+      `Extracted GCP cloud connector vars: service_account=${!!serviceAccountWithSecretRef}, audience=${!!audienceWithSecretRef}, gcp_credentials_cloud_connector_id=[REDACTED]`
+    );
+
+    return gcpCloudConnectorVars;
+  }
+
+  logger.error(
+    `Missing required GCP vars: service_account=${!!serviceAccountVar}, audience=${!!audienceVar}, gcp_credentials_cloud_connector_id=[REDACTED]`
+  );
+  throw new CloudConnectorInvalidVarsError(
+    'Missing required GCP cloud connector variables: ' +
+      `service_account=${!!serviceAccountVar}, audience=${!!audienceVar}, gcp_credentials_cloud_connector_id=[REDACTED]`
+  );
+}
+
+/**
  * Extracts secret IDs from cloud connector variables for cleanup during deletion
- * This function handles extracting secret references from both AWS and Azure cloud connectors.
+ * This function handles extracting secret references from AWS, Azure, and GCP cloud connectors.
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param cloudConnectorVars - The cloud connector variables containing secret references
@@ -271,6 +388,21 @@ export function extractSecretIdsFromCloudConnectorVars(
     }
     if (azureVars.client_id?.value?.isSecretRef && azureVars.client_id.value.id) {
       secretIds.push(azureVars.client_id.value.id);
+    }
+  } else if (cloudProvider === 'gcp') {
+    const gcpVars = cloudConnectorVars as GcpCloudConnectorVars;
+    // GCP has service_account, audience, and gcp_credentials_cloud_connector_id as secrets
+    if (gcpVars.service_account?.value?.isSecretRef && gcpVars.service_account.value.id) {
+      secretIds.push(gcpVars.service_account.value.id);
+    }
+    if (gcpVars.audience?.value?.isSecretRef && gcpVars.audience.value.id) {
+      secretIds.push(gcpVars.audience.value.id);
+    }
+    if (
+      gcpVars.gcp_credentials_cloud_connector_id?.value?.isSecretRef &&
+      gcpVars.gcp_credentials_cloud_connector_id.value.id
+    ) {
+      secretIds.push(gcpVars.gcp_credentials_cloud_connector_id.value.id);
     }
   }
 

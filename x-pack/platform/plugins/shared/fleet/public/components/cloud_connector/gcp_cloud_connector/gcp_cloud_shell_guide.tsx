@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSpacer, EuiCode, EuiCodeBlock } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCode, EuiCodeBlock, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface GoogleCloudShellCloudCredentialsGuideProps {
   isOrganization?: boolean;
   commandText?: string;
 }
+
+const GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL = 'https://cloud.google.com/shell/docs';
 
 export const GoogleCloudShellCloudCredentialsGuide: React.FC<
   GoogleCloudShellCloudCredentialsGuideProps
@@ -23,6 +25,28 @@ export const GoogleCloudShellCloudCredentialsGuide: React.FC<
 
   return (
     <>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.gcp.guide.description"
+          defaultMessage="The Google Cloud Shell Command below will generate a Service Account for assessing your GCP environment's security posture. Learn more about {googleCloudShellLink}."
+          values={{
+            googleCloudShellLink: (
+              <EuiLink
+                href={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}
+                target="_blank"
+                rel="noopener nofollow noreferrer"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.gcp.guide.googleCloudShellLinkText"
+                  defaultMessage="Google Cloud Shell"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
       <EuiText size="s">
         <ol>
           <li>
