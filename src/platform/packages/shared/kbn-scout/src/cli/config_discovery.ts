@@ -276,9 +276,10 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * Scout tests, filters them based on deployment target tags, and optionally saves
  * or validates the results.
  *
- * The command supports four deployment targets:
+ * The command supports five deployment targets:
  * - 'all': Finds configs with deployment-agnostic tags
  * - 'local': Finds configs with @local-* tags (local stateful + local serverless)
+ * - 'local-stateful-only': Finds configs with @local-stateful-* tags only
  * - 'mki': Finds configs with @cloud-serverless-* tags
  * - 'ech': Finds configs with @cloud-stateful-* tags
  *
@@ -299,6 +300,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     --target <target>         Filter configs by deployment target:
                               - 'all': deployment-agnostic tags (default)
                               - 'local': @local-* tags (local stateful + local serverless)
+                              - 'local-stateful-only': @local-stateful-* tags only
                               - 'mki': @cloud-serverless-* tags
                               - 'ech': @cloud-stateful-* tags
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
@@ -313,6 +315,9 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Discover configs for local targets (@local-*)
     node scripts/scout discover-playwright-configs --target local
+
+    # Discover only local stateful configs (@local-stateful-*)
+    node scripts/scout discover-playwright-configs --target local-stateful-only
 
     # Discover cloud serverless configs (@cloud-serverless-*)
     node scripts/scout discover-playwright-configs --target mki

@@ -372,6 +372,72 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(configLogCall![0]).not.toContain('@cloud-serverless-observability_complete');
   });
 
+  it('filters configs based on target tags for "local-stateful-only" target (@local-stateful-*)', () => {
+    flagsReader.enum.mockReturnValue('local-stateful-only');
+    flagsReader.boolean.mockReturnValue(false);
+
+    // Add a module with @local-serverless-search to verify it gets excluded
+    mockTestableModules.modules.push({
+      name: 'pluginLocalServerless',
+      group: 'groupD',
+      type: 'plugin' as const,
+      visibility: 'private' as const,
+      root: 'x-pack/platform/plugins/private/pluginLocalServerless',
+      configs: [
+        {
+          path: 'pluginLocalServerless/config.playwright.config.ts',
+          category: 'ui',
+          type: 'playwright',
+          manifest: {
+            path: 'pluginLocalServerless/config.playwright.config.ts',
+            exists: true,
+            lastModified: '2024-01-01T00:00:00Z',
+            sha1: 'local789',
+            tests: [
+              {
+                id: 'localServerlessTest',
+                title: 'Local Serverless Test',
+                expectedStatus: 'passed',
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+                tags: ['@local-serverless-search'],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA config1 has @local-stateful-classic which matches @local-stateful-*
+    // pluginA parallel has @cloud-serverless-search which does NOT match
+    // pluginB has @cloud-serverless-workplaceai which does NOT match
+    // pluginLocalServerless has @local-serverless-search which does NOT match @local-stateful-*
+    // packageA has @local-stateful-classic which matches @local-stateful-*
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+
+    // Verify only @local-stateful-* tags are kept
+    const configLogCall = infoCalls.find((call) =>
+      call[0].includes('config1.playwright.config.ts')
+    );
+    expect(configLogCall).toBeDefined();
+    expect(configLogCall![0]).toContain('@local-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-serverless');
+    expect(configLogCall![0]).not.toContain('@local-serverless');
+
+    // pluginLocalServerless should be excluded
+    const localServerlessLog = infoCalls.find((call) => call[0].includes('pluginLocalServerless'));
+    expect(localServerlessLog).toBeUndefined();
+  });
+
   it('includes custom-server configs alongside defaults when "include-custom-servers" is true', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => flag === 'include-custom-servers');

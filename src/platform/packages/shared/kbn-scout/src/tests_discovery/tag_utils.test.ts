@@ -17,6 +17,13 @@ describe('getTestTagsForTarget', () => {
     result.forEach((tag) => expect(tag).toMatch(/^@local-/));
   });
 
+  it('returns only @local-stateful-* tags for target "local-stateful-only"', () => {
+    const result = getTestTagsForTarget('local-stateful-only');
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((tag) => expect(tag).toMatch(/^@local-stateful-/));
+  });
+
   it('returns only @cloud-serverless-* tags for target "mki"', () => {
     const result = getTestTagsForTarget('mki');
     expect(Array.isArray(result)).toBe(true);

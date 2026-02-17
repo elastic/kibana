@@ -16,6 +16,8 @@ export const getTestTagsForTarget = (target: string): string[] => {
   switch (target) {
     case 'local':
       return testTargets.local.map((t) => t.playwrightTag);
+    case 'local-stateful-only':
+      return testTargets.local.filter((t) => t.arch === 'stateful').map((t) => t.playwrightTag);
     case 'mki':
       return testTargets.cloud.filter((t) => t.arch === 'serverless').map((t) => t.playwrightTag);
     case 'ech':
