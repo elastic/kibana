@@ -72,6 +72,7 @@ const getAllIntegrationsRoute = (
               ).length,
               version: integration.version,
               createdBy: integration.createdBy,
+              createdByProfileUid: integration.createdByProfileUid,
               status: integration.status,
             })
           ) as AllIntegrationsResponseIntegration[];

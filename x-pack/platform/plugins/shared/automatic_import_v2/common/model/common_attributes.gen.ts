@@ -190,6 +190,10 @@ export const IntegrationResponse = z.object({
    */
   createdBy: z.string().optional(),
   /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
+  /**
    * The data streams of the integration
    */
   dataStreams: z.array(DataStreamResponse),
@@ -232,6 +236,10 @@ export const AllIntegrationsResponseIntegration = z.object({
    * The username of the user who created the integration
    */
   createdBy: NonEmptyString,
+  /**
+   * The profile UID of the user who created the integration
+   */
+  createdByProfileUid: z.string().optional(),
   /**
    * The status of the integration
    */

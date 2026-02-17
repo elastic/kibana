@@ -20,6 +20,8 @@ export const integrationSavedObjectType: SavedObjectsType = {
       // Deprecated: kept for backwards compatibility with existing saved objects.
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
+      created_by_profile_uid: { type: 'keyword' },
+      // Deprecated: status is now derived from data streams. Kept for backward compatibility.
       status: { type: 'keyword' },
       metadata: {
         properties: {

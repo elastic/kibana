@@ -18,10 +18,17 @@ export const integrationSchemaV1 = schema.object({
    */
   data_stream_count: schema.maybe(schema.number()),
   created_by: schema.string({ minLength: 1 }),
+  created_by_profile_uid: schema.maybe(schema.string()),
   last_updated_by: schema.maybe(schema.string({ minLength: 1 })),
   last_updated_at: schema.maybe(schema.string()),
-  status: schema.oneOf(
-    Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
+  /**
+   * @deprecated Status is now derived from data streams. This field is kept for backwards
+   * compatibility with existing saved objects and is no longer written by the service.
+   */
+  status: schema.maybe(
+    schema.oneOf(
+      Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
+    )
   ),
   metadata: schema.object(
     {

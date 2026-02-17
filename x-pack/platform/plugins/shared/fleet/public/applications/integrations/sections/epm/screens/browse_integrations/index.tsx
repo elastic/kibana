@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -29,6 +29,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 import { useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
@@ -271,6 +273,7 @@ interface CreatedIntegrationRow {
   successfulDataStreamCount: number;
   version?: string;
   createdBy: string;
+  createdByProfileUid?: string;
   status: string;
 }
 
@@ -295,7 +298,36 @@ const ManageIntegrationsTable: React.FC<{
   isLoading: boolean;
   isError: boolean;
 }> = ({ integrations, isLoading, isError }) => {
-  const { application } = useStartServices();
+  const { application, userProfile: userProfileService } = useStartServices();
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserProfileWithAvatar>>(new Map());
+
+  useEffect(() => {
+    const profileUids = integrations
+      .map((i) => i.createdByProfileUid)
+      .filter((uid): uid is string => !!uid);
+    const uniqueUids = [...new Set(profileUids)];
+
+    if (uniqueUids.length === 0) {
+      return;
+    }
+
+    userProfileService
+      .bulkGet<{ avatar: { initials?: string; color?: string; imageUrl?: string | null } }>({
+        uids: new Set(uniqueUids),
+        dataPath: 'avatar',
+      })
+      .then((profiles) => {
+        const profileMap = new Map<string, UserProfileWithAvatar>();
+        for (const profile of profiles) {
+          profileMap.set(profile.uid, profile as UserProfileWithAvatar);
+        }
+        setUserProfiles(profileMap);
+      })
+      .catch(() => {
+        // Gracefully degrade — show username only if profile fetch fails
+      });
+  }, [integrations, userProfileService]);
+
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
       {
@@ -321,7 +353,7 @@ const ManageIntegrationsTable: React.FC<{
               <EuiLink
                 onClick={() => {
                   application.navigateToApp('automaticImportVTwo', {
-                    path: `/integrations/${item.integrationId}`,
+                    path: `/edit/${item.integrationId}`,
                   });
                 }}
               >
@@ -362,6 +394,24 @@ const ManageIntegrationsTable: React.FC<{
             defaultMessage="Created by"
           />
         ),
+        render: (_createdBy: string, item: CreatedIntegrationRow) => {
+          const profile = item.createdByProfileUid
+            ? userProfiles.get(item.createdByProfileUid)
+            : undefined;
+          const fallbackUser = { username: item.createdBy };
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <UserAvatar
+                  user={profile?.user ?? fallbackUser}
+                  avatar={profile?.data.avatar}
+                  size="s"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{profile?.user.full_name || item.createdBy}</EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'status',
@@ -374,7 +424,7 @@ const ManageIntegrationsTable: React.FC<{
         render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
       },
     ],
-    [application]
+    [application, userProfiles]
   );
 
   if (isLoading) {
