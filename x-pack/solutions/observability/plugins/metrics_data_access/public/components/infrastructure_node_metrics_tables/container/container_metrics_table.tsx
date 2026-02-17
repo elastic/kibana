@@ -10,7 +10,7 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
@@ -23,10 +23,6 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import {
-  SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
-  SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
-} from '../shared/constants';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
