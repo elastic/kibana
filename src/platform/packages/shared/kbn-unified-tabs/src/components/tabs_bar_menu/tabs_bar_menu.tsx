@@ -273,6 +273,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           ),
           panel: groupPanelId,
           'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroup_${closedAt}`,
+          size: 's',
         });
 
         const groupPanelItems: EuiContextMenuPanelItemDescriptor[] = [
@@ -413,6 +414,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </EuiPopoverTitle>
           <div css={sectionListCss}>
             <EuiContextMenu
+              size="s"
               initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
               panels={openedTabsPanels}
               data-test-subj="unifiedTabs_tabsMenu_openedTabsContextMenu"
@@ -452,6 +454,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               </EuiPopoverTitle>
               <div css={sectionListCss}>
                 <EuiContextMenu
+                  size="s"
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}
                   data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"
