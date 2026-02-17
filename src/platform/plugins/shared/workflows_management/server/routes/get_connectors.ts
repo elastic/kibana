@@ -17,13 +17,13 @@ import { API_VERSIONS, WORKFLOWS_API_PATHS } from '../../common/api/constants';
 export function registerGetConnectorsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: WORKFLOWS_API_PATHS.CONNECTORS,
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_READ_SECURITY,
     })
     .addVersion(
-      { version: API_VERSIONS.internal.v1, validate: {} },
+      { version: API_VERSIONS.public.v1, validate: {} },
       withLicenseCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);

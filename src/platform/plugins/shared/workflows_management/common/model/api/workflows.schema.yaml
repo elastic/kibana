@@ -309,7 +309,6 @@ paths:
       summary: Get available connectors
       operationId: GetConnectors
       x-codegen-enabled: true
-      x-internal: true
       description: Returns available connector types for workflows
       tags:
         - Workflows

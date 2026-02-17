@@ -45,7 +45,7 @@ describe('GET /api/workflows/connectors', () => {
         spaces: mockSpaces,
       });
       const route = mockRouter.versioned.getRoute('get', WORKFLOWS_API_PATHS.CONNECTORS);
-      routeHandler = route.versions[API_VERSIONS.internal.v1].handler;
+      routeHandler = route.versions[API_VERSIONS.public.v1].handler;
     });
 
     it('should return available connectors successfully', async () => {
