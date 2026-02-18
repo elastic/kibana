@@ -604,7 +604,9 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     this.isUiamEnabled = core.security.authc.apiKeys.uiam !== null;
-    this.isUiamSupported = this.isServerless;
+    // Temporarily disabled until we get a flag from core.
+    // Then we will use: this.isUiamSupported = core.uiam.supported;
+    this.isUiamSupported = false;
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
