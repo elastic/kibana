@@ -81,9 +81,12 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgno
         .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
         .toBeGreaterThan(10);
 
-      // Checking tag clouds rendered
-      const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
-      const legendTexts = await legendLabels.allInnerTexts();
+      // Checking legends rendered (elastic-charts)
+      const legendLabels = page.locator(
+        '.echLegendItem__label, [data-testid="echLegendItemLabel"]'
+      );
+      await expect.poll(async () => await legendLabels.count()).toBeGreaterThan(0);
+      const legendTexts = (await legendLabels.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
       ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
         expect(legendTexts).toContain(value);
       });
