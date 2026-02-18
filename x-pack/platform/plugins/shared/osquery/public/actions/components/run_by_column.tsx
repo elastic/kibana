@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatarCell } from './user_avatar_cell';
 
@@ -23,6 +23,10 @@ const RunByColumnComponent: React.FC<RunByColumnProps> = ({
   isLoadingProfiles,
 }) => {
   const profile = userProfileUid ? profilesMap.get(userProfileUid) : undefined;
+  const fallbackUser = useMemo(
+    () => (userId ? ({ username: userId } as UserProfileWithAvatar['user']) : undefined),
+    [userId]
+  );
 
   if (profile) {
     return <UserAvatarCell user={profile.user} avatar={profile.data?.avatar} />;
@@ -32,8 +36,8 @@ const RunByColumnComponent: React.FC<RunByColumnProps> = ({
     return null;
   }
 
-  if (userId) {
-    return <UserAvatarCell user={{ username: userId }} />;
+  if (fallbackUser) {
+    return <UserAvatarCell user={fallbackUser} />;
   }
 
   return <>-</>;
