@@ -200,7 +200,6 @@ export class AssetManager {
     type: EntityType,
     logExtractionParams?: LogExtractionBodyParams
   ): Promise<boolean> {
-
     const installed = await this.install(type, logExtractionParams);
     if (installed) {
       await this.start(request, type);
