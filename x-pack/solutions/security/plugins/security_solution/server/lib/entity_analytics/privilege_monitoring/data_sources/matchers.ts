@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Matcher,
-  MonitoringEntitySourceType,
-} from '@kbn/securitysolution-api';
+import type { Matcher, MonitoringEntitySourceType } from '@kbn/securitysolution-api';
 import type { IntegrationType } from './constants';
 import { INTEGRATION_TYPES } from './constants';
 

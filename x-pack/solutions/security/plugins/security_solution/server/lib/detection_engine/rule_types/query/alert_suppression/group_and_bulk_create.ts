@@ -9,6 +9,7 @@ import type moment from 'moment';
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildEventsSearchQuery, buildTimeRangeFilter } from '../../utils/build_events_query';
 import type {
@@ -30,7 +31,6 @@ import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from '../../utils/bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';

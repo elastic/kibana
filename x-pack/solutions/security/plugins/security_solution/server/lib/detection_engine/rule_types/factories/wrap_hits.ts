@@ -6,14 +6,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import type { SecuritySharedParams, SignalSource, SimpleHit } from '../types';
 import { generateId } from '../utils/utils';
 import { transformHitToAlert } from './utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 
 /**
  * wrapHits is responsible for turning source events into alerts. Since we copy the source data into the alert, we are

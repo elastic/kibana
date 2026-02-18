@@ -14,7 +14,6 @@ import {
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   BareNote,
   ExportTimelineNotFoundError,
@@ -32,6 +31,7 @@ import type {
   TimelineType,
 } from '@kbn/securitysolution-api';
 import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';

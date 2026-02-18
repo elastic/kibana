@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import {
-  PERFORM_RULE_UPGRADE_URL,
-  PerformRuleUpgradeRequestBody,
-} from '@kbn/securitysolution-api';
+import { PERFORM_RULE_UPGRADE_URL, PerformRuleUpgradeRequestBody } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {

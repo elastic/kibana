@@ -15,11 +15,10 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { EntityType } from '../../../../../common/search_strategy';
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { RiskScoresCalculationResponse } from '@kbn/securitysolution-api';
-import type { AfterKeys } from '@kbn/securitysolution-api';
+import type { RiskScoresCalculationResponse, AfterKeys } from '@kbn/securitysolution-api';
 import { RiskScoresEntityCalculationRequest } from '@kbn/securitysolution-api';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { EntityType } from '../../../../../common/search_strategy';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';

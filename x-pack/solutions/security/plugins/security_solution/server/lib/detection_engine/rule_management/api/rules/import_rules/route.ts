@@ -12,11 +12,8 @@ import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { ImportRulesRequestQuery, ImportRulesResponse } from '@kbn/securitysolution-api';
 import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
-import {
-  ImportRulesRequestQuery,
-  ImportRulesResponse,
-} from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';

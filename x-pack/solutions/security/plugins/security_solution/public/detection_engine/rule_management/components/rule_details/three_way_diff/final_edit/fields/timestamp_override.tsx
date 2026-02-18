@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { DiffableRule, TimestampOverrideObject } from '@kbn/securitysolution-api';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { Field, UseField, useFormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
@@ -13,10 +14,6 @@ import { EsFieldSelectorField } from '../../../../../../rule_creation_ui/compone
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
-import type {
-  DiffableRule,
-  TimestampOverrideObject,
-} from '@kbn/securitysolution-api';
 
 export const timestampOverrideSchema = {
   timestampOverride: schema.timestampOverride,

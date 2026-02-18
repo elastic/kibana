@@ -7,9 +7,9 @@
 
 import type { IconColor } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { assertUnreachable } from '../../../../../common/utility_types';
 import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../common/utility_types';
 
 export const getStatusText = (value: RuleExecutionStatus | null | undefined): string | null => {
   if (value == null) {

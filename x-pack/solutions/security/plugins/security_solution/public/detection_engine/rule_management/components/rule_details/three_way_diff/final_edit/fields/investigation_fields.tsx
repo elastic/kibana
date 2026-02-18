@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import type { FormSchema, FormData } from '../../../../../../../shared_imports';
-import { UseField } from '../../../../../../../shared_imports';
-import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
 import type {
   DiffableRule,
   InvestigationFields,
   RuleFalsePositiveArray,
 } from '@kbn/securitysolution-api';
+import type { FormSchema, FormData } from '../../../../../../../shared_imports';
+import { UseField } from '../../../../../../../shared_imports';
+import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
 import { MultiSelectFieldsAutocomplete } from '../../../../../../rule_creation_ui/components/multi_select_fields';
 import { useAllEsqlRuleFields } from '../../../../../../rule_creation_ui/hooks';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';

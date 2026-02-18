@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { encode } from '@kbn/rison';
+import type { SortFieldTimeline } from '@kbn/securitysolution-api';
 import type { State } from '../../../common/store';
 
 import { PageScope } from '../../../data_view_manager/constants';
@@ -22,7 +23,6 @@ import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { SortFieldTimeline } from '@kbn/securitysolution-api';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';

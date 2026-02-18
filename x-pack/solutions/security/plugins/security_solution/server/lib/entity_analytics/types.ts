@@ -7,14 +7,14 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { RiskScoresPreviewResponse } from '@kbn/securitysolution-api';
-import type { EntityType } from '../../../common/search_strategy';
-import type { ITelemetryEventsSender } from '../telemetry/sender';
 import type {
+  RiskScoresPreviewResponse,
   AfterKeys,
   EntityAfterKey,
   RiskScoreWeights,
 } from '@kbn/securitysolution-api';
+import type { EntityType } from '../../../common/search_strategy';
+import type { ITelemetryEventsSender } from '../telemetry/sender';
 import type { Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
 import type { SetupPlugins, StartPlugins } from '../../plugin';

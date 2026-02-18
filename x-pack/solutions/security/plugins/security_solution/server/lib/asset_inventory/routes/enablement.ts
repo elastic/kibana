@@ -9,10 +9,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { API_VERSIONS } from '../../../../common/constants';
-import type { AssetInventoryRoutesDeps } from '../types';
 import { InitEntityStoreRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import { ASSET_INVENTORY_ENABLE_API_PATH } from '@kbn/securitysolution-api';
+import { API_VERSIONS } from '../../../../common/constants';
+import type { AssetInventoryRoutesDeps } from '../types';
 import { checkAndInitAssetCriticalityResources } from '../../entity_analytics/asset_criticality/check_and_init_asset_criticality_resources';
 import { errorInactiveFeature } from '../errors';
 

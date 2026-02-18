@@ -9,11 +9,11 @@ import { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { RunTimeMappings } from '@kbn/securitysolution-api';
 import {
   type GetFieldsData,
   useGetFieldsData,
 } from '../../document_details/shared/hooks/use_get_fields_data';
-import type { RunTimeMappings } from '@kbn/securitysolution-api';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 
 export interface UseDocumentDetailsParams {

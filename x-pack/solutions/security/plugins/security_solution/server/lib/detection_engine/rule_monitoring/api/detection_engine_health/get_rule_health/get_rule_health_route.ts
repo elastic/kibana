@@ -10,10 +10,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GetRuleHealthResponse } from '@kbn/securitysolution-api';
-import {
-  GetRuleHealthRequestBody,
-  GET_RULE_HEALTH_URL,
-} from '@kbn/securitysolution-api';
+import { GetRuleHealthRequestBody, GET_RULE_HEALTH_URL } from '@kbn/securitysolution-api';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';

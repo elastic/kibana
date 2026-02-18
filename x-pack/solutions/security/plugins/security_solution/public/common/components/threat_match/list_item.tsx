@@ -10,12 +10,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
+import type { ThreatMapping, ThreatMappingEntry } from '@kbn/securitysolution-api';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
 import type { FormattedEntry } from './types';
-import type {
-  ThreatMapping,
-  ThreatMappingEntry,
-} from '@kbn/securitysolution-api';
 import { EntryItem } from './entry_item';
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 import { AndBadgeComponent } from './and_badge';

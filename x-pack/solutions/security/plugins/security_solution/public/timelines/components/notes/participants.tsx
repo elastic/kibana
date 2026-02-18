@@ -19,13 +19,13 @@ import {
 import { css } from '@emotion/react';
 import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { type Note } from '@kbn/securitysolution-api';
 import {
   NOTE_AVATAR_WITH_NAME_TEST_ID,
   NOTES_PARTICIPANTS_TITLE_TEST_ID,
   TIMELINE_AVATAR_WITH_NAME_TEST_ID,
   TIMELINE_PARTICIPANT_TITLE_TEST_ID,
 } from './test_ids';
-import { type Note } from '@kbn/securitysolution-api';
 
 export const PARTICIPANTS = i18n.translate(
   'xpack.securitySolution.timeline.notes.participantsTitle',

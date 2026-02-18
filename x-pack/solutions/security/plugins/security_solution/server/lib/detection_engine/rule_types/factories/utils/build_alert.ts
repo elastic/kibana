@@ -50,6 +50,7 @@ import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
+import type { AncestorLatest, DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
 import type { SimpleHit } from '../../types';
 import type { ThresholdResult } from '../../threshold/types';
@@ -95,10 +96,6 @@ import {
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import type {
-  AncestorLatest,
-  DetectionAlertLatest,
-} from '@kbn/securitysolution-api';
 
 export interface BuildAlertFieldsProps {
   docs: SimpleHit[];

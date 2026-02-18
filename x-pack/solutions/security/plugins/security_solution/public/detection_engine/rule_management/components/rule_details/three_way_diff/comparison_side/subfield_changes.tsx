@@ -7,9 +7,9 @@
 
 import React, { Fragment } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import type { SubfieldChanges } from './types';
 import { Subfield } from './subfield';
-import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import { NoChanges } from './no_changes';
 
 interface SubfieldChangesProps {

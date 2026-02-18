@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import { useSelector } from 'react-redux';
+import { TimelineStatusEnum, type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { DeleteConfirmModal } from '../../../../notes/components/delete_confirm_modal';
 import * as i18n from '../translations';
 import type {
@@ -30,11 +31,6 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import {
-  TimelineStatusEnum,
-  type TimelineType,
-  TimelineTypeEnum,
-} from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 

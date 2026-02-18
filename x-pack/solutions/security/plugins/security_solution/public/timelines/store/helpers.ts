@@ -8,13 +8,6 @@
 import { cloneDeep, getOr, isEmpty, isEqualWith, omit, union, uniq } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
-import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type {
-  DataProvider,
-  QueryMatch,
-  QueryOperator,
-} from '../components/timeline/data_providers/data_provider';
-import { EXISTS_OPERATOR, IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
   type DataProviderType,
   type RowRendererId,
@@ -23,6 +16,13 @@ import {
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
+import type {
+  DataProvider,
+  QueryMatch,
+  QueryOperator,
+} from '../components/timeline/data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import type {
   ColumnHeaderOptions,
   SerializedFilterQuery,

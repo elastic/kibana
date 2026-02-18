@@ -8,8 +8,6 @@
 import { omitBy, isUndefined } from 'lodash';
 import dateMath from '@kbn/datemath';
 
-import { KibanaServices } from '../../../common/lib/kibana';
-
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -25,6 +23,7 @@ import {
   getRuleExecutionResultsUrl,
   SETUP_HEALTH_URL,
 } from '@kbn/securitysolution-api';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 import type {
   FetchRuleExecutionEventsArgs,

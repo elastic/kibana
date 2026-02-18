@@ -7,19 +7,21 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_DASHBOARD_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
+import {
+  SiemMigrationAuditLogger,
+  getRetryFilter,
+  withLicense,
+  createTracersCallbacks,
+  withExistingMigration,
+} from '@kbn/securitysolution-api';
+import { authz } from './util/authz';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   StartDashboardsMigrationRequestBody,
   StartDashboardsMigrationRequestParams,
   type StartDashboardsMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
-import { authz } from './util/authz';
-import { getRetryFilter } from '@kbn/securitysolution-api';
-import { withLicense } from '@kbn/securitysolution-api';
-import { createTracersCallbacks } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
+import { SIEM_DASHBOARD_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 
 export const registerSiemDashboardMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,

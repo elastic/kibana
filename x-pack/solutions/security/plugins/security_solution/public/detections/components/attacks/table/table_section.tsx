@@ -14,6 +14,7 @@ import { isGroupingBucket } from '@kbn/grouping/src';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import type { Status } from '@kbn/securitysolution-api';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -28,7 +29,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
-import type { Status } from '@kbn/securitysolution-api';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';

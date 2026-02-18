@@ -17,11 +17,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import { TimelineId } from '../../../common/types';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { timelineSelectors } from '../../timelines/store';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { timelineDefaults } from '../../timelines/store/defaults';

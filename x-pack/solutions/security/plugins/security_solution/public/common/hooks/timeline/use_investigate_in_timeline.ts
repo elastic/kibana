@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
@@ -18,7 +19,6 @@ import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { sourcererActions } from '../../store/actions';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 

@@ -8,12 +8,8 @@
 import { Readable } from 'stream';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
-import type { RuleToImport } from '@kbn/securitysolution-api';
-import {
-  getOutputDetailsSample,
-  getSampleDetailsAsNdjson,
-} from '@kbn/securitysolution-api';
-import type { InvestigationFields } from '@kbn/securitysolution-api';
+import type { RuleToImport, InvestigationFields } from '@kbn/securitysolution-api';
+import { getOutputDetailsSample, getSampleDetailsAsNdjson } from '@kbn/securitysolution-api';
 import { createPromiseFromRuleImportStream } from './create_promise_from_rule_import_stream';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({

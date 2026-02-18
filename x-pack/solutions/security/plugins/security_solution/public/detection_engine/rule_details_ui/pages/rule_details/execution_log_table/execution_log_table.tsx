@@ -37,6 +37,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
+import type { RuleExecutionResult, RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
@@ -46,10 +47,6 @@ import {
   RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
   RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
 } from '../../../../../../common/constants';
-import type {
-  RuleExecutionResult,
-  RuleExecutionStatus,
-} from '@kbn/securitysolution-api';
 import { RuleDetailTabs } from '../use_rule_details_tabs';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {

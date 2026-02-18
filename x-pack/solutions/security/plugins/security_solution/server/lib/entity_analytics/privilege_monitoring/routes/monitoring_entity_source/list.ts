@@ -10,15 +10,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
+  ListEntitySourcesRequestQuery,
+  type ListEntitySourcesResponse,
+} from '@kbn/securitysolution-api';
+import {
   API_VERSIONS,
   APP_ID,
   MONITORING_ENTITY_LIST_SOURCES_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import {
-  ListEntitySourcesRequestQuery,
-  type ListEntitySourcesResponse,
-} from '@kbn/securitysolution-api';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (

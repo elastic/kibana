@@ -7,6 +7,10 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
+import type {
+  RequiredField,
+  RequiredFieldInput,
+} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { UseField } from '../../../../shared_imports';
 import { NameComboBox } from './name_combobox';
 import { TypeComboBox } from './type_combobox';
@@ -14,10 +18,6 @@ import { makeValidateRequiredField } from './make_validate_required_field';
 import * as i18n from './translations';
 
 import type { ArrayItem, FieldConfig, FieldHook } from '../../../../shared_imports';
-import type {
-  RequiredField,
-  RequiredFieldInput,
-} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 interface RequiredFieldRowProps {
   item: ArrayItem;

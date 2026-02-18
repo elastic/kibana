@@ -15,6 +15,8 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 import { RuleActionsField } from '../../../../../../common/components/rule_actions_field';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
@@ -26,8 +28,6 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
-import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';

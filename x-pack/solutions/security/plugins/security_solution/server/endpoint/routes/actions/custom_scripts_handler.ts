@@ -6,14 +6,14 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import { CustomScriptsRequestSchema } from '@kbn/securitysolution-api';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { errorHandler } from '../error_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
-import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
-import { CustomScriptsRequestSchema } from '@kbn/securitysolution-api';
 
 import type {
   SecuritySolutionPluginRouter,

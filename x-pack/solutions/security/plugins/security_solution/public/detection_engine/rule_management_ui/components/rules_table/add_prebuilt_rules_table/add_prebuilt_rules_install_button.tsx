@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
-import type { Rule } from '../../../../rule_management/logic';
 import type { RuleSignatureId } from '@kbn/securitysolution-api';
+import type { Rule } from '../../../../rule_management/logic';
 import {
   useAddPrebuiltRulesTableContext,
   type AddPrebuiltRulesTableActions,

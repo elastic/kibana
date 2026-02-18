@@ -20,6 +20,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import type { Status } from '@kbn/securitysolution-api';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
@@ -59,7 +60,6 @@ import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
-import type { Status } from '@kbn/securitysolution-api';
 import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 const StyledFlexItem = styled(EuiFlexItem)`

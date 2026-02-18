@@ -11,18 +11,18 @@ import { pipe } from 'fp-ts/pipeable';
 import { map, fold } from 'fp-ts/Either';
 import { identity } from 'fp-ts/function';
 import {
-  SavedObjectTimelineRuntimeType,
-  SavedObjectTimelineTypeLiteralWithNullRt,
-  SavedObjectTimelineType,
-  SavedObjectTimelineStatus,
-} from '../../../../../common/types/timeline/saved_object';
-import {
   type TimelineType,
   TimelineTypeEnum,
   type TimelineStatus,
   TimelineStatusEnum,
   type TimelineResponse,
 } from '@kbn/securitysolution-api';
+import {
+  SavedObjectTimelineRuntimeType,
+  SavedObjectTimelineTypeLiteralWithNullRt,
+  SavedObjectTimelineType,
+  SavedObjectTimelineStatus,
+} from '../../../../../common/types/timeline/saved_object';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([

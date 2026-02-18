@@ -6,8 +6,8 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '@kbn/securitysolution-api';
+import type { AlertClosingReason } from '../../../../../common/types';
 import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,

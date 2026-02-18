@@ -7,13 +7,12 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SiemMigrationAuditLogger, withLicense } from '@kbn/securitysolution-api';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from './util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemRuleMigrationsGetRoute = (

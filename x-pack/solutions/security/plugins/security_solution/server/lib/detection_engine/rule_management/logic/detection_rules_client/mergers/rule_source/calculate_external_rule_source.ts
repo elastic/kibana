@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ExternalRuleSource,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
+import type { ExternalRuleSource, RuleResponse } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert_prebuilt_rule_asset_to_rule_response';

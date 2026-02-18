@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import type { GetInstalledIntegrationsResponse } from '@kbn/securitysolution-api';
+import { GET_INSTALLED_INTEGRATIONS_URL } from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { GetInstalledIntegrationsResponse } from '@kbn/securitysolution-api';
-import { GET_INSTALLED_INTEGRATIONS_URL } from '@kbn/securitysolution-api';
 import { createInstalledIntegrationSet } from './installed_integration_set';
 import { getFleetPackages } from '../../logic/get_fleet_packages';
 import { getFleetPackagePolicies } from '../../logic/get_package_policies';

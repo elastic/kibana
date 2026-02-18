@@ -7,13 +7,13 @@
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
   EndpointScript,
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
-import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';

@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import type {
-  DiffableCommonFields,
-  DiffableRule,
-} from '@kbn/securitysolution-api';
+import type { DiffableCommonFields, DiffableRule } from '@kbn/securitysolution-api';
 import { RelatedIntegrationsReadOnly } from './fields/related_integrations/related_integrations';
 import { RequiredFieldsReadOnly } from './fields/required_fields/required_fields';
 import { SeverityMappingReadOnly } from './fields/severity_mapping/severity_mapping';

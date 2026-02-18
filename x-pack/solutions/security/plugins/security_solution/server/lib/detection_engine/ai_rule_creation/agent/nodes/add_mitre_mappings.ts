@@ -8,6 +8,10 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import type {
+  Threat,
+  ThreatTechnique,
+} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 import {
@@ -20,10 +24,6 @@ import type {
   MitreTechnique,
   MitreSubTechnique,
 } from '../../../../../../common/detection_engine/mitre/types';
-import type {
-  Threat,
-  ThreatTechnique,
-} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 interface MitreMappingSelectionResponse {
   tactics: string[]; // Array of tactic IDs like ["TA0001", "TA0002"]

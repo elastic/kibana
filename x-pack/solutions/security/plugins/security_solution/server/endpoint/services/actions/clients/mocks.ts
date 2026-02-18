@@ -24,8 +24,18 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type {
+  MemoryDumpActionRequestBody,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+  ScanActionRequestBody,
+  RunScriptActionRequestBody,
+  CancelActionRequestBody,
+} from '@kbn/securitysolution-api';
 import { ScriptsLibraryMock } from '../../scripts_library/mocks';
-import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -50,16 +60,6 @@ import {
 } from '../../../mocks';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
 import { ACTION_RESPONSE_INDICES } from '../constants';
-import type {
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-  ScanActionRequestBody,
-  RunScriptActionRequestBody,
-  CancelActionRequestBody,
-} from '@kbn/securitysolution-api';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';

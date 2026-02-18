@@ -6,12 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
-  DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
-  DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
-  DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
-} from '../../../../../common/constants';
 import type {
   SearchUnifiedAlertsRequestBody,
   SearchUnifiedAlertsResponse,
@@ -19,6 +13,12 @@ import type {
   SetUnifiedAlertsTagsRequestBody,
   SetUnifiedAlertsAssigneesRequestBody,
 } from '@kbn/securitysolution-api';
+import {
+  DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+  DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+  DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+  DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+} from '../../../../../common/constants';
 import { KibanaServices } from '../../../lib/kibana';
 
 /**

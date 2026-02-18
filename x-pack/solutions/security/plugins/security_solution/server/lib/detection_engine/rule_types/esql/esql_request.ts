@@ -12,8 +12,8 @@ import type {
   QueryDslQueryContainer,
   EsqlEsqlShardFailure,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { logEsqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 

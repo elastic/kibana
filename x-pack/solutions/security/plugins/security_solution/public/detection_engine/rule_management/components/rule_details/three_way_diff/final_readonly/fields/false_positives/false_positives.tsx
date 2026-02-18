@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import * as ruleDetailsI18n from '../../../../translations';
 import type { RuleFalsePositiveArray } from '@kbn/securitysolution-api';
+import * as ruleDetailsI18n from '../../../../translations';
 import { FalsePositives } from '../../../../rule_about_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 

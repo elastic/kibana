@@ -9,8 +9,8 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createConnector } from '../../../endpoint/common/connectors_services';
 import type { Client as DetectionsClient } from '@kbn/securitysolution-api/api/quickstart_client.gen';
+import { createConnector } from '../../../endpoint/common/connectors_services';
 import { basicRule } from '../rules/new_terms/basic_rule';
 
 interface LegacyActionRequestSchema {

@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RowRenderer } from '../../../../../../../common/types';
 import type { RowRendererId } from '@kbn/securitysolution-api';
+import type { RowRenderer } from '../../../../../../../common/types';
 
 export const combineRenderers = ({
   a,

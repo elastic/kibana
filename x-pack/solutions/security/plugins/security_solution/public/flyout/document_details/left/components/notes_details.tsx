@@ -9,6 +9,8 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Note } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import type { TimelineModel } from '../../../..';
 import { Flyouts } from '../../shared/constants/flyouts';
@@ -21,8 +23,6 @@ import { NOTES_LOADING_TEST_ID } from '../../../../notes/components/test_ids';
 import { NotesList } from '../../../../notes/components/notes_list';
 import { pinEvent } from '../../../../timelines/store/actions';
 import type { State } from '../../../../common/store';
-import type { Note } from '@kbn/securitysolution-api';
-import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import {
   fetchNotesByDocumentIds,
   ReqStatus,

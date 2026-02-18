@@ -7,8 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleResponse } from '@kbn/securitysolution-api';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { createPrebuiltRuleObjectsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { createPrebuiltRuleAssetsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';

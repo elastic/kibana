@@ -11,6 +11,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
+import type { BulkActionEditPayload, BulkActionEditType } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum, BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
 import {
@@ -24,14 +26,6 @@ import { convertRulesFilterToKQL } from '../../../../../../common/detection_engi
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
-import type {
-  BulkActionEditPayload,
-  BulkActionEditType,
-} from '@kbn/securitysolution-api';
-import {
-  BulkActionEditTypeEnum,
-  BulkActionTypeEnum,
-} from '@kbn/securitysolution-api';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';

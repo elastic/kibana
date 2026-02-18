@@ -10,12 +10,12 @@ import { isEmpty } from 'lodash/fp';
 import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import {
   DataProviderTypeEnum,
   type TimelineType,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import type {
   DataProvider,
   DataProvidersAnd,

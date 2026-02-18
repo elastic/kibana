@@ -8,8 +8,8 @@
 import { capitalize } from 'lodash';
 import semver from 'semver';
 
-import type { Integration } from '@kbn/securitysolution-api';
 import type {
+  Integration,
   RelatedIntegration,
   RelatedIntegrationArray,
 } from '@kbn/securitysolution-api';

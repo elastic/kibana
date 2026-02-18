@@ -7,11 +7,7 @@
 
 import { flow } from 'fp-ts/function';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-  RuleUpdateProps,
-} from '@kbn/securitysolution-api';
+import type { RuleCreateProps, RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these

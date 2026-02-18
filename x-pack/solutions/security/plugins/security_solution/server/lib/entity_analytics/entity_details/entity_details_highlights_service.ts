@@ -29,10 +29,10 @@ import type {
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlSummaryJob } from '@kbn/ml-plugin/server';
-import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
-import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { EntityDetailsHighlightsRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_details/highlights.gen';
+import { createGetRiskScores } from '../risk_score/get_risk_score';
+import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
 import type { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';

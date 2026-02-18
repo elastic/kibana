@@ -14,11 +14,6 @@ import type {
   FieldSpec,
 } from '@kbn/data-views-plugin/common';
 import userEvent from '@testing-library/user-event';
-import { initialUserPrivilegesState } from '../../../../../../../common/components/user_privileges/user_privileges_context';
-import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
-import { invariant } from '../../../../../../../../common/utils/invariant';
-import { TIMELINES_URL } from '../../../../../../../../common/constants';
-import { RulesPage } from '../../..';
 import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import {
   GET_ALL_INTEGRATIONS_URL,
@@ -28,6 +23,11 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/securitysolution-api';
+import { initialUserPrivilegesState } from '../../../../../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
+import { invariant } from '../../../../../../../../common/utils/invariant';
+import { TIMELINES_URL } from '../../../../../../../../common/constants';
+import { RulesPage } from '../../..';
 import { KibanaServices } from '../../../../../../../common/lib/kibana';
 import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 

@@ -7,14 +7,13 @@
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type { ThresholdNormalized } from '@kbn/securitysolution-api';
+import type { ThresholdNormalized, DetectionAlertLatest } from '@kbn/securitysolution-api';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { ThresholdCompositeBucket } from './types';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
-import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { bulkCreate, wrapHits } from '../factories';
 
 interface BulkCreateThresholdSignalsParams {

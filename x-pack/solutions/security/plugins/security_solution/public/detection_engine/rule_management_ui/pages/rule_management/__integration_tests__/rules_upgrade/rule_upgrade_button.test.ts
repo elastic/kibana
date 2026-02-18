@@ -6,10 +6,7 @@
  */
 
 import { screen, within } from '@testing-library/react';
-import {
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-} from '@kbn/securitysolution-api';
+import { ThreeWayDiffConflict, ThreeWayDiffOutcome } from '@kbn/securitysolution-api';
 import {
   mockRuleUpgradeReviewData,
   renderRuleUpgradeFlyout,

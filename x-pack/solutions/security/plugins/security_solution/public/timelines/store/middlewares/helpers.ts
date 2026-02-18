@@ -9,13 +9,13 @@ import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { IHttpFetchError } from '@kbn/core/public';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import type { TimelineModel } from '../model';
 import { saveTimeline, updateTimeline } from '../actions';
-import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { selectTimelineById } from '../selectors';
 
 /**

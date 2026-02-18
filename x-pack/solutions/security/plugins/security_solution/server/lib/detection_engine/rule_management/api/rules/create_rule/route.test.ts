@@ -21,11 +21,11 @@ import {
   getCreateEsqlRulesSchemaMock,
   getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
+  getRulesSchemaMock,
 } from '@kbn/securitysolution-api';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
-import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import type {
   MockClients,
   SecuritySolutionRequestHandlerContextMock,

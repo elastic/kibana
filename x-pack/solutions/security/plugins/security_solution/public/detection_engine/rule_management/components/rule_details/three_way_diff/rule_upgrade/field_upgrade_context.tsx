@@ -8,14 +8,14 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
-import { useRulePreviewContext } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
   ThreeWayDiffOutcome,
   type DiffableRule,
   type ThreeWayFieldsDiff,
   type ThreeWayDiff,
 } from '@kbn/securitysolution-api';
+import { useRulePreviewContext } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { SetRuleFieldResolvedValueFn } from '../../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';

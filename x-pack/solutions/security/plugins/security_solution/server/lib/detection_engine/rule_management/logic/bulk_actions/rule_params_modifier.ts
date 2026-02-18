@@ -6,7 +6,6 @@
  */
 
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
@@ -14,12 +13,13 @@ import type {
   BulkActionEditPayloadSetAlertSuppression,
 } from '@kbn/securitysolution-api';
 import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
-import { invariant } from '../../../../../../common/utils/invariant';
-import { calculateFromValue } from '../../../rule_types/utils/utils';
 import type {
   AlertSuppressionCamel,
   AlertSuppressionDuration,
 } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
+import { calculateFromValue } from '../../../rule_types/utils/utils';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>

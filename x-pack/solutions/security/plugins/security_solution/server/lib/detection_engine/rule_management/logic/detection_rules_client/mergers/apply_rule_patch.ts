@@ -7,7 +7,6 @@
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   EqlRule,
   EqlRuleResponseFields,
@@ -27,6 +26,7 @@ import type {
   ThresholdRule,
   ThresholdRuleResponseFields,
   TypeSpecificResponse,
+  PatchRuleRequestBody,
 } from '@kbn/securitysolution-api';
 import {
   EqlRulePatchFields,
@@ -38,7 +38,7 @@ import {
   ThreatMatchRulePatchFields,
   ThresholdRulePatchFields,
 } from '@kbn/securitysolution-api';
-import type { PatchRuleRequestBody } from '@kbn/securitysolution-api';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,

@@ -15,8 +15,6 @@ import type {
   BulkEditActionSummary,
   NormalizedRuleError,
   RuleDetailsInError,
-} from '@kbn/securitysolution-api';
-import type {
   BulkActionType,
   BulkEditActionResponse,
   BulkActionsDryRunErrCode,

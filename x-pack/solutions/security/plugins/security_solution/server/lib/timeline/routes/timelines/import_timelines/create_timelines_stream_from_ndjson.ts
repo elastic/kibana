@@ -8,6 +8,7 @@
 import type { Transform } from 'stream';
 import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { ImportTimelines } from '@kbn/securitysolution-api';
 import {
   parseNdjsonStrings,
   filterExportedCounts,
@@ -15,7 +16,6 @@ import {
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import type { ImportTimelineResponse } from './types';
-import { ImportTimelines } from '@kbn/securitysolution-api';
 import { parseOrThrowErrorFactory } from '../../../../../../common/timelines/zod_errors';
 
 const createPlainError = (message: string) => new Error(message);

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import type {
-  RuleDataSource,
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { RuleDataSource, ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
@@ -21,6 +16,7 @@ import {
   determineDiffOutcomeForDataSource,
   isIndexPatternDataSourceType,
 } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
 /**

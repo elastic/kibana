@@ -23,10 +23,7 @@ import type {
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { RuleToImportInput } from '@kbn/securitysolution-api';
-import {
-  RuleToImport,
-  validateRuleToImport,
-} from '@kbn/securitysolution-api';
+import { RuleToImport, validateRuleToImport } from '@kbn/securitysolution-api';
 import type { RulesObjectsExportResultDetails } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 import {
   parseNdjsonStrings,

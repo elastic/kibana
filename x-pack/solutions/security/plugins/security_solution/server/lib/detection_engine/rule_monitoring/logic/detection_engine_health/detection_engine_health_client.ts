@@ -7,9 +7,6 @@
 
 import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import type { ExtMeta } from '../utils/console_logging';
-
 import type {
   ClusterHealthParameters,
   ClusterHealthSnapshot,
@@ -19,6 +16,8 @@ import type {
   SpaceHealthParameters,
   SpaceHealthSnapshot,
 } from '@kbn/securitysolution-api';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import type { ExtMeta } from '../utils/console_logging';
 
 import type { IEventLogHealthClient } from './event_log/event_log_health_client';
 import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_health_client';

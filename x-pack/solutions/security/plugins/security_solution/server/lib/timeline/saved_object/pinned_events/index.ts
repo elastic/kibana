@@ -12,12 +12,12 @@ import { identity } from 'fp-ts/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   BarePinnedEvent,
   PinnedEvent,
   PersistPinnedEventResponse,
 } from '@kbn/securitysolution-api';
+import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { FrameworkRequest } from '../../../framework';

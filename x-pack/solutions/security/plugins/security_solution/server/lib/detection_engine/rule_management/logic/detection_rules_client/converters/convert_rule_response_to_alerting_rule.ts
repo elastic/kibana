@@ -9,11 +9,8 @@ import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rul
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import type { RuleResponse, TypeSpecificCreateProps } from '@kbn/securitysolution-api';
 import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
-import type {
-  RuleResponse,
-  TypeSpecificCreateProps,
-} from '@kbn/securitysolution-api';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,

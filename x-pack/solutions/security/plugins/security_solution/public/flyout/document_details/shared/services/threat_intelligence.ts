@@ -11,8 +11,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { CtiQueries } from '@kbn/securitysolution-api';
-import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy';
 import type { EventEnrichmentRequestOptionsInput } from '@kbn/securitysolution-api';
+import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy';
 
 type GetEventEnrichmentProps = Omit<EventEnrichmentRequestOptionsInput, 'factoryQueryType'> & {
   /**

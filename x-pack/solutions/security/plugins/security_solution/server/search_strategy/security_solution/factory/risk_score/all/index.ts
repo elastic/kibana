@@ -10,8 +10,8 @@ import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskQueries } from '@kbn/securitysolution-api';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   BucketItem,

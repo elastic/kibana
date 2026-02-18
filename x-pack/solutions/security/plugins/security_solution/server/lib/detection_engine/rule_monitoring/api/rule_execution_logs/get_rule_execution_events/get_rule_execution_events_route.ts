@@ -9,15 +9,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { buildSiemResponse } from '../../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-
 import type { GetRuleExecutionEventsResponse } from '@kbn/securitysolution-api';
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
 } from '@kbn/securitysolution-api';
+import { buildSiemResponse } from '../../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
 /**
  * Returns execution events of a given rule (e.g. status changes) from Event Log.

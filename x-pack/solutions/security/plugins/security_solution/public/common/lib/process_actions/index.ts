@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
-} from '@kbn/securitysolution-api';
+import type { KillProcessRequestBody, SuspendProcessRequestBody } from '@kbn/securitysolution-api';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
 import { KILL_PROCESS_ROUTE, SUSPEND_PROCESS_ROUTE } from '../../../../common/endpoint/constants';

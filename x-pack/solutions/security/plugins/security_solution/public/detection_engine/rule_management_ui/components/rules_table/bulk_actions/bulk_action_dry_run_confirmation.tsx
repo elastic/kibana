@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../common/translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
-import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 import type { BulkActionForConfirmation, DryRunResult } from './types';

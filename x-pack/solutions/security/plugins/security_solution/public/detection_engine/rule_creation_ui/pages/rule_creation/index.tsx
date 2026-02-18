@@ -20,6 +20,7 @@ import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from '
 import styled from 'styled-components';
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { RuleCreateProps, RuleResponse } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -27,10 +28,6 @@ import {
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import {

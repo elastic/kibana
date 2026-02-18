@@ -12,11 +12,11 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SignalSource, LoggedRequestsConfig } from '../types';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { logSearchRequest } from './logged_requests';
 
 export interface SingleSearchAfterParams<TSearchRequest> {

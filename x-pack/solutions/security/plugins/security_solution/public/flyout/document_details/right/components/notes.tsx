@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Note } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -31,7 +32,6 @@ import {
   NOTES_VIEW_NOTES_BUTTON_TEST_ID,
 } from './test_ids';
 import type { State } from '../../../../common/store';
-import type { Note } from '@kbn/securitysolution-api';
 import {
   fetchNotesByDocumentIds,
   ReqStatus,

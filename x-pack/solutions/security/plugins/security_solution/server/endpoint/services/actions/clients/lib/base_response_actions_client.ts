@@ -17,8 +17,22 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
-import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import type {
+  MemoryDumpActionRequestBody,
+  CustomScriptsRequestQueryParams,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  KillProcessRequestBody,
+  ResponseActionGetFileRequestBody,
+  ResponseActionsRequestBody,
+  RunScriptActionRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
+  UploadActionApiRequestBody,
+  CancelActionRequestBody,
+} from '@kbn/securitysolution-api';
 import type { ResponseActionRequestTag } from '../../constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
@@ -92,20 +106,6 @@ import type {
   ResponseActionMemoryDumpParameters,
   ResponseActionMemoryDumpOutputContent,
 } from '../../../../../../common/endpoint/types';
-import type {
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  KillProcessRequestBody,
-  ResponseActionGetFileRequestBody,
-  ResponseActionsRequestBody,
-  RunScriptActionRequestBody,
-  ScanActionRequestBody,
-  SuspendProcessRequestBody,
-  UnisolationRouteRequestBody,
-  UploadActionApiRequestBody,
-  CancelActionRequestBody,
-} from '@kbn/securitysolution-api';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';

@@ -15,13 +15,13 @@ import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-commo
 import { isErrorResult, isOtherResult } from '@kbn/agent-builder-common/tools';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import { RuleResponse } from '@kbn/securitysolution-api';
 import {
   SecurityAgentBuilderAttachments,
   THREAT_HUNTING_AGENT_ID,
 } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { RuleResponse } from '@kbn/securitysolution-api';
 import * as i18n from '../translations';
 import type { ToolProgressUpdate } from '../agent_builder_updates';
 

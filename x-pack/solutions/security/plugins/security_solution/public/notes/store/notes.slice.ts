@@ -8,6 +8,7 @@
 import type { EntityState, SerializedError } from '@reduxjs/toolkit';
 import { createAsyncThunk, createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
+import type { BareNote, Note } from '@kbn/securitysolution-api';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import type { State } from '../../common/store';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
-import type { BareNote, Note } from '@kbn/securitysolution-api';
 
 export enum ReqStatus {
   Idle = 'idle',

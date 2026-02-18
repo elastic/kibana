@@ -8,8 +8,7 @@
 import type { ESFilter } from '@kbn/es-types';
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
-import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
+import type { PrebuiltRuleAssetsFilter, PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
 
 export function prepareQueryDslFilter(

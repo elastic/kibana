@@ -14,12 +14,12 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
   AssetCriticalityUpsertForBulkUpload,
 } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import type { CriticalityValues } from './constants';

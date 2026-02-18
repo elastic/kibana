@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import * as ruleDetailsI18n from '../../../../translations';
 import type { MaxSignals as MaxSignalsType } from '@kbn/securitysolution-api';
+import * as ruleDetailsI18n from '../../../../translations';
 import { MaxSignals } from '../../../../rule_about_section';
 
 interface MaxSignalsReadOnlyProps {

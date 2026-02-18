@@ -6,11 +6,8 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
+import type { GetRuleHealthRequestBody, GetRuleHealthResponse } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type {
-  GetRuleHealthRequestBody,
-  GetRuleHealthResponse,
-} from '@kbn/securitysolution-api';
 import { useGetRuleHealthQuery } from '../../api/hooks/use_get_rule_health';
 import * as i18n from './translations';
 

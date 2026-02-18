@@ -9,7 +9,7 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getRulesSchemaMock } from '@kbn/securitysolution-api';
+import { getRulesSchemaMock, getValidatedRuleToImportMock } from '@kbn/securitysolution-api';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -17,7 +17,6 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
-import { getValidatedRuleToImportMock } from '@kbn/securitysolution-api';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 

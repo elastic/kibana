@@ -10,10 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import type { DeleteRuleResponse } from '@kbn/securitysolution-api';
-import {
-  DeleteRuleRequestQuery,
-  validateQueryRuleByIds,
-} from '@kbn/securitysolution-api';
+import { DeleteRuleRequestQuery, validateQueryRuleByIds } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';

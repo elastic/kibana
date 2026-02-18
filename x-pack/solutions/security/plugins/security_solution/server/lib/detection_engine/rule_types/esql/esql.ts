@@ -15,6 +15,7 @@ import {
   getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
@@ -30,7 +31,6 @@ import {
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';

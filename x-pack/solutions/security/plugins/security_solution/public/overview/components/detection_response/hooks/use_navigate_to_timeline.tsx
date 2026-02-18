@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { sourcererActions } from '../../../../sourcerer/store';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';

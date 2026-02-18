@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { PageScope } from '../../../../data_view_manager/constants';
 import type { RunTimeMappings } from '@kbn/securitysolution-api';
+import { PageScope } from '../../../../data_view_manager/constants';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {

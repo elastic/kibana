@@ -8,10 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
-import type {
-  HealthIntervalGranularity,
-  HealthHistory,
-} from '@kbn/securitysolution-api';
+import type { HealthIntervalGranularity, HealthHistory } from '@kbn/securitysolution-api';
 import type { RawData } from '../../../utils/normalization';
 
 import * as f from '../../../event_log/event_log_fields';

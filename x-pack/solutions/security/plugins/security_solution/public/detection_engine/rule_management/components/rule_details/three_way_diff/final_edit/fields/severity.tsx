@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { type FieldHook, UseField } from '../../../../../../../shared_imports';
 import type { Severity } from '@kbn/securitysolution-api';
+import { type FieldHook, UseField } from '../../../../../../../shared_imports';
 import { DefaultSeverity } from '../../../../../../rule_creation_ui/components/severity_mapping/default_severity';
 
 export function SeverityEdit(): JSX.Element {

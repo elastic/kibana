@@ -9,10 +9,7 @@ import React, { useCallback } from 'react';
 import { replace } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type {
-  RuleExecutionStatus,
-  RuleRunType,
-} from '@kbn/securitysolution-api';
+import type { RuleExecutionStatus, RuleRunType } from '@kbn/securitysolution-api';
 
 import {
   RUN_TYPE_FILTERS,

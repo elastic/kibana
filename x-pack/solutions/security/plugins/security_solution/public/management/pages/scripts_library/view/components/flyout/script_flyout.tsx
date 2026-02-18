@@ -8,9 +8,9 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../../../../../components/artifact_list_page/hooks/use_set_url_params';
-import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useToasts } from '../../../../../../common/lib/kibana';
 import {
   useScriptsLibraryUrlParams,

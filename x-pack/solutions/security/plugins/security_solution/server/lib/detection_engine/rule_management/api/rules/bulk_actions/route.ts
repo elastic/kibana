@@ -11,13 +11,13 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '@kbn/securitysolution-api';
 import {
   BulkActionTypeEnum,
   PerformRulesBulkActionRequestBody,
   PerformRulesBulkActionRequestQuery,
 } from '@kbn/securitysolution-api';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,

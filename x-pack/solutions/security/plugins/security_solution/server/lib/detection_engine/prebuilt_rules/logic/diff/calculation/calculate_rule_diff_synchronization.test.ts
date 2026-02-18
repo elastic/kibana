@@ -13,6 +13,7 @@ import { convertRuleToDiffable } from '../../../../../../../common/detection_eng
 import type {
   RuleResponse,
   ThreeWayRuleFieldsDiff,
+  TwoWayDiffRule,
 } from '@kbn/securitysolution-api';
 import {
   AlertSuppressionDurationUnitEnum,
@@ -20,7 +21,6 @@ import {
   MissingVersion,
   SeverityEnum,
 } from '@kbn/securitysolution-api';
-import type { TwoWayDiffRule } from '@kbn/securitysolution-api';
 
 const CUSTOM_QUERY_PREBUILT_RULE_ASSET = getPrebuiltRuleMockOfType('query');
 const CUSTOM_QUERY_PREBUILT_RULE_RESPONSE = convertPrebuiltRuleAssetToRuleResponse(

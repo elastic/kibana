@@ -11,6 +11,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import _ from 'lodash';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -31,7 +32,6 @@ import {
 } from '../../../../../../common/search_strategy';
 import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
-import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
   buildDsl: (options) => {

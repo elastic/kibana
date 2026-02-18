@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PINNED_EVENT_URL } from '../../../../common/constants';
 import type { PersistPinnedEventRouteResponse } from '@kbn/securitysolution-api';
+import { PINNED_EVENT_URL } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({

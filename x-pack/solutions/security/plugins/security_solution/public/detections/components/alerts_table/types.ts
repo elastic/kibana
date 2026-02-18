@@ -12,10 +12,9 @@ import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/typ
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { GroupingBucket } from '@kbn/grouping/src';
+import type { Status, Note } from '@kbn/securitysolution-api';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
-import type { Status } from '@kbn/securitysolution-api';
-import type { Note } from '@kbn/securitysolution-api';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/model';
 import type { ControlColumnProps, RowRenderer } from '../../../../common/types';

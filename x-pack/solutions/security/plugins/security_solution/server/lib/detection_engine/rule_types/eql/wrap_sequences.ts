@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { EqlSequence } from '../../../../../common/detection_engine/types';
-import type { SecuritySharedParams, SignalSource } from '../types';
-import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
-import type { EqlRuleParams } from '../../rule_schema';
 import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlert,
 } from '@kbn/securitysolution-api';
+import type { EqlSequence } from '../../../../../common/detection_engine/types';
+import type { SecuritySharedParams, SignalSource } from '../types';
+import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
+import type { EqlRuleParams } from '../../rule_schema';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const wrapSequences = ({

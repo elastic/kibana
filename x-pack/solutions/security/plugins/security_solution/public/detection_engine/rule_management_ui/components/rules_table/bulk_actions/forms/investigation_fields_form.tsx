@@ -9,15 +9,14 @@ import React from 'react';
 import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
 import * as i18n from '../../../../../common/translations';
 
 import { useFetchIndex } from '../../../../../../common/containers/source';
-
-import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
-import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {

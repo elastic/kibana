@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import {
   containsInvalidItems,
   singleEntryThreat,
 } from '../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../shared_imports';
-import type { ThreatMapping } from '@kbn/securitysolution-api';
 
 export function threatMatchMappingValidatorFactory(): ValidationFunc<
   FormData,

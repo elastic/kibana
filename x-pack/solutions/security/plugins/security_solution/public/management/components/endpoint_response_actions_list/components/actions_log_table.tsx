@@ -24,12 +24,12 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getActionStatus } from './hooks';

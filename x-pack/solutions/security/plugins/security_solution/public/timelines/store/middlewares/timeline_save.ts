@@ -21,6 +21,12 @@ import {
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  PersistTimelineResponse,
+  SavedTimeline,
+  TimelineErrorResponse,
+} from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { PageScope } from '../../../data_view_manager/constants';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
@@ -38,12 +44,6 @@ import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import type {
-  PersistTimelineResponse,
-  SavedTimeline,
-  TimelineErrorResponse,
-} from '@kbn/securitysolution-api';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';

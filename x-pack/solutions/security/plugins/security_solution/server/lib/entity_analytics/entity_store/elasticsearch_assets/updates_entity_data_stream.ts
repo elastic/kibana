@@ -11,10 +11,7 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema/src/schema/v1/patterns';
-import type {
-  EntityType,
-  EngineComponentStatus,
-} from '@kbn/securitysolution-api';
+import type { EntityType, EngineComponentStatus } from '@kbn/securitysolution-api';
 import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 
 export const initEntityUpdatesDataStream = async (

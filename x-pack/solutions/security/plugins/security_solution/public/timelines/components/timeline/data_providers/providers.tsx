@@ -18,6 +18,7 @@ import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
+import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { timelineActions } from '../../../store';
 
@@ -30,7 +31,6 @@ import {
 } from '../../../../common/components/drag_and_drop/helpers';
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 import { IS_OPERATOR } from './data_provider';
-import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 

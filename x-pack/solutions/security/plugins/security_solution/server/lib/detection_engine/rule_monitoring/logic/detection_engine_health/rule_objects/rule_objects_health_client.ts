@@ -7,8 +7,8 @@
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import type {
+  RuleResponse,
   ClusterHealthParameters,
   RuleHealthParameters,
   SpaceHealthParameters,

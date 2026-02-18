@@ -8,9 +8,8 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo, memo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
+import type { RuleSignatureId, RuleResponse } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../common/utils/invariant';
-import type { RuleSignatureId } from '@kbn/securitysolution-api';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
 import {
   RulePreviewContextProvider,

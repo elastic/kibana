@@ -7,18 +7,14 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { FieldComparisonSide } from './field_comparison_side';
-import type {
-  ThreeWayDiff,
-  DiffableAllFields,
-  RuleKqlQuery,
-} from '@kbn/securitysolution-api';
+import type { ThreeWayDiff, DiffableAllFields, RuleKqlQuery } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   ThreeWayDiffConflict,
   KqlQueryType,
 } from '@kbn/securitysolution-api';
+import { FieldComparisonSide } from './field_comparison_side';
 export default {
   component: FieldComparisonSide,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/ComparisonSide',

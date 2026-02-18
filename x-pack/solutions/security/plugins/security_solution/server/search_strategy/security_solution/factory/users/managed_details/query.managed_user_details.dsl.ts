@@ -7,8 +7,8 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptions } from '@kbn/securitysolution-api';
+import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 
 export const buildManagedUserDetailsQuery = ({

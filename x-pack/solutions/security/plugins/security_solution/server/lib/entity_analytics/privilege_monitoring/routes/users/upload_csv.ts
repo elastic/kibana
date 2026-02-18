@@ -10,13 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
+import type { PrivmonBulkUploadUsersCSVResponse } from '@kbn/securitysolution-api';
 import {
   MONITORING_USERS_CSV_UPLOAD_URL,
   PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE,
 } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
-import type { PrivmonBulkUploadUsersCSVResponse } from '@kbn/securitysolution-api';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCsvService } from '../../users/csv_upload';

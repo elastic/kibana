@@ -8,10 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  CopyTimelineRequestBody,
-  type CopyTimelineResponse,
-} from '@kbn/securitysolution-api';
+import { CopyTimelineRequestBody, type CopyTimelineResponse } from '@kbn/securitysolution-api';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';

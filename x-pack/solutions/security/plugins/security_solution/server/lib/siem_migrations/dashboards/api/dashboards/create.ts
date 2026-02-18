@@ -8,6 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
+import {
+  withLicense,
+  SiemMigrationAuditLogger,
+  withExistingMigration,
+} from '@kbn/securitysolution-api';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import {
   CreateDashboardMigrationDashboardsRequestBody,
@@ -16,11 +21,8 @@ import {
 import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 import type { CreateMigrationItemInput } from '../../../common/data/siem_migrations_data_item_client';
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 type CreateMigrationDashboardInput = CreateMigrationItemInput<DashboardMigrationDashboard>;
 

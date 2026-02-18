@@ -9,13 +9,12 @@ import React from 'react';
 import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../../common/translations';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
-
-import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
-import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {

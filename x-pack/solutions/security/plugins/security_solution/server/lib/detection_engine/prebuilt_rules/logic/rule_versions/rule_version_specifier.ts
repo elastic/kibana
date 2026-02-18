@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleSignatureId,
-  RuleVersion,
-} from '@kbn/securitysolution-api';
+import type { RuleSignatureId, RuleVersion } from '@kbn/securitysolution-api';
 
 export interface RuleVersionSpecifier {
   rule_id: RuleSignatureId;

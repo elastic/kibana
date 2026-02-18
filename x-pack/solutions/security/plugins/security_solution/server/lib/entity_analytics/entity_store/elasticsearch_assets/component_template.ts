@@ -6,10 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentStatus,
-} from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum, type EngineComponentStatus } from '@kbn/securitysolution-api';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;

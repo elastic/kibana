@@ -15,6 +15,13 @@ import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import type {
+  DataViewId,
+  IndexPatternArray,
+  RuleObjectId,
+  RuleSignatureId,
+  Status,
+} from '@kbn/securitysolution-api';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -40,13 +47,6 @@ import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { TimelineId } from '../../../../../common/types/timeline';
-import type {
-  DataViewId,
-  IndexPatternArray,
-  RuleObjectId,
-  RuleSignatureId,
-  Status,
-} from '@kbn/securitysolution-api';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';

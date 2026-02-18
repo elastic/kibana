@@ -9,6 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import type {
+  GetMetadataListRequestQuery,
+  GetMetadataRequestSchema,
+} from '@kbn/securitysolution-api';
 import { stringify } from '../../utils/stringify';
 import type {
   MetadataListResponse,
@@ -18,10 +22,6 @@ import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import type { EndpointAppContext } from '../../types';
-import type {
-  GetMetadataListRequestQuery,
-  GetMetadataRequestSchema,
-} from '@kbn/securitysolution-api';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,

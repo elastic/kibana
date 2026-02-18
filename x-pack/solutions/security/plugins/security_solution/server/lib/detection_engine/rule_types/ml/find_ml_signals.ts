@@ -9,9 +9,9 @@ import dateMath from '@kbn/datemath';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { Filter } from '@kbn/es-query';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import type { AnomalyResults } from '../../../machine_learning';
 import { getAnomalies, buildAnomalyQuery } from '../../../machine_learning';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { logSearchRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 

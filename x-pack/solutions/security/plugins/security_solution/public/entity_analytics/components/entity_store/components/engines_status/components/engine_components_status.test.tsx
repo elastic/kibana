@@ -8,10 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineComponentsStatusTable } from './engine_components_status';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentStatus,
-} from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum, type EngineComponentStatus } from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../../../../common/mock';
 
 const uninstalledWithErrorsComponent = {

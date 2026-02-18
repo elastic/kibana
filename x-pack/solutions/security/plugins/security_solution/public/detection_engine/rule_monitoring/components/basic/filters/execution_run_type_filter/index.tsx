@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { MultiselectFilter } from '../multiselect_filter';
 import type { RuleRunType } from '@kbn/securitysolution-api';
 import { RuleRunTypeEnum } from '@kbn/securitysolution-api';
+import { MultiselectFilter } from '../multiselect_filter';
 import * as i18n from './translations';
 import {
   RULE_EXECUTION_TYPE_BACKFILL,

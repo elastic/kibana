@@ -10,6 +10,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
@@ -19,7 +20,6 @@ import { AllRulesTabs } from '../rules_table_toolbar';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
-import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`

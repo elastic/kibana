@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/securitysolution-api';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/securitysolution-api';
 
 const PRIVILEGED_ACCESS_DETECTION_INDEX_PATTERN =
   'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';

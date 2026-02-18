@@ -10,8 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
-import { SetAlertsStatusRequestBody } from '@kbn/securitysolution-api';
-import { AlertStatusEnum } from '@kbn/securitysolution-api';
+import { SetAlertsStatusRequestBody, AlertStatusEnum } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,

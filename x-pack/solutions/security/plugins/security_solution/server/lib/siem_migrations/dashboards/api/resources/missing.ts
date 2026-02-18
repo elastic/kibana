@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import { withLicense, withExistingMigration } from '@kbn/securitysolution-api';
 import type { SiemMigrationResourceBase } from '../../../../../../common/siem_migrations/model/common.gen';
 import {
   GetDashboardMigrationResourcesMissingRequestParams,
@@ -16,8 +17,6 @@ import {
 import { SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsResourceGetMissingRoute = (
   router: SecuritySolutionPluginRouter,

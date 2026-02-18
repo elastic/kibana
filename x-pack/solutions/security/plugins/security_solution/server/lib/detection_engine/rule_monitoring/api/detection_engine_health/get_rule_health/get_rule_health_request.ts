@@ -6,10 +6,7 @@
  */
 
 import moment from 'moment';
-import type {
-  GetRuleHealthRequest,
-  GetRuleHealthRequestBody,
-} from '@kbn/securitysolution-api';
+import type { GetRuleHealthRequest, GetRuleHealthRequestBody } from '@kbn/securitysolution-api';
 import { validateHealthInterval } from '../health_interval';
 
 export const validateGetRuleHealthRequest = (

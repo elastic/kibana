@@ -6,6 +6,7 @@
  */
 
 import type { ICON_TYPES, EuiTableActionsColumnType } from '@elastic/eui';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type {
   ActionTimelineToShow,
   DeleteTimelines,
@@ -16,7 +17,6 @@ import type {
   OnOpenDeleteTimelineModal,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 type Action = EuiTableActionsColumnType<object>['actions'][number];
 /**

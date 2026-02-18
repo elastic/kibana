@@ -23,14 +23,14 @@ import React from 'react';
 import styled from 'styled-components';
 import type { Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import { constructThreatMappingDescription } from '../../../rule_management/components/rule_details/rule_definition_section';
-import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
   ThreatMapping,
 } from '@kbn/securitysolution-api';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
+import { constructThreatMappingDescription } from '../../../rule_management/components/rule_details/rule_definition_section';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';

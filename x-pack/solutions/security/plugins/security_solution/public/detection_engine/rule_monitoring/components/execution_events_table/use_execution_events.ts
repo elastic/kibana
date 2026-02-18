@@ -6,9 +6,9 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { GetRuleExecutionEventsResponse } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import type { GetRuleExecutionEventsResponse } from '@kbn/securitysolution-api';
 import type { FetchRuleExecutionEventsArgs } from '../../api';
 import { api } from '../../api';
 

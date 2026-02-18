@@ -6,9 +6,9 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { ensureUserHasAuthzToFilesForAction } from './utils';
 import type { EndpointActionFileInfoParams } from '@kbn/securitysolution-api';
 import { EndpointActionFileInfoSchema } from '@kbn/securitysolution-api';
+import { ensureUserHasAuthzToFilesForAction } from './utils';
 import type { ResponseActionsClient } from '../../services';
 import {
   getResponseActionsClient,

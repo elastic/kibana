@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import * as ruleDetailsI18n from '../../../../translations';
 import type { Threshold as ThresholdType } from '@kbn/securitysolution-api';
+import * as ruleDetailsI18n from '../../../../translations';
 import { Threshold } from '../../../../rule_definition_section';
 
 interface ThresholdReadOnlyProps {

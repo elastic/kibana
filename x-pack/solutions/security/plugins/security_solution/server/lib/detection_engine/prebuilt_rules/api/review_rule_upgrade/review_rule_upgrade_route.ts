@@ -7,10 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import {
-  REVIEW_RULE_UPGRADE_URL,
-  ReviewRuleUpgradeRequestBody,
-} from '@kbn/securitysolution-api';
+import { REVIEW_RULE_UPGRADE_URL, ReviewRuleUpgradeRequestBody } from '@kbn/securitysolution-api';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import {

@@ -9,8 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import * as i18n from './translations';
 import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
+import * as i18n from './translations';
 import { getSharedListsTableColumns } from '../utils';
 
 interface ExceptionsLinkedToListComponentProps {

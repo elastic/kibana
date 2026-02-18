@@ -14,6 +14,7 @@ import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
 import { timelineSelectors } from '../../../timelines/store';
@@ -26,7 +27,6 @@ import {
 } from '../../hooks/translations';
 import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,

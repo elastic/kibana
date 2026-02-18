@@ -6,16 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  convertObjectKeysToCamelCase,
-  convertObjectKeysToSnakeCase,
-} from '../../../../../../utils/object_case_converters';
-import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
   RuleSource,
   TypeSpecificCreateProps,
 } from '@kbn/securitysolution-api';
+import {
+  convertObjectKeysToCamelCase,
+  convertObjectKeysToSnakeCase,
+} from '../../../../../../utils/object_case_converters';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,

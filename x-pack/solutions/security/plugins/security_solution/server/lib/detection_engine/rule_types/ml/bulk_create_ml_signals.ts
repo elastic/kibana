@@ -8,12 +8,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import { flow, omit } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set';
 
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { wrapHits, type GenericBulkCreateResponse, bulkCreate } from '../factories';
 import type { Anomaly } from '../../../machine_learning';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
-import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 
 interface EcsAnomaly extends Anomaly {
   '@timestamp': string;

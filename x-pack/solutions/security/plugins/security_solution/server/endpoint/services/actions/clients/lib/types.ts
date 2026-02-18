@@ -6,8 +6,22 @@
  */
 
 import type { Readable } from 'stream';
-import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
-import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import type {
+  MemoryDumpActionRequestBody,
+  CustomScriptsRequestQueryParams,
+  BaseActionRequestBody,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  KillProcessRequestBody,
+  ResponseActionGetFileRequestBody,
+  RunScriptActionRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  CancelActionRequestBody,
+  UnisolationRouteRequestBody,
+  UploadActionApiRequestBody,
+} from '@kbn/securitysolution-api';
 import type {
   ActionDetails,
   ResponseActionScriptsApiResponse,
@@ -33,20 +47,6 @@ import type {
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
 } from '../../../../../../common/endpoint/types';
-import type {
-  BaseActionRequestBody,
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  KillProcessRequestBody,
-  ResponseActionGetFileRequestBody,
-  RunScriptActionRequestBody,
-  ScanActionRequestBody,
-  SuspendProcessRequestBody,
-  CancelActionRequestBody,
-  UnisolationRouteRequestBody,
-  UploadActionApiRequestBody,
-} from '@kbn/securitysolution-api';
 
 export type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
   T,

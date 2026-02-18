@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BulkActionTypeEnum,
-  BulkActionsDryRunErrCode,
-} from '@kbn/securitysolution-api';
+import type { BulkActionTypeEnum, BulkActionsDryRunErrCode } from '@kbn/securitysolution-api';
 
 /**
  * Only 4 bulk actions are supported for for confirmation dry run modal:

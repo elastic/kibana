@@ -14,11 +14,11 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
-import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
 } from '@kbn/securitysolution-api';
+import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,

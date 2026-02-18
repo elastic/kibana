@@ -8,9 +8,6 @@
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
-} from '@kbn/securitysolution-api';
-import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
-import type {
   AllThreeWayFieldsDiff,
   RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithEqlQuery,
@@ -18,6 +15,7 @@ import type {
   RuleFieldsDiffWithKqlQuery,
   ThreeWayDiff,
 } from '@kbn/securitysolution-api';
+import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { stringifyWithExpandedEmpties } from '../three_way_diff/comparison_side/utils';
 

@@ -6,12 +6,11 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PrebuiltRuleAssetsFilter, PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleVersionSpecifier } from '../../rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from '../../basic_rule_info';
-import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
-import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';
 import { fetchAssetsByVersion } from './methods/fetch_assets_by_version';

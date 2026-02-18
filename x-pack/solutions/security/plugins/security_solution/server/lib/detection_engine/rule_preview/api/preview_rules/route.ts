@@ -21,21 +21,18 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { wrapAsyncSearchClient } from '@kbn/alerting-plugin/server/lib';
 import {
+  validateCreateRuleProps,
+  RuleExecutionStatusEnum,
+  RulePreviewRequestBody,
+  RulePreviewRequestQuery,
+} from '@kbn/securitysolution-api';
+import type { RulePreviewResponse, RulePreviewLogs } from '@kbn/securitysolution-api';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
+import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
   SERVER_APP_ID,
 } from '../../../../../../common/constants';
-import { validateCreateRuleProps } from '@kbn/securitysolution-api';
-import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
-import type {
-  RulePreviewResponse,
-  RulePreviewLogs,
-} from '@kbn/securitysolution-api';
-import {
-  RulePreviewRequestBody,
-  RulePreviewRequestQuery,
-} from '@kbn/securitysolution-api';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';

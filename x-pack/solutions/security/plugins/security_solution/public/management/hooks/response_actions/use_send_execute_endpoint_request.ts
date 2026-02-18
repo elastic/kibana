@@ -8,10 +8,10 @@
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@kbn/react-query';
+import type { ExecuteActionRequestBody } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import type { ExecuteActionRequestBody } from '@kbn/securitysolution-api';
 
 export const useSendExecuteEndpoint = (
   options?: UseMutationOptions<ResponseActionApiResponse, IHttpFetchError, ExecuteActionRequestBody>

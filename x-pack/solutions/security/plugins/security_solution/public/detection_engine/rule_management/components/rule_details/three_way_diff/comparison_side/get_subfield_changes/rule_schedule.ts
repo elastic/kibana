@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { SimpleRuleSchedule } from '@kbn/securitysolution-api';
+import type { SimpleRuleSchedule, DiffableAllFields } from '@kbn/securitysolution-api';
 import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import { stringifyToSortedJson } from '../utils';
-import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import type { SubfieldChange } from '../types';
 
 export function getSubfieldChangesForRuleSchedule(

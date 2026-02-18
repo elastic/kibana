@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { convertFieldToDisplayName } from '../../../../rule_management/components/rule_details/helpers';
 import type { ThreeWayFieldsDiff } from '@kbn/securitysolution-api';
+import { convertFieldToDisplayName } from '../../../../rule_management/components/rule_details/helpers';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { ModifiedBadge } from '../../../../rule_management/components/rule_details/three_way_diff/badges/modified_badge';

@@ -7,13 +7,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
+import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
 import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
-import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 
 export const getEntityType = (record: Entity): EntityType => {
   // Looking at `entity.type` to keep backward compatibility

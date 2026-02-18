@@ -10,10 +10,10 @@ import { merge } from 'lodash/fp';
 import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import type { ReadPrivilegesResponse } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import type { ReadPrivilegesResponse } from '@kbn/securitysolution-api';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

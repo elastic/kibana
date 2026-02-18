@@ -24,14 +24,11 @@ import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
-import type {
-  RuleResponse,
-  RuleUpdateProps,
-} from '@kbn/securitysolution-api';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';

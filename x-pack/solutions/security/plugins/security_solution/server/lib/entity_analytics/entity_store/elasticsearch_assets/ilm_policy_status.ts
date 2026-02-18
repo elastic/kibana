@@ -7,10 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_HISTORY_ILM_POLICY } from '@kbn/entityManager-plugin/common/constants_entities';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentStatus,
-} from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum, type EngineComponentStatus } from '@kbn/securitysolution-api';
 
 interface Options {
   esClient: ElasticsearchClient;

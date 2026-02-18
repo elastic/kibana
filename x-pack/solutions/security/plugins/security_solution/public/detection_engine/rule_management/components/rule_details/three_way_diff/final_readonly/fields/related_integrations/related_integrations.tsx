@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
+import type { RelatedIntegrationArray } from '@kbn/securitysolution-api';
 import * as ruleDetailsI18n from '../../../../translations';
 import { RelatedIntegrationsDescription } from '../../../../../../../common/components/related_integrations/integrations_description';
-import type { RelatedIntegrationArray } from '@kbn/securitysolution-api';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface RelatedIntegrationsReadOnly {

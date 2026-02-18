@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { type HistoryWindowStart } from '@kbn/securitysolution-api';
 import { ScheduleItemField } from '../schedule_item_field';
 import { type FieldConfig, UseField } from '../../../../shared_imports';
-import { type HistoryWindowStart } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { validateHistoryWindowStart } from './validate_history_window_start';
 

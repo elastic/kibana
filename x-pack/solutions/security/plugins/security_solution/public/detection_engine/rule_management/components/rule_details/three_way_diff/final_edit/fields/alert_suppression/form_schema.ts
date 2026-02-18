@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type {
+  AlertSuppressionDurationUnit,
+  AlertSuppressionMissingFieldsStrategy,
+} from '@kbn/securitysolution-api';
 import { alertSuppressionFieldsValidatorFactory } from '../../../../../../../rule_creation_ui/validators/alert_suppression_fields_validator_factory';
 import type {
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
@@ -16,10 +20,6 @@ import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit';
-import type {
-  AlertSuppressionDurationUnit,
-  AlertSuppressionMissingFieldsStrategy,
-} from '@kbn/securitysolution-api';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import { type FormSchema } from '../../../../../../../../shared_imports';
 

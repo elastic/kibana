@@ -8,6 +8,11 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { partition } from 'lodash';
+import {
+  SiemMigrationAuditLogger,
+  withLicense,
+  withExistingMigration,
+} from '@kbn/securitysolution-api';
 import { SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import {
   UpsertDashboardMigrationResourcesRequestBody,
@@ -16,12 +21,9 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { DashboardResourceIdentifier } from '../../../../../../common/siem_migrations/dashboards/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from '../util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 import { processLookups } from '../../../rules/api/util/lookups';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { getVendorTag } from '@kbn/securitysolution-api';
 import type {
   DashboardMigrationDashboard,
   UpdateMigrationDashboard,
@@ -13,7 +14,6 @@ import type {
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
-import { getVendorTag } from '@kbn/securitysolution-api';
 import { findOrCreateTagReferences } from './tag_utils';
 
 const MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL = 10;

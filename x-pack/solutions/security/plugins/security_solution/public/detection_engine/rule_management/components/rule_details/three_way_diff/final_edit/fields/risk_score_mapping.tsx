@@ -7,11 +7,8 @@
 
 import React, { useCallback } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DiffableRule, RiskScoreMapping } from '@kbn/securitysolution-api';
 import { type FormData, type FieldHook, UseField } from '../../../../../../../shared_imports';
-import type {
-  DiffableRule,
-  RiskScoreMapping,
-} from '@kbn/securitysolution-api';
 import { RiskScoreOverride } from '../../../../../../rule_creation_ui/components/risk_score_mapping/risk_score_override';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

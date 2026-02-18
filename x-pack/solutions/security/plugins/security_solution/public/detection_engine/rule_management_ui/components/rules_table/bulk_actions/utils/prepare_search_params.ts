@@ -6,12 +6,11 @@
  */
 
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
+import { BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
-
-import { BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 
 type PrepareSearchFilterProps =
   | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }

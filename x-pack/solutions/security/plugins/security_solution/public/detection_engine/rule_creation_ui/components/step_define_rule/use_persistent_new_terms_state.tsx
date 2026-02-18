@@ -7,14 +7,11 @@
 
 import { useEffect, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { type NewTermsFields, type HistoryWindowStart } from '@kbn/securitysolution-api';
 import { isNewTermsRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
 import { type DefineStepRule } from '../../../common/types';
-import {
-  type NewTermsFields,
-  type HistoryWindowStart,
-} from '@kbn/securitysolution-api';
 
 interface UsePersistentNewTermsStateParams {
   form: FormHook<DefineStepRule>;

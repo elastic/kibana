@@ -8,17 +8,13 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/securitysolution-api';
-import { getPatchRulesSchemaMock } from '@kbn/securitysolution-api';
-import {
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL , getPatchRulesSchemaMock ,
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
   getRulesSchemaMock,
-} from '@kbn/securitysolution-api';
-import {
+,
   BulkActionTypeEnum,
-  BulkActionEditTypeEnum,
-} from '@kbn/securitysolution-api';
+  BulkActionEditTypeEnum} from '@kbn/securitysolution-api';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 

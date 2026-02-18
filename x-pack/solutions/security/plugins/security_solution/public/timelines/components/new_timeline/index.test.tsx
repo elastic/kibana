@@ -11,11 +11,7 @@ import { NewTimelineButton } from '.';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions } from '../../store';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import {
-  RowRendererValues,
-  type TimelineType,
-  TimelineTypeEnum,
-} from '@kbn/securitysolution-api';
+import { RowRendererValues, type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 

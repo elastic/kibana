@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FormData } from '../../../../../../../shared_imports';
 import type { DiffableRule } from '@kbn/securitysolution-api';
+import type { FormData } from '../../../../../../../shared_imports';
 
 export interface RuleFieldEditComponentProps {
   finalDiffableRule: DiffableRule;

@@ -14,14 +14,13 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { isCustomizedPrebuiltRule, BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
-import { isCustomizedPrebuiltRule } from '@kbn/securitysolution-api';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { getRulesUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';

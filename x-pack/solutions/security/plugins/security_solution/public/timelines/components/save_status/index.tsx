@@ -9,10 +9,10 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { pick } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 
 const UNSAVED = i18n.translate('xpack.securitySolution.timeline.saveStatus.unsavedLabel', {
   defaultMessage: 'Unsaved',

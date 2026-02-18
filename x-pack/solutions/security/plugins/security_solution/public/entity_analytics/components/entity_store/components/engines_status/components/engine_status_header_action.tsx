@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEnableEntityStoreMutation } from '../../../hooks/use_entity_store';
 import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
+import { useEnableEntityStoreMutation } from '../../../hooks/use_entity_store';
 import type { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { isEngineLoading } from '../helpers';
 

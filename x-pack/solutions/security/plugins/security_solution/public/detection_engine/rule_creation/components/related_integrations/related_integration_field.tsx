@@ -20,8 +20,8 @@ import {
   EuiFormRow,
   EuiTextTruncate,
 } from '@elastic/eui';
-import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '@kbn/securitysolution-api';
+import type { FieldHook } from '../../../../shared_imports';
 import { useIntegrations } from '../../../common/components/related_integrations/use_integrations';
 import { IntegrationStatusBadge } from './integration_status_badge';
 import * as i18n from './translations';

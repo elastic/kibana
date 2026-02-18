@@ -8,6 +8,7 @@
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../common/store/types';
 import {
   endTimelineSaving,
@@ -16,7 +17,6 @@ import {
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
 } from '../actions';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';

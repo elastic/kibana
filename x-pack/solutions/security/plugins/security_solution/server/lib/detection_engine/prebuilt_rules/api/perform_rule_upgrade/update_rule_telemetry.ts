@@ -5,10 +5,7 @@
  * 2.0.
  */
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
-import {
-  ThreeWayDiffOutcome,
-  ThreeWayDiffConflict,
-} from '@kbn/securitysolution-api';
+import { ThreeWayDiffOutcome, ThreeWayDiffConflict } from '@kbn/securitysolution-api';
 import {
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,

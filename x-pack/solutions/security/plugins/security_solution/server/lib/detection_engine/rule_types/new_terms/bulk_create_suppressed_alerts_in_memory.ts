@@ -6,20 +6,20 @@
  */
 
 import type {
+  AlertSuppressionCamel,
+  DetectionAlertLatest,
+  WrappedAlert,
+} from '@kbn/securitysolution-api';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
+import type {
   SecurityRuleServices,
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
 } from '../types';
 
-import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 
 import { executeBulkCreateAlerts } from '../utils/bulk_create_suppressed_alerts_in_memory';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';

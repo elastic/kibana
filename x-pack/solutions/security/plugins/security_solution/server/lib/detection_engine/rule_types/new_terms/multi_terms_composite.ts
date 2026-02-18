@@ -7,6 +7,8 @@
 import pRetry from 'p-retry';
 import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
+import type { NewTermsAlertLatest } from '@kbn/securitysolution-api';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import type { NewTermsRuleParams } from '../../rule_schema';
 import type { GetFilterArgs } from '../utils/get_filter';
 import { getFilter } from '../utils/get_filter';
@@ -21,7 +23,6 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-import type { NewTermsAlertLatest } from '@kbn/securitysolution-api';
 import {
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
@@ -35,7 +36,6 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
 } from '../types';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 
 /**

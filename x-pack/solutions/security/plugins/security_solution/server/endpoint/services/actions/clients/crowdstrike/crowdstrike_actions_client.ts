@@ -18,6 +18,11 @@ import type {
 } from '@kbn/connector-schemas/crowdstrike';
 import { v4 as uuidv4 } from 'uuid';
 
+import type {
+  IsolationRouteRequestBody,
+  RunScriptActionRequestBody,
+  UnisolationRouteRequestBody,
+} from '@kbn/securitysolution-api';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
@@ -38,11 +43,6 @@ import type {
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
-import type {
-  IsolationRouteRequestBody,
-  RunScriptActionRequestBody,
-  UnisolationRouteRequestBody,
-} from '@kbn/securitysolution-api';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,

@@ -10,6 +10,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { Status } from '@kbn/securitysolution-api';
 import { PageFilters } from './page_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -19,7 +20,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
-import type { Status } from '@kbn/securitysolution-api';
 
 export interface FiltersSectionProps {
   /**

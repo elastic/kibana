@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleResponse,
-  RuleSource,
-  ValidatedRuleToImport,
-} from '@kbn/securitysolution-api';
+import type { RuleResponse, RuleSource, ValidatedRuleToImport } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { calculateExternalRuleSource } from '../detection_rules_client/mergers/rule_source/calculate_external_rule_source';
 import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';

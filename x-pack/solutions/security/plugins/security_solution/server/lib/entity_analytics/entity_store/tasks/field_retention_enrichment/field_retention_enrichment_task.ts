@@ -17,9 +17,9 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
-import { getEnabledEntityTypes } from '../../../../../../common/entity_analytics/utils';
 import type { EntityType } from '@kbn/securitysolution-api';
 import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
+import { getEnabledEntityTypes } from '../../../../../../common/entity_analytics/utils';
 import {
   defaultState,
   stateSchemaByVersion,

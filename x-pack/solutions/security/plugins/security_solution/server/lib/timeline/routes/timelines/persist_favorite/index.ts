@@ -8,6 +8,11 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  type PersistFavoriteRouteResponse,
+  PersistFavoriteRouteRequestBody,
+  TimelineTypeEnum,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
@@ -16,11 +21,6 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import {
-  type PersistFavoriteRouteResponse,
-  PersistFavoriteRouteRequestBody,
-  TimelineTypeEnum,
-} from '@kbn/securitysolution-api';
 
 export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

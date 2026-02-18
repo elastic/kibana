@@ -9,9 +9,9 @@ import { get } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
+import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 import {
   DESTINATION_IP,
   DESTINATION_PORT,

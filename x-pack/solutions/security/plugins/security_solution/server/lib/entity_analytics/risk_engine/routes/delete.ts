@@ -7,13 +7,13 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { CleanUpRiskEngineResponse } from '@kbn/securitysolution-api';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import { RISK_ENGINE_CLEANUP_URL, APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { CleanUpRiskEngineResponse } from '@kbn/securitysolution-api';
 
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

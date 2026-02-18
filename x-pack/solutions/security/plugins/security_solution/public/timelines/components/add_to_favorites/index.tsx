@@ -9,10 +9,10 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../common/store';
 import { selectTimelineById } from '../../store/selectors';
 import { timelineActions } from '../../store';
-import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const ADD_TO_FAVORITES = i18n.translate(

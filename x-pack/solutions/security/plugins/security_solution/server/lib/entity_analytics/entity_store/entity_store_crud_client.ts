@@ -17,11 +17,11 @@ import { generatePivotGroup } from '@kbn/entityManager-plugin/server/lib/entitie
 import get from 'lodash/get';
 import type { EntityContainer } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/common.gen';
-import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
   Entity,
   EntityField,
 } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import {
   BadCRUDRequestError,

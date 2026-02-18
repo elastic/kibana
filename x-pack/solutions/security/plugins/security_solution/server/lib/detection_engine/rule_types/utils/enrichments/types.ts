@@ -9,10 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import type { SecurityRuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 

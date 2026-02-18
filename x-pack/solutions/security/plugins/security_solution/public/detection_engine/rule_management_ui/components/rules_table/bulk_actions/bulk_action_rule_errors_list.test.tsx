@@ -7,10 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import {
-  BulkActionTypeEnum,
-  BulkActionsDryRunErrCodeEnum,
-} from '@kbn/securitysolution-api';
+import { BulkActionTypeEnum, BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../../../common/mock';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import type { DryRunResult } from './types';

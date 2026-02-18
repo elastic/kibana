@@ -6,7 +6,6 @@
  */
 
 import type React from 'react';
-import type { TimelineModel } from '../../store/model';
 import type {
   Note,
   ResolvedTimeline,
@@ -15,6 +14,7 @@ import type {
   TimelineStatus,
   TimelineType,
 } from '@kbn/securitysolution-api';
+import type { TimelineModel } from '../../store/model';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

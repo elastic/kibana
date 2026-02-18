@@ -11,9 +11,9 @@ import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
 import pRetry from 'p-retry';
+import { type RuleResponse } from '@kbn/securitysolution-api';
 import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';
-import { type RuleResponse } from '@kbn/securitysolution-api';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,

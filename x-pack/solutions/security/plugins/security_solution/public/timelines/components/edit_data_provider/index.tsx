@@ -20,11 +20,11 @@ import {
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
+import { type DataProviderType, DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import type { BrowserFields } from '../../../common/containers/source';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
 import type { OnDataProviderEdited } from '../timeline/events';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
-import { type DataProviderType, DataProviderTypeEnum } from '@kbn/securitysolution-api';
 
 import {
   getCategorizedFieldNames,

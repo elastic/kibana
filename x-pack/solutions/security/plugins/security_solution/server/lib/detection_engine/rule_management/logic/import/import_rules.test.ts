@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '@kbn/securitysolution-api';
-import { getRulesSchemaMock } from '@kbn/securitysolution-api';
+import { getImportRulesSchemaMock, getRulesSchemaMock } from '@kbn/securitysolution-api';
 
 import { importRules } from './import_rules';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';

@@ -7,10 +7,7 @@
 
 import { useMemo, useState } from 'react';
 
-import type {
-  LogLevel,
-  RuleExecutionEventType,
-} from '@kbn/securitysolution-api';
+import type { LogLevel, RuleExecutionEventType } from '@kbn/securitysolution-api';
 import type { DateRange } from '../../api';
 
 export const useFilters = () => {

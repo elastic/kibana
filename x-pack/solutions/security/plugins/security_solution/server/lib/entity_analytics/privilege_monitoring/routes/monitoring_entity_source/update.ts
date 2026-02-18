@@ -11,16 +11,16 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
+  UpdateEntitySourceRequestBody,
+  type UpdateEntitySourceResponse,
+  UpdateEntitySourceRequestParams,
+} from '@kbn/securitysolution-api';
+import {
   API_VERSIONS,
   APP_ID,
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import {
-  UpdateEntitySourceRequestBody,
-  type UpdateEntitySourceResponse,
-  UpdateEntitySourceRequestParams,
-} from '@kbn/securitysolution-api';
 import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';

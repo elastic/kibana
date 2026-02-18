@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   MissingVersion,
   ThreeWayDiffConflict,

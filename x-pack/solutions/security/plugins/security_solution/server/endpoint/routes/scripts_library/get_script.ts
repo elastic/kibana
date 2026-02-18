@@ -6,9 +6,9 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import type { GetOneScriptRequestParams } from '@kbn/securitysolution-api';
 import { GetOneScriptRequestSchema } from '@kbn/securitysolution-api';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';

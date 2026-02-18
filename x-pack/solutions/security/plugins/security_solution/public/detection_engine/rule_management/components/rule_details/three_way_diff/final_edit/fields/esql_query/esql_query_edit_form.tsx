@@ -6,14 +6,10 @@
  */
 
 import React from 'react';
+import { type DiffableRule, QueryLanguageEnum, RuleEsqlQuery } from '@kbn/securitysolution-api';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar_field';
-import {
-  type DiffableRule,
-  QueryLanguageEnum,
-  RuleEsqlQuery,
-} from '@kbn/securitysolution-api';
 import { EsqlQueryEditAdapter } from './esql_query_edit_adapter';
 
 export function EsqlQueryEditForm(): JSX.Element {

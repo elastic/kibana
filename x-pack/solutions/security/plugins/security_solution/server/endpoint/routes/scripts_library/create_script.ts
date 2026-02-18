@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
+import { CreateScriptRequestSchema } from '@kbn/securitysolution-api';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
@@ -16,8 +18,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
-import { CreateScriptRequestSchema } from '@kbn/securitysolution-api';
 
 export const getCreateScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService

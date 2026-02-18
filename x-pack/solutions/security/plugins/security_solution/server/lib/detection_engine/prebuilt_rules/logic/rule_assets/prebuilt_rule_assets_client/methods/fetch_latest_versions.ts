@@ -10,13 +10,12 @@ import type {
   SearchHitsMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { PrebuiltRuleAssetsFilter, PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import type { BasicRuleInfo } from '../../../basic_rule_info';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
-import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import {
   prepareQueryDslFilter,
   prepareQueryDslSort,

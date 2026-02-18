@@ -26,10 +26,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
-import type {
-  BuildingBlockType,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
+import type { BuildingBlockType, RuleResponse } from '@kbn/securitysolution-api';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';

@@ -26,10 +26,7 @@ import type { Rule } from '../../../rule_management/logic/types';
 
 import { TestProviders } from '../../../../common/mock';
 
-import {
-  getRulesEqlSchemaMock,
-  getRulesSchemaMock,
-} from '@kbn/securitysolution-api';
+import { getRulesEqlSchemaMock, getRulesSchemaMock } from '@kbn/securitysolution-api';
 import type { AlertData } from '../../utils/types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');

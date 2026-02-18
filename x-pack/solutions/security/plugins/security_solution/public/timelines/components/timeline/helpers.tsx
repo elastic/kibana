@@ -16,6 +16,7 @@ import {
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
 
+import { type DataProviderType, DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import { assertUnreachable } from '../../../../common/utility_types';
 import type { BrowserFields } from '../../../common/containers/source';
@@ -29,7 +30,6 @@ import {
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
 import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
-import { type DataProviderType, DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const buildQueryMatch = (

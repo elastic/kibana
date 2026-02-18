@@ -11,10 +11,7 @@ import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
 } from '@kbn/securitysolution-api';
-import {
-  LogLevelEnum,
-  RuleExecutionEventTypeEnum,
-} from '@kbn/securitysolution-api';
+import { LogLevelEnum, RuleExecutionEventTypeEnum } from '@kbn/securitysolution-api';
 
 import { api } from './api_client';
 import type { FetchRuleExecutionEventsArgs } from './api_client_interface';

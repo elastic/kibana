@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, IKibanaResponse, Logger } from '@kbn/core/server';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { withLicense } from '@kbn/securitysolution-api';
 import type { GetRuleMigrationPrivilegesResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
@@ -14,7 +15,6 @@ import {
 } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

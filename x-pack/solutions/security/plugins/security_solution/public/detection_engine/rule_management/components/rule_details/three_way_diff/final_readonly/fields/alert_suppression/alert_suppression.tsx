@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import * as ruleDetailsI18n from '../../../../translations';
 import type {
   AlertSuppression,
   DiffableRuleTypes,
   ThresholdAlertSuppression,
 } from '@kbn/securitysolution-api';
+import * as ruleDetailsI18n from '../../../../translations';
 import { AlertSuppressionLabel } from '../../../../../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import {
   MissingFieldsStrategy,

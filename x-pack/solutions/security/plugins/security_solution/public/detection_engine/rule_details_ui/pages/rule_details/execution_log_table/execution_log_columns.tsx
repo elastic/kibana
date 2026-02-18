@@ -18,10 +18,7 @@ import {
 import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  RuleExecutionResult,
-  RuleExecutionStatus,
-} from '@kbn/securitysolution-api';
+import type { RuleExecutionResult, RuleExecutionStatus } from '@kbn/securitysolution-api';
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';

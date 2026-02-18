@@ -9,11 +9,8 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import { makeFloatString } from '../utils/utils';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';

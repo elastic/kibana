@@ -8,11 +8,11 @@
 import React, { useCallback } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { useForm, UseField } from '../../../../../../shared_imports';
 import { PickTimeline } from '../../../../../rule_creation/components/pick_timeline';
-import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
-import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkApplyTimelineTemplate as i18n } from '../translations';

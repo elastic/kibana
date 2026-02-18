@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { EndpointSortableField } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_DEFAULT_PAGE,
@@ -19,7 +20,6 @@ import {
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
-import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 
 export interface QueryBuilderOptions {

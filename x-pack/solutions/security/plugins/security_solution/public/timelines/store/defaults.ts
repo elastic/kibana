@@ -5,12 +5,8 @@
  * 2.0.
  */
 
+import { RowRendererIdEnum, TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { TimelineTabs } from '../../../common/types/timeline';
-import {
-  RowRendererIdEnum,
-  TimelineStatusEnum,
-  TimelineTypeEnum,
-} from '@kbn/securitysolution-api';
 
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';

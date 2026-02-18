@@ -18,12 +18,10 @@ import type {
   InvestigationFields,
   RuleResponse,
   RuleAction as RuleActionSchema,
-} from '@kbn/securitysolution-api';
-import type {
   FindRulesResponse,
   RuleToImport,
+  WarningSchema,
 } from '@kbn/securitysolution-api';
-import type { WarningSchema } from '@kbn/securitysolution-api';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';

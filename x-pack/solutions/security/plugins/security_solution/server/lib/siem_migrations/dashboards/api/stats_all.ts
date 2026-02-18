@@ -6,11 +6,11 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { withLicense } from '@kbn/securitysolution-api';
 import type { GetAllDashboardMigrationsStatsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsStatsAllRoute = (
   router: SecuritySolutionPluginRouter,

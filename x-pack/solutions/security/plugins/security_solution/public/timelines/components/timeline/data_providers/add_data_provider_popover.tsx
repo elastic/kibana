@@ -20,8 +20,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 
-import type { BrowserFields } from '../../../../common/containers/source';
 import { DataProviderTypeEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';

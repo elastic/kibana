@@ -28,8 +28,6 @@ import { Writable, type Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
-import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
-import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
@@ -37,6 +35,8 @@ import type {
   MSDefenderRunScriptActionRequestParams,
   CancelActionRequestBody,
 } from '@kbn/securitysolution-api';
+import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
+import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   ActionDetails,
   ResponseActionScriptsApiResponse,

@@ -6,7 +6,11 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { getPatchRulesSchemaMock } from '@kbn/securitysolution-api';
+import {
+  getPatchRulesSchemaMock,
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+} from '@kbn/securitysolution-api';
 
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
@@ -19,11 +23,6 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
-
-import {
-  getRulesSchemaMock,
-  getRulesMlSchemaMock,
-} from '@kbn/securitysolution-api';
 
 import { patchRuleRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';

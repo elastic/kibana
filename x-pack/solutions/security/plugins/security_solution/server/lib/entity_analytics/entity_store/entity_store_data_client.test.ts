@@ -18,10 +18,7 @@ import type { EntityStoreConfig } from './types';
 import { EntityStoreCapability, type EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
-import type {
-  EngineDescriptor,
-  InitEntityEngineResponse,
-} from '@kbn/securitysolution-api';
+import type { EngineDescriptor, InitEntityEngineResponse } from '@kbn/securitysolution-api';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultOptions } from './constants';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';

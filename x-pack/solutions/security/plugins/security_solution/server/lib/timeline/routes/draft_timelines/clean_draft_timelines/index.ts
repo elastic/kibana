@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { CleanDraftTimelinesResponse } from '@kbn/securitysolution-api';
+import { CleanDraftTimelinesRequestBody, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
@@ -21,11 +23,6 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import type { CleanDraftTimelinesResponse } from '@kbn/securitysolution-api';
-import {
-  CleanDraftTimelinesRequestBody,
-  TimelineTypeEnum,
-} from '@kbn/securitysolution-api';
 
 export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

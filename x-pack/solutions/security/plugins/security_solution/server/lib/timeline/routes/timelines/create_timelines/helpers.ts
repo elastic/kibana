@@ -8,9 +8,9 @@
 import { isEmpty } from 'lodash/fp';
 
 import moment from 'moment';
+import type { SavedTimeline, Note } from '@kbn/securitysolution-api';
 import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import type { FrameworkRequest } from '../../../../framework';
-import type { SavedTimeline, Note } from '@kbn/securitysolution-api';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
 import type { InternalTimelineResponse } from '../../../saved_object/timelines';
 

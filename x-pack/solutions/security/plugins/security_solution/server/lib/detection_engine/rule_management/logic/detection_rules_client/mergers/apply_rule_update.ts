@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleResponse,
-  RuleUpdateProps,
-} from '@kbn/securitysolution-api';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from './apply_rule_defaults';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';

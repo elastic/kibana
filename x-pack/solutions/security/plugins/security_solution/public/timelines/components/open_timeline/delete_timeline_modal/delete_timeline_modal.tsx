@@ -11,8 +11,8 @@ import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 
 import { useParams } from 'react-router-dom';
-import * as i18n from '../translations';
 import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
+import * as i18n from '../translations';
 
 interface Props {
   title?: string | null;

@@ -15,7 +15,6 @@ import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import * as Boom from '@hapi/boom';
-import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
   BareNote,
@@ -23,6 +22,7 @@ import type {
   ResponseNote,
   GetNotesResult,
 } from '@kbn/securitysolution-api';
+import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';

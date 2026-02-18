@@ -7,9 +7,6 @@
 
 import { isEqual, xorWith } from 'lodash';
 import pMap from 'p-map';
-import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
-import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
-import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
   RuleResponse,
   EndpointResponseAction,
@@ -21,6 +18,9 @@ import type {
   RuleResponseOsqueryAction,
   RuleToImport,
 } from '@kbn/securitysolution-api';
+import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../../common/endpoint/service/response_actions/constants';

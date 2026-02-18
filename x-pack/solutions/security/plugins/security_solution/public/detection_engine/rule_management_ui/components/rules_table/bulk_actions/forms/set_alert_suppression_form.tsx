@@ -8,17 +8,17 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon } from '@elastic/eui';
 
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
-import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
-import { useFetchIndex } from '../../../../../../common/containers/source';
 import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   AlertSuppressionDuration,
 } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
+import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
+import { useFetchIndex } from '../../../../../../common/containers/source';
 import { useForm, fieldValidators } from '../../../../../../shared_imports';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

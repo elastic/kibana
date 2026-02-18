@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { RuleResponse, RuleSignatureId } from '@kbn/securitysolution-api';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
@@ -18,10 +19,6 @@ import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type {
-  RuleResponse,
-  RuleSignatureId,
-} from '@kbn/securitysolution-api';
 import { getNormalizedSeverity } from '../helpers';
 import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';

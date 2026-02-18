@@ -12,16 +12,14 @@ import type {
   RuleSignatureId,
   RuleTagArray,
   RuleVersion,
+  FindRulesSortField,
+  PrebuiltRulesFilter,
+  SortOrder,
 } from '@kbn/securitysolution-api';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
-import type {
-  FindRulesSortField,
-  PrebuiltRulesFilter,
-  SortOrder,
-} from '@kbn/securitysolution-api';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 
 interface FetchAllInstalledRulesArgs {

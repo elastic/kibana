@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { partition } from 'lodash';
+import { SiemMigrationAuditLogger, withLicense } from '@kbn/securitysolution-api';
 import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
@@ -17,10 +18,8 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
-import { withLicense } from '@kbn/securitysolution-api';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (

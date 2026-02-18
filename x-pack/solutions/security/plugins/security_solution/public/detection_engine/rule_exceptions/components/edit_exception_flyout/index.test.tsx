@@ -22,10 +22,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { Rule } from '../../../rule_management/logic/types';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  getRulesEqlSchemaMock,
-  getRulesSchemaMock,
-} from '@kbn/securitysolution-api';
+import { getRulesEqlSchemaMock, getRulesSchemaMock } from '@kbn/securitysolution-api';
 
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';

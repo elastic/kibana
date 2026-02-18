@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleToImport,
-  ValidatedRuleToImport,
-} from '@kbn/securitysolution-api';
+import type { RuleToImport, ValidatedRuleToImport } from '@kbn/securitysolution-api';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient as createPrebuiltRuleObjectsClientMock } from '../../../../prebuilt_rules/logic/rule_objects/__mocks__/prebuilt_rule_objects_client';
 import { requestContextMock } from '../../../../routes/__mocks__';

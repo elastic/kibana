@@ -12,12 +12,9 @@ import { queryToFields } from '@kbn/data-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
+import type { IndexPatternArray, RuleQuery } from '@kbn/securitysolution-api';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getAllFilters } from './get_query_filter';
-import type {
-  IndexPatternArray,
-  RuleQuery,
-} from '@kbn/securitysolution-api';
 
 export const getQueryFilterLoadFields =
   (dataViewsService: DataViewsContract) =>

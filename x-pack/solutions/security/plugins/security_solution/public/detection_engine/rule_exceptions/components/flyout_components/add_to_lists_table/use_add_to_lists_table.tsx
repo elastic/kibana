@@ -20,8 +20,8 @@ import type {
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getExceptionItemsReferences } from '../../../../../exceptions/api';
 import * as i18n from './translations';
 import * as commoni18n from '../translations';

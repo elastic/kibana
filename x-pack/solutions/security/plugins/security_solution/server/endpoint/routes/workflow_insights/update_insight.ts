@@ -6,12 +6,12 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
 } from '@kbn/securitysolution-api';
 import { UpdateWorkflowInsightRequestSchema } from '@kbn/securitysolution-api';
+import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import { securityWorkflowInsightsService } from '../../services';
 
 import { errorHandler } from '../error_handler';

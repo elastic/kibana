@@ -7,13 +7,12 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { withLicense, withExistingMigration } from '@kbn/securitysolution-api';
 import type { GetDashboardMigrationStatsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { GetDashboardMigrationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from '@kbn/securitysolution-api';
 import { authz } from './util/authz';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,

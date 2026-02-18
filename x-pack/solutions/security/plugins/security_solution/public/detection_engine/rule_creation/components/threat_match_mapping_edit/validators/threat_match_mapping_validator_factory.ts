@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataViewBase } from '@kbn/es-query';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import {
   containsInvalidItems,
   singleEntryThreat,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
-import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { THREAT_MATCH_MAPPING_ERROR_CODES } from './error_codes';
 import { getUnknownThreatMatchMappingFieldNames } from './get_unknown_threat_match_mapping_field_names';
 import {

@@ -7,10 +7,7 @@
 
 import React from 'react';
 
-import type {
-  BulkActionEditPayload,
-  BulkActionEditType,
-} from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload, BulkActionEditType } from '@kbn/securitysolution-api';
 import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';

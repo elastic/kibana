@@ -8,10 +8,7 @@
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type {
-  RuleObjectId,
-  RuleSignatureId,
-} from '@kbn/securitysolution-api';
+import type { RuleObjectId, RuleSignatureId } from '@kbn/securitysolution-api';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleParams } from '../../../rule_schema';
 import { hasValidRuleType } from '../../../rule_schema';

@@ -8,17 +8,15 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import type { LogLevel } from '@kbn/securitysolution-api';
-import {
-  eventLogLevelFromExecutionStatus,
-  logLevelToNumber,
-  ruleExecutionStatusToNumber,
-} from '@kbn/securitysolution-api';
 import type {
+  LogLevel,
   RuleExecutionMetrics,
   RuleExecutionStatus,
 } from '@kbn/securitysolution-api';
 import {
+  eventLogLevelFromExecutionStatus,
+  logLevelToNumber,
+  ruleExecutionStatusToNumber,
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
 } from '@kbn/securitysolution-api';

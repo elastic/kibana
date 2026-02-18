@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '@kbn/securitysolution-api';
+import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { RuleStepProps, AboutStepRule } from '../../../common/types';
 import { AddItem } from '../add_item_form';

@@ -7,7 +7,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { RuleResponse } from '@kbn/securitysolution-api';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
@@ -15,7 +15,6 @@ import { validateNonCustomizableUpdateFields } from '../../../utils/validate';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
 
-import type { RuleUpdateProps } from '@kbn/securitysolution-api';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';

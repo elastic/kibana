@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { assertDiffableFieldsMatchRuleType } from './assert_diffable_fields_match_rule_type';
 import {
   type UpgradeSpecificRulesRequest,
   type RuleFieldsToUpgrade,
@@ -12,6 +11,7 @@ import {
   type FieldUpgradeSpecifier,
   type PickVersionValues,
 } from '@kbn/securitysolution-api';
+import { assertDiffableFieldsMatchRuleType } from './assert_diffable_fields_match_rule_type';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { mapRuleFieldToDiffableRuleField } from './diffable_rule_fields_mappings';
 

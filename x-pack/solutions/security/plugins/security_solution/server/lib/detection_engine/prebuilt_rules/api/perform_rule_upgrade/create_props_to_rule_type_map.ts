@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SharedCreateProps,
-  TypeSpecificCreatePropsInternal,
-} from '@kbn/securitysolution-api';
+import { SharedCreateProps, TypeSpecificCreatePropsInternal } from '@kbn/securitysolution-api';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 function createRuleTypeToCreateRulePropsMap() {

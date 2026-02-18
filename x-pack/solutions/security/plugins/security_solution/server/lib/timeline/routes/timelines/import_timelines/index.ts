@@ -12,6 +12,10 @@ import { get } from 'lodash/fp';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  ImportTimelinesRequestBody,
+  type ImportTimelinesResponse,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
@@ -20,10 +24,6 @@ import type { ConfigType } from '../../../../../config';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { importTimelines } from './helpers';
-import {
-  ImportTimelinesRequestBody,
-  type ImportTimelinesResponse,
-} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';

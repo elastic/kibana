@@ -22,12 +22,12 @@ import type {
   MicrosoftDefenderEndpointGetActionsParams,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { merge } from 'lodash';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
 import type { NormalizedExternalConnectorClient } from '../../../../..';
-import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {

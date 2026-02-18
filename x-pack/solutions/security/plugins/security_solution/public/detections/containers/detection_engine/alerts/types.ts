@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '@kbn/securitysolution-api';
+import type { AlertClosingReason } from '../../../../../common/types';
 
 export interface BasicSignals {
   signal: AbortSignal;

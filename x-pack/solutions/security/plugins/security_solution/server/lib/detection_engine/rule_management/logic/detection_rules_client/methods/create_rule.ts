@@ -8,11 +8,8 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { RuleCreateProps, RuleResponse } from '@kbn/securitysolution-api';
 import { SERVER_APP_ID } from '../../../../../../../common';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';

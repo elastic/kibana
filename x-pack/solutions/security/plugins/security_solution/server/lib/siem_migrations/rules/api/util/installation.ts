@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleResponse } from '@kbn/securitysolution-api';
+import { getVendorTag } from '@kbn/securitysolution-api';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { UpdateRuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
@@ -14,14 +16,12 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
 import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { StoredRuleMigrationRule } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../../common/siem_migrations/rules/utils';
-import { getVendorTag } from '@kbn/securitysolution-api';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 

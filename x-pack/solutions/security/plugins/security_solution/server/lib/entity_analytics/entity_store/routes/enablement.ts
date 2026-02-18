@@ -9,12 +9,12 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildInitRequestBodyValidation } from './validation';
 import type { InitEntityStoreResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
+import { InitEntityStoreRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
+import { buildInitRequestBodyValidation } from './validation';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
-import { InitEntityStoreRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';

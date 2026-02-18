@@ -35,6 +35,7 @@ import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -51,7 +52,6 @@ import {
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,

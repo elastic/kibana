@@ -8,11 +8,8 @@
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter, EsQueryConfig, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { IndexPatternArray, RuleQuery } from '@kbn/securitysolution-api';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import type {
-  IndexPatternArray,
-  RuleQuery,
-} from '@kbn/securitysolution-api';
 
 export const getQueryFilter = ({
   query,

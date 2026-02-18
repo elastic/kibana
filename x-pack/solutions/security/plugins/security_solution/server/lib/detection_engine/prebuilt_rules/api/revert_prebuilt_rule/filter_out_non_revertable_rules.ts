@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  isCustomizedPrebuiltRule,
-  isNonCustomizedPrebuiltRule,
-} from '@kbn/securitysolution-api';
+import { isCustomizedPrebuiltRule, isNonCustomizedPrebuiltRule } from '@kbn/securitysolution-api';
 import {
   BulkRevertSkipReasonEnum,
   type BulkActionReversionSkipResult,

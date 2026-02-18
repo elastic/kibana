@@ -9,14 +9,14 @@ import { Readable } from 'stream';
 import { createFileClientMock, createFileMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
-import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
-import { createHapiReadableStreamMock } from '../actions/mocks';
 import type {
   CreateScriptRequestBody,
   ListScriptsRequestQuery,
   PatchUpdateRequestBody,
 } from '@kbn/securitysolution-api';
+import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
+import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
+import { createHapiReadableStreamMock } from '../actions/mocks';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,

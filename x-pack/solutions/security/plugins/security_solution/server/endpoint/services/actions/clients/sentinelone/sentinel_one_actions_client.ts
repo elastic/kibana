@@ -36,7 +36,16 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
-import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import type {
+  CustomScriptsRequestQueryParams,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+  KillProcessRequestBody,
+  UnisolationRouteRequestBody,
+  RunScriptActionRequestBody,
+  SentinelOneRunScriptActionRequestParams,
+} from '@kbn/securitysolution-api';
 import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
@@ -93,15 +102,6 @@ import type {
   SentinelOneScript,
   SentinelOneRunScriptResponseMeta,
 } from '../../../../../../common/endpoint/types';
-import type {
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-  KillProcessRequestBody,
-  UnisolationRouteRequestBody,
-  RunScriptActionRequestBody,
-  SentinelOneRunScriptActionRequestParams,
-} from '@kbn/securitysolution-api';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientPendingAction,

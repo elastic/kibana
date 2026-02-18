@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { UsersQueries } from '@kbn/securitysolution-api';
+import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';

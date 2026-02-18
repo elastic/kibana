@@ -6,10 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type {
-  RuleObjectId,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
+import type { RuleObjectId, RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../../rule_schema';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 

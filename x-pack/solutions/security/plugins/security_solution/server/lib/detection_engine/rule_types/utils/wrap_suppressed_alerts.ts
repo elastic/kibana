@@ -10,11 +10,8 @@ import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import type { SecuritySharedParams, SignalSourceHit } from '../types';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';

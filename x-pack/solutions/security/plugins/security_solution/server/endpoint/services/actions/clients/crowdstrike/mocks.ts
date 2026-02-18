@@ -12,6 +12,7 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import {
   createCrowdstrikeAgentDetailsMock,
@@ -23,7 +24,6 @@ import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
-import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;

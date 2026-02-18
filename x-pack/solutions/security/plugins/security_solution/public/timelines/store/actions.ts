@@ -8,6 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { DataProviderType, RowRendererId } from '@kbn/securitysolution-api';
 import type {
   DataProvider,
   QueryOperator,
@@ -26,7 +27,6 @@ import type {
   TimelinePersistInput,
   TimelineTabs,
 } from '../../../common/types/timeline';
-import type { DataProviderType, RowRendererId } from '@kbn/securitysolution-api';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 

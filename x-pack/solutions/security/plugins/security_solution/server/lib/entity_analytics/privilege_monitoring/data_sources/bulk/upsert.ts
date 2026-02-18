@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
-import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 
 /**
  * Updates a user's privileged state based on the latest status from a source.

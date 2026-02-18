@@ -6,10 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  HealthOverviewState,
-  TotalEnabledDisabled,
-} from '@kbn/securitysolution-api';
+import type { HealthOverviewState, TotalEnabledDisabled } from '@kbn/securitysolution-api';
 import type { RawData } from '../../../utils/normalization';
 
 export const getRuleStatsAggregation = (): Record<

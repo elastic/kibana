@@ -8,18 +8,12 @@
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import type { GetClusterHealthRequest, GetClusterHealthResponse } from '@kbn/securitysolution-api';
+import { GET_CLUSTER_HEALTH_URL, GetClusterHealthRequestBody } from '@kbn/securitysolution-api';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type {
-  GetClusterHealthRequest,
-  GetClusterHealthResponse,
-} from '@kbn/securitysolution-api';
-import {
-  GET_CLUSTER_HEALTH_URL,
-  GetClusterHealthRequestBody,
-} from '@kbn/securitysolution-api';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetClusterHealthRequest } from './get_cluster_health_request';

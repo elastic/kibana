@@ -21,6 +21,8 @@ import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { Note } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { TimelineModel } from '../../../../..';
 import { SaveTimelineCallout } from '../../../notes/save_timeline';
 import { AddNote } from '../../../../../notes/components/add_note';
@@ -40,8 +42,6 @@ import {
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
 } from '../../../../../notes';
-import type { Note } from '@kbn/securitysolution-api';
-import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { NotesList } from '../../../../../notes/components/notes_list';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';

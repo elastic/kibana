@@ -8,15 +8,15 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type {
+  EndpointRunScriptActionRequestParams,
+  RunScriptActionRequestBody,
+} from '@kbn/securitysolution-api';
 import { parsedExecuteTimeout } from '../lib/utils';
 import type { ParsedCommandInput } from '../../console/service/types';
 import { RunscriptActionResult } from '../../runscript_action_result';
 import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
-import type {
-  EndpointRunScriptActionRequestParams,
-  RunScriptActionRequestBody,
-} from '@kbn/securitysolution-api';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionRunScriptOutputContent,

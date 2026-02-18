@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getDashboardsRequest } from '@kbn/securitysolution-api';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getDashboardsRequest } from '@kbn/securitysolution-api';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 export const getDashboardsByTagsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {

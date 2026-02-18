@@ -6,15 +6,12 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import type { DiffableAllFields, DiffableRule } from '@kbn/securitysolution-api';
 import { extractValidationMessages } from '../../../../../../rule_creation/logic/extract_validation_messages';
 import type { FormWithWarningsSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
-import type {
-  DiffableAllFields,
-  DiffableRule,
-} from '@kbn/securitysolution-api';
 import { useFieldUpgradeContext } from '../../rule_upgrade/field_upgrade_context';
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';

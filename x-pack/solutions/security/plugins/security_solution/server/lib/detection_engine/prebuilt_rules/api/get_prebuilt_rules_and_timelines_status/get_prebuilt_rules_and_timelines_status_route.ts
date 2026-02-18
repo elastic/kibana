@@ -8,14 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { InstallPrepackedTimelinesRequestBody } from '@kbn/securitysolution-api';
-import { buildSiemResponse } from '../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-
 import {
+  InstallPrepackedTimelinesRequestBody,
   ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '@kbn/securitysolution-api';
+import { buildSiemResponse } from '../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { findRules } from '../../../rule_management/logic/search/find_rules';

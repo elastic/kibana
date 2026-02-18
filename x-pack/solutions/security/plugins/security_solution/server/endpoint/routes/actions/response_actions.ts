@@ -7,10 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { MemoryDumpActionRequestSchema } from '@kbn/securitysolution-api';
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-} from '../../../../common/endpoint/service/response_actions/constants';
 import {
   EndpointActionGetFileSchema,
   ExecuteActionRequestSchema,
@@ -25,6 +21,10 @@ import {
   RunScriptActionRequestSchema,
   CancelActionRequestSchema,
 } from '@kbn/securitysolution-api';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 import {
   CANCEL_ROUTE,

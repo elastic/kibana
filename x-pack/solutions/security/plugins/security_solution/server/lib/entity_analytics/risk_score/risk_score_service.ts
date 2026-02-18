@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { RiskScoresPreviewResponse } from '@kbn/securitysolution-api';
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ExperimentalFeatures } from '../../../../common';
-import type { RiskScoresPreviewResponse } from '@kbn/securitysolution-api';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,

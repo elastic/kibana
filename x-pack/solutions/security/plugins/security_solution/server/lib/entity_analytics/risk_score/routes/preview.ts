@@ -9,9 +9,9 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { EntityType } from '../../../../../common/search_strategy';
 import type { RiskScoresPreviewResponse } from '@kbn/securitysolution-api';
 import { RiskScoresPreviewRequest } from '@kbn/securitysolution-api';
+import type { EntityType } from '../../../../../common/search_strategy';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,

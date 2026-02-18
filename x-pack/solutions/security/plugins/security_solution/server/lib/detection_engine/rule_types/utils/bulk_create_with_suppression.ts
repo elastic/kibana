@@ -13,12 +13,9 @@ import type {
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
 
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { makeFloatString } from './utils';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import type { EnrichEventsWrapper } from './enrichments/types';

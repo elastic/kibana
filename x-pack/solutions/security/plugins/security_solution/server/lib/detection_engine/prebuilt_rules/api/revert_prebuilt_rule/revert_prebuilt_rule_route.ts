@@ -7,10 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import {
-  REVERT_PREBUILT_RULES_URL,
-  RevertPrebuiltRulesRequest,
-} from '@kbn/securitysolution-api';
+import { REVERT_PREBUILT_RULES_URL, RevertPrebuiltRulesRequest } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { revertPrebuiltRuleHandler } from './revert_prebuilt_rule_handler';

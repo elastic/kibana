@@ -22,13 +22,13 @@ import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleAboutSection } from '../../../rule_management/components/rule_details/rule_about_section';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types';
 import * as i18n from './translations';
 import { fullHeight } from './styles';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
 
 const detailsOption: EuiButtonGroupOptionProps = {

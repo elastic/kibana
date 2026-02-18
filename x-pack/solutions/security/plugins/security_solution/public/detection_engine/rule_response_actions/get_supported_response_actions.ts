@@ -6,10 +6,7 @@
  */
 
 import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/components/enabled_features';
-import {
-  ResponseActionTypes,
-  ResponseActionTypesEnum,
-} from '@kbn/securitysolution-api';
+import { ResponseActionTypes, ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 
 export interface ResponseActionType {
   id: ResponseActionTypes;

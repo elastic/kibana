@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  DiffableRuleTypes,
-  ThreeVersionsOf,
-} from '@kbn/securitysolution-api';
+import type { DiffableRuleTypes, ThreeVersionsOf } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,

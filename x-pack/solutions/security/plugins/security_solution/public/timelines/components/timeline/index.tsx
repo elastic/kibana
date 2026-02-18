@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -21,7 +22,6 @@ import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
 import { TimelineModalHeader } from '../modal/header';
 import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { sourcererSelectors } from '../../../common/store';

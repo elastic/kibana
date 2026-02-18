@@ -7,6 +7,11 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  withLicense,
+  withExistingMigration,
+  SiemMigrationAuditLogger,
+} from '@kbn/securitysolution-api';
 import type { UpdateRuleMigrationIndexPatternResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   UpdateRuleMigrationIndexPatternRequestParams,
@@ -15,9 +20,6 @@ import {
 import { SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,

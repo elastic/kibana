@@ -17,10 +17,7 @@ import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
-import {
-  EntityRiskQueries,
-  type RiskScoreRequestOptions,
-} from '@kbn/securitysolution-api';
+import { EntityRiskQueries, type RiskScoreRequestOptions } from '@kbn/securitysolution-api';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {

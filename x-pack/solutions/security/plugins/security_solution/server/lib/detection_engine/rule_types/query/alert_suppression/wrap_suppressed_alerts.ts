@@ -15,10 +15,7 @@ import {
   ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import type { SecuritySharedParams, SignalSource } from '../../types';
 import { transformHitToAlert } from '../../factories/utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';

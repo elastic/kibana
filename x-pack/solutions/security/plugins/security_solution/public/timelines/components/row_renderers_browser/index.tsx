@@ -22,9 +22,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import type { State } from '../../../common/store';
 import { RowRendererValues } from '@kbn/securitysolution-api';
 import type { RowRendererId } from '@kbn/securitysolution-api';
+import type { State } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/actions';
 import { timelineSelectors } from '../../store';

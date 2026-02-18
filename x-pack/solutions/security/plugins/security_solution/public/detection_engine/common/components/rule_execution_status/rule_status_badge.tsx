@@ -7,12 +7,11 @@
 
 import React from 'react';
 
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 import { getCapitalizedStatusText, getStatusColor } from './utils';
-
-import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
-import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 
 interface RuleStatusBadgeProps {
   status: RuleExecutionStatus | null | undefined;

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BulkActionEditPayload,
-  BulkActionEditType,
-} from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload, BulkActionEditType } from '@kbn/securitysolution-api';
 import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 

@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { CaseUI } from '@kbn/cases-plugin/common';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
 import { selectTimelineById } from '../../../store/selectors';
 import type { State } from '../../../../common/store';
@@ -16,7 +17,6 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { setInsertTimeline, showTimeline } from '../../../store/actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';

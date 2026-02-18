@@ -8,15 +8,15 @@
 import type { UseMutationResult, UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type {
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
+  AssetCriticalityRecord,
 } from '@kbn/securitysolution-api';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useHasSecurityCapability } from '../../../helper_hooks';
-import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 

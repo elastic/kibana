@@ -13,18 +13,16 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { getRulesSchemaMock } from '@kbn/securitysolution-api';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { updateRuleRoute } from './route';
-import {
+import { getRulesSchemaMock ,
   getCreateEqlRuleSchemaMock,
   getCreateEsqlRulesSchemaMock,
   getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
-} from '@kbn/securitysolution-api';
+, ResponseActionTypesEnum } from '@kbn/securitysolution-api';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { updateRuleRoute } from './route';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import type {
   MockClients,

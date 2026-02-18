@@ -6,9 +6,9 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '@kbn/securitysolution-api';
 import { EndpointAgentStatusRequestSchema } from '@kbn/securitysolution-api';
+import { errorHandler } from '../error_handler';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,

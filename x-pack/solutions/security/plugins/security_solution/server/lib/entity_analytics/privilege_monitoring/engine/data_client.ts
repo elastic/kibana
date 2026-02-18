@@ -15,8 +15,8 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
 import type { MonitoringEngineComponentResource } from '@kbn/securitysolution-api';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
 import type { PrivilegeMonitoringEngineActions } from '../auditing/actions';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SortOrder } from '@kbn/securitysolution-api';
 import type {
+  SortOrder,
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
   GetRuleHealthRequestBody,

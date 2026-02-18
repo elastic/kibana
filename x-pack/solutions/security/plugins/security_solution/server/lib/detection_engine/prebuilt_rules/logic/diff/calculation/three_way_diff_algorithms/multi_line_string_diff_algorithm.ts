@@ -6,11 +6,7 @@
  */
 
 import { merge } from 'node-diff3';
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import type {
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
@@ -19,6 +15,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 /**
  * Diff algorithm used for string fields that contain multiple lines

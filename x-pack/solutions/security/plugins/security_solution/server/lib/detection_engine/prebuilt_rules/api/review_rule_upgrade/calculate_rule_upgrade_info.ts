@@ -6,8 +6,8 @@
  */
 
 import { pickBy } from 'lodash';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import type {
+  RuleResponse,
   RuleUpgradeInfoForReview,
   ThreeWayDiff,
 } from '@kbn/securitysolution-api';

@@ -11,11 +11,11 @@ import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,

@@ -9,10 +9,9 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { camelCase } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
-import type { ReadAuthRulePatchProps } from '@kbn/securitysolution-api';
+import type { ReadAuthRulePatchProps, RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../../../rule_schema';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { applyRulePatch } from '../../mergers/apply_rule_patch';
 import { getReadAuthFieldValue } from '../../utils';
 

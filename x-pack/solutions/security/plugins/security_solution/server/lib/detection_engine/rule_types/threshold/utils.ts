@@ -10,8 +10,8 @@ import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import type {
+  DetectionAlertLatest,
   ThresholdNormalized,
   ThresholdWithCardinality,
 } from '@kbn/securitysolution-api';

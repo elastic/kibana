@@ -14,10 +14,7 @@ import { termsEnumSuggestions } from '@kbn/kql/server/autocomplete/terms_enum';
 import { termsAggSuggestions } from '@kbn/kql/server/autocomplete/terms_agg';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type {
-  EndpointSuggestionsParams,
-  EndpointSuggestionsBody,
-} from '@kbn/securitysolution-api';
+import type { EndpointSuggestionsParams, EndpointSuggestionsBody } from '@kbn/securitysolution-api';
 import { EndpointSuggestionsSchema } from '@kbn/securitysolution-api';
 import type {
   SecuritySolutionPluginRouter,

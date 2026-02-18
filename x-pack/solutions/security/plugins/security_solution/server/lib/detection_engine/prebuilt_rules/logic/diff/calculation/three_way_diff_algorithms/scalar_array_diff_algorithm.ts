@@ -6,11 +6,7 @@
  */
 
 import { union, uniq } from 'lodash';
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import type {
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
@@ -19,6 +15,7 @@ import {
   ThreeWayDiffConflict,
   ThreeWayMergeOutcome,
 } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import { mergeDedupedArrays } from './helpers';
 
 type ScalarArrayDiffAlgorithm<TValue> = (

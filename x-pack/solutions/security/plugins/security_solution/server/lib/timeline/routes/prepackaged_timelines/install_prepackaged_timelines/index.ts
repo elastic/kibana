@@ -8,15 +8,15 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 
+import {
+  InstallPrepackedTimelinesRequestBody,
+  type InstallPrepackedTimelinesResponse,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../../config';
-import {
-  InstallPrepackedTimelinesRequestBody,
-  type InstallPrepackedTimelinesResponse,
-} from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './helpers';

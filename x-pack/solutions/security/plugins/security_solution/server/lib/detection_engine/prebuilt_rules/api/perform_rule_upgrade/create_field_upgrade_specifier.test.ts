@@ -6,10 +6,7 @@
  */
 
 import { createFieldUpgradeSpecifier } from './create_field_upgrade_specifier';
-import {
-  PickVersionValuesEnum,
-  type DiffableRuleTypes,
-} from '@kbn/securitysolution-api';
+import { PickVersionValuesEnum, type DiffableRuleTypes } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 describe('createFieldUpgradeSpecifier', () => {

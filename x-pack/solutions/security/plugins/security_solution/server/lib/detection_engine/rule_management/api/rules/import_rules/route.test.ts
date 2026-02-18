@@ -11,8 +11,8 @@ import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
+  getRulesSchemaMock,
 } from '@kbn/securitysolution-api';
-import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 
 import type { requestMock } from '../../../../routes/__mocks__';
 import { configMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';

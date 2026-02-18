@@ -7,16 +7,18 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  SiemMigrationAuditLogger,
+  withLicense,
+  withExistingMigration,
+} from '@kbn/securitysolution-api';
 import { SIEM_DASHBOARD_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import {
   StopDashboardsMigrationRequestParams,
   type StopDashboardsMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from './util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsStopRoute = (
   router: SecuritySolutionPluginRouter,

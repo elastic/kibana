@@ -6,17 +6,17 @@
  */
 
 import type { AuditLogger, Logger } from '@kbn/core/server';
-import {
-  defaultMonitoringUsersIndex,
-  getPrivilegedMonitorUsersIndex,
-} from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
-import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import type {
   MonitoringEntitySource,
   MonitoringEntitySourceAttributes,
   MonitoringEntitySourceType,
 } from '@kbn/securitysolution-api';
 import { MonitoringEngineComponentResourceEnum } from '@kbn/securitysolution-api';
+import {
+  defaultMonitoringUsersIndex,
+  getPrivilegedMonitorUsersIndex,
+} from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import type { IntegrationType } from '../data_sources';
 import {
   getMatchersFor,

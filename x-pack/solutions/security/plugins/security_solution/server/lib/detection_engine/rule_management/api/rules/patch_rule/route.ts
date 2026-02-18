@@ -13,12 +13,9 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
 } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '@kbn/securitysolution-api';
-import {
-  PatchRuleRequestBody,
-  validatePatchRuleRequestBody,
-} from '@kbn/securitysolution-api';
+import { PatchRuleRequestBody, validatePatchRuleRequestBody } from '@kbn/securitysolution-api';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';

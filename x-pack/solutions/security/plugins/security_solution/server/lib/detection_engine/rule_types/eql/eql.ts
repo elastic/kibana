@@ -8,6 +8,8 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -29,16 +31,11 @@ import {
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { EqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 import {
   bulkCreateSuppressedAlertsInMemory,
   bulkCreateSuppressedSequencesInMemory,
 } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';

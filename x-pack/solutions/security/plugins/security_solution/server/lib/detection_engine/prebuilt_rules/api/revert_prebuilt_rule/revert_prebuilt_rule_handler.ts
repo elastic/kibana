@@ -7,13 +7,13 @@
 
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
-import type { RuleResponse } from '@kbn/securitysolution-api';
-import {
+import type {
+  RuleResponse,
   type BulkActionReversionSkipResult,
   type RevertPrebuiltRulesRequest,
   type RevertPrebuiltRulesResponseBody,
 } from '@kbn/securitysolution-api';
+import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';

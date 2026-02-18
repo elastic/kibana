@@ -8,10 +8,10 @@
 import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { Status } from '@kbn/securitysolution-api';
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import type { Status } from '@kbn/securitysolution-api';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleSchedule } from '@kbn/securitysolution-api';
-import type { DiffableRule } from '@kbn/securitysolution-api';
+import type { RuleSchedule, DiffableRule } from '@kbn/securitysolution-api';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { FullRuleScheduleAdapter } from './full_rule_schedule_adapter';

@@ -9,10 +9,10 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { Note } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
-import type { Note } from '@kbn/securitysolution-api';
 import {
   ReqStatus,
   selectDeleteNotesError,

@@ -29,25 +29,19 @@ import {
   DETECTION_ENGINE_RULES_IMPORT_URL,
   DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/securitysolution-api';
-
-import {
+import { RULE_MANAGEMENT_FILTERS_URL ,
   BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
-} from '@kbn/securitysolution-api';
-import {
+,
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
-  getPerformBulkActionEditAlertSuppressionSchemaMock,
-} from '@kbn/securitysolution-api';
-
-import { getCreateRulesSchemaMock } from '@kbn/securitysolution-api';
-
-import {
+  getPerformBulkActionEditAlertSuppressionSchemaMock, getCreateRulesSchemaMock ,
   getFinalizeSignalsMigrationSchemaMock,
-  getSignalsMigrationStatusSchemaMock,
-} from '@kbn/securitysolution-api';
+  getSignalsMigrationStatusSchemaMock} from '@kbn/securitysolution-api';
+
+
+
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';

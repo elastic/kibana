@@ -10,6 +10,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Status } from '@kbn/securitysolution-api';
 import { PageFilters } from './page_filters';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -21,7 +22,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
-import type { Status } from '@kbn/securitysolution-api';
 
 export interface FiltersSectionProps {
   /**

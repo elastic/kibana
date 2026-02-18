@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import type { Threshold } from '@kbn/securitysolution-api';
 import type { FormData } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { ThresholdAdapter } from './threshold_adapter';
 import type { FieldValueThreshold } from '../../../../../../../rule_creation_ui/components/threshold_input';
-import type { Threshold } from '@kbn/securitysolution-api';
 import { normalizeThresholdField } from '../../../../../../../../../common/detection_engine/utils';
 
 export function ThresholdEditForm(): JSX.Element {

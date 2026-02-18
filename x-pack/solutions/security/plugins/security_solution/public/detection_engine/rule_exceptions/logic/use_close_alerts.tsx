@@ -8,12 +8,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IndexPatternArray } from '@kbn/securitysolution-api';
 import {
   buildAlertsFilterByRuleIds,
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../utils/get_es_query_filter';
-import type { IndexPatternArray } from '@kbn/securitysolution-api';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';

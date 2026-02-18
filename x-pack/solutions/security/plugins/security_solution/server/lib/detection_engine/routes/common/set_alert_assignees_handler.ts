@@ -10,8 +10,8 @@ import { uniq } from 'lodash/fp';
 import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { SetAlertAssigneesRequestBody } from '@kbn/securitysolution-api';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import { buildSiemResponse } from '../utils';
 import { validateAlertAssigneesArrays } from '../signals/helpers';
 

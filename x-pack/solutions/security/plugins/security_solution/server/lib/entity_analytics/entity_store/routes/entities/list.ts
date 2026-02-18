@@ -9,10 +9,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { EntityType } from '../../../../../../common/search_strategy';
-import { LIST_ENTITIES_URL } from '../../../../../../common/entity_analytics/entity_store/constants';
 import type { ListEntitiesResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { ListEntitiesRequestQuery } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { EntityType } from '../../../../../../common/search_strategy';
+import { LIST_ENTITIES_URL } from '../../../../../../common/entity_analytics/entity_store/constants';
 import { APP_ID } from '../../../../../../common';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';

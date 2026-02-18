@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { get, has } from 'lodash';
-import type { RuleSchedule } from '@kbn/securitysolution-api';
 import type {
+  RuleSchedule,
   DataSourceIndexPatterns,
   DataSourceDataView,
   InlineKqlQuery,

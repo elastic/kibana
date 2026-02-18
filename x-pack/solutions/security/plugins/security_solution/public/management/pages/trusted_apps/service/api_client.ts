@@ -13,6 +13,7 @@ import type {
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { HttpStart } from '@kbn/core/public';
+import type { EndpointSuggestionsBody } from '@kbn/securitysolution-api';
 import type { ConditionEntry } from '../../../../../common/endpoint/types';
 import {
   conditionEntriesToEntries,
@@ -21,7 +22,6 @@ import {
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
 import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
-import type { EndpointSuggestionsBody } from '@kbn/securitysolution-api';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { isAdvancedModeEnabled } from '../../../../../common/endpoint/service/artifacts/utils';
 

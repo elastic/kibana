@@ -7,9 +7,9 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { OpenTimelineModal } from '../open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../open_timeline/types';
 

@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 
+import type { RuleExecutionSettings } from '@kbn/securitysolution-api';
+import { LogLevelSetting } from '@kbn/securitysolution-api';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 
@@ -14,8 +16,6 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../../../../../common/constants';
-import type { RuleExecutionSettings } from '@kbn/securitysolution-api';
-import { LogLevelSetting } from '@kbn/securitysolution-api';
 
 export const useRuleExecutionSettings = (): RuleExecutionSettings => {
   const featureFlagEnabled = useIsExperimentalFeatureEnabled('extendedRuleExecutionLoggingEnabled');

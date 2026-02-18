@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiLink,
 } from '@elastic/eui';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
 import {
@@ -24,7 +25,6 @@ import {
   RULE_TITLE_SUPPRESSED_TEST_ID,
   NAVIGATE_TO_RULE_DETAILS_PAGE_TEST_ID,
 } from './test_ids';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';

@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 import { get, isEmpty } from 'lodash/fp';
 import type { Query } from '@kbn/es-query';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import {
   UNTITLED_TEMPLATE,
   UNTITLED_TIMELINE,
@@ -17,7 +18,6 @@ import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
 import type { InsertTimeline } from './types';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({

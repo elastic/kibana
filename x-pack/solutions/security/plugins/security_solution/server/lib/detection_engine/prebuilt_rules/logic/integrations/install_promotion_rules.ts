@@ -8,15 +8,15 @@
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
+import type {
+  RuleBootstrapError,
+  RuleBootstrapResults,
+} from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
 import type { IPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../rule_objects/upgrade_prebuilt_rules';
-import type {
-  RuleBootstrapError,
-  RuleBootstrapResults,
-} from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
 import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';

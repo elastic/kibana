@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Status } from '@kbn/securitysolution-api';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -28,7 +29,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
-import type { Status } from '@kbn/securitysolution-api';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { AlertsTable } from '../../alerts_table';
 

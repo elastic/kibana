@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
-import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
-import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
-import type { PromisePoolError } from '../../../../../utils/promise_pool';
-import {
+import type {
+  UpgradeConflictResolution,
   type PerformRuleUpgradeRequestBody,
   type PickVersionValues,
   type AllThreeWayFieldsDiff,
   MissingVersion,
 } from '@kbn/securitysolution-api';
-import type { UpgradeConflictResolution } from '@kbn/securitysolution-api';
 import { UpgradeConflictResolutionEnum } from '@kbn/securitysolution-api';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
+import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
+import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';

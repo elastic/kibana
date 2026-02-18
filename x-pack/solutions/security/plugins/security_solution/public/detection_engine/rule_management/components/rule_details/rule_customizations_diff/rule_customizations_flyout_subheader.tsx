@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import type { PartialThreeWayRuleDiff, RuleResponse } from '@kbn/securitysolution-api';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import type {
-  PartialThreeWayRuleDiff,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { convertFieldToDisplayName } from '../helpers';
 

@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../common/lib/telemetry';
 import type { BulkActionEditPayloadDeleteAlertSuppression } from '@kbn/securitysolution-api';
 import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../common/lib/telemetry';
 import { bulkAlertSuppression as i18n } from './translations';
 
 interface Props {

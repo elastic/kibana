@@ -9,12 +9,12 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
 import { z } from '@kbn/zod';
+import { withLicense } from '@kbn/securitysolution-api';
 import { DashboardMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_DASHBOARD_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 

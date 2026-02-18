@@ -11,10 +11,7 @@ import type {
   MappingTypeMapping,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentStatus,
-} from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum, type EngineComponentStatus } from '@kbn/securitysolution-api';
 import type { EntityEngineInstallationDescriptor, FieldDescription } from '../installation/types';
 
 const DEFAULT_MAPPINGS: Record<PropertyName, MappingProperty> = {

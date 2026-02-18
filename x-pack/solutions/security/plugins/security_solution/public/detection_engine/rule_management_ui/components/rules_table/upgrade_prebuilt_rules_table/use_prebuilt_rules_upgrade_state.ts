@@ -6,14 +6,6 @@
  */
 
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import type {
-  RulesUpgradeState,
-  FieldsUpgradeState,
-  SetRuleFieldResolvedValueFn,
-} from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
   type ThreeWayFieldsDiff,
   type DiffableAllFields,
@@ -23,6 +15,14 @@ import {
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
   ThreeWayDiffOutcome,
 } from '@kbn/securitysolution-api';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import type {
+  RulesUpgradeState,
+  FieldsUpgradeState,
+  SetRuleFieldResolvedValueFn,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import * as i18n from './translations';
 

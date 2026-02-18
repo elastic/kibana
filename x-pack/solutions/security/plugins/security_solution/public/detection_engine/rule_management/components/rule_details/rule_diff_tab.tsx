@@ -16,9 +16,9 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import type { RuleResponse } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
-import type { RuleResponse } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
 import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
 

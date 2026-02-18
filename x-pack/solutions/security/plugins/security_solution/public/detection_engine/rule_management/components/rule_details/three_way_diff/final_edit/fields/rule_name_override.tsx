@@ -6,13 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
+import type { DiffableRule, RuleNameOverrideObject } from '@kbn/securitysolution-api';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type {
-  DiffableRule,
-  RuleNameOverrideObject,
-} from '@kbn/securitysolution-api';
 import { EsFieldSelectorField } from '../../../../../../rule_creation_ui/components/es_field_selector_field';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { getUseRuleIndexPatternParameters } from '../utils';

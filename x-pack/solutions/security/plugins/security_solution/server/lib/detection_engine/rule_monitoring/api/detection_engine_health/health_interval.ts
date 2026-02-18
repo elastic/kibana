@@ -7,14 +7,8 @@
 
 import moment from 'moment';
 
-import type {
-  HealthInterval,
-  HealthIntervalParameters,
-} from '@kbn/securitysolution-api';
-import {
-  HealthIntervalGranularity,
-  HealthIntervalType,
-} from '@kbn/securitysolution-api';
+import type { HealthInterval, HealthIntervalParameters } from '@kbn/securitysolution-api';
+import { HealthIntervalGranularity, HealthIntervalType } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 const DEFAULT_INTERVAL_PARAMETERS: HealthIntervalParameters = {

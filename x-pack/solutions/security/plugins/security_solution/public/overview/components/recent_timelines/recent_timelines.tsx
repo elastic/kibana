@@ -9,13 +9,13 @@ import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import styled from '@emotion/styled';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { RecentTimelineHeader } from './header';
 import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { HoverPopover } from '../../../common/components/hover_popover';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';

@@ -7,10 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiCheckbox, EuiSpacer } from '@elastic/eui';
-import type {
-  ImportRulesResponse,
-  WarningSchema,
-} from '@kbn/securitysolution-api';
+import type { ImportRulesResponse, WarningSchema } from '@kbn/securitysolution-api';
 import { importRules } from '../../../rule_management/logic';
 import { showToast } from './utils';
 import { ActionConnectorWarnings } from './action_connectors_warning';

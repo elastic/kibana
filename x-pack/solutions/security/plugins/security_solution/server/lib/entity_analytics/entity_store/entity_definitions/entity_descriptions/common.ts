@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BaseECSEntityField,
-  EntityType,
-} from '@kbn/securitysolution-api';
+import type { BaseECSEntityField, EntityType } from '@kbn/securitysolution-api';
 import type { FieldDescription } from '../../installation/types';
 
 import { oldestValue, newestValue } from './field_utils';

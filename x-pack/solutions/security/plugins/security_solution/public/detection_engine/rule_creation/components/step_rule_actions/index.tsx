@@ -16,8 +16,8 @@ import type {
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { RuleActionsField } from '../../../../common/components/rule_actions_field';
 import type { RuleObjectId } from '@kbn/securitysolution-api';
+import { RuleActionsField } from '../../../../common/components/rule_actions_field';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type { ActionsStepRule, RuleStepProps } from '../../../common/types';
 import type { FormHook } from '../../../../shared_imports';

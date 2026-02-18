@@ -6,12 +6,9 @@
  */
 
 import { each } from 'lodash';
+import type { RuleResponseEndpointAction, ProcessesParams } from '@kbn/securitysolution-api';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
-import type {
-  RuleResponseEndpointAction,
-  ProcessesParams,
-} from '@kbn/securitysolution-api';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';

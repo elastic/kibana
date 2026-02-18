@@ -6,6 +6,7 @@
  */
 
 import { get, isEqual, isObject } from 'lodash';
+import type { ThreatMapping, ThreatMappingEntry } from '@kbn/securitysolution-api';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../../common/cti/constants';
 
 import type { SignalSourceHit } from '../../types';
@@ -14,10 +15,6 @@ import type {
   MatchedHitAndQuery,
   SignalIdToMatchedQueriesMap,
 } from './get_signal_id_to_matched_queries_map';
-import type {
-  ThreatMapping,
-  ThreatMappingEntry,
-} from '@kbn/securitysolution-api';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 

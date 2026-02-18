@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { invariant } from '../../../../../../../common/utils/invariant';
-
 import type {
   AllThreeWayFieldsDiff,
   DiffableAllFields,
@@ -31,11 +28,13 @@ import type {
   SavedQueryThreeWayFieldsDiff,
   ThreatMatchThreeWayFieldsDiff,
   ThresholdThreeWayFieldsDiff,
+  ThreeWayFieldsDiffAlgorithmsFor,
+  ThreeVersionsOf,
 } from '@kbn/securitysolution-api';
 
-import type { ThreeWayFieldsDiffAlgorithmsFor } from '@kbn/securitysolution-api';
-import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
 import { MissingVersion } from '@kbn/securitysolution-api';
+import { invariant } from '../../../../../../../common/utils/invariant';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import {
   dataSourceDiffAlgorithm,

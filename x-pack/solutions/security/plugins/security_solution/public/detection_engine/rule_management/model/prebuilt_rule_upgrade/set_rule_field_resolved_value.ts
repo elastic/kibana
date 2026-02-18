@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  DiffableAllFields,
-  RuleSignatureId,
-} from '@kbn/securitysolution-api';
+import type { DiffableAllFields, RuleSignatureId } from '@kbn/securitysolution-api';
 
 export type SetRuleFieldResolvedValueFn<
   FieldName extends keyof DiffableAllFields = keyof DiffableAllFields

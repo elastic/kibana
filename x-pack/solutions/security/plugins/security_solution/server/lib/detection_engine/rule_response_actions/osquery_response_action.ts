@@ -9,9 +9,9 @@ import { each, map, some, uniq } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
 import { requiredOptional } from '@kbn/zod-helpers';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { RuleResponseOsqueryAction } from '@kbn/securitysolution-api';
 import type { ResponseActionAlerts } from './types';
 import type { SetupPlugins } from '../../../plugin_contract';
-import type { RuleResponseOsqueryAction } from '@kbn/securitysolution-api';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
 export const osqueryResponseAction = (

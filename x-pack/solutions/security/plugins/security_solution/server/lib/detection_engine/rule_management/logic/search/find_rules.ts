@@ -6,9 +6,7 @@
  */
 
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
-import type { FindRulesSortField } from '@kbn/securitysolution-api';
-
-import type { Page, PerPage, SortOrder } from '@kbn/securitysolution-api';
+import type { FindRulesSortField, Page, PerPage, SortOrder } from '@kbn/securitysolution-api';
 
 import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';

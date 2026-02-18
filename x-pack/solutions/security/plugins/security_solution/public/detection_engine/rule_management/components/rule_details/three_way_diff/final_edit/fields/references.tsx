@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { compact } from 'lodash';
+import type { RuleReferenceArray } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../../../rule_creation_ui/components/step_about_rule/translations';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleReferenceArray } from '@kbn/securitysolution-api';
 import { AddItem } from '../../../../../../rule_creation_ui/components/add_item_form';
 import { isUrlInvalid } from '../../../../../../../common/utils/validators';
 

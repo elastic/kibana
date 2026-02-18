@@ -11,23 +11,15 @@ import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type {
-  RuleCustomizationStatus,
-  WarningSchema,
-} from '@kbn/securitysolution-api';
-import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
-
-import { SortOrder } from '@kbn/securitysolution-api';
-import type {
+import type { RuleCustomizationStatus, WarningSchema , RuleExecutionStatus ,
   RuleCreateProps,
   RuleResponse,
   RuleUpdateProps,
-} from '@kbn/securitysolution-api';
-import type {
+,
   CoverageOverviewFilter,
-  PatchRuleRequestBody,
-} from '@kbn/securitysolution-api';
-import { FindRulesSortField } from '@kbn/securitysolution-api';
+  PatchRuleRequestBody} from '@kbn/securitysolution-api';
+
+import { SortOrder , FindRulesSortField } from '@kbn/securitysolution-api';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;

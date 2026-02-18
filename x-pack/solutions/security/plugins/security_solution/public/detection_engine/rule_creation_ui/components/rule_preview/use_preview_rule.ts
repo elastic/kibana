@@ -7,11 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import type { RuleCreateProps, RulePreviewResponse } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type {
-  RuleCreateProps,
-  RulePreviewResponse,
-} from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../common/transforms';

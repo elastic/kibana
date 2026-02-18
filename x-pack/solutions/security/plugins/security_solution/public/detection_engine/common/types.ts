@@ -22,16 +22,6 @@ import type {
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import type {
-  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
-  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
-  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-} from '../rule_creation/components/alert_suppression_edit';
-import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
-import type { FieldValueQueryBar } from '../rule_creation_ui/components/query_bar_field';
-import type { FieldValueTimeline } from '../rule_creation/components/pick_timeline';
-import type { FieldValueThreshold } from '../rule_creation_ui/components/threshold_input';
-import type {
   AlertSuppression,
   AlertSuppressionMissingFieldsStrategy,
   BuildingBlockType,
@@ -48,13 +38,21 @@ import type {
   TimestampOverride,
   ThreatIndex,
   ThreatMapping,
-} from '@kbn/securitysolution-api';
-import type { SortOrder } from '@kbn/securitysolution-api';
-import type { EqlOptions } from '../../../common/search_strategy';
-import type {
+  SortOrder,
   ResponseAction,
   RuleResponseAction,
 } from '@kbn/securitysolution-api';
+import type {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../rule_creation/components/alert_suppression_edit';
+import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
+import type { FieldValueQueryBar } from '../rule_creation_ui/components/query_bar_field';
+import type { FieldValueTimeline } from '../rule_creation/components/pick_timeline';
+import type { FieldValueThreshold } from '../rule_creation_ui/components/threshold_input';
+import type { EqlOptions } from '../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;

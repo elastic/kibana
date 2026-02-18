@@ -13,6 +13,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
 import type { estypes } from '@elastic/elasticsearch';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
@@ -49,7 +50,6 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { FUNCTIONAL_FIELD_MAP } from '../detection_engine/rule_management/constants';
 
 /**

@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
@@ -29,7 +30,6 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import type { WarningSchema } from '@kbn/securitysolution-api';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {

@@ -19,6 +19,11 @@ import {
   HeaderMenu,
   generateLinkedRulesMenuItems,
 } from '@kbn/securitysolution-exception-list-components';
+import type {
+  ExceptionListRuleReferencesInfoSchema,
+  ExceptionListRuleReferencesSchema,
+  RuleResponse,
+} from '@kbn/securitysolution-api';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import {
   enrichExceptionItemsWithOS,
@@ -29,13 +34,8 @@ import {
   enrichSharedExceptions,
   lowercaseHashValues,
 } from '../../utils/helpers';
-import type {
-  ExceptionListRuleReferencesInfoSchema,
-  ExceptionListRuleReferencesSchema,
-} from '@kbn/securitysolution-api';
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 
 /**
  * Adds user defined name to all new exceptionItems

@@ -17,6 +17,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
 import type { UserProfile } from '@kbn/core-user-profile-common';
+import { GetNotesRequestQuery, type GetNotesResponse } from '@kbn/securitysolution-api';
 import type { StartPlugins } from '../../../../plugin_contract';
 import { AssociatedFilter } from '../../../../../common/notes/constants';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -27,7 +28,6 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
 import { getAllSavedNote } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
-import { GetNotesRequestQuery, type GetNotesResponse } from '@kbn/securitysolution-api';
 
 /* eslint-disable complexity */
 export const getNotesRoute = (

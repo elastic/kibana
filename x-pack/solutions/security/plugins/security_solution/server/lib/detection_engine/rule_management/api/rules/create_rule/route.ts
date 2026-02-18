@@ -9,12 +9,9 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { CreateRuleResponse } from '@kbn/securitysolution-api';
-import {
-  CreateRuleRequestBody,
-  validateCreateRuleProps,
-} from '@kbn/securitysolution-api';
+import { CreateRuleRequestBody, validateCreateRuleProps } from '@kbn/securitysolution-api';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';

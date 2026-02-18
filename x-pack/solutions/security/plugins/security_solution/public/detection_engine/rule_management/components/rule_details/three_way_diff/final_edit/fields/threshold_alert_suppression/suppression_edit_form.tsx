@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import type { ThresholdAlertSuppression } from '@kbn/securitysolution-api';
 import {
   THRESHOLD_ALERT_SUPPRESSION_ENABLED,
   ThresholdAlertSuppressionEdit,
 } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit';
 import { ALERT_SUPPRESSION_DURATION_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { type FormData } from '../../../../../../../../shared_imports';
-import type { ThresholdAlertSuppression } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import {
   thresholdAlertSuppressionFormSchema,

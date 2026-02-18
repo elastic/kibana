@@ -9,10 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
-import type {
-  ThreatMapping,
-  ThreatMappingEntry,
-} from '@kbn/securitysolution-api';
+import type { ThreatMapping, ThreatMappingEntry } from '@kbn/securitysolution-api';
 
 import type { FormattedEntry } from './types';
 

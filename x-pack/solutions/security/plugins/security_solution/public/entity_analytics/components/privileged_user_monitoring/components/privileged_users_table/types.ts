@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { EntityRiskLevels } from '@kbn/securitysolution-api';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 
 export interface TableItemType extends Record<string, string | string[] | number | undefined> {
   'user.name': string;

@@ -6,10 +6,7 @@
  */
 
 import { createMockEndpointAppContextService } from '../../../mocks';
-import type {
-  ResponseAction,
-  RuleResponseAction,
-} from '@kbn/securitysolution-api';
+import type { ResponseAction, RuleResponseAction } from '@kbn/securitysolution-api';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { ValidateRuleResponseActionsOptions } from './rule_response_actions_validators';

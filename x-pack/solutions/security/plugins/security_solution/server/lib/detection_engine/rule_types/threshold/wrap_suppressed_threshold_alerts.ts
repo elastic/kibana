@@ -18,10 +18,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import type { ThresholdCompositeBucket } from './types';

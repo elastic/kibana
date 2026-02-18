@@ -6,12 +6,12 @@
  */
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { HTTPError } from '../../../../../../common/detection_engine/types';
 import type {
   RevertPrebuiltRulesResponseBody,
   RevertPrebuiltRulesRequest,
 } from '@kbn/securitysolution-api';
 import { REVERT_PREBUILT_RULES_URL } from '@kbn/securitysolution-api';
+import type { HTTPError } from '../../../../../../common/detection_engine/types';
 import { revertPrebuiltRule } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';

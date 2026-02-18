@@ -9,6 +9,10 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import {
+  type PersistPinnedEventRouteResponse,
+  PersistPinnedEventRouteRequestBody,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
@@ -16,10 +20,6 @@ import { PINNED_EVENT_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import {
-  type PersistPinnedEventRouteResponse,
-  PersistPinnedEventRouteRequestBody,
-} from '@kbn/securitysolution-api';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
 export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) => {

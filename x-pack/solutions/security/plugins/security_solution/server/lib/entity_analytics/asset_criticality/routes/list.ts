@@ -8,14 +8,14 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { FindAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
+import { FindAssetCriticalityRecordsRequestQuery } from '@kbn/securitysolution-api';
 import {
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   APP_ID,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import type { FindAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
-import { FindAssetCriticalityRecordsRequestQuery } from '@kbn/securitysolution-api';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';

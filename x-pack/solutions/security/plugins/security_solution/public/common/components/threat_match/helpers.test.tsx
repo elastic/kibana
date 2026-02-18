@@ -10,10 +10,7 @@ import type { FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
-import type {
-  ThreatMapping,
-  ThreatMappingEntry,
-} from '@kbn/securitysolution-api';
+import type { ThreatMapping, ThreatMappingEntry } from '@kbn/securitysolution-api';
 import {
   getEntryOnFieldChange,
   getFormattedEntries,

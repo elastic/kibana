@@ -12,6 +12,8 @@ import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
   PerformRuleInstallationRequestBody,
+  RuleSignatureId,
+  RuleVersion,
 } from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -21,7 +23,6 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
-import type { RuleSignatureId, RuleVersion } from '@kbn/securitysolution-api';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (

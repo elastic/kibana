@@ -7,13 +7,15 @@
 
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  withLicense,
+  SiemMigrationAuditLogger,
+  withExistingMigration,
+} from '@kbn/securitysolution-api';
 import { DeleteDashboardMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '@kbn/securitysolution-api';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
-import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsDeleteRoute = (
   router: SecuritySolutionPluginRouter,

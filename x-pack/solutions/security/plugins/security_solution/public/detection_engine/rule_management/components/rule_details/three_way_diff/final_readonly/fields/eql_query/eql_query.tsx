@@ -8,10 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import {
-  type RuleDataSource,
-  type RuleEqlQuery,
-} from '@kbn/securitysolution-api';
+import { type RuleDataSource, type RuleEqlQuery } from '@kbn/securitysolution-api';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
 import { getDataSourceProps, isFilters } from '../../../../helpers';

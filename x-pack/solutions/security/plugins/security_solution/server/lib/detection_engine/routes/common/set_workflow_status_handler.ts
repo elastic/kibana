@@ -16,11 +16,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertStatusEnum } from '@kbn/securitysolution-api';
+import { SetAlertsStatusByIds, type SetAlertsStatusRequestBody } from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import {
-  SetAlertsStatusByIds,
-  type SetAlertsStatusRequestBody,
-} from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../utils';
 
 interface SetWorkflowStatusProps {

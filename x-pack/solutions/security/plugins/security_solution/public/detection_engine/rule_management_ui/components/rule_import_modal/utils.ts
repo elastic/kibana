@@ -8,9 +8,9 @@
 import { uniq } from 'lodash/fp';
 import type { IToasts } from '@kbn/core/public';
 
+import type { ErrorSchema, ImportRulesResponse } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 
-import type { ErrorSchema, ImportRulesResponse } from '@kbn/securitysolution-api';
 import { showErrorToast } from '../../../../common/components/utils';
 
 export function getFailedConnectorsCount(actionConnectorsErrors: ErrorSchema[]) {

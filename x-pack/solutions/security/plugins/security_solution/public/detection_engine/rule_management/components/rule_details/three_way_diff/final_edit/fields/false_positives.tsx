@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { isEmpty } from 'lodash';
+import type { RuleFalsePositiveArray } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../../../rule_creation_ui/components/step_about_rule/translations';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleFalsePositiveArray } from '@kbn/securitysolution-api';
 import { AddItem } from '../../../../../../rule_creation_ui/components/add_item_form';
 
 export const falsePositivesSchema = { falsePositives: schema.falsePositives } as FormSchema<{

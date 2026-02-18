@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataSourceType } from '../../../../../common/types';
 import type { DiffableRule } from '@kbn/securitysolution-api';
 import { DataSourceType as DataSourceTypeSnakeCase } from '@kbn/securitysolution-api';
+import { DataSourceType } from '../../../../../common/types';
 
 interface UseRuleIndexPatternParameters {
   dataSourceType: DataSourceType;

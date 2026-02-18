@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ThreatIndicatorPath,
-  ThreatMapping,
-} from '@kbn/securitysolution-api';
+import type { ThreatIndicatorPath, ThreatMapping } from '@kbn/securitysolution-api';
 import type { SignalSourceHit } from '../../types';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
 import { type SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';

@@ -10,16 +10,16 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import {
-  getAllMissingPrivileges,
-  getMissingPrivilegesErrorMessage,
-} from '../../../../../common/entity_analytics/privileges';
-import { EntityType } from '../../../../../common/search_strategy';
 import type { InitEntityEngineResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/init.gen';
 import {
   InitEntityEngineRequestBody,
   InitEntityEngineRequestParams,
 } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/init.gen';
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../../common/entity_analytics/privileges';
+import { EntityType } from '../../../../../common/search_strategy';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';

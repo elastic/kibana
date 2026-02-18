@@ -19,8 +19,8 @@ import type {
 import * as z from '@kbn/zod';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
-import { RuleResponseAction } from '@kbn/securitysolution-api';
 import {
+  RuleResponseAction,
   AlertsIndex,
   AlertsIndexNamespace,
   AlertSuppressionCamel,

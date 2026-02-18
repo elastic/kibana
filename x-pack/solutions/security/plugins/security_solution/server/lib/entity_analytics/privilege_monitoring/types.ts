@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MonitoringLabel,
-  MonitoringEntitySource,
-} from '@kbn/securitysolution-api';
+import type { MonitoringLabel, MonitoringEntitySource } from '@kbn/securitysolution-api';
 
 export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics_integration';
 

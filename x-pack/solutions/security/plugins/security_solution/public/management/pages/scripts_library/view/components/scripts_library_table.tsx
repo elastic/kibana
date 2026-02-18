@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { ActionsContextMenu } from '../../../../components/actions_context_menu';
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
 import type { ScriptTagKey } from '../../../../../../common/endpoint/service/scripts_library/constants';
@@ -29,7 +30,6 @@ import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../common/constants';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
-import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type {
   EndpointScript,

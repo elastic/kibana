@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SavedTimeline, Note } from '@kbn/securitysolution-api';
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 
-import type { SavedTimeline, Note } from '@kbn/securitysolution-api';
 import type { TimelineStatusActions } from '../../../utils/common';
 
 export type ImportedTimeline = SavedTimeline & {

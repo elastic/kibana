@@ -7,11 +7,8 @@
 
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
+import type { RuleCreateProps, RuleResponse } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
 import { transformOutput } from '../../../common/transforms';
 import { createRule } from '../api';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';

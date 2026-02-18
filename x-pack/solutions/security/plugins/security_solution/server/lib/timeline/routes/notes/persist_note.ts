@@ -8,6 +8,10 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  PersistNoteRouteRequestBody,
+  type PersistNoteRouteResponse,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
@@ -15,10 +19,6 @@ import { NOTE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import {
-  PersistNoteRouteRequestBody,
-  type PersistNoteRouteResponse,
-} from '@kbn/securitysolution-api';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {

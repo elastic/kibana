@@ -6,12 +6,9 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
-import type {
-  PatchUpdateRequestBody,
-  PatchUpdateRequestParams,
-} from '@kbn/securitysolution-api';
+import type { PatchUpdateRequestBody, PatchUpdateRequestParams } from '@kbn/securitysolution-api';
 import { PatchUpdateScriptRequestSchema } from '@kbn/securitysolution-api';
+import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type {
   SecuritySolutionPluginRouter,

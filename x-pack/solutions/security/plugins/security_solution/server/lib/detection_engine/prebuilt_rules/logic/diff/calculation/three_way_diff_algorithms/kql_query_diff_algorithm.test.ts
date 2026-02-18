@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleKqlQuery,
-  ThreeVersionsOf,
-} from '@kbn/securitysolution-api';
+import type { RuleKqlQuery, ThreeVersionsOf } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,

@@ -8,15 +8,9 @@
 import { act, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
-import { invariant } from '../../../../../../../../common/utils/invariant';
 import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
-import {
-  addEuiComboBoxOption,
-  clearEuiComboBoxSelection,
-  selectEuiComboBoxOption,
-} from '../../../../../../../common/test/eui/combobox';
-import { selectEuiSuperSelectOption } from '../../../../../../../common/test/eui/super_select';
-import {
+import type {
+  RuleSchedule,
   DataSourceType,
   type BuildingBlockObject,
   type DiffableAllFields,
@@ -42,7 +36,13 @@ import {
   type Threshold,
   KqlQueryType,
 } from '@kbn/securitysolution-api';
-import type { RuleSchedule } from '@kbn/securitysolution-api';
+import { invariant } from '../../../../../../../../common/utils/invariant';
+import {
+  addEuiComboBoxOption,
+  clearEuiComboBoxSelection,
+  selectEuiComboBoxOption,
+} from '../../../../../../../common/test/eui/combobox';
+import { selectEuiSuperSelectOption } from '../../../../../../../common/test/eui/super_select';
 
 type ToDiscriminatedUnion<T> = {
   [K in keyof T]-?: { fieldName: K; value: T[K] };

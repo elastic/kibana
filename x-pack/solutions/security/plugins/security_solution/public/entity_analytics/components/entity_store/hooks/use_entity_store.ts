@@ -14,12 +14,12 @@ import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import {
   type DeleteEntityEngineResponse,
   type StopEntityEngineResponse,
   type EntityType,
 } from '@kbn/securitysolution-api';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 

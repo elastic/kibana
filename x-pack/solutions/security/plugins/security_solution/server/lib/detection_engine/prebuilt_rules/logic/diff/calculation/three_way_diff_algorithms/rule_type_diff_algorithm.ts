@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import type {
-  DiffableRuleTypes,
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { DiffableRuleTypes, ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
@@ -19,6 +14,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 export const ruleTypeDiffAlgorithm = <TValue extends DiffableRuleTypes>(
   versions: ThreeVersionsOf<TValue>

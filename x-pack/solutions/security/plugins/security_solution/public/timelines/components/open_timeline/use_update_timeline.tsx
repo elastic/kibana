@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
+import type { Note } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
-import type { Note } from '@kbn/securitysolution-api';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { createNote } from '../notes/helpers';
 import { sourcererActions } from '../../../sourcerer/store';
 

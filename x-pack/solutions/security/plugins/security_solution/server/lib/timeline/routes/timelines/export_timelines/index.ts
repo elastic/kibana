@@ -7,15 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ExportTimelinesRequestQuery, ExportTimelinesRequestBody } from '@kbn/securitysolution-api';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import {
-  ExportTimelinesRequestQuery,
-  ExportTimelinesRequestBody,
-} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 import { getExportTimelineByObjectIds } from './helpers';

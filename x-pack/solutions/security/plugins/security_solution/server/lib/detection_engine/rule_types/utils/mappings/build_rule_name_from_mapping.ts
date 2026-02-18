@@ -8,11 +8,7 @@
 import * as t from 'io-ts';
 import { get } from 'lodash/fp';
 
-import type {
-  RuleMetadata,
-  RuleName,
-  RuleNameOverride,
-} from '@kbn/securitysolution-api';
+import type { RuleMetadata, RuleName, RuleNameOverride } from '@kbn/securitysolution-api';
 import type { SignalSource } from '../../types';
 
 interface BuildRuleNameFromMappingProps {

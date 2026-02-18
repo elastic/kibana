@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { DataSourceType } from '@kbn/securitysolution-api';
 import { indexPatternValidatorFactory } from '../../../../../../../rule_creation_ui/validators/index_pattern_validator_factory';
 import { dataViewIdValidatorFactory } from '../../../../../../../rule_creation_ui/validators/data_view_id_validator_factory';
 import {
@@ -16,7 +17,6 @@ import {
   type ERROR_CODE,
   FIELD_TYPES,
 } from '../../../../../../../../shared_imports';
-import { DataSourceType } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { DataSourceEdit } from './data_source_edit';
 import { INDEX_HELPER_TEXT } from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';

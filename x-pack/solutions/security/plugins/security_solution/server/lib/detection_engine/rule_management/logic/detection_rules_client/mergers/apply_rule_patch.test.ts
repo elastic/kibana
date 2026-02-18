@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AlertSuppressionDuration,
-  PatchRuleRequestBody,
-} from '@kbn/securitysolution-api';
+import type { AlertSuppressionDuration, PatchRuleRequestBody } from '@kbn/securitysolution-api';
 import {
   getEsqlRuleSchemaMock,
   getRulesEqlSchemaMock,

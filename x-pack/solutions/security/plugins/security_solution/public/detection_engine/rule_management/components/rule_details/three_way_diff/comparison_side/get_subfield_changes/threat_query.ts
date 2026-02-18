@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { stringifyToSortedJson } from '../utils';
 import type { DiffableAllFields } from '@kbn/securitysolution-api';
+import { stringifyToSortedJson } from '../utils';
 import type { SubfieldChange } from '../types';
 
 export const getSubfieldChangesForThreatQuery = (

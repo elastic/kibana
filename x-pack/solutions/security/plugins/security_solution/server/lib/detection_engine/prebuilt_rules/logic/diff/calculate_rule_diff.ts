@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   DiffableRule,
   FullThreeWayRuleDiff,
   ThreeWayDiff,
   ThreeWayRuleFieldsDiff,
+  RuleResponse,
 } from '@kbn/securitysolution-api';
-import {
-  MissingVersion,
-  ThreeWayDiffConflict,
-} from '@kbn/securitysolution-api';
-import type { RuleResponse } from '@kbn/securitysolution-api';
+import { MissingVersion, ThreeWayDiffConflict } from '@kbn/securitysolution-api';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';

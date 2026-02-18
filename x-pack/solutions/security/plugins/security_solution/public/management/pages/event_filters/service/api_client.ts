@@ -12,8 +12,8 @@ import type {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
-import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
 import type { EndpointSuggestionsBody } from '@kbn/securitysolution-api';
+import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { EVENT_FILTER_LIST_DEFINITION } from '../constants';

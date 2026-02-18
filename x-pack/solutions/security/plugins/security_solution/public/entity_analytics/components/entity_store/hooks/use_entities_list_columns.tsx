@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
+import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -23,7 +24,6 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { RiskScoreLevel } from '../../severity/common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../../explore/components/paginated_table';
-import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 import { type CriticalityLevels } from '../../../../../common/constants';
 import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';

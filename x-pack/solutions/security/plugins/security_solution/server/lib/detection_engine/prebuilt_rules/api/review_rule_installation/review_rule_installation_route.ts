@@ -9,8 +9,10 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { z } from '@kbn/zod';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { Logger } from '@kbn/core/server';
-import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/securitysolution-api';
-import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '@kbn/securitysolution-api';
+import {
+  REVIEW_RULE_INSTALLATION_URL,
+  ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {

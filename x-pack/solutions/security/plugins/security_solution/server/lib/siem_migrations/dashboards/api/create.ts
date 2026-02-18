@@ -8,13 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { withLicense, SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { SIEM_DASHBOARD_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
 import type { CreateDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { CreateDashboardMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import { withLicense } from '@kbn/securitysolution-api';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,

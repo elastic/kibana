@@ -13,12 +13,12 @@ import type {
 } from '@kbn/core/server';
 import { ProductFeatureRulesKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
 import type {
   BootstrapPrebuiltRulesResponse,
   PackageInstallStatus,
   RuleBootstrapResults,
 } from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { installEndpointPackage } from '../../logic/integrations/install_endpoint_package';

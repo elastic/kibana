@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { defaultHeaders } from './default_timeline_headers';
 import type { SavedTimeline } from '@kbn/securitysolution-api';
 import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
+import { defaultHeaders } from './default_timeline_headers';
 import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: SavedTimeline = {

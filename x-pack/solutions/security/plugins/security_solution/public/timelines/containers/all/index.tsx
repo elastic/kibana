@@ -10,13 +10,6 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { getTimelineQueryTypes } from '../helpers';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import type { OpenTimelineResult } from '../../components/open_timeline/types';
-import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
-import { inputsActions } from '../../../common/store/inputs';
-
-import * as i18n from '../../pages/translations';
 import type {
   TimelineType,
   TimelineStatus,
@@ -26,6 +19,13 @@ import type {
   GetTimelinesRequestQuery,
 } from '@kbn/securitysolution-api';
 import { TimelineTypeEnum } from '@kbn/securitysolution-api';
+import { getTimelineQueryTypes } from '../helpers';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { OpenTimelineResult } from '../../components/open_timeline/types';
+import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
+import { inputsActions } from '../../../common/store/inputs';
+
+import * as i18n from '../../pages/translations';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {

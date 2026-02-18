@@ -5,15 +5,9 @@
  * 2.0.
  */
 
+import type { BulkActionEditPayload, BulkActionType } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum, BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import type { HTTPError } from '../../../../../common/detection_engine/types';
-import type {
-  BulkActionEditPayload,
-  BulkActionType,
-} from '@kbn/securitysolution-api';
-import {
-  BulkActionEditTypeEnum,
-  BulkActionTypeEnum,
-} from '@kbn/securitysolution-api';
 import * as i18n from '../../../common/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 

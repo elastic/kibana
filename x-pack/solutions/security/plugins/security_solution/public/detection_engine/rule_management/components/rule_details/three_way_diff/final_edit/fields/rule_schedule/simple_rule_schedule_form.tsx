@@ -7,13 +7,9 @@
 
 import React from 'react';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
-import type {
-  RuleSchedule,
-  SimpleRuleSchedule,
-} from '@kbn/securitysolution-api';
+import type { RuleSchedule, SimpleRuleSchedule, DiffableRule } from '@kbn/securitysolution-api';
 import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import { type FormData } from '../../../../../../../../shared_imports';
-import type { DiffableRule } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { SimpleRuleScheduleAdapter } from './simple_rule_schedule_adapter';
 import { invariant } from '../../../../../../../../../common/utils/invariant';

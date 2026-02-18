@@ -8,11 +8,14 @@
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
-import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
   ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
+  PrebuiltRuleAssetsFilter,
+  PrebuiltRuleAssetsSort,
+  RuleResponse,
 } from '@kbn/securitysolution-api';
+import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -22,9 +25,6 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
-import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 
 export const reviewRuleInstallationHandler = async (

@@ -7,10 +7,7 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import type {
-  GetRuleHealthRequestBody,
-  GetRuleHealthResponse,
-} from '@kbn/securitysolution-api';
+import type { GetRuleHealthRequestBody, GetRuleHealthResponse } from '@kbn/securitysolution-api';
 import { GET_RULE_HEALTH_URL } from '@kbn/securitysolution-api';
 import { api } from '../api_client';
 import { DEFAULT_QUERY_OPTIONS } from './constants';

@@ -11,13 +11,13 @@ import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import {
   type DataProviderType,
   DataProviderTypeEnum,
   type TimelineType,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 

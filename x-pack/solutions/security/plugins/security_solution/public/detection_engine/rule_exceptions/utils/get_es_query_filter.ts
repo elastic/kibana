@@ -11,12 +11,9 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IndexPatternArray, RuleQuery } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import type {
-  IndexPatternArray,
-  RuleQuery,
-} from '@kbn/securitysolution-api';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 
 export const getEsQueryFilter = async (

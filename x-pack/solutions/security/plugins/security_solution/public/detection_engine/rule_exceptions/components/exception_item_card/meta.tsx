@@ -23,10 +23,10 @@ import {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;

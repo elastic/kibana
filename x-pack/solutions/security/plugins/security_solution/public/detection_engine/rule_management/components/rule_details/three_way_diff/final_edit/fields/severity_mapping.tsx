@@ -7,12 +7,8 @@
 
 import React, { useCallback } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DiffableRule, Severity, SeverityMapping } from '@kbn/securitysolution-api';
 import { type FieldHook, type FormData, UseField } from '../../../../../../../shared_imports';
-import type {
-  DiffableRule,
-  Severity,
-  SeverityMapping,
-} from '@kbn/securitysolution-api';
 import { SeverityOverride } from '../../../../../../rule_creation_ui/components/severity_mapping/severity_override';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

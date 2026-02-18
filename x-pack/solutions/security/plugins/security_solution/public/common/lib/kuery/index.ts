@@ -15,10 +15,10 @@ import {
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =

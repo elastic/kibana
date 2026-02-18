@@ -7,8 +7,10 @@
 
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 
-import { GET_RULE_EXECUTION_RESULTS_URL } from '@kbn/securitysolution-api';
-import { getRuleExecutionResultsResponseMock } from '@kbn/securitysolution-api';
+import {
+  GET_RULE_EXECUTION_RESULTS_URL,
+  getRuleExecutionResultsResponseMock,
+} from '@kbn/securitysolution-api';
 import { getRuleExecutionResultsRoute } from './get_rule_execution_results_route';
 import type {
   MockClients,

@@ -18,12 +18,14 @@ import type {
   RuleExecutionSettings,
   RuleExecutionStatus,
   LogLevel,
+  RuleExecutionMetrics,
 } from '@kbn/securitysolution-api';
 import {
   consoleLogLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatusEnum,
+  LogLevelEnum,
 } from '@kbn/securitysolution-api';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -38,8 +40,6 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
-import type { RuleExecutionMetrics } from '@kbn/securitysolution-api';
-import { LogLevelEnum } from '@kbn/securitysolution-api';
 import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
 
 export const createRuleExecutionLogClientForExecutors = (

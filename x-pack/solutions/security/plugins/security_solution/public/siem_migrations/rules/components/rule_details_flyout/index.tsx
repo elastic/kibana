@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiFlyoutProps } from '@elastic/eui';
 
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -30,7 +31,6 @@ import {
   RuleOverviewTab,
   useOverviewTabSections,
 } from '../../../../detection_engine/rule_management/components/rule_details/rule_overview_tab';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 
 import * as logicI18n from '../../logic/translations';
 import * as i18n from './translations';

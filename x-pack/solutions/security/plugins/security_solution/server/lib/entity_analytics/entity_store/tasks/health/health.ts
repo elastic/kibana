@@ -17,11 +17,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
+import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
 import type { EntityStoreConfig } from '../../types';
 import { EntityStoreDataClient } from '../../entity_store_data_client';
 import { getApiKeyManager } from '../../auth/api_key';
 import type { ExperimentalFeatures } from '../../../../../../common';
-import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -33,7 +34,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 import type { AppClientFactory } from '../../../../../client';
-import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
 
 const getTaskName = (): string => TYPE;
 

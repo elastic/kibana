@@ -7,6 +7,8 @@
 
 import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -26,9 +28,7 @@ import type {
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 
-import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import * as i18n from '../translations';
 
 const createLoggedRequestsConfig = (

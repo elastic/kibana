@@ -8,11 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
-import type {
-  TemplateTimelineType,
-  TimelineStatus,
-  TimelineType,
-} from '@kbn/securitysolution-api';
+import type { TemplateTimelineType, TimelineStatus, TimelineType } from '@kbn/securitysolution-api';
 import {
   TemplateTimelineTypeEnum,
   TimelineStatusEnum,

@@ -7,6 +7,12 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type {
+  PinnedEvent,
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+} from '@kbn/securitysolution-api';
 import type { EqlOptions, TimelineNonEcsData } from '../../../common/search_strategy/timeline';
 import type {
   ColumnHeaderOptions,
@@ -18,12 +24,6 @@ import type {
   KueryFilterQuery,
   TimelineTabs,
 } from '../../../common/types/timeline';
-import type {
-  PinnedEvent,
-  RowRendererId,
-  TimelineStatus,
-  TimelineType,
-} from '@kbn/securitysolution-api';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';

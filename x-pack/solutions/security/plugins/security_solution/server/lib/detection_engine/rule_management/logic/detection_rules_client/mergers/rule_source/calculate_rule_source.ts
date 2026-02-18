@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleResponse,
-  RuleSource,
-} from '@kbn/securitysolution-api';
+import type { RuleResponse, RuleSource } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { calculateExternalRuleSource } from './calculate_external_rule_source';

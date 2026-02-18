@@ -9,6 +9,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import {
+  ResolveTimelineRequestQuery,
+  type ResolveTimelineResponse,
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_RESOLVE_URL } from '../../../../../../common/constants';
@@ -16,10 +20,6 @@ import { TIMELINE_RESOLVE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import {
-  ResolveTimelineRequestQuery,
-  type ResolveTimelineResponse,
-} from '@kbn/securitysolution-api';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 
 export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {

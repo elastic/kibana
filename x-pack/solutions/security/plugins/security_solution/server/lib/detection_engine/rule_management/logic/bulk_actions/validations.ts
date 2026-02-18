@@ -6,14 +6,8 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  BulkActionEditPayload,
-  BulkActionEditType,
-} from '@kbn/securitysolution-api';
-import {
-  BulkActionEditTypeEnum,
-  BulkActionsDryRunErrCodeEnum,
-} from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload, BulkActionEditType } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum, BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { isEsqlRule, isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';

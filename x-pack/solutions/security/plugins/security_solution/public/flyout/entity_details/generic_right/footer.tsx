@@ -11,6 +11,7 @@ import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
+import type { AssetCriticalityLevel } from '@kbn/securitysolution-api';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { TakeAction } from '../shared/components/take_action';
 import {
@@ -22,7 +23,6 @@ import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/co
 import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
-import type { AssetCriticalityLevel } from '@kbn/securitysolution-api';
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 
 interface GenericEntityFlyoutFooterProps {

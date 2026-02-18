@@ -6,10 +6,7 @@
  */
 
 import type { Duration } from 'moment';
-import type {
-  RuleExecutionStatus,
-  RuleExecutionStatusEnum,
-} from '@kbn/securitysolution-api';
+import type { RuleExecutionStatus, RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 
 /**
  * Used from rule executors to log various information about the rule execution:

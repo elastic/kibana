@@ -8,8 +8,8 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import type { RuleResponse } from '@kbn/securitysolution-api';
-import {
+import type {
+  RuleResponse,
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
   type GetPrebuiltRuleBaseVersionResponseBody,

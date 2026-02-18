@@ -7,11 +7,11 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
-import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { appActions } from '../../common/store/app';

@@ -8,10 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { memoize } from 'lodash';
 import hash from 'object-hash';
-import type {
-  Matcher,
-  MonitoringEntitySource,
-} from '@kbn/securitysolution-api';
+import type { Matcher, MonitoringEntitySource } from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import type { PrivMonBulkUser } from '../../../types';
 import { makeOpsBuilder } from '../../bulk/upsert';

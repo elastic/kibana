@@ -7,8 +7,8 @@
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation, type UseMutationOptions, type UseMutationResult } from '@kbn/react-query';
-import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import type { ScanActionRequestBody } from '@kbn/securitysolution-api';
+import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { SCAN_ROUTE } from '../../../../common/endpoint/constants';
 

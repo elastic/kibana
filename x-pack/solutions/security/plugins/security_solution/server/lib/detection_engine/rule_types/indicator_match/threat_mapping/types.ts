@@ -12,6 +12,13 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type {
+  ThreatMappingEntry,
+  ThreatMapping,
+  ThreatIndex,
+  ThreatMatchRuleOptionalFields,
+  ThreatIndicatorPath,
+} from '@kbn/securitysolution-api';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import type {
   RuleRangeTuple,
@@ -24,13 +31,6 @@ import type {
 import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
-import type {
-  ThreatMappingEntry,
-  ThreatMapping,
-  ThreatIndex,
-  ThreatMatchRuleOptionalFields,
-  ThreatIndicatorPath,
-} from '@kbn/securitysolution-api';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

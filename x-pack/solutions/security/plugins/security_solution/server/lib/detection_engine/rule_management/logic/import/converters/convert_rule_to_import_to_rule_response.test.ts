@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getImportRulesSchemaMock,
-  getValidatedRuleToImportMock,
-} from '@kbn/securitysolution-api';
+import { getImportRulesSchemaMock, getValidatedRuleToImportMock } from '@kbn/securitysolution-api';
 import { convertRuleToImportToRuleResponse } from './convert_rule_to_import_to_rule_response';
 
 describe('convertRuleToImportToRuleResponse', () => {

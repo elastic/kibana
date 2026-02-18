@@ -7,10 +7,7 @@
 
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type {
-  RuleResponse,
-  RuleUpdateProps,
-} from '@kbn/securitysolution-api';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import { transformOutput } from '../../../common/transforms';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRule } from '../api';

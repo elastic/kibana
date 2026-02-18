@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import type {
-  ThreeVersionsOf,
-  ThreeWayDiff,
-} from '@kbn/securitysolution-api';
+import type { ThreeVersionsOf, ThreeWayDiff } from '@kbn/securitysolution-api';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
@@ -18,6 +14,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/securitysolution-api';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 /**
  * The default diff algorithm, diffs versions passed using a simple lodash `isEqual` comparison

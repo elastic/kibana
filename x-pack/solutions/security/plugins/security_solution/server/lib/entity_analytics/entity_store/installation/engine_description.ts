@@ -7,10 +7,7 @@
 
 import { assign, concat } from 'lodash/fp';
 import { EntityStoreCapability } from '@kbn/entities-schema';
-import type {
-  EntityType,
-  InitEntityEngineRequestBody,
-} from '@kbn/securitysolution-api';
+import type { EntityType, InitEntityEngineRequestBody } from '@kbn/securitysolution-api';
 import { generateIndexMappings } from '../elasticsearch_assets';
 import {
   hostEntityEngineDescription,

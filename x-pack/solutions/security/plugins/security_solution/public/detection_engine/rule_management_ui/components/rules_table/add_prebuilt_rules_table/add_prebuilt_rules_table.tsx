@@ -17,9 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { PrebuiltRuleAssetsSortField } from '@kbn/securitysolution-api';
+import type { PrebuiltRuleAssetsSortField, RuleResponse } from '@kbn/securitysolution-api';
 import * as i18n from '../../../pages/add_rules/translations';
-import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';

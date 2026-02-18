@@ -8,10 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { uniqBy } from 'lodash';
 
-import type {
-  DetectionAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
+import type { DetectionAlertLatest, WrappedAlert } from '@kbn/securitysolution-api';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';

@@ -6,11 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type {
-  RuleObjectId,
-  RuleResponse,
-  RuleSignatureId,
-} from '@kbn/securitysolution-api';
+import type { RuleObjectId, RuleResponse, RuleSignatureId } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { getRuleById } from './get_rule_by_id';
 import { getRuleByRuleId } from './get_rule_by_rule_id';

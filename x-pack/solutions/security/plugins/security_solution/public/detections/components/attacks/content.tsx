@@ -22,6 +22,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import type { Status } from '@kbn/securitysolution-api';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -39,7 +40,6 @@ import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
-import type { Status } from '@kbn/securitysolution-api';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 

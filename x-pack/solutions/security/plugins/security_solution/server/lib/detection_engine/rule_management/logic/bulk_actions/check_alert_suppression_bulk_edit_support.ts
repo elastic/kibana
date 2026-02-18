@@ -6,8 +6,8 @@
  */
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
-import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
 import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
 
 import { hasAlertSuppressionBulkEditAction } from './utils';
 

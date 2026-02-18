@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import {
   GetProtectionUpdatesNoteSchema,
   CreateUpdateProtectionUpdatesNoteSchema,
 } from '@kbn/securitysolution-api';
+import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';

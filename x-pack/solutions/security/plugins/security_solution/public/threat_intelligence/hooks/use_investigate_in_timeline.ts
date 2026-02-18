@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 
 import moment from 'moment';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { generateDataProvider } from '../modules/timeline/utils/data_provider';
 import {
   fieldAndValueValid,
@@ -23,7 +24,6 @@ import {
 import { timelineDefaults } from '../../timelines/store/defaults';
 import { APP_UI_ID } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useStartTransaction } from '../../common/lib/apm/use_start_transaction';
 import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';

@@ -33,6 +33,13 @@ import type {
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
+import type {
+  RuleCreateProps,
+  AlertSuppression,
+  RequiredFieldInput,
+  SeverityMapping,
+  RelatedIntegrationArray,
+} from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -51,13 +58,6 @@ import type {
   ActionsStepRuleJson,
 } from '../../../common/types';
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
-import type {
-  RuleCreateProps,
-  AlertSuppression,
-  RequiredFieldInput,
-  SeverityMapping,
-  RelatedIntegrationArray,
-} from '@kbn/securitysolution-api';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import {

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { FormData } from '../../../../../../../../shared_imports';
 import { type MachineLearningJobId } from '@kbn/securitysolution-api';
+import type { FormData } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { normalizeMachineLearningJobId } from '../../../../../../../../common/utils/normalize_machine_learning_job_id';
 import { MachineLearningJobIdAdapter } from './machine_learning_job_id_adapter';

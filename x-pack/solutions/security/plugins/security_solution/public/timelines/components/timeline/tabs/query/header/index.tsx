@@ -11,14 +11,14 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { css } from '@emotion/react';
-import { MigrationMessageCallout } from './migration_message_callout';
-import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
-import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import {
   type TimelineStatus,
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import { MigrationMessageCallout } from './migration_message_callout';
+import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
+import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';

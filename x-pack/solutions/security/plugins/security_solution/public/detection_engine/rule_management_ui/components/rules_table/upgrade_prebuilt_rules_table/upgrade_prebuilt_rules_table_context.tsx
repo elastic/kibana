@@ -11,9 +11,9 @@ import type {
   FindRulesSortField,
   PrebuiltRulesFilter,
   SortOrder,
+  RuleSignatureId,
 } from '@kbn/securitysolution-api';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { RuleSignatureId } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';

@@ -13,12 +13,12 @@ import React, {
   useMemo,
   useReducer,
 } from 'react';
-import { invariant } from '../../../../../common/utils/invariant';
 import {
   BulkActionTypeEnum,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '@kbn/securitysolution-api';
+import { invariant } from '../../../../../common/utils/invariant';
 import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
 import {
   SET_SHOW_EXPANDED_CELLS,

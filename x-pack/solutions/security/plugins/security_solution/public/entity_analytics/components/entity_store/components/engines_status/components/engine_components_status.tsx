@@ -7,9 +7,9 @@
 import type { ReactNode } from 'react';
 import React, { useState, useMemo, useCallback, Fragment } from 'react';
 import { EuiSpacer, EuiHealth, EuiCodeBlock } from '@elastic/eui';
+import type { EngineComponentStatus } from '@kbn/securitysolution-api';
 import { BasicTable } from '../../../../../../common/components/ml/tables/basic_table';
 import { useColumns } from '../hooks/use_columns';
-import type { EngineComponentStatus } from '@kbn/securitysolution-api';
 
 type ExpandedRowMap = Record<string, ReactNode>;
 

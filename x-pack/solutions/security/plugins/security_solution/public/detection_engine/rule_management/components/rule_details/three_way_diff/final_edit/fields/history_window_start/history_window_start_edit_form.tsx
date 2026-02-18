@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import type { HistoryWindowStart } from '@kbn/securitysolution-api';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { HistoryWindowStartEditAdapter } from './history_window_start_edit_adapter';
-import type { HistoryWindowStart } from '@kbn/securitysolution-api';
 import {
   convertDurationToDateMath,
   convertDateMathToDuration,

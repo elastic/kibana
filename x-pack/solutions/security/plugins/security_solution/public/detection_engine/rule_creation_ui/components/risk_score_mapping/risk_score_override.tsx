@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
-import * as i18n from './translations';
 import type { RiskScoreMapping } from '@kbn/securitysolution-api';
+import * as i18n from './translations';
 
 const NestedContent = styled.div`
   margin-left: 24px;

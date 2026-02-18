@@ -7,10 +7,7 @@
 
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import type {
-  GetSpaceHealthRequestBody,
-  GetSpaceHealthResponse,
-} from '@kbn/securitysolution-api';
+import type { GetSpaceHealthRequestBody, GetSpaceHealthResponse } from '@kbn/securitysolution-api';
 import { GET_SPACE_HEALTH_URL } from '@kbn/securitysolution-api';
 import { api } from '../api_client';
 import { DEFAULT_QUERY_OPTIONS } from './constants';

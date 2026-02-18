@@ -9,10 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
-import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { createAndNewEntryItem, createOrNewEntryItem } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`

@@ -6,8 +6,8 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
-import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '@kbn/securitysolution-api';
+import type { OverrideBodyQuery } from '../types';
 
 interface BuildEventsSearchQuery<
   TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined

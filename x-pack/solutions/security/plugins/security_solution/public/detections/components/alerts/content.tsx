@@ -15,6 +15,7 @@ import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolutio
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { Status } from '@kbn/securitysolution-api';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -33,7 +34,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import type { Status } from '@kbn/securitysolution-api';
 
 export const CONTENT_TEST_ID = 'alerts-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'alerts-page-security-solution-page-wrapper';

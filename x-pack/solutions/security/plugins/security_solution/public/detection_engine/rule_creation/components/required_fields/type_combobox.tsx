@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiComboBox, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { FieldHook } from '../../../../shared_imports';
 import type { RequiredFieldInput } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 
 interface TypeComboBoxProps {

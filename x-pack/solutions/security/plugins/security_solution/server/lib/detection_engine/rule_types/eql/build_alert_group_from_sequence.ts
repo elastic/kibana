@@ -15,6 +15,12 @@ import type {
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
 import { intersection as lodashIntersection, isArray } from 'lodash';
 
+import type {
+  DetectionAlertLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
+} from '@kbn/securitysolution-api';
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type { Ancestor, SecuritySharedParams, SignalSource, SignalSourceHit } from '../types';
@@ -29,12 +35,6 @@ import {
   ALERT_GROUP_ID,
   ALERT_GROUP_INDEX,
 } from '../../../../../common/field_maps/field_names';
-import type {
-  DetectionAlertLatest,
-  EqlBuildingBlockAlertLatest,
-  EqlShellAlertLatest,
-  WrappedAlert,
-} from '@kbn/securitysolution-api';
 import type { SuppressionTerm } from '../utils';
 
 export interface ExtraFieldsForShellAlert {

@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import type {
   HostInfo,
   HostMetadata,
@@ -43,7 +44,6 @@ import {
   wrapErrorIfNeeded,
 } from '../../utils';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 

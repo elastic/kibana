@@ -9,11 +9,11 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import {
   UpdatePrivMonUserRequestParams,
   UpdatePrivMonUserRequestBody,
 } from '@kbn/securitysolution-api';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';

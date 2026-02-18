@@ -5,12 +5,9 @@
  * 2.0.
  */
 import { useState, useCallback, useRef } from 'react';
+import type { BulkActionEditPayload, BulkActionEditType } from '@kbn/securitysolution-api';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
-import type {
-  BulkActionEditPayload,
-  BulkActionEditType,
-} from '@kbn/securitysolution-api';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
 interface UseBulkEditFormFlyout {

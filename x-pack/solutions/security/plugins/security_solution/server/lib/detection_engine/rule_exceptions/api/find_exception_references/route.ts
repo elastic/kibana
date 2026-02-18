@@ -10,10 +10,6 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-
 import type {
   FindExceptionReferencesOnRuleSchemaDecoded,
   RuleReferencesSchema,
@@ -23,6 +19,10 @@ import {
   findExceptionReferencesOnRuleSchema,
   rulesReferencedByExceptionListsSchema,
 } from '@kbn/securitysolution-api';
+import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {

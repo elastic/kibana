@@ -10,11 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { USERS_API_READ } from '@kbn/security-solution-features/constants';
+import { SuggestUserProfilesRequestQuery } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { StartPlugins } from '../../../../plugin';
-import { SuggestUserProfilesRequestQuery } from '@kbn/securitysolution-api';
 
 export const suggestUserProfilesRoute = (
   router: SecuritySolutionPluginRouter,

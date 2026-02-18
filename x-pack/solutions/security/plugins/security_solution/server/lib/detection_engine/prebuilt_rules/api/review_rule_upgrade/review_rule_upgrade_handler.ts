@@ -7,8 +7,8 @@
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '@kbn/securitysolution-api';
 import type {
+  ReviewPrebuiltRuleUpgradeFilter,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
   ReviewRuleUpgradeSort,

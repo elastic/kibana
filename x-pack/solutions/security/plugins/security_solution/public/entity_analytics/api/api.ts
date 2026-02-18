@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { EntityDetailsHighlightsResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   CreateEntitySourceResponse,
@@ -37,6 +36,7 @@ import type {
   UploadAssetCriticalityRecordsResponse,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '@kbn/securitysolution-api';
+import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,

@@ -7,10 +7,10 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { HostsFields, TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { PageScope } from '../../data_view_manager/constants';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
-import { HostsFields } from '@kbn/securitysolution-api';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -36,7 +36,6 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState } from '../../sourcerer/store/model';

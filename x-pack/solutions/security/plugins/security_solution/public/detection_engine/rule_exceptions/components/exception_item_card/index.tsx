@@ -10,13 +10,13 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 import { getFormattedComments } from '../../utils/helpers';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
 import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
-import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {

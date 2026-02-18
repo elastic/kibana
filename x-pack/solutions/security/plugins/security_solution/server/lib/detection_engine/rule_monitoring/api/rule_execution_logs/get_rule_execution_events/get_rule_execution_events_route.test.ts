@@ -11,8 +11,8 @@ import {
   GET_RULE_EXECUTION_EVENTS_URL,
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
+  getRuleExecutionEventsResponseMock,
 } from '@kbn/securitysolution-api';
-import { getRuleExecutionEventsResponseMock } from '@kbn/securitysolution-api';
 import type { GetExecutionEventsArgs } from '../../../logic/rule_execution_log';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 import type {

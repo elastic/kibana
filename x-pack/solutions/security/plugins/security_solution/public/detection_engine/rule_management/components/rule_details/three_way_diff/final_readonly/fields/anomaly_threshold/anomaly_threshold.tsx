@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import * as ruleDetailsI18n from '../../../../translations';
 import type { AnomalyThreshold as AnomalyThresholdType } from '@kbn/securitysolution-api';
+import * as ruleDetailsI18n from '../../../../translations';
 import { AnomalyThreshold } from '../../../../rule_definition_section';
 
 interface TagsReadOnlyProps {

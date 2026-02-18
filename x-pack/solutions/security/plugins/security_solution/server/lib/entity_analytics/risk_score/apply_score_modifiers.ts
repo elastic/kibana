@@ -7,13 +7,10 @@
 import type { Logger } from '@kbn/core/server';
 import _ from 'lodash';
 
+import type { EntityRiskScoreRecord, RiskScoreWeights } from '@kbn/securitysolution-api';
 import { isDefined } from '../../../../common/utils/nullable';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 
-import type {
-  EntityRiskScoreRecord,
-  RiskScoreWeights,
-} from '@kbn/securitysolution-api';
 import { getRiskLevel, RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { AssetCriticalityService } from '../asset_criticality';
 

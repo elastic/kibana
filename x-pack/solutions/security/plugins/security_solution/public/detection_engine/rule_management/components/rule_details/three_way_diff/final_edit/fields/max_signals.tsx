@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { MaxSignals as MaxSignalsType } from '@kbn/securitysolution-api';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { MaxSignals as MaxSignalsType } from '@kbn/securitysolution-api';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../../common/constants';
 import { MaxSignals } from '../../../../../../rule_creation_ui/components/max_signals';
 

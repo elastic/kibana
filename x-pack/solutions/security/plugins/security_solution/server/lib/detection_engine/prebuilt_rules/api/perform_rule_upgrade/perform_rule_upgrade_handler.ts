@@ -7,7 +7,6 @@
 
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
@@ -15,6 +14,9 @@ import type {
   RuleUpgradeSpecifier,
   SkippedRuleUpgrade,
   ThreeWayDiff,
+  RuleResponse,
+  RuleSignatureId,
+  RuleVersion,
 } from '@kbn/securitysolution-api';
 import {
   ModeEnum,
@@ -23,6 +25,7 @@ import {
   ThreeWayDiffConflict,
   UpgradeConflictResolutionEnum,
 } from '@kbn/securitysolution-api';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -33,11 +36,6 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
-import type {
-  RuleResponse,
-  RuleSignatureId,
-  RuleVersion,
-} from '@kbn/securitysolution-api';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';

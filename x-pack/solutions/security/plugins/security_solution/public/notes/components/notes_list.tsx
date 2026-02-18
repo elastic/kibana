@@ -10,13 +10,13 @@ import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elast
 import { useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { Note } from '@kbn/securitysolution-api';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
 import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
-import type { Note } from '@kbn/securitysolution-api';
 import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {

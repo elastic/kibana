@@ -8,16 +8,13 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { PatchTimelineRequestBody, type PatchTimelineResponse } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import {
-  PatchTimelineRequestBody,
-  type PatchTimelineResponse,
-} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';

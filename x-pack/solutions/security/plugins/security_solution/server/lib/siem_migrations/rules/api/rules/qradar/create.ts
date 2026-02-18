@@ -7,6 +7,11 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  SiemMigrationAuditLogger,
+  withExistingMigration,
+  withLicense,
+} from '@kbn/securitysolution-api';
 import { SIEM_RULE_MIGRATION_QRADAR_RULES_PATH } from '../../../../../../../common/siem_migrations/constants';
 import {
   CreateQRadarRuleMigrationRulesRequestBody,
@@ -15,10 +20,7 @@ import {
 import { QradarRulesXmlParser } from '../../../../../../../common/siem_migrations/parsers/qradar/rules_xml';
 import { RuleResourceIdentifier } from '../../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from '../../util/authz';
-import { withExistingMigration } from '@kbn/securitysolution-api';
-import { withLicense } from '@kbn/securitysolution-api';
 import type { CreateSiemMigrationResourceInput } from '../../../../common/data/siem_migrations_data_resources_client';
 import { getVendorProcessor } from '../../../vendors/get_vendor_processor';
 

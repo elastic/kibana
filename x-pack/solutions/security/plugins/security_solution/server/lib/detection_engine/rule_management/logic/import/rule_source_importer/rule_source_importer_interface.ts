@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleSource,
-  RuleToImport,
-  ValidatedRuleToImport,
-} from '@kbn/securitysolution-api';
+import type { RuleSource, RuleToImport, ValidatedRuleToImport } from '@kbn/securitysolution-api';
 
 export interface CalculatedRuleSource {
   ruleSource: RuleSource;

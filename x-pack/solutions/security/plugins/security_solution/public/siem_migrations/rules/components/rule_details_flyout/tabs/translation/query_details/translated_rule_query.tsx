@@ -7,10 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type {
-  QueryLanguage,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
+import type { QueryLanguage, RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { VALIDATION_WARNING_CODES } from '../../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';

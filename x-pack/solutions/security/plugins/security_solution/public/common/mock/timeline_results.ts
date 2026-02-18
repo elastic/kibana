@@ -8,8 +8,6 @@
 import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
-import { VIEW_SELECTION } from '../../../common/constants';
-import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
   type ColumnHeaderResult,
   type TimelineResponse,
@@ -17,6 +15,8 @@ import {
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import { VIEW_SELECTION } from '../../../common/constants';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';

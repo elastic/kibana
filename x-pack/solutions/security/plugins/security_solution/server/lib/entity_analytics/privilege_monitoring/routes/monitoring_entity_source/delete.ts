@@ -10,13 +10,13 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { DeleteEntitySourceRequestParams } from '@kbn/securitysolution-api';
 import {
   API_VERSIONS,
   APP_ID,
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { DeleteEntitySourceRequestParams } from '@kbn/securitysolution-api';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const deleteMonitoringEntitySourceRoute = (

@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import type {
-  InlineKqlQuery,
-  RuleDataSource,
-} from '@kbn/securitysolution-api';
+import type { InlineKqlQuery, RuleDataSource } from '@kbn/securitysolution-api';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { InlineKqlQueryReadOnly } from '../kql_query/inline_kql_query';

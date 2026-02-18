@@ -6,10 +6,7 @@
  */
 
 import { act, fireEvent, within } from '@testing-library/react';
-import {
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-} from '@kbn/securitysolution-api';
+import { ThreeWayDiffConflict, ThreeWayDiffOutcome } from '@kbn/securitysolution-api';
 import { VersionsPickerOptionEnum } from '../../../../../rule_management/components/rule_details/three_way_diff/comparison_side/versions_picker/versions_picker';
 import {
   mockRuleUpgradeReviewData,

@@ -6,10 +6,7 @@
  */
 
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
-import type {
-  PerformRuleUpgradeRequestBody,
-  PickVersionValues,
-} from '@kbn/securitysolution-api';
+import type { PerformRuleUpgradeRequestBody, PickVersionValues } from '@kbn/securitysolution-api';
 
 describe('assertPickVersionIsTarget', () => {
   const ruleId = 'test-rule-id';

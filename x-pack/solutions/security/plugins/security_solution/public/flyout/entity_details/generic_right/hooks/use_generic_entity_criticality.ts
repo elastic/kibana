@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type {
   CriticalityLevelWithUnassigned,
   IdField,
@@ -15,7 +16,6 @@ import {
   type DeleteAssetCriticalityResponse,
   useEntityAnalyticsRoutes,
 } from '../../../../entity_analytics/api/api';
-import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 const QUERY_KEY = 'generic-entity-asset-criticality';
 

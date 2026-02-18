@@ -6,12 +6,12 @@
  */
 
 import { stableStringify } from '@kbn/std';
-import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '@kbn/securitysolution-api';
+import { Version } from './versions_picker/constants';
 import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import * as i18n from './translations';

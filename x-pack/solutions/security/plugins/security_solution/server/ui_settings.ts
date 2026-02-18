@@ -14,6 +14,7 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
+import { LogLevelSetting } from '@kbn/securitysolution-api';
 import {
   APP_ID,
   DEFAULT_ALERT_TAGS_KEY,
@@ -53,7 +54,6 @@ import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { LogLevelSetting } from '@kbn/securitysolution-api';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 

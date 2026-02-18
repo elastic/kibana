@@ -6,10 +6,7 @@
  */
 
 import { within } from '@testing-library/react';
-import {
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-} from '@kbn/securitysolution-api';
+import { ThreeWayDiffConflict, ThreeWayDiffOutcome } from '@kbn/securitysolution-api';
 import { toggleFieldAccordion } from './rule_upgrade_helpers';
 import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './rule_upgrade_flyout';
 

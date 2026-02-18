@@ -8,8 +8,8 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
+import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';

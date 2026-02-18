@@ -9,13 +9,13 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 import type { Alert } from '@kbn/alerting-plugin/server';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import type { DetectionAlert } from '@kbn/securitysolution-api';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import type { RuleParams } from '../../../rule_schema';
 import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
 import { isDetectionAlert } from '../../../rule_types/utils/utils';
-import type { DetectionAlert } from '@kbn/securitysolution-api';
 
 export type NotificationRuleTypeParams = RuleParams & {
   id: string;

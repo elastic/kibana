@@ -19,9 +19,9 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+import type { Status } from '@kbn/securitysolution-api';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { Status } from '@kbn/securitysolution-api';
 
 export type ColorSchemas = Record<string, string>;
 

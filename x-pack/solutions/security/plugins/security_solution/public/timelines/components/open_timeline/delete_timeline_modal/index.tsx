@@ -10,9 +10,9 @@ import React, { useCallback } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
 import { useParams } from 'react-router-dom';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import type { DeleteTimelines } from '../types';
-import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 

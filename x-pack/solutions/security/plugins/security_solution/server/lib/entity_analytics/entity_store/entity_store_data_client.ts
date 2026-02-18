@@ -28,6 +28,25 @@ import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-sche
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import type {
+  GetEntityStoreStatusRequestQuery,
+  GetEntityStoreStatusResponse,
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
+import type {
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
+import type {
+  Entity,
+  EngineDataviewUpdateResult,
+  InitEntityEngineRequestBody,
+  InitEntityEngineResponse,
+  InspectQuery,
+  ListEntityEnginesResponse,
+  EngineComponentStatus,
+  EngineComponentResource,
+} from '@kbn/securitysolution-api';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
@@ -44,26 +63,7 @@ import {
 import { merge } from '../../../../common/utils/objects/merge';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
-import type {
-  GetEntityStoreStatusRequestQuery,
-  GetEntityStoreStatusResponse,
-} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
-import type {
-  InitEntityStoreRequestBody,
-  InitEntityStoreResponse,
-} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
-import type {
-  Entity,
-  EngineDataviewUpdateResult,
-  InitEntityEngineRequestBody,
-  InitEntityEngineResponse,
-  InspectQuery,
-  ListEntityEnginesResponse,
-  EngineComponentStatus,
-  EngineComponentResource,
-} from '@kbn/securitysolution-api';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import {
   ENGINE_STATUS,

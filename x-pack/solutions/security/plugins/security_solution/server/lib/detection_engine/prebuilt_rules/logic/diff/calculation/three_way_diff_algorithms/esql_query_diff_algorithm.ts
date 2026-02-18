@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleEsqlQuery,
-  ThreeVersionsOf,
-} from '@kbn/securitysolution-api';
+import type { RuleEsqlQuery, ThreeVersionsOf } from '@kbn/securitysolution-api';
 import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
 /**

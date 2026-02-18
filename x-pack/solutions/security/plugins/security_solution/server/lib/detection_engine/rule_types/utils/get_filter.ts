@@ -17,12 +17,8 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { IndexPatternArray, RuleQuery, SavedIdOrUndefined } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import type {
-  IndexPatternArray,
-  RuleQuery,
-} from '@kbn/securitysolution-api';
-import type { SavedIdOrUndefined } from '@kbn/securitysolution-api';
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';

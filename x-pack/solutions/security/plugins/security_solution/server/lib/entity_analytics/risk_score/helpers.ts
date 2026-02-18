@@ -7,19 +7,17 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import type { EntityType } from '../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type {
   RiskScoresCalculationResponse,
   AssetCriticalityRecord,
-} from '@kbn/securitysolution-api';
-import type {
   AfterKeys,
   EntityAfterKey,
   EntityRiskScoreRecord,
   RiskScoreWeights,
   RiskScoreWeight,
 } from '@kbn/securitysolution-api';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import {
   getRiskLevel,
   RiskCategories,

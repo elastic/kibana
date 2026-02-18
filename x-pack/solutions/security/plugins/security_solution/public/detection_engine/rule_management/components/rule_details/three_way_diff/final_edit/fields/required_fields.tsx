@@ -6,12 +6,9 @@
  */
 
 import React from 'react';
+import type { DiffableRule, RequiredFieldInput } from '@kbn/securitysolution-api';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_define_rule/schema';
-import type {
-  DiffableRule,
-  RequiredFieldInput,
-} from '@kbn/securitysolution-api';
 import { RequiredFields } from '../../../../../../rule_creation/components/required_fields';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

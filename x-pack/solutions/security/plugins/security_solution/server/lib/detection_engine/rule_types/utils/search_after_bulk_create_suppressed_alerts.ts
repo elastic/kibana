@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 import { getSuppressionMaxSignalsWarning } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
 } from '../types';
-import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;

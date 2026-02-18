@@ -10,10 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { isEmpty } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
-import type {
-  RulePatchProps,
-  RuleResponse,
-} from '@kbn/securitysolution-api';
+import type { RulePatchProps, RuleResponse } from '@kbn/securitysolution-api';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getIdError } from '../../../utils/utils';

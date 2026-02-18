@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RuleSchedule } from '@kbn/securitysolution-api';
-import type { ThreeWayDiff } from '@kbn/securitysolution-api';
+import type { RuleSchedule, ThreeWayDiff } from '@kbn/securitysolution-api';
 import { getFieldDiffsForRuleSchedule } from './get_field_diffs_for_grouped_fields';
 
 describe('getFieldDiffsForRuleSchedule', () => {

@@ -7,6 +7,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import {
   addNote,
   addNoteToEvent,
@@ -101,7 +102,6 @@ import {
 
 import type { TimelineState } from './types';
 import { EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

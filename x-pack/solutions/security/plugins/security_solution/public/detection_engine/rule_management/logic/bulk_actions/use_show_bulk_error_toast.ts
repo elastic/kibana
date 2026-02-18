@@ -6,9 +6,9 @@
  */
 
 import { useCallback } from 'react';
+import type { BulkActionType } from '@kbn/securitysolution-api';
 import type { HTTPError } from '../../../../../common/detection_engine/types';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkActionType } from '@kbn/securitysolution-api';
 import { explainBulkError, summarizeBulkError } from './translations';
 
 interface ShowBulkErrorToastProps {

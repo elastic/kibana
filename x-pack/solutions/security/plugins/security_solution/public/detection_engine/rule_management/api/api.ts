@@ -14,7 +14,6 @@ import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
-import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
   GetPrebuiltRuleBaseVersionResponseBody,
@@ -29,6 +28,18 @@ import type {
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
+  BulkActionEditPayload,
+  BulkActionsDryRunErrCode,
+  BulkActionType,
+  BulkDuplicateRules,
+  BulkManualRuleRun,
+  CoverageOverviewResponse,
+  GetRuleManagementFiltersResponse,
+  ImportRulesResponse,
+  BulkManualRuleFillGaps,
+  RulesReferencedByExceptionListsSchema,
+  RulePreviewResponse,
+  RuleResponse,
 } from '@kbn/securitysolution-api';
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
@@ -40,23 +51,12 @@ import {
   REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
-} from '@kbn/securitysolution-api';
-import type {
-  BulkActionEditPayload,
-  BulkActionsDryRunErrCode,
-  BulkActionType,
-  BulkDuplicateRules,
-  BulkManualRuleRun,
-  CoverageOverviewResponse,
-  GetRuleManagementFiltersResponse,
-  ImportRulesResponse,
-  BulkManualRuleFillGaps,
-} from '@kbn/securitysolution-api';
-import {
   BulkActionTypeEnum,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
+  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '@kbn/securitysolution-api';
+import type { BootstrapPrebuiltRulesResponse } from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_IMPORT_URL,
@@ -64,11 +64,6 @@ import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../common/constants';
-
-import type { RulesReferencedByExceptionListsSchema } from '@kbn/securitysolution-api';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/securitysolution-api';
-
-import type { RulePreviewResponse, RuleResponse } from '@kbn/securitysolution-api';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../common/translations';
@@ -90,7 +85,7 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import type { BootstrapPrebuiltRulesResponse } from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import { defaultRangeValue } from '../../rule_gaps/constants';
 
 /**

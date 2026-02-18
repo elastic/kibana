@@ -9,6 +9,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -18,7 +19,6 @@ import {
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';

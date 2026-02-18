@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { InvestigationGuide } from '@kbn/securitysolution-api';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { InvestigationGuide } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../../../rule_creation_ui/components/step_about_rule/translations';
 import { MarkdownEditorForm } from '../../../../../../../common/components/markdown_editor';
 

@@ -7,10 +7,10 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { GetPolicyResponseSchema } from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { errorHandler } from '../error_handler';
-import type { GetPolicyResponseSchema } from '@kbn/securitysolution-api';
 import { getPolicyResponseByAgentId } from './service';
 import { NotFoundError } from '../../errors';
 

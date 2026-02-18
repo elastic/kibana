@@ -9,9 +9,6 @@ import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
-import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import type { ColumnHeaderOptions, KueryFilterQuery } from '../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   DataProviderTypeEnum,
   RowRendererValues,
@@ -25,6 +22,9 @@ import {
   type TimelineResponse,
   TimelineTypeEnum,
 } from '@kbn/securitysolution-api';
+import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import type { ColumnHeaderOptions, KueryFilterQuery } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';

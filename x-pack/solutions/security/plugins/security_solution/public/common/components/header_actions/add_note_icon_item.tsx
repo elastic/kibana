@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
+import { NotesButton } from '../../../timelines/components/timeline/notes/notes_button';
 import { useUserPrivileges } from '../user_privileges';
 import { ActionIconItem } from './action_icon_item';
 

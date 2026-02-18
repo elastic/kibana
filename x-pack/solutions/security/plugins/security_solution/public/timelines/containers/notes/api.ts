@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NOTE_URL } from '../../../../common/constants';
 import type { BareNote, PersistNoteRouteResponse } from '@kbn/securitysolution-api';
+import { NOTE_URL } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({

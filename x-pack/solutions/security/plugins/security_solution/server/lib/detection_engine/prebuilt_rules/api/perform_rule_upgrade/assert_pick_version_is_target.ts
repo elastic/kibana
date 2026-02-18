@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  PerformRuleUpgradeRequestBody,
-  PickVersionValues,
-} from '@kbn/securitysolution-api';
+import type { PerformRuleUpgradeRequestBody, PickVersionValues } from '@kbn/securitysolution-api';
 
 interface AssertRuleTypeMatchProps {
   requestBody: PerformRuleUpgradeRequestBody;

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  BulkActionsDryRunErrCodeEnum,
-  type ExportRulesDetails,
-} from '@kbn/securitysolution-api';
+import { BulkActionsDryRunErrCodeEnum, type ExportRulesDetails } from '@kbn/securitysolution-api';
 import type { BulkActionResponse } from '../../../../../rule_management/logic';
 
 import type { DryRunResult } from '../types';

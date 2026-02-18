@@ -18,10 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
-import type {
-  RiskEngineStatusResponse,
-  StoreStatus,
-} from '@kbn/securitysolution-api';
+import type { RiskEngineStatusResponse, StoreStatus } from '@kbn/securitysolution-api';
 import { RiskEngineStatusEnum } from '@kbn/securitysolution-api';
 import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';
 import { useEnableEntityStoreMutation } from '../hooks/use_entity_store';
