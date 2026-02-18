@@ -15,6 +15,23 @@ import { validateVariable } from './validate_variable';
 import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import type { VariableItem, YamlValidationResult } from '../model/types';
 
+/**
+ * If the variable item has no offset, try to compute it on the fly from the editor model.
+ */
+function fallbackForOffsetValue(
+  variableItem: VariableItem,
+  yamlDocument?: Document | null,
+  model?: monaco.editor.ITextModel
+) {
+  if (yamlDocument && model) {
+    return model?.getOffsetAt({
+      lineNumber: variableItem.startLineNumber,
+      column: variableItem.startColumn,
+    });
+  }
+  return undefined;
+}
+
 export function validateVariables(
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
@@ -29,13 +46,7 @@ export function validateVariables(
 
     let context: typeof DynamicStepContextSchema;
     try {
-      const variableOffset =
-        offset ?? (yamlDocument && model)
-          ? model?.getOffsetAt({
-              lineNumber: variableItem.startLineNumber,
-              column: variableItem.startColumn,
-            })
-          : undefined;
+      const variableOffset = offset ?? fallbackForOffsetValue(variableItem, yamlDocument, model);
       context = getContextSchemaForPath(
         workflowDefinition,
         workflowGraph,
