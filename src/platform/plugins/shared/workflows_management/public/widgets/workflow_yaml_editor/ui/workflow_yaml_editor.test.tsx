@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -221,17 +222,21 @@ describe('WorkflowYAMLEditor', () => {
     editorRef: { current: null },
   };
 
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
   const renderWithProviders = (
     component: React.ReactElement,
     store?: ReturnType<typeof createMockStore>
   ) => {
     const testStore = store || createMockStore();
     return render(
-      <MemoryRouter>
-        <I18nProviderMock>
-          <Provider store={testStore}>{component}</Provider>
-        </I18nProviderMock>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <I18nProviderMock>
+            <Provider store={testStore}>{component}</Provider>
+          </I18nProviderMock>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   };
 
@@ -254,13 +259,15 @@ describe('WorkflowYAMLEditor', () => {
   it('updates store when editor content changes', async () => {
     const store = createMockStore();
     const { container } = render(
-      <MemoryRouter>
-        <I18nProviderMock>
-          <Provider store={store}>
-            <WorkflowYAMLEditor {...defaultProps} />
-          </Provider>
-        </I18nProviderMock>
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <I18nProviderMock>
+            <Provider store={store}>
+              <WorkflowYAMLEditor {...defaultProps} />
+            </Provider>
+          </I18nProviderMock>
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     const textarea = container.querySelector(

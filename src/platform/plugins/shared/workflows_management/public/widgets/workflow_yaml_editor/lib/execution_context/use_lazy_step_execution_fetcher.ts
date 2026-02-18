@@ -11,8 +11,8 @@ import { useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
-import { useKibana } from '../../../../hooks/use_kibana';
 import type { StepExecutionData } from './build_execution_context';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 const STEP_EXECUTION_QUERY_KEY = 'stepExecution';
 
@@ -49,9 +49,7 @@ export function useLazyStepExecutionFetcher(
   const stepExecutionsRef = useRef(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
 
-  const fetchRef = useRef<(stepId: string) => Promise<StepExecutionData | null>>(
-    async () => null
-  );
+  const fetchRef = useRef<(stepId: string) => Promise<StepExecutionData | null>>(async () => null);
 
   fetchRef.current = async (stepId: string): Promise<StepExecutionData | null> => {
     const currentExecutionId = executionIdRef.current;
