@@ -26,6 +26,7 @@ export interface ConnectorIdItem extends BaseItem {
 
 export interface VariableItem extends BaseItem {
   type: 'regexp' | 'foreach';
+  offset?: number;
 }
 
 export interface CustomPropertyItem extends BaseItem {

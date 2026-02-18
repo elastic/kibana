@@ -44,6 +44,7 @@ describe('validateVariables', () => {
     endLineNumber: 1,
     endColumn: 10,
     yamlPath: ['steps', 0, 'params', 'value'],
+    offset: 0,
     ...overrides,
   });
 
@@ -304,6 +305,7 @@ describe('validateVariables', () => {
       endLineNumber: 1,
       endColumn: 10,
       yamlPath: ['steps', 0, 'with', 'message'],
+      offset: variableOffsetInDoc,
     });
     const mockModel = {
       getOffsetAt: jest.fn((pos: { lineNumber: number; column: number }) => {
@@ -353,6 +355,7 @@ describe('validateVariables', () => {
       startColumn: 10,
       endLineNumber: 5,
       endColumn: 20,
+      offset: 0,
     });
 
     mockGetContextSchemaForPath.mockReturnValue({} as any);

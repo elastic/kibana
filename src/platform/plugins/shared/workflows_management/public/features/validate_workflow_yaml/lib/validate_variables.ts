@@ -25,13 +25,13 @@ export function validateVariables(
   const errors: YamlValidationResult[] = [];
 
   for (const variableItem of variableItems) {
-    const { yamlPath: path } = variableItem;
+    const { yamlPath: path, offset } = variableItem;
 
     let context: typeof DynamicStepContextSchema;
     try {
-      const offset =
-        yamlDocument && model
-          ? model.getOffsetAt({
+      const variableOffset =
+        offset ?? (yamlDocument && model)
+          ? model?.getOffsetAt({
               lineNumber: variableItem.startLineNumber,
               column: variableItem.startColumn,
             })
@@ -41,7 +41,7 @@ export function validateVariables(
         workflowGraph,
         path,
         yamlDocument,
-        offset
+        variableOffset
       );
 
       const error = validateVariable(variableItem, context);
