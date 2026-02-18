@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/utility-types'
+  - '@kbn/es-query-server'
 tags:
   - shared-server
   - package
