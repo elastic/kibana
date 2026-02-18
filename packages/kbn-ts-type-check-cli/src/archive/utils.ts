@@ -347,16 +347,6 @@ export function logArtifactFreshness(
     const freshProjects = totalProjects - affectedProjects;
     const freshPercent = Math.round((freshProjects / totalProjects) * 100);
 
-    const freshnessColor = (freshPercent: number) => {
-      if (freshPercent < 20) {
-        return 'red';
-      }
-      if (freshPercent < 50) {
-        return 'yellow';
-      }
-      return 'green';
-    };
-
     lines.push('');
     lines.push(
       `  ${changedFiles} file(s) changed across ${affectedProjects} of ${totalProjects} projects.\n`
@@ -435,3 +425,13 @@ export async function calculateFileHashes(
   });
   return hashes;
 }
+
+const freshnessColor = (freshPercent: number) => {
+  if (freshPercent < 20) {
+    return 'red';
+  }
+  if (freshPercent < 50) {
+    return 'yellow';
+  }
+  return 'green';
+};
