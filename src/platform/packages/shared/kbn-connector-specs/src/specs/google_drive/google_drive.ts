@@ -54,8 +54,19 @@ export const GoogleDriveConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
+
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'ears',
+        defaults: {
+          authorizationUrl: 'https://localhost:8052/google/oauth/authorize',
+          tokenUrl: 'https://localhost:8052/google/oauth/token',
+          scope: 'profile,email',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },
