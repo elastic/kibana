@@ -62,14 +62,14 @@ export const createDslStepsFlyoutSerializer = (initialLifecycle: IngestStreamLif
 
     if (downsample.length === 0) {
       if (next.dsl) {
-        delete (next.dsl as any).downsample;
+        delete next.dsl.downsample;
         // Preserve any existing DSL fields, but don't materialize a new empty `dsl` object.
         if (Object.keys(next.dsl).length === 0) {
-          delete (next as any).dsl;
+          delete (next as Partial<IngestStreamLifecycleDSL>).dsl;
         }
       }
     } else {
-      next.dsl = { ...(next.dsl ?? {}), downsample } as any;
+      next.dsl = { ...(next.dsl ?? {}), downsample };
     }
 
     return next;
