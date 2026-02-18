@@ -143,15 +143,34 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: c4d-standard-2
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-c,us-central1-a
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+#  - command: .buildkite/scripts/steps/checks/api_contracts.sh
+#    label: 'Check API Contracts'
+#    agents:
+#      image: family/kibana-ubuntu-2404
+#      imageProject: elastic-images-prod
+#      provider: gcp
+#      machineType: c4d-standard-2
+#      diskType: hyperdisk-balanced
+#      preemptible: true
+#      spotZones: us-central1-c,us-central1-a
+#    depends_on: check_oas_snapshot
+#    timeout_in_minutes: 30
+#    soft_fail: true
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3
 
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs
@@ -209,7 +228,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
@@ -223,7 +242,7 @@ steps:
       - build
     env:
       SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_types'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
