@@ -10,9 +10,26 @@ import { schema } from '@kbn/config-schema';
 import type { Filter } from '@kbn/es-query';
 
 export const SingleOverviewCustomSchema = schema.object({
-  slo_id: schema.string(),
-  slo_instance_id: schema.maybe(schema.string()),
-  remote_name: schema.maybe(schema.string()),
+  slo_id: schema.string({
+    meta: {
+      description: 'The ID of the SLO',
+    },
+  }),
+  slo_instance_id: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID.',
+      },
+    })
+  ),
+  remote_name: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The name of the remote SLO',
+      },
+    })
+  ),
   show_all_group_by_instances: schema.maybe(schema.boolean()),
   overview_mode: schema.literal('single'),
 });
