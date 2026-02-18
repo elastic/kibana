@@ -12,6 +12,7 @@ import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock child components
@@ -96,13 +97,19 @@ describe('WorkflowExecutionPanel', () => {
     onClose: jest.fn(),
   };
 
+  let mockStore: ReturnType<
+    typeof import('../../../shared/test_utils/test_wrapper').TestWrapper extends any ? any : never
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStore = undefined;
   });
 
-  const renderComponent = (props = {}) => {
+  const renderComponent = (props = {}, store?: any) => {
+    mockStore = store;
     return render(
-      <TestWrapper>
+      <TestWrapper store={store}>
         <WorkflowExecutionPanel {...defaultProps} {...props} />
       </TestWrapper>
     );
@@ -275,6 +282,49 @@ describe('WorkflowExecutionPanel', () => {
     it('should pass null selectedId when not provided', () => {
       renderComponent({ selectedId: null });
       expect(screen.getByText('No Selection')).toBeInTheDocument();
+    });
+  });
+
+  describe('replay button', () => {
+    it('should show replay button when done button is visible', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+      expect(screen.getByTestId('replayExecutionButton')).toBeInTheDocument();
+    });
+
+    it('should not show replay button when execution is still running', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.RUNNING },
+      });
+      expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
+    });
+
+    it('should not show replay button when showBackButton is true', () => {
+      renderComponent({
+        showBackButton: true,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+      expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
+    });
+
+    it('should dispatch setReplayExecutionId and setIsTestModalOpen on click', () => {
+      const store = createMockStore();
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+        },
+        store
+      );
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      const state = store.getState();
+      expect(state.detail.replayExecutionId).toBe('exec-123');
+      expect(state.detail.isTestModalOpen).toBe(true);
     });
   });
 
