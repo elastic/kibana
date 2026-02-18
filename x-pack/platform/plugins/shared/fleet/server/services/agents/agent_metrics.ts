@@ -15,11 +15,19 @@ const AGGREGATION_MAX_SIZE = 1000;
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
-    let fleetAgents = agents.filter((agent) => agent.type !== 'OPAMP');
-    let opampAgents = agents.filter((agent) => agent.type === 'OPAMP');
-    fleetAgents = await _fetchAndAssignAgentMetrics(esClient, fleetAgents);
-    opampAgents = await _fetchAndAssignOtelMetrics(esClient, opampAgents);
-    return [...fleetAgents, ...opampAgents];
+    const fleetAgents = agents.filter((agent) => agent.type !== 'OPAMP');
+    const opampAgents = agents.filter((agent) => agent.type === 'OPAMP');
+    const fleetAgentsMetrics = await _fetchAndAssignAgentMetrics(esClient, fleetAgents);
+    const opampAgentsMetrics = await _fetchAndAssignOtelMetrics(esClient, opampAgents);
+    const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce((acc, agent) => {
+      acc[agent.id] = agent.metrics;
+      return acc;
+    }, {} as Record<string, Agent['metrics']>);
+
+    return agents.map((agent) => ({
+      ...agent,
+      metrics: metricsMap[agent.id],
+    }));
   } catch (err) {
     //  Do not throw if we are not able to fetch metrics, as it could occur if the user is missing some permissions
     appContextService.getLogger().warn(err);
@@ -59,7 +67,7 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
     const results = formattedResults[agent.id];
 
     return {
-      ...agent,
+      id: agent.id,
       metrics: {
         cpu_avg: results?.avg_cpu ? Math.trunc(results.avg_cpu * 100000) / 100000 : undefined,
         memory_size_byte_avg: results?.avg_memory_size
@@ -178,7 +186,7 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
     const results = formattedResults[agent.id];
 
     return {
-      ...agent,
+      id: agent.id,
       metrics: {
         cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 100000) / 100000 : undefined,
         memory_size_byte_avg: results?.sum_memory_size
