@@ -21,6 +21,15 @@ export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
     id: {
       type: 'keyword',
     },
+    spaceId: {
+      type: 'keyword',
+    },
+    workflowId: {
+      type: 'keyword',
+    },
+    workflowRunId: {
+      type: 'keyword',
+    },
     type: {
       type: 'keyword',
     },
@@ -29,6 +38,9 @@ export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     concurrencyGroupKey: {
       type: 'keyword',
+    },
+    createdAt: {
+      type: 'date',
     },
   },
 };
