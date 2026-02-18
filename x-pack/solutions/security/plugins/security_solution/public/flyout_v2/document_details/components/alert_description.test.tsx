@@ -123,4 +123,3 @@ describe('<AlertDescription />', () => {
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 });
-

@@ -20,4 +20,3 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout/test/setup.ts',
   ],
 };
-

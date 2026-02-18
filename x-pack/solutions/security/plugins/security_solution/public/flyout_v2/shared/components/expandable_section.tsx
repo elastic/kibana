@@ -91,4 +91,3 @@ export const ExpandableSection = memo(
 );
 
 ExpandableSection.displayName = 'ExpandableSection';
-
