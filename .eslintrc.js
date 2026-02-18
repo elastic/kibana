@@ -800,6 +800,7 @@ module.exports = {
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
+        '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
       ],
       rules: {
@@ -1877,6 +1878,19 @@ module.exports = {
      */
     {
       files: ['x-pack/platform/plugins/shared/lens/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Streams overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
