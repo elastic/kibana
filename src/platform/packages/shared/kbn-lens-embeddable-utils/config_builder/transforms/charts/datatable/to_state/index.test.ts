@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState } from '../../../../schema';
-import { buildVisualizationState } from '.';
+import type { DatatableState, DatatableStateESQL } from '../../../../schema';
+import { buildVisualizationState, getValueColumns } from '.';
 
 describe('Datatable ES|QL column ordering', () => {
   describe('buildVisualizationState', () => {
@@ -64,6 +64,47 @@ describe('Datatable ES|QL column ordering', () => {
 
       expect(rowCol?.isMetric).toBe(false);
       expect(metricCol?.isMetric).toBe(true);
+    });
+  });
+
+  describe('getValueColumns', () => {
+    test('returns value columns for rows, split_metrics_by, and metrics', () => {
+      const config = {
+        type: 'datatable',
+        metrics: [
+          { operation: 'value', column: 'bytes' },
+          { operation: 'value', column: 'requests' },
+        ],
+        rows: [{ operation: 'value', column: 'host' }],
+        split_metrics_by: [{ operation: 'value', column: 'region' }],
+      } as unknown as DatatableStateESQL;
+
+      const result = getValueColumns(config);
+
+      expect(result).toEqual([
+        {
+          columnId: 'datatable_accessor_row_0',
+          fieldName: 'host',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'datatable_accessor_split_metric_by_0',
+          fieldName: 'region',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'datatable_accessor_metric_0',
+          fieldName: 'bytes',
+          inMetricDimension: true,
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'datatable_accessor_metric_1',
+          fieldName: 'requests',
+          inMetricDimension: true,
+          meta: { type: 'number' },
+        },
+      ]);
     });
   });
 });
