@@ -14,6 +14,7 @@ import {
 } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -145,7 +146,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
