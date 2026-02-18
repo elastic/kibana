@@ -7,36 +7,33 @@
 
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField } from './commons';
 
 export interface IdentitySourceFields {
-  /** Fields of which at least one must be present for identity to be valid. */
+  /** At least one must be present for identity to be valid.
+   * This can be used to filter documents before the entity ID is calculated.
+   */
   requiresOneOf: string[];
-  /** All field names used in EUID composition, deduplicated in definition order. */
+  /** All field names used in EUID composition, deduplicated
+   * This can be used to extract the ID fields from the document.
+   **/
   identitySourceFields: string[];
 }
 
 /**
- * Returns the identity source field names for a given entity type.
- * Used when projecting or persisting identity data (e.g. risk-score ESQL or entity store updates).
+ * Returns the identity source field names for a given entity type and
+ * required fields for the entity ID.
  *
  * @param entityType - The entity type (e.g. 'host', 'user', 'service')
- * @returns requiresOneOf and deduplicated identitySourceFields from the entity definition
+ * @returns requiresOneOf and identitySourceFields from the entity definition
  */
 export function getIdentitySourceFields(entityType: EntityType): IdentitySourceFields {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const seen = new Set<string>();
-  const identitySourceFields: string[] = [];
-  for (const composedField of identityField.euidFields) {
-    for (const attr of composedField) {
-      if (isEuidField(attr) && !seen.has(attr.field)) {
-        seen.add(attr.field);
-        identitySourceFields.push(attr.field);
-      }
-    }
-  }
+  const {
+    identityField: { requiresOneOfFields, euidFields },
+  } = getEntityDefinitionWithoutId(entityType);
   return {
-    requiresOneOf: [...identityField.requiresOneOfFields],
-    identitySourceFields,
+    requiresOneOf: requiresOneOfFields,
+    identitySourceFields: Array.from(
+      new Set(euidFields.flatMap((composedField) => composedField.map((attr) => attr.field)))
+    ),
   };
 }
