@@ -669,41 +669,6 @@ describe('start', () => {
         expect(updatedIsCollapsed).toBe(!isCollapsed);
       });
     });
-
-    describe('getIsFeedbackBtnVisible$', () => {
-      it('should return false by default', async () => {
-        const { chrome, service } = await start();
-        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsFeedbackBtnVisible$());
-        service.stop();
-        expect(isCollapsed).toBe(false);
-      });
-
-      it('should return "false" when the sidenav is collapsed', async () => {
-        const { chrome, service } = await start();
-
-        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
-        chrome.sideNav.setIsFeedbackBtnVisible(true); // Mark it as visible
-        chrome.sideNav.setIsCollapsed(true); // But the sidenav is collapsed
-
-        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
-        service.stop();
-        expect(isFeedbackBtnVisible).toBe(false);
-      });
-    });
-
-    describe('setIsFeedbackBtnVisible', () => {
-      it('should update the isFeedbackBtnVisible$ observable', async () => {
-        const { chrome, service } = await start();
-        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
-        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
-
-        chrome.sideNav.setIsFeedbackBtnVisible(!isFeedbackBtnVisible);
-
-        const updatedIsFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
-        service.stop();
-        expect(updatedIsFeedbackBtnVisible).toBe(!isFeedbackBtnVisible);
-      });
-    });
   });
 });
 
