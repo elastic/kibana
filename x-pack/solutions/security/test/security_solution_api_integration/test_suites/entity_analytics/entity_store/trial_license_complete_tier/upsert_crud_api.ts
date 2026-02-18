@@ -39,21 +39,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('upsert user', () => {
       before(async () => {
         await cleanUpEntityStore(providerContext);
-        // Initialize security solution by creating a prerequisite index pattern.
-        // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
-        await dataView.create('security-solution');
 
-        // Verify the data view is accessible before proceeding
-        // This ensures the data view is fully propagated in CI environments
-        await retry.waitForWithTimeout('Data view to be accessible', 30000, async () => {
-          const response = await supertest
-            .get('/s/default/api/data_views/data_view/security-solution-default')
-            .expect(200);
-          log.info(`Data view verified: ${response.body.data_view?.title}`);
-          return response.body.data_view?.title === 'logs-*';
-        });
-
-        // Create a test index matching transform's pattern to store test documents
+        // Create a test datastream FIRST to ensure it exists before data view references it
         await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
 
         // Verify the datastream is ready
@@ -64,6 +51,20 @@ export default function (providerContext: FtrProviderContext) {
             log.info(`Datastream ${COMMON_DATASTREAM_NAME} is ready`);
           }
           return ready;
+        });
+
+        // Initialize security solution by creating a prerequisite index pattern.
+        // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
+        // The data view pattern logs-* will match our test datastream logs-elastic_agent.cloudbeat-test
+        await dataView.create('security-solution');
+
+        // Verify the data view is accessible before proceeding
+        await retry.waitForWithTimeout('Data view to be accessible', 30000, async () => {
+          const response = await supertest
+            .get('/s/default/api/data_views/data_view/security-solution-default')
+            .expect(200);
+          log.info(`Data view verified: ${response.body.data_view?.title}`);
+          return response.body.data_view?.title === 'logs-*';
         });
 
         log.info('before complete');
@@ -97,6 +98,44 @@ export default function (providerContext: FtrProviderContext) {
             }))
           )}`
         );
+
+        // Wait for the user transform to be in started state with correct source indices
+        await retry.waitForWithTimeout('User transform to be ready', 60000, async () => {
+          try {
+            const transformConfig = await es.transform.getTransform({
+              transform_id: USER_TRANSFORM_ID,
+            });
+            const transform = transformConfig.transforms?.[0];
+            if (!transform) {
+              log.debug('User transform not found yet');
+              return false;
+            }
+            const sourceIndices = transform.source?.index;
+            log.info(`User transform source indices: ${JSON.stringify(sourceIndices)}`);
+
+            // Verify the transform includes logs-* pattern
+            const hasLogsPattern = Array.isArray(sourceIndices)
+              ? sourceIndices.some((idx: string) => idx.includes('logs'))
+              : String(sourceIndices).includes('logs');
+            if (!hasLogsPattern) {
+              log.warning(`User transform missing logs pattern in source: ${sourceIndices}`);
+            }
+
+            // Check transform status
+            const statsResponse = await es.transform.getTransformStats({
+              transform_id: USER_TRANSFORM_ID,
+            });
+            const stats = statsResponse.transforms?.[0];
+            log.info(`User transform state: ${stats?.state}`);
+            return stats?.state === 'started' || stats?.state === 'indexing';
+          } catch (e: any) {
+            if (e.message?.includes('resource_not_found_exception')) {
+              log.debug('User transform not found yet');
+              return false;
+            }
+            throw e;
+          }
+        });
 
         log.info('beforeEach complete');
       });
