@@ -9,14 +9,48 @@ import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { storedFilterSchema } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import {
-  SingleOverviewCustomSchema,
-  GroupOverviewCustomSchema,
-} from '../../../common/embeddables/overview/schema';
 
 /** Triggers supported by the SLO overview embeddable for drilldowns */
 export const SLO_OVERVIEW_EMBEDDABLE_SUPPORTED_TRIGGERS = ['VALUE_CLICK_TRIGGER'];
+
+export const SingleOverviewCustomSchema = schema.object({
+  slo_id: schema.string({
+    meta: { description: 'The ID of the SLO' },
+  }),
+  slo_instance_id: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID.',
+      },
+    })
+  ),
+  remote_name: schema.maybe(
+    schema.string({
+      meta: { description: 'The name of the remote SLO' },
+    })
+  ),
+  show_all_group_by_instances: schema.maybe(schema.boolean()),
+  overview_mode: schema.literal('single'),
+});
+
+export const GroupOverviewCustomSchema = schema.object({
+  group_filters: schema.maybe(
+    schema.object({
+      group_by: schema.oneOf([
+        schema.literal('slo.tags'),
+        schema.literal('status'),
+        schema.literal('slo.indicator.type'),
+      ]),
+      groups: schema.maybe(schema.arrayOf(schema.string())),
+      filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+      kql_query: schema.maybe(schema.string()),
+    })
+  ),
+  overview_mode: schema.literal('groups'),
+});
 
 export const SingleOverviewEmbeddableSchema = schema.allOf(
   [SingleOverviewCustomSchema, serializedTitlesSchema],
@@ -62,6 +96,11 @@ export const getOverviewEmbeddableSchema = (_getDrilldownsSchema: GetDrilldownsS
     { meta: { description: 'SLO Overview embeddable schema with drilldowns' } }
   );
 };
+
+/** Derived from SingleOverviewCustomSchema - use for type-only imports from common/public */
+export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
+/** Derived from GroupOverviewCustomSchema - use for type-only imports from common/public */
+export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
 
 export type OverviewEmbeddableState = TypeOf<typeof overviewEmbeddableSchema>;
 export type SingleOverviewEmbeddableState = TypeOf<typeof SingleOverviewEmbeddableSchema>;

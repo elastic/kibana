@@ -8,9 +8,10 @@
 import type {
   LegacySingleOverviewEmbeddableState,
   LegacyGroupOverviewEmbeddableState,
+  SingleOverviewCustomState,
+  GroupOverviewCustomState,
 } from '../schema';
 import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
-import type { SingleOverviewCustomState, GroupOverviewCustomState } from '../schema';
 
 type StoredStateWithLegacy = Partial<SingleOverviewCustomState> &
   Partial<GroupOverviewCustomState> &
