@@ -98,12 +98,7 @@ export function SignificantEventsTable({
               if (query.feature?.name) {
                 setSelectedFeature(featuresByName[query.feature.name]);
               }
-            }}'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
-              {
-                defaultMessage: 'O              {
-                defaultMessage: 'Open feature details',
-              }
-            )}
+            }}
             data-test-subj="significant_events_table_feature_badge"
           >
             {query.feature?.name ?? '--'}
