@@ -107,22 +107,24 @@ export const LifecyclePhaseButton = ({
           >
             <b>{capitalize(label)}</b>
           </EuiText>
-          {size && !isEditLifecycleFlyoutOpen && (
-            <EuiText
-              size="xs"
-              color={euiTheme.colors.plainDark}
-              data-test-subj={`${prefix}lifecyclePhase-${label}-size`}
-              title={size}
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '100%',
-              }}
-            >
-              {size}
-            </EuiText>
-          )}
+          <EuiText
+            size="xs"
+            color={euiTheme.colors.plainDark}
+            data-test-subj={
+              size && !isEditLifecycleFlyoutOpen
+                ? `${prefix}lifecyclePhase-${label}-size`
+                : undefined
+            }
+            title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+            }}
+          >
+            {size && !isEditLifecycleFlyoutOpen ? size : null}
+          </EuiText>
         </EuiFlexGroup>
       )}
     </EuiPanel>
