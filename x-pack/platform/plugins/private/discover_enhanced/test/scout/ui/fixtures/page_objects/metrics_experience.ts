@@ -56,6 +56,28 @@ interface ChartActions {
   readonly explore: Locator;
 }
 
+interface BreakdownSelector {
+  readonly button: Locator;
+  readonly search: Locator;
+  readonly selectable: Locator;
+  getOption(dimensionName: string): Locator;
+  getButtonWithSelectedDimension(dimensionName: string): Locator;
+}
+
+function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
+  return {
+    button: page.testSubj.locator('metricsExperienceBreakdownSelectorButton'),
+    search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
+    selectable: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable'),
+    getOption: (dimensionName: string) =>
+      page.testSubj.locator(`metricsExperienceBreakdownSelectorOption-${dimensionName}`),
+    getButtonWithSelectedDimension: (dimensionName: string) =>
+      page.locator(
+        `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
+      ),
+  };
+}
+
 function createChartActions(page: ScoutPage): ChartActions {
   return {
     viewDetails: page.testSubj.locator(
@@ -112,6 +134,7 @@ export class MetricsExperiencePage {
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
   public readonly chartActions: ChartActions;
+  public readonly breakdownSelector: BreakdownSelector;
 
   constructor(
     private readonly page: ScoutPage,
@@ -125,6 +148,7 @@ export class MetricsExperiencePage {
     this.pagination = createPagination(this.container);
     this.flyout = createFlyout(page);
     this.chartActions = createChartActions(page);
+    this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');

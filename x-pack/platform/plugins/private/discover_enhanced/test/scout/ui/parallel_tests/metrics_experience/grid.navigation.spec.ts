@@ -25,6 +25,10 @@ import {
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
+const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
+const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
+const { name: FILTER_DIMENSION_NAME, values: FILTER_DIMENSION_VALUES } =
+  DEFAULT_CONFIG.dimensions[0];
 
 // Sort metrics alphabetically to match UI display order
 const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
@@ -93,6 +97,17 @@ spaceTest.describe(
       });
     });
 
+    spaceTest(
+      'should render grid with wildcard TS query and WHERE filter',
+      async ({ pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+        const query = `${testData.ESQL_QUERIES.TS_METRICS_WILDCARD} | WHERE ${FILTER_DIMENSION_NAME} == "${FILTER_DIMENSION_VALUES[0]}"`;
+        await metricsExperience.runEsqlQuery(query);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+      }
+    );
+
     spaceTest('should filter metrics using search', async ({ pageObjects }) => {
       const { metricsExperience } = pageObjects;
       await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
@@ -115,5 +130,34 @@ spaceTest.describe(
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
     });
+
+    spaceTest(
+      'should update grid when selecting a breakdown dimension',
+      async ({ pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+        await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
+        await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('select first dimension as breakdown', async () => {
+          await metricsExperience.breakdownSelector.button.click();
+          await metricsExperience.breakdownSelector.getOption(FIRST_DIMENSION).click();
+          await expect(
+            metricsExperience.breakdownSelector.getButtonWithSelectedDimension(FIRST_DIMENSION)
+          ).toBeVisible();
+          await expect(metricsExperience.grid).toBeVisible();
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+
+        await spaceTest.step('switch to second dimension and verify grid updates', async () => {
+          await metricsExperience.breakdownSelector.button.click();
+          await metricsExperience.breakdownSelector.getOption(SECOND_DIMENSION).click();
+          await expect(
+            metricsExperience.breakdownSelector.getButtonWithSelectedDimension(SECOND_DIMENSION)
+          ).toBeVisible();
+          await expect(metricsExperience.grid).toBeVisible();
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+      }
+    );
   }
 );
