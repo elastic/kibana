@@ -11,7 +11,6 @@ export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
-console.log('ALL_ENTITY_TYPES ============= ', ALL_ENTITY_TYPES);
 
 const mappingSchema = z.any();
 
