@@ -203,7 +203,7 @@ describe('updateFailureIssue()', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-123',
-        target: 'serverless=es',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -216,7 +216,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             5678,
-            "New failure for \\"serverless=es\\" target: [kibana-on-merge - main](https://build-url)",
+            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)",
           ],
         ],
         "results": Array [
@@ -262,7 +262,7 @@ describe('updateFailureIssue()', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-456',
-        target: 'serverless=es',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -270,7 +270,7 @@ describe('updateFailureIssue()', () => {
     );
 
     const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).not.toContain('New error message');
   });
 
@@ -311,7 +311,7 @@ describe('updateFailureIssue()', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-1112',
-        target: 'serverless=es',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -319,7 +319,7 @@ describe('updateFailureIssue()', () => {
     );
 
     const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).not.toContain('New error message');
   });
 
@@ -357,7 +357,7 @@ describe('updateFailureIssue()', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-1213',
-        target: 'serverless=es',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -365,7 +365,7 @@ describe('updateFailureIssue()', () => {
     );
 
     const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
     expect(comment).toContain('New error message');
     expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
   });
@@ -384,7 +384,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-123',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -407,7 +407,7 @@ describe('createFailureIssue() - Scout failures', () => {
       | Field | Value |
       |-------|-------|
       | Test ID | test-id-123 |
-      | Target | stateful |
+      | Target | local-serverless-observability_complete |
       | Location | /path/to/test.ts |
       | Duration | 5.00s |
       | Module | N/A |
@@ -485,7 +485,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-789',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 2000,
         owners: 'team:test',
@@ -520,7 +520,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-789',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 2000,
         owners: 'team:test',

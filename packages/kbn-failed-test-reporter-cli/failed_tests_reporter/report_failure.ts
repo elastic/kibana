@@ -202,8 +202,38 @@ function createScoutComment(
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
   if (!newErrorMessage) {
+    /*
+     * If there's a failure with the same error message as before, just post a comment
+     * with pipeline link and failure target.
+     * Example:
+     *
+     * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+     */
     return base;
   }
+
+  /*
+   * If there's a new error message, include it in the comment. This provides more
+   * context on how the failure has changed since the issue was opened or last updated.
+   *
+   * Example:
+   *
+   * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+   *
+   * New error message:
+   * ```
+   * Error: expect(locator).toBeEnabled() failed
+   *
+   * Locator: locator('notExist')
+   * Expected: enabled
+   * Timeout: 10000ms
+   * Error: element(s) not found
+   *
+   * Call log:
+   *   - Expect "toBeEnabled" with timeout 10000ms
+   *   - waiting for locator('notExist')
+   * ```
+   */
 
   return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
 }
