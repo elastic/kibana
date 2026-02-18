@@ -21,7 +21,7 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
 - **Reporting**: the [Scout Reporter](./scout/reporting.md) captures run metrics.
-- **Reusability**: reuse shared fixtures/page objects/helpers when they exist to reduce duplication.
+- **Reusability**: reuse or write reusable fixtures, page objects and API helpers to reduce duplication.
 - **Follows modern best practices**: check out our [Scout best practices](./scout/best-practices.md).
 
 ## Scout packages [scout-packages]
@@ -38,16 +38,8 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 | `@kbn/scout-security` | Security solution          |
 | `@kbn/scout-search`   | Search solution            |
 
-Other Scout packages exist, but are mainly for internals/tooling:
-
-| Package                      | Purpose                        |
-| ---------------------------- | ------------------------------ |
-| `@kbn/scout-info`            | Scout internals/tooling        |
-| `@kbn/scout-reporting`       | Reporting / result ingestion   |
-| `@kbn/scout-release-testing` | Release testing infrastructure |
-
 ::::::{note}
-Helpers in `@kbn/scout` are shared; helpers added in a solution package or a plugin test folder are scoped to that solution/plugin.
+Fixtures, page objects, and API helpers defined in `@kbn/scout` can be imported by solution-specific Scout packages. When they are defined in a solution package or a plugin they will only be available to that solution or plugin.
 ::::::
 
 ## FAQ [scout-faq]
