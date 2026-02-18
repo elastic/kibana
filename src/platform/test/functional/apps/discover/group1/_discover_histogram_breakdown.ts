@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should clear breakdown field in persisted discover session', async () => {
       const savedSearchName = 'with breakdown and then cleared';
-      await discover.chooseBreakdownField('extension.raw');
+      await discover.chooseBreakdownField('geo.dest');
       await header.waitUntilLoadingHasFinished();
       await discover.saveSearch(savedSearchName);
 
