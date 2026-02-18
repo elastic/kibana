@@ -157,6 +157,7 @@ export {
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
   featureSchema,

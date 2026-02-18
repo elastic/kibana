@@ -101,7 +101,7 @@ apiTest.describe('Entity Store install - privilege checks', { tag: ENTITY_STORE_
       const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { logExtraction: { additionalIndexPattern: restrictedIndex } },
+        body: { logExtraction: { additionalIndexPatterns: [restrictedIndex] } },
       });
 
       expect(response.statusCode).toBe(403);
