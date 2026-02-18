@@ -48,10 +48,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ? stepExecution?.stepType?.replace('trigger_', '')
       : undefined;
 
+    const hasInput = Boolean(stepExecution?.input);
+    const hasError = Boolean(stepExecution?.error);
+
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
         const pseudoTabs: { id: string; name: string }[] = [];
-        if (stepExecution?.input) {
+        if (hasInput) {
           pseudoTabs.push({
             id: 'input',
             name: 'Input',
@@ -62,14 +65,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       return [
         {
           id: 'output',
-          name: stepExecution?.error ? 'Error' : 'Output',
+          name: hasError ? 'Error' : 'Output',
         },
         {
           id: 'input',
           name: 'Input',
         },
       ];
-    }, [stepExecution, isTriggerPseudoStep]);
+    }, [hasInput, hasError, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 

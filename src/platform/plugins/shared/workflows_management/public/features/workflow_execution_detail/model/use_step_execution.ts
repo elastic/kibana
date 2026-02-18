@@ -12,7 +12,7 @@ import type { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const REFETCH_INTERVAL_MS = 2000;
+const REFETCH_INTERVAL_MS = 5000;
 
 /**
  * Fetches a single step execution with full data (input/output).

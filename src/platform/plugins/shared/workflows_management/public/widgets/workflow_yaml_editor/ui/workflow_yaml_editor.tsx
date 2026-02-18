@@ -18,10 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
-import { useQueryClient } from '@kbn/react-query';
 import { isTriggerType } from '@kbn/workflows';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
@@ -68,8 +65,8 @@ import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monac
 import {
   buildExecutionContext,
   type ExecutionContext,
-  type StepExecutionData,
 } from '../lib/execution_context/build_execution_context';
+import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
@@ -152,7 +149,6 @@ export const WorkflowYAMLEditor = ({
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { notifications, http } = useKibana().services;
-  const queryClient = useQueryClient();
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -183,13 +179,9 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
-  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
-  stepExecutionsRef.current = stepExecutions;
 
   const execution = useSelector(selectExecution);
   const executionContextRef = useRef<ExecutionContext | null>(null);
-  const executionIdRef = useRef<string | undefined>(execution?.id);
-  executionIdRef.current = execution?.id;
 
   // Build execution context when step executions are available
   // Steps will have status/error/state but no I/O - those are lazy-loaded on hover
@@ -201,61 +193,7 @@ export const WorkflowYAMLEditor = ({
     }
   }, [isExecutionYaml, stepExecutions, execution?.context]);
 
-  // Lazily fetch a step's I/O data for template hover hints.
-  // Checks the React Query cache first (populated by the execution tab when clicking steps),
-  // and only makes an HTTP request if the data isn't already cached.
-  // Uses a ref so the hover provider (registered once at mount) always has the latest function.
-  const fetchStepExecutionDataRef = useRef<(stepId: string) => Promise<StepExecutionData | null>>(
-    async () => null
-  );
-  fetchStepExecutionDataRef.current = async (stepId: string): Promise<StepExecutionData | null> => {
-    const executionId = executionIdRef.current;
-    if (!executionId) {
-      return null;
-    }
-
-    // Map stepId (workflow definition name) to the step execution's document ID
-    const stepDocId = stepExecutionsRef.current?.find((s) => s.stepId === stepId)?.id;
-    if (!stepDocId) {
-      return null;
-    }
-
-    // Check React Query cache first (populated by the execution tab's useStepExecution)
-    const cached = queryClient.getQueryData<EsWorkflowStepExecution>([
-      'stepExecution',
-      executionId,
-      stepDocId,
-    ]);
-    if (cached) {
-      return {
-        output: cached.output,
-        error: cached.error,
-        input: cached.input,
-        status: cached.status,
-        state: cached.state as StepExecutionData['state'],
-      };
-    }
-
-    try {
-      const stepExecution = await http.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${executionId}/steps/${stepDocId}`
-      );
-      if (!stepExecution) {
-        return null;
-      }
-      // Store in React Query cache so useStepExecution won't re-fetch
-      queryClient.setQueryData(['stepExecution', executionId, stepDocId], stepExecution);
-      return {
-        output: stepExecution.output,
-        error: stepExecution.error,
-        input: stepExecution.input,
-        status: stepExecution.status,
-        state: stepExecution.state as StepExecutionData['state'],
-      };
-    } catch {
-      return null;
-    }
-  };
+  const fetchStepExecutionDataRef = useLazyStepExecutionFetcher(execution?.id, stepExecutions);
 
   // Ref to track saving state for keyboard handlers
   const isSavingRef = useRef<boolean>(false);

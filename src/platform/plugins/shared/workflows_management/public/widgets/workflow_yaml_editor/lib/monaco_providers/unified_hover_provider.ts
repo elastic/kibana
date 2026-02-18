@@ -364,32 +364,32 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
-   * Ensure step I/O data is available in the execution context, fetching on demand if needed.
-   * Returns true if the data was fetched or already available, false if fetch failed.
+   * Fetch step I/O data on demand if not already available.
+   * Returns the enriched step data (merged with fetched I/O), or the existing
+   * data if already present. Returns null if the step doesn't exist.
    */
-  private async ensureStepData(
-    executionContext: ExecutionContext,
+  private async fetchStepDataIfNeeded(
+    stepData: StepExecutionData | undefined,
     stepId: string
-  ): Promise<boolean> {
-    const stepData = executionContext.steps[stepId];
-    if (!stepData || !this.fetchStepExecutionData) {
-      return !!stepData;
+  ): Promise<StepExecutionData | null> {
+    if (!stepData) {
+      return null;
     }
 
-    // Already fetched or already has data - no need to fetch again
+    if (!this.fetchStepExecutionData) {
+      return stepData;
+    }
+
     if (this.fetchedStepIds.has(stepId) || stepData.output !== undefined) {
-      return true;
+      return stepData;
     }
 
-    // Fetch the full step data and merge into the context (cached for this execution)
     this.fetchedStepIds.add(stepId);
     const fullStepData = await this.fetchStepExecutionData(stepId);
     if (fullStepData) {
-      // eslint-disable-next-line require-atomic-updates
-      executionContext.steps[stepId] = { ...stepData, ...fullStepData };
-      return true;
+      return { ...stepData, ...fullStepData };
     }
-    return false;
+    return stepData;
   }
 
   /**
@@ -416,10 +416,20 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     }
 
     try {
-      // Lazily fetch step I/O if the hovered expression references a step
+      // Build a local context, enriching with lazily-fetched step I/O if needed
+      let evalContext: ExecutionContext = executionContext;
       const stepId = this.extractStepIdFromPath(templateInfo.pathSegments);
       if (stepId) {
-        await this.ensureStepData(executionContext, stepId);
+        const enrichedStep = await this.fetchStepDataIfNeeded(
+          executionContext.steps[stepId],
+          stepId
+        );
+        if (enrichedStep && enrichedStep !== executionContext.steps[stepId]) {
+          evalContext = {
+            ...executionContext,
+            steps: { ...executionContext.steps, [stepId]: enrichedStep },
+          };
+        }
       }
 
       // Determine what to evaluate
@@ -427,18 +437,16 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       let evaluatedPath: string;
 
       if (templateInfo.filters.length > 0 && templateInfo.isOnFilter) {
-        // Cursor is on the filter part - evaluate with filters
         evaluatedPath = templateInfo.expression;
         value = evaluateExpression({
           expression: templateInfo.expression,
-          context: executionContext,
+          context: evalContext,
         });
       } else {
-        // Cursor is on the variable path (not filter) - resolve path only
         evaluatedPath = templateInfo.pathUpToCursor.join('.');
         value = evaluateExpression({
           expression: evaluatedPath,
-          context: executionContext,
+          context: evalContext,
         });
       }
 
