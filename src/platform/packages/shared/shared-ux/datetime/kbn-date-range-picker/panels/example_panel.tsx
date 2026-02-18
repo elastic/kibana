@@ -20,6 +20,7 @@ import {
   SubPanelHeading,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
+import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 
 /**
  * A panel to demo how panels can be structured.
@@ -33,6 +34,7 @@ import { useDateRangePickerContext } from '../date_range_picker_context';
  */
 export function ExamplePanel() {
   const { text, setText, applyRange } = useDateRangePickerContext();
+  const { navigateTo } = useDateRangePickerPanelNavigation();
 
   const onInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value),
@@ -70,6 +72,11 @@ export function ExamplePanel() {
             </EuiFormRow>
           </form>
         </PanelBodySection>
+        <PanelBodySection>
+          <EuiButton size="s" fullWidth onClick={() => navigateTo(ExampleNestedPanel.PANEL_ID)}>
+            Go to Example panel, nested
+          </EuiButton>
+        </PanelBodySection>
       </PanelBody>
       <PanelFooter
         primaryAction={
@@ -86,3 +93,25 @@ export function ExamplePanel() {
   );
 }
 ExamplePanel.PANEL_ID = 'example-panel';
+
+/**
+ * A second example panel with dummy content, used to demo navigation history
+ * (navigating forward and going back between panels).
+ */
+export function ExampleNestedPanel() {
+  return (
+    <PanelContainer>
+      <PanelHeader>
+        <SubPanelHeading>Example panel, nested</SubPanelHeading>
+      </PanelHeader>
+      <PanelBody>
+        <PanelBodySection>
+          <EuiText size="s">
+            <p>This is the second example panel.</p>
+          </EuiText>
+        </PanelBodySection>
+      </PanelBody>
+    </PanelContainer>
+  );
+}
+ExampleNestedPanel.PANEL_ID = 'example-panel-nested';

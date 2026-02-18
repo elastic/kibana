@@ -9,13 +9,15 @@
 
 import React from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 
 import {
   PanelContainer,
   PanelHeader,
   PanelBody,
   PanelBodySection,
+  PanelListItem,
+  PanelFooter,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 
@@ -28,12 +30,25 @@ export function MainPanel() {
         <h1>Main panel</h1>
       </PanelHeader>
       <PanelBody>
-        <PanelBodySection>
-          <EuiButton size="s" fullWidth onClick={() => navigateTo('example-panel')}>
-            Example panel
-          </EuiButton>
+        <PanelBodySection spacingSide="block">
+          <ul>
+            <PanelListItem
+              onClick={() => {}}
+              suffix={'-15m'}
+              extraActions={
+                <EuiButtonIcon aria-label="more" size="xs" color="danger" iconType="trash" />
+              }
+            >
+              Last 15 minutes
+            </PanelListItem>
+          </ul>
         </PanelBodySection>
       </PanelBody>
+      <PanelFooter>
+        <EuiButton size="s" fullWidth onClick={() => navigateTo('example-panel')}>
+          Example panel
+        </EuiButton>
+      </PanelFooter>
     </PanelContainer>
   );
 }
