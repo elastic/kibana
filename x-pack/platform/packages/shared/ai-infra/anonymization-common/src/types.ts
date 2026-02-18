@@ -16,10 +16,11 @@ import type {
   nerRuleSchema,
   replacementsSetSchema,
   tokenSourceEntrySchema,
+  tokenSourceRefSchema,
   updateAnonymizationProfileRequestSchema,
 } from './schemas';
 
-export type { AnonymizationEntityClass, NerEntityClass } from './schemas';
+export type { AnonymizationEntityClass, NerEntityClass, TokenSourceType } from './schemas';
 export { ANONYMIZATION_ENTITY_CLASSES, NER_ENTITY_CLASSES } from './schemas';
 
 /**
@@ -63,6 +64,7 @@ export type ReplacementsSet = z.infer<typeof replacementsSetSchema>;
  * A single token source entry describing where a token was produced.
  */
 export type TokenSourceEntry = z.infer<typeof tokenSourceEntrySchema>;
+export type TokenSourceRef = z.infer<typeof tokenSourceRefSchema>;
 
 /**
  * The effective policy state for a single field after resolution.

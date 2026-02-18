@@ -8,7 +8,12 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ReplacementsSet, TokenSourceEntry } from '@kbn/anonymization-common';
+import type {
+  ReplacementsSet,
+  TokenSourceEntry,
+  AnonymizationEntityClass,
+  TokenSourceType,
+} from '@kbn/anonymization-common';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
 
 /** ES document shape for replacements. */
@@ -25,6 +30,7 @@ interface EsReplacementsDocument {
     entity_class: string;
     source_type: string;
     source_id: string;
+    source_ref?: Record<string, string | number | boolean>;
     span_start?: number;
     span_end?: number;
     field?: string;
@@ -141,6 +147,14 @@ export class ReplacementsRepository {
     return doc.token_to_original ?? {};
   }
 
+  private sourceRefKey(sourceRef?: Record<string, string | number | boolean>): string {
+    if (!sourceRef) {
+      return '';
+    }
+    const sortedEntries = Object.entries(sourceRef).sort(([a], [b]) => a.localeCompare(b));
+    return JSON.stringify(sortedEntries);
+  }
+
   /**
    * Creates a new replacements set.
    */
@@ -160,6 +174,7 @@ export class ReplacementsRepository {
         entity_class: s.entityClass,
         source_type: s.sourceType,
         source_id: s.sourceId,
+        source_ref: s.sourceRef,
         span_start: s.spanStart,
         span_end: s.spanEnd,
         field: s.field,
@@ -279,11 +294,17 @@ export class ReplacementsRepository {
 
     // Deduplicate token_sources
     const existingSourceKeys = new Set(
-      existing.tokenSources.map((s) => `${s.sourceType}:${s.sourceId}:${s.pointer}:${s.token}`)
+      existing.tokenSources.map(
+        (s) =>
+          `${s.sourceType}:${s.sourceId}:${this.sourceRefKey(s.sourceRef)}:${s.pointer}:${s.token}`
+      )
     );
 
     const newSources = params.tokenSources.filter(
-      (s) => !existingSourceKeys.has(`${s.sourceType}:${s.sourceId}:${s.pointer}:${s.token}`)
+      (s) =>
+        !existingSourceKeys.has(
+          `${s.sourceType}:${s.sourceId}:${this.sourceRefKey(s.sourceRef)}:${s.pointer}:${s.token}`
+        )
     );
 
     const mergedSources = [...existing.tokenSources, ...newSources].slice(0, MAX_TOKEN_SOURCES);
@@ -299,6 +320,7 @@ export class ReplacementsRepository {
           entity_class: s.entityClass,
           source_type: s.sourceType,
           source_id: s.sourceId,
+          source_ref: s.sourceRef,
           span_start: s.spanStart,
           span_end: s.spanEnd,
           field: s.field,
@@ -379,9 +401,10 @@ export class ReplacementsRepository {
       tokenSources: (doc.token_sources ?? []).map((s) => ({
         token: s.token,
         pointer: s.pointer,
-        entityClass: s.entity_class,
-        sourceType: s.source_type,
+        entityClass: s.entity_class as AnonymizationEntityClass,
+        sourceType: s.source_type as TokenSourceType,
         sourceId: s.source_id,
+        sourceRef: s.source_ref,
         spanStart: s.span_start,
         spanEnd: s.span_end,
         field: s.field,

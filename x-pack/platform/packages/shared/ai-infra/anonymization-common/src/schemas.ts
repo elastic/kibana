@@ -34,6 +34,11 @@ export type AnonymizationEntityClass = (typeof ANONYMIZATION_ENTITY_CLASSES)[num
 
 export const anonymizationEntityClassSchema = z.enum(ANONYMIZATION_ENTITY_CLASSES);
 export const nerEntityClassSchema = z.enum(NER_ENTITY_CLASSES);
+export const TOKEN_SOURCE_TYPES = ['message', 'tool_call', 'artifact', 'workflow'] as const;
+export type TokenSourceType = (typeof TOKEN_SOURCE_TYPES)[number];
+export const tokenSourceTypeSchema = z.enum(TOKEN_SOURCE_TYPES);
+const tokenSourceRefValueSchema = z.union([z.string(), z.number(), z.boolean()]);
+export const tokenSourceRefSchema = z.record(z.string(), tokenSourceRefValueSchema);
 
 export const fieldRuleSchema = z.object({
   /** ECS or custom field name (e.g., `host.name`). */
@@ -142,21 +147,26 @@ export const findAnonymizationProfilesQuerySchema = z.object({
   per_page: z.number().int().min(1).max(1000).optional(),
 });
 
-export const tokenSourceEntrySchema = z.object({
+const tokenSourceEntryBaseSchema = z.object({
   /** The token (e.g., `HOST_NAME_ae687...`). */
   token: z.string(),
   /** RFC-6901 JSON Pointer to the string leaf that was tokenized. */
   pointer: z.string(),
   /** Token prefix/class label (e.g., `HOST_NAME`). */
-  entityClass: z.string(),
-  /** The producing artifact/workflow type (e.g., `attack_discovery`). */
-  sourceType: z.string(),
+  entityClass: anonymizationEntityClassSchema,
+  /** The producing artifact/workflow type. */
+  sourceType: tokenSourceTypeSchema,
   /** The producing scope/artifact id. */
   sourceId: z.string(),
+  /**
+   * Generic source reference metadata used to locate the token occurrence
+   * within the source payload (for example message id/index, artifact path, etc).
+   */
+  sourceRef: tokenSourceRefSchema.optional(),
   /** Start index within the pointer string leaf (optional). */
-  spanStart: z.number().optional(),
+  spanStart: z.number().int().nonnegative().optional(),
   /** End index within the pointer string leaf (optional). */
-  spanEnd: z.number().optional(),
+  spanEnd: z.number().int().nonnegative().optional(),
   /** Logical field identifier used for policy evaluation (optional). */
   field: z.string().optional(),
   /** Semantic field reference inside a templated string (optional). */
@@ -168,6 +178,27 @@ export const tokenSourceEntrySchema = z.object({
   /** When the token was first seen (optional). */
   firstSeenAt: z.string().optional(),
 });
+
+export const tokenSourceEntrySchema = tokenSourceEntryBaseSchema.refine(
+  (entry) => {
+    if (entry.sourceType !== 'message') {
+      return true;
+    }
+
+    const messageId = entry.sourceRef?.messageId;
+    const messageIndex = entry.sourceRef?.messageIndex;
+    const hasMessageId = typeof messageId === 'string' && messageId.length > 0;
+    const hasMessageIndex =
+      typeof messageIndex === 'number' && Number.isInteger(messageIndex) && messageIndex >= 0;
+
+    return hasMessageId || hasMessageIndex;
+  },
+  {
+    message:
+      'tokenSourceEntry.sourceRef.messageId or tokenSourceEntry.sourceRef.messageIndex is required when sourceType is "message"',
+    path: ['sourceRef'],
+  }
+);
 
 export const replacementsSetSchema = z.object({
   /** UUID for the mapping set. */

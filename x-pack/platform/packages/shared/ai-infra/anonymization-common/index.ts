@@ -18,6 +18,7 @@ export type {
   EffectivePolicy,
   ReplacementsSet,
   TokenSourceEntry,
+  TokenSourceRef,
 } from './src/types';
 
 export {
@@ -31,13 +32,16 @@ export {
   nerRuleSchema,
   replacementsSetSchema,
   tokenSourceEntrySchema,
+  tokenSourceRefSchema,
+  tokenSourceTypeSchema,
   anonymizationEntityClassSchema,
   nerEntityClassSchema,
   ANONYMIZATION_ENTITY_CLASSES,
   NER_ENTITY_CLASSES,
+  TOKEN_SOURCE_TYPES,
 } from './src/schemas';
 
-export type { AnonymizationEntityClass, NerEntityClass } from './src/schemas';
+export type { AnonymizationEntityClass, NerEntityClass, TokenSourceType } from './src/schemas';
 
 export { generateToken } from './src/generate_token';
 export { replaceTokensWithOriginals } from './src/replace_tokens_with_originals';

@@ -34,6 +34,7 @@ export const ANONYMIZATION_REPLACEMENTS_MAPPINGS = {
         entity_class: { type: 'keyword' as const },
         source_type: { type: 'keyword' as const },
         source_id: { type: 'keyword' as const },
+        source_ref: { type: 'flattened' as const },
         span_start: { type: 'integer' as const },
         span_end: { type: 'integer' as const },
         field: { type: 'keyword' as const },
