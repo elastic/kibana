@@ -72,7 +72,7 @@ describe('tab mapping utils', () => {
       expect(tabState).toMatchInlineSnapshot(`
         Object {
           "appState": Object {
-            "breakdownField": undefined,
+            "breakdownField": "",
             "columns": Array [
               "column2",
             ],
@@ -86,7 +86,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
-            "interval": undefined,
+            "interval": "auto",
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -165,7 +165,7 @@ describe('tab mapping utils', () => {
       expect(tabState).toMatchInlineSnapshot(`
         Object {
           "appState": Object {
-            "breakdownField": undefined,
+            "breakdownField": "",
             "columns": Array [
               "column2",
             ],
@@ -179,7 +179,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
-            "interval": undefined,
+            "interval": "auto",
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -283,7 +283,7 @@ describe('tab mapping utils', () => {
       });
       expect(savedSearch).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
+          "breakdownField": "",
           "chartInterval": "auto",
           "columns": Array [
             "column1",
@@ -539,8 +539,8 @@ describe('tab mapping utils', () => {
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
-          "chartInterval": undefined,
+          "breakdownField": "",
+          "chartInterval": "auto",
           "columns": Array [
             "column1",
           ],
@@ -578,8 +578,8 @@ describe('tab mapping utils', () => {
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
-          "chartInterval": undefined,
+          "breakdownField": "",
+          "chartInterval": "auto",
           "columns": Array [
             "column1",
           ],

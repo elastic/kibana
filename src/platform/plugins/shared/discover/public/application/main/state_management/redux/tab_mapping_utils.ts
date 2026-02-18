@@ -168,8 +168,8 @@ export const fromTabStateToSavedObjectTab = ({
       tab.appState.sampleSize && tab.appState.sampleSize === allowedSampleSize
         ? tab.appState.sampleSize
         : undefined,
-    breakdownField: tab.appState.breakdownField,
-    chartInterval: tab.appState.interval,
+    breakdownField: tab.appState.breakdownField || '',
+    chartInterval: tab.appState.interval || 'auto',
     density: tab.appState.density,
     visContext: tab.attributes.visContext,
     controlGroupJson: tab.attributes.controlGroupState
