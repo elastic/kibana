@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, ComponentRef } from 'react';
+import type { ComponentRef } from 'react';
 import React, { useMemo, useCallback, Fragment, useRef, useState, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
   DataCascadeRow,
   DataCascadeRowCell,
+  toRestorableState,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -112,56 +113,9 @@ const ESQLDataCascade = React.memo(
       [dataView, props]
     );
 
-    const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(() => {
-      const persistedCascadeUiState = getDataCascadeUiState();
-
-      if (!persistedCascadeUiState) {
-        return undefined;
-      }
-
-      // we need to verify that the rows persisted as "expanded" if any, are currently viable for rendering
-      // for instance a user might have applied a filter that removed a row from the data set,
-      // which the cascade component would not know about so in this scenario the current cascade ui state would be considered to be stale
-      // till there's actual interaction with the table after the fact.
-      // Here we leverage the visible rows for this check so we don't need to iterate over all rows in the data set.
-      const visibleRowData = cascadeGroupData.slice(
-        persistedCascadeUiState.range && Boolean(persistedCascadeUiState.range.endIndex)
-          ? // in the event that the expanded row is the only visible group within the viewport
-            // the start and end range index would have the same value,
-            // so we subtract 1 from the end index to use as the start index,
-            // in this scenario at most we run the check against 2 records
-            Math.min(
-              persistedCascadeUiState.range.startIndex,
-              persistedCascadeUiState.range.endIndex - 1
-            )
-          : 0,
-        persistedCascadeUiState.range?.endIndex
-          ? persistedCascadeUiState.range.endIndex + 1
-          : cascadeGroupData.length
-      );
-
-      const viableExpandedRows = Object.entries(persistedCascadeUiState.expanded ?? {}).reduce(
-        (acc, [rowId, isExpanded]) => {
-          if (visibleRowData.find((row) => row.id === rowId)) {
-            acc[rowId] = isExpanded;
-          }
-          return acc;
-        },
-        {} as Exclude<DataCascadeUiState['expanded'], true>
-      );
-
-      return {
-        ...persistedCascadeUiState,
-        expanded: viableExpandedRows,
-      };
-    }, [getDataCascadeUiState, cascadeGroupData]);
-
-    const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialTableState']>(
-      () => ({
-        expanded: dataCascadeUiState?.expanded,
-        rowSelection: dataCascadeUiState?.rowSelection,
-      }),
-      [dataCascadeUiState]
+    const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(
+      () => getDataCascadeUiState(),
+      [getDataCascadeUiState]
     );
 
     const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
@@ -176,13 +130,18 @@ const ESQLDataCascade = React.memo(
         return;
       }
 
-      const unsubscribeSnapshot = snapshotStore.subscribe(
-        throttle(() => {
-          latestSetDataCascadeUiState.current({ ...snapshotStore.getSnapshot() });
-        }, 150)
-      );
+      const throttledHandler = throttle(() => {
+        const snapshot = toRestorableState(snapshotStore.getSnapshot());
+        latestSetDataCascadeUiState.current(snapshot);
+      }, 150);
+
+      const unsubscribeSnapshot = snapshotStore.subscribe(throttledHandler);
 
       return () => {
+        // Flush any pending throttled invocation so the last scroll
+        // position is persisted before the listener is removed.
+        throttledHandler.flush();
+        throttledHandler.cancel();
         unsubscribeSnapshot();
       };
     }, [dataCascadeRef, latestSetDataCascadeUiState]);
@@ -195,8 +154,7 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
-        initialTableState={initialTableState}
-        initialRect={dataCascadeUiState?.scrollRect}
+        initialState={dataCascadeUiState}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
@@ -226,7 +184,7 @@ export type CascadedDocumentsLayoutProps = Omit<
 
 export const CascadedDocumentsLayout = React.memo(
   ({ dataView, ...props }: CascadedDocumentsLayoutProps) => {
-    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab } =
+    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab, setDataCascadeUiState } =
       useCascadedDocumentsContext();
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -242,12 +200,21 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(parsedQuery);
     }, [esqlQuery]);
 
+    const updateESQLQuery = useCallback(
+      (...args: Parameters<typeof onUpdateESQLQuery>) => {
+        onUpdateESQLQuery(...args);
+        // reset data cascade ui state, on query change
+        setDataCascadeUiState(undefined);
+      },
+      [onUpdateESQLQuery, setDataCascadeUiState]
+    );
+
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      updateESQLQuery: onUpdateESQLQuery,
+      updateESQLQuery,
       openInNewTab,
     });
 

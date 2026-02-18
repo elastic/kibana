@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -36,8 +37,6 @@ interface ESQLDataCascadeLeafCellProps
       | 'renderDocumentView'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
-      | 'initialState'
-      | 'onInitialStateChange'
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
@@ -93,7 +92,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     controller: virtualizerController,
     cellId,
     rowIndex,
-    // @ts-expect-error - fff
+    // @ts-expect-error - required to allow the use of the visibleRows array
     rows: visibleRows,
     estimatedRowHeight: 65,
     overscan: 10,
@@ -167,8 +166,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
-    initialState,
-    onInitialStateChange,
     renderDocumentView,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
@@ -176,6 +173,22 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
+    );
+
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, newInitialGridState);
+      },
+      [cellId, setDataGridUiState]
     );
 
     // TODO: Implement column selection logic,
@@ -225,24 +238,23 @@ export const ESQLDataCascadeLeafCell = React.memo(
         gridWidth,
         headerRow,
         footerRow,
-      }) =>
-        virtualizerController ? (
-          <CustomCascadeGridBodyMemoized
-            key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
-            Cell={Cell}
-            data={cellData}
-            visibleColumns={visibleColumns}
-            visibleRowData={visibleRowData}
-            headerRow={headerRow}
-            footerRow={footerRow}
-            gridWidth={gridWidth}
-            setCustomGridBodyProps={setCustomGridBodyProps}
-            virtualizerController={virtualizerController}
-            cellId={cellId}
-            rowIndex={rowIndex}
-            isFullScreenMode={isCellInFullScreenMode}
-          />
-        ) : null,
+      }) => (
+        <CustomCascadeGridBodyMemoized
+          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          Cell={Cell}
+          data={cellData}
+          visibleColumns={visibleColumns}
+          visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
+          gridWidth={gridWidth}
+          setCustomGridBodyProps={setCustomGridBodyProps}
+          virtualizerController={virtualizerController}
+          cellId={cellId}
+          rowIndex={rowIndex}
+          isFullScreenMode={isCellInFullScreenMode}
+        />
+      ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
 

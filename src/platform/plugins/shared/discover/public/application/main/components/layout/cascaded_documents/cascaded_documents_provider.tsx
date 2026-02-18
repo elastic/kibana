@@ -14,7 +14,7 @@ import { createContext, useContext } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type {
   CascadeGroupNodeUIInteraction,
-  DataCascadeUISnapshot,
+  DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
@@ -26,7 +26,7 @@ import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 import type { ESQLDataGroupNode } from './blocks';
 
-export type DataCascadeUiState = DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
+export type DataCascadeUiState = DataCascadeRestorableState;
 
 export type CascadedDocumentsDataGridUiStateMap = Record<
   string,
@@ -45,7 +45,7 @@ export interface CascadedDocumentsContext
   ) => DataTableRecord[] | null;
   getDataCascadeUiState: () => DataCascadeUiState | undefined;
   getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
-  setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
+  setDataCascadeUiState: (uiState: DataCascadeUiState | undefined) => void;
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;

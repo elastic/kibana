@@ -14,7 +14,7 @@ import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
 import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
-import type { DataCascadeImplRef } from '../../lib/core/api';
+import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -260,13 +260,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   allowMultipleRowToggle?: boolean;
   /**
-   * Index of the initial vertical item visible in within the scroll container. When set the list more or less starts at this item.
+   * Persisted restorable state to restore the component to a previous state on mount.
    */
-  initialAnchorItemIndex?: number;
-  /**
-   * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
-   */
-  initialRect?: { width: number; height: number };
+  initialState?: DataCascadeRestorableState;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
   cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }

@@ -66,8 +66,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   enableRowSelection = false,
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
-  initialAnchorItemIndex,
-  initialRect,
+  initialState,
   cascadeRef,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
@@ -144,7 +143,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     childController: virtualizerInstance.current?.childController,
   });
 
-  // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
+  const initialPersistedAnchors = useMemo(() => {
+    if (!initialState?.connectedChildren) return undefined;
+    const anchors: Record<string, number | null> = {};
+    for (const [cellId, child] of Object.entries(initialState.connectedChildren)) {
+      anchors[cellId] = child.scrollAnchorItemIndex;
+    }
+    return anchors;
+  }, [initialState?.connectedChildren]);
+
   virtualizerInstance.current = useCascadeVirtualizer<G>({
     rows,
     overscan,
@@ -152,8 +159,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     enableStickyGroupHeader,
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
     onStateChange: collectVirtualizerStateChanges,
-    initialRect,
-    initialAnchorItemIndex,
+    initialRect: initialState?.scrollRect,
+    initialAnchorItemIndex: initialState?.scrollAnchorItemIndex ?? undefined,
+    initialPersistedAnchors,
   });
 
   // Calculate activeStickyIndex directly from the virtualizer's current range.
@@ -182,9 +190,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           virtualRowStyle,
           isMobile,
           innerRef: virtualizerInstance.current!.measureElement,
+          activeStickyRenderSlotRef,
           // getVirtualizer will not return undefined here as it is set immediately after the first render
           getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
-          activeStickyRenderSlotRef,
           ...rowElement.props,
         }}
       />
@@ -285,8 +293,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         </EuiFlexItem>
         <EuiFlexItem grow={true} style={{ position: 'relative' }}>
           <EuiAutoSizer
-            defaultHeight={initialRect?.height}
-            defaultWidth={initialRect?.width}
+            defaultHeight={initialState?.scrollRect?.height}
+            defaultWidth={initialState?.scrollRect?.width}
             doNotBailOutOnEmptyChildren
           >
             {cascadeTreeGridRenderer}

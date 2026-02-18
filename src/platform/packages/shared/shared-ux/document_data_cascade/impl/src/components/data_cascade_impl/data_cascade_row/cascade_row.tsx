@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
-import { isCascadeGroupRowNode } from '../../../lib/utils';
+import {
+  isCascadeGroupRowNode,
+  getCascadeRowNodePath,
+  getCascadeRowNodePathValueRecord,
+  getCascadeRowLeafDataCacheKey,
+} from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
   rootRowAttribute,
@@ -55,13 +60,20 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
-  const isExpandedOnMount = useRef<boolean>(rowIsExpanded);
-
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
-  if (isExpandedOnMount.current && rowIsExpanded && !isGroupNode) {
-    getVirtualizer().childController?.markRowAsReturning(virtualRow.index);
-  }
+  const cellId = useMemo(() => {
+    if (isGroupNode) return null;
+    const nodePath = getCascadeRowNodePath(currentGroupByColumns, rowInstance);
+    const nodePathMap = getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance);
+    return getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, rowInstance.id);
+  }, [currentGroupByColumns, rowInstance, isGroupNode]);
+
+  useEffect(() => {
+    if (!rowIsExpanded && cellId) {
+      getVirtualizer().childController?.clearPersistedAnchor(cellId);
+    }
+  }, [rowIsExpanded, cellId, getVirtualizer]);
 
   const styles = useMemo(() => {
     return cascadeRowStyles(

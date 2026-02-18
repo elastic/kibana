@@ -24,17 +24,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
-import { v5 as uuidv5 } from 'uuid';
 
-/** Same namespace as in hooks/data_fetching.ts for deterministic group node ids */
-const CASCADE_NODE_ID_NAMESPACE = '5a14c15b-0999-49a6-84f5-2bad4f24c45a';
-
-/** Captured DataCascade props we assert on in tests (includes provider props like initialTableState). */
+/** Captured DataCascade props we assert on in tests. */
 const mockDataCascadeProps: Array<
-  Pick<
-    ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>,
-    'initialScrollOffset' | 'initialTableState' | 'initialRect'
-  >
+  Pick<ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>, 'initialState'>
 > = [];
 
 const mockGetUISnapshotStore = jest.fn().mockReturnValue(null);
@@ -50,11 +43,7 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
     ref: ForwardedRef<DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>>
   ) {
     mockDataCascadeProps.push({
-      initialScrollOffset: props.initialScrollOffset as number | undefined,
-      initialTableState: props.initialTableState as
-        | { expanded?: Record<string, boolean>; rowSelection?: Record<string, boolean> }
-        | undefined,
-      initialRect: props.initialRect as { width: number; height: number } | undefined,
+      initialState: props.initialState,
     });
     ReactLib.useImperativeHandle(ref, () => mockDataCascadeRefObject, []);
     return ReactLib.createElement(
@@ -211,23 +200,7 @@ describe('CascadedDocumentsLayout', () => {
       expect(screen.getByTestId('mock-data-cascade')).toBeInTheDocument();
     });
 
-    it('passes undefined initialScrollOffset to DataCascade when no persisted state', () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
-
-      render(
-        <Wrapper>
-          <CascadedDocumentsLayout {...defaultLayoutProps} />
-        </Wrapper>
-      );
-
-      expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
-      expect(
-        mockDataCascadeProps[mockDataCascadeProps.length - 1].initialScrollOffset
-      ).toBeUndefined();
-    });
-
-    it('passes initialTableState with undefined expanded and rowSelection when no persisted state', () => {
+    it('passes undefined initialState to DataCascade when no persisted state', () => {
       const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
       const { Wrapper } = createWrapper({ getDataCascadeUiState });
 
@@ -239,39 +212,18 @@ describe('CascadedDocumentsLayout', () => {
 
       expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
       const lastProps = mockDataCascadeProps[mockDataCascadeProps.length - 1];
-      expect(lastProps.initialTableState).toEqual({
-        expanded: undefined,
-        rowSelection: undefined,
-      });
-    });
-
-    it('passes undefined initialRect to DataCascade when no persisted state', () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
-
-      render(
-        <Wrapper>
-          <CascadedDocumentsLayout {...defaultLayoutProps} />
-        </Wrapper>
-      );
-
-      expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
-      expect(mockDataCascadeProps[mockDataCascadeProps.length - 1].initialRect).toBeUndefined();
+      expect(lastProps.initialState).toBeUndefined();
     });
   });
 
   describe('when persistedCascadeUiState exists', () => {
-    it('passes persisted scroll offset and rect to DataCascade', () => {
+    it('passes persisted restorable state to DataCascade as initialState', () => {
       const persistedState = {
-        scrollOffset: 100,
         scrollRect: { width: 800, height: 600 },
-        range: { startIndex: 0, endIndex: 10 },
-        isScrolling: false,
-        activeStickyIndex: null,
-        totalRowCount: 10,
-        totalSize: 500,
+        scrollAnchorItemIndex: 5,
         expanded: { 'row-1': true },
         rowSelection: {},
+        connectedChildren: {},
       };
       const getDataCascadeUiState = jest.fn().mockReturnValue(persistedState);
       const { Wrapper } = createWrapper({ getDataCascadeUiState });
@@ -284,40 +236,14 @@ describe('CascadedDocumentsLayout', () => {
 
       expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
       const lastProps = mockDataCascadeProps[mockDataCascadeProps.length - 1];
-      expect(lastProps.initialScrollOffset).toBe(100);
-      expect(lastProps.initialRect).toEqual({ width: 800, height: 600 });
-      expect(lastProps.initialTableState).toEqual(expect.objectContaining({ rowSelection: {} }));
-      // expanded is filtered to visible rows only; 'row-1' is not in cascadeGroupData so it becomes {}
-      expect(lastProps.initialTableState?.expanded).toEqual({});
-    });
-
-    it('when range startIndex and endIndex are equal (one row fills viewport), expanded row is still restored', () => {
-      // When a single row (e.g. expanded) takes up the entire viewport, the virtualizer reports range { startIndex: N, endIndex: N }
-      const firstGroupId = uuidv5('category-A', CASCADE_NODE_ID_NAMESPACE);
-      const persistedState = {
-        scrollOffset: 0,
-        scrollRect: { width: 800, height: 600 },
-        range: { startIndex: 1, endIndex: 1 },
-        isScrolling: false,
-        activeStickyIndex: null,
-        totalRowCount: 2,
-        totalSize: 100,
-        expanded: { [firstGroupId]: true },
-        rowSelection: {},
-      };
-
-      const getDataCascadeUiState = jest.fn().mockReturnValue(persistedState);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
-
-      render(
-        <Wrapper>
-          <CascadedDocumentsLayout {...defaultLayoutProps} />
-        </Wrapper>
+      expect(lastProps.initialState).toEqual(
+        expect.objectContaining({
+          scrollRect: { width: 800, height: 600 },
+          scrollAnchorItemIndex: 5,
+          expanded: { 'row-1': true },
+          rowSelection: {},
+        })
       );
-
-      expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
-      const lastProps = mockDataCascadeProps[mockDataCascadeProps.length - 1];
-      expect(lastProps.initialTableState?.expanded).toEqual({ [firstGroupId]: true });
     });
   });
 });

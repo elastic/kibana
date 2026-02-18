@@ -53,7 +53,7 @@ export interface DataCascadeUISnapshot<
    * State of all child virtualizers connected via the controller.
    * Empty when no children are connected.
    */
-  connectedChildren: ReadonlyMap<string, ConnectedChildState>;
+  connectedChildren: Readonly<Record<string, ConnectedChildState>>;
 }
 
 /**
@@ -96,8 +96,49 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   expanded: {},
   rowSelection: {},
   scrollAnchorItemIndex: null,
-  connectedChildren: new Map(),
+  connectedChildren: {},
 });
+
+/**
+ * Serializable subset of {@link DataCascadeUISnapshot} that a consumer can
+ * persist and pass back as `initialState` to restore the component.
+ */
+export interface DataCascadeRestorableState {
+  expanded?: Record<string, boolean>;
+  rowSelection?: Record<string, boolean>;
+  scrollRect?: { width: number; height: number };
+  scrollAnchorItemIndex?: number | null;
+  connectedChildren?: Record<
+    string,
+    Pick<ConnectedChildState, 'cellId' | 'scrollAnchorItemIndex'> & { isConnected: boolean }
+  >;
+}
+
+/**
+ * Derives a {@link DataCascadeRestorableState} from a live snapshot,
+ * keeping only the fields meaningful for restoration.
+ */
+export const toRestorableState = <G extends GroupNode, L extends LeafNode>(
+  snapshot: DataCascadeUISnapshot<G, L>
+): DataCascadeRestorableState => {
+  const connectedChildren: DataCascadeRestorableState['connectedChildren'] = {};
+
+  for (const [key, child] of Object.entries(snapshot.connectedChildren)) {
+    connectedChildren[key] = {
+      cellId: child.cellId,
+      scrollAnchorItemIndex: child.scrollAnchorItemIndex,
+      isConnected: !child.isDetached,
+    };
+  }
+
+  return {
+    expanded: typeof snapshot.expanded === 'object' ? snapshot.expanded : undefined,
+    rowSelection: snapshot.rowSelection,
+    scrollRect: snapshot.scrollRect,
+    scrollAnchorItemIndex: snapshot.scrollAnchorItemIndex,
+    connectedChildren,
+  };
+};
 
 /**
  * Definition of the public API ref for the data cascade component.
@@ -202,11 +243,13 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
 
   useEffect(() => {
     const childController = options.childController;
+
     if (!childController) return;
+
     return childController.subscribe(() => {
       storeRef.current.snapshot = {
         ...storeRef.current.snapshot,
-        connectedChildren: new Map(childController.getConnectedChildren()),
+        connectedChildren: Object.fromEntries(childController.getConnectedChildren()),
       };
       storeRef.current.listeners.forEach((listener) => listener());
     });
