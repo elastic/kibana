@@ -82,10 +82,6 @@ async function importMcpTools(
     logger,
   });
 
-  if (mcpTools === undefined) {
-    throw new Error(`No imported connector tools found for ${name}`);
-  }
-
   const dataSourceTools = mcpTools.map((tool) => ({
     name: tool.name,
     description: tool.description + ' ' + tools.find((t) => t.name === tool.name)!.description,
