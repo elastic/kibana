@@ -10,22 +10,23 @@ import { act, render } from '@testing-library/react';
 import {
   ABOUT_SECTION_CONTENT_TEST_ID,
   ABOUT_SECTION_HEADER_TEST_ID,
-  ALERT_DESCRIPTION_TITLE_TEST_ID,
-  EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_CATEGORY_DESCRIPTION_TEST_ID,
-  REASON_TITLE_TEST_ID,
-  MITRE_ATTACK_TITLE_TEST_ID,
+  EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_RENDERER_TEST_ID,
+  MITRE_ATTACK_TITLE_TEST_ID,
+  REASON_TITLE_TEST_ID,
   WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../../shared/hooks/use_expand_section');
+jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
+  useExpandSection: jest.fn(),
+}));
 
 const mockGetFieldsData: (field: string) => string = (field: string) => {
   switch (field) {
@@ -51,17 +52,23 @@ const renderAboutSection = (getFieldsData = mockGetFieldsData) => {
 };
 
 describe('<AboutSection />', () => {
+  const mockUseExpandSection = jest.mocked(useExpandSection);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExpandSection.mockReturnValue(true);
+  });
+
   it('should render about component', async () => {
     const { getByTestId } = renderAboutSection();
     await act(async () => {
-      expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toHaveTextContent('About');
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
     });
   });
 
   it('should render the component collapsed if value is false in local storage', async () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseExpandSection.mockReturnValue(false);
 
     const { getByTestId } = renderAboutSection();
     await act(async () => {
@@ -70,27 +77,22 @@ describe('<AboutSection />', () => {
   });
 
   it('should render the component expanded if value is true in local storage', async () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
     const { getByTestId } = renderAboutSection();
     await act(async () => {
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeVisible();
     });
   });
 
-  it('should render about section for signal document', async () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-
-    const { getByTestId } = renderAboutSection();
+  it('should render about section for document', async () => {
+    const { getByTestId, getByText } = renderAboutSection();
     await act(async () => {
-      expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByText('Document description')).toBeInTheDocument();
       expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
     });
   });
 
   it('should render event kind description if event.kind is not event', async () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
     const _mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
@@ -102,9 +104,9 @@ describe('<AboutSection />', () => {
       }
     };
 
-    const { getByTestId, queryByTestId } = renderAboutSection(_mockGetFieldsData);
+    const { getByTestId, queryByTestId, queryByText } = renderAboutSection(_mockGetFieldsData);
     await act(async () => {
-      expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByText('Rule description')).not.toBeInTheDocument();
       expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();
@@ -120,7 +122,6 @@ describe('<AboutSection />', () => {
   });
 
   it('should render event category description if event.kind is event', async () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
     const _mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
@@ -132,9 +133,9 @@ describe('<AboutSection />', () => {
       }
     };
 
-    const { getByTestId, queryByTestId } = renderAboutSection(_mockGetFieldsData);
+    const { getByTestId, queryByTestId, queryByText } = renderAboutSection(_mockGetFieldsData);
     await act(async () => {
-      expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByText('Rule description')).not.toBeInTheDocument();
       expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();

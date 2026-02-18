@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
-import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
