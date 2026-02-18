@@ -40,7 +40,7 @@ import {
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
+import { ConfirmDeployAgentPolicyModal, IncompatibleAgentVersionCallout } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
@@ -71,6 +71,7 @@ import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
+import { useHasIncompatibleAgentVersion } from '../../../hooks/use_has_incompatible_agent_version';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -211,6 +212,17 @@ export const EditPackagePolicyForm = memo<{
     () => agentPoliciesToRemove.map((policy) => policy.name),
     [agentPoliciesToRemove]
   );
+
+  const selectedExistingPolicies = useMemo(() => {
+    return existingAgentPolicies.filter((existingPolicy) =>
+      agentPolicies.find((policy) => policy.id === existingPolicy.id)
+    );
+  }, [agentPolicies, existingAgentPolicies]);
+  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+    packageInfo,
+    selectedExistingPolicies
+  );
+  console.log('TEST', selectedExistingPolicies);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
@@ -592,6 +604,12 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {hasIncompatibleAgentVersion !== 'NONE' && (
+              <>
+                <IncompatibleAgentVersionCallout incompatibility={hasIncompatibleAgentVersion} />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

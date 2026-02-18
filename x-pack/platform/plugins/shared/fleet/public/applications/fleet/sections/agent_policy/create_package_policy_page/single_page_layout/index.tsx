@@ -60,7 +60,11 @@ import {
   Loading,
 } from '../../../../components';
 
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
+import {
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+  IncompatibleAgentVersionCallout,
+} from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
@@ -680,33 +684,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         </>
       )}
 
-      {(hasIncompatibleAgentVersion === 'SOME' || hasIncompatibleAgentVersion === 'ALL') && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.incompatibleAgentVersionTitle"
-                defaultMessage="Incompatible agent version"
-              />
-            }
-            color="warning"
-          >
-            {hasIncompatibleAgentVersion === 'SOME' ? (
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
-                defaultMessage="The selected agent policies have some agent in a version non compatible with the integration."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
-                defaultMessage="The selected agent policies have no agents in a version compatible with the integration."
-              />
-            )}
-          </EuiCallOut>
-
-          <EuiSpacer size="m" />
-        </>
+      {hasIncompatibleAgentVersion !== 'NONE' && (
+        <IncompatibleAgentVersionCallout incompatibility={hasIncompatibleAgentVersion} />
       )}
 
       {showSecretsDisabledCallout && (

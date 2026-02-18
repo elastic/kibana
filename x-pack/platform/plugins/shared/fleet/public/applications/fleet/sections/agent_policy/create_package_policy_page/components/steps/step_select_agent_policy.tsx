@@ -24,7 +24,7 @@ import { Error } from '../../../../../components';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
-
+import { useHasIncompatibleAgentVersion } from '../../../../../hooks/use_has_incompatible_agent_version';
 import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
@@ -168,6 +168,16 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     []
   );
 
+  const newlySelectedAgentPolicies = selectedAgentPolicies.filter(
+    (policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id)
+  );
+
+  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+    packageInfo,
+    newlySelectedAgentPolicies
+  );
+  const someNewAgentPoliciesHaveAllAgentIncompatible = hasIncompatibleAgentVersion === 'ALL';
+
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
     return (
@@ -185,11 +195,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const someNewAgentPoliciesHaveLimitedPackage =
     !packageInfo ||
-    selectedAgentPolicies
-      .filter((policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id))
-      .some((selectedAgentPolicy) =>
-        doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
-      );
+    newlySelectedAgentPolicies.some((selectedAgentPolicy) =>
+      doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
+    );
 
   return (
     <>
@@ -243,12 +251,20 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   />
                 ) : null
               }
-              isInvalid={Boolean(someNewAgentPoliciesHaveLimitedPackage)}
+              isInvalid={Boolean(
+                someNewAgentPoliciesHaveLimitedPackage ||
+                  someNewAgentPoliciesHaveAllAgentIncompatible
+              )}
               error={
                 someNewAgentPoliciesHaveLimitedPackage ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError"
                     defaultMessage="This integration can only be added once per agent policy."
+                  />
+                ) : someNewAgentPoliciesHaveAllAgentIncompatible ? (
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError"
+                    defaultMessage="The selected agent policies have all agents in a version non compatible with the integration."
                   />
                 ) : null
               }
