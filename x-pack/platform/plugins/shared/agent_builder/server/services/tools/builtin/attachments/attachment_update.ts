@@ -34,7 +34,7 @@ export const createAttachmentUpdateTool = ({
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, data, description }) => {
-    const existing = attachmentManager.get(attachmentId);
+    const existing = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!existing) {
       return {

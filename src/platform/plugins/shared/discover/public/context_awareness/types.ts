@@ -21,7 +21,6 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type {
@@ -32,17 +31,10 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type {
-  UpdateCascadeGroupingActionPayload,
-  UpdateESQLQueryActionPayload,
-} from '../application/main/state_management/redux/types';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
 
 export type UpdateESQLQueryFn = (
   queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
-) => void;
-
-export type UpdateCascadeGroupingFn = (
-  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
 ) => void;
 
 /**
@@ -356,11 +348,6 @@ export interface RowControlsExtensionParams {
    */
   query?: DiscoverAppState['query'];
 }
-
-/**
- * The Discover cell actions trigger
- */
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 /**
  * Metadata passed to Discover cell actions

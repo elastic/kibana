@@ -11,7 +11,6 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
-import type { JsonModelSchema } from '../schema';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
@@ -27,6 +26,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
+import type { JsonModelSchema } from '../schema/common/json_model_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -130,12 +130,19 @@ function generateStepSchemaForConnector(
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
+  const connectorIdSchema: Record<string, z.ZodType> = {};
+  // Add connector-id schema if hasConnectorId has a value
+  if (connector.hasConnectorId) {
+    connectorIdSchema['connector-id'] =
+      connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
+  }
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
+    ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
   });
@@ -158,13 +165,11 @@ function generateAliasSchemas(
     const connector = connectors.find((c) => c.type === newType);
     if (connector) {
       // Create a schema with the old type name but same params/output
+      const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
       aliasSchemas.push(
-        BaseConnectorStepSchema.extend({
+        newSchema.extend({
           // Mark as deprecated in description so it's clear this is a legacy alias
           type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
-          'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-          with: connector.paramsSchema,
-          'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
         })
       );
     }

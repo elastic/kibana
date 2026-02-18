@@ -9,6 +9,7 @@ import moment from 'moment';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter } from '../../utils/dsl_filters';
+import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { AnchorLog } from './types';
 import { getTotalHits } from '../../utils/get_total_hits';
 
@@ -56,14 +57,7 @@ export async function getCorrelatedLogsForAnchor({
   const totalHits = getTotalHits(res);
 
   return {
-    logs: res.hits.hits.map((hit) => {
-      return Object.fromEntries(
-        Object.entries(hit.fields ?? {}).map(([key, value]) => [
-          key,
-          Array.isArray(value) && value.length === 1 ? value[0] : value,
-        ])
-      );
-    }),
+    logs: res.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
     isTruncated: totalHits > maxLogsPerSequence,
   };
 }

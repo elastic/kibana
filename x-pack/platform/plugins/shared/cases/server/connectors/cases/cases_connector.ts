@@ -11,7 +11,6 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
-import { SAVED_OBJECT_TYPES } from '../../../common';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
 import { ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
@@ -26,6 +25,7 @@ import {
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
 import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
+import { getSavedObjectsTypes } from '../../../common';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -109,7 +109,7 @@ export class CasesConnector extends SubActionConnector<
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
-        [...SAVED_OBJECT_TYPES, CASE_RULES_SAVED_OBJECT]
+        [...getSavedObjectsTypes(), CASE_RULES_SAVED_OBJECT]
       );
 
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);

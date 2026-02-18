@@ -27,7 +27,10 @@ import {
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -53,6 +56,7 @@ import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
+  getStepsData,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -84,6 +88,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -110,7 +115,11 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC = () => {
+const CreateRulePageComponent: React.FC<{
+  rule?: RuleResponse;
+  sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
+  backComponent?: React.ReactNode;
+}> = ({ rule, sendToAgentChat, backComponent }) => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -131,6 +140,8 @@ const CreateRulePageComponent: React.FC = () => {
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
   // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
+
+  const isAICreatedRuleValidated = useRef<boolean>(false);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -158,6 +169,12 @@ const CreateRulePageComponent: React.FC = () => {
     [kibanaAbsoluteUrl]
   );
 
+  const stepsData = rule
+    ? getStepsData({
+        rule,
+      })
+    : undefined;
+
   const {
     defineStepForm,
     defineStepData,
@@ -169,10 +186,10 @@ const CreateRulePageComponent: React.FC = () => {
     actionsStepData,
     handleNewConnectorCreated,
   } = useRuleForms({
-    defineStepDefault,
-    aboutStepDefault: stepAboutDefaultValue,
-    scheduleStepDefault: defaultSchedule,
-    actionsStepDefault,
+    defineStepDefault: stepsData?.defineRuleData || defineStepDefault,
+    aboutStepDefault: stepsData?.aboutRuleData || stepAboutDefaultValue,
+    scheduleStepDefault: stepsData?.scheduleRuleData || defaultSchedule,
+    actionsStepDefault: stepsData?.ruleActionsData || actionsStepDefault,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -214,15 +231,15 @@ const CreateRulePageComponent: React.FC = () => {
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   useEffect(() => {
-    if (prevRuleType !== ruleType) {
+    if (prevRuleType && prevRuleType !== ruleType) {
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
       scheduleStepForm.updateFieldValues(
         isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
       );
-      setPrevRuleType(ruleType);
     }
+    setPrevRuleType(ruleType);
   }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
@@ -355,6 +372,15 @@ const CreateRulePageComponent: React.FC = () => {
 
     return { valid, warnings };
   }, [validateStep]);
+
+  useEffect(() => {
+    // validate Define step when rule is loaded after AI suggestion.
+    // It's required to make sure we highlight possible errors in query that were not caught during AI generation.
+    if (rule && sendToAgentChat && isAICreatedRuleValidated.current === false) {
+      validateStep(RuleStep.defineRule);
+      isAICreatedRuleValidated.current = true;
+    }
+  }, [rule, sendToAgentChat, validateStep]);
 
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
@@ -791,6 +817,28 @@ const CreateRulePageComponent: React.FC = () => {
     [actionsStepForm.isValid, activeStep, editStep]
   );
 
+  const addToChatButton = useMemo(
+    () =>
+      sendToAgentChat ? (
+        <AddRuleAttachmentToChatButton
+          defineStepData={defineStepData}
+          aboutStepData={aboutStepData}
+          scheduleStepData={scheduleStepData}
+          actionsStepData={actionsStepData}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          size="s"
+        />
+      ) : undefined,
+    [
+      sendToAgentChat,
+      defineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+    ]
+  );
+
   const onToggleCollapsedMemo = useCallback(
     () => setIsRulePreviewVisible((isVisible) => !isVisible),
     []
@@ -830,12 +878,14 @@ const CreateRulePageComponent: React.FC = () => {
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <CustomHeaderPageMemo
-                        backOptions={backOptions}
+                        backOptions={backComponent ? undefined : backOptions}
+                        backComponent={backComponent}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
+                        addToChatButton={addToChatButton}
                       />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion

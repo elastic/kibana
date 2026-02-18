@@ -26,7 +26,11 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
+<<<<<<< HEAD
     handlerHash: '2e8977d2cde707713161dcee117fda71bf1dde0e9fcc35d325a2256606062ad6',
+=======
+    handlerHash: 'affaf17569853b40868f907f0d6ea4f2a13f55c1f264e29ae59244b45596af28',
+>>>>>>> a4ee0242f813558a3bf9b157ad293516d98784da
   },
   {
     id: 'ai.classify',
@@ -34,7 +38,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
   },
   {
     id: 'ai.summarize',

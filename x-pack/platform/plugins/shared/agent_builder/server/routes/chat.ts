@@ -24,7 +24,7 @@ import {
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { ChatService } from '../services/chat';
+import type { AgentExecutionService } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -36,7 +36,6 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
-  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -165,8 +164,29 @@ export function registerChatRoutes({
         }
       )
     ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
+    _execution_mode: schema.maybe(
+      schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
+        meta: {
+          description:
+            '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        },
+      })
+    ),
   });
 
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
   const validateConfigurationOverrides = async ({
     payload,
     request,
@@ -188,16 +208,16 @@ export function registerChatRoutes({
     }
   };
 
-  const callConverse = ({
+  const executeAgent = async ({
     payload,
     request,
-    chatService,
     abortSignal,
+    executionService,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    chatService: ChatService;
     abortSignal: AbortSignal;
+    executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
@@ -209,23 +229,34 @@ export function registerChatRoutes({
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
+      action,
+      _execution_mode: executionMode,
     } = payload;
 
-    return chatService.converse({
-      agentId,
-      connectorId,
-      conversationId,
-      capabilities,
-      browserApiTools,
-      configurationOverrides,
-      abortSignal,
-      nextInput: {
-        message: input,
-        prompts,
-        attachments,
-      },
+    const useTaskManager =
+      executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
+
+    const { events$ } = await executionService.executeAgent({
       request,
+      abortSignal,
+      useTaskManager,
+      params: {
+        agentId,
+        connectorId,
+        conversationId,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        action,
+        nextInput: {
+          message: input,
+          prompts,
+          attachments,
+        },
+      },
     });
+
+    return events$;
   };
 
   router.versioned
@@ -237,7 +268,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -259,21 +290,22 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        await validateConfigurationOverrides({ payload, request });
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
-          chatService,
           request,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -331,21 +363,22 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService } = getInternalServices();
+        const { execution: executionService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
+
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
         });
 
-        await validateConfigurationOverrides({ payload, request });
-
-        const chatEvents$ = callConverse({
+        const chatEvents$ = await executeAgent({
           payload,
           request,
-          chatService,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         return response.ok({

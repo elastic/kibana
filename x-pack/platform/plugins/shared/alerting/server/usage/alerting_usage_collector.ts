@@ -12,48 +12,186 @@ import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-  DYNAMIC_KEY: { type: 'long' },
+  DYNAMIC_KEY: { type: 'long', _meta: { description: 'Breakdown for other rule types.' } },
   // Known rule types (searching the use of the rules API `registerType`:
   // Built-in
-  '__index-threshold': { type: 'long' },
-  '__es-query': { type: 'long' },
-  transform_health: { type: 'long' },
+  '__index-threshold': {
+    type: 'long',
+    _meta: { description: 'Breakdown for index-threshold rule type.' },
+  },
+  '__es-query': { type: 'long', _meta: { description: 'Breakdown for ES query rule type.' } },
+  transform_health: {
+    type: 'long',
+    _meta: { description: 'Breakdown for transform health rule type.' },
+  },
   // APM
-  apm__error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  apm__transaction_error_rate: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  apm__transaction_duration: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  apm__transaction_duration_anomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  apm__error_rate: {
+    type: 'long',
+    _meta: { description: 'Breakdown for APM error rate type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  apm__transaction_error_rate: {
+    type: 'long',
+    _meta: { description: 'Breakdown for APM transaction error rate rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  apm__transaction_duration: {
+    type: 'long',
+    _meta: { description: 'Breakdown for APM transaction duration rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  apm__transaction_duration_anomaly: {
+    type: 'long',
+    _meta: { description: 'Breakdown for APM transaction duration anomaly rule type.' },
+  },
+  apm__anomaly: { type: 'long', _meta: { description: 'Breakdown for APM anomaly rule type.' } }, // eslint-disable-line @typescript-eslint/naming-convention
   // Infra
-  metrics__alert__threshold: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  metrics__alert__inventory__threshold: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  logs__alert__document__count: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  metrics__alert__threshold: {
+    type: 'long',
+    _meta: { description: 'Breakdown for metrics threshold rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  metrics__alert__inventory__threshold: {
+    type: 'long',
+    _meta: { description: 'Breakdown for inventory threshold rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  logs__alert__document__count: {
+    type: 'long',
+    _meta: { description: 'Breakdown for log document count rule type.' },
+  },
   // Monitoring
-  monitoring_alert_cluster_health: { type: 'long' },
-  monitoring_alert_cpu_usage: { type: 'long' },
-  monitoring_alert_disk_usage: { type: 'long' },
-  monitoring_alert_elasticsearch_version_mismatch: { type: 'long' },
-  monitoring_alert_kibana_version_mismatch: { type: 'long' },
-  monitoring_alert_license_expiration: { type: 'long' },
-  monitoring_alert_logstash_version_mismatch: { type: 'long' },
-  monitoring_alert_nodes_changed: { type: 'long' },
+  monitoring_alert_cluster_health: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring cluster health rule type.' },
+  },
+  monitoring_alert_cpu_usage: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring CPU usage rule type.' },
+  },
+  monitoring_alert_disk_usage: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring disk usage rule type.' },
+  },
+  monitoring_alert_elasticsearch_version_mismatch: {
+    type: 'long',
+    _meta: {
+      description: 'Breakdown for monitoring Elasticsearch version mismatch rule type.',
+    },
+  },
+  monitoring_alert_kibana_version_mismatch: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring Kibana version mismatch rule type.' },
+  },
+  monitoring_alert_license_expiration: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring license expiration rule type.' },
+  },
+  monitoring_alert_logstash_version_mismatch: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Logstash version mismatch rule type.' },
+  },
+  monitoring_alert_nodes_changed: {
+    type: 'long',
+    _meta: { description: 'Breakdown for monitoring nodes changed rule type.' },
+  },
+  // Observability
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  observability__rules__custom_threshold: {
+    type: 'long',
+    _meta: { description: 'Breakdown for custom threshold  rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__synthetics__alerts__monitorStatus: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Synthetics monitor status rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__synthetics__alerts__tls: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Synthetics TLS rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  slo__rules__burnRate: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SLO burn rate rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  streams__rules__esql: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Streams ES|QL rule type.' },
+  },
   // Security Solution
-  siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__eqlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__indicatorRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__mlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__queryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__savedQueryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  siem__thresholdRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__signals: { type: 'long', _meta: { description: 'Breakdown for SIEM signals rule type.' } }, // eslint-disable-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__notifications: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM notifications rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__eqlRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM EQL rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__indicatorRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM indicator rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__mlRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM ML rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__queryRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM query rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__savedQueryRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM saved query rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__thresholdRule: {
+    type: 'long',
+    _meta: { description: 'Breakdown for SIEM threshold rule type.' },
+  },
   // Uptime
-  xpack__uptime__alerts__monitorStatus: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  xpack__uptime__alerts__tls: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  xpack__uptime__alerts__durationAnomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__uptime__alerts__monitorStatus: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Uptime monitor status rule type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__uptime__alerts__tls: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Uptime TLS rules type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__uptime__alerts__durationAnomaly: {
+    type: 'long',
+    _meta: { description: 'Breakdown for Uptime duration anomaly rules type.' },
+  },
   // Maps
-  '__geo-containment': { type: 'long' },
+  '__geo-containment': {
+    type: 'long',
+    _meta: { description: 'Breakdown for geo-containment rule type.' },
+  },
   // ML
-  xpack__ml__anomaly_detection_alert: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
-  xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__ml__anomaly_detection_alert: {
+    type: 'long',
+    _meta: { description: 'Breakdown for ML anomaly detection alert rules type.' },
+  },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  xpack__ml__anomaly_detection_jobs_health: {
+    type: 'long',
+    _meta: { description: 'Breakdown for ML anomaly detection jobs health rules type.' },
+  },
 };
 
 export const NUM_ALERTING_RULE_TYPES = Object.keys(byTypeSchema).length;
@@ -203,10 +341,13 @@ export function createAlertingUsageCollector(
             on_throttle_interval: 0,
           },
           count_rules_with_tags: 0,
+          count_rules_with_elasticagent_tag: 0,
+          count_rules_with_elasticagent_tag_by_type: {},
           count_rules_snoozed: 0,
           count_rules_muted: 0,
           count_rules_with_linked_dashboards: 0,
           count_rules_with_investigation_guide: 0,
+          count_rules_with_api_key_created_by_user: 0,
           count_mw_total: 0,
           count_mw_with_repeat_toggle_on: 0,
           count_mw_with_filter_alert_toggle_on: 0,
@@ -301,11 +442,25 @@ export function createAlertingUsageCollector(
       count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
       count_rules_by_execution_status: byStatusSchema,
       count_rules_with_tags: { type: 'long' },
+      count_rules_with_elasticagent_tag: {
+        type: 'long',
+        _meta: {
+          description: 'Count of rules with Elastic Agent tag',
+        },
+      },
+      count_rules_with_elasticagent_tag_by_type: byTypeSchema,
       count_rules_by_notify_when: byNotifyWhenSchema,
       count_rules_snoozed: { type: 'long' },
       count_rules_muted: { type: 'long' },
       count_rules_with_linked_dashboards: { type: 'long' },
       count_rules_with_investigation_guide: { type: 'long' },
+      count_rules_with_api_key_created_by_user: {
+        type: 'long',
+        _meta: {
+          description:
+            'The total number of rules with API keys that are manually provided by the user, not created by the alerting framework.',
+        },
+      },
       count_mw_total: { type: 'long' },
       count_mw_with_repeat_toggle_on: { type: 'long' },
       count_mw_with_filter_alert_toggle_on: { type: 'long' },
