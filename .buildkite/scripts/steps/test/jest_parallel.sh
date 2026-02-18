@@ -15,7 +15,7 @@ configs=""
 # NOTE: JEST_MAX_PARALLEL default now depends on TEST_TYPE (unit=3, integration=1).
 # It can still be overridden by exporting JEST_MAX_PARALLEL.
 JEST_MAX_PARALLEL="${JEST_MAX_PARALLEL:-3}"
-JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-8192}"
+JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-4096}"
 
 if [[ "$1" == 'jest.config.js' ]]; then
   # unit tests
