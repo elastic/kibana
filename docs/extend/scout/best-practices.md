@@ -19,6 +19,7 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 | How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
 | Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
 | Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
+| Where should **shared values** live?     | [Use constants for shared test values](#use-constants-for-shared-test-values)                                          |
 | What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
 | How do I know if my test is **flaky**?   | [Use the Flaky Test Runner to catch flaky tests early](#use-the-flaky-test-runner-to-catch-flaky-tests-early)          |
 
@@ -98,6 +99,30 @@ test.afterEach(async ({ esClient, log }) => {
     log.debug(`Index cleanup failed: ${e.message}`);
   }
 });
+```
+
+### Use constants for shared test values [use-constants-for-shared-test-values]
+
+If a value is reused across suites (archive paths, fixed time ranges, endpoints, common headers), extract it into a shared `constants.ts` file. This reduces duplication and typos, and makes updates safer.
+
+```ts
+// test/scout/ui/constants.ts
+export const LENS_BASIC_TIME_RANGE = {
+  from: 'Sep 22, 2015 @ 00:00:00.000',
+  to: 'Sep 23, 2015 @ 00:00:00.000',
+};
+
+export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+
+export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
+
+// test/scout/api/constants.ts
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+} as const;
 ```
 
 ### Test with minimal permissions [test-with-minimal-permissions-avoid-admin-when-possible]
