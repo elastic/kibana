@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,9 +24,8 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useQueryClient } from '@kbn/react-query';
-import React, { useCallback, useMemo, useState } from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import React, { useState, useCallback, useMemo } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
@@ -55,6 +55,8 @@ import {
   BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
+  DELETE_QUERY_ERROR_TOAST_TITLE,
+  DETAILS_BUTTON_ARIA_LABEL,
   IMPACT_COLUMN,
   LAST_OCCURRED_COLUMN,
   NO_ITEMS_MESSAGE,
@@ -71,6 +73,7 @@ import {
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   PROMOTE_QUERY_ACTION_DESCRIPTION,
   PROMOTE_QUERY_ACTION_TITLE,
+  SAVE_QUERY_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
   TABLE_CAPTION,
@@ -82,6 +85,8 @@ import {
   getPromoteAllSuccessToast,
 } from './translations';
 import { PromoteAction } from './promote_action';
+import { QueryDetailsFlyout } from './query_details_flyout';
+import { formatLastOccurredAt } from './utils';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
@@ -104,6 +109,7 @@ export function QueriesTable() {
     size: number;
   }>({ ...DEFAULT_PAGINATION });
 
+  const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -121,23 +127,71 @@ export function QueriesTable() {
   } = useFetchStreams();
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
-  const { promoteAll } = useQueriesApi();
+  const { promoteAll, upsertQuery, removeQuery } = useQueriesApi();
 
-  const [{ loading: isPromoting }, onPromoteAll] = useAsyncFn(async () => {
-    try {
-      const { promoted } = await promoteAll();
-      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
-      await Promise.all([
+  const invalidateQueriesData = useCallback(
+    async () =>
+      Promise.all([
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
-      ]);
-    } catch (error) {
+      ]),
+    [queryClient]
+  );
+
+  const promoteAllMutation = useMutation<{ promoted: number }, Error>({
+    mutationFn: promoteAll,
+    onSuccess: async ({ promoted }) => {
+      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
+      await invalidateQueriesData();
+    },
+    onError: (error) => {
       toasts.addError(error, {
         title: PROMOTE_ALL_ERROR_TOAST_TITLE,
       });
-    }
-  }, [promoteAll, queryClient, toasts]);
+    },
+  });
+
+  const saveQueryMutation = useMutation<
+    void,
+    Error,
+    { updatedQuery: SignificantEventQueryRow['query']; streamName: string }
+  >({
+    mutationFn: async ({ updatedQuery, streamName }) => {
+      await upsertQuery({ query: updatedQuery, streamName });
+    },
+    onSuccess: async (_, variables) => {
+      await invalidateQueriesData();
+      setSelectedQuery((currentSelectedQuery) =>
+        currentSelectedQuery !== null
+          ? {
+              ...currentSelectedQuery,
+              query: variables.updatedQuery,
+            }
+          : currentSelectedQuery
+      );
+    },
+    onError: (error) => {
+      toasts.addError(error, {
+        title: SAVE_QUERY_ERROR_TOAST_TITLE,
+      });
+    },
+  });
+
+  const deleteQueryMutation = useMutation<void, Error, { queryId: string; streamName: string }>({
+    mutationFn: async ({ queryId, streamName }) => {
+      await removeQuery({ queryId, streamName });
+    },
+    onSuccess: async () => {
+      await invalidateQueriesData();
+      setSelectedQuery(null);
+    },
+    onError: (error) => {
+      toasts.addError(error, {
+        title: DELETE_QUERY_ERROR_TOAST_TITLE,
+      });
+    },
+  });
 
   const onTableChange = useCallback(
     ({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
@@ -158,6 +212,19 @@ export function QueriesTable() {
 
     return [
       {
+        field: 'details',
+        name: '',
+        width: '40px',
+        render: (_: unknown, item: SignificantEventQueryRow) => (
+          <EuiButtonIcon
+            data-test-subj="queriesDiscoveryDetailsButton"
+            iconType="expand"
+            aria-label={DETAILS_BUTTON_ARIA_LABEL}
+            onClick={() => setSelectedQuery(item)}
+          />
+        ),
+      },
+      {
         field: 'query.title',
         name: TITLE_COLUMN,
         render: (_: unknown, item: SignificantEventQueryRow) => (
@@ -175,23 +242,7 @@ export function QueriesTable() {
         field: 'occurrences',
         name: LAST_OCCURRED_COLUMN,
         render: (_: unknown, item: SignificantEventQueryRow) => {
-          const lastOccurrence = item.occurrences.findLast((occurrence) => occurrence.y !== 0);
-          if (!lastOccurrence) {
-            return '--';
-          }
-          const date = new Date(lastOccurrence.x);
-          const formattedDate = date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          });
-          const formattedTime = date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-          });
-          return <EuiText size="s">{`${formattedDate} @ ${formattedTime}`}</EuiText>;
+          return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
         },
       },
       {
@@ -308,8 +359,8 @@ export function QueriesTable() {
             <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
             <EuiButton
               fill
-              onClick={onPromoteAll}
-              isLoading={isPromoting}
+              onClick={() => promoteAllMutation.mutate()}
+              isLoading={promoteAllMutation.isLoading}
               data-test-subj="queriesPromoteAllButton"
             >
               {PROMOTE_ALL_BUTTON}
@@ -392,6 +443,20 @@ export function QueriesTable() {
           onChange={onTableChange}
         />
       </EuiFlexItem>
+      {selectedQuery && (
+        <QueryDetailsFlyout
+          item={selectedQuery}
+          onClose={() => setSelectedQuery(null)}
+          onSave={(updatedQuery, streamName) =>
+            saveQueryMutation.mutateAsync({ updatedQuery, streamName })
+          }
+          onDelete={(queryId, streamName) =>
+            deleteQueryMutation.mutateAsync({ queryId, streamName })
+          }
+          isSaving={saveQueryMutation.isLoading}
+          isDeleting={deleteQueryMutation.isLoading}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
