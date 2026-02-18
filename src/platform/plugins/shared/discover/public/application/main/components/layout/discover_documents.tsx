@@ -497,6 +497,9 @@ function DiscoverDocumentsComponent({
   const latestDataCascadeUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.dataCascade)
   );
+  const latestCascadedDocumentsDataGridsUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
@@ -504,6 +507,9 @@ function DiscoverDocumentsComponent({
     internalStateActions.setSelectedCascadeGroups
   );
   const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
+  const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
+    internalStateActions.setCascadedDocumentsDataGridUiState
+  );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
@@ -522,8 +528,11 @@ function DiscoverDocumentsComponent({
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
       dataCascadeUiState: latestDataCascadeUiState.current,
+      dataGridUiStateMap: latestCascadedDocumentsDataGridsUiState.current,
       setDataCascadeUiState: (nextUiState) =>
         dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
+      setDataGridUiState: (nodeId, uiState) =>
+        dispatch(setCascadedDocumentsDataGridUiState({ nodeId, dataGridUiState: uiState })),
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -535,11 +544,13 @@ function DiscoverDocumentsComponent({
     cascadedDocumentsFetcher,
     dispatch,
     esqlVariables,
+    latestCascadedDocumentsDataGridsUiState,
     latestDataCascadeUiState,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
+    setCascadedDocumentsDataGridUiState,
     setDataCascadeUiState,
     setSelectedCascadeGroups,
     viewModeToggle,
