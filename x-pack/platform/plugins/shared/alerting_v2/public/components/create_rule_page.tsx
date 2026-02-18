@@ -139,8 +139,9 @@ export const CreateRulePage = () => {
           evaluation: {
             query: {
               base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
-              condition:
-                rule.evaluation?.query?.condition ?? DEFAULT_RULE_VALUES.evaluation.query.condition,
+              ...(rule.evaluation?.query?.condition != null
+                ? { condition: rule.evaluation.query.condition }
+                : {}),
             },
           },
           recovery_policy: rule.recovery_policy,

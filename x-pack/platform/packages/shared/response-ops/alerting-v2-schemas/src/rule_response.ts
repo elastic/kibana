@@ -29,7 +29,7 @@ export interface RuleResponse {
   evaluation: {
     query: {
       base: string;
-      condition: string;
+      condition?: string;
     };
   };
   recovery_policy?: {
