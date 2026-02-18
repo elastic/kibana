@@ -31,6 +31,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type {
   PublishesDataViews,
   PublishingSubject,
+  SerializedTimeRange,
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -201,10 +202,9 @@ export interface LensPublicCallbacks extends LensApiProps {
  */
 export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCallbacks>;
 
-export interface LensUnifiedSearchContext {
+export interface LensUnifiedSearchContext extends SerializedTimeRange {
   filters?: Filter[];
   query?: Query | AggregateQuery;
-  timeRange?: TimeRange;
   timeslice?: [number, number];
   searchSessionId?: string;
   lastReloadRequestTime?: number;

@@ -108,7 +108,7 @@ describe('runSaveLensVisualization', () => {
               initialInput: {
                 attributes: defaultByValueDoc,
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               },
             },
             { returnToOrigin: true }

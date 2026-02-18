@@ -54,10 +54,9 @@ export const deserializeSavedObjectState = async ({
   savedObjectId,
   drilldowns,
   uiState,
-  timeRange,
+  time_range,
   title: embeddableTitle,
   description: embeddableDescription,
-
   hide_title,
 }: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
@@ -106,7 +105,7 @@ export const deserializeSavedObjectState = async ({
     savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
-    ...(timeRange ? { timeRange } : {}),
+    ...(time_range ? { time_range } : {}),
     ...(drilldowns ? { drilldowns } : {}),
   } as VisualizeRuntimeState;
 };
@@ -118,7 +117,7 @@ export const serializeState: (props: {
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
   getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
-  timeRange?: VisualizeRuntimeState['timeRange'];
+  time_range?: VisualizeRuntimeState['time_range'];
 }) => VisualizeEmbeddableState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
@@ -126,7 +125,7 @@ export const serializeState: (props: {
   savedObjectProperties,
   linkedToLibrary,
   getDynamicActionsState,
-  timeRange,
+  time_range,
 }) => {
   const dynamicActionsState = getDynamicActionsState ? getDynamicActionsState() : {};
   // save by reference
@@ -135,7 +134,7 @@ export const serializeState: (props: {
       ...(titles ? titles : {}),
       ...dynamicActionsState,
       ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
-      ...(timeRange ? { timeRange } : {}),
+      ...(time_range ? { time_range } : {}),
       savedObjectId: id,
     } as VisualizeByReferenceState;
   }
@@ -144,7 +143,7 @@ export const serializeState: (props: {
     ...(titles ? titles : {}),
     ...savedObjectProperties,
     ...dynamicActionsState,
-    ...(timeRange ? { timeRange } : {}),
+    ...(time_range ? { time_range } : {}),
     savedVis: {
       ...serializedVis,
       id,
