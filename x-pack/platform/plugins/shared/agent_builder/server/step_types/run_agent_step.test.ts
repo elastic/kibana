@@ -262,7 +262,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.error?.message).toContain('aborted');
   });
 
-  it('propagates attachments to chatService.converse', async () => {
+  it('propagates attachments to execution service nextInput', async () => {
     const attachments = [
       {
         id: 'attachment-1',
@@ -276,25 +276,20 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       },
     ];
 
-    const chat = {
-      converse: jest.fn().mockReturnValue(
-        of({
-          type: ChatEventType.roundComplete,
-          data: {
-            round: {
-              id: 'r-1',
-              response: { message: 'ok' },
-            },
-          },
-        })
-      ),
-    };
-    const runner = { runAgent: jest.fn() };
+    const events$ = of({
+      type: ChatEventType.roundComplete,
+      data: {
+        round: {
+          id: 'r-1',
+          response: { message: 'ok' },
+        },
+      },
+    });
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
       internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
+        execution,
       },
     } as any;
 
@@ -308,16 +303,17 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
-    expect(chat.converse).toHaveBeenCalledWith(
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
-        nextInput: {
-          message: 'hello',
-          attachments,
-        },
+        params: expect.objectContaining({
+          nextInput: {
+            message: 'hello',
+            attachments,
+          },
+        }),
       })
     );
-    expect(runner.runAgent).not.toHaveBeenCalled();
     expect(res.output?.message).toBe('ok');
   });
 });
