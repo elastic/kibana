@@ -52,7 +52,7 @@ export const JSON_SCHEMA_FORMAT_VALUES = [
   'uuid',
 ] as const;
 
-export type JsonSchema = {
+export interface JsonSchema {
   type?: JsonSchemaType | JsonSchemaType[];
   title?: string;
   description?: string;
@@ -97,7 +97,7 @@ export type JsonSchema = {
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
-};
+}
 
 /**
  * JSON Schema property keywords available for autocomplete.

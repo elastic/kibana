@@ -135,10 +135,7 @@ describe('getJsonSchemaSuggestions', () => {
     });
 
     it('should return empty when property has no enum values', () => {
-      const context = createMockContext(
-        ['inputs', 'properties', 'name', 'enum', 0],
-        '        - '
-      );
+      const context = createMockContext(['inputs', 'properties', 'name', 'enum', 0], '        - ');
       context.workflowDefinition = {
         inputs: {
           type: 'object',
