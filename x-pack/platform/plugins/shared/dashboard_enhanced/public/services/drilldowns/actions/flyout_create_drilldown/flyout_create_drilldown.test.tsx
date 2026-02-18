@@ -32,7 +32,7 @@ jest.mock('../../../kibana_services', () => {
     uiActionsEnhancedServices: {
       getActionFactories: jest.fn(() => [
         {
-          supportedTriggers: () => [ON_CLICK_VALUE],
+          supportedTriggers: () => ['on_click_value'],
           isCompatibleLicense: () => true,
         } as unknown as UiActionsEnhancedActionFactory,
       ]),
