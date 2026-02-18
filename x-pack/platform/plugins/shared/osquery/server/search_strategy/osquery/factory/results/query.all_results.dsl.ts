@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
@@ -23,14 +24,27 @@ export const buildResultsQuery = ({
   integrationNamespaces,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
-  const actionIdQuery = `action_id: ${actionId}`;
-  const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-  let filter = actionIdQuery + agentQuery;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
 
-  const timeRangeFilter =
+  // Match either action_id (live queries) or schedule_id (scheduled queries)
+  const actionIdFilter: estypes.QueryDslQueryContainer = {
+    bool: {
+      should: [
+        { term: { action_id: actionId } },
+        { term: { schedule_id: actionId } },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
+  const agentFilter: estypes.QueryDslQueryContainer[] = agentId
+    ? [{ term: { 'agent.id': agentId } }]
+    : [];
+
+  const kueryFilter: estypes.QueryDslQueryContainer[] = !isEmpty(kuery)
+    ? [getQueryFilter({ filter: kuery })]
+    : [];
+
+  const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
           {
@@ -43,7 +57,12 @@ export const buildResultsQuery = ({
           },
         ]
       : [];
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+  const filterQuery: estypes.QueryDslQueryContainer[] = [
+    ...timeRangeFilter,
+    actionIdFilter,
+    ...agentFilter,
+    ...kueryFilter,
+  ];
 
   let index: string;
 

@@ -20,6 +20,7 @@ import {
   API_VERSIONS,
   DEFAULT_MAX_TABLE_QUERY_SIZE,
   OSQUERY_INTEGRATION_NAME,
+  OSQUERY_SCHEDULED_INPUT_TYPE,
 } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
@@ -165,10 +166,19 @@ export const getLiveQueryResultsRoute = (
               )
             )
           );
+
+          // For scheduled queries, result documents have no action_id field.
+          // They use schedule_id = pack SO id (request.params.id) to correlate.
+          const inputType = actionDetails?._source?.input_type;
+          const resultsActionId =
+            inputType === OSQUERY_SCHEDULED_INPUT_TYPE
+              ? request.params.id // pack SO id — matches schedule_id in result docs
+              : request.params.actionId;
+
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
-                actionId: request.params.actionId,
+                actionId: resultsActionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,

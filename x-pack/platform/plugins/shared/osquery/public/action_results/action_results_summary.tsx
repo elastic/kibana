@@ -26,6 +26,7 @@ interface ActionResultsSummaryProps {
   expirationDate?: string;
   agentIds?: string[];
   error?: string;
+  isScheduled?: boolean;
 }
 
 // Use Elasticsearch's native SearchHit type for result edges
@@ -92,6 +93,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   agentIds,
   error,
   startDate,
+  isScheduled,
 }) => {
   const { http, application } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -102,7 +104,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
   );
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(!isScheduled);
   const { data } = useActionResults({
     actionId,
     startDate,
@@ -112,6 +114,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    isScheduled,
   });
 
   // Extract agent IDs from current page edges
@@ -292,27 +295,37 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     }
   }, []);
 
+  const totalItemCount = isScheduled
+    ? data.aggregations.totalResponded
+    : (agentIds?.length ?? 0);
+
   const pagination = useMemo(
     () => ({
       initialPageSize: DEFAULT_PAGE_SIZE,
       pageIndex,
       pageSize,
-      totalItemCount: agentIds?.length ?? 0,
+      totalItemCount,
       pageSizeOptions: [10, 20, 50, 100],
       showPerPageOptions: true,
     }),
-    [pageIndex, pageSize, agentIds?.length]
+    [pageIndex, pageSize, totalItemCount]
   );
 
   const statusTableCss = useMemo(
-    () => createStatusTableCss(pageSize, pageIndex, agentIds?.length ?? 0),
-    [pageSize, pageIndex, agentIds?.length]
+    () => createStatusTableCss(pageSize, pageIndex, totalItemCount),
+    [pageSize, pageIndex, totalItemCount]
   );
 
   // Guard against race conditions when updating isLive
   const currentAgentCountRef = useRef(agentIds?.length);
 
   useEffect(() => {
+    if (isScheduled) {
+      setIsLive(false);
+
+      return;
+    }
+
     // Only update if agentIds length hasn't changed during render (prevents race conditions)
     if (currentAgentCountRef.current === agentIds?.length) {
       setIsLive(() => {
@@ -323,7 +336,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     }
 
     currentAgentCountRef.current = agentIds?.length;
-  }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
+  }, [agentIds?.length, data.aggregations.totalResponded, error, expired, isScheduled]);
 
   return (
     <div css={statusTableCss}>

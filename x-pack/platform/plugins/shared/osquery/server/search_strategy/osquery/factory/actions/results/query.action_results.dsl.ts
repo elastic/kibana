@@ -29,11 +29,6 @@ export const buildActionResultsQuery = ({
   useNewDataStream,
   integrationNamespaces,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
-  let filter = `action_id: ${actionId}`;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
-
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
@@ -63,10 +58,26 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
+  // Match either action_id (live queries) or schedule_id (scheduled queries)
+  const actionIdFilter: estypes.QueryDslQueryContainer = {
+    bool: {
+      should: [
+        { term: { action_id: actionId } },
+        { term: { schedule_id: actionId } },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
+  const kueryFilter: estypes.QueryDslQueryContainer[] = !isEmpty(kuery)
+    ? [getQueryFilter({ filter: kuery })]
+    : [];
+
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
-    getQueryFilter({ filter }),
+    actionIdFilter,
+    ...kueryFilter,
   ];
 
   let baseIndex: string;
@@ -98,13 +109,11 @@ export const buildActionResultsQuery = ({
           responses_by_action_id: {
             filter: {
               bool: {
-                must: [
-                  {
-                    match: {
-                      action_id: actionId,
-                    },
-                  },
+                should: [
+                  { term: { action_id: actionId } },
+                  { term: { schedule_id: actionId } },
                 ],
+                minimum_should_match: 1,
               },
             },
             aggs: {

@@ -20,6 +20,26 @@ jest.mock('../../../../../utils/build_query', () => ({
   })),
 }));
 
+const expectedActionIdFilter = (actionId: string) => ({
+  bool: {
+    should: [
+      { term: { action_id: actionId } },
+      { term: { schedule_id: actionId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+const expectedAggFilter = (actionId: string) => ({
+  bool: {
+    should: [
+      { term: { action_id: actionId } },
+      { term: { schedule_id: actionId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 describe('buildActionResultsQuery', () => {
   describe('basic functionality', () => {
     it('should build query with minimal required parameters using agent actions results index', () => {
@@ -49,17 +69,7 @@ describe('buildActionResultsQuery', () => {
             global: {},
             aggs: {
               responses_by_action_id: {
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          action_id: 'action-123',
-                        },
-                      },
-                    ],
-                  },
-                },
+                filter: expectedAggFilter('action-123'),
                 aggs: {
                   rows_count: {
                     sum: {
@@ -83,11 +93,7 @@ describe('buildActionResultsQuery', () => {
         query: {
           bool: {
             filter: [
-              {
-                query_string: {
-                  query: 'action_id: action-123',
-                },
-              },
+              expectedActionIdFilter('action-123'),
             ],
           },
         },
@@ -169,10 +175,10 @@ describe('buildActionResultsQuery', () => {
       expect(result.query).toEqual({
         bool: {
           filter: [
+            expectedActionIdFilter('action-kuery'),
             {
               query_string: {
-                query:
-                  'action_id: action-kuery AND agent.name: "test-agent" AND error.message: *timeout*',
+                query: 'agent.name: "test-agent" AND error.message: *timeout*',
               },
             },
           ],
@@ -213,11 +219,7 @@ describe('buildActionResultsQuery', () => {
                 },
               },
             },
-            {
-              query_string: {
-                query: 'action_id: action-time-range',
-              },
-            },
+            expectedActionIdFilter('action-time-range'),
           ],
         },
       });
@@ -281,17 +283,7 @@ describe('buildActionResultsQuery', () => {
             global: {},
             aggs: {
               responses_by_action_id: {
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          action_id: 'action-comprehensive',
-                        },
-                      },
-                    ],
-                  },
-                },
+                filter: expectedAggFilter('action-comprehensive'),
                 aggs: {
                   rows_count: {
                     sum: {
@@ -323,10 +315,10 @@ describe('buildActionResultsQuery', () => {
                   },
                 },
               },
+              expectedActionIdFilter('action-comprehensive'),
               {
                 query_string: {
-                  query:
-                    'action_id: action-comprehensive AND error.type: "timeout" OR status: "failed"',
+                  query: 'error.type: "timeout" OR status: "failed"',
                 },
               },
             ],

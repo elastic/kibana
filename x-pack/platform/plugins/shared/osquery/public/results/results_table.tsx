@@ -101,6 +101,7 @@ export interface ResultsTableComponentProps {
   liveQueryActionId?: string;
   error?: string;
   addToTimeline?: AddToTimelineHandler;
+  isScheduled?: boolean;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -112,8 +113,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   liveQueryActionId,
   error,
   addToTimeline,
+  isScheduled,
 }) => {
-  const [isLive, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(!isScheduled);
 
   const { data } = useActionResults({
     actionId,
@@ -124,6 +126,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    isScheduled,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
@@ -430,6 +433,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
+        if (isScheduled) return false;
+
         if (!agentIds?.length || expired || error) return false;
 
         return !!(
@@ -445,6 +450,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       allResultsData?.total,
       error,
       expired,
+      isScheduled,
     ]
   );
 

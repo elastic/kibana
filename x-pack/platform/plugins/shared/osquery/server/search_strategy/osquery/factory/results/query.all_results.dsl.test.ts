@@ -19,6 +19,16 @@ jest.mock('../../../../utils/build_query', () => ({
   })),
 }));
 
+const expectedActionIdFilter = (actionId: string) => ({
+  bool: {
+    should: [
+      { term: { action_id: actionId } },
+      { term: { schedule_id: actionId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 describe('buildResultsQuery', () => {
   describe('basic functionality', () => {
     it('should build query with minimal required parameters', () => {
@@ -60,11 +70,7 @@ describe('buildResultsQuery', () => {
         query: {
           bool: {
             filter: [
-              {
-                query_string: {
-                  query: 'action_id: action-123',
-                },
-              },
+              expectedActionIdFilter('action-123'),
             ],
           },
         },
@@ -105,11 +111,8 @@ describe('buildResultsQuery', () => {
       expect(result.query).toEqual({
         bool: {
           filter: [
-            {
-              query_string: {
-                query: 'action_id: action-456 AND agent.id: agent-789',
-              },
-            },
+            expectedActionIdFilter('action-456'),
+            { term: { 'agent.id': 'agent-789' } },
           ],
         },
       });
@@ -134,9 +137,10 @@ describe('buildResultsQuery', () => {
       expect(result.query).toEqual({
         bool: {
           filter: [
+            expectedActionIdFilter('action-abc'),
             {
               query_string: {
-                query: 'action_id: action-abc AND osquery.calendarTime: *',
+                query: 'osquery.calendarTime: *',
               },
             },
           ],
@@ -179,11 +183,7 @@ describe('buildResultsQuery', () => {
                 },
               },
             },
-            {
-              query_string: {
-                query: 'action_id: action-time',
-              },
-            },
+            expectedActionIdFilter('action-time'),
           ],
         },
       });
@@ -271,10 +271,12 @@ describe('buildResultsQuery', () => {
                   },
                 },
               },
+              expectedActionIdFilter('action-full'),
+              { term: { 'agent.id': 'agent-complete' } },
               {
                 query_string: {
                   query:
-                    'action_id: action-full AND agent.id: agent-complete AND agent.name: "test-agent" AND osquery.action: "executed"',
+                    'agent.name: "test-agent" AND osquery.action: "executed"',
                 },
               },
             ],

@@ -38,6 +38,7 @@ export interface UseActionResults {
   sortField: string;
   kuery?: string;
   isLive?: boolean;
+  isScheduled?: boolean;
 }
 
 interface ActionResultsResponse {
@@ -66,19 +67,22 @@ export const useActionResults = ({
   kuery,
   startDate,
   isLive = false,
+  isScheduled = false,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   const currentPageAgentIds = useMemo(() => {
+    if (isScheduled) return [];
+
     const startIndex = activePage * limit;
     const endIndex = startIndex + limit;
 
     return agentIds?.slice(startIndex, endIndex) || [];
-  }, [agentIds, activePage, limit]);
+  }, [agentIds, activePage, limit, isScheduled]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField }],
+    ['actionResults', { actionId, activePage, limit, direction, sortField, isScheduled }],
     () =>
       http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
@@ -97,6 +101,14 @@ export const useActionResults = ({
       }),
     {
       select: (response) => {
+        if (isScheduled) {
+          return {
+            edges: response.edges as ResultEdges,
+            aggregations: response.aggregations,
+            inspect: response.inspect || { dsl: [], response: [] },
+          };
+        }
+
         // Server already filtered by agentIds - build set of responded agents
         const respondedAgentIds = new Set(
           response.edges
@@ -138,7 +150,7 @@ export const useActionResults = ({
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!actionId && !!agentIds?.length,
+      enabled: !!actionId && (!!agentIds?.length || isScheduled),
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

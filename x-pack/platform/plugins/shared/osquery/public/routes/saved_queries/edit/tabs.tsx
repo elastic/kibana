@@ -29,6 +29,7 @@ interface ResultTabsProps {
   liveQueryActionId?: string;
   error?: string;
   addToTimeline?: AddToTimelineHandler;
+  isScheduled?: boolean;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -41,6 +42,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   liveQueryActionId,
   error,
   addToTimeline,
+  isScheduled,
 }) => {
   const tabs = useMemo(
     () => [
@@ -58,6 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             liveQueryActionId={liveQueryActionId}
             error={error}
             addToTimeline={addToTimeline}
+            isScheduled={isScheduled}
           />
         ),
       },
@@ -72,6 +75,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             agentIds={agentIds}
             expirationDate={endDate}
             error={error}
+            isScheduled={isScheduled}
           />
         ),
         append: failedAgentsCount ? (
@@ -91,6 +95,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       error,
       failedAgentsCount,
       addToTimeline,
+      isScheduled,
     ]
   );
 
