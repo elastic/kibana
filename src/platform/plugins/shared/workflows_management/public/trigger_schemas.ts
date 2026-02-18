@@ -32,6 +32,13 @@ class TriggerSchemas {
   }
 
   /**
+   * Returns registered trigger ids.
+   */
+  public getRegisteredIds(): string[] {
+    return this.getTriggerDefinitions().map((t) => t.id);
+  }
+
+  /**
    * Returns whether the given id is a registered (custom) trigger type.
    */
   public isRegisteredTriggerId(id: string): boolean {

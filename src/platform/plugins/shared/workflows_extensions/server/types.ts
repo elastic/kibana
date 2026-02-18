@@ -50,7 +50,7 @@ export interface WorkflowsExtensionsTriggerListStartContract {
    * Get all registered trigger definitions.
    * @returns Array of all registered trigger definitions
    */
-  listTriggers(): ServerTriggerDefinition[];
+  getAllTriggerDefinitions(): ServerTriggerDefinition[];
 }
 
 /**

@@ -1383,7 +1383,7 @@ export class WorkflowsService {
       this.getAvailableConnectors(spaceId, request),
     ]);
     const registeredTriggerIds = plugins.workflowsExtensions
-      .listTriggers()
+      .getAllTriggerDefinitions()
       .map((trigger: { id: string }) => trigger.id);
     return getWorkflowZodSchema(connectorsByType, registeredTriggerIds);
   }

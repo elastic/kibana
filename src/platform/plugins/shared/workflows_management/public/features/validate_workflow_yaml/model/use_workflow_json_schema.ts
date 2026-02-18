@@ -53,7 +53,7 @@ export const useWorkflowJsonSchema = ({
           : WorkflowSchemaUriStrictWithDynamicConnectors;
       }
       const connectorTypes = connectorsData?.connectorTypes ?? {};
-      const registeredTriggerIds = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
+      const registeredTriggerIds = triggerSchemas.getRegisteredIds();
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorTypes)
         : getWorkflowZodSchema(connectorTypes, registeredTriggerIds); // TODO: remove this once we move the schema generation up to detail page or some wrapper component

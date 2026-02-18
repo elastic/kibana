@@ -25,10 +25,7 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
-  schema: getWorkflowZodSchema(
-    {},
-    triggerSchemas.getTriggerDefinitions().map((t) => t.id)
-  ),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,

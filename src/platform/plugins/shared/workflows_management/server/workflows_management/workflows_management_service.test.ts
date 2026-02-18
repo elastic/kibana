@@ -114,7 +114,7 @@ describe('WorkflowsService', () => {
         getActionsClientWithRequest: mockGetActionsClientWithRequest,
       },
       workflowsExtensions: {
-        listTriggers: jest.fn().mockReturnValue([]),
+        getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
       },
     });
 
@@ -2313,7 +2313,7 @@ steps:
           getActionsClientWithRequest: mockGetActionsClientWithRequest,
         },
         workflowsExtensions: {
-          listTriggers: jest.fn().mockReturnValue([]),
+          getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
         },
       });
 

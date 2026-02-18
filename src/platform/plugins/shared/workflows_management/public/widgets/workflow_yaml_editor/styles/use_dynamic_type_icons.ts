@@ -159,7 +159,7 @@ export function useDynamicTypeIcons(
     .join(',');
   const injectionRunIdRef = useRef(0);
   const lastInjectedShadowCssRef = useRef<string | null>(null);
-  const customTriggerIds = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
+  const customTriggerIds = triggerSchemas.getRegisteredIds();
   // Detect custom trigger in content: known registered ids OR pattern "type: x.y" (custom triggers use dots; built-in are manual/alert/scheduled).
   // This ensures we re-run and retry when loading saved YAML that has a custom trigger before the extension has registered.
   const contentHasCustomTrigger = Boolean(

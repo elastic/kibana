@@ -20,9 +20,7 @@ export const customTriggerEventSchema = z.object({
 export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;
 
 /** Shared trigger definition (id + eventSchema) for use by public and server. */
-export const commonCustomTriggerDefinition: CommonTriggerDefinition<
-  typeof customTriggerEventSchema
-> = {
+export const commonCustomTriggerDefinition: CommonTriggerDefinition = {
   id: CUSTOM_TRIGGER_ID,
   eventSchema: customTriggerEventSchema,
 };

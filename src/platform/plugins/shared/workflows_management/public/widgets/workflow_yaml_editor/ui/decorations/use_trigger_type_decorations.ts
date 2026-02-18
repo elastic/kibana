@@ -46,7 +46,7 @@ function resolveDocument(
 }
 
 function isRegisteredCustomTrigger(triggerType: string): boolean {
-  const registeredIds = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
+  const registeredIds = triggerSchemas.getRegisteredIds();
   return registeredIds.includes(triggerType);
 }
 
