@@ -65,13 +65,14 @@ const createMockExecution = (id: string): WorkflowExecutionDto => ({
   yaml: 'version: "1"',
 });
 
-const mockUseWorkflowExecutionPolling = jest.fn(() => ({
+const mockUseWorkflowExecutionPolling = jest.fn((_executionId: string) => ({
   workflowExecution: createMockExecution('exec-1'),
   isLoading: false,
   error: null,
 }));
 jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => ({
-  useWorkflowExecutionPolling: (...args: unknown[]) => mockUseWorkflowExecutionPolling(...args),
+  useWorkflowExecutionPolling: (executionId: string) =>
+    mockUseWorkflowExecutionPolling(executionId),
 }));
 
 describe('WorkflowExecutionDetail - cache invalidation', () => {
