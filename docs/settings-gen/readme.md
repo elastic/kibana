@@ -46,7 +46,6 @@ groups:
         #     - "ess: ga"
         #     - "self: ga"
         #
-        # state: OPTIONAL (legacy) One of deprecated/hidden/tech-preview
         # deprecation_details: "" OPTIONAL
         # note: "" OPTIONAL
         # tip: "" OPTIONAL
