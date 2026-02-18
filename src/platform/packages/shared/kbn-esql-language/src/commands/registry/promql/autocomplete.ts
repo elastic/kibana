@@ -364,7 +364,7 @@ function suggestParamValues(
     return [
       {
         ...valuePlaceholderConstant,
-        label: 'Insert bucket count',
+        label: 'Insert number of buckets',
         text: '${0:100}',
         detail: 'Positive integer (default: 100)',
       },
