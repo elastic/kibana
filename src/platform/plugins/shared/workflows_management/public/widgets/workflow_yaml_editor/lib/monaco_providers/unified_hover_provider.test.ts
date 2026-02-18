@@ -8,9 +8,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ExecutionContext, StepExecutionData } from '../execution_context/build_execution_context';
 import type { ProviderConfig } from './provider_interfaces';
 import { UnifiedHoverProvider } from './unified_hover_provider';
+import type {
+  ExecutionContext,
+  StepExecutionData,
+} from '../execution_context/build_execution_context';
 
 jest.mock('../template_expression/parse_template_at_position');
 jest.mock('../template_expression/evaluate_expression');
@@ -28,10 +31,9 @@ const createMockModel = () =>
     uri: { toString: () => 'inmemory://test' },
     getLineContent: jest.fn().mockReturnValue('  message: "{{ steps.search.output.hits }}"'),
     getLineDecorations: jest.fn().mockReturnValue([]),
-  }) as unknown as monaco.editor.ITextModel;
+  } as unknown as monaco.editor.ITextModel);
 
-const createMockPosition = (line = 1, column = 25) =>
-  new monaco.Position(line, column);
+const createMockPosition = (line = 1, column = 25) => new monaco.Position(line, column);
 
 describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
   let fetchStepExecutionData: jest.Mock;
