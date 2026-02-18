@@ -15,7 +15,6 @@ import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_t
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../../common/types';
-import type { DashboardMigrationTranslationStats } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -50,7 +49,6 @@ const defaultMigrationStats = {
   created_at: '2025-01-01T00:00:00Z',
   last_updated_at: '2025-01-01T01:00:00Z',
 };
-
 
 describe('useInstallMigrationDashboards', () => {
   beforeEach(() => {
