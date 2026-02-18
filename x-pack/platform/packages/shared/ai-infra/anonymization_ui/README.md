@@ -28,9 +28,12 @@ Package-owned:
 
 ### Package structure
 
-- `src/profiles/state`: profiles state and feature hooks.
-- `src/profiles/components/<sub_component>`: UI sub-components and colocated UI hooks.
-- `src/profiles/services`: API clients, query hooks, and lookup services.
+- `src/anonymization_profiles_section`: section-level orchestration and list/delete flows.
+- `src/profile_form`: controlled form composition (`ProfileFormProvider`, `ProfileFormContent`, `ProfileFormFooter`) and form-specific hooks.
+- `src/profile_form/panels/*_panel`: panel UI implementations and colocated tests
+  (for example `field_rules_panel`, `regex_rules_panel`, `ner_rules_panel`, `preview_panel`).
+- `src/common/services`: shared API clients and React Query hooks used by section and form surfaces.
+- `src/index.ts`: package public surface; section hooks are exported from `anonymization_profiles_section` and form primitives from `profile_form`.
 
 Host-owned:
 
