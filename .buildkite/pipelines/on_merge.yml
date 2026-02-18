@@ -27,7 +27,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       diskSizeGb: 95
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
@@ -164,7 +164,7 @@ steps:
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
       diskSizeGb: 105
-    timeout_in_minutes: 80
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -277,7 +277,7 @@ steps:
       - linting_with_types
       - check_oas_snapshot
       - check_types
-    timeout_in_minutes: 80
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
