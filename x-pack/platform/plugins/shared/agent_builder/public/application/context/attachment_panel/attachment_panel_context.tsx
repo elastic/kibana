@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { animate } from 'framer-motion';
 
 export interface AttachmentEntry {
   /** Unique attachment identifier */
@@ -39,6 +40,10 @@ interface AttachmentPanelContextValue {
   navigateToPrevious: () => void;
   /** Navigate to the next attachment in the list */
   navigateToNext: () => void;
+  /** Smooth-scroll the chat container to the attachment element in the conversation */
+  scrollToAttachmentInChat: (id: string) => void;
+  /** Ref to register the chat scroll container */
+  chatScrollContainerRef: React.RefObject<HTMLElement | null>;
 }
 
 const AttachmentPanelContext = createContext<AttachmentPanelContextValue | undefined>(undefined);
@@ -75,6 +80,7 @@ export const AttachmentPanelProvider: React.FC<AttachmentPanelProviderProps> = (
   const [attachmentId, setAttachmentId] = useState<string | undefined>(undefined);
   const [attachments, setAttachments] = useState<AttachmentEntry[]>([]);
   const [tempTitles, setTempTitles] = useState<Record<string, string>>({});
+  const chatScrollContainerRef = useRef<HTMLElement | null>(null);
 
   const setTempTitle = useCallback((id: string, tempTitle: string) => {
     setTempTitles((prev) => ({ ...prev, [id]: tempTitle }));
@@ -126,6 +132,29 @@ export const AttachmentPanelProvider: React.FC<AttachmentPanelProviderProps> = (
     });
   }, [attachments]);
 
+  const scrollToAttachmentInChat = useCallback((id: string) => {
+    const container = chatScrollContainerRef.current;
+    if (!container) return;
+
+    const target = container.querySelector(`[data-attachment-id="${id}"]`);
+    if (!target) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const targetScrollTop =
+      container.scrollTop + targetRect.top - containerRect.top - containerRect.height * 0.15;
+
+    animate(container.scrollTop, targetScrollTop, {
+      type: 'spring',
+      stiffness: 120,
+      damping: 20,
+      mass: 0.8,
+      onUpdate: (v) => {
+        container.scrollTop = v;
+      },
+    });
+  }, []);
+
   const value = useMemo<AttachmentPanelContextValue>(
     () => ({
       isPanelOpen,
@@ -140,6 +169,8 @@ export const AttachmentPanelProvider: React.FC<AttachmentPanelProviderProps> = (
       navigateToAttachment,
       navigateToPrevious,
       navigateToNext,
+      scrollToAttachmentInChat,
+      chatScrollContainerRef,
     }),
     [
       isPanelOpen,
@@ -154,6 +185,7 @@ export const AttachmentPanelProvider: React.FC<AttachmentPanelProviderProps> = (
       navigateToAttachment,
       navigateToPrevious,
       navigateToNext,
+      scrollToAttachmentInChat,
     ]
   );
 

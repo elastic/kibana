@@ -23,6 +23,7 @@ import { useShouldStickToBottom } from '../../context/conversation/use_should_st
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
+import { useAttachmentPanel } from '../../context/attachment_panel/attachment_panel_context';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
   conversationElementPaddingStyles,
@@ -54,6 +55,13 @@ export const Conversation: React.FC<{}> = () => {
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const { chatScrollContainerRef } = useAttachmentPanel();
+
+  // Sync the local scroll container ref with the attachment panel context
+  useEffect(() => {
+    chatScrollContainerRef.current = scrollContainerRef.current;
+  });
+
   const { showScrollButton, smoothScrollToBottom, scrollToMostRecentRoundTop, stickToBottom } =
     useConversationScrollActions({
       isResponseLoading,

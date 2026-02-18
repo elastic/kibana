@@ -82,7 +82,7 @@ export const FakeAttachment = ({
   }, [isEmbeddedContext, openPanel, attachmentId, title]);
 
   return (
-    <>
+    <div data-attachment-id={attachmentId}>
       <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween" css={styles}>
         <EuiFlexItem grow={false}>
           <EuiText
@@ -118,6 +118,7 @@ export const FakeAttachment = ({
           display: flex;
           justify-content: center;
           align-items: center;
+          padding: 16px;
         `}
       >
         <EuiText size="s">
@@ -167,6 +168,6 @@ export const FakeAttachment = ({
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-    </>
+    </div>
   );
 };

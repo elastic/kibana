@@ -60,17 +60,17 @@ type WidgetState = 'line' | 'pill' | 'open';
 /* Framer Motion variants — three states */
 const shellVariants = {
   line: { width: 48, height: 5, borderRadius: 100 },
-  pill: { width: 224, height: 48, borderRadius: 100 },
-  open: { width: 320, height: 'auto' as const, borderRadius: 16 },
+  pill: { width: 300, height: 48, borderRadius: 100 },
+  open: { width: 400, height: 'auto' as const, borderRadius: 16 },
 };
 
 const labelContainerVariants = {
-  pill: { width: 72 },
-  open: { width: 160 },
+  pill: { width: 140 },
+  open: { width: 220 },
 };
 
 const dropdownVariants = {
-  open: { height: 200, opacity: 1 },
+  open: { height: 'auto' as const, opacity: 1 },
   closed: { height: 0, opacity: 0 },
 };
 
@@ -101,6 +101,7 @@ export const AttachmentNavigator: React.FC<AttachmentNavigatorProps> = ({ isPane
     attachments,
     tempTitles,
     navigateToAttachment,
+    scrollToAttachmentInChat,
   } = useAttachmentPanel();
 
   const [state, setState] = useState<WidgetState>('line');
@@ -139,9 +140,10 @@ export const AttachmentNavigator: React.FC<AttachmentNavigatorProps> = ({ isPane
   const handleSelect = useCallback(
     (id: string) => {
       navigateToAttachment(id);
+      scrollToAttachmentInChat(id);
       setState('pill');
     },
-    [navigateToAttachment]
+    [navigateToAttachment, scrollToAttachmentInChat]
   );
 
   const handleKeyDown = useCallback(
@@ -394,7 +396,7 @@ const dropdownWrapStyles = css`
 
 const listStyles = css`
   padding: 0 20px 16px;
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
 `;
 
