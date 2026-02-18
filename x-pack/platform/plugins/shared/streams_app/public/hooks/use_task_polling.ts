@@ -33,13 +33,6 @@ export function useTaskPolling({
   const isCancellingTask = task?.status === TaskStatus.BeingCanceled || isCancellingRequested;
 
   /**
-   * Start refreshing the task status on mount without waiting for the first poll wait to complete.
-   */
-  useEffect(() => {
-    onRefresh();
-  }, [onRefresh]);
-
-  /**
    * Resets optimistic cancellation state once task reaches a terminal status.
    */
   useEffect(() => {

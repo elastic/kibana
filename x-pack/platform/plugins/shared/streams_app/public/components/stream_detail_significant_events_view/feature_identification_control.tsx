@@ -46,6 +46,10 @@ export function FeatureIdentificationControl({
   const [isNoResultsDismissed, { on: dismissNoResults, off: resetNoResultsDismissed }] =
     useBoolean(false);
 
+  useEffect(() => {
+    getTask();
+  }, [getTask]);
+
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
     onPoll: getFeaturesIdentificationStatus,

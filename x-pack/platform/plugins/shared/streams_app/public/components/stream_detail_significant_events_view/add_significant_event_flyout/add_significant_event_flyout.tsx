@@ -21,12 +21,14 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
+import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -93,21 +95,40 @@ export function AddSignificantEventFlyout({
   const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
-  const [{ loading: isGettingTask, value: task }, getTask] = useAsyncFn(getGenerationTask);
+
+  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>({
+    status: TaskStatus.NotStarted,
+  });
+  const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
+    useBoolean(false);
+
   const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
     useAsyncFn(scheduleGenerationTask);
+
+  const scheduleTask = (connectorId: string, effectiveSystems: System[]) => {
+    setTask({ status: TaskStatus.NotStarted });
+    doScheduleGenerationTask(connectorId, effectiveSystems).then(setTask);
+  };
+
+  const getTaskStatus = () => {
+    gettingTaskStatus();
+    getGenerationTask()
+      .then(setTask)
+      .then(stoppedGettingTaskStatus)
+      .finally(stoppedGettingTaskStatus);
+  };
 
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
     onPoll: getGenerationTask,
-    onRefresh: getTask,
+    onRefresh: getTaskStatus,
     onCancel: cancelGenerationTask,
   });
 
   const isGenerating =
     task?.status === 'in_progress' ||
     isCancellingTask ||
-    isGettingTask ||
+    isGettingTaskStatus ||
     isSchedulingGenerationTask;
 
   const prevTaskStatusRef = useRef<string | undefined>(undefined);
@@ -160,30 +181,19 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = useCallback(
-    (systemsOverride?: System[]) => {
-      const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
-      if (!connectorId) {
-        return;
-      }
+  const generateQueries = (systemsOverride?: System[]) => {
+    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connectorId) {
+      return;
+    }
 
-      setSelectedFlow('ai');
-      setGeneratedQueries([]);
+    setSelectedFlow('ai');
+    setGeneratedQueries([]);
 
-      const effectiveSystems = systemsOverride ?? selectedSystems;
+    const effectiveSystems = systemsOverride ?? selectedSystems;
 
-      (async () => {
-        await doScheduleGenerationTask(connectorId, effectiveSystems);
-        getTask();
-      })();
-    },
-    [
-      aiFeatures?.genAiConnectors.selectedConnector,
-      selectedSystems,
-      doScheduleGenerationTask,
-      getTask,
-    ]
-  );
+    scheduleTask(connectorId, effectiveSystems);
+  };
 
   useEffect(() => {
     if (initialFlow === 'ai' && generateOnMount) {

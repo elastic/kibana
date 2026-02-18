@@ -6,7 +6,7 @@
  */
 
 import type { System, Streams } from '@kbn/streams-schema';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +42,9 @@ export function SystemIdentificationControl({
   } = useStreamSystemsApi(definition);
 
   const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationStatus);
+  useEffect(() => {
+    getTask();
+  }, [getTask]);
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
     onPoll: getSystemIdentificationStatus,

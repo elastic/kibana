@@ -51,6 +51,10 @@ export function Summary({ count }: { count: number }) {
     await getTaskStatus();
   }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
+  useEffect(() => {
+    getTaskStatus();
+  }, [getTaskStatus]);
+
   const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
 
   useEffect(() => {

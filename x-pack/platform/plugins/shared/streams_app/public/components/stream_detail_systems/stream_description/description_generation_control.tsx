@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +39,9 @@ export function DescriptionGenerationControl({
 }: DescriptionGenerationControlProps) {
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    refreshTask();
+  }, [refreshTask]);
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
     onPoll: getDescriptionGenerationStatus,
