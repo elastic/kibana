@@ -8,4 +8,5 @@
  */
 
 export type { CommonStepDefinition } from './step_registry/types';
+export type { CommonTriggerDefinition } from './trigger_registry/types';
 export { DataMapStepTypeId } from './steps/data';
