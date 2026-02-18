@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -36,7 +37,6 @@ import type {
 } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 
 interface LogsExtractionOptions {
   specificWindow?: {
