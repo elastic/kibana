@@ -13,7 +13,8 @@ globalSetupHook('Setup environment for streams tests', async ({ apiServices, log
     await apiServices.streams.enable();
   } catch (error) {
     // Ignore 409 Conflict errors (streams already enabled)
-    if (error?.response?.status !== 409) {
+    const errorWithResponse = error as { response?: { status?: number } };
+    if (errorWithResponse?.response?.status !== 409) {
       throw error;
     }
     log.debug('[setup] Streams already enabled, continuing...');

@@ -226,7 +226,9 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : error instanceof Error
+                  ? error.message
+                  : String(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
