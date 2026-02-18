@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
@@ -160,9 +160,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const targets = connections.map(getTargetName).sort();
 
-        expect(targets).to.eql(
-          [CHECKOUT_SERVICE.resource, RECOMMENDATION_SERVICE.resource].sort()
-        );
+        expect(targets).to.eql([CHECKOUT_SERVICE.resource, RECOMMENDATION_SERVICE.resource].sort());
       });
 
       it('depth=1 fast path returns the same dependencies and metrics as trace-based', async () => {
