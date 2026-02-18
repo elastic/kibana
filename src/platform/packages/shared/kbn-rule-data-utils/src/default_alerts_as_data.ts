@@ -151,17 +151,17 @@ const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
 const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
 
-// kibana.alert.snooze_expires_at - ISO timestamp when per-alert snooze expires
-const ALERT_SNOOZE_EXPIRES_AT = `${ALERT_NAMESPACE}.snooze_expires_at` as const;
+// kibana.alert.snooze.expires_at - ISO timestamp when per-alert snooze expires
+const ALERT_SNOOZE_EXPIRES_AT = `${ALERT_NAMESPACE}.snooze.expires_at` as const;
 
-// kibana.alert.snooze_conditions - JSON-encoded array of snooze conditions
-const ALERT_SNOOZE_CONDITIONS = `${ALERT_NAMESPACE}.snooze_conditions` as const;
+// kibana.alert.snooze.conditions - JSON-encoded array of snooze conditions
+const ALERT_SNOOZE_CONDITIONS = `${ALERT_NAMESPACE}.snooze.conditions` as const;
 
-// kibana.alert.snooze_condition_operator - how conditions combine: 'any' or 'all'
-const ALERT_SNOOZE_CONDITION_OPERATOR = `${ALERT_NAMESPACE}.snooze_condition_operator` as const;
+// kibana.alert.snooze.condition_operator - how conditions combine: 'any' or 'all'
+const ALERT_SNOOZE_CONDITION_OPERATOR = `${ALERT_NAMESPACE}.snooze.condition_operator` as const;
 
-// kibana.alert.snooze_snapshot - snapshot of field values at time of snooze
-const ALERT_SNOOZE_SNAPSHOT = `${ALERT_NAMESPACE}.snooze_snapshot` as const;
+// kibana.alert.snooze.snapshot - snapshot of field values at time of snooze
+const ALERT_SNOOZE_SNAPSHOT = `${ALERT_NAMESPACE}.snooze.snapshot` as const;
 
 const namespaces = {
   KIBANA_NAMESPACE,

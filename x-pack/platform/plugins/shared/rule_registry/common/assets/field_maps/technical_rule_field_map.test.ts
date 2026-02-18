@@ -323,22 +323,22 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
-      "kibana.alert.snooze_condition_operator": Object {
+      "kibana.alert.snooze.condition_operator": Object {
         "array": false,
         "required": false,
         "type": "keyword",
       },
-      "kibana.alert.snooze_conditions": Object {
+      "kibana.alert.snooze.conditions": Object {
         "array": false,
         "required": false,
         "type": "flattened",
       },
-      "kibana.alert.snooze_expires_at": Object {
+      "kibana.alert.snooze.expires_at": Object {
         "array": false,
         "required": false,
         "type": "date",
       },
-      "kibana.alert.snooze_snapshot": Object {
+      "kibana.alert.snooze.snapshot": Object {
         "array": false,
         "required": false,
         "type": "flattened",

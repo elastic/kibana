@@ -542,7 +542,7 @@ describe('Per-Alert Action Scheduler', () => {
           return {
             'kibana.alert.instance.id': '2',
             'kibana.alert.muted': true,
-            'kibana.alert.snooze_expires_at': new Date(Date.now() - 60000).toISOString(),
+            'kibana.alert.snooze.expires_at': new Date(Date.now() - 60000).toISOString(),
           };
         }
         return undefined;
@@ -569,7 +569,7 @@ describe('Per-Alert Action Scheduler', () => {
           return {
             'kibana.alert.instance.id': '2',
             'kibana.alert.muted': true,
-            'kibana.alert.snooze_expires_at': new Date(Date.now() + 3600000).toISOString(),
+            'kibana.alert.snooze.expires_at': new Date(Date.now() + 3600000).toISOString(),
           };
         }
         return undefined;
@@ -640,7 +640,7 @@ describe('Per-Alert Action Scheduler', () => {
           return {
             'kibana.alert.instance.id': '2',
             'kibana.alert.muted': false,
-            'kibana.alert.snooze_expires_at': new Date(Date.now() + 3600000).toISOString(),
+            'kibana.alert.snooze.expires_at': new Date(Date.now() + 3600000).toISOString(),
           };
         }
         return undefined;

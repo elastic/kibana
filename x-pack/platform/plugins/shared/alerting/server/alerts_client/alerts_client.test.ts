@@ -1993,10 +1993,10 @@ describe('Alerts Client', () => {
                 }
                 if (params.toAutoUnmute.contains(ctx._source['kibana.alert.uuid'])) {
                   ctx._source['kibana.alert.muted'] = false;
-                  ctx._source.remove('kibana.alert.snooze_expires_at');
-                  ctx._source.remove('kibana.alert.snooze_conditions');
-                  ctx._source.remove('kibana.alert.snooze_condition_operator');
-                  ctx._source.remove('kibana.alert.snooze_snapshot');
+                  ctx._source.remove('kibana.alert.snooze.expires_at');
+                  ctx._source.remove('kibana.alert.snooze.conditions');
+                  ctx._source.remove('kibana.alert.snooze.condition_operator');
+                  ctx._source.remove('kibana.alert.snooze.snapshot');
                 }
               `,
             },

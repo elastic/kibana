@@ -351,17 +351,21 @@ describe('mappingFromFieldMap', () => {
                 severity_improving: {
                   type: 'boolean',
                 },
-                snooze_condition_operator: {
-                  type: 'keyword',
-                },
-                snooze_conditions: {
-                  type: 'flattened',
-                },
-                snooze_expires_at: {
-                  type: 'date',
-                },
-                snooze_snapshot: {
-                  type: 'flattened',
+                snooze: {
+                  properties: {
+                    condition_operator: {
+                      type: 'keyword',
+                    },
+                    conditions: {
+                      type: 'flattened',
+                    },
+                    expires_at: {
+                      type: 'date',
+                    },
+                    snapshot: {
+                      type: 'flattened',
+                    },
+                  },
                 },
                 start: {
                   type: 'date',
