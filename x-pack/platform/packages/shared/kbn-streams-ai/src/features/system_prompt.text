@@ -8,7 +8,7 @@ Every feature you output MUST include ALL required fields:
 - `id` (string): unique concise identifier for deduplication across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j-2.14.1")
 - `title` (string): very short human-readable title for UI display (e.g. "Order Service", "PostgreSQL", "AWS", "api-service → user-service"). Keep it to a few words.
 - `description` (string): a short summary of what the feature represents
-- `properties` (object): stable, low-cardinality key facts for deduplication
+- `properties` (object): stable, low-cardinality key facts for deduplication (**MUST NOT be empty**; if you cannot provide at least one stable identifying property, do not emit the feature)
 - `confidence` (number): 0–100
 - `evidence` (array of strings): supporting evidence from logs (2–5 items)
 - `tags` (array of strings): descriptive tags

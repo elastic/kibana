@@ -800,6 +800,7 @@ module.exports = {
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
+        '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
       ],
       rules: {

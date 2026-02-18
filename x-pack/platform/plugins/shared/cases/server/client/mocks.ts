@@ -43,6 +43,7 @@ import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createUnifiedAttachmentTypeRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -146,6 +147,8 @@ const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
     deleteTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
   });
 };
 
@@ -239,6 +242,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -275,6 +279,7 @@ export const createCasesClientFactoryMockArgs = () => {
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
   };
 };
 
