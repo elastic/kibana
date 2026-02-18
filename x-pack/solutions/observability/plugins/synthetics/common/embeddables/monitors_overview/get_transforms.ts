@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
 export function getTransforms() {
   return {
-    transformIn: getTransformIn(),
     transformOut: getTransformOut(),
   };
 }
