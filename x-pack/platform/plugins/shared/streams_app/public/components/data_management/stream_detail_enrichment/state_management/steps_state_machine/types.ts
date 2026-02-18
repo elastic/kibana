@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyActorRef } from 'xstate5';
+import type { AnyActorRef } from 'xstate';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,

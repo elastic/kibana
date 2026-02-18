@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
-import { useContentListConfig } from '@kbn/content-list-provider';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
@@ -34,7 +35,7 @@ const defaultPlaceholder = i18n.translate(
  * `ContentListToolbar` component.
  *
  * Provides a toolbar with search and filter controls for content lists using `EuiSearchBar`.
- * Currently supports the Sort filter; additional filters will be added in subsequent PRs.
+ * Currently supports search and the Sort filter; additional filters will be added in subsequent PRs.
  *
  * **Smart Defaults**: When no children are provided, auto-renders filters
  * based on provider configuration.
@@ -65,17 +66,31 @@ const ContentListToolbarComponent = ({
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
   const { labels } = useContentListConfig();
+  const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
   const filters = useFilters(children);
+
+  const handleSearchChange = useCallback(
+    ({ queryText, error }: EuiSearchBarOnChangeArgs) => {
+      if (error) {
+        return;
+      }
+      // `queryText` preserves the raw input (including whitespace) for display fidelity.
+      // `filters.search` is trimmed so data fetching ignores leading/trailing spaces.
+      setSearch(queryText, { search: queryText.trim() || undefined });
+    },
+    [setSearch]
+  );
 
   return (
     <EuiSearchBar
+      query={search}
       box={{
         placeholder: labels.searchPlaceholder ?? defaultPlaceholder,
         incremental: true,
         'data-test-subj': `${dataTestSubj}-searchBox`,
-        // TODO: Enable when search query support is wired up to the provider.
-        disabled: true,
+        disabled: !searchIsSupported,
       }}
+      onChange={handleSearchChange}
       filters={filters}
       data-test-subj={dataTestSubj}
     />
