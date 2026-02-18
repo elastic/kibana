@@ -110,9 +110,9 @@ export function CellActionsPopover({
           >
             <strong>{name}</strong>{' '}
             {typeof renderValue === 'function' ? (
-              <span>{renderValue(escapeAndPreserveHighlightTags(value))}</span>
+              <>{renderValue(escapeAndPreserveHighlightTags(value))}</>
             ) : rawValue != null && typeof rawValue !== 'object' ? (
-              <span>{rawValue as React.ReactNode}</span>
+              <>{rawValue as React.ReactNode}</>
             ) : (
               <span
                 // eslint-disable-next-line react/no-danger
