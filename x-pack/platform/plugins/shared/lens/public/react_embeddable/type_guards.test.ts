@@ -8,20 +8,18 @@
 import type { UserMessage } from '@kbn/lens-common';
 import { apiHasUserMessages } from './type_guards';
 
-function createUserMessage(uniqueId: string): UserMessage {
-  return {
-    uniqueId,
-    severity: 'info',
-    shortMessage: 'Test message',
-    longMessage: () => 'Test message',
-    fixableInEditor: false,
-    displayLocations: [{ id: 'embeddableBadge' }],
-  };
-}
-
 describe('apiHasUserMessages', () => {
   it('should return true when api has userMessages property with array', () => {
-    const messages: UserMessage[] = [createUserMessage('msg-1')];
+    const messages: UserMessage[] = [
+      {
+        uniqueId: 'msg-1',
+        severity: 'info',
+        shortMessage: 'Test message',
+        longMessage: () => 'Test message',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'embeddableBadge' }],
+      },
+    ];
     const api = { userMessages: messages };
     expect(apiHasUserMessages(api)).toBe(true);
     expect(api.userMessages).toBe(messages);
