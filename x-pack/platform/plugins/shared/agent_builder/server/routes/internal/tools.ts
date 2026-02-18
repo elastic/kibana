@@ -65,7 +65,24 @@ export function registerInternalToolsRoutes({
       const { ids, force } = request.body;
       const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
 
-      if (force) {
+      if (!force) {
+        const { agents } = await agentsService.getAgentsUsingTools({
+          request,
+          toolIds: ids,
+        });
+        if (agents.length > 0) {
+          return response.conflict({
+            body: {
+              message:
+                'One or more tools are used by agents. Use force=true to remove them from agents and delete.',
+              attributes: {
+                code: 'TOOL_USED_BY_AGENTS',
+                agents,
+              },
+            },
+          });
+        }
+      } else {
         await agentsService.removeToolRefsFromAgents({
           request,
           toolIds: ids,
