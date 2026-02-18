@@ -22,7 +22,7 @@ export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> 
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
       getSchema: () => markdownEmbeddableSchema,
-      ...getTransforms(),
+      getTransforms,
     });
 
     plugins.contentManagement.register({
