@@ -55,55 +55,55 @@ import type { Trigger } from './types';
 export const triggers: { [key: string]: Trigger } = {
   [ON_CLICK_VALUE]: {
     id: ON_CLICK_VALUE,
-    title: i18n.translate('uiActions.triggers.valueClickTrigger.title', {
+    title: i18n.translate('uiActions.triggers.onClickValue.title', {
       defaultMessage: 'Single click',
     }),
-    description: i18n.translate('uiActions.triggers.valueClickTrigger.description', {
+    description: i18n.translate('uiActions.triggers.onClickValue.description', {
       defaultMessage: 'A data point click on the visualization',
     }),
   },
   [ON_CLICK_IMAGE]: {
     id: ON_CLICK_IMAGE,
-    title: i18n.translate('uiActions.triggers.imageClickTriggerTitle', {
+    title: i18n.translate('uiActions.triggers.onClickImage.title', {
       defaultMessage: 'Image click',
     }),
-    description: i18n.translate('uiActions.triggers.imageClickDescription', {
+    description: i18n.translate('uiActions.triggers.onClickImage.description', {
       defaultMessage: 'Clicking the image will trigger the action',
     }),
   },
   [ON_CLICK_ROW]: {
     id: ON_CLICK_ROW,
-    title: i18n.translate('uiActions.triggers.rowClickTitle', {
+    title: i18n.translate('uiActions.triggers.onClickRow.title', {
       defaultMessage: 'Table row click',
     }),
-    description: i18n.translate('uiActions.triggers.rowClickkDescription', {
+    description: i18n.translate('uiActions.triggers.onClickRow.description', {
       defaultMessage: 'A click on a table row',
     }),
   },
   [ON_SELECT_RANGE]: {
     id: ON_SELECT_RANGE,
-    title: i18n.translate('uiActions.triggers.selectRangeTrigger.title', {
+    title: i18n.translate('uiActions.triggers.onSelectRange.title', {
       defaultMessage: 'Range selection',
     }),
-    description: i18n.translate('uiActions.triggers.selectRangeTrigger.description', {
+    description: i18n.translate('uiActions.triggers.onSelectRange.description', {
       defaultMessage: 'A range of values on the visualization',
     }),
   },
   [ON_APPLY_FILTER]: {
     id: ON_APPLY_FILTER,
-    title: i18n.translate('uiActions.triggers.applyFilterTitle', {
+    title: i18n.translate('uiActions.triggers.onApplyFilter.title', {
       defaultMessage: 'Apply filter',
     }),
-    description: i18n.translate('uiActions.triggers.applyFilterDescription', {
+    description: i18n.translate('uiActions.triggers.onApplyFilter.description', {
       defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
     }),
   },
   [ON_OPEN_PANEL_MENU]: {
     id: ON_OPEN_PANEL_MENU,
-    title: i18n.translate('uiActions.triggers.contextMenuTrigger.title', {
+    title: i18n.translate('uiActions.triggers.onOpenPanelMenu.title', {
       defaultMessage: 'Context menu',
     }),
-    description: i18n.translate('uiActions.triggers.contextMenuTrigger.description', {
+    description: i18n.translate('uiActions.triggers.onOpenPanelMenu.description', {
       defaultMessage: "A new option will be added to the panel's context menu",
     }),
   },
