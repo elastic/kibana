@@ -35,7 +35,15 @@ export interface GetStreamFeaturesQuery {
 
 export type LlmFeature = Pick<
   Feature,
-  'type' | 'subtype' | 'title' | 'description' | 'confidence' | 'properties' | 'evidence' | 'tags'
+  | 'type'
+  | 'subtype'
+  | 'title'
+  | 'description'
+  | 'confidence'
+  | 'properties'
+  | 'evidence'
+  | 'tags'
+  | 'meta'
 >;
 
 export function resolveFeatureTypeFilters(
@@ -108,5 +116,6 @@ export function toFeatureForLlmContext(feature: Feature): LlmFeature {
     'properties',
     'evidence',
     'tags',
+    'meta',
   ]);
 }
