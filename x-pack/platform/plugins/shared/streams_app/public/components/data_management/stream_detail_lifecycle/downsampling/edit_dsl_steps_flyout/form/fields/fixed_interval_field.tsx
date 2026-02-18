@@ -170,6 +170,12 @@ export const FixedIntervalField = ({
                       compressed
                       fullWidth
                       min={1}
+                      aria-label={i18n.translate(
+                        'xpack.streams.editDslStepsFlyout.fixedIntervalAriaLabel',
+                        {
+                          defaultMessage: 'Downsample interval value',
+                        }
+                      )}
                       value={currentValue}
                       isInvalid={isInvalid}
                       data-test-subj={`${dataTestSubj}FixedIntervalValue`}

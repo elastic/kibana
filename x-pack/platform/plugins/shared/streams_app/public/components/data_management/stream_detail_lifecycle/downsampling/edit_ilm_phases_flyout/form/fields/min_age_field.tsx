@@ -74,6 +74,14 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         defaultMessage: 'Move after data stored',
       });
 
+  const fieldAriaLabel = isDeletePhase
+    ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterAriaLabel', {
+        defaultMessage: 'Delete after value',
+      })
+    : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterAriaLabel', {
+        defaultMessage: 'Move after value',
+      });
+
   return (
     <UseField
       path={minAgeValuePath}
@@ -133,6 +141,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                           compressed
                           min={0}
                           fullWidth
+                          aria-label={fieldAriaLabel}
                           value={currentValue}
                           isInvalid={isInvalid}
                           data-test-subj={`${dataTestSubj}MoveAfterValue`}

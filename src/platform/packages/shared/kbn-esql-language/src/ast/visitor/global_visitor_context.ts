@@ -214,6 +214,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitFuseCommand) break;
         return this.visitFuseCommand(parent, commandNode, input as any);
       }
+      case 'mmr': {
+        if (!this.methods.visitMmrCommand) break;
+        return this.visitMmrCommand(parent, commandNode, input as any);
+      }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
   }
@@ -472,6 +476,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitFuseCommand'> {
     const context = new contexts.FuseCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitFuseCommand', context, input);
+  }
+
+  public visitMmrCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitMmrCommand'>
+  ): types.VisitorOutput<Methods, 'visitMmrCommand'> {
+    const context = new contexts.MmrCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMmrCommand', context, input);
   }
 
   // #endregion
