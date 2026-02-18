@@ -119,6 +119,8 @@ export function useSelectTextPartsWithArrowKeys({
         const updatedParts = getTextParts(newText);
         selectPart(currentIndex, updatedParts);
       }
+
+      return newText;
     };
 
     const keydownHandler = (event: KeyboardEvent) => {
@@ -161,8 +163,9 @@ export function useSelectTextPartsWithArrowKeys({
             modifyPart('increase');
             return;
           case 'ArrowDown':
-            event.stopImmediatePropagation();
-            modifyPart('decrease');
+            const modified = modifyPart('decrease');
+            // Allow propagation if no modification was made
+            if (modified) event.stopImmediatePropagation();
             return;
         }
       }
