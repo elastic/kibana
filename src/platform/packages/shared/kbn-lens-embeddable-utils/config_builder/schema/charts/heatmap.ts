@@ -110,9 +110,7 @@ const heatmapSharedStateSchema = {
   percentage_mode: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to show values as percentages' } })
   ),
-  show_tooltip: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to show tooltips' } })
-  ),
+  show_tooltip: schema.maybe(schema.boolean({ meta: { description: 'Whether to show tooltips' } })),
   highlight_in_hover: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to highlight cells on legend hover' } })
   ),
