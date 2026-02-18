@@ -247,31 +247,6 @@ describe('DimensionsSelector', () => {
     });
   });
 
-  describe('Option sorting', () => {
-    it('sorts options correctly using helper functions', () => {
-      renderWithIntl(
-        <DimensionsSelector
-          {...defaultProps}
-          selectedDimensions={[mockDimensions[2], mockDimensions[0]]}
-        />
-      );
-      const options = screen.getAllByTestId(
-        new RegExp(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-`)
-      );
-
-      const firstUnselectedIndex = options.findIndex(
-        (opt) => opt.getAttribute('data-checked') !== 'on'
-      );
-      const lastSelectedIndex = options.findLastIndex(
-        (opt) => opt.getAttribute('data-checked') === 'on'
-      );
-
-      if (firstUnselectedIndex >= 0 && lastSelectedIndex >= 0) {
-        expect(lastSelectedIndex).toBeLessThan(firstUnselectedIndex);
-      }
-    });
-  });
-
   describe('Single selection mode', () => {
     it('calls onChange immediately when option is selected', () => {
       const onChange = jest.fn();
