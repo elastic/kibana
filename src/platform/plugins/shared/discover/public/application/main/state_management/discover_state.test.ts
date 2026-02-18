@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
@@ -16,6 +17,7 @@ import {
   selectHasUnsavedChanges,
   selectTabRuntimeState,
   createRuntimeStateManager,
+  selectTabSavedSearch,
 } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
@@ -546,6 +548,51 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
+      const currentSavedSearch = await selectTabSavedSearch({
+        tabId: state.getCurrentTab().id,
+        getState: state.internalState.getState,
+        runtimeStateManager: state.runtimeStateManager,
+        services: mockServices,
+      });
+      expect(omit(currentSavedSearch, 'searchSource')).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": "",
+          "chartInterval": "auto",
+          "columns": Array [
+            "default_column",
+          ],
+          "controlGroupJson": undefined,
+          "density": undefined,
+          "description": undefined,
+          "grid": Object {},
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": false,
+          "id": undefined,
+          "isTextBasedQuery": false,
+          "managed": false,
+          "references": undefined,
+          "refreshInterval": undefined,
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "sharingSavedObjectProps": undefined,
+          "sort": Array [],
+          "tags": undefined,
+          "timeRange": undefined,
+          "timeRestore": false,
+          "title": undefined,
+          "usesAdHocDataView": false,
+          "viewMode": undefined,
+          "visContext": undefined,
+        }
+      `);
+      expect(currentSavedSearch.searchSource.getSerializedFields()).toMatchInlineSnapshot(`
+        Object {
+          "filter": Array [],
+          "index": "the-data-view-id",
+        }
+      `);
       const { currentDataView$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
@@ -809,8 +856,6 @@ describe('Discover state', () => {
           },
         })
       );
-      // The saved search is not updated from appState anymore;
-      // hideChart is tracked in Redux appState instead
       expect(state.getCurrentTab().appState.hideChart).toBe(undefined);
     });
 
@@ -1025,6 +1070,7 @@ describe('Discover state', () => {
         ...dataViewMock,
         ...dataViewSpecMock,
         isPersisted: () => false,
+        toMinimalSpec: () => dataViewSpecMock,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1043,6 +1089,13 @@ describe('Discover state', () => {
         state.getCurrentTab().id
       );
       expect(currentDataView$.getValue()?.id).toEqual(dataViewSpecMock.id);
+      const currentSavedSearch = await selectTabSavedSearch({
+        tabId: state.getCurrentTab().id,
+        getState: state.internalState.getState,
+        runtimeStateManager: state.runtimeStateManager,
+        services: mockServices,
+      });
+      expect(currentSavedSearch.searchSource.getField('index')).toEqual(dataViewSpecMock);
       const { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: mockServices,
@@ -1203,13 +1256,37 @@ describe('Discover state', () => {
           },
         })
       );
-      // Initial persisted session should have the saved search ID
-      expect(state.internalState.getState().persistedDiscoverSession?.id).toBe(savedSearchMock.id);
+      let currentSavedSearch = await selectTabSavedSearch({
+        tabId: state.getCurrentTab().id,
+        getState: state.internalState.getState,
+        runtimeStateManager: state.runtimeStateManager,
+        services: mockServices,
+      });
+      expect(currentSavedSearch.id).toBe(savedSearchMock.id);
+      expect(currentSavedSearch.hideChart).toBe(false);
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { hideChart: true },
+        })
+      );
+      currentSavedSearch = await selectTabSavedSearch({
+        tabId: state.getCurrentTab().id,
+        getState: state.internalState.getState,
+        runtimeStateManager: state.runtimeStateManager,
+        services: mockServices,
+      });
+      expect(currentSavedSearch.hideChart).toBe(true);
       await state.internalState.dispatch(
         internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
       );
-      // After opening the same session, the session should still have the same ID
-      expect(state.internalState.getState().persistedDiscoverSession?.id).toBe(savedSearchMock.id);
+      currentSavedSearch = await selectTabSavedSearch({
+        tabId: state.getCurrentTab().id,
+        getState: state.internalState.getState,
+        runtimeStateManager: state.runtimeStateManager,
+        services: mockServices,
+      });
+      expect(currentSavedSearch.id).toBe(savedSearchMock.id);
+      expect(currentSavedSearch.hideChart).toBe(false);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
