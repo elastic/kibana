@@ -205,6 +205,7 @@ function createScoutComment(
     /*
      * If there's a failure with the same error message as before, just post a comment
      * with pipeline link and failure target.
+     *
      * Example:
      *
      * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
