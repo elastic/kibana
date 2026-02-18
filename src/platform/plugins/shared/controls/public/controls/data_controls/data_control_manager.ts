@@ -232,6 +232,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
+      labelManager.cleanup();
     },
     internalApi: {
       onSelectionChange: () => {

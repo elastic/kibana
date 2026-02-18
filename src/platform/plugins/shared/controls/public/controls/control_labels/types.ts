@@ -24,6 +24,7 @@ type ControlTitleState = Pick<SerializedTitles, 'title'>;
 export interface ControlLabelStateManager {
   getLatestState: StateManager<ControlTitleState>['getLatestState'];
   reinitializeState: StateManager<ControlTitleState>['reinitializeState'];
-  api: SettersOf<ControlLabelState> & SubjectsOf<ControlLabelState>;
+  api: SettersOf<ControlLabelState> & SubjectsOf<ControlLabelState & { defaultLabel: string }>;
   anyStateChange$: Observable<void>;
+  cleanup: () => void;
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -202,31 +202,40 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       return {
         api,
-        Component: () => (
-          <OptionsListControlContext.Provider
-            value={{
-              componentApi,
-              displaySettings: {
-                hideActionBar: false,
-                hideExclude: true,
-                hideExists: true,
-                hideSort: true,
-                placeholder: VariableControlsStrings.emptySelectionPlaceholder,
-              },
-              customStrings: {
-                invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
-                  componentApi.invalidSelections$.value.size
-                ),
-              },
-            }}
-          >
-            <OptionsListControl
-              // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
-              disableMultiValueEmptySelection={true}
-              isPinned={isPinned}
-            />
-          </OptionsListControlContext.Provider>
-        ),
+        Component: () => {
+          useEffect(() => {
+            return () => {
+              selections.cleanup();
+              labelManager.cleanup();
+            };
+          }, []);
+
+          return (
+            <OptionsListControlContext.Provider
+              value={{
+                componentApi,
+                displaySettings: {
+                  hideActionBar: false,
+                  hideExclude: true,
+                  hideExists: true,
+                  hideSort: true,
+                  placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+                },
+                customStrings: {
+                  invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
+                    componentApi.invalidSelections$.value.size
+                  ),
+                },
+              }}
+            >
+              <OptionsListControl
+                // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+                disableMultiValueEmptySelection={true}
+                isPinned={isPinned}
+              />
+            </OptionsListControlContext.Provider>
+          );
+        },
       };
     },
   };

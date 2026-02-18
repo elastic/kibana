@@ -67,5 +67,8 @@ export const initializeLabelManager = <
     reinitializeState: (newState) => {
       label$.next(newState?.title);
     },
+    cleanup: () => {
+      visibleLabelSubscription.unsubscribe();
+    },
   };
 };

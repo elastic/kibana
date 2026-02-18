@@ -366,6 +366,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
