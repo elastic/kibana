@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
-import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
+import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate';
+import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
