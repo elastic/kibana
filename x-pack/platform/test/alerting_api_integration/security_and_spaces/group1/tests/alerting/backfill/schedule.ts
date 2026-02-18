@@ -23,7 +23,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe.only('schedule backfill', () => {
+  describe('schedule backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
