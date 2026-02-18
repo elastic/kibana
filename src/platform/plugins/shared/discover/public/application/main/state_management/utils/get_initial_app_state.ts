@@ -220,9 +220,5 @@ function getDefaultAppState({
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
   }
-  if (persistedTab?.hideDataTable !== undefined) {
-    defaultState.hideDataTable = persistedTab.hideDataTable;
-  }
-
   return defaultState;
 }
