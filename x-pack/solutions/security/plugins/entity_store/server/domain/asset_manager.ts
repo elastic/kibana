@@ -25,7 +25,7 @@ import {
   type EngineDescriptorClient,
   type LogExtractionState,
 } from './definitions/saved_objects';
-import type { EntityMaintainersTasksClient } from '../infra/saved-objects/entity_maintainers_client';
+import type { EntityMaintainersTasksClient } from '../infra/saved_objects/entity_maintainers_client';
 import type { LogExtractionBodyParams } from '../routes/constants';
 import {
   ENGINE_STATUS,

@@ -17,8 +17,8 @@ import type {
 import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
-import { EntityMaintainersTasksClient } from '../../infra/saved-objects/entity_maintainers_client';
-import { EntityMaintainersTasksTypeName } from '../../infra/saved-objects/entity_maintainers_client/types';
+import { EntityMaintainersTasksClient } from '../../infra/saved_objects/entity_maintainers_client';
+import { EntityMaintainersTasksTypeName } from '../../infra/saved_objects/entity_maintainers_client/types';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;

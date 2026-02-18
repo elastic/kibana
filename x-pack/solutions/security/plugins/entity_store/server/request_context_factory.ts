@@ -16,8 +16,8 @@ import type {
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
-import { EntityMaintainersTasksClient } from './infra/saved-objects/entity_maintainers_client';
-import { EntityMaintainersTasksTypeName } from './infra/saved-objects/entity_maintainers_client/types';
+import { EntityMaintainersTasksClient } from './infra/saved_objects/entity_maintainers_client';
+import { EntityMaintainersTasksTypeName } from './infra/saved_objects/entity_maintainers_client/types';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {

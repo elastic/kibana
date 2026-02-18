@@ -16,7 +16,7 @@ const mockRegisterTaskDefinitions = jest.fn();
 const mockCreateInternalRepository = jest.fn();
 const mockGetStartServices = jest.fn();
 
-jest.mock('../../infra/saved-objects/entity_maintainers_client', () => ({
+jest.mock('../../infra/saved_objects/entity_maintainers_client', () => ({
   EntityMaintainersTasksClient: jest.fn().mockImplementation(() => ({
     getAll: mockGetAll,
     addOrUpdate: jest.fn().mockResolvedValue(undefined),
