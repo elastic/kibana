@@ -35,12 +35,15 @@
             }
           },
           "slo_id": {
+            "description": "The ID of the SLO",
             "type": "string"
           },
           "slo_instance_id": {
+            "description": "ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID.",
             "type": "string"
           },
           "remote_name": {
+            "description": "The name of the remote SLO",
             "type": "string"
           },
           "show_all_group_by_instances": {
@@ -100,9 +103,7 @@
             "filters": {
               "type": "array",
               "items": {
-                "type": "object",
-                "properties": {},
-                "additionalProperties": true
+                "$ref": "#/components/schemas/kbn-es-query-server-storedFilterSchema"
               }
             },
             "kql_query": {
