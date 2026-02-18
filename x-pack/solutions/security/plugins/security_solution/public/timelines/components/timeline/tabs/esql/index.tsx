@@ -115,10 +115,14 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     if (!savedSearch) return;
     return {
       ...savedSearch,
+      timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
+      refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
+      breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
+      rowsPerPage: discoverStateContainer.current?.getCurrentTab().appState.rowsPerPage,
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
-  }, [discoverStateContainer, title, description]);
+  }, [discoverStateContainer, discoverDataService.query.timefilter.timefilter, title, description]);
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
   useEffect(() => {
