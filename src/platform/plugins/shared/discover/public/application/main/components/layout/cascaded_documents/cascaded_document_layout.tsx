@@ -62,7 +62,9 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
       viewModeToggle,
       dataCascadeUiState,
+      dataGridUiStateMap,
       setDataCascadeUiState,
+      setDataGridUiState,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
@@ -110,6 +112,10 @@ const ESQLDataCascade = React.memo(
       ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
+          initialState={dataGridUiStateMap?.[cellId]}
+          onInitialStateChange={(initialState) => {
+            setDataGridUiState(cellId, initialState);
+          }}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
@@ -117,7 +123,7 @@ const ESQLDataCascade = React.memo(
           rowIndex={rowIndex}
         />
       ),
-      [dataView, props]
+      [dataGridUiStateMap, dataView, props, setDataGridUiState]
     );
 
     const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialTableState']>(
