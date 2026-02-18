@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { replaySnapshot } from '@kbn/es-snapshot-loader';
+import { createGcsRepository, replaySnapshot } from '@kbn/es-snapshot-loader';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export const OTEL_DEMO_SNAPSHOT_NAME = 'payment-service-failures';
@@ -20,8 +20,10 @@ export async function replayObservabilityDataStreams(
   await replaySnapshot({
     esClient,
     log,
-    // Scout server uses /tmp/repo as the default snapshot repository path
-    snapshotUrl: 'file:///tmp/repo',
+    repository: createGcsRepository({
+      bucket: 'obs-ai-datasets',
+      basePath: 'otel-demo/payment-service-failures',
+    }),
     snapshotName,
     patterns: ['logs-*', 'metrics-*', 'traces-*'],
   });

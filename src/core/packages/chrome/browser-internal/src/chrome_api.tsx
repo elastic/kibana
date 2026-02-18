@@ -71,7 +71,6 @@ export function createChromeApi({
       projectNavigation.setProjectHome(homeHref);
     },
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-    setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
     initNavigation: (id, navigationTree$, config) => {
       validateProjectStyle();
@@ -167,8 +166,6 @@ export function createChromeApi({
     sideNav: {
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       setIsCollapsed: state.sideNav.collapsed.set,
-      getIsFeedbackBtnVisible$: () => state.feedback.isBtnVisible$,
-      setIsFeedbackBtnVisible: state.feedback.setIsBtnVisible,
     },
 
     // Project Navigation
