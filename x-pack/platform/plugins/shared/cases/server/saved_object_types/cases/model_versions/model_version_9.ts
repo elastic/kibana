@@ -45,6 +45,8 @@ export const modelVersion9: SavedObjectsModelVersion = {
           schema.literal(10),
           schema.literal(20),
           schema.literal(30),
+          // NOTE: this is required for legacy reasons
+          schema.literal(40),
         ]),
       },
       { unknowns: 'ignore' }
