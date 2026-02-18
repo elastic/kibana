@@ -285,7 +285,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
+    if (!response?.rerank) throw new Error('Invalid rerank response');
+    return response.rerank.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
   }
 
   /**
@@ -302,7 +303,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.sparse_embedding!;
+    if (!response?.sparse_embedding) throw new Error('Invalid sparse_embedding response');
+    return response.sparse_embedding;
   }
 
   /**
@@ -327,7 +329,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.text_embedding!;
+    if (!response?.text_embedding) throw new Error('Invalid text_embedding response');
+    return response.text_embedding;
   }
 
   /**
@@ -368,7 +371,8 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.completion!;
+    if (!response?.completion) throw new Error('Invalid completion response');
+    return response.completion;
   }
 
   /**

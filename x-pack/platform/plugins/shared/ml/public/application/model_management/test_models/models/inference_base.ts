@@ -377,10 +377,9 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options: estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] =
-      this.getDefaultInferenceConfig();
+    const options = this.getDefaultInferenceConfig() as { num_top_classes?: number } | undefined;
 
-    if (options && 'num_top_classes' in options && (options?.num_top_classes ?? 0 > 0)) {
+    if (options && (options.num_top_classes ?? 0) > 0) {
       return {};
     }
 

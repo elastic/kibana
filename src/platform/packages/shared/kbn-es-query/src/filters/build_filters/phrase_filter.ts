@@ -30,8 +30,8 @@ export type PhraseFilterMeta = FilterMeta & {
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
   query: {
-    match_phrase?: estypes.QueryDslQueryContainer['match_phrase'];
-    match?: estypes.QueryDslQueryContainer['match'];
+    match_phrase?: NonNullable<estypes.QueryDslQueryContainer>['match_phrase'];
+    match?: NonNullable<estypes.QueryDslQueryContainer>['match'];
   };
 };
 
@@ -84,8 +84,16 @@ export const getPhraseFilterValue = (
 ): PhraseFilterValue => {
   if (isPhraseFilter(filter)) {
     const queryConfig = filter.query.match_phrase || filter.query.match || {};
-    const queryValue = Object.values(queryConfig)[0];
-    return isPlainObject(queryValue) ? queryValue.query : queryValue;
+    const queryValue = Object.values(queryConfig)[0] as
+      | { query: PhraseFilterValue }
+      | PhraseFilterValue
+      | undefined;
+    if (queryValue === undefined) {
+      return '' as PhraseFilterValue;
+    }
+    return isPlainObject(queryValue)
+      ? (queryValue as { query: PhraseFilterValue }).query
+      : (queryValue as PhraseFilterValue);
   } else {
     return filter.query?.script?.script?.params?.value;
   }

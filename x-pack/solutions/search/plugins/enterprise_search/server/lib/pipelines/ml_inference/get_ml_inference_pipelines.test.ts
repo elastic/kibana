@@ -103,23 +103,39 @@ describe('getMlInferencePipelines', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
+    const p1Processors = actualPipelines.pipeline1.processors as IngestProcessorContainer[];
+    const p2Processors = actualPipelines.pipeline2.processors as IngestProcessorContainer[];
+    const p3Processors = actualPipelines.pipeline3.processors as IngestProcessorContainer[];
+    const p4Processors = actualPipelines.pipeline4.processors as IngestProcessorContainer[];
     expect(
-      (actualPipelines.pipeline1.processors as IngestProcessorContainer[])[1].inference?.model_id
+      p1Processors[1] && 'inference' in p1Processors[1]
+        ? p1Processors[1].inference?.model_id
+        : undefined
     ).toEqual('model1');
     expect(
-      (actualPipelines.pipeline2.processors as IngestProcessorContainer[])[1].inference?.model_id
+      p2Processors[1] && 'inference' in p2Processors[1]
+        ? p2Processors[1].inference?.model_id
+        : undefined
     ).toEqual('model2');
     expect(
-      (actualPipelines.pipeline3.processors as IngestProcessorContainer[])[1].inference?.model_id
+      p3Processors[1] && 'inference' in p3Processors[1]
+        ? p3Processors[1].inference?.model_id
+        : undefined
     ).toEqual(''); // Redacted model ID
     expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[1].inference?.model_id
+      p4Processors[1] && 'inference' in p4Processors[1]
+        ? p4Processors[1].inference?.model_id
+        : undefined
     ).toEqual('');
     expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[2].inference?.model_id
+      p4Processors[2] && 'inference' in p4Processors[2]
+        ? p4Processors[2].inference?.model_id
+        : undefined
     ).toEqual('model2');
     expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[3].inference?.model_id
+      p4Processors[3] && 'inference' in p4Processors[3]
+        ? p4Processors[3].inference?.model_id
+        : undefined
     ).toEqual('');
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({ id: 'ml-inference-*' });
     expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledWith({});

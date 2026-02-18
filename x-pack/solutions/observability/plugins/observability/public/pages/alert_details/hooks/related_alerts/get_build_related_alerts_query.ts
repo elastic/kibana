@@ -29,7 +29,7 @@ interface Props {
 export function getBuildRelatedAlertsQuery({
   alert,
   filterProximal,
-}: Props): QueryDslQueryContainer {
+}: Props): Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>> {
   const groups = alert.fields[ALERT_GROUP];
   const shouldGroups: QueryDslQueryContainer[] = [];
   groups?.forEach(({ field, value }) => {

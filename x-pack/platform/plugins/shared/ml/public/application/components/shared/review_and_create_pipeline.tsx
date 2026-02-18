@@ -35,7 +35,8 @@ function getFieldFromPipelineConfig(config: estypes.IngestPipeline) {
   const { processors } = config;
   let field = '';
   if (processors?.length) {
-    field = Object.keys(processors[0].inference?.field_map ?? {})[0];
+    const firstProcessor = processors[0];
+    field = firstProcessor ? Object.keys(firstProcessor.inference?.field_map ?? {})[0] ?? '' : '';
   }
   return field;
 }

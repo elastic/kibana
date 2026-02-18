@@ -192,7 +192,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: estypes.QueryDslQueryContainer;
+      searchQuery: string | { [key: string]: unknown };
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -205,7 +205,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
       setDataComparisonListState({
         ...dataComparisonListState,
-        searchQuery: searchParams.searchQuery,
+        searchQuery: searchParams.searchQuery as estypes.QueryDslQueryContainer,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
@@ -404,7 +404,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
             <SearchPanelContent
               dataView={dataView}
               searchString={searchString}
-              searchQuery={searchQuery}
+              searchQuery={searchQuery ?? { match_all: {} }}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
               onQueryChange={onQueryChange}

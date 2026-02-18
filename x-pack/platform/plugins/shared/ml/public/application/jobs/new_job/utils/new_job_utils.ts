@@ -62,7 +62,7 @@ export function createQueries(
   kibanaConfig: IUiSettingsClient
 ) {
   let query = getDefaultQuery();
-  let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
+  let combinedQuery: NonNullable<estypes.QueryDslQueryContainer> = getDefaultDatafeedQuery();
 
   query = data.query;
   const filter = data.filter;
@@ -71,22 +71,25 @@ export function createQueries(
   if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
-      combinedQuery = toElasticsearchQuery(ast, dataView);
+      combinedQuery = toElasticsearchQuery(
+        ast,
+        dataView
+      ) as NonNullable<estypes.QueryDslQueryContainer>;
+    }
+    if (!combinedQuery) {
+      combinedQuery = getDefaultDatafeedQuery();
     }
     const filterQuery = buildQueryFromFilters(filters, dataView);
 
     if (combinedQuery.bool === undefined) {
-      combinedQuery.bool = {};
-      // toElasticsearchQuery may add a single multi_match item to the
-      // root of its returned query, rather than putting it inside
-      // a bool.should
-      // in this case, move it to a bool.should
+      const boolQuery: estypes.QueryDslBoolQuery = {};
       if (combinedQuery.multi_match !== undefined) {
-        combinedQuery.bool.should = {
+        boolQuery.should = {
           multi_match: combinedQuery.multi_match,
-        };
+        } as estypes.QueryDslQueryContainer;
         delete combinedQuery.multi_match;
       }
+      combinedQuery.bool = boolQuery;
     }
 
     if (Array.isArray(combinedQuery.bool.filter) === false) {
@@ -113,7 +116,12 @@ export function createQueries(
     ];
   } else {
     const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-    combinedQuery = buildEsQuery(dataView, [query], filters, esQueryConfigs);
+    combinedQuery = buildEsQuery(
+      dataView,
+      [query],
+      filters,
+      esQueryConfigs
+    ) as unknown as NonNullable<estypes.QueryDslQueryContainer>;
   }
 
   return {

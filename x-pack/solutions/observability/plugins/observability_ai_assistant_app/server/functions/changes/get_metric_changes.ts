@@ -9,7 +9,7 @@ import type {
   AggregationsAutoDateHistogramAggregation,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateOf, AggregateOfMap, ChangePointType } from '@kbn/es-types/src/search';
+import type { AggregateOf, ChangePointType } from '@kbn/es-types/src/search';
 import type { ObservabilityAIAssistantElasticsearchClient } from '../../clients/elasticsearch';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
@@ -103,11 +103,11 @@ export async function getMetricChanges({
 
   const groupAgg = getGroupingAggregation(groupBy);
 
-  const subAggs = {
+  const subAggs: Record<string, AggregationsAggregationContainer> = {
     over_time: {
       auto_date_histogram: dateHistogram,
       aggs: {
-        metric: metricAgg,
+        metric: metricAgg as AggregationsAggregationContainer,
         value: {
           bucket_script: {
             buckets_path: {
@@ -143,11 +143,22 @@ export async function getMetricChanges({
     },
   });
 
-  const groups = (response.aggregations?.groups.buckets || []) as Array<
-    AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }
-  >;
+  interface OverTimeBucket {
+    key_as_string?: string;
+    key?: string | number;
+    value?: { value?: number };
+  }
 
-  const series = groups.map((group) => {
+  interface GroupBucket {
+    key?: string;
+    key_as_string?: string;
+    over_time?: { buckets?: OverTimeBucket[] };
+    changes?: AggregateOf<{ change_point: { buckets_path: string } }, unknown>;
+  }
+
+  const groups = (response.aggregations?.groups.buckets || []) as GroupBucket[];
+
+  const series = groups.map((group: GroupBucket) => {
     const key = group.key ?? 'all';
 
     const changes = group.changes as AggregateOf<
@@ -155,16 +166,19 @@ export async function getMetricChanges({
       unknown
     >;
 
+    const overTime = group.over_time;
+    const buckets: OverTimeBucket[] = overTime?.buckets ?? [];
+
     return {
       key,
-      over_time: group.over_time.buckets.map((bucket) => {
+      over_time: buckets.map((bucket: OverTimeBucket) => {
         return {
-          x: new Date(bucket.key_as_string).getTime(),
+          x: new Date(bucket.key_as_string ?? bucket.key ?? 0).getTime(),
           y: bucket.value?.value as number | null,
         };
       }),
       changes:
-        changes.type.indeterminable || !changes.bucket?.key
+        !changes || changes.type.indeterminable || !changes.bucket?.key
           ? { type: 'indeterminable' as ChangePointType }
           : {
               time: new Date(changes.bucket.key).toISOString(),

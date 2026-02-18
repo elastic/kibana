@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ESSearchResponse } from '@kbn/es-types';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
 import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
@@ -13,19 +12,30 @@ import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 
-export function transformINPResponse<T>(
-  response?: ESSearchResponse<T, ReturnType<typeof inpQuery>, { restTotalHitsAsInt: false }>,
+interface InPAggregations {
+  inp?: { values?: Record<string, number> };
+  inpRanks?: { values?: Array<{ value?: number }> };
+}
+
+interface InPSearchResponse {
+  aggregations?: InPAggregations;
+  hits?: { total?: { value?: number } };
+}
+
+export function transformINPResponse(
+  response?: InPSearchResponse,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;
-  const { inp, inpRanks } = response.aggregations ?? {};
+  const aggs = (response.aggregations ?? {}) as InPAggregations;
+  const { inp, inpRanks } = aggs;
 
   const pkey = percentile.toFixed(1);
 
   return {
-    hasINP: response.hits.total.value > 0,
-    inp: inp?.values[pkey],
-    inpRanks: inp?.values[pkey]
+    hasINP: (response.hits?.total?.value ?? 0) > 0,
+    inp: inp?.values?.[pkey],
+    inpRanks: inp?.values?.[pkey]
       ? getRanksPercentages(inpRanks?.values) ?? DEFAULT_RANKS
       : DEFAULT_RANKS,
   };
@@ -39,7 +49,7 @@ export function inpQuery(
   urlQuery?: string,
   uiFilters?: UxUIFilters,
   percentile = PERCENTILE_DEFAULT
-) {
+): ReturnType<typeof mergeProjection> {
   const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 
   const projection = getRumPageExitTransactionsProjection({

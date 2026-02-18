@@ -71,7 +71,7 @@ export const useData = (
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
         index: selectedDataView.getIndexPattern(),
-        searchQuery,
+        searchQuery: searchQuery ?? { match_all: {} },
         timeFieldName: selectedDataView.timeFieldName,
         runtimeFieldMap: selectedDataView.getRuntimeMappings(),
       };

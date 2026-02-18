@@ -46,7 +46,7 @@ export interface TableProps {
   /**
    * Query that contains the id of the alerts to display in the table
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
 }
 
 /**

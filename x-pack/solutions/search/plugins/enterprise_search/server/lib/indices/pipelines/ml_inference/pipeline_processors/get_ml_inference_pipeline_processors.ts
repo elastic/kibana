@@ -49,7 +49,7 @@ export const getMlInferencePipelineProcessorNamesFromPipelines = (
   } = pipelines;
 
   return mlInferencePipelineProcessors
-    .map((obj) => obj.pipeline?.name)
+    .map((obj) => (obj != null && 'pipeline' in obj ? obj.pipeline?.name : undefined))
     .filter((name): name is string => name !== undefined);
 };
 
@@ -67,7 +67,7 @@ export const getProcessorPipelineMap = (
 
   Object.entries(pipelines).forEach(([name, pipeline]) =>
     pipeline?.processors?.forEach((processor) => {
-      if (processor.pipeline?.name !== undefined) {
+      if (processor != null && 'pipeline' in processor && processor.pipeline?.name !== undefined) {
         addPipelineToProcessorMap(processor.pipeline.name, name);
       }
     })
@@ -92,8 +92,13 @@ export const fetchPipelineProcessorInferenceData = async (
         mlInferencePipelineProcessorConfigs[pipelineProcessorName].processors || [];
 
       // Get the inference processors; there is one per configured field, but they share the same model ID
-      const inferenceProcessors = subProcessors.filter((processor) =>
-        Object.hasOwn(processor, 'inference')
+      const inferenceProcessors = subProcessors.filter(
+        (
+          processor
+        ): processor is NonNullable<typeof processor> & {
+          inference: { model_id?: string; field_map?: Record<string, string> };
+        } =>
+          processor != null && Object.hasOwn(processor, 'inference') && processor.inference != null
       );
 
       const trainedModelName = inferenceProcessors[0]?.inference?.model_id;

@@ -40,7 +40,7 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
         [aggregation.type]: {
           field: aggregation.field,
         },
-      } as Record<Exclude<MetricType, 'count' | 'p95' | 'p99'>, { field: string }>,
+      } as unknown as AggregationsAggregationContainer,
       buckets_path: 'metric',
     };
   }
@@ -153,7 +153,8 @@ async function getMetricChangePoints({
         ],
       },
     },
-    aggs: aggregations as Record<string, AggregationsAggregationContainer>,
+    // AggregationsAggregationContainer is ExactlyOne - cast through unknown for nested multi-agg structure
+    aggs: aggregations as unknown as Record<string, AggregationsAggregationContainer>,
   });
 
   const buckets = (response.aggregations as { groups?: { buckets?: Bucket[] } })?.groups?.buckets;

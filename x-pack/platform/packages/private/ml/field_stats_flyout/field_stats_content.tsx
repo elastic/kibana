@@ -76,11 +76,13 @@ export const FieldStatsContent: FC<FieldStatsFlyoutProps> = (props) => {
 
   const showFieldStats = timeRange && isDefined(selectedDataView) && fieldForStats;
 
-  return showFieldStats ? (
+  const effectiveDslQuery = dslQuery ?? getDefaultDSLQuery();
+
+  return showFieldStats && effectiveDslQuery ? (
     <FieldStats
       key={fieldForStats.name}
       services={fieldStatsServices}
-      dslQuery={dslQuery ?? getDefaultDSLQuery()}
+      dslQuery={effectiveDslQuery as object}
       fromDate={timeRange.from}
       toDate={timeRange.to}
       dataViewOrDataViewId={selectedDataView}

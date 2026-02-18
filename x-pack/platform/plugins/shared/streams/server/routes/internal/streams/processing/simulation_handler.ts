@@ -217,29 +217,34 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
     traceCustomIdentifiers: true,
   }).processors;
 
-  return transpiledIngestPipelineProcessors.map((processor) => {
-    const type = Object.keys(processor)[0];
-    const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
+  return transpiledIngestPipelineProcessors
+    .filter((p): p is NonNullable<typeof p> => p != null)
+    .map((processor) => {
+      const type = Object.keys(processor)[0];
+      const processorConfig =
+        type && type in processor
+          ? (processor as Record<string, Record<string, unknown>>)[type]
+          : undefined;
 
-    return {
-      [type]: {
-        ...processorConfig,
-        ignore_failure: false,
-        on_failure: [
-          {
-            append: {
-              field: '_errors',
-              value: {
-                message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig.tag,
-                type: 'generic_processor_failure',
+      return {
+        [type]: {
+          ...processorConfig,
+          ignore_failure: false,
+          on_failure: [
+            {
+              append: {
+                field: '_errors',
+                value: {
+                  message: '{{{ _ingest.on_failure_message }}}',
+                  processor_id: processorConfig?.tag,
+                  type: 'generic_processor_failure',
+                },
               },
             },
-          },
-        ],
-      },
-    };
-  });
+          ],
+        },
+      };
+    }) as IngestProcessorContainer[];
 };
 
 const prepareSimulationData = (
@@ -592,9 +597,13 @@ const initProcessorMetricsMap = (
   const ids = new Set<string>();
 
   for (const processor of processors) {
+    if (!processor) continue;
     const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config = processor[type] as Record<string, unknown>;
-    const tag = config.tag;
+    const config =
+      type && type in processor
+        ? (processor as Record<string, Record<string, unknown>>)[type]
+        : undefined;
+    const tag = config?.tag;
 
     if (typeof tag === 'string') {
       ids.add(tag);

@@ -102,7 +102,7 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
                     description: j.description ?? '',
                     source_index: j.source.index as string[], // esclient types are wrong
                     dest_index: j.dest.index,
-                    job_type: Object.keys(j.analysis)[0] ?? '',
+                    job_type: Object.keys(j.analysis ?? {})[0] ?? '',
                     state: dfaStatsMapped[id]?.state ?? '',
                     spaces: dfaJobStatus['data-frame-analytics'][id] ?? [],
                   };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
@@ -27,8 +26,10 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { inputsModel } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 
+type AlertsTableQuery = AlertsTableProps['query'];
+
 // check to see if the query is a known "empty" shape
-export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
+export function isKnownEmptyQuery(query: AlertsTableQuery) {
   const queries = [
     // the default query used by the job wizards
     { bool: { must: [{ match_all: {} }] } },
@@ -47,7 +48,7 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   return false;
 }
 
-function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
+function getFiltersForDSLQuery(datafeedQuery: AlertsTableQuery): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
     return [];
   }

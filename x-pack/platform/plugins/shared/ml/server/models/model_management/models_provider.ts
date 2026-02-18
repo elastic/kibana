@@ -516,13 +516,18 @@ export class ModelsProvider {
         const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
 
         for (const processor of processors) {
-          const id = processor.inference?.model_id;
-          if (modelIdsMap.has(id)) {
+          const id =
+            processor && 'inference' in processor
+              ? (processor as { inference?: { model_id?: string } }).inference?.model_id
+              : undefined;
+          if (id !== undefined && id !== null && modelIdsMap.has(id)) {
             const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+            if (obj == null) {
+              modelIdsMap.set(id, {
+                [pipelineName]: pipelineDefinition as unknown as PipelineDefinition,
+              });
             } else {
-              obj![pipelineName] = pipelineDefinition;
+              obj[pipelineName] = pipelineDefinition as unknown as PipelineDefinition;
             }
           }
         }

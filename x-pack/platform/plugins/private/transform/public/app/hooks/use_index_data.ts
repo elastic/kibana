@@ -29,6 +29,7 @@ import {
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { isCCSRemoteIndexName } from '@kbn/es-query';
+import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
@@ -154,7 +155,9 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
       index: indexPattern,
       fields: ['*'],
       _source: false,
-      query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      query: (isDefaultQuery(query)
+        ? defaultQuery
+        : queryWithBaseFilterCriteria) as SavedSearchQuery,
       from: pagination.pageIndex * pagination.pageSize,
       size: pagination.pageSize,
       ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -216,7 +219,7 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
                 type: getFieldType(cT.schema),
               };
         }),
-      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      (isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria) as SavedSearchQuery,
       combinedRuntimeMappings,
       chartsVisible
     );

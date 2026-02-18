@@ -265,12 +265,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     } = useKibana();
     const esQuery = useMemo(() => {
       try {
-        lastValidEsQuery.current = buildEsQuery(
+        const built = buildEsQuery(
           dataView,
           [kquery],
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
         );
+        lastValidEsQuery.current = built as EsQuery;
       } catch (err) {
         notifications?.toasts.addError(err, {
           title: i18n.translate(

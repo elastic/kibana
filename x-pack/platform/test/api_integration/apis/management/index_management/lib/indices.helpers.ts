@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesStatsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getRandomString } from './random';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -28,7 +29,7 @@ export function indicesHelpers(getService: FtrProviderContext['getService']) {
   const catIndex = (index?: string, h?: any) =>
     es.cat.indices({ index, format: 'json', h }, { meta: true });
 
-  const indexStats = (index: string, metric: string) =>
+  const indexStats = (index: string, metric: IndicesStatsRequest['metric']) =>
     es.indices.stats({ index, metric }, { meta: true });
 
   return { createIndex, deleteAllIndices, catIndex, indexStats };
