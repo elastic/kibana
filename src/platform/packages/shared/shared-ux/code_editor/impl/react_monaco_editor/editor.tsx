@@ -132,15 +132,17 @@ const applyModelContentChanges = (
   prevValue: string,
   changes: monacoEditor.editor.IModelContentChange[]
 ): string => {
-  // Apply in descending order of offset so earlier edits don't shift later offsets.
+  // Monaco reports offsets and lengths relative to the *previous* value. When multiple changes are
+  // present (e.g. multi-cursor edits), apply them from the end of the string towards the start so
+  // earlier edits don't shift the offsets of later ones.
   const sortedChanges = [...changes].sort((a, b) => b.rangeOffset - a.rangeOffset);
-  let nextValue = prevValue;
-  for (const change of sortedChanges) {
+
+  return sortedChanges.reduce((acc, change) => {
     const start = change.rangeOffset;
+    // `rangeLength` is the number of chars to replace from the previous value.
     const end = change.rangeOffset + change.rangeLength;
-    nextValue = nextValue.slice(0, start) + change.text + nextValue.slice(end);
-  }
-  return nextValue;
+    return acc.slice(0, start) + change.text + acc.slice(end);
+  }, prevValue);
 };
 
 // initialize supported languages
@@ -250,7 +252,8 @@ export function MonacoEditor({
   }, [euiTheme]);
 
   const initMonaco = () => {
-    const finalValue = value !== null ? value : defaultValue;
+    // Treat `null`/`undefined` as uncontrolled, per the prop contract.
+    const finalValue = value ?? defaultValue;
 
     if (containerElement.current && overflowWidgetsDomNode.current) {
       // add the monaco class name to the overflow widgets dom node so that styles,

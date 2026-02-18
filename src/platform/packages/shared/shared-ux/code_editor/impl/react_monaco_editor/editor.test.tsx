@@ -149,6 +149,24 @@ describe('react monaco editor', () => {
 
     expect(await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID)).toBeDefined();
   });
+
+  it('uses defaultValue when value is undefined (uncontrolled mode)', async () => {
+    const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
+    let firstArg: unknown;
+    const createModelSpy = jest
+      .spyOn(monaco.editor, 'createModel')
+      .mockImplementation((...args) => {
+        firstArg = args[0];
+        return originalCreateModel(...args);
+      });
+
+    render(<MonacoEditor {...defaultProps} value={undefined} defaultValue="fallback" />);
+
+    await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
+    expect(firstArg).toBe('fallback');
+
+    createModelSpy.mockRestore();
+  });
 });
 
 describe('react monaco editor onChange performance', () => {
