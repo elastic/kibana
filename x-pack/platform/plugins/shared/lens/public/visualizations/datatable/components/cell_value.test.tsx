@@ -16,6 +16,13 @@ import type { DatatableArgs } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
 
+const createMockFieldFormat = (convertFn: (x: unknown) => string): FieldFormat =>
+  ({
+    convert: convertFn,
+    convertToReact: (x: unknown) => <>{convertFn(x)}</>,
+    hasReactSupport: () => true,
+  } as unknown as FieldFormat);
+
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
   const cellColorFnMock = jest.fn().mockReturnValue(innerCellColorFnMock);
@@ -36,7 +43,7 @@ describe('datatable cell renderer', () => {
   };
   const CellRenderer = createGridCell(
     {
-      a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+      a: createMockFieldFormat((x) => `formatted ${x}`),
     },
     { columns: [], sortingColumnId: '', sortingDirection: 'none' },
     DataContext,
@@ -86,18 +93,18 @@ describe('datatable cell renderer', () => {
 
   it('set class with text alignment', () => {
     renderCellRenderer();
-    expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--right');
+    expect(screen.getByTestId('lnsTableCellContent')).toHaveClass('lnsTableCell--right');
   });
 
   it('does not set multiline class for regular height tables', () => {
     renderCellRenderer();
-    expect(screen.getByText('formatted 123')).not.toHaveClass('lnsTableCell--multiline');
+    expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--multiline');
   });
 
   it('set multiline class for auto height tables', () => {
     const MultiLineCellRenderer = createGridCell(
       {
-        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+        a: createMockFieldFormat((x) => `formatted ${x}`),
       },
       { columns: [], sortingColumnId: '', sortingDirection: 'none' },
       DataContext,
@@ -118,13 +125,13 @@ describe('datatable cell renderer', () => {
       { wrapper: DataContextProviderWrapper() }
     );
 
-    expect(screen.getByText('formatted 123')).toHaveClass('lnsTableCell--multiline');
+    expect(screen.getByTestId('lnsTableCellContent')).toHaveClass('lnsTableCell--multiline');
   });
 
   it('renders as button if oneClickFilter is set', () => {
     const MultiLineCellRenderer = createGridCell(
       {
-        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+        a: createMockFieldFormat((x) => `formatted ${x}`),
       },
       {
         columns: [
@@ -161,7 +168,7 @@ describe('datatable cell renderer', () => {
     function getCellRenderer(columnConfig: DatatableArgs) {
       return createGridCell(
         {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+          a: createMockFieldFormat((x) => `formatted ${x}`),
         },
         columnConfig,
         DataContext,
@@ -305,7 +312,7 @@ describe('datatable cell renderer', () => {
       innerCellColorFnMock.mockReturnValue(backgroundColor);
       const CellRendererWithColor = createGridCell(
         {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+          a: createMockFieldFormat((x) => `formatted ${x}`),
         },
         columnConfig,
         DataContext,

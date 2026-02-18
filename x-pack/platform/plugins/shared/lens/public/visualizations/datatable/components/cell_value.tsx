@@ -13,6 +13,7 @@ import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { FormattedValue } from '@kbn/field-formats-plugin/common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -44,7 +45,7 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+    const textContent = filterOnClick ? formatter?.convert(rawValue, 'text') : undefined;
     const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {
@@ -103,7 +104,7 @@ export const createGridCell = (
               handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
             }}
           >
-            {content}
+            {textContent}
           </EuiLink>
         </div>
       );
@@ -111,18 +112,15 @@ export const createGridCell = (
 
     return (
       <div
-        /*
-         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-         * which is produced in a safe way.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
         className={classNames({
           'lnsTableCell--multiline': fitRowToContent,
           'lnsTableCell--colored': colorMode !== 'none',
           [`lnsTableCell--${currentAlignment}`]: true,
         })}
-      />
+      >
+        {formatter && <FormattedValue fieldFormat={formatter} value={rawValue} />}
+      </div>
     );
   };
 };
