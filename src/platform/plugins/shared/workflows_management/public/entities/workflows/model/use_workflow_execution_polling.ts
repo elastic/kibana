@@ -26,7 +26,7 @@ interface PollingState {
  * This hook uses RxJS operators for a more declarative approach.
  * It uses RxJS's built-in operators for polling and cleanup.
  */
-export const useWorkflowExecutionPolling = (workflowExecutionId: string): PollingState => {
+export const useWorkflowExecutionPolling = (executionId: string): PollingState => {
   const [loadExecution, { result: workflowExecution, error }] =
     useAsyncThunkState(loadExecutionThunk);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +42,7 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
     // Create an observable that polls at intervals, starting immediately
     // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
     const polling$ = timer(0, PollingIntervalMs).pipe(
-      switchMap(() => loadExecution({ id: workflowExecutionId })),
+      switchMap(() => loadExecution({ id: executionId })),
       takeUntil(stop$)
     );
 
@@ -53,7 +53,7 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
       stop$.next();
       setIsLoading(false);
     };
-  }, [workflowExecutionId, loadExecution]);
+  }, [executionId, loadExecution]);
 
   // Stop polling when execution reaches terminal state
   useEffect(() => {

@@ -9,6 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_API_PATHS } from '../../../../../../common/api/constants';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
@@ -54,7 +55,7 @@ export const testWorkflowThunk = createAsyncThunk<
       }
 
       // Make the API call to test the workflow
-      const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
+      const response = await http.post<TestWorkflowResponse>(WORKFLOWS_API_PATHS.TEST, {
         body: JSON.stringify(requestBody),
       });
 

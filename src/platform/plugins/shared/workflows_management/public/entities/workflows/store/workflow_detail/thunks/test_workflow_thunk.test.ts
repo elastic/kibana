@@ -41,7 +41,7 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/workflow/test', {
       body: JSON.stringify({
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: testInputs,
@@ -74,7 +74,7 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/workflow/test', {
       body: JSON.stringify({
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: testInputs,
@@ -168,7 +168,7 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/workflow/test', {
       body: JSON.stringify({
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: {},

@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
+import { getWorkflowExecutionsListPath } from '../../../../common/api/constants';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -41,9 +42,11 @@ export function useWorkflowExecutions(
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return http.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
+      if (!params.workflowId) {
+        throw new Error('Workflow ID is required'); // This should never happen
+      }
+      return http.get<WorkflowExecutionListDto>(getWorkflowExecutionsListPath(params.workflowId), {
         query: {
-          workflowId: params.workflowId,
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           ...(params.executedBy && params.executedBy.length > 0

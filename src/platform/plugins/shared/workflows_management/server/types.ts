@@ -32,7 +32,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import type { WorkflowsManagementApi } from './service/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;

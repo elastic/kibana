@@ -26,6 +26,9 @@ import {
 } from './connectors/workflows';
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { defineRoutes } from './routes';
+import { WorkflowsManagementApi } from './service/workflows_management_api';
+import { WorkflowsService } from './service/workflows_management_service';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsRequestHandlerContext,
@@ -35,9 +38,6 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
 import { stepSchemas } from '../common/step_schemas';
 // Import the workflows connector
 

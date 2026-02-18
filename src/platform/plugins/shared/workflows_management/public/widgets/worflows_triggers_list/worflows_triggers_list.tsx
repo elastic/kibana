@@ -28,7 +28,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="crossInCircle" size="s" />
+          <EuiIcon type="crossInCircle" size="s" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
@@ -44,7 +44,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={TRIGGERS_ICONS[firstTrigger.type]} size="s" />
+        <EuiIcon type={TRIGGERS_ICONS[firstTrigger.type]} size="s" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">{capitalize(firstTrigger.type)}</EuiText>
@@ -64,7 +64,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={TRIGGERS_ICONS[trigger.type]} size="s" />
+                  <EuiIcon type={TRIGGERS_ICONS[trigger.type]} size="s" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">{capitalize(trigger.type)}</EuiText>

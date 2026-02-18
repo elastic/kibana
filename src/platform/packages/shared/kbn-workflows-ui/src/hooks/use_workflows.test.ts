@@ -52,14 +52,14 @@ describe('useWorkflows', () => {
       query: 'test',
     };
 
-    mockCore.http.post.mockResolvedValue(mockData);
+    mockCore.http.get.mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useWorkflows(params), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/search', {
-      body: JSON.stringify(params),
+    expect(mockCore.http.get).toHaveBeenCalledWith('/api/workflows', {
+      query: params,
     });
     expect(result.current.data).toEqual(mockData);
   });

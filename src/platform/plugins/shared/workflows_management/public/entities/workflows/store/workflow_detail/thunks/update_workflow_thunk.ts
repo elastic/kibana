@@ -11,6 +11,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
 import { loadWorkflowThunk } from './load_workflow_thunk';
+import { getWorkflowPath } from '../../../../../../common/api/constants';
 import { affectsYamlMetadata, updateWorkflowYamlFields } from '../../../../../../common/lib/yaml';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import { queryClient } from '../../../../../shared/lib/query_client';
@@ -54,7 +55,7 @@ export const updateWorkflowThunk = createAsyncThunk<
       }
 
       // Make the API call to update the workflow
-      await http.put<void>(`/api/workflows/${id}`, {
+      await http.put<void>(getWorkflowPath(id), {
         body: JSON.stringify(workflow),
       });
 

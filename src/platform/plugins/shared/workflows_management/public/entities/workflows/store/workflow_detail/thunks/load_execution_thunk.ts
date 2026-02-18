@@ -10,6 +10,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { getExecutionByIdPath } from '../../../../../../common/api/constants';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { _setComputedExecution, setExecution } from '../slice';
@@ -32,8 +33,8 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      // Make the API call to load the execution
-      const response = await http.get<WorkflowExecutionDto>(`/api/workflowExecutions/${id}`);
+      // Make the API call to load the execution (by executionId only)
+      const response = await http.get<WorkflowExecutionDto>(getExecutionByIdPath(id));
       dispatch(setExecution(response));
 
       if (id !== previousExecution?.id) {

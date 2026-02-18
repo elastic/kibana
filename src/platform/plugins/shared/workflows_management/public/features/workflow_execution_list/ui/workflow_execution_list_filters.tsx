@@ -164,7 +164,7 @@ export function ExecutionListFilters({
             )}
             css={styles.filterButtonStyle}
           >
-            <EuiIcon type="filter" />
+            <EuiIcon type="filter" aria-hidden={true} />
           </EuiFilterButton>
         }
         panelPaddingSize="none"

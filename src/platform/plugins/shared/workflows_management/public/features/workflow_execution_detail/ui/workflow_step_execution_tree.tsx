@@ -185,7 +185,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -201,7 +201,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="list" size="l" />}
+        icon={<EuiIcon type="list" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -330,7 +330,7 @@ export const WorkflowStepExecutionTree = ({
   return (
     <EuiEmptyPrompt
       {...emptyPromptCommonProps}
-      icon={<EuiIcon type="error" size="l" />}
+      icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
       title={
         <h2>
           <FormattedMessage

@@ -44,7 +44,7 @@ describe('runWorkflowThunk', () => {
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/${mockWorkflow.id}/run`, {
+    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/workflow/${mockWorkflow.id}/run`, {
       body: JSON.stringify({
         inputs: testInputs,
       }),
@@ -136,7 +136,7 @@ describe('runWorkflowThunk', () => {
 
     const result = await store.dispatch(runWorkflowThunk({ inputs: {} }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/${mockWorkflow.id}/run`, {
+    expect(mockServices.http.post).toHaveBeenCalledWith(`/api/workflows/workflow/${mockWorkflow.id}/run`, {
       body: JSON.stringify({
         inputs: {},
       }),

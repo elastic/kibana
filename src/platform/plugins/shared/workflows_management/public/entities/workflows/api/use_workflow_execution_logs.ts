@@ -8,6 +8,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { getExecutionLogsPath } from '../../../../common/api/constants';
 import { useKibana } from '../../../hooks/use_kibana';
 interface WorkflowExecutionLogEntry {
   id: string;
@@ -61,7 +62,7 @@ export function useWorkflowExecutionLogs({
     ],
     queryFn: async () => {
       const response = await http.get<WorkflowExecutionLogsResponse>(
-        `/api/workflowExecutions/${executionId}/logs`,
+        getExecutionLogsPath(executionId),
         {
           query: {
             stepExecutionId,

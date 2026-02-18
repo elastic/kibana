@@ -29,12 +29,13 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
 export interface WorkflowExecutionDetailProps {
+  workflowId: string;
   executionId: string;
   onClose: () => void;
 }
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
-  ({ executionId, onClose }) => {
+  ({ workflowId, executionId, onClose }) => {
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
 
     const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();

@@ -18,6 +18,7 @@ jest.mock('../../../hooks/use_async_thunk');
 const mockUseAsyncThunkState = useAsyncThunkState as jest.MockedFunction<typeof useAsyncThunkState>;
 
 describe('useWorkflowExecutionPolling', () => {
+  const mockWorkflowId = 'test-workflow-id';
   const mockWorkflowExecutionId = 'test-execution-id';
   let mockLoadExecution: jest.Mock;
   let hookResult: any;
@@ -131,7 +132,9 @@ describe('useWorkflowExecutionPolling', () => {
       jest.advanceTimersByTime(0);
     });
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
-    expect(mockLoadExecution).toHaveBeenCalledWith({ id: mockWorkflowExecutionId });
+    expect(mockLoadExecution).toHaveBeenCalledWith({
+      id: mockWorkflowExecutionId,
+    });
   });
 
   it('should not start polling when workflow execution data is not available', () => {

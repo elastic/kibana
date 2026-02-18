@@ -16,6 +16,12 @@ import type {
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import {
+  getWorkflowClonePath,
+  getWorkflowPath,
+  getWorkflowRunPath,
+  WORKFLOWS_API_PATHS,
+} from '../../../../common/api/constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
@@ -44,7 +50,7 @@ export function useWorkflowActions() {
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
     mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
-      return http.put<void>(`/api/workflows/${id}`, {
+      return http.put<void>(getWorkflowPath(id), {
         body: JSON.stringify(workflow),
       });
     },
@@ -149,7 +155,7 @@ export function useWorkflowActions() {
   const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => {
-      return http.delete(`/api/workflows`, {
+      return http.delete(WORKFLOWS_API_PATHS.BULK_DELETE, {
         body: JSON.stringify({ ids }),
       });
     },
@@ -227,7 +233,7 @@ export function useWorkflowActions() {
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
-      return http.post(`/api/workflows/${id}/run`, {
+      return http.post(getWorkflowRunPath(id), {
         body: JSON.stringify({ inputs }),
       });
     },
@@ -268,7 +274,7 @@ export function useWorkflowActions() {
   const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
     mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
-      return http.post(`/api/workflows/testStep`, {
+      return http.post(WORKFLOWS_API_PATHS.TEST_STEP, {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
@@ -298,7 +304,7 @@ export function useWorkflowActions() {
   const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
-      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
+      return http.post<WorkflowDetailDto>(getWorkflowClonePath(id));
     },
     onSuccess: (clonedWorkflow, variables) => {
       // Report telemetry for successful clone

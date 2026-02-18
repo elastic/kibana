@@ -146,8 +146,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               ) : null
             }
             executionDetail={
-              selectedExecutionId ? (
+              id && selectedExecutionId ? (
                 <WorkflowExecutionDetail
+                  workflowId={id}
                   executionId={selectedExecutionId}
                   onClose={onCloseExecutionDetail}
                 />

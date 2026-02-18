@@ -75,7 +75,7 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
+      expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/workflow/test-workflow-1', {
         body: JSON.stringify({ yaml: 'name: Updated Workflow\nsteps: []' }),
       });
       expect(mockLoadWorkflowThunk).toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk());
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows', {
+      expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/workflow', {
         body: JSON.stringify({ yaml: 'name: New Workflow\nsteps: []' }),
       });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
