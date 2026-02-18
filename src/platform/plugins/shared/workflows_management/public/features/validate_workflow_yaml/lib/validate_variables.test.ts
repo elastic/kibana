@@ -262,7 +262,7 @@ describe('validateVariables', () => {
       mockWorkflowGraph,
       ['steps', 0, 'params', 'value'],
       undefined,
-      undefined
+      0
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
