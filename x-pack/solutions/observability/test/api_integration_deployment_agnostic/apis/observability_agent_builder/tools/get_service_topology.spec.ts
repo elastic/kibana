@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
@@ -78,6 +78,9 @@ const getTargetName = (c: ServiceTopologyConnection) =>
 
 const getSourceName = (c: ServiceTopologyConnection) => c.source['service.name'];
 
+const getConnectionByTarget = (connections: ServiceTopologyConnection[], targetName: string) =>
+  connections.find((c) => getTargetName(c) === targetName);
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
@@ -105,7 +108,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    // Helper to execute the tool with given params
     const executeTopology = async (params: {
       serviceName: string;
       direction?: 'downstream' | 'upstream' | 'both';
@@ -178,15 +180,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
         );
 
+        expect(traceBasedImmediate.length).to.be(2);
         expect(metricsBasedConnections.length).to.be(traceBasedImmediate.length);
 
         // Both paths query the same underlying service_destination metrics (1m rollups),
-        // so the RED metrics must match. Stringify+sort to compare as sets (order may differ).
-        const toSortedMetrics = (conns: ServiceTopologyConnection[]) =>
-          conns.map((c) => JSON.stringify(c.metrics)).sort();
+        // so the RED metrics must match despite different target naming.
+        expect(
+          getConnectionByTarget(metricsBasedConnections, CHECKOUT_SERVICE.resource)?.metrics
+        ).to.eql(getConnectionByTarget(traceBasedImmediate, CHECKOUT_SERVICE.serviceName)?.metrics);
 
-        expect(toSortedMetrics(metricsBasedConnections)).to.eql(
-          toSortedMetrics(traceBasedImmediate)
+        expect(
+          getConnectionByTarget(metricsBasedConnections, RECOMMENDATION_SERVICE.resource)?.metrics
+        ).to.eql(
+          getConnectionByTarget(traceBasedImmediate, RECOMMENDATION_SERVICE.serviceName)?.metrics
         );
       });
     });
@@ -265,18 +271,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           serviceName: CHECKOUT_SERVICE.serviceName,
           direction: 'downstream',
         });
-        const toPostgres = connections.find(
-          (c) =>
-            'span.destination.service.resource' in c.target &&
-            c.target['span.destination.service.resource'] === POSTGRES_DEPENDENCY.resource
-        );
+        const { metrics } = getConnectionByTarget(connections, POSTGRES_DEPENDENCY.resource)!;
 
-        expect(toPostgres?.metrics?.latencyMs).to.be.a('number');
-        expect(toPostgres?.metrics?.latencyMs).to.be.greaterThan(0);
+        expect(metrics?.latencyMs).to.be.a('number');
+        expect(metrics?.latencyMs).to.be.greaterThan(0);
         // Regression: must be ms not µs — synthtrace spans are 30-40ms
-        expect(toPostgres?.metrics?.latencyMs).to.be.lessThan(1000);
-        expect(toPostgres?.metrics?.throughputPerMin).to.be.greaterThan(0);
-        expect(toPostgres?.metrics?.errorRate).to.be(0);
+        expect(metrics?.latencyMs).to.be.lessThan(1000);
+        expect(metrics?.throughputPerMin).to.be.greaterThan(0);
+        expect(metrics?.errorRate).to.be(0);
       });
     });
 
