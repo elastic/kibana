@@ -128,6 +128,34 @@ export const deleteDataStream = async ({
     }
   );
 
+export interface ReanalyzeDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+  connectorId: string;
+}
+
+export interface ReanalyzeDataStreamResponse {
+  success: boolean;
+}
+
+export const reanalyzeDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  connectorId,
+}: RequestDeps & ReanalyzeDataStreamRequest): Promise<ReanalyzeDataStreamResponse> =>
+  http.put<ReanalyzeDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/reanalyze`,
+    {
+      version: '1',
+      body: JSON.stringify({ connectorId }),
+      signal: abortSignal,
+    }
+  );
+
 export interface GetDataStreamResultsRequest {
   integrationId: string;
   dataStreamId: string;
