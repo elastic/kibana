@@ -17,6 +17,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              CreateWatchlistRequest:
+                summary: Create watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
@@ -101,6 +109,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              UpdateWatchlistRequest:
+                summary: Update watchlist request
+                value:
+                  description: High risk vendor watchlist
+                  managed: false
+                  name: High Risk Vendors
+                  riskModifier: 1.5
             schema:
               type: object
               properties:
