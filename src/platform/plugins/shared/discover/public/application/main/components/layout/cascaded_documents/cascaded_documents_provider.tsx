@@ -16,6 +16,7 @@ import type {
   CascadeGroupNodeUIInteraction,
   DataCascadeUISnapshot,
 } from '@kbn/shared-ux-document-data-cascade';
+import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
@@ -26,6 +27,11 @@ import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_d
 import type { ESQLDataGroupNode } from './blocks';
 
 export type DataCascadeUiState = DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
+
+export type CascadedDocumentsDataGridUiStateMap = Record<
+  string,
+  Partial<UnifiedDataTableRestorableState>
+>;
 
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
@@ -38,7 +44,9 @@ export interface CascadedDocumentsContext
     args: CascadeGroupNodeUIInteraction<ESQLDataGroupNode>
   ) => DataTableRecord[] | null;
   dataCascadeUiState: DataCascadeUiState | undefined;
+  dataGridUiStateMap: CascadedDocumentsDataGridUiStateMap | undefined;
   setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
+  setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;

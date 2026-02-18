@@ -484,6 +484,9 @@ function DiscoverDocumentsComponent({
   const latestDataCascadeUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.dataCascade)
   );
+  const latestCascadedDocumentsDataGridsUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
@@ -491,6 +494,9 @@ function DiscoverDocumentsComponent({
     internalStateActions.setSelectedCascadeGroups
   );
   const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
+  const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
+    internalStateActions.setCascadedDocumentsDataGridUiState
+  );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const resolveLeafData = useCallback<NonNullable<CascadedDocumentsContext['resolveLeafData']>>(
@@ -531,8 +537,11 @@ function DiscoverDocumentsComponent({
       resolveLeafData,
       cascadeGroupingChangeHandler,
       dataCascadeUiState: latestDataCascadeUiState.current,
+      dataGridUiStateMap: latestCascadedDocumentsDataGridsUiState.current,
       setDataCascadeUiState: (nextUiState) =>
         dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
+      setDataGridUiState: (nodeId, uiState) =>
+        dispatch(setCascadedDocumentsDataGridUiState({ nodeId, dataGridUiState: uiState })),
       onUpdateESQLQuery,
       openInNewTab,
     };
@@ -550,6 +559,8 @@ function DiscoverDocumentsComponent({
     onUpdateESQLQuery,
     openInNewTab,
     dispatch,
+    latestCascadedDocumentsDataGridsUiState,
+    setCascadedDocumentsDataGridUiState,
     setDataCascadeUiState,
   ]);
 
