@@ -52,7 +52,7 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownAc
           });
         }
 
-        execute(drilldownState, context);
+        await execute(drilldownState, context);
       },
       isCompatible: async (context: EmbeddableApiContext) => {
         const { embeddable } = context;
