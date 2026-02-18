@@ -52,7 +52,15 @@ export function useTaskPolling({
 
     const scheduleNextPoll = () => {
       timeoutId = setTimeout(async () => {
-        const polledTask = await onPoll();
+        let polledTask: TaskWithStatus | undefined;
+        try {
+          polledTask = await onPoll();
+        } catch {
+          if (isMounted) {
+            scheduleNextPoll();
+          }
+          return;
+        }
 
         if (!isMounted) {
           return;
@@ -64,8 +72,14 @@ export function useTaskPolling({
           polledTask.status !== TaskStatus.InProgress &&
           polledTask.status !== TaskStatus.BeingCanceled
         ) {
-          onRefresh();
-          return;
+          try {
+            await onRefresh();
+          } catch {
+            if (isMounted) {
+              scheduleNextPoll();
+            }
+            return;
+          }
         }
 
         scheduleNextPoll();
