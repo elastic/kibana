@@ -34,7 +34,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL));
   }
 
-  describe('Automatic agent upgrades', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/248310
+  // Failing: See https://github.com/elastic/kibana/issues/245377
+  describe.skip('Automatic agent upgrades', () => {
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       const { body: agentPolicyResponse } = await supertest
