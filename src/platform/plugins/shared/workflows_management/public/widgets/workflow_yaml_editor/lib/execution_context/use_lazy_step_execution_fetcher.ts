@@ -10,6 +10,7 @@
 import { useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { StepExecutionData } from './build_execution_context';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -62,12 +63,15 @@ export function useLazyStepExecutionFetcher(
       return null;
     }
 
-    const cached = queryClient.getQueryData<EsWorkflowStepExecution>([
-      STEP_EXECUTION_QUERY_KEY,
-      currentExecutionId,
-      stepDocId,
-    ]);
-    if (cached) {
+    const queryKey = [STEP_EXECUTION_QUERY_KEY, currentExecutionId, stepDocId];
+    const cached = queryClient.getQueryData<EsWorkflowStepExecution>(queryKey);
+
+    // Only trust the cache for terminal steps — their data won't change.
+    // Running steps need a fresh fetch since output may have appeared.
+    const stepInfo = stepExecutionsRef.current?.find((s) => s.stepId === stepId);
+    const isStepTerminal = stepInfo?.status && isTerminalStatus(stepInfo.status);
+
+    if (cached && isStepTerminal) {
       return toStepExecutionData(cached);
     }
 
@@ -78,10 +82,7 @@ export function useLazyStepExecutionFetcher(
       if (!stepExecution) {
         return null;
       }
-      queryClient.setQueryData(
-        [STEP_EXECUTION_QUERY_KEY, currentExecutionId, stepDocId],
-        stepExecution
-      );
+      queryClient.setQueryData(queryKey, stepExecution);
       return toStepExecutionData(stepExecution);
     } catch {
       return null;

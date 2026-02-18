@@ -9,8 +9,8 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useStepExecution } from './use_step_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -110,8 +110,7 @@ describe('useStepExecution', () => {
 
   it('should stop polling when step transitions to terminal status', async () => {
     const { result, rerender } = renderHook(
-      ({ status }: { status: ExecutionStatus }) =>
-        useStepExecution('exec-1', 'step-doc-1', status),
+      ({ status }: { status: ExecutionStatus }) => useStepExecution('exec-1', 'step-doc-1', status),
       {
         wrapper: createWrapper(queryClient),
         initialProps: { status: ExecutionStatus.RUNNING },
