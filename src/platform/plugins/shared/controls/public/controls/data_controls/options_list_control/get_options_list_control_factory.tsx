@@ -26,7 +26,7 @@ import {
   OPTIONS_LIST_CONTROL,
   OPTIONS_LIST_DEFAULT_SORT,
 } from '@kbn/controls-constants';
-import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -96,7 +96,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
       );
-
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
       const dataLoadingSubscription = combineLatest([
@@ -213,7 +212,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(state.selectedOptions?.length || state.existsSelected)
+        Boolean(state.selected_options?.length || state.exists_selected)
       );
       const hasSelectionsSubscription = combineLatest([
         selectionsManager.api.selectedOptions$,
@@ -247,9 +246,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             if (!dataView) return;
 
             const newFilter = buildFilter(dataView, uuid, {
-              fieldName,
-              selectedOptions,
-              existsSelected,
+              field_name: fieldName,
+              selected_options: selectedOptions,
+              exists_selected: existsSelected,
               exclude,
               sectionId,
             });
@@ -257,18 +256,18 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListControlState {
+      function serializeState(): OptionsListDSLControlState {
         return {
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
 
           // serialize state that cannot be changed to keep it consistent
-          displaySettings: state.displaySettings,
+          display_settings: state.display_settings,
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -283,14 +282,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...selectionComparators,
             ...editorComparators,
             // This state cannot currently be changed after the control is created
-            displaySettings: 'skip',
+            display_settings: 'skip',
           };
         },
         defaultState: {
-          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+          search_technique: DEFAULT_SEARCH_TECHNIQUE,
           sort: OPTIONS_LIST_DEFAULT_SORT,
           exclude: false,
-          existsSelected: false,
+          exists_selected: false,
         },
         onReset: (lastSaved) => {
           if (isOptionsListESQLControlState(lastSaved)) {
@@ -375,7 +374,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: state.displaySettings ?? {},
+                displaySettings: state.display_settings ?? {},
               }}
             >
               <OptionsListControl isPinned={isPinned} />

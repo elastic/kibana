@@ -45,6 +45,8 @@ import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
+import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
+import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -552,16 +554,23 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$'>
+  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getCascadedDocumentsStateManager: (tabId) => {
+      return createCascadedDocumentsStateManager({
+        internalState,
+        tabId,
+      });
+    },
   };
 
   const internalState = configureStore({

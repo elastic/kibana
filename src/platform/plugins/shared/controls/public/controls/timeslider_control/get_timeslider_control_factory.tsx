@@ -58,7 +58,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.isAnchored);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.is_anchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
@@ -101,17 +101,17 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+        const { start_percentage_of_time_range, end_percentage_of_time_range } =
           timeRangePercentage.getLatestState();
 
         if (
-          timesliceStartAsPercentageOfTimeRange !== undefined &&
-          timesliceEndAsPercentageOfTimeRange !== undefined
+          start_percentage_of_time_range !== undefined &&
+          end_percentage_of_time_range !== undefined
         ) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             )
           );
         } else {
@@ -253,12 +253,12 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return {
             ...timeRangePercentageComparators,
             width: 'skip',
-            isAnchored: 'skip',
+            is_anchored: 'skip',
           };
         },
         onReset: (lastSaved) => {
           timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.isAnchored);
+          setIsAnchored(lastSaved?.is_anchored);
         },
       });
 
@@ -318,19 +318,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             )
               return;
 
-            const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+            const { start_percentage_of_time_range, end_percentage_of_time_range } =
               timeRangePercentage.getLatestState();
             syncTimesliceWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             );
           }
         );
 
       // Initialize the timeslice
       syncTimesliceWithTimeRangePercentage(
-        state.timesliceStartAsPercentageOfTimeRange,
-        state.timesliceEndAsPercentageOfTimeRange
+        state.start_percentage_of_time_range,
+        state.end_percentage_of_time_range
       );
 
       return {
