@@ -79,7 +79,7 @@ export async function suggestIntegrations({
       ),
     };
 
-    await executeAsReasoningAgent({
+    const result = await executeAsReasoningAgent({
       inferenceClient,
       prompt: IntegrationSuggestionsPrompt,
       input: promptInput,
@@ -143,6 +143,23 @@ export async function suggestIntegrations({
       },
       abortSignal: signal,
     });
+
+    // Extract suggestions from the returned tool calls if the callback wasn't executed
+    // (this happens when finalToolChoice forces completion without calling the callback)
+    if (finalSuggestions.length === 0 && result.toolCalls?.length) {
+      const finalizeCall = result.toolCalls.find(
+        (tc) => tc.function.name === 'finalize_suggestions'
+      );
+      if (finalizeCall) {
+        const args = finalizeCall.function.arguments as {
+          suggestions?: IntegrationSuggestionFromAI[];
+        };
+        finalSuggestions = args.suggestions || [];
+        logger.debug(
+          `[suggestIntegrations] Extracted ${finalSuggestions.length} suggestions from tool call`
+        );
+      }
+    }
 
     const suggestions: IntegrationSuggestionOutput[] = finalSuggestions
       .filter((suggestion) => featureMap.has(suggestion.featureId))
