@@ -23,6 +23,7 @@ import type {
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
+import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
 import {
   type EventEdge,
   type RelationshipEdge,
@@ -377,6 +378,10 @@ const processEventRecord = (record: EventEdge, context: ParseContext) => {
   });
 };
 
+const getRelationshipLabel = (relationship: string): string =>
+  ENTITY_RELATIONSHIP_LABELS[relationship as keyof typeof ENTITY_RELATIONSHIP_LABELS] ??
+  relationship;
+
 /**
  * Creates a relationship node for static/configuration-based relationships.
  * The node ID is based on relationshipNodeId (source + relationship) to ensure
@@ -388,7 +393,7 @@ const createRelationshipNode = (
 ): RelationshipNodeDataModel => {
   return {
     id: `rel(${relationshipNodeId})`,
-    label: relationship.replace(/_/g, ' '), // "Depends_on" -> "Depends on"
+    label: getRelationshipLabel(relationship),
     shape: 'relationship',
   };
 };
