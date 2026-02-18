@@ -23,6 +23,10 @@ import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
 import { isSubQuery, isSource } from '../../../ast/is';
 import { esqlCommandRegistry } from '../../../..';
+import {
+  getIndicesBrowserSuggestion,
+  shouldSuggestIndicesBrowserAfterComma,
+} from '../../definitions/utils/autocomplete/resource_browser_suggestions';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -67,6 +71,11 @@ async function handleFromAutocomplete(
   // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
+  const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
+    callbacks,
+    context,
+    innerText: commandText,
+  });
 
   // METADATA suggestions - uses commandText for regex pattern matching
   const metadataSuggestions = await getMetadataSuggestions(command, commandText);
@@ -84,7 +93,11 @@ async function handleFromAutocomplete(
   // Case 1: FROM | (no sources yet)
   if (!hasAnySources) {
     // Use innerText for absolute positions in rangeToReplace
-    return suggestInitialSources(context, innerText);
+    const suggestions = suggestInitialSources(context, innerText);
+    if (indicesBrowserSuggestion) {
+      suggestions.unshift(indicesBrowserSuggestion);
+    }
+    return suggestions;
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
@@ -94,7 +107,14 @@ async function handleFromAutocomplete(
 
   // Case 3: FROM in|, FROM index, | (typing or adding more indexes)
   // Use innerText for absolute positions in rangeToReplace
-  return suggestAdditionalSources(innerText, context, callbacks, indexes);
+  const shouldSuggestIndicesBrowserInAdditionalSlot =
+    Boolean(indicesBrowserSuggestion) && shouldSuggestIndicesBrowserAfterComma(commandText);
+
+  const suggestions = await suggestAdditionalSources(innerText, context, callbacks, indexes);
+  if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
+    suggestions.unshift(indicesBrowserSuggestion);
+  }
+  return suggestions;
 }
 
 /**
