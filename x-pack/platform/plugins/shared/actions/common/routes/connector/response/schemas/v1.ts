@@ -127,6 +127,13 @@ export const connectorTypeResponseSchema = schema.object({
       description: 'The source of the connector type definition.',
     },
   }),
+  select_message: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'A message shown when selecting this connector type.',
+      },
+    })
+  ),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);

@@ -34,4 +34,5 @@ export interface ActionType {
   subFeature?: SubFeature;
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
+  selectMessage?: string;
 }

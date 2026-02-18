@@ -7,8 +7,17 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  EuiButtonGroup,
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
@@ -26,6 +35,7 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
+import { useActionTypeModel } from '../../../hooks/use_action_type_model';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { FlyoutHeader } from './header';
@@ -103,15 +113,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
+  const {
+    actionTypeModel,
+    isLoading: isLoadingActionTypeModel,
+    error: actionTypeModelError,
+  } = useActionTypeModel(actionTypeRegistry, actionType);
+
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  const disabled = hasErrors || !canSave;
-
-  const actionTypeModel: ActionTypeModel | null =
-    actionType != null ? actionTypeRegistry.get(actionType.id) : null;
-
+  const disabled = hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError;
   const isTestable =
     !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
@@ -284,6 +296,35 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
+            {isLoadingActionTypeModel && (
+              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="xl" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+
+            {actionTypeModelError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  size="s"
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="connector-spec-load-error"
+                  title={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.specLoadError',
+                    {
+                      defaultMessage: 'Failed to load connector configuration',
+                    }
+                  )}
+                >
+                  <p>{actionTypeModelError.message}</p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             {showFormErrors && (
               <>
                 <EuiCallOut
@@ -309,14 +350,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="m" />
               </>
             )}
-            <ConnectorForm
-              actionTypeModel={actionTypeModel}
-              connector={defaultConnector}
-              isEdit={false}
-              onChange={setFormState}
-              setResetForm={setResetForm}
-            />
-            {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+
+            {!isLoadingActionTypeModel && !actionTypeModelError && (
+              <>
+                <ConnectorForm
+                  actionTypeModel={actionTypeModel}
+                  connector={defaultConnector}
+                  isEdit={false}
+                  onChange={setFormState}
+                  setResetForm={setResetForm}
+                />
+                {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+              </>
+            )}
           </>
         ) : (
           <ActionTypeMenu

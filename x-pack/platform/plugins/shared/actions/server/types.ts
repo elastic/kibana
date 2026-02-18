@@ -213,6 +213,10 @@ export interface ActionTypeCoreFields<
    */
   allowMultipleSystemActions?: boolean;
   /**
+   * A message shown when selecting this connector type in the UI.
+   */
+  selectMessage?: string;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute

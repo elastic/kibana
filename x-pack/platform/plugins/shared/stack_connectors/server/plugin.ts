@@ -58,7 +58,9 @@ export class StackConnectorsPlugin
       experimentalFeatures: this.experimentalFeatures,
     });
 
+    console.log('experimentalFeatures', this.experimentalFeatures);
     if (this.experimentalFeatures.connectorsFromSpecs) {
+      console.log('registering connectors from specs');
       registerConnectorTypesFromSpecs({ actions });
     }
 

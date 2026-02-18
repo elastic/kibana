@@ -11,10 +11,10 @@ import { ZodError } from '@kbn/zod/v4';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import type { FormConfig } from './form';
+import type { FormConfig, ResolvedMetaFunctions } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
-import { addMeta, getMeta } from './schema_connector_metadata';
+import { addMeta as defaultAddMeta, getMeta as defaultGetMeta } from './schema_connector_metadata';
 
 const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
   defaultMessage: 'Optional',
@@ -89,11 +89,14 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
   schema,
   rootPath,
   formConfig,
+  meta = { getMeta: defaultGetMeta, addMeta: defaultAddMeta },
 }: {
   schema: z.ZodObject<T>;
   rootPath?: string;
   formConfig: FormConfig;
+  meta?: ResolvedMetaFunctions;
 }) => {
+  const { getMeta, addMeta } = meta;
   const fields: FieldDefinition[] = [];
   const isFormOrParentDisabled = formConfig.disabled || getMeta(schema).disabled;
 
@@ -121,13 +124,17 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
 
 interface RenderFieldProps {
   field: FieldDefinition;
+  meta?: ResolvedMetaFunctions;
 }
-export const renderField = ({ field }: RenderFieldProps) => {
+export const renderField = ({
+  field,
+  meta = { getMeta: defaultGetMeta, addMeta: defaultAddMeta },
+}: RenderFieldProps) => {
+  const { getMeta, addMeta } = meta;
   const { schema, validate, path, formConfig, defaultValue, isOptional } = field;
 
-  const WidgetComponent = getWidgetComponent(schema);
-
   // getWidgetComponent might update meta information, therefore we get the meta after calling it
+  const WidgetComponent = getWidgetComponent(schema, { getMeta, addMeta });
   const { label, helpText, disabled, placeholder } = getMeta(schema);
 
   return (
@@ -137,6 +144,7 @@ export const renderField = ({ field }: RenderFieldProps) => {
         path={path}
         schema={schema}
         formConfig={formConfig}
+        meta={meta}
         fieldConfig={{
           label,
           defaultValue,

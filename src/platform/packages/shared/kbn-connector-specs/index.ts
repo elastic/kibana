@@ -8,6 +8,8 @@
  */
 
 export * as connectorsSpecs from './src/all_specs';
-export type * from './src/connector_spec';
-
+export * from './src/connector_spec';
 export * as authTypeSpecs from './src/all_auth_types';
+export * from './src/lib';
+export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
+export type { BaseMetadata } from './src/connector_spec_ui';

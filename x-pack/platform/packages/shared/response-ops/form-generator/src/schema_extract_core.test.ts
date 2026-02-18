@@ -598,4 +598,54 @@ describe('extractSchemaCore', () => {
       expect(result.defaultValue).toBeUndefined();
     });
   });
+
+  describe('meta preservation after JSON Schema round-trip', () => {
+    it('should preserve meta on URL field after unwrapping round-tripped schema', () => {
+      const innerSchema = z.url();
+      const optionalSchema = innerSchema.optional();
+      const defaultSchema = optionalSchema.default('https://example.com');
+
+      z.globalRegistry.add(defaultSchema, { label: 'Test URL', placeholder: 'https://' });
+
+      const { schema: unwrapped } = extractSchemaCore(defaultSchema);
+
+      const meta = getMeta(unwrapped);
+      expect(meta.label).toBe('Test URL');
+      expect(meta.placeholder).toBe('https://');
+    });
+
+    it('should preserve meta when meta exists on both wrapper and inner schema', () => {
+      const innerSchema = z.string();
+      z.globalRegistry.add(innerSchema, { label: 'Inner Label', sensitive: true });
+
+      const optionalSchema = innerSchema.optional();
+      z.globalRegistry.add(optionalSchema, { label: 'Wrapper Label', placeholder: 'test' });
+
+      const { schema: unwrapped } = extractSchemaCore(optionalSchema);
+
+      const meta = getMeta(unwrapped);
+      expect(meta.label).toBe('Inner Label'); // Inner wins
+      expect(meta.sensitive).toBe(true); // From inner
+      expect(meta.placeholder).toBe('test'); // From wrapper (not overwritten)
+    });
+
+    it('should preserve meta through multiple wrapper layers like parseObject creates', () => {
+      const baseSchema = z.url();
+      z.globalRegistry.add(baseSchema, { label: 'Base Label', widget: 'text' });
+
+      const optionalSchema = baseSchema.optional();
+      const defaultSchema = optionalSchema.default('https://default.com');
+      z.globalRegistry.add(defaultSchema, {
+        label: 'Browse URL',
+        placeholder: 'https://r.jina.ai',
+      });
+
+      const { schema: unwrapped } = extractSchemaCore(defaultSchema);
+
+      const meta = getMeta(unwrapped);
+      expect(meta.label).toBe('Base Label');
+      expect(meta.widget).toBe('text');
+      expect(meta.placeholder).toBe('https://r.jina.ai');
+    });
+  });
 });

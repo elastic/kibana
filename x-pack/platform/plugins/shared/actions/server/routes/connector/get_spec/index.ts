@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerConnectorTypesFromSpecs } from './register_from_spec';
+export { getConnectorSpecRoute } from './get_spec';
