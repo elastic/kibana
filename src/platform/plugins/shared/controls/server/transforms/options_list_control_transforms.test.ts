@@ -55,12 +55,12 @@ describe('options list control transforms', () => {
         Object {
           "data_view_id": "data-view-id",
           "exclude": true,
-          "field_name": "category",
+          "field_name": "test",
           "search_technique": "prefix",
           "selected_options": Array [
             "val",
           ],
-          "title": "Category",
+          "title": "Test",
         }
       `);
     });
