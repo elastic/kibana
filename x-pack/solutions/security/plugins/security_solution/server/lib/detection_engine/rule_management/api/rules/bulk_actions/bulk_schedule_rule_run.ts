@@ -8,7 +8,7 @@
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import type { ScheduleBackfillParams } from '@kbn/alerting-plugin/server/application/backfill/methods/schedule/types';
 import { backfillInitiator } from '@kbn/alerting-plugin/common/constants';
-import type { BulkManualRuleRun } from '../../../../../../../common/api/detection_engine';
+import type { BulkManualRuleRun } from '@kbn/securitysolution-api';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../../rule_schema';

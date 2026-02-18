@@ -10,7 +10,7 @@ import type {
   CreateScriptRequestBody,
   PatchUpdateRequestBody,
   ListScriptsRequestQuery,
-} from '../../../../common/api/endpoint/scripts_library';
+} from '@kbn/securitysolution-api';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,

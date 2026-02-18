@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
+import type { ReviewPrebuiltRuleUpgradeFilter } from '@kbn/securitysolution-api';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
@@ -26,7 +26,7 @@ import {
   ThreeWayDiffConflict,
   SkipRuleUpgradeReasonEnum,
   UpgradeConflictResolutionEnum,
-} from '../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { usePrebuiltRulesUpgradeState } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { useOutdatedMlJobsUpgradeModal } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_ml_jobs_upgrade_modal';
 import {

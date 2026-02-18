@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { BuildingBlockObject } from '../../../../../../../../common/api/detection_engine';
+import type { BuildingBlockObject } from '@kbn/securitysolution-api';
 
 export const buildingBlockSchema = { isBuildingBlock: schema.isBuildingBlock } as FormSchema<{
   isBuildingBlock: boolean;

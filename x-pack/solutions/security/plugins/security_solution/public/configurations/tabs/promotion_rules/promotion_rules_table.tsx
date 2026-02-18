@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { FindRulesSortField } from '../../../../common/api/detection_engine';
+import type { FindRulesSortField } from '@kbn/securitysolution-api';
 import { Loader } from '../../../common/components/loader';
 import type { EuiBasicTableOnChange } from '../../../detection_engine/common/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';

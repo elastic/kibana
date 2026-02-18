@@ -23,7 +23,7 @@ import type {
   RowRendererId,
   TimelineStatus,
   TimelineType,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';

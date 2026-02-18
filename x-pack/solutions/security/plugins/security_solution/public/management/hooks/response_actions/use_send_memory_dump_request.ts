@@ -8,7 +8,7 @@
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { MemoryDumpActionRequestBody } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { MEMORY_DUMP_ROUTE } from '../../../../common/endpoint/constants';

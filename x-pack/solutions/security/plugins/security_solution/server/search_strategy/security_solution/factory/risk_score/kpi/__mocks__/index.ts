@@ -8,7 +8,7 @@
 import {
   EntityRiskQueries,
   type RiskScoreKpiRequestOptionsInput,
-} from '../../../../../../../common/api/search_strategy';
+} from '@kbn/securitysolution-api';
 import { EntityType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: RiskScoreKpiRequestOptionsInput = {

@@ -15,11 +15,11 @@ import {
   getMissingPrivilegesErrorMessage,
 } from '../../../../../common/entity_analytics/privileges';
 import { EntityType } from '../../../../../common/search_strategy';
-import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import type { InitEntityEngineResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/init.gen';
 import {
   InitEntityEngineRequestBody,
   InitEntityEngineRequestParams,
-} from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';

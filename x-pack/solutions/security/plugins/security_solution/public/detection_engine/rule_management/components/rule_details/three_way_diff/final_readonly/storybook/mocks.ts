@@ -7,7 +7,7 @@
 
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataSourceType, KqlQueryType } from '../../../../../../../../common/api/detection_engine';
+import { DataSourceType, KqlQueryType } from '@kbn/securitysolution-api';
 import type {
   DataSourceDataView,
   DataSourceIndexPatterns,
@@ -24,7 +24,7 @@ import type {
   InlineKqlQuery,
   RuleEqlQuery,
   SavedKqlQuery,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../../common/constants';
 
 export const filters = [

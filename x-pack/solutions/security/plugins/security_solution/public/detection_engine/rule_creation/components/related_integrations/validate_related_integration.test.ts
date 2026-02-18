@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import type { ValidationFuncArg } from '../../../../shared_imports';
 import { validateRelatedIntegration } from './validate_related_integration';
 

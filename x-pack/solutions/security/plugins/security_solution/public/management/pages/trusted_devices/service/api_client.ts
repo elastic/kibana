@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
+import type { EndpointSuggestionsBody } from '@kbn/securitysolution-api';
 import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';

@@ -15,7 +15,7 @@ import type {
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { HoverPopover } from '../../../common/components/hover_popover';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';

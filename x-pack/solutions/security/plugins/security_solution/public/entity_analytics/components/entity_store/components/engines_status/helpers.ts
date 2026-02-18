@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EngineStatus } from '../../../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EngineStatus } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/common.gen';
 
 export const isEngineLoading = (status: EngineStatus | undefined) =>
   status === 'updating' || status === 'installing';

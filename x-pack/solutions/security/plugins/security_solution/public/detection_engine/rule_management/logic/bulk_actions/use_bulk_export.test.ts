@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';

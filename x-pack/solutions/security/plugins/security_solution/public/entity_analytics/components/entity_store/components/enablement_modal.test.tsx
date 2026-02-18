@@ -14,7 +14,7 @@ import {
   type EntityAnalyticsPrivileges,
   RiskEngineStatusEnum,
   StoreStatusEnum,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { RiskEngineMissingPrivilegesResponse } from '../../../hooks/use_missing_risk_engine_privileges';
 
 const mockToggle = jest.fn();

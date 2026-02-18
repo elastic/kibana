@@ -7,7 +7,7 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 
-import type { RuleSource } from '../../../common/api/detection_engine/model/rule_schema';
+import type { RuleSource } from '@kbn/securitysolution-api';
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
 import type { RssGrowthCircuitBreakerConfig } from './diagnostic/circuit_breakers/rss_growth_circuit_breaker';

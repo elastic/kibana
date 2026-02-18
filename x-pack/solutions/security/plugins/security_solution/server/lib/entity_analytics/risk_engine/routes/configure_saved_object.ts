@@ -9,8 +9,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../../common/api/entity_analytics';
-import { ConfigureRiskEngineSavedObjectRequestBody } from '../../../../../common/api/entity_analytics';
+import type { ConfigureRiskEngineSavedObjectResponse } from '@kbn/securitysolution-api';
+import { ConfigureRiskEngineSavedObjectRequestBody } from '@kbn/securitysolution-api';
 import {
   RISK_ENGINE_CONFIGURE_SO_URL,
   APP_ID,

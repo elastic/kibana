@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RulePreviewLogs } from '../../../../../../common/api/detection_engine';
+import type { RulePreviewLogs } from '@kbn/securitysolution-api';
 
 export const previewLogs: RulePreviewLogs[] = [
   {

@@ -18,12 +18,12 @@ import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/co
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { RuleSignatureId } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import type {
   ReadAuthRulePatchWithRuleSource,
   RuleResponse,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../rule_schema';
 
 export const toggleRuleEnabledOnUpdate = async (

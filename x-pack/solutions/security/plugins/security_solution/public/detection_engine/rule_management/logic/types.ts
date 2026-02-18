@@ -14,20 +14,20 @@ import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/
 import type {
   RuleCustomizationStatus,
   WarningSchema,
-} from '../../../../common/api/detection_engine';
-import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 
-import { SortOrder } from '../../../../common/api/detection_engine';
+import { SortOrder } from '@kbn/securitysolution-api';
 import type {
   RuleCreateProps,
   RuleResponse,
   RuleUpdateProps,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type {
   CoverageOverviewFilter,
   PatchRuleRequestBody,
-} from '../../../../common/api/detection_engine/rule_management';
-import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { FindRulesSortField } from '@kbn/securitysolution-api';
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;

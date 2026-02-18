@@ -21,7 +21,7 @@ import { DeleteNoteButtonIcon } from '../components/delete_note_button';
 import { Title } from '../../common/components/header_page/title';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 // TODO unify this type from the api with the one in public/common/lib/note
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
 import {
   userSelectedPage,

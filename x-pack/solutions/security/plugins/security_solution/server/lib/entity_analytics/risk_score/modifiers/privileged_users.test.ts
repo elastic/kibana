@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 import type { RiskScoreBucket } from '../../types';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics';
+import type { MonitoredUserDoc } from '@kbn/securitysolution-api';
 
 import { applyPrivmonModifier, PRIVILEGED_USER_MODIFIER } from './privileged_users';
 import { allowedExperimentalValues } from '../../../../../common';

@@ -18,7 +18,7 @@ import { mockHistory, Router } from '../../../../common/mock/router';
 import { render, act, fireEvent } from '@testing-library/react';
 import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
-import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
+import type { ResolveTimelineResponse } from '@kbn/securitysolution-api';
 
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {

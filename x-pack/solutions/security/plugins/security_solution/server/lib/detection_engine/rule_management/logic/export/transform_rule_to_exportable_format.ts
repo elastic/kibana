@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 /**
  * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like

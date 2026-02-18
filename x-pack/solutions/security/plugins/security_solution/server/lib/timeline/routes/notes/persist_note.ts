@@ -18,7 +18,7 @@ import { buildFrameworkRequest } from '../../utils/common';
 import {
   PersistNoteRouteRequestBody,
   type PersistNoteRouteResponse,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {

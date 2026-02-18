@@ -40,8 +40,8 @@ import {
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
 } from '../../../../../notes';
-import type { Note } from '../../../../../../common/api/timeline';
-import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { NotesList } from '../../../../../notes/components/notes_list';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';

@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import { getDefineStepsData } from '../../../../detection_engine/common/helpers';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { useDefaultIndexPattern } from '../../../../detection_engine/rule_management/hooks/use_default_index_pattern';

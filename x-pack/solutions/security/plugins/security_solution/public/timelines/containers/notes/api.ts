@@ -6,7 +6,7 @@
  */
 
 import { NOTE_URL } from '../../../../common/constants';
-import type { BareNote, PersistNoteRouteResponse } from '../../../../common/api/timeline';
+import type { BareNote, PersistNoteRouteResponse } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({

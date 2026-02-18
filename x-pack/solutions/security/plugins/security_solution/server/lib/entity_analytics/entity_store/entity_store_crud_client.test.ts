@@ -15,7 +15,7 @@ import {
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
 } from './errors';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
+import type { Entity } from '@kbn/securitysolution-api';
 import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
 import type { TransformPreviewTransformResponse } from '@elastic/elasticsearch/lib/api/types';

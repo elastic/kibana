@@ -15,7 +15,7 @@ import {
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import type { ImportTimelineResponse } from './types';
-import { ImportTimelines } from '../../../../../../common/api/timeline';
+import { ImportTimelines } from '@kbn/securitysolution-api';
 import { parseOrThrowErrorFactory } from '../../../../../../common/timelines/zod_errors';
 
 const createPlainError = (message: string) => new Error(message);

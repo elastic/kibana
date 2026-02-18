@@ -9,7 +9,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import type {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export const extractSelected = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity

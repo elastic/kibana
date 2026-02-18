@@ -19,7 +19,7 @@ import { buildFrameworkRequest } from '../../utils/common';
 import {
   type PersistPinnedEventRouteResponse,
   PersistPinnedEventRouteRequestBody,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
 export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) => {

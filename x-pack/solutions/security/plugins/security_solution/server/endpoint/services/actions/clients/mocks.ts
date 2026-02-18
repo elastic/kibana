@@ -25,7 +25,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ScriptsLibraryMock } from '../../scripts_library/mocks';
-import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -59,7 +59,7 @@ import type {
   ScanActionRequestBody,
   RunScriptActionRequestBody,
   CancelActionRequestBody,
-} from '../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';

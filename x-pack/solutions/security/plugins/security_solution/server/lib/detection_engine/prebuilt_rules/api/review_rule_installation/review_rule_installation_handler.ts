@@ -12,7 +12,7 @@ import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects
 import type {
   ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -22,9 +22,9 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
+import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 
 export const reviewRuleInstallationHandler = async (

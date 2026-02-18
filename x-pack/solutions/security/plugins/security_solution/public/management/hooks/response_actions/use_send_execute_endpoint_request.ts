@@ -11,7 +11,7 @@ import { useMutation } from '@kbn/react-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import type { ExecuteActionRequestBody } from '../../../../common/api/endpoint';
+import type { ExecuteActionRequestBody } from '@kbn/securitysolution-api';
 
 export const useSendExecuteEndpoint = (
   options?: UseMutationOptions<ResponseActionApiResponse, IHttpFetchError, ExecuteActionRequestBody>

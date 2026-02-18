@@ -6,8 +6,8 @@
  */
 
 import { defaultHeaders } from './default_timeline_headers';
-import type { SavedTimeline } from '../../../../common/api/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import type { SavedTimeline } from '@kbn/securitysolution-api';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: SavedTimeline = {

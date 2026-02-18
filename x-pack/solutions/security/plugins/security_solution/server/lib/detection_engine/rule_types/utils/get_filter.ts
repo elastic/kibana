@@ -21,8 +21,8 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import type { SavedIdOrUndefined } from '@kbn/securitysolution-api';
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';

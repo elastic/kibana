@@ -21,7 +21,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { Status } from '../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 
 export type ColorSchemas = Record<string, string>;
 

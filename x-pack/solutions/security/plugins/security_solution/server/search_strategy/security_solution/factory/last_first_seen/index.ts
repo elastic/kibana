@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy';
+import { firstLastSeenRequestOptionsSchema } from '@kbn/securitysolution-api';
 import type {
   FactoryQueryTypes,
   FirstLastSeenStrategyResponse,

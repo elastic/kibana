@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { usePrebuiltRulesUpgrade } from '../../hooks/use_prebuilt_rules_upgrade';
 

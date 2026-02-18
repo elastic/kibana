@@ -7,7 +7,7 @@
 
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved, extractTimelineIdsAndVersions } from './helpers';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';

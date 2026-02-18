@@ -11,7 +11,7 @@ import {
   RuleVersion,
   BaseCreateProps,
   TypeSpecificCreatePropsInternal,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 function zodMaskFor<T>() {
   return function <U extends keyof T>(props: U[]): Record<U, true> {

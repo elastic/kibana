@@ -10,7 +10,7 @@ import type {
   TimelineResponse,
   ImportTimelines,
   InstallPrepackedTimelinesRequestBody,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import type { FrameworkRequest } from '../../framework';
 

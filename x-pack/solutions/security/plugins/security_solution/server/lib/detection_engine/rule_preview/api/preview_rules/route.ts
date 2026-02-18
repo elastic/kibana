@@ -25,17 +25,17 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   SERVER_APP_ID,
 } from '../../../../../../common/constants';
-import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import { validateCreateRuleProps } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import type {
   RulePreviewResponse,
   RulePreviewLogs,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   RulePreviewRequestBody,
   RulePreviewRequestQuery,
-} from '../../../../../../common/api/detection_engine';
-import type { RulePreviewLoggedRequest } from '../../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+} from '@kbn/securitysolution-api';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';

@@ -10,8 +10,8 @@ import type { EndpointScriptApiResponse } from '../../../../common/endpoint/type
 import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,
-} from '../../../../common/api/endpoint/scripts_library';
-import { PatchUpdateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+} from '@kbn/securitysolution-api';
+import { PatchUpdateScriptRequestSchema } from '@kbn/securitysolution-api';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type {
   SecuritySolutionPluginRouter,

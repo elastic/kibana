@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import type { FirstLastSeenRequestOptionsInput } from '@kbn/securitysolution-api';
 import { Direction, FirstLastSeenQuery } from '../../../../../../common/search_strategy';
 
 export const mockOptions: FirstLastSeenRequestOptionsInput = {

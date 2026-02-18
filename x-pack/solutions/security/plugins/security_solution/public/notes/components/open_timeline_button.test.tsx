@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { useUserPrivileges } from '../../common/components/user_privileges';

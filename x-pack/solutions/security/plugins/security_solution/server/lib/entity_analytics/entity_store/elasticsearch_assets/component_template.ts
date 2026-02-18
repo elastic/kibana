@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;

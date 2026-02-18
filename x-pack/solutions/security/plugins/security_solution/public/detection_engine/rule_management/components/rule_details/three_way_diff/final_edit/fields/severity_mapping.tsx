@@ -12,7 +12,7 @@ import type {
   DiffableRule,
   Severity,
   SeverityMapping,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { SeverityOverride } from '../../../../../../rule_creation_ui/components/severity_mapping/severity_override';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

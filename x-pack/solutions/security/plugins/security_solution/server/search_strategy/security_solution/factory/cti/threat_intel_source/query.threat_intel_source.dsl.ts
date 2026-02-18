@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreatIntelSourceRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { ThreatIntelSourceRequestOptions } from '@kbn/securitysolution-api';
 
 export const buildTiDataSourceQuery = ({
   timerange,

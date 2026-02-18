@@ -10,7 +10,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   UpsertEntitiesBulkRequestBody,
   UpsertEntitiesBulkRequestQuery,
-} from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { BadCRUDRequestError, EngineNotRunningError } from '../../errors';

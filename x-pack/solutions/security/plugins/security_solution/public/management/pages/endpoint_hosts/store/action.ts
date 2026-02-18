@@ -7,7 +7,7 @@
 
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
-import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
+import type { IsolationRouteRequestBody } from '@kbn/securitysolution-api';
 import type {
   GetHostPolicyResponse,
   ISOLATION_ACTIONS,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregatedPrebuiltRuleError } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type { AggregatedPrebuiltRuleError } from '@kbn/securitysolution-api';
 import { getErrorMessage, getErrorStatusCode } from '../../../../utils/error_helpers';
 import type { PromisePoolError } from '../../../../utils/promise_pool';
 

@@ -6,8 +6,8 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { PerformRuleUpgradeRequestBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { ModeEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { PerformRuleUpgradeRequestBody } from '@kbn/securitysolution-api';
+import { ModeEnum } from '@kbn/securitysolution-api';
 
 export function validatePerformRuleUpgradeRequest({
   isRulesCustomizationEnabled,

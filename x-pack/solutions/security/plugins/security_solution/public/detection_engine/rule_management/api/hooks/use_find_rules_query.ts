@@ -8,7 +8,7 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, WarningSchema } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
 import { fetchRules } from '../api';

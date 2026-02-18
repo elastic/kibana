@@ -16,7 +16,7 @@ import {
   type UseSendScanRequestResult,
 } from './use_send_scan_request';
 import { SCAN_ROUTE } from '../../../../common/endpoint/constants';
-import type { ScanActionRequestBody } from '../../../../common/api/endpoint';
+import type { ScanActionRequestBody } from '@kbn/securitysolution-api';
 const useMutationMock = _useMutation as jest.Mock;
 
 jest.mock('@kbn/react-query', () => {

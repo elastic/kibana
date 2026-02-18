@@ -10,8 +10,8 @@ import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/teleme
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
-} from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
-import { UpdateWorkflowInsightRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
+} from '@kbn/securitysolution-api';
+import { UpdateWorkflowInsightRequestSchema } from '@kbn/securitysolution-api';
 import { securityWorkflowInsightsService } from '../../services';
 
 import { errorHandler } from '../error_handler';

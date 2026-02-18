@@ -29,7 +29,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
+import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getActionStatus } from './hooks';

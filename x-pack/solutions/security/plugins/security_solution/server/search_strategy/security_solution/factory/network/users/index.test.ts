@@ -13,7 +13,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkUsersRequestOptions } from '@kbn/securitysolution-api';
 
 describe('networkUsers search strategy', () => {
   const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');

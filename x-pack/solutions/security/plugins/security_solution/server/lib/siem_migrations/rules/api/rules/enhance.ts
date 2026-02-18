@@ -15,9 +15,9 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
-import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
+import { withLicense } from '@kbn/securitysolution-api';
+import { withExistingMigration } from '@kbn/securitysolution-api';
 import { getVendorProcessor } from '../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsEnhanceRoute = (

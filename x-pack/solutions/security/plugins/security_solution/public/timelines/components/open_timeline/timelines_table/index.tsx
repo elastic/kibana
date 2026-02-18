@@ -34,7 +34,7 @@ import {
   TimelineStatusEnum,
   type TimelineType,
   TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 

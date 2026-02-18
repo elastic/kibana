@@ -8,7 +8,7 @@
 import type {
   Matcher,
   MonitoringEntitySourceType,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { IntegrationType } from './constants';
 import { INTEGRATION_TYPES } from './constants';
 

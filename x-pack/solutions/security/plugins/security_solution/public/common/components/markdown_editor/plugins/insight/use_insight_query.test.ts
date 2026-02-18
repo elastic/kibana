@@ -6,7 +6,7 @@
  */
 import { renderHook } from '@testing-library/react';
 import type { QueryOperator } from '@kbn/timelines-plugin/common';
-import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 import { useInsightQuery } from './use_insight_query';
 import { TestProviders } from '../../../../mock';
 import { IS_OPERATOR } from '../../../../../timelines/components/timeline/data_providers/data_provider';

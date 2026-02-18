@@ -11,7 +11,7 @@ import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   type RuleDataSource,
   type RuleEqlQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query, Filters } from '../../../../rule_definition_section';
 import { getDataSourceProps, isFilters } from '../../../../helpers';

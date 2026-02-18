@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { HostUncommonProcessesRequestOptions } from '@kbn/securitysolution-api';
 import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostUncommonProcessesRequestOptions = {

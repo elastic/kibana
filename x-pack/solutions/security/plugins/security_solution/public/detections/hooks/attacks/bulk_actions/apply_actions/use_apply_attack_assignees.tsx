@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-import type { AlertAssignees } from '../../../../../../common/api/detection_engine';
+import type { AlertAssignees } from '@kbn/securitysolution-api';
 import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';

@@ -24,7 +24,7 @@ import { createTimelines } from './helpers';
 import {
   CreateTimelinesRequestBody,
   type CreateTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export * from './helpers';
 

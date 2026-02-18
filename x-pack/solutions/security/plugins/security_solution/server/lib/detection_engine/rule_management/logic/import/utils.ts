@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
+import type { RuleToImport } from '@kbn/securitysolution-api';
 
 export type RuleFromImportStream = RuleToImport | Error;
 

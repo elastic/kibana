@@ -13,7 +13,7 @@ import { addEcsToRequiredFields } from '../../../../../../../common/detection_en
 import type {
   RuleResponse,
   TypeSpecificCreateProps,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,

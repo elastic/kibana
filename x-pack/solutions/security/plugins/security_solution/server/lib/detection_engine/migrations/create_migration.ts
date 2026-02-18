@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AlertsReindexOptions } from '../../../../common/api/detection_engine/signals_migration';
+import type { AlertsReindexOptions } from '@kbn/securitysolution-api';
 import { createMigrationIndex } from './create_migration_index';
 
 export interface CreatedMigration {

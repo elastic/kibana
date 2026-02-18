@@ -29,8 +29,8 @@ import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
   ThreatMapping,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';

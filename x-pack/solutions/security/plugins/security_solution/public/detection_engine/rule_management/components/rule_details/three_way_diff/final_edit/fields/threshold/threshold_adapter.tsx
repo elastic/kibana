@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
 import { ThresholdEdit } from '../../../../../../../rule_creation/components/threshold_edit';
 
 interface ThresholdAdapterProps {

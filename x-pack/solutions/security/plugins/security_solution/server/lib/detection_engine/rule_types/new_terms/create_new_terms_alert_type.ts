@@ -20,7 +20,7 @@ import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 import type { EventsAndTerms } from './types';
 import type { CreateAlertsHook } from './build_new_terms_aggregation';
-import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '@kbn/securitysolution-api';
 import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
@@ -42,7 +42,7 @@ import {
 } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 import { bulkCreate } from '../factories';
 

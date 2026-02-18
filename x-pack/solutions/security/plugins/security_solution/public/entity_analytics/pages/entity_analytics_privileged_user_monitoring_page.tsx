@@ -20,7 +20,7 @@ import {
   type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
   type PrivMonHealthResponse,
-} from '../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';

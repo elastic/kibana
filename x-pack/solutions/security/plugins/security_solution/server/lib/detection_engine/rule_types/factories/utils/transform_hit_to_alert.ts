@@ -18,7 +18,7 @@ import { buildAlertFields, isThresholdResult } from './build_alert';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
-import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';

@@ -11,7 +11,7 @@ import { FormattedDate } from '../../../../../common/components/formatted_date';
 import type {
   PartialThreeWayRuleDiff,
   RuleResponse,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { convertFieldToDisplayName } from '../helpers';
 

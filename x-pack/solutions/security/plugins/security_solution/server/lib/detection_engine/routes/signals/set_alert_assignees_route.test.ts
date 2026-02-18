@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSetAlertAssigneesRequestMock } from '../../../../../common/api/detection_engine/alert_assignees/mocks';
+import { getSetAlertAssigneesRequestMock } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';

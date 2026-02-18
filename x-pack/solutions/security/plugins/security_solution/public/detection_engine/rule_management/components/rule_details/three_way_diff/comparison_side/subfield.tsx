@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import { DiffView } from '../../json_diff/diff_view';
 import { SubfieldHeader } from './subfield_header';
 import { FIELDS_WITH_SUBFIELDS } from './constants';

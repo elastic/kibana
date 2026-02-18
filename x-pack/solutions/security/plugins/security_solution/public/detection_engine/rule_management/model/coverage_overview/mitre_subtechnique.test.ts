@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '@kbn/securitysolution-api';
 import { getNumOfCoveredSubtechniques } from './mitre_subtechnique';
 import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 import {

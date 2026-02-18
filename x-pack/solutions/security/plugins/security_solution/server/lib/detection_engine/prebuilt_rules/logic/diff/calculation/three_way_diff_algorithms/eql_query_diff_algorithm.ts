@@ -8,7 +8,7 @@
 import type {
   RuleEqlQuery,
   ThreeVersionsOf,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
 /**

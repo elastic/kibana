@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { AlertTags } from '../../../../../common/api/detection_engine';
+import type { AlertTags } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { setAlertTags } from '../../../containers/alert_tags/api';

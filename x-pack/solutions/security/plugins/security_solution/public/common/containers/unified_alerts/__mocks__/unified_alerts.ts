@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchUnifiedAlertsResponse } from '../../../../../common/api/detection_engine/unified_alerts';
+import type { SearchUnifiedAlertsResponse } from '@kbn/securitysolution-api';
 
 export const getSearchUnifiedAlertsResponseMock = (
   overrides?: Partial<SearchUnifiedAlertsResponse>

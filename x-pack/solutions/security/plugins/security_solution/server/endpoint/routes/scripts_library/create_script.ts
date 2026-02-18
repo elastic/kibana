@@ -16,8 +16,8 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import { CreateScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
+import { CreateScriptRequestSchema } from '@kbn/securitysolution-api';
 
 export const getCreateScriptRequestHandler = (
   endpointAppServices: EndpointAppContextService

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { FrameworkRequest } from '../../framework';
 
 import {

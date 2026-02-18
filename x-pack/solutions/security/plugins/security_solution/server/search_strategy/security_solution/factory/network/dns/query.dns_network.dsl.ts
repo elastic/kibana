@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkDnsRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkDnsRequestOptions } from '@kbn/securitysolution-api';
 import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

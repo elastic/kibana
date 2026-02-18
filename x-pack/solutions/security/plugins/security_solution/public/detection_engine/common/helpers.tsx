@@ -20,7 +20,7 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -28,7 +28,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
-import type { ResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';
+import type { ResponseAction } from '@kbn/securitysolution-api';
 import { normalizeThresholdField } from '../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../common/utility_types';
 import {
@@ -45,7 +45,7 @@ import type {
 import { AlertSuppressionDurationType, DataSourceType } from './types';
 import { SeverityLevel } from '../rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../common/detection_engine/constants';
-import type { RuleAction, RuleResponse } from '../../../common/api/detection_engine';
+import type { RuleAction, RuleResponse } from '@kbn/securitysolution-api';
 import { normalizeMachineLearningJobId } from '../../common/utils/normalize_machine_learning_job_id';
 import { convertDateMathToDuration } from '../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../common/constants';

@@ -8,7 +8,7 @@
 import {
   BulkActionsDryRunErrCodeEnum,
   type ExportRulesDetails,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import type { BulkActionResponse } from '../../../../../rule_management/logic';
 
 import type { DryRunResult } from '../types';

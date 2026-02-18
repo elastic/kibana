@@ -13,7 +13,7 @@ import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getDashboardsRequest } from '../../../../common/api/tags';
+import { getDashboardsRequest } from '@kbn/securitysolution-api';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 export const getDashboardsByTagsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {

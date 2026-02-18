@@ -12,7 +12,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/se
 import { EndpointAuthorizationError } from '../../errors';
 import { registerListScriptsRoute } from './list_scripts';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 
 describe('GET: fetch list of scripts', () => {
   let apiTestSetup: HttpApiTestSetupMock;

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 export type ExportableRule = Omit<RuleResponse, 'execution_summary'>;

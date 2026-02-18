@@ -2046,6 +2046,8 @@
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/platform/test/security_functional/plugins/test_endpoints/*"],
       "@kbn/security-ui-components": ["x-pack/platform/packages/private/security/ui_components"],
       "@kbn/security-ui-components/*": ["x-pack/platform/packages/private/security/ui_components/*"],
+      "@kbn/securitysolution-api": ["src/platform/packages/shared/kbn-securitysolution-api"],
+      "@kbn/securitysolution-api/*": ["src/platform/packages/shared/kbn-securitysolution-api/*"],
       "@kbn/securitysolution-autocomplete": ["x-pack/solutions/security/packages/kbn-securitysolution-autocomplete"],
       "@kbn/securitysolution-autocomplete/*": ["x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/*"],
       "@kbn/securitysolution-data-table": ["x-pack/solutions/security/packages/data-table"],

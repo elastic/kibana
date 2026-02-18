@@ -9,7 +9,7 @@ import type {
   CoverageOverviewFilter,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
 export interface CoverageOverviewDashboardState {

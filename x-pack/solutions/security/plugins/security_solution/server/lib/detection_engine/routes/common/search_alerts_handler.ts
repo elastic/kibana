@@ -15,7 +15,7 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { QueryAlertsBodyParams } from '../../../../../common/api/detection_engine/signals';
+import type { QueryAlertsBodyParams } from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../utils';
 
 interface SearchAlertsProps {

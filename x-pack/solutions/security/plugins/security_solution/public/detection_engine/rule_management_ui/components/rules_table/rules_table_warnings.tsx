@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import type { WarningSchema } from '../../../../../common/api/detection_engine';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import { MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE } from '../../../../../common/constants';
 import * as i18n from '../../../common/translations';
 

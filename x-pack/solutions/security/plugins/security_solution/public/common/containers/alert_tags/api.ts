@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../common/constants';
-import type { AlertTags } from '../../../../common/api/detection_engine';
+import type { AlertTags } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../lib/kibana';
 
 export const setAlertTags = async ({

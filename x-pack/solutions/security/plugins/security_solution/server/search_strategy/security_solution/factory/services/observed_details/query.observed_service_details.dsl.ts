@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { ObservedServiceDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { ObservedServiceDetailsRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { SERVICE_FIELDS } from './helpers';

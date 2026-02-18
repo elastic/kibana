@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
 import { buildAnnotationsFromError } from '../helpers';
 import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 

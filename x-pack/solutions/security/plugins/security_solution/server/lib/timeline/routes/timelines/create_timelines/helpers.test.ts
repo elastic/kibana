@@ -9,7 +9,7 @@ import { createTimelines } from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import type { FrameworkRequest } from '../../../../framework';
-import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
+import type { SavedTimeline, Note } from '@kbn/securitysolution-api';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';

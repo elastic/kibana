@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import type { AlertAssignees } from '../../../../common/api/detection_engine';
+import type { AlertAssignees } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection } from './types';
 import { removeNoAssigneesSelection } from './utils';

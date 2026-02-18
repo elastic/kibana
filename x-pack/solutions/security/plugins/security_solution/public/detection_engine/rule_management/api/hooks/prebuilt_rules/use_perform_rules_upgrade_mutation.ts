@@ -9,8 +9,8 @@ import { useMutation } from '@kbn/react-query';
 import type {
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+} from '@kbn/securitysolution-api';
+import { PERFORM_RULE_UPGRADE_URL } from '@kbn/securitysolution-api';
 import { performUpgradeRules } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';

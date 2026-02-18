@@ -8,7 +8,7 @@
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { UnisolationRouteRequestBody } from '../../../../common/api/endpoint';
+import type { UnisolationRouteRequestBody } from '@kbn/securitysolution-api';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { unIsolateHost } from '../../../common/lib/endpoint/endpoint_isolation';
 

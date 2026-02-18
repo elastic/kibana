@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleUpdateCallout } from '../components/rule_details/rule_update_callout';
 
 interface UseRuleUpdateCalloutProps {

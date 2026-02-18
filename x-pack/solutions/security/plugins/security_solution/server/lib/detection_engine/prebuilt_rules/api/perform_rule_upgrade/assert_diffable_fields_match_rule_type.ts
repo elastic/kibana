@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DiffableRuleTypes } from '../../../../../../common/api/detection_engine';
-import { DIFFABLE_RULE_TYPE_FIELDS_MAP } from '../../../../../../common/api/detection_engine';
+import type { DiffableRuleTypes } from '@kbn/securitysolution-api';
+import { DIFFABLE_RULE_TYPE_FIELDS_MAP } from '@kbn/securitysolution-api';
 
 /**
  * Validates that the upgradeable (diffable) fields match the target rule type's diffable fields.

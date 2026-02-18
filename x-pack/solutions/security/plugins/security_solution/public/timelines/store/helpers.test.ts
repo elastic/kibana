@@ -12,7 +12,7 @@ import {
   DataProviderTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type {
   DataProvider,
   DataProvidersAnd,

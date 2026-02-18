@@ -9,7 +9,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,
-} from '../../../../../../../common/api/search_strategy';
+} from '@kbn/securitysolution-api';
 
 import type {
   NetworkTopNFlowCountStrategyResponse,

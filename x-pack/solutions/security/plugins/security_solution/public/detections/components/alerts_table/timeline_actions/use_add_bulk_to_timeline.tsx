@@ -34,7 +34,7 @@ import { useUpdateTimeline } from '../../../../timelines/components/open_timelin
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
 import type { Direction } from '../../../../../common/search_strategy';

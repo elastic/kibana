@@ -17,7 +17,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../common/types/timeline';
-import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { PageScope } from '../../data_view_manager/constants';

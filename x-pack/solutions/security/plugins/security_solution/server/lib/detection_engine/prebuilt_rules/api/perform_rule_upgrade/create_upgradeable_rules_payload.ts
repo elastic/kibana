@@ -13,9 +13,9 @@ import {
   type PickVersionValues,
   type AllThreeWayFieldsDiff,
   MissingVersion,
-} from '../../../../../../common/api/detection_engine';
-import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
+import type { UpgradeConflictResolution } from '@kbn/securitysolution-api';
+import { UpgradeConflictResolutionEnum } from '@kbn/securitysolution-api';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';

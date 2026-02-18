@@ -8,8 +8,8 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { DeleteAssetCriticalityRecordResponse } from '../../../../../common/api/entity_analytics';
-import { DeleteAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
+import type { DeleteAssetCriticalityRecordResponse } from '@kbn/securitysolution-api';
+import { DeleteAssetCriticalityRecordRequestQuery } from '@kbn/securitysolution-api';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,

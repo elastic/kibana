@@ -7,7 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 
-import type { SetUnifiedAlertsAssigneesRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
+import type { SetUnifiedAlertsAssigneesRequestBody } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { setUnifiedAlertsAssignees } from '../api';
 

@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../common/constants';
-import type { AlertAssignees } from '../../../../common/api/detection_engine';
+import type { AlertAssignees } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../lib/kibana';
 
 export const setAlertAssignees = async ({

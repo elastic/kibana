@@ -6,8 +6,8 @@
  */
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { PerformRuleInstallationResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+import type { PerformRuleInstallationResponseBody } from '@kbn/securitysolution-api';
+import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/securitysolution-api';
 import { performInstallAllRules } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';

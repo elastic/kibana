@@ -9,7 +9,7 @@ import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import { useEffect } from 'react';
 
-import { SETUP_HEALTH_URL } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { SETUP_HEALTH_URL } from '@kbn/securitysolution-api';
 import { api } from '../../api';
 
 export const SETUP_DETECTION_ENGINE_HEALTH_API_MUTATION_KEY = ['POST', SETUP_HEALTH_URL];

@@ -8,7 +8,7 @@
 import type {
   BaseECSEntityField,
   EntityType,
-} from '../../../../../../common/api/entity_analytics/entity_store';
+} from '@kbn/securitysolution-api';
 import type { FieldDescription } from '../../installation/types';
 
 import { oldestValue, newestValue } from './field_utils';

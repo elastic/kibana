@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';

@@ -14,7 +14,7 @@ import {
   RuleHistoryRow,
 } from './flyout_history_row';
 import { TestProviders } from '../../../common/mock';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import {
   type ExpandableFlyoutApi,
   type FlyoutPanelHistory,

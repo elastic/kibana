@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { EntityType } from '../../../common/entity_analytics/types';
-import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
+import type { RiskScoreInput } from '@kbn/securitysolution-api';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 

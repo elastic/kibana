@@ -12,7 +12,7 @@ import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../../shared_imports';
-import type { RiskScore } from '../../../../../../../../common/api/detection_engine';
+import type { RiskScore } from '@kbn/securitysolution-api';
 import { DefaultRiskScore } from '../../../../../../rule_creation_ui/components/risk_score_mapping/default_risk_score';
 import { defaultRiskScoreValidator } from '../../../../../../rule_creation_ui/validators/default_risk_score_validator';
 

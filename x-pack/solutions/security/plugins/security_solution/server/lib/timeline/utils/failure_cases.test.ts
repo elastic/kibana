@@ -26,8 +26,8 @@ import {
   NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
-import type { TimelineResponse } from '../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import type { TimelineResponse } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 
 describe('failure cases', () => {

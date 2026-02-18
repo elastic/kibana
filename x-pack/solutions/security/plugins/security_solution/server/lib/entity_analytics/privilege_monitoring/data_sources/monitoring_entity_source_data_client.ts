@@ -12,7 +12,7 @@ import type {
   ListEntitySourcesRequestQuery,
   ListEntitySourcesResponse,
   Matcher,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { PartialMonitoringEntitySource } from '../types';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 import { areMatchersEqual, getDefaultMatchersForSource } from './matchers';

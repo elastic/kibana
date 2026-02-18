@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics';
+import type { PrivMonHealthResponse } from '@kbn/securitysolution-api';
 import { useEntityAnalyticsRoutes } from '../api/api';
 
 /**

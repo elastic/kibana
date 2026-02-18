@@ -15,12 +15,12 @@ import {
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
 } from '../../../../../../../common/constants';
-import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import type { FindRulesResponse } from '@kbn/securitysolution-api';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';

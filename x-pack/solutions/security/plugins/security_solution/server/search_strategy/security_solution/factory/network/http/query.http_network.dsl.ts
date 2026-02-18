@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkHttpRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkHttpRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 import type { SortField } from '../../../../../../common/search_strategy';

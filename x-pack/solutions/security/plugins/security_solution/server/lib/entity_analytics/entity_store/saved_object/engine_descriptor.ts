@@ -10,12 +10,12 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { merge } from 'lodash/fp';
-import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import type { InitEntityEngineRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/init.gen';
 import type {
   EngineDescriptor,
   EngineStatus,
   EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/common.gen';
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
 import { getByEntityTypeQuery } from '../utils';

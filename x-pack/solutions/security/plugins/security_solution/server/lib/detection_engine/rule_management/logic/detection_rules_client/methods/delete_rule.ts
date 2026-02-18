@@ -6,7 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '@kbn/securitysolution-api';
 
 interface DeleteRuleParams {
   rulesClient: RulesClient;

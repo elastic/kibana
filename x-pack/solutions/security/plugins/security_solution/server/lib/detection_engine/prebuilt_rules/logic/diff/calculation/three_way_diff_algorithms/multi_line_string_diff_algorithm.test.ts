@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
+import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { multiLineStringDiffAlgorithm } from './multi_line_string_diff_algorithm';
 import {
   TEXT_M_A,

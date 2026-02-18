@@ -23,7 +23,7 @@ import type {
 import type {
   Threat,
   ThreatTechnique,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 interface MitreMappingSelectionResponse {
   tactics: string[]; // Array of tactic IDs like ["TA0001", "TA0002"]

@@ -14,8 +14,8 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import type { FindAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
-import { FindAssetCriticalityRecordsRequestQuery } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { FindAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
+import { FindAssetCriticalityRecordsRequestQuery } from '@kbn/securitysolution-api';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';

@@ -10,7 +10,7 @@ import { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   EntityType,
   InitEntityEngineRequestBody,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { generateIndexMappings } from '../elasticsearch_assets';
 import {
   hostEntityEngineDescription,

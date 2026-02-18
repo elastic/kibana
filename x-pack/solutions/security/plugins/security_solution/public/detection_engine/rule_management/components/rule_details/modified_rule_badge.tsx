@@ -7,8 +7,8 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
+import { isCustomizedPrebuiltRule } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { useRuleCustomizationsContext } from './rule_customizations_diff/rule_customizations_context';
 import { PrebuiltRuleDiffBadge } from './prebuilt_rule_diff_badge';

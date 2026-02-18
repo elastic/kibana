@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { NetworkOverviewRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { NetworkOverviewRequestOptions } from '@kbn/securitysolution-api';
 
 import { NetworkQueries } from '../../../../../../../common/search_strategy';
 

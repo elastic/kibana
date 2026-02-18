@@ -14,7 +14,7 @@ import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrat
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { withLicense } from '../../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 

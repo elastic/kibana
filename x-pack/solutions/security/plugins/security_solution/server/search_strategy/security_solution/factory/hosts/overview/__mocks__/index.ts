@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { HostOverviewRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { HostOverviewRequestOptions } from '@kbn/securitysolution-api';
 
 import { HostsQueries } from '../../../../../../../common/search_strategy';
 

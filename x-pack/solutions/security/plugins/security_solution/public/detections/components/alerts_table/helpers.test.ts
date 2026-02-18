@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderTypeEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';

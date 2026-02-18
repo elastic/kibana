@@ -11,7 +11,7 @@ import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type {
   PartialThreeWayRuleDiff,
   RuleResponse,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { PerFieldRuleDiffTab } from '../per_field_rule_diff_tab';
 import { RuleDetailsFlyout, TabContentPadding } from '../rule_details_flyout';
 import * as ruleDetailsI18n from '../translations';

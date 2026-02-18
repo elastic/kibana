@@ -15,9 +15,9 @@ import {
   InstallMigrationDashboardsRequestParams,
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
-import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
-import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { withLicense } from '@kbn/securitysolution-api';
+import { withExistingMigration } from '@kbn/securitysolution-api';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { installTranslated } from './util/installation';
 
 export const registerSiemDashboardMigrationsInstallRoute = (

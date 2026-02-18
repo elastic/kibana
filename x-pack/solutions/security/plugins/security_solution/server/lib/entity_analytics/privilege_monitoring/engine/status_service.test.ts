@@ -19,7 +19,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EngineStatusService } from './status_service';
 import { createEngineStatusService } from './status_service';
 import type { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
-import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics';
+import type { MonitoringEngineDescriptor } from '@kbn/securitysolution-api';
 
 const mockRemovePrivilegeMonitoringTask = jest.fn();
 const mockScheduleNow = jest.fn();

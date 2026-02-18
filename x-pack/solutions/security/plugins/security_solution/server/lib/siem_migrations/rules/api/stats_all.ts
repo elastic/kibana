@@ -10,7 +10,7 @@ import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/sie
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsStatsAllRoute = (
   router: SecuritySolutionPluginRouter,

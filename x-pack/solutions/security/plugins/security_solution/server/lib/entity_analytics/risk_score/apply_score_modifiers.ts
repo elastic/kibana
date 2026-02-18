@@ -13,7 +13,7 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import type {
   EntityRiskScoreRecord,
   RiskScoreWeights,
-} from '../../../../common/api/entity_analytics/common';
+} from '@kbn/securitysolution-api';
 import { getRiskLevel, RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { AssetCriticalityService } from '../asset_criticality';
 

@@ -7,7 +7,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { ALERT_SUPPRESSION_EVENT } from '../../../../telemetry/event_based/events';
-import type { AlertSuppressionDuration } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { AlertSuppressionDuration } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { RuleParams } from '../../../rule_schema';
 
 import { isThresholdParams } from '../utils';

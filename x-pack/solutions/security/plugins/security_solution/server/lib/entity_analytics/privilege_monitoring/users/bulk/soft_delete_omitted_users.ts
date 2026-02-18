@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics';
+import type { MonitoredUserDoc } from '@kbn/securitysolution-api';
 import type { BulkProcessingError, BulkProcessingResults, Options } from './types';
 
 export interface SoftDeletionResults {

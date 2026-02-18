@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedTimeline } from '../../../../common/api/timeline';
+import type { SavedTimeline } from '@kbn/securitysolution-api';
 
 export const defaultColumnHeaderType = 'not-filtered';
 

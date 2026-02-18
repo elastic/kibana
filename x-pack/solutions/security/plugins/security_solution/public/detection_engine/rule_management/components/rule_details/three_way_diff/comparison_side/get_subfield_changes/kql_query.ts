@@ -6,7 +6,7 @@
  */
 
 import { stringifyToSortedJson } from '../utils';
-import type { RuleKqlQuery } from '../../../../../../../../common/api/detection_engine';
+import type { RuleKqlQuery } from '@kbn/securitysolution-api';
 import type { SubfieldChange } from '../types';
 
 export const getSubfieldChangesForKqlQuery = (

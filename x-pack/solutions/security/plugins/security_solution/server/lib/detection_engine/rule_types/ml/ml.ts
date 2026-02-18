@@ -8,7 +8,7 @@
 /* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';

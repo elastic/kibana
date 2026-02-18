@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineType } from '../../../../common/api/timeline';
+import type { TimelineType } from '@kbn/securitysolution-api';
 import { appendSearch } from './helpers';
 
 export const getTimelineTabsUrl = (tabName: TimelineType, search?: string) =>

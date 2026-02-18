@@ -7,11 +7,11 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { DeleteSingleEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+import type { DeleteSingleEntityResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import {
   DeleteSingleEntityRequestParams,
   DeleteSingleEntityRequestBody,
-} from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import {

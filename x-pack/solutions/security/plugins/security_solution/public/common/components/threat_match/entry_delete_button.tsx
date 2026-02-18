@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMappingEntry } from '@kbn/securitysolution-api';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;

@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import type { EuiMarkdownEditorUiPlugin, EuiSelectableOption } from '@elastic/eui';
 import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
 
-import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
 import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';

@@ -16,7 +16,7 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,
-} from '../../../../../../common/api/search_strategy';
+} from '@kbn/securitysolution-api';
 import type { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';

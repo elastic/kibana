@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
 import { BuildingBlock } from '../../../../rule_about_section';
-import type { BuildingBlockObject } from '../../../../../../../../../common/api/detection_engine';
+import type { BuildingBlockObject } from '@kbn/securitysolution-api';
 
 interface BuildingBlockReadOnlyProps {
   buildingBlock?: BuildingBlockObject;

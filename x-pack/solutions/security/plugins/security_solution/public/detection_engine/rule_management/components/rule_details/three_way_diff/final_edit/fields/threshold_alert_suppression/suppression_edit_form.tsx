@@ -12,7 +12,7 @@ import {
 } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit';
 import { ALERT_SUPPRESSION_DURATION_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { type FormData } from '../../../../../../../../shared_imports';
-import type { ThresholdAlertSuppression } from '../../../../../../../../../common/api/detection_engine';
+import type { ThresholdAlertSuppression } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import {
   thresholdAlertSuppressionFormSchema,

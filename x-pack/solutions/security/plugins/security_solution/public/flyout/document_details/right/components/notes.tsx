@@ -31,7 +31,7 @@ import {
   NOTES_VIEW_NOTES_BUTTON_TEST_ID,
 } from './test_ids';
 import type { State } from '../../../../common/store';
-import type { Note } from '../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import {
   fetchNotesByDocumentIds,
   ReqStatus,

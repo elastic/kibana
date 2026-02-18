@@ -15,7 +15,7 @@ import {
   type DeleteAssetCriticalityResponse,
   useEntityAnalyticsRoutes,
 } from '../../../../entity_analytics/api/api';
-import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 const QUERY_KEY = 'generic-entity-asset-criticality';
 

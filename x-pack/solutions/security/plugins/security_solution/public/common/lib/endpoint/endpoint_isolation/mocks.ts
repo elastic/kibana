@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
+import type { IsolationRouteRequestBody } from '@kbn/securitysolution-api';
 import type { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import type { ResponseProvidersInterface } from '../../../mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../../mock/endpoint/http_handler_mock_factory';

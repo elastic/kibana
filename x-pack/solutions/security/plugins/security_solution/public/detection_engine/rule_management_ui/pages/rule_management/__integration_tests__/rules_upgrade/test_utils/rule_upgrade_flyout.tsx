@@ -19,7 +19,7 @@ import { useUserPrivileges } from '../../../../../../../common/components/user_p
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { TIMELINES_URL } from '../../../../../../../../common/constants';
 import { RulesPage } from '../../..';
-import type { RelatedIntegration } from '../../../../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import {
   GET_ALL_INTEGRATIONS_URL,
   GET_PREBUILT_RULES_STATUS_URL,
@@ -27,7 +27,7 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../../../../../common/lib/kibana';
 import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 

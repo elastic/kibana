@@ -17,7 +17,7 @@ import React from 'react';
 import { TimelineId } from '../../../../../../common/types';
 import { SAVE_TIMELINE_CALLOUT_TEST_ID } from '../../../notes/test_ids';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../../../common/store';
 
 jest.mock('../../../../../common/components/user_privileges');

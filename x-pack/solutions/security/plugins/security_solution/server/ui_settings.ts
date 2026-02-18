@@ -53,7 +53,7 @@ import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '@kbn/securitysolution-api';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 

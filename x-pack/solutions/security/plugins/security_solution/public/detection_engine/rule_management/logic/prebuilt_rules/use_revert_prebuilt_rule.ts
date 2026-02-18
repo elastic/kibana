@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RevertPrebuiltRulesResponseBody } from '../../../../../common/api/detection_engine';
+import type { RevertPrebuiltRulesResponseBody } from '@kbn/securitysolution-api';
 import type { HTTPError } from '../../../../../common/detection_engine/types';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useRevertPrebuiltRuleMutation } from '../../api/hooks/prebuilt_rules/use_revert_prebuilt_rule_mutation';

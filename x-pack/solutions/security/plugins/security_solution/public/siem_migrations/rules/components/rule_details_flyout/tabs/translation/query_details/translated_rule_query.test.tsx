@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../../../common/mock';
 import { getRuleMigrationRuleMock } from '../../../../../../../../common/siem_migrations/model/__mocks__';
 import { TranslatedRuleQuery } from './translated_rule_query';
-import { getRulesEqlSchemaMock } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { getRulesEqlSchemaMock } from '@kbn/securitysolution-api';
 
 describe('TranslatedRuleQuery', () => {
   it('renders viewer mode by default with custom translation', () => {

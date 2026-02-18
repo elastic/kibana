@@ -11,7 +11,7 @@ import {
   type DiffableRuleTypes,
   type FieldUpgradeSpecifier,
   type PickVersionValues,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { mapRuleFieldToDiffableRuleField } from './diffable_rule_fields_mappings';
 

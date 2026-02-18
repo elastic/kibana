@@ -12,7 +12,7 @@ import {
   type RulePatchProps,
   RuleResponse,
   type RuleUpdateProps,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { hasValidRuleType, type RuleParams } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';

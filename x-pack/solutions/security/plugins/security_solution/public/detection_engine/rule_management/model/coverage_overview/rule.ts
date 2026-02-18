@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleObjectId } from '../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '@kbn/securitysolution-api';
 
 export interface CoverageOverviewRule {
   id: RuleObjectId; // rule SO's ids (not ruleId)

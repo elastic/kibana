@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
-import { getRulesSchemaMock } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import type { RuleResponse } from '@kbn/securitysolution-api';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 
 export const getRuleByRuleId = jest
   .fn()

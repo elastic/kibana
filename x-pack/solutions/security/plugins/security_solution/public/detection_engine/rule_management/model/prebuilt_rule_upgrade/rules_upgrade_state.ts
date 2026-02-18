@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '@kbn/securitysolution-api';
 import type { RuleUpgradeState } from './rule_upgrade_state';
 
 export type RulesUpgradeState = Record<RuleSignatureId, RuleUpgradeState>;

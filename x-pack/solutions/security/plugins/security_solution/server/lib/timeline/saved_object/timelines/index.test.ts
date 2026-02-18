@@ -21,12 +21,12 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type {
   GetTimelinesResponse,
   ResolvedTimeline,
   SavedTimeline,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import {
   mockResolvedSavedObject,
   mockResolvedTimeline,

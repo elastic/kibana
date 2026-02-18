@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@kbn/react-query';
 import dateMath from '@kbn/datemath';
-import type { RiskScoresPreviewRequest } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type { RiskScoresPreviewRequest } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/preview_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export type UseRiskScorePreviewParams = Omit<RiskScoresPreviewRequest, 'data_view_id'> & {

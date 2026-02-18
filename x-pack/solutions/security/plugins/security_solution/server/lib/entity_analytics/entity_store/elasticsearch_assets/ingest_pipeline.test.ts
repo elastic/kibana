@@ -13,7 +13,7 @@ import {
   ENRICH_FIELD,
 } from './ingest_pipeline';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 
 describe('ingest_pipeline', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;

@@ -30,9 +30,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlSummaryJob } from '@kbn/ml-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
-import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
-import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type { EntityDetailsHighlightsRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_details/highlights.gen';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
 import type { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';

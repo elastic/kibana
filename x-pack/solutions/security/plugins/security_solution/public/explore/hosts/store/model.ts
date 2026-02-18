@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HostsFields } from '../../../../common/api/search_strategy/hosts/model/sort';
+import type { HostsFields } from '@kbn/securitysolution-api';
 import type { Direction } from '../../../../common/search_strategy';
 import type {
   RiskScoreSortField,

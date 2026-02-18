@@ -17,7 +17,7 @@ import { getAllFilters } from './get_query_filter';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 export const getQueryFilterLoadFields =
   (dataViewsService: DataViewsContract) =>

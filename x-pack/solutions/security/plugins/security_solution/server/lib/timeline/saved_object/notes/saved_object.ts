@@ -22,7 +22,7 @@ import type {
   BareNoteWithoutExternalRefs,
   ResponseNote,
   GetNotesResult,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';

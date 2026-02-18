@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { BulkActionError } from '../../../rule_management/api/rules/bulk_actions/bulk_actions_response';
 import { createBulkActionError } from '../../../rule_management/utils/utils';
 

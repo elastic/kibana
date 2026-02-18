@@ -18,7 +18,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   ThresholdNormalized,
   TimestampOverride,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import {
@@ -29,7 +29,7 @@ import type { ThresholdCompositeBucket } from './types';
 import { shouldFilterByCardinality } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getMaxSignalsWarning, stringifyAfterKey } from '../utils/utils';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 
 interface FindThresholdSignalsParams {

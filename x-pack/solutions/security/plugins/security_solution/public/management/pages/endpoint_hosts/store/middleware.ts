@@ -18,7 +18,7 @@ import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
-} from '../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,

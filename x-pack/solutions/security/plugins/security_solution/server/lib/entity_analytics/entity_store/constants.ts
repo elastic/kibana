@@ -9,7 +9,7 @@ import type {
   EngineStatus,
   InitEntityEngineRequestBody,
   StoreStatus,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { DEFAULT_INTERVAL } from './tasks/field_retention_enrichment/constants';
 
 export const DEFAULT_LOOKBACK_PERIOD = '3h';

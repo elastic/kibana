@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
 import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
-} from '../../../common/api/entity_analytics/entity_store/enable.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import type {
   DeleteEntityEngineResponse,
   EntityType,
   InitEntityEngineResponse,
   ListEntityEnginesResponse,
   StopEntityEngineResponse,
-} from '../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 

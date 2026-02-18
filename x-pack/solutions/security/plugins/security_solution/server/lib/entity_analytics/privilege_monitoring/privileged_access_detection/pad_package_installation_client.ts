@@ -23,7 +23,7 @@ import type {
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { Installable, RegistrySearchResult } from '@kbn/fleet-plugin/common';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../common/api/entity_analytics';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/securitysolution-api';
 
 interface PadPackageInstallationClientOpts {
   logger: Logger;

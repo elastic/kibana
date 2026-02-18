@@ -13,7 +13,7 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 /**
  * Returns the columns that have icon headers

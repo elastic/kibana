@@ -17,7 +17,7 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
 import type {
   MonitoringEntitySourceAttributes,
   MonitoringEntitySourceType,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { areMatchersEqual, getDefaultMatchersForSource } from '../data_sources/matchers';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';

@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   MonitoringEntitySource,
   MonitoringEntitySourceAttributes,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { PartialMonitoringEntitySource } from '../types';
 import { MonitoringEntitySourceDescriptorClient } from './monitoring_entity_source';
 

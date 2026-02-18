@@ -16,7 +16,7 @@ import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
-import type { Status } from '../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import {
   getColumns,
   getRulePreviewColumns,

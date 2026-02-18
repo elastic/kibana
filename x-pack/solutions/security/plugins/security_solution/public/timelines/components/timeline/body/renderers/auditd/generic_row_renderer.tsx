@@ -10,7 +10,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 
 import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';

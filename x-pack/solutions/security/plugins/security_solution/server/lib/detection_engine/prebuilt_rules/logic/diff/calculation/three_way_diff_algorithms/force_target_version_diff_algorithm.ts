@@ -8,13 +8,13 @@
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   MissingVersion,
   ThreeWayDiffConflict,
   ThreeWayMergeOutcome,
   determineDiffOutcome,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 
 /**
  * Diff algorithm forcing target version. Useful for special fields like `version`.

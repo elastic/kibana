@@ -8,7 +8,7 @@
 import type {
   GetInstalledIntegrationsResponse,
   GetAllIntegrationsResponse,
-} from '../../../../common/api/detection_engine/fleet_integrations';
+} from '@kbn/securitysolution-api';
 
 export interface IFleetIntegrationsApiClient {
   /**

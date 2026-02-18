@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RiskEngineScheduleNowResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import type { RiskEngineScheduleNowResponse } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import {
   API_VERSIONS,
   APP_ID,

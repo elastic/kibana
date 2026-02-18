@@ -29,7 +29,7 @@ import type {
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
-} from '../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
@@ -40,7 +40,7 @@ import {
   REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
-} from '../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type {
   BulkActionEditPayload,
   BulkActionsDryRunErrCode,
@@ -51,12 +51,12 @@ import type {
   GetRuleManagementFiltersResponse,
   ImportRulesResponse,
   BulkManualRuleFillGaps,
-} from '../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   BulkActionTypeEnum,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
-} from '../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_IMPORT_URL,
@@ -65,10 +65,10 @@ import {
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../common/constants';
 
-import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
+import type { RulesReferencedByExceptionListsSchema } from '@kbn/securitysolution-api';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/securitysolution-api';
 
-import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
+import type { RulePreviewResponse, RuleResponse } from '@kbn/securitysolution-api';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../common/translations';
@@ -90,7 +90,7 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { BootstrapPrebuiltRulesResponse } from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
 
 /**

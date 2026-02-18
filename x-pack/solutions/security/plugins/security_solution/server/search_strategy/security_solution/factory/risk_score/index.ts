@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityRiskQueries } from '../../../../../common/api/search_strategy';
+import { EntityRiskQueries } from '@kbn/securitysolution-api';
 import type { FactoryQueryTypes } from '../../../../../common/search_strategy';
 
 import type { SecuritySolutionFactory } from '../types';

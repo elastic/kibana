@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleAboutSection, Description } from './rule_about_section';
 import { RuleDefinitionSection } from './rule_definition_section';
 import { RuleScheduleSection } from './rule_schedule_section';

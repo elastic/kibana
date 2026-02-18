@@ -36,7 +36,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana');

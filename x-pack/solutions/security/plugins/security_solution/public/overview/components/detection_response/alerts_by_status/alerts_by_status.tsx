@@ -59,7 +59,7 @@ import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 const StyledFlexItem = styled(EuiFlexItem)`

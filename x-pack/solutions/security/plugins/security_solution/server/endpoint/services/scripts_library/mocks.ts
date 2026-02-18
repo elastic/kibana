@@ -16,7 +16,7 @@ import type {
   CreateScriptRequestBody,
   ListScriptsRequestQuery,
   PatchUpdateRequestBody,
-} from '../../../../common/api/endpoint/scripts_library';
+} from '@kbn/securitysolution-api';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,

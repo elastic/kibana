@@ -18,7 +18,7 @@ import {
   mockDefineStepRule,
   mockScheduleStepRule,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import {
   BODY_TEST_ID,
   ABOUT_HEADER_TEST_ID,

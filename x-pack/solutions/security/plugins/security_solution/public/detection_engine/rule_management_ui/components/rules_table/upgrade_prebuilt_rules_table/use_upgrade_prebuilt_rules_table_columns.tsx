@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RuleUpgradeEventTypes } from '../../../../../common/lib/telemetry/events/rule_upgrade/types';
-import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
+import { ThreeWayDiffConflict } from '@kbn/securitysolution-api';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleSignatureId } from '@kbn/securitysolution-api';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../common/components/related_integrations/integrations_popover';

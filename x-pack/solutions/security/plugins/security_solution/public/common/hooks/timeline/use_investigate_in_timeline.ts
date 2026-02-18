@@ -18,7 +18,7 @@ import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { sourcererActions } from '../../store/actions';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 

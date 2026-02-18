@@ -18,12 +18,12 @@ import type {
   InvestigationFields,
   RuleResponse,
   RuleAction as RuleActionSchema,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type {
   FindRulesResponse,
   RuleToImport,
-} from '../../../../../common/api/detection_engine/rule_management';
-import type { WarningSchema } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';

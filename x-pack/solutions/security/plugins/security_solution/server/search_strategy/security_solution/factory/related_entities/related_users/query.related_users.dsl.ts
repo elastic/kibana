@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { RelatedUsersRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { RelatedUsersRequestOptions } from '@kbn/securitysolution-api';
 
 export const buildRelatedUsersQuery = ({
   hostName,

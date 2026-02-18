@@ -12,8 +12,8 @@ import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
-import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
+import { IdentifierType } from '@kbn/securitysolution-api/api/entity_analytics/common/common.gen';
+import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';

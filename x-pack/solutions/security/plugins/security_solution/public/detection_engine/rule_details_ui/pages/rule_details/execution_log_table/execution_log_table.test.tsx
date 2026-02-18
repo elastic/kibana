@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
-import { getRuleExecutionResultsResponseMock } from '../../../../../../common/api/detection_engine/rule_monitoring/mocks';
+import { getRuleExecutionResultsResponseMock } from '@kbn/securitysolution-api';
 
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';

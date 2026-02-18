@@ -19,7 +19,7 @@ import type {
   AssetCriticalityUpsert,
   AssetCriticalityUpsertForBulkUpload,
 } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import type { CriticalityValues } from './constants';

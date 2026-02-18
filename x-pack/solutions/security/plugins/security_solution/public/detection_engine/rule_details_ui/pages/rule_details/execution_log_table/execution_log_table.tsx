@@ -49,7 +49,7 @@ import {
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import { RuleDetailTabs } from '../use_rule_details_tabs';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import {

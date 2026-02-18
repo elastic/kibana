@@ -13,7 +13,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
-import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';

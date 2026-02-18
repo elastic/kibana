@@ -22,7 +22,7 @@ import {
   type TimelineStatus,
   TimelineStatusEnum,
   type TimelineResponse,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([

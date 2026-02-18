@@ -6,7 +6,7 @@
  */
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useFetchRuleByIdQuery } from '../api/hooks/use_fetch_rule_by_id_query';
 import * as i18n from './translations';
 

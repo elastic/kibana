@@ -12,7 +12,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
-import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { createAndNewEntryItem, createOrNewEntryItem } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`

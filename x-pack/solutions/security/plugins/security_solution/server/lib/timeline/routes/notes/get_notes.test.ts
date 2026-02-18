@@ -14,7 +14,7 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { NOTE_URL } from '../../../../../common/constants';
-import type { GetNotesRequestQuery } from '../../../../../common/api/timeline';
+import type { GetNotesRequestQuery } from '@kbn/securitysolution-api';
 import { mockGetCurrentUser } from '../../__mocks__/import_timelines';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 

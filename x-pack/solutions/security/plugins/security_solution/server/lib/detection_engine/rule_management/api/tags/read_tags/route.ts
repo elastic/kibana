@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import type { ReadTagsResponse } from '../../../../../../../common/api/detection_engine';
+import type { ReadTagsResponse } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';

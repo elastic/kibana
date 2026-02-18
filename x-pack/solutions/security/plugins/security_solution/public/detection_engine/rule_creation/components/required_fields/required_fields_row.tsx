@@ -17,7 +17,7 @@ import type { ArrayItem, FieldConfig, FieldHook } from '../../../../shared_impor
 import type {
   RequiredField,
   RequiredFieldInput,
-} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 interface RequiredFieldRowProps {
   item: ArrayItem;

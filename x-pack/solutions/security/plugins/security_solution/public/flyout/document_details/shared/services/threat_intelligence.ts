@@ -10,9 +10,9 @@ import { filter } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import { CtiQueries } from '../../../../../common/api/search_strategy';
+import { CtiQueries } from '@kbn/securitysolution-api';
 import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy';
-import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { EventEnrichmentRequestOptionsInput } from '@kbn/securitysolution-api';
 
 type GetEventEnrichmentProps = Omit<EventEnrichmentRequestOptionsInput, 'factoryQueryType'> & {
   /**

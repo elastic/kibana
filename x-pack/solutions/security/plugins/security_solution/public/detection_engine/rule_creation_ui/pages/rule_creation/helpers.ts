@@ -57,7 +57,7 @@ import type {
   RequiredFieldInput,
   SeverityMapping,
   RelatedIntegrationArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import {

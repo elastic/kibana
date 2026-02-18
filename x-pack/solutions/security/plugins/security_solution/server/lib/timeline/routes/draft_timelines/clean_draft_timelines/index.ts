@@ -21,11 +21,11 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import type { CleanDraftTimelinesResponse } from '../../../../../../common/api/timeline';
+import type { CleanDraftTimelinesResponse } from '@kbn/securitysolution-api';
 import {
   CleanDraftTimelinesRequestBody,
   TimelineTypeEnum,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

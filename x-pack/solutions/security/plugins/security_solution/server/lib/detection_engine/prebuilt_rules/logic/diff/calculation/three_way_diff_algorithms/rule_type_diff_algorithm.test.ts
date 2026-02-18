@@ -8,13 +8,13 @@
 import type {
   DiffableRuleTypes,
   ThreeVersionsOf,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { ruleTypeDiffAlgorithm } from './rule_type_diff_algorithm';
 
 describe('ruleTypeDiffAlgorithm', () => {

@@ -7,7 +7,7 @@
 
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
-import type { LogLevel } from '../../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import type { LogLevel } from '@kbn/securitysolution-api';
 
 /**
  * "Static" health state at the moment of the API call. Calculated for a set of rules.

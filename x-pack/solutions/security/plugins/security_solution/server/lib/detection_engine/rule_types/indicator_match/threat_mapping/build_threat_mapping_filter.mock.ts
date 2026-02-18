@@ -7,7 +7,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { Filter } from '@kbn/es-query';
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import type { ThreatListDoc, ThreatListItem, ThreatMappingEntries } from './types';
 
 export const getThreatMappingEntriesMock = (): ThreatMappingEntries => {

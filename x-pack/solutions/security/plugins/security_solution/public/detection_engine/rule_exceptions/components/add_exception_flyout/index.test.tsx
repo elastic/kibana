@@ -29,7 +29,7 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+} from '@kbn/securitysolution-api';
 import type { AlertData } from '../../utils/types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');

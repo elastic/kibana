@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_define_rule/schema';
-import type { TimelineTemplateReference } from '../../../../../../../../common/api/detection_engine';
+import type { TimelineTemplateReference } from '@kbn/securitysolution-api';
 import {
   PickTimeline,
   type FieldValueTimeline,

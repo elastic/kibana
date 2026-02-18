@@ -30,8 +30,8 @@ import type {
   TimelineResponse,
   TimelineStatus,
   TimelineType,
-} from '../../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';

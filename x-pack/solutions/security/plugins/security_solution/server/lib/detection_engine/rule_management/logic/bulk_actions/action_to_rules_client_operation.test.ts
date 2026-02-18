@@ -6,7 +6,7 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 describe('bulkEditActionToRulesClientOperation', () => {

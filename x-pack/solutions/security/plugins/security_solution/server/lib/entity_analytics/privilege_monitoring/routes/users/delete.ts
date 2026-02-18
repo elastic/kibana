@@ -12,7 +12,7 @@ import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_
 import {
   DeletePrivMonUserRequestParams,
   type DeletePrivMonUserResponse,
-} from '../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';

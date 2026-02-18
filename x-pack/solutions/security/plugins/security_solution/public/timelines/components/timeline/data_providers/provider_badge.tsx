@@ -17,7 +17,7 @@ import {
   DataProviderTypeEnum,
   type TimelineType,
   TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigationFields } from '../../../../common/api/detection_engine';
+import type { InvestigationFields } from '@kbn/securitysolution-api';
 import type { Rule } from './types';
 import { transformRuleFromAlertHit } from './use_rule_with_fallback';
 

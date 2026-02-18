@@ -9,7 +9,7 @@ import { asyncForEach } from '@kbn/std';
 import { first } from 'lodash/fp';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { monitoringEntitySourceTypeName } from '../saved_objects/monitoring_entity_source_type';
-import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 import { getApiKeyManager } from '../auth/api_key';
 import { deleteUsersWithSourceIndexFactory } from '../data_sources/migrations/delete_user_with_source_indices';
 import { migrateSourceIndexFactory } from '../data_sources/migrations/source_index_update';

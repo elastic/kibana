@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface UseRuleDetailsParams {

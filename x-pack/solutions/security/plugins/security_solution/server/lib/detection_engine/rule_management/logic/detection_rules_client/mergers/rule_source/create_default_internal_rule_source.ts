@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InternalRuleSource } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { InternalRuleSource } from '@kbn/securitysolution-api';
 
 export const createDefaultInternalRuleSource = (): InternalRuleSource => ({
   type: 'internal',

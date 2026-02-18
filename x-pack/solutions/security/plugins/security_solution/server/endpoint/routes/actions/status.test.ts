@@ -34,7 +34,7 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
+import { ActionStatusRequestSchema } from '@kbn/securitysolution-api';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 

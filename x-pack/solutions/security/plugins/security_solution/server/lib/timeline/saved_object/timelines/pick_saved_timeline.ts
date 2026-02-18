@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { SavedTimeline } from '../../../../../common/api/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
+import type { SavedTimeline } from '@kbn/securitysolution-api';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 
 export const pickSavedTimeline = (
   timelineId: string | null,

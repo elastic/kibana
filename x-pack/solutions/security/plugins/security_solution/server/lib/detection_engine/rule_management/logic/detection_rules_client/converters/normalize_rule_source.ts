@@ -8,7 +8,7 @@
 import type {
   ExternalRuleSource,
   RuleSource,
-} from '../../../../../../../common/api/detection_engine/model';
+} from '@kbn/securitysolution-api';
 import type { BaseRuleParams, ExternalRuleSourceCamelCased } from '../../../../rule_schema';
 import { createDefaultExternalRuleSource } from '../mergers/rule_source/create_default_external_rule_source';
 import { createDefaultInternalRuleSource } from '../mergers/rule_source/create_default_internal_rule_source';

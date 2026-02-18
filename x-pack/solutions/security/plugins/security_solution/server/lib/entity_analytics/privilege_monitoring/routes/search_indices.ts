@@ -12,7 +12,7 @@ import { take } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { API_VERSIONS, APP_ID, PRIVMON_INDICES_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
+import { SearchPrivilegesIndicesRequestQuery } from '@kbn/securitysolution-api';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';

@@ -8,13 +8,13 @@
 import type {
   RuleEqlQuery,
   ThreeVersionsOf,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { eqlQueryDiffAlgorithm } from './eql_query_diff_algorithm';
 
 describe('eqlQueryDiffAlgorithm', () => {

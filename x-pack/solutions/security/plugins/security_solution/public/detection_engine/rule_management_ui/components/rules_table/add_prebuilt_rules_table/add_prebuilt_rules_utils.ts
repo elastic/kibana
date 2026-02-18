@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PrebuiltRulesStatusStats } from '../../../../../../common/api/detection_engine';
+import type { PrebuiltRulesStatusStats } from '@kbn/securitysolution-api';
 
 interface UpgradeReviewEnabledProps {
   canEditRules: boolean | null;

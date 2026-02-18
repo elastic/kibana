@@ -36,7 +36,7 @@ import type {
   UnisolationRouteRequestBody,
   MSDefenderRunScriptActionRequestParams,
   CancelActionRequestBody,
-} from '../../../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type {
   ActionDetails,
   ResponseActionScriptsApiResponse,

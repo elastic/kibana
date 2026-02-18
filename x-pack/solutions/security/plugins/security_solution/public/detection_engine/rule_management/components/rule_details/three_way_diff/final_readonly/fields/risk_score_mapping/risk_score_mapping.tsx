@@ -8,7 +8,7 @@
 import React from 'react';
 import { requiredOptional } from '@kbn/zod-helpers';
 import { EuiDescriptionList } from '@elastic/eui';
-import type { RiskScoreMapping } from '../../../../../../../../../common/api/detection_engine';
+import type { RiskScoreMapping } from '@kbn/securitysolution-api';
 import * as ruleDetailsI18n from '../../../../translations';
 import { RiskScoreMappingItem } from '../../../../rule_about_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';

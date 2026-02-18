@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { DiffableRuleTypes } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRuleTypes } from '@kbn/securitysolution-api';
 import { RuleType } from '../../../../rule_definition_section';
 
 interface TypeReadOnlyProps {

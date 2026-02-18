@@ -26,7 +26,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;

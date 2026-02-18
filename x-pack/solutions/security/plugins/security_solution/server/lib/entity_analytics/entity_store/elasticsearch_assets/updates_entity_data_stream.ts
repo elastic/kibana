@@ -14,8 +14,8 @@ import {
 import type {
   EntityType,
   EngineComponentStatus,
-} from '../../../../../common/api/entity_analytics/entity_store';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/entity_store';
+} from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 
 export const initEntityUpdatesDataStream = async (
   entityType: EntityType,

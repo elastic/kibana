@@ -17,10 +17,10 @@ import type {
   TwoWayRuleDiffThreatMatchFields,
   TwoWayRuleDiffThresholdFields,
   TwoWayRuleFieldsDiff,
-} from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/two_way_diff/two_way_rule_diff';
+} from '@kbn/securitysolution-api';
 import { normalizeRuleResponse } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/normalize_rule_response';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
-import type { TwoWayFieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/two_way_diff/two_way_diff_outcome';
+import type { RuleResponse } from '@kbn/securitysolution-api';
+import type { TwoWayFieldsDiffAlgorithmsFor } from '@kbn/securitysolution-api';
 import { deepEqualityDiffAlgorithm } from './two_way_diff_algorithms/deep_equality_diff_algorithm';
 import { orderAgnosticArrayDiffAlgorithm } from './two_way_diff_algorithms/order_agnostic_array_diff_algorithm';
 

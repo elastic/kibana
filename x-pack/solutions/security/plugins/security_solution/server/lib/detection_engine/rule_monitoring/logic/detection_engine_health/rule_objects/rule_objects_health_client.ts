@@ -7,12 +7,12 @@
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type {
   ClusterHealthParameters,
   RuleHealthParameters,
   SpaceHealthParameters,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { DETECTION_RULES_FILTER } from './filters';
 import {

@@ -8,7 +8,7 @@
 import type {
   MonitoringLabel,
   MonitoringEntitySource,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 
 export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics_integration';
 

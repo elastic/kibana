@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
 import { useSendMemoryDumpRequest } from '../../../hooks/response_actions/use_send_memory_dump_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import type { SupportedArguments } from '../../console';
 import type { ActionRequestComponentProps } from '../types';
 import type {

@@ -21,7 +21,7 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '@kbn/securitysolution-api';
 import {
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
@@ -35,7 +35,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
 } from '../types';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
 
 /**

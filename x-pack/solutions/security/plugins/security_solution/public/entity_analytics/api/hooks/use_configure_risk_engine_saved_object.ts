@@ -7,12 +7,12 @@
 
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
+import type { TaskManagerUnavailableResponse } from '@kbn/securitysolution-api';
 import { useEntityAnalyticsRoutes } from '../api';
 import type {
   ConfigureRiskEngineSavedObjectRequestBody,
   ConfigureRiskEngineSavedObjectResponse,
-} from '../../../../common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 
 interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;

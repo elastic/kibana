@@ -8,7 +8,7 @@
 import type {
   DiffableAllFields,
   RuleSignatureId,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export type SetRuleFieldResolvedValueFn<
   FieldName extends keyof DiffableAllFields = keyof DiffableAllFields

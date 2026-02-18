@@ -17,7 +17,7 @@ import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
 import type { InsertTimeline } from './types';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 

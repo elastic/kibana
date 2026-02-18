@@ -19,7 +19,7 @@ import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
+import type { AfterKeys } from '@kbn/securitysolution-api';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';

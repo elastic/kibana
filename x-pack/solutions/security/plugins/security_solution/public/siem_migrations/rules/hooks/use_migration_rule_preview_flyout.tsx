@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 

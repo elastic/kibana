@@ -11,7 +11,7 @@ import type { RenderHookResult } from '@testing-library/react';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { RUN_SCRIPT_ROUTE } from '../../../../common/endpoint/constants';
-import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 import type {
   RunScriptRequestCustomOptions,
   UseSendRunScriptRequestResult,

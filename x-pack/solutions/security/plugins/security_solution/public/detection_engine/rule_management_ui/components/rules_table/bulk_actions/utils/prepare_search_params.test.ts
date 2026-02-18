@@ -11,7 +11,7 @@ import type { FilterOptions } from '../../../../../rule_management/logic/types';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 
 import { prepareSearchParams } from './prepare_search_params';
-import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 
 jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),

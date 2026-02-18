@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UploadAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { UploadAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
 import { reducer } from './reducer';
 import { FileUploaderSteps } from './types';

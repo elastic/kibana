@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
-import type { RuleDataSource } from '../../../../../../../../../common/api/detection_engine';
+import { DataSourceType } from '@kbn/securitysolution-api';
+import type { RuleDataSource } from '@kbn/securitysolution-api';
 import { Index, DataViewId, DataViewIndexPattern } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import { assertUnreachable } from '../../../../../../../../../common/utility_types';

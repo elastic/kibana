@@ -6,7 +6,7 @@
  */
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
+import type { ResponseActionsRequestBody } from '@kbn/securitysolution-api';
 import type { CommonResponseActionMethodOptions } from '../../../endpoint/services';
 
 export type Alert = ParsedTechnicalFields & {

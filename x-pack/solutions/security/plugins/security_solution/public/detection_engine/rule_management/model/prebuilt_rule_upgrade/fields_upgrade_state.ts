@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import type { FieldUpgradeStateEnum } from './field_upgrade_state_enum';
 
 export type FieldsUpgradeState = Record<

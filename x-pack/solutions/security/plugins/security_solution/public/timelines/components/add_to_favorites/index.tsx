@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { State } from '../../../common/store';
 import { selectTimelineById } from '../../store/selectors';
 import { timelineActions } from '../../store';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const ADD_TO_FAVORITES = i18n.translate(

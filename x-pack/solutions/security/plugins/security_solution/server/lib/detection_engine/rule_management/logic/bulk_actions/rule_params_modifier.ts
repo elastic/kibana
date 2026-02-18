@@ -12,14 +12,14 @@ import type {
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
   BulkActionEditPayloadSetAlertSuppression,
-} from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { calculateFromValue } from '../../../rule_types/utils/utils';
 import type {
   AlertSuppressionCamel,
   AlertSuppressionDuration,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+} from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>

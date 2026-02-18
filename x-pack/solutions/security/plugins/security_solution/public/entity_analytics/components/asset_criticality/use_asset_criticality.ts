@@ -13,10 +13,10 @@ import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics
 import type {
   EntityAnalyticsPrivileges,
   FindAssetCriticalityRecordsResponse,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useHasSecurityCapability } from '../../../helper_hooks';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 

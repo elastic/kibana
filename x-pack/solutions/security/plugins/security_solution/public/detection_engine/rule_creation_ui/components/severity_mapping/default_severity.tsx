@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import React from 'react';
-import type { Severity } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { Severity } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { useSeverityOptions } from '../step_about_rule/data';
 import * as i18n from './translations';
 

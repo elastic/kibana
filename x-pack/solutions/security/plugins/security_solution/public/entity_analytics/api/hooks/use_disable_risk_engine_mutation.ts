@@ -6,11 +6,11 @@
  */
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
+import type { TaskManagerUnavailableResponse } from '@kbn/securitysolution-api';
 import type {
   RiskEngineDisableErrorResponse,
   DisableRiskEngineResponse,
-} from '../../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 

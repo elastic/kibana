@@ -12,8 +12,8 @@ import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 
 import * as i18n from './translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';

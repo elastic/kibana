@@ -11,7 +11,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import _ from 'lodash';
-import type { AssetCriticalityRecord } from '../../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   HostAggEsItem,

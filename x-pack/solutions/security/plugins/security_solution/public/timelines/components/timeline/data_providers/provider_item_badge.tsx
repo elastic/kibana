@@ -12,7 +12,7 @@ import {
   type DataProviderType,
   DataProviderTypeEnum,
   TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store';

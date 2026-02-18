@@ -42,9 +42,9 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { TimestampOverride } from '@kbn/securitysolution-api';
+import type { Privilege } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
@@ -74,7 +74,7 @@ import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {

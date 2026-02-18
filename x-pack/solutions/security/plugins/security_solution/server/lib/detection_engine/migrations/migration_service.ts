@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AlertsReindexOptions } from '../../../../common/api/detection_engine/signals_migration';
+import type { AlertsReindexOptions } from '@kbn/securitysolution-api';
 import type { SignalsMigrationSO } from './saved_objects_schema';
 import { createMigrationSavedObject } from './create_migration_saved_object';
 import { createMigration } from './create_migration';

@@ -13,7 +13,7 @@ import type {
   MonitoredUserDoc,
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 
 import type { PrivMonUserSource } from '../types';
 

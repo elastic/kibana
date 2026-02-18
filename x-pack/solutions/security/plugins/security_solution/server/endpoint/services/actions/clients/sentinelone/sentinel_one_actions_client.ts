@@ -36,7 +36,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
-import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
 import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
@@ -101,7 +101,7 @@ import type {
   UnisolationRouteRequestBody,
   RunScriptActionRequestBody,
   SentinelOneRunScriptActionRequestParams,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientPendingAction,

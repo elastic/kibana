@@ -10,7 +10,7 @@ import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../chart_panels/chart_context_menu';

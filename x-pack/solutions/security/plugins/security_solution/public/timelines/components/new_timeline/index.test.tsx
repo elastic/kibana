@@ -15,7 +15,7 @@ import {
   RowRendererValues,
   type TimelineType,
   TimelineTypeEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 

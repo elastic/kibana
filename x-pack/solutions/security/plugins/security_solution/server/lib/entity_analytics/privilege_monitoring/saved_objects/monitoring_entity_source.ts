@@ -11,7 +11,7 @@ import type {
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
   ListEntitySourcesResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
 import type { PartialMonitoringEntitySource } from '../types';
 

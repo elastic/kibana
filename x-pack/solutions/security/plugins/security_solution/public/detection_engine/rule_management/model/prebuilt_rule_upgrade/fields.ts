@@ -16,7 +16,7 @@ import {
   type DiffableThreatMatchFields,
   type DiffableThresholdFields,
   type ThreeWayRuleFieldsDiff,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export type NonUpgradeableDiffableFields = (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number];
 

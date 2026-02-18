@@ -6,8 +6,8 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionEventTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionEventType } from '@kbn/securitysolution-api';
+import { RuleExecutionEventTypeEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 import * as i18n from './translations';

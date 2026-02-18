@@ -8,7 +8,7 @@
 import {
   FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
   FIELDS_TO_UPGRADE_TO_TARGET_VERSION,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 

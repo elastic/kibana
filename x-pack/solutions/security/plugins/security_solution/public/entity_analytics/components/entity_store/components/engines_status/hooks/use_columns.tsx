@@ -20,7 +20,7 @@ import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
   type EngineComponentStatus,
-} from '../../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;

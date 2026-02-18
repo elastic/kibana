@@ -9,7 +9,7 @@ import { TestProviders } from '../../../common/mock';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 import { waitFor, renderHook, act } from '@testing-library/react';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_status_route.gen';
 
 const enabledRiskEngineStatus = {
   risk_engine_status: RiskEngineStatusEnum.ENABLED,

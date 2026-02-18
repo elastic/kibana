@@ -16,7 +16,7 @@ import type {
   FindRulesRequestQuery,
   FindRulesResponse,
   RuleResponse,
-} from '../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 /**
  * Creates a detection engine rule

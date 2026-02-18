@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';

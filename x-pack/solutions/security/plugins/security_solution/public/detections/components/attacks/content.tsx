@@ -39,7 +39,7 @@ import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
 
-import type { Status } from '../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 

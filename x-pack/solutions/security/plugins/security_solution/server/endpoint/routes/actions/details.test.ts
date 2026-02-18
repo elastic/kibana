@@ -15,7 +15,7 @@ import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks
 import { getActionDetailsRequestHandler } from './details';
 import { NotFoundError } from '../../errors';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
+import type { ActionDetailsRequestSchema } from '@kbn/securitysolution-api';
 
 describe('when calling the Action Details route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;

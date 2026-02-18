@@ -15,7 +15,7 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../..';
-import type { ResolveTimelineResponse } from '../../../common/api/timeline';
+import type { ResolveTimelineResponse } from '@kbn/securitysolution-api';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import {
   getMockDataView,

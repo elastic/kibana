@@ -13,7 +13,7 @@ import type {
   DiffableRule,
   InvestigationFields,
   RuleFalsePositiveArray,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { MultiSelectFieldsAutocomplete } from '../../../../../../rule_creation_ui/components/multi_select_fields';
 import { useAllEsqlRuleFields } from '../../../../../../rule_creation_ui/hooks';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';

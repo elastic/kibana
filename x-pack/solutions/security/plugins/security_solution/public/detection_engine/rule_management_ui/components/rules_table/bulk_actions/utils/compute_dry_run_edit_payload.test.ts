@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditType } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import { computeDryRunEditPayload } from './compute_dry_run_edit_payload';
 

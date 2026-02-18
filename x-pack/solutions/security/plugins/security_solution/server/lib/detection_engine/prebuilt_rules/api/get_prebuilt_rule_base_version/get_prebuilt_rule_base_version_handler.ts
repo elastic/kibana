@@ -8,7 +8,7 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
@@ -16,7 +16,7 @@ import {
   type PartialThreeWayRuleDiff,
   type ThreeWayDiff,
   type FullThreeWayRuleDiff,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';

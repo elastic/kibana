@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReadRiskEngineSettingsResponse } from '../../../../common/api/entity_analytics';
+import type { ReadRiskEngineSettingsResponse } from '@kbn/securitysolution-api';
 
 export const DEFAULT_ENTITY_TYPES = ['host', 'user', 'service'] as const;
 

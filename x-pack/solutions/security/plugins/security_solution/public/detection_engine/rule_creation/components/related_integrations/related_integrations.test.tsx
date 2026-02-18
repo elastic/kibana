@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
 import { createReactQueryWrapper } from '../../../../common/mock';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';

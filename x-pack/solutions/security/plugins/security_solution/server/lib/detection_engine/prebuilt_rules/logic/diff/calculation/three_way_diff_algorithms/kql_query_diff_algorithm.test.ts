@@ -8,7 +8,7 @@
 import type {
   RuleKqlQuery,
   ThreeVersionsOf,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
@@ -16,7 +16,7 @@ import {
   ThreeWayDiffConflict,
   KqlQueryType,
   KqlQueryLanguageEnum,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { kqlQueryDiffAlgorithm } from './kql_query_diff_algorithm';
 
 describe('kqlQueryDiffAlgorithm', () => {

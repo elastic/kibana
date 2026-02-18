@@ -12,7 +12,7 @@ import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters'
 import type { ThresholdCompositeBucket } from './types';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
-import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';

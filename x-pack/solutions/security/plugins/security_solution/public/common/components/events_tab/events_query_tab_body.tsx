@@ -17,7 +17,7 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
-import { RowRendererValues } from '../../../../common/api/timeline';
+import { RowRendererValues } from '@kbn/securitysolution-api';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';

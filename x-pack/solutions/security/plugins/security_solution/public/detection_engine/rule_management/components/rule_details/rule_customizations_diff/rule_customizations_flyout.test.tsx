@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { RuleCustomizationsFlyout } from './rule_customizations_flyout';
 import { TestProviders } from '../../../../../common/mock';
-import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
 jest.mock('../../../../../common/hooks/use_app_toasts', () => ({

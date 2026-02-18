@@ -18,7 +18,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { NotesList } from './notes_list';
 import { ReqStatus } from '../store/notes.slice';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 jest.mock('../../common/hooks/use_experimental_features');

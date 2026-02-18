@@ -14,7 +14,7 @@ import type {
   ServiceEntity,
   UserEntity,
   GenericEntity,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 
 describe('helpers', () => {
   describe('getEntityType', () => {

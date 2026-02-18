@@ -16,7 +16,7 @@ import { validateRuleImportResponseActions } from '../../../../../../endpoint/se
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';

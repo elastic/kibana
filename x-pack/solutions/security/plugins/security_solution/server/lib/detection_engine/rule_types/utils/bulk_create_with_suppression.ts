@@ -18,7 +18,7 @@ import { makeFloatString } from './utils';
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import type { EnrichEventsWrapper } from './enrichments/types';

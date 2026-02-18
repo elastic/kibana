@@ -12,8 +12,8 @@ import type {
   NormalizedRuleAction,
   ThrottleForBulkActions,
   BulkActionEditPayload,
-} from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 

@@ -13,7 +13,7 @@ import {
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RuleResponse,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
 import * as useGetSavedQueryMock from '../../../common/use_get_saved_query';
 import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';

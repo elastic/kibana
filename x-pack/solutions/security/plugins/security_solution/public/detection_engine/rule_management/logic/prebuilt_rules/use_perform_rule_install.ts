@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IToasts } from '@kbn/core/public';
-import type { PerformRuleInstallationResponseBody } from '../../../../../common/api/detection_engine';
+import type { PerformRuleInstallationResponseBody } from '@kbn/securitysolution-api';
 import { useToasts } from '../../../../common/lib/kibana';
 import { usePerformAllRulesInstallMutation } from '../../api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import { usePerformSpecificRulesInstallMutation } from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_install_mutation';

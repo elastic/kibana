@@ -12,7 +12,7 @@ import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurr
 import { HORIZONTAL_LINE } from '../endpoint/common/constants';
 import { createEsClient, createKbnClient } from '../endpoint/common/stack_services';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
-import { Client as DetectionsClient } from '../../common/api/quickstart_client.gen';
+import { Client as DetectionsClient } from '@kbn/securitysolution-api/api/quickstart_client.gen';
 import { duplicateRuleParams } from './modules/rules';
 import { basicRule } from './modules/rules/new_terms/basic_rule';
 

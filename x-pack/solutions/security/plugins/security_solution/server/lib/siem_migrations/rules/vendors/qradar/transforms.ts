@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Threat } from '../../../../../../common/api/detection_engine';
+import type { Threat } from '@kbn/securitysolution-api';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import type { QradarRule } from '../../../../../../common/siem_migrations/parsers/qradar/types';

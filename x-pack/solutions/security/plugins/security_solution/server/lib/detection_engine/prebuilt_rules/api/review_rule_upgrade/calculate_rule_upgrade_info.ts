@@ -6,12 +6,12 @@
  */
 
 import { pickBy } from 'lodash';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type {
   RuleUpgradeInfoForReview,
   ThreeWayDiff,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { ThreeWayDiffOutcome } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
+import { ThreeWayDiffOutcome } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';

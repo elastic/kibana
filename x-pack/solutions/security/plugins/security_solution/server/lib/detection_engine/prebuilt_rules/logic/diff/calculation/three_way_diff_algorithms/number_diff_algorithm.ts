@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
+import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
 import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
 export const numberDiffAlgorithm = <TValue extends number | undefined>(

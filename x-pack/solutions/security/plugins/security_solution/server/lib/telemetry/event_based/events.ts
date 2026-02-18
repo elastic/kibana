@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,

@@ -11,7 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { i18n } from '@kbn/i18n';
-import type { BaseActionRequestBody } from '../../../../../common/api/endpoint/actions/common/base';
+import type { BaseActionRequestBody } from '@kbn/securitysolution-api';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ActionSuccess } from '../components/action_success';
 import { ActionError } from '../components/action_error';

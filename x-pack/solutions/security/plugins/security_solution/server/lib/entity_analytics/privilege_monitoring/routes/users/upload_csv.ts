@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
+import type { PrivmonBulkUploadUsersCSVResponse } from '@kbn/securitysolution-api';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCsvService } from '../../users/csv_upload';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeleteScriptRequestParams } from '../../../../common/api/endpoint';
+import type { DeleteScriptRequestParams } from '@kbn/securitysolution-api';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';

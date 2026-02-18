@@ -9,7 +9,7 @@ import { partition } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { isBoom } from '@hapi/boom';
-import type { RuleToImport } from '../../../../../../../common/api/detection_engine';
+import type { RuleToImport } from '@kbn/securitysolution-api';
 import { createBulkErrorObject, type BulkError } from '../../../../routes/utils';
 
 export type ActionsOrErrors =

@@ -12,7 +12,7 @@ import type { AssetCriticalityUpsert } from '../../../../../common/entity_analyt
 import {
   CreateAssetCriticalityRecordRequestBody,
   type CreateAssetCriticalityRecordResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,

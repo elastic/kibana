@@ -15,7 +15,7 @@ import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,

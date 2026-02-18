@@ -47,13 +47,13 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
   GetEntityStoreStatusResponse,
-} from '../../../../common/api/entity_analytics/entity_store/status.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
 import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
-} from '../../../../common/api/entity_analytics/entity_store/enable.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -63,7 +63,7 @@ import type {
   ListEntityEnginesResponse,
   EngineComponentStatus,
   EngineComponentResource,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import {
   ENGINE_STATUS,

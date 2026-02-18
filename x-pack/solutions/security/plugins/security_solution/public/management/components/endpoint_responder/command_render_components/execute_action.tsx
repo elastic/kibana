@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
+import type { ExecuteActionRequestBody } from '@kbn/securitysolution-api';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionExecuteOutputContent,

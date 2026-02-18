@@ -15,8 +15,8 @@ import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/s
 import type { BasicRuleInfo } from '../../../basic_rule_info';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
-import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
+import type { PrebuiltRuleAssetsSort } from '@kbn/securitysolution-api';
 import {
   prepareQueryDslFilter,
   prepareQueryDslSort,

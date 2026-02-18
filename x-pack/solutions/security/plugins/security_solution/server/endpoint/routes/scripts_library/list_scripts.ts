@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { errorHandler } from '../error_handler';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
-import { ListScriptsRequestSchema } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
+import { ListScriptsRequestSchema } from '@kbn/securitysolution-api';
 import { stringify } from '../../utils/stringify';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';

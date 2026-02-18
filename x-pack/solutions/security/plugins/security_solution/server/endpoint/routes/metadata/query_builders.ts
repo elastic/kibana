@@ -19,7 +19,7 @@ import {
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
-import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
+import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 
 export interface QueryBuilderOptions {

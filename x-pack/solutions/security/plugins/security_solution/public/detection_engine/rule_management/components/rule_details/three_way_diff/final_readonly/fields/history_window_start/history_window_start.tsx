@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { HistoryWindowStart as HistoryWindowStartType } from '../../../../../../../../../common/api/detection_engine';
+import type { HistoryWindowStart as HistoryWindowStartType } from '@kbn/securitysolution-api';
 import { HistoryWindowSize } from '../../../../rule_definition_section';
 
 interface HistoryWindowStartReadOnlyProps {

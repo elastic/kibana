@@ -8,7 +8,7 @@
 import {
   SharedCreateProps,
   TypeSpecificCreatePropsInternal,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { type PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 function createRuleTypeToCreateRulePropsMap() {

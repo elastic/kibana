@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 
-import type { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
+import type { SearchUnifiedAlertsRequestBody } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { searchUnifiedAlerts } from '../api';
 

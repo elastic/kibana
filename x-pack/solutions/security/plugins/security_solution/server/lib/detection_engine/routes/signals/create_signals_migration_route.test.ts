@@ -7,7 +7,7 @@
 
 import { requestMock, serverMock } from '../__mocks__';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
-import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
+import { getCreateSignalsMigrationSchemaMock } from '@kbn/securitysolution-api';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { createMigration } from '../../migrations/create_migration';
@@ -15,7 +15,7 @@ import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
-import type { AlertsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
+import type { AlertsReindexOptions } from '@kbn/securitysolution-api';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../index/check_template_version');

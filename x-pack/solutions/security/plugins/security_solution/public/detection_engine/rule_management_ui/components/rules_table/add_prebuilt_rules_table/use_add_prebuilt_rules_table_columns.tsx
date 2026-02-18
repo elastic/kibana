@@ -21,7 +21,7 @@ import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_cont
 import type {
   RuleResponse,
   RuleSignatureId,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { getNormalizedSeverity } from '../helpers';
 import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';

@@ -8,7 +8,7 @@
 import type {
   AlertSuppressionDuration,
   AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { getEqlRuleParams } from '../../../../rule_schema/mocks';
 import { typeSpecificCamelToSnake } from './type_specific_camel_to_snake';
 

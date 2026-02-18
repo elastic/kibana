@@ -15,7 +15,7 @@ import {
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
-import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
+import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
   HOST_METADATA_GET_ROUTE,

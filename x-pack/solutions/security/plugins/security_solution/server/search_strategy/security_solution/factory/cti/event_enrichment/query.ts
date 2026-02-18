@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventEnrichmentRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { EventEnrichmentRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildIndicatorShouldClauses } from './helpers';
 

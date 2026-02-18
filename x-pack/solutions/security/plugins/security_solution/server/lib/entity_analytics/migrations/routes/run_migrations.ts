@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import type { RunEntityAnalyticsMigrationsResponse } from '../../../../../common/api/entity_analytics/migrations/run_migrations_route.gen';
+import type { RunEntityAnalyticsMigrationsResponse } from '@kbn/securitysolution-api/api/entity_analytics/migrations/run_migrations_route.gen';
 import {
   API_VERSIONS,
   APP_ID,

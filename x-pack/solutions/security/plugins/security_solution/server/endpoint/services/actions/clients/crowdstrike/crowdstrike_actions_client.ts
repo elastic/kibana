@@ -42,7 +42,7 @@ import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,

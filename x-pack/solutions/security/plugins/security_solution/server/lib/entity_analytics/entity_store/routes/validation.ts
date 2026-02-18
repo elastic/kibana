@@ -10,7 +10,7 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { TypeOf, ZodType } from '@kbn/zod';
-import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics';
+import type { InitEntityEngineRequestBody } from '@kbn/securitysolution-api';
 
 export const buildInitRequestBodyValidation =
   <ZodSchema extends ZodType, Type = TypeOf<ZodSchema>>(

@@ -10,7 +10,7 @@ import React from 'react';
 import type { Search } from '@elastic/eui';
 import { EuiSkeletonText, EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import { useAddToRulesTable } from './use_add_to_rules_table';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: RuleResponse[];

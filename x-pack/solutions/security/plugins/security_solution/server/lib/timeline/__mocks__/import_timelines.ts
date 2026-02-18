@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 
 export const mockDuplicateIdErrors = [];
 

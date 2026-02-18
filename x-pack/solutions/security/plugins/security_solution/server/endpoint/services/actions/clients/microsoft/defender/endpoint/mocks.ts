@@ -27,7 +27,7 @@ import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../..
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
 import type { NormalizedExternalConnectorClient } from '../../../../..';
-import type { RunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {

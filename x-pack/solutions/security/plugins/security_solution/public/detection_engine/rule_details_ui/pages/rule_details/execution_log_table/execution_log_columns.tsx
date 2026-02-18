@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';

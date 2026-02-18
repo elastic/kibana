@@ -9,7 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { errorHandler } from '../error_handler';
 import { stringify } from '../../utils/stringify';
-import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
+import { ActionStatusRequestSchema } from '@kbn/securitysolution-api';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,

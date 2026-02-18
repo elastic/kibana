@@ -18,7 +18,7 @@ import {
   type TimelineStatus,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { TimelineTabs } from '../../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../../store';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';

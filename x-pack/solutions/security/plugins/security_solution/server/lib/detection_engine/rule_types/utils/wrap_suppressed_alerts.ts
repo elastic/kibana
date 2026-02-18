@@ -14,7 +14,7 @@ import type { SecuritySharedParams, SignalSourceHit } from '../types';
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';

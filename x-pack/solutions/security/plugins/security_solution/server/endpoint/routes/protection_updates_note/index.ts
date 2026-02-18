@@ -9,7 +9,7 @@ import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } fro
 import {
   GetProtectionUpdatesNoteSchema,
   CreateUpdateProtectionUpdatesNoteSchema,
-} from '../../../../common/api/endpoint/protection_updates_note';
+} from '@kbn/securitysolution-api';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { PROTECTION_UPDATES_NOTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';

@@ -18,7 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   ListEntitySourcesRequestQuery,
   type ListEntitySourcesResponse,
-} from '../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (

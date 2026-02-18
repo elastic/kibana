@@ -29,7 +29,7 @@ import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../common/constants';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
-import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type {
   EndpointScript,

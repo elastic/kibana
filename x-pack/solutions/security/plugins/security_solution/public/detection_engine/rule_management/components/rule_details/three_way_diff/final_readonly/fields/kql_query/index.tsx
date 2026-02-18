@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { KqlQueryType } from '../../../../../../../../../common/api/detection_engine';
+import { KqlQueryType } from '@kbn/securitysolution-api';
 import type {
   DiffableRuleTypes,
   RuleDataSource,
   RuleKqlQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { InlineKqlQueryReadOnly } from './inline_kql_query';
 import { SavedKqlQueryReadOnly } from './saved_kql_query';
 import { assertUnreachable } from '../../../../../../../../../common/utility_types';

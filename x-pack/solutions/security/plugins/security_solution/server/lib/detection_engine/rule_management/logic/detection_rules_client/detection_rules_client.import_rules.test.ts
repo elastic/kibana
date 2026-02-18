@@ -10,8 +10,8 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { buildMlAuthz } from '../../../../machine_learning/__mocks__/authz';
-import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
-import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getImportRulesSchemaMock } from '@kbn/securitysolution-api';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import { ruleSourceImporterMock } from '../import/rule_source_importer/rule_source_importer.mock';
 import { createDetectionRulesClient } from './detection_rules_client';
 import { importRule } from './methods/import_rule';

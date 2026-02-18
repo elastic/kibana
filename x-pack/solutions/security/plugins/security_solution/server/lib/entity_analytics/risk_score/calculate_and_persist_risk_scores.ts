@@ -13,7 +13,7 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
+import type { RiskScoresCalculationResponse } from '@kbn/securitysolution-api';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 export type CalculationResults = RiskScoresCalculationResponse & {

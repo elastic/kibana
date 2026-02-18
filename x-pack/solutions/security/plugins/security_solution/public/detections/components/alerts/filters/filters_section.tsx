@@ -21,7 +21,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 
 export interface FiltersSectionProps {
   /**

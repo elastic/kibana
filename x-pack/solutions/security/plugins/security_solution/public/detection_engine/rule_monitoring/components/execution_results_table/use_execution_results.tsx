@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { GetRuleExecutionResultsResponse } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { GetRuleExecutionResultsResponse } from '@kbn/securitysolution-api';
 import type { FetchRuleExecutionResultsArgs } from '../../api';
 import { api } from '../../api';
 import * as i18n from './translations';

@@ -12,7 +12,7 @@ import { SERVER_APP_ID } from '../../../../../../../common';
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';

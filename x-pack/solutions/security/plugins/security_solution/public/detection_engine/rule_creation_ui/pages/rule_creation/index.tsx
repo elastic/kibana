@@ -30,7 +30,7 @@ import { useCreateRule } from '../../../rule_management/logic';
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import {

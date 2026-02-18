@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { NetworkUsersRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { NetworkUsersRequestOptionsInput } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';

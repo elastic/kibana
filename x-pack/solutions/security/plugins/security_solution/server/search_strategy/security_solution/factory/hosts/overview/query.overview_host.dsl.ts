@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { HostOverviewRequestOptions } from '../../../../../../common/api/search_strategy/hosts/hosts';
+import type { HostOverviewRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildOverviewHostQuery = ({

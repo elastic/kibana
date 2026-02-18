@@ -7,7 +7,7 @@
 
 import { getMappingFilters } from './get_mapping_filters';
 
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 
 describe('getMappingFilters', () => {
   const sampleMapping: ThreatMapping = [

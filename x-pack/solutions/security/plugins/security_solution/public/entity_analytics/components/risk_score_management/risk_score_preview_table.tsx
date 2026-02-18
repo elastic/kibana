@@ -10,7 +10,7 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import { EntityDetailsLink } from '../../../common/components/links';

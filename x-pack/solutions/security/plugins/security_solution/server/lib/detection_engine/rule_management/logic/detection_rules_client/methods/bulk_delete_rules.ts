@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '@kbn/securitysolution-api';
 import type { RuleAlertType } from '../../../../rule_schema';
 
 // The `rulesClient.bulkDeleteRules` method converts IDs into a KQL "OR" query,

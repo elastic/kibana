@@ -11,7 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
   RuleCreateProps,
   RulePreviewResponse,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../common/transforms';

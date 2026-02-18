@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import {

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   AssetInventoryInstallDataViewResponse,
   AssetInventoryServerApiError,
-} from '../../../../../common/api/asset_inventory/types';
+} from '@kbn/securitysolution-api';
 import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_routes';
 
 /**

@@ -9,7 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import type {
   RiskEngineScheduleNowResponse,
   RiskEngineScheduleNowErrorResponse,
-} from '../../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import { RISK_ENGINE_SCHEDULE_NOW_URL } from '../../../../common/constants';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';

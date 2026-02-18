@@ -13,7 +13,7 @@ import {
   type DiffableRule,
   QueryLanguageEnum,
   RuleEsqlQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { EsqlQueryEditAdapter } from './esql_query_edit_adapter';
 
 export function EsqlQueryEditForm(): JSX.Element {

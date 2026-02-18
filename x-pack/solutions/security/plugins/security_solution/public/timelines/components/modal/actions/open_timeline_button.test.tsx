@@ -10,7 +10,7 @@ import React from 'react';
 import { OpenTimelineButton } from './open_timeline_button';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useParams } from 'react-router-dom';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineStatus } from '../../open_timeline/use_timeline_status';

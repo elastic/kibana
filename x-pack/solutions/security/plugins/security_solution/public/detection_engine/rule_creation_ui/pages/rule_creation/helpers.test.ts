@@ -9,7 +9,7 @@ import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleCreateProps } from '@kbn/securitysolution-api';
 import type { Rule } from '../../../rule_management/logic';
 import {
   getEndpointListMock,

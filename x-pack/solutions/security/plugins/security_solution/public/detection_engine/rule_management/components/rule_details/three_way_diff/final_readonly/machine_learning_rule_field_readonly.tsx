@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DiffableMachineLearningFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableMachineLearningFields } from '@kbn/securitysolution-api';
 import { MachineLearningJobIdReadOnly } from './fields/machine_learning_job_id/machine_learning_job_id';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';

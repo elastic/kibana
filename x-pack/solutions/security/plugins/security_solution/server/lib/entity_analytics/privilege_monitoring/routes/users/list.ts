@@ -13,7 +13,7 @@ import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_
 import {
   ListPrivMonUsersRequestQuery,
   type ListPrivMonUsersResponse,
-} from '../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import {
   API_VERSIONS,
   APP_ID,

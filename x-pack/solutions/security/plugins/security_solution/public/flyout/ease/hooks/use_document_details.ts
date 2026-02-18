@@ -13,7 +13,7 @@ import {
   type GetFieldsData,
   useGetFieldsData,
 } from '../../document_details/shared/hooks/use_get_fields_data';
-import type { RunTimeMappings } from '../../../../common/api/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-api';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 
 export interface UseDocumentDetailsParams {

@@ -13,7 +13,7 @@ import { makeFloatString } from '../utils/utils';
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';

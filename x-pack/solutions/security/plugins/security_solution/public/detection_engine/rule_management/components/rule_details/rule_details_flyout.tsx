@@ -26,7 +26,7 @@ import {
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
 import {

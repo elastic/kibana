@@ -9,7 +9,7 @@ import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
 import type {
   PerformRuleUpgradeRequestBody,
   PickVersionValues,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 describe('assertPickVersionIsTarget', () => {
   const ruleId = 'test-rule-id';

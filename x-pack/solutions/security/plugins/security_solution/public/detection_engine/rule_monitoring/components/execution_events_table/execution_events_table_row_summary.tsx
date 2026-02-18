@@ -12,8 +12,8 @@ import type {
   RuleExecutionEvent,
   RuleExecutionMetrics,
   RuleExecutionStatus,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionEventTypeEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
+import { RuleExecutionEventTypeEnum } from '@kbn/securitysolution-api';
 
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { TruncatedText } from '../basic/text/truncated_text';

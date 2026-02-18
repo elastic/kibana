@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   GetMetadataListRequestSchema,
   GetMetadataRequestSchema,
-} from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { HostStatus } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import {

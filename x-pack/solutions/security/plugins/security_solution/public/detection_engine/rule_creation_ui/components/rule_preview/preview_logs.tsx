@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
+import type { RulePreviewLogs } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { LoggedRequests } from './logged_requests';
 import { useAccordionStyling } from './use_accordion_styling';

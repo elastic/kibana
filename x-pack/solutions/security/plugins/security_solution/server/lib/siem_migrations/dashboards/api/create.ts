@@ -13,8 +13,8 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
 import type { CreateDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { CreateDashboardMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import { withLicense } from '../../common/api/util/with_license';
-import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { withLicense } from '@kbn/securitysolution-api';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,

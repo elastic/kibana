@@ -10,7 +10,7 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow, mount } from 'enzyme';
 
-import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 

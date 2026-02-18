@@ -14,7 +14,7 @@ import { RelatedEntitiesQueries } from '../../../../../../../common/search_strat
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { createMockConfig } from '../../../../../../lib/detection_engine/routes/__mocks__';
-import type { RelatedHostsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { RelatedHostsRequestOptions } from '@kbn/securitysolution-api';
 
 export const mockOptions: RelatedHostsRequestOptions = {
   defaultIndex: ['test_indices*'],

@@ -12,14 +12,14 @@ import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics
 import type {
   RiskScoresCalculationResponse,
   AssetCriticalityRecord,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type {
   AfterKeys,
   EntityAfterKey,
   EntityRiskScoreRecord,
   RiskScoreWeights,
   RiskScoreWeight,
-} from '../../../../common/api/entity_analytics/common';
+} from '@kbn/securitysolution-api';
 import {
   getRiskLevel,
   RiskCategories,

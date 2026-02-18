@@ -7,7 +7,7 @@
 
 import type { AuditLogger, AuditEvent } from '@kbn/core/server';
 import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../audit';
-import type { MonitoringEngineComponentResource } from '../../../../common/api/entity_analytics';
+import type { MonitoringEngineComponentResource } from '@kbn/securitysolution-api';
 import { PrivilegeMonitoringEngineActions } from './auditing/actions';
 
 export interface PrivMonAuditLogger {

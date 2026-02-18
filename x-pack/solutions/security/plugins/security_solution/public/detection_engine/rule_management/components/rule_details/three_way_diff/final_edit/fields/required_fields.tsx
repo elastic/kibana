@@ -11,7 +11,7 @@ import { schema } from '../../../../../../rule_creation_ui/components/step_defin
 import type {
   DiffableRule,
   RequiredFieldInput,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { RequiredFields } from '../../../../../../rule_creation/components/required_fields';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

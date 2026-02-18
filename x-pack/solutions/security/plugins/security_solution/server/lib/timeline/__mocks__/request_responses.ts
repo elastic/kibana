@@ -22,7 +22,7 @@ import {
   type TimelineType,
   TimelineTypeEnum,
   TimelineStatusEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 

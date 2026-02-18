@@ -6,7 +6,7 @@
  */
 
 import type { ExtMeta } from '../../utils/console_logging';
-import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import type { RuleExecutionContext } from './client_interface';
 
 export interface ICorrelationIds {

@@ -12,7 +12,7 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { TimelineId } from '../../../../common/types';
 import {
   createMockStore,

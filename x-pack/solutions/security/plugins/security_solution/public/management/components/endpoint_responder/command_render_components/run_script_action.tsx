@@ -16,7 +16,7 @@ import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_se
 import type {
   EndpointRunScriptActionRequestParams,
   RunScriptActionRequestBody,
-} from '../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionRunScriptOutputContent,

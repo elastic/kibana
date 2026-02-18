@@ -16,7 +16,7 @@ import type {
   RuleExecutionResult,
   RuleExecutionStatus,
   RuleRunType,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../common/utils/invariant';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDetailTabs } from './use_rule_details_tabs';

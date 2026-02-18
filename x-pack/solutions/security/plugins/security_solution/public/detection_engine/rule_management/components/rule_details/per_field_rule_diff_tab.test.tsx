@@ -10,8 +10,8 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-} from '../../../../../common/api/detection_engine';
-import type { PartialThreeWayRuleDiff } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import type { PartialThreeWayRuleDiff } from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';

@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { z } from '@kbn/zod';
-import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
+import { searchStrategyRequestSchema } from '@kbn/securitysolution-api';
 import { securitySolutionFactory } from './factory';
 import type { EndpointAppContext } from '../../endpoint/types';
 

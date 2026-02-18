@@ -8,7 +8,7 @@
 import type {
   GetAllIntegrationsResponse,
   GetInstalledIntegrationsResponse,
-} from '../../../../../common/api/detection_engine/fleet_integrations';
+} from '@kbn/securitysolution-api';
 import type {
   FetchAllIntegrationsArgs,
   FetchInstalledIntegrationsArgs,

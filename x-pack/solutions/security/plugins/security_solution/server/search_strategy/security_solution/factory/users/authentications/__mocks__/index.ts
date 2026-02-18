@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { UserAuthenticationsRequestOptions } from '@kbn/securitysolution-api';
 import type { AuthenticationHit } from '../../../../../../../common/search_strategy';
 import {
   Direction,

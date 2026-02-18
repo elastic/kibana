@@ -10,7 +10,7 @@ import { EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import type {
   ImportRulesResponse,
   WarningSchema,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { importRules } from '../../../rule_management/logic';
 import { showToast } from './utils';
 import { ActionConnectorWarnings } from './action_connectors_warning';

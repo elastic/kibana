@@ -7,12 +7,12 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { UpsertEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
+import type { UpsertEntityResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import {
   UpsertEntityRequestBody,
   UpsertEntityRequestParams,
   UpsertEntityRequestQuery,
-} from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import {

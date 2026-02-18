@@ -14,12 +14,12 @@ import { EntityType } from '../../../../../common/search_strategy';
 import type {
   DeleteEntityEngineResponse,
   DeleteEntityEnginesResponse,
-} from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/delete.gen';
 import {
   DeleteEntityEngineRequestQuery,
   DeleteEntityEngineRequestParams,
   DeleteEntityEnginesRequestQuery,
-} from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';

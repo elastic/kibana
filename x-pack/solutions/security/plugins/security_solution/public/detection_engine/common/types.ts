@@ -48,13 +48,13 @@ import type {
   TimestampOverride,
   ThreatIndex,
   ThreatMapping,
-} from '../../../common/api/detection_engine/model/rule_schema';
-import type { SortOrder } from '../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import type { SortOrder } from '@kbn/securitysolution-api';
 import type { EqlOptions } from '../../../common/search_strategy';
 import type {
   ResponseAction,
   RuleResponseAction,
-} from '../../../common/api/detection_engine/model/rule_response_actions';
+} from '@kbn/securitysolution-api';
 
 export interface EuiBasicTableSortTypes {
   field: string;

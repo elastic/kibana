@@ -6,8 +6,8 @@
  */
 
 import { difference, union, uniq } from 'lodash';
-import type { RuleDataSource } from '../../../../../../../../common/api/detection_engine';
-import { DataSourceType } from '../../../../../../../../common/api/detection_engine';
+import type { RuleDataSource } from '@kbn/securitysolution-api';
+import { DataSourceType } from '@kbn/securitysolution-api';
 
 export const mergeDedupedArrays = <T>(
   dedupedBaseVersion: T[],

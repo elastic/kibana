@@ -7,7 +7,7 @@
 
 import { capitalize } from 'lodash';
 import type { PackageList, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations/model/integrations';
+import type { Integration } from '@kbn/securitysolution-api';
 
 export function extractIntegrations(
   packages: PackageList,

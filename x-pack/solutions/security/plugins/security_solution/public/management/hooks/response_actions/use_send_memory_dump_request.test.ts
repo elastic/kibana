@@ -6,7 +6,7 @@
  */
 
 import { useMutation as _useMutation } from '@kbn/react-query';
-import type { MemoryDumpActionRequestBody } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';

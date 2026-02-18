@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 import { performBulkAction } from '../../../rule_management/api/api';
 import { RuleSwitchComponent } from '.';
-import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 import { TestProviders } from '../../../../common/mock';

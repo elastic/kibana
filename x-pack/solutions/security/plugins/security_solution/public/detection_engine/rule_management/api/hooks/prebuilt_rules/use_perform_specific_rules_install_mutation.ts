@@ -9,8 +9,8 @@ import { useMutation } from '@kbn/react-query';
 import type {
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+} from '@kbn/securitysolution-api';
+import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/securitysolution-api';
 import type { BulkAction } from '../../api';
 import { performInstallSpecificRules } from '../../api';
 import { useBulkActionMutation } from '../use_bulk_action_mutation';

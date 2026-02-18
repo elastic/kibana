@@ -10,7 +10,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
   GetRuleHealthRequestBody,
   GetRuleHealthResponse,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { useGetRuleHealthQuery } from '../../api/hooks/use_get_rule_health';
 import * as i18n from './translations';
 

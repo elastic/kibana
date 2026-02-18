@@ -15,7 +15,7 @@ import type { FormattedEntry } from './types';
 import type {
   ThreatMapping,
   ThreatMappingEntry,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { EntryItem } from './entry_item';
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 import { AndBadgeComponent } from './and_badge';

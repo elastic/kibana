@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DiffableThreatMatchFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableThreatMatchFields } from '@kbn/securitysolution-api';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';

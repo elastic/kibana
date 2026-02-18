@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 
 import { createPrivilegedUsersCrudService } from './privileged_users_crud';
 
-import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/monitoring/users/create.gen';
+import type { CreatePrivMonUserRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/monitoring/users/create.gen';
 import type { PrivMonUserSource } from '../types';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 

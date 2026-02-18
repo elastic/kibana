@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import type {
   BulkActionEditPayload,
   BulkActionEditForRuleAttributes,
   BulkActionEditForRuleParams,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 
 /**
  * Split bulk edit actions in 2 chunks: actions applied to params and

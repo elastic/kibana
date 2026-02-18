@@ -14,7 +14,7 @@ import { schema } from '../../../../../../../rule_creation_ui/components/step_de
 import { HiddenField, UseField } from '../../../../../../../../shared_imports';
 import { QueryBarField } from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import * as stepDefineRuleI18n from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
 import type { SetRuleQuery } from '../../../../../../../../detections/hooks/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../../../../../detections/hooks/use_rule_from_timeline';
 import { useGetSavedQuery } from '../../../../../../../common/use_get_saved_query';

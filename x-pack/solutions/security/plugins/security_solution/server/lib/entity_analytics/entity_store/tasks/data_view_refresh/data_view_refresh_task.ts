@@ -21,7 +21,7 @@ import type { EntityStoreConfig } from '../../types';
 import { EntityStoreDataClient } from '../../entity_store_data_client';
 import { getApiKeyManager } from '../../auth/api_key';
 import type { ExperimentalFeatures } from '../../../../../../common';
-import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import {
   defaultState,
   stateSchemaByVersion,

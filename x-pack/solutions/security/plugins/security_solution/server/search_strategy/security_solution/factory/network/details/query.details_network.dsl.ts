@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkDetailsRequestOptions } from '@kbn/securitysolution-api';
 
 const getAggs = (type: string, ip: string) => {
   return {

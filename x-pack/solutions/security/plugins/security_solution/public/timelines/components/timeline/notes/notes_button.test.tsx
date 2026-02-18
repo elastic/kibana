@@ -9,7 +9,7 @@ import type { ComponentProps } from 'react';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { NotesButton } from './notes_button';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { ThemeProvider } from 'styled-components';
 
 const toggleShowNotesMock = jest.fn();

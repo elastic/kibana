@@ -6,7 +6,7 @@
  */
 
 import * as z from '@kbn/zod';
-import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 
 export enum RuleSource {

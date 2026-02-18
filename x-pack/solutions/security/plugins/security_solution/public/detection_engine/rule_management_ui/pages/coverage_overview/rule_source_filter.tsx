@@ -17,7 +17,7 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
+import type { CoverageOverviewRuleSource } from '@kbn/securitysolution-api';
 import {
   coverageOverviewFilterWidth,
   ruleSourceFilterDefaultOptions,

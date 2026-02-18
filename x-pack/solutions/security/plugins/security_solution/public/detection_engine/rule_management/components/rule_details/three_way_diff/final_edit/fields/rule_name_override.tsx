@@ -12,7 +12,7 @@ import { schema } from '../../../../../../rule_creation_ui/components/step_about
 import type {
   DiffableRule,
   RuleNameOverrideObject,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { EsFieldSelectorField } from '../../../../../../rule_creation_ui/components/es_field_selector_field';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { getUseRuleIndexPatternParameters } from '../utils';

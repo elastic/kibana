@@ -12,7 +12,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   BulkUpsertAssetCriticalityRecordsRequestBody,
   type BulkUpsertAssetCriticalityRecordsResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { ConfigType } from '../../../../config';
 import {
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,

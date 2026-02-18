@@ -14,7 +14,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';

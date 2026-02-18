@@ -22,7 +22,7 @@ import {
   type RuleSignatureId,
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
   ThreeWayDiffOutcome,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import * as i18n from './translations';
 

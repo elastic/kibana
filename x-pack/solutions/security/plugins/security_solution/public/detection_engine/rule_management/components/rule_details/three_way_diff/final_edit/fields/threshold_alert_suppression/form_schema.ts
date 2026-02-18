@@ -11,7 +11,7 @@ import type {
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { ALERT_SUPPRESSION_DURATION_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
-import type { AlertSuppressionDurationUnit } from '../../../../../../../../../common/api/detection_engine';
+import type { AlertSuppressionDurationUnit } from '@kbn/securitysolution-api';
 import { type FormSchema, FIELD_TYPES } from '../../../../../../../../shared_imports';
 
 export interface ThresholdAlertSuppressionFormData {

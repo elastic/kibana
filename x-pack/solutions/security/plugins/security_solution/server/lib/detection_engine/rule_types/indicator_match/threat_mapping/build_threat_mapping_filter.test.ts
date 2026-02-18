@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import {
   threatMappingEntriesAreValid,
   buildThreatMappingFilter,

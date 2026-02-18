@@ -6,8 +6,8 @@
  */
 
 import { getScheduleNotificationResponseActionsService } from './schedule_notification_response_actions';
-import type { RuleResponseAction } from '../../../../common/api/detection_engine';
-import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine';
+import type { RuleResponseAction } from '@kbn/securitysolution-api';
+import { ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';

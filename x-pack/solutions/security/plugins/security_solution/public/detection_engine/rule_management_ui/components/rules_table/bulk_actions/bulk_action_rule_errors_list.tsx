@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { BulkActionsDryRunErrCode } from '../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionsDryRunErrCode } from '@kbn/securitysolution-api';
 import {
   BulkActionTypeEnum,
   BulkActionsDryRunErrCodeEnum,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   BULK_ACTION_SET_ALERT_SUPPRESSION,
   BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,

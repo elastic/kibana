@@ -8,7 +8,7 @@ import type { UseQueryResult, UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
 import type {
   ResponseActionScript,
   ResponseActionScriptsApiResponse,

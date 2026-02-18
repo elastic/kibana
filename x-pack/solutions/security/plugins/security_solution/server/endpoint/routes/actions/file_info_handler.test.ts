@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import type { EndpointActionFileDownloadParams } from '@kbn/securitysolution-api';
 import { getActionFileInfoRouteHandler, registerActionFileInfoRoute } from './file_info_handler';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,

@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { get, isEmpty } from 'lodash';
 
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { TelemetryChannel } from '../../../../telemetry/types';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 

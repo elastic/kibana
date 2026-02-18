@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';

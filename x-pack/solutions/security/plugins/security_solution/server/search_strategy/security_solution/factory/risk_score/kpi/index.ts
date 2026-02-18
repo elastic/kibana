@@ -9,7 +9,7 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
+import type { EntityRiskQueries } from '@kbn/securitysolution-api';
 import type { KpiRiskScoreStrategyResponse } from '../../../../../../common/search_strategy';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 

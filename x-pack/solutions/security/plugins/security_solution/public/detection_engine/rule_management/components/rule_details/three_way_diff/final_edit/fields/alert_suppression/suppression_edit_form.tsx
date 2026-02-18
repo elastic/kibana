@@ -16,7 +16,7 @@ import {
 import { AlertSuppressionDurationType } from '../../../../../../../common/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
-import { type AlertSuppression } from '../../../../../../../../../common/api/detection_engine';
+import { type AlertSuppression } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { AlertSuppressionEditAdapter } from './suppression_edit_adapter';
 import { type AlertSuppressionFormData, alertSuppressionFormSchema } from './form_schema';

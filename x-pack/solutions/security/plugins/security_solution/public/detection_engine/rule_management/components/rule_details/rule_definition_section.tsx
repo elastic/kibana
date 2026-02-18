@@ -31,8 +31,8 @@ import type {
   RuleResponse,
   Threshold as ThresholdType,
   ThreatMapping as ThreatMappingType,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';

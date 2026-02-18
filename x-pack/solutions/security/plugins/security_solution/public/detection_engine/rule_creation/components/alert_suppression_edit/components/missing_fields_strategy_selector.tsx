@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { EuiFormRowProps, EuiRadioGroupOption, EuiRadioGroupProps } from '@elastic/eui';
 import { RadioGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { UseField } from '../../../../../shared_imports';
 import { SuppressionInfoIcon } from './suppression_info_icon';
 import { ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME } from '../constants/fields';

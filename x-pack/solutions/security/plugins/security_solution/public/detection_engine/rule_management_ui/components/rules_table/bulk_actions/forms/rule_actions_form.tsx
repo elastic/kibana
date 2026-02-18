@@ -26,8 +26,8 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';

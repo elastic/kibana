@@ -17,7 +17,7 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
-} from '@kbn/timelines-plugin/common/api/search_strategy';
+} from '@kbn/securitysolution-api';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';

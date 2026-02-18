@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
+import { GetPolicyResponseSchema } from '@kbn/securitysolution-api';
 import type { EndpointAppContext } from '../../types';
 import { getHostPolicyResponseHandler } from './handlers';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';

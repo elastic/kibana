@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/monitoring';
+import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { createSourcesSyncService } from './sources_sync';
 import { createIndexDeletionDetectionService } from './deletion_detection/index/deletion_detection';

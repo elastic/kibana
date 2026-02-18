@@ -13,7 +13,7 @@ import { UsersFields } from '../../../../../../../common/search_strategy/securit
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createMockEndpointAppContext } from '../../../../../../endpoint/mocks';
-import type { UsersRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { UsersRequestOptions } from '@kbn/securitysolution-api';
 
 export const mockOptions: UsersRequestOptions = {
   defaultIndex: ['test_indices*'],

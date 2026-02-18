@@ -7,7 +7,7 @@
 
 import { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ScanActionRequestBody } from '../../../../../common/api/endpoint';
+import type { ScanActionRequestBody } from '@kbn/securitysolution-api';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendScanRequest } from '../../../hooks/response_actions/use_send_scan_request';

@@ -6,7 +6,7 @@
  */
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import type { MemoryDumpActionRequestBody } from '../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_AGENT_FILE_INFO_ROUTE,

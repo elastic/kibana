@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
+import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
 import {
   ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { forceTargetVersionDiffAlgorithm } from './force_target_version_diff_algorithm';
 
 describe('forceTargetVersionDiffAlgorithm', () => {

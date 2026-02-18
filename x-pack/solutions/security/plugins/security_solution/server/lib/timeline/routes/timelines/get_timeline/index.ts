@@ -18,7 +18,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import {
   GetTimelineRequestQuery,
   type GetTimelineResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 
 export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {

@@ -68,7 +68,7 @@ import type {
   ResponseActionsRequestBody,
   UploadActionApiRequestBody,
   CancelActionRequestBody,
-} from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import * as fetchActionUtils from '../../services/actions/utils/fetch_action_request_by_id';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';

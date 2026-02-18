@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { SpaceHealthState } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { SpaceHealthState } from '@kbn/securitysolution-api';
 import { getRuleStatsAggregation, normalizeRuleStatsAggregation } from './rule_stats';
 
 export const getSpaceHealthAggregation = (): Record<

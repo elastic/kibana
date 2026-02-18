@@ -8,7 +8,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
-import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api';
 
 const oneHourFromNow = () => {
   const date = new Date();

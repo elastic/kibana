@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiPaddingSize } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api';
 import { OptimizedAccordion } from './optimized_accordion';
 import { useAccordionStyling } from './use_accordion_styling';
 import { LoggedRequestsQuery } from './logged_requests_query';

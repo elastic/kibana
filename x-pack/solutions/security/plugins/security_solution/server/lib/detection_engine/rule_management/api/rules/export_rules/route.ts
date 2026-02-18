@@ -13,7 +13,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import {
   ExportRulesRequestBody,
   ExportRulesRequestQuery,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import { getRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';

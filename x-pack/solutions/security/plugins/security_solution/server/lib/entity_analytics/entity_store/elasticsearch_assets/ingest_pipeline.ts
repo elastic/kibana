@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 
 import {
   debugDeepCopyContextStep,

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { ThreatMatchMappingEdit } from '../../../../../../../rule_creation/components/threat_match_mapping_edit';
-import type { ThreatIndex } from '../../../../../../../../../common/api/detection_engine';
+import type { ThreatIndex } from '@kbn/securitysolution-api';
 import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { useDataView } from '../hooks/use_data_view';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';

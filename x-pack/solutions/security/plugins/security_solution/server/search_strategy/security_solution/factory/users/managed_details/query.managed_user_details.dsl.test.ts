@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
-import { UsersQueries } from '../../../../../../common/api/search_strategy';
+import type { ManagedUserDetailsRequestOptions } from '@kbn/securitysolution-api';
+import { UsersQueries } from '@kbn/securitysolution-api';
 import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 export const mockOptions: ManagedUserDetailsRequestOptions = {

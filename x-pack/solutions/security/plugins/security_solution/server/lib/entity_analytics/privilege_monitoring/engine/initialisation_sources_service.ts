@@ -15,8 +15,8 @@ import type {
   MonitoringEntitySource,
   MonitoringEntitySourceAttributes,
   MonitoringEntitySourceType,
-} from '../../../../../common/api/entity_analytics';
-import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
+import { MonitoringEngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import type { IntegrationType } from '../data_sources';
 import {
   getMatchersFor,

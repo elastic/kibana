@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_asset';
 
 export interface RuleTriad {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
+import type { FirstLastSeenRequestOptions } from '@kbn/securitysolution-api';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 

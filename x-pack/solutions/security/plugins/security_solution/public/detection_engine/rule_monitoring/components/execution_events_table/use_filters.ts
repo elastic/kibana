@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 import type {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import type { DateRange } from '../../api';
 
 export const useFilters = () => {

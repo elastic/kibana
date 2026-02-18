@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import type { FormData, ERROR_CODE, ValidationFunc } from '../../../../shared_imports';
 import * as i18n from './translations';
 

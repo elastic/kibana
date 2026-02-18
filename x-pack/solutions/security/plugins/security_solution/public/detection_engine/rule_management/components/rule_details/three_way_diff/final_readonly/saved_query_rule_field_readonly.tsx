@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DiffableSavedQueryFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableSavedQueryFields } from '@kbn/securitysolution-api';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
 import { TypeReadOnly } from './fields/type/type';

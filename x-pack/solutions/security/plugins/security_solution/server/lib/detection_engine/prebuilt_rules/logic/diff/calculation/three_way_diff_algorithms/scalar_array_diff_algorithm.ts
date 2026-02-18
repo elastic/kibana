@@ -10,7 +10,7 @@ import { assertUnreachable } from '../../../../../../../../common/utility_types'
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
@@ -18,7 +18,7 @@ import {
   MissingVersion,
   ThreeWayDiffConflict,
   ThreeWayMergeOutcome,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import { mergeDedupedArrays } from './helpers';
 
 type ScalarArrayDiffAlgorithm<TValue> = (

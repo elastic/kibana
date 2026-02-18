@@ -13,7 +13,7 @@ import {
   ASSET_CRITICALITY_INDEX_PATTERN,
   RISK_SCORE_INDEX_PATTERN,
 } from '../../../../common/constants';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 
 export const getEntityType = (record: Entity): EntityType => {
   // Looking at `entity.type` to keep backward compatibility

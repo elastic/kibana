@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../../common/api/detection_engine';
+import type { SortOrder } from '@kbn/securitysolution-api';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -18,7 +18,7 @@ import type {
   RuleExecutionResult,
   RuleExecutionStatus,
   RuleRunType,
-} from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 export interface IRuleMonitoringApiClient {
   /**

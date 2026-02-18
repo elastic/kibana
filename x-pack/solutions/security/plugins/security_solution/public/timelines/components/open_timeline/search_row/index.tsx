@@ -15,7 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from '../translations';
 import type { OpenTimelineProps } from '../types';
 

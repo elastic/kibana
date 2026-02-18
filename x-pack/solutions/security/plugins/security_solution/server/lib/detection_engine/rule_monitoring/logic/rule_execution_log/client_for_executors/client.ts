@@ -18,13 +18,13 @@ import type {
   RuleExecutionSettings,
   RuleExecutionStatus,
   LogLevel,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   consoleLogLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatusEnum,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
@@ -38,8 +38,8 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
-import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import type { RuleExecutionMetrics } from '@kbn/securitysolution-api';
+import { LogLevelEnum } from '@kbn/securitysolution-api';
 import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
 
 export const createRuleExecutionLogClientForExecutors = (

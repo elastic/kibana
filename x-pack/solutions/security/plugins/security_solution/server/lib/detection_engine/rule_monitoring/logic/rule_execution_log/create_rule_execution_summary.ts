@@ -7,12 +7,12 @@
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 
-import type { RuleExecutionSummary } from '../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '@kbn/securitysolution-api';
 import {
   RuleExecutionStatusEnum,
   ruleExecutionStatusToNumber,
   ruleLastRunOutcomeToExecutionStatus,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import type { RuleParams } from '../../../rule_schema';
 

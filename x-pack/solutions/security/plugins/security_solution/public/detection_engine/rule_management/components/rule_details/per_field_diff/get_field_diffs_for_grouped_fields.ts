@@ -8,8 +8,8 @@
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+} from '@kbn/securitysolution-api';
+import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import type {
   AllThreeWayFieldsDiff,
   RuleFieldsDiffWithDataSource,
@@ -17,7 +17,7 @@ import type {
   RuleFieldsDiffWithEsqlQuery,
   RuleFieldsDiffWithKqlQuery,
   ThreeWayDiff,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { stringifyWithExpandedEmpties } from '../three_way_diff/comparison_side/utils';
 

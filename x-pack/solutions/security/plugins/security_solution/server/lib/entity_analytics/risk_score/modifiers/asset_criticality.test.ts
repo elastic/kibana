@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { assetCriticalityServiceMock } from '../../asset_criticality/asset_criticality_service.mock';
 import type { AssetCriticalityService } from '../../asset_criticality';
 import type { RiskScoreBucket } from '../../types';
-import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 import { applyCriticalityModifier } from './asset_criticality';
 import * as helpers from '../../asset_criticality/helpers';

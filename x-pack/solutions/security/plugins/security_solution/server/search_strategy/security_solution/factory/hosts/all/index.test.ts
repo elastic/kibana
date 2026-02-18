@@ -17,7 +17,7 @@ import {
   mockDeps as defaultMockDeps,
 } from './__mocks__';
 import { get } from 'lodash/fp';
-import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { HostsRequestOptions } from '@kbn/securitysolution-api';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 class IndexNotFoundException extends Error {

@@ -10,10 +10,10 @@ import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import type {
   RuleSchedule,
   SimpleRuleSchedule,
-} from '../../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
-import { toSimpleRuleSchedule } from '../../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+} from '@kbn/securitysolution-api';
+import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import { type FormData } from '../../../../../../../../shared_imports';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { SimpleRuleScheduleAdapter } from './simple_rule_schedule_adapter';
 import { invariant } from '../../../../../../../../../common/utils/invariant';

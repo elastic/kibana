@@ -16,7 +16,7 @@ import {
 } from './pin_event_action';
 import { useUserPrivileges } from '../user_privileges';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { timelineActions } from '../../../timelines/store';
 import { TimelineId } from '../../../../common/types';
 

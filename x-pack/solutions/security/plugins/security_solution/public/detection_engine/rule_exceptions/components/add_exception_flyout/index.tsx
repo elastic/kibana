@@ -39,7 +39,7 @@ import {
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import {

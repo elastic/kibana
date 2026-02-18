@@ -11,7 +11,7 @@ import React from 'react';
 
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 import {
   DESTINATION_IP,
   DESTINATION_PORT,

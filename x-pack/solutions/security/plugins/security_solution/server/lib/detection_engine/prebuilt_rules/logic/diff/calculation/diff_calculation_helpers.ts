@@ -10,8 +10,8 @@ import type {
   ThreeWayFieldsDiff,
   ThreeWayFieldsDiffAlgorithmsFor,
   ThreeVersionsOf,
-} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
+import { MissingVersion } from '@kbn/securitysolution-api';
 
 export const calculateFieldsDiffFor = <TObject extends object>(
   ruleVersions: ThreeVersionsOf<TObject>,

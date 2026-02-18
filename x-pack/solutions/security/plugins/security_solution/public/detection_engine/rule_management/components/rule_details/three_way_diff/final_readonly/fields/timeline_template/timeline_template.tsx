@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { TimelineTemplateReference } from '../../../../../../../../../common/api/detection_engine';
+import type { TimelineTemplateReference } from '@kbn/securitysolution-api';
 import { TimelineTitle } from '../../../../rule_definition_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 

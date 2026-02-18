@@ -11,7 +11,7 @@ import { type FormData, type FieldHook, UseField } from '../../../../../../../sh
 import type {
   DiffableRule,
   RiskScoreMapping,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { RiskScoreOverride } from '../../../../../../rule_creation_ui/components/risk_score_mapping/risk_score_override';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';

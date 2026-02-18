@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { TabsContent } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';

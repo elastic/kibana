@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { DELETE_NOTE_ERROR, DeleteNoteButtonIcon } from './delete_note_button';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import { ReqStatus } from '..';
 import { useUserPrivileges } from '../../common/components/user_privileges';

@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '@kbn/securitysolution-api';
 import { fleetIntegrationsApi } from '../../../fleet_integrations';
 
 const ONE_MINUTE = 60000;

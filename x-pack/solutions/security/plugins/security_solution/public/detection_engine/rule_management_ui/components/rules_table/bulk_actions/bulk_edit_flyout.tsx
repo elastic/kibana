@@ -10,8 +10,8 @@ import React from 'react';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
-} from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';

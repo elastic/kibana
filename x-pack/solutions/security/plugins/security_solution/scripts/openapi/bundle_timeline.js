@@ -7,13 +7,18 @@
 
 require('@kbn/setup-node-env');
 const { bundle } = require('@kbn/openapi-bundler');
+const { REPO_ROOT } = require('@kbn/repo-info');
 const { join, resolve } = require('path');
 
 const ROOT = resolve(__dirname, '../..');
+const SECURITYSOLUTION_API_ROOT = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-securitysolution-api'
+);
 
 (async () => {
   await bundle({
-    sourceGlob: join(ROOT, 'common/api/timeline/**/*.schema.yaml'),
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/timeline/**/*.schema.yaml'),
     outputFilePath: join(
       ROOT,
       'docs/openapi/serverless/security_solution_timeline_api_{version}.bundled.schema.yaml'
@@ -39,7 +44,7 @@ const ROOT = resolve(__dirname, '../..');
   });
 
   await bundle({
-    sourceGlob: join(ROOT, 'common/api/timeline/**/*.schema.yaml'),
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/timeline/**/*.schema.yaml'),
     outputFilePath: join(
       ROOT,
       'docs/openapi/ess/security_solution_timeline_api_{version}.bundled.schema.yaml'

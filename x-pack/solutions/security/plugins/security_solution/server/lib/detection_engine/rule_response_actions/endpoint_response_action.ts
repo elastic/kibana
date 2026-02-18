@@ -11,7 +11,7 @@ import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
   ProcessesParams,
-} from '../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 
 export const FIELDS_WITH_SUBFIELDS: Array<keyof DiffableAllFields> = [
   'data_source',

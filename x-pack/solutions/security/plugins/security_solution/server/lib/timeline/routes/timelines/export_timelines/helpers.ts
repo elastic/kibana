@@ -14,7 +14,7 @@ import type {
   Note,
   PinnedEvent,
   TimelineResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import type { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/notes';

@@ -13,7 +13,7 @@ import type { OpenTimelineResult } from '../../open_timeline/types';
 import type { SelectableTimelineProps } from '../selectable_timeline';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;

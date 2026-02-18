@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from '../../../../common/api/siem_readiness/constants';
+import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from '@kbn/securitysolution-api';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 

@@ -8,11 +8,11 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
-import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
+import type { CoverageOverviewResponse } from '@kbn/securitysolution-api';
 import {
   CoverageOverviewRequestBody,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';

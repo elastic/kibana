@@ -10,8 +10,8 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import type { ImportTimelineResult } from '../../../../common/api/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import type { ImportTimelineResult } from '@kbn/securitysolution-api';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,

@@ -11,7 +11,7 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 import type {
   HealthIntervalGranularity,
   HealthHistory,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import type { RawData } from '../../../utils/normalization';
 
 import * as f from '../../../event_log/event_log_fields';

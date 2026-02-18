@@ -14,8 +14,8 @@ import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { EntityType } from '../../../../common/search_strategy';
 import { useRiskEngineStatus } from './use_risk_engine_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics';
-import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import type { RiskEngineStatusResponse } from '@kbn/securitysolution-api';
+import { EntityRiskQueries } from '@kbn/securitysolution-api';
 jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: jest.fn(),
 }));

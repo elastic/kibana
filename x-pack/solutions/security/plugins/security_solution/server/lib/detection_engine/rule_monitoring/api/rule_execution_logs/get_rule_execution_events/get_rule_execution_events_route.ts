@@ -12,12 +12,12 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '@kbn/securitysolution-api';
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 /**
  * Returns execution events of a given rule (e.g. status changes) from Event Log.

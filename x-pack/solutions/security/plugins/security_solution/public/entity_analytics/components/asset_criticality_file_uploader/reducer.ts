@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UploadAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { UploadAssetCriticalityRecordsResponse } from '@kbn/securitysolution-api';
 import { FileUploaderSteps } from './types';
 import type { ValidatedFile } from './types';
 import { isFilePickerStep, isValidationStep } from './helpers';

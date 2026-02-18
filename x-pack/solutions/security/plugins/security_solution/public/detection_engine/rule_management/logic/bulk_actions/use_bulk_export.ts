@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';

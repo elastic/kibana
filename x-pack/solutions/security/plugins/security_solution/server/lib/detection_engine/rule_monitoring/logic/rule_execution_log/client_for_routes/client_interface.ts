@@ -13,9 +13,9 @@ import type {
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
   RuleRunType,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { SortOrder } from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import type { RuleObjectId } from '@kbn/securitysolution-api';
+import type { SortOrder } from '@kbn/securitysolution-api';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:

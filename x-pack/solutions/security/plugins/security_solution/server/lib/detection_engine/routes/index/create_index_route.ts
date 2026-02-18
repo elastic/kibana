@@ -16,7 +16,7 @@ import {
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
 import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
-import type { CreateAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
+import type { CreateAlertsIndexResponse } from '@kbn/securitysolution-api';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,

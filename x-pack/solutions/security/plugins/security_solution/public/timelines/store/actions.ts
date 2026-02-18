@@ -26,7 +26,7 @@ import type {
   TimelinePersistInput,
   TimelineTabs,
 } from '../../../common/types/timeline';
-import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
+import type { DataProviderType, RowRendererId } from '@kbn/securitysolution-api';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 

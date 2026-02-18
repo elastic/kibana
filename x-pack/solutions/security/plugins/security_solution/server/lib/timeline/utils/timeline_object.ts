@@ -10,7 +10,7 @@ import {
   type TimelineResponse,
   TimelineTypeEnum,
   TimelineStatusEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 

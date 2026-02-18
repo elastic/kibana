@@ -11,7 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   GetAssetCriticalityRecordRequestQuery,
   type GetAssetCriticalityRecordResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,

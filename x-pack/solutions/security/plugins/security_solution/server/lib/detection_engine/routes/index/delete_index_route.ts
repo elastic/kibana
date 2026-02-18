@@ -15,7 +15,7 @@ import {
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { ALERTS_API_ALL } from '@kbn/security-solution-features/constants';
-import type { DeleteAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
+import type { DeleteAlertsIndexResponse } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';

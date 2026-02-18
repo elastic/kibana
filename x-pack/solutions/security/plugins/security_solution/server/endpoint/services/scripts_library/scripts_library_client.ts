@@ -21,7 +21,7 @@ import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
 import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
@@ -34,7 +34,7 @@ import {
 } from '../../lib/scripts_library';
 import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
 import type {
   EndpointScript,
   EndpointScriptListApiResponse,

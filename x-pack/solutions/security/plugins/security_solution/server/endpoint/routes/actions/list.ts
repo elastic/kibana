@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { EndpointActionListRequestSchema } from '../../../../common/api/endpoint';
+import { EndpointActionListRequestSchema } from '@kbn/securitysolution-api';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { actionListHandler } from './list_handler';
 

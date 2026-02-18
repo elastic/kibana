@@ -19,7 +19,7 @@ import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');

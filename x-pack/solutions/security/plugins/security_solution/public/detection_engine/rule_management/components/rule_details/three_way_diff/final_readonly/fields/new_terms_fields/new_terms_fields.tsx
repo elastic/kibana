@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { NewTermsFields as NewTermsFieldsType } from '../../../../../../../../../common/api/detection_engine';
+import type { NewTermsFields as NewTermsFieldsType } from '@kbn/securitysolution-api';
 import { NewTermsFields } from '../../../../rule_definition_section';
 
 interface NewTermsFieldsReadOnlyProps {

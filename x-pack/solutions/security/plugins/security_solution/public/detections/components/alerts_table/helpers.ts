@@ -15,7 +15,7 @@ import {
   DataProviderTypeEnum,
   type TimelineType,
   TimelineTypeEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type {
   DataProvider,
   DataProvidersAnd,

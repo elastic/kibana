@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { RelatedIntegrations } from '../../../../../../rule_creation/components/related_integrations';
-import type { RelatedIntegrationArray } from '../../../../../../../../common/api/detection_engine';
+import type { RelatedIntegrationArray } from '@kbn/securitysolution-api';
 import { filterOutEmptyRelatedIntegrations } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
 
 export const relatedIntegrationsSchema = {

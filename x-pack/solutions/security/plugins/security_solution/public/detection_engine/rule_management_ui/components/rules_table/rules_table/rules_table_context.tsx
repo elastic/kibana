@@ -29,7 +29,7 @@ import type {
   RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import type { WarningSchema } from '../../../../../../common/api/detection_engine';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {

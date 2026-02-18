@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
-import type { CoverageOverviewResponse } from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '@kbn/securitysolution-api';
+import type { CoverageOverviewResponse } from '@kbn/securitysolution-api';
 import { buildCoverageOverviewDashboardModel } from './build_coverage_overview_dashboard_model';
 import {
   getMockCoverageOverviewSubtechniques,

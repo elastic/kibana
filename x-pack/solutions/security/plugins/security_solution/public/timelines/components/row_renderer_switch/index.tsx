@@ -9,7 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiToolTip, EuiSwitch, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RowRendererValues } from '../../../../common/api/timeline';
+import { RowRendererValues } from '@kbn/securitysolution-api';
 import type { State } from '../../../common/store';
 import { setExcludedRowRendererIds } from '../../store/actions';
 import { selectExcludedRowRendererIds } from '../../store/selectors';

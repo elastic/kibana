@@ -15,7 +15,7 @@ import {
   type DiffableRule,
   RuleEqlQuery,
   QueryLanguageEnum,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { EqlQueryEditAdapter } from './eql_query_edit_adapter';
 
 export function EqlQueryEditForm(): JSX.Element {

@@ -14,7 +14,7 @@ import type {
   RuleFieldsDiffWithThreshold,
   RuleFieldsDiffWithEsqlQuery,
   RuleFieldsDiffWithThreatQuery,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
 import {
   getFieldDiffsForDataSource,

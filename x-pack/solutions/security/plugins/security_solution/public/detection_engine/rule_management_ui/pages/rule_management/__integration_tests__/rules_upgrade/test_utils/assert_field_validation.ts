@@ -9,7 +9,7 @@ import { waitFor } from '@testing-library/react';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   getSaveFieldValueButton,
   switchToFieldEdit,

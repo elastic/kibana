@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleName } from '../../../../../../../../common/api/detection_engine';
+import type { RuleName } from '@kbn/securitysolution-api';
 
 export const nameSchema = { name: schema.name } as FormSchema<{ name: RuleName }>;
 

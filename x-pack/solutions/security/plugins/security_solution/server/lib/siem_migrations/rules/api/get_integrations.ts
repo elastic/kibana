@@ -6,12 +6,12 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import { type GetRuleMigrationIntegrationsResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsIntegrationsRoute = (
   router: SecuritySolutionPluginRouter,

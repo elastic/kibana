@@ -19,7 +19,7 @@ import {
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
-import type { BareNote, Note } from '../../../common/api/timeline';
+import type { BareNote, Note } from '@kbn/securitysolution-api';
 
 export enum ReqStatus {
   Idle = 'idle',

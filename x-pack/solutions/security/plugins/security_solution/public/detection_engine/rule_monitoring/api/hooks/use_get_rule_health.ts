@@ -10,8 +10,8 @@ import { useQuery } from '@kbn/react-query';
 import type {
   GetRuleHealthRequestBody,
   GetRuleHealthResponse,
-} from '../../../../../common/api/detection_engine';
-import { GET_RULE_HEALTH_URL } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import { GET_RULE_HEALTH_URL } from '@kbn/securitysolution-api';
 import { api } from '../api_client';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 

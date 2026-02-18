@@ -42,8 +42,8 @@ import type {
   PersistTimelineResponse,
   SavedTimeline,
   TimelineErrorResponse,
-} from '../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';

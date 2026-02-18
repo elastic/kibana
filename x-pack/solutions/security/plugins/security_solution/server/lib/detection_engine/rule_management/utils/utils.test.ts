@@ -11,9 +11,9 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
-import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type { ThreatMapping } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleToImport } from '@kbn/securitysolution-api';
+import { getCreateRulesSchemaMock } from '@kbn/securitysolution-api';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
 import {

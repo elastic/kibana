@@ -13,7 +13,7 @@ import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas
 import pRetry from 'p-retry';
 import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';
-import { type RuleResponse } from '../../../common/api/detection_engine';
+import { type RuleResponse } from '@kbn/securitysolution-api';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type {
   S1SitesListApiResponse,

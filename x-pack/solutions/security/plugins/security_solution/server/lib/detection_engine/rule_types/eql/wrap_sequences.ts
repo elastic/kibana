@@ -13,7 +13,7 @@ import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const wrapSequences = ({

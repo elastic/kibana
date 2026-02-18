@@ -16,7 +16,7 @@ import type {
   SetAlertsStatusByQuery,
   SetAlertsStatusRequestBodyInput,
   SearchAlertsRequestBody,
-} from '../../../../../common/api/detection_engine/signals';
+} from '@kbn/securitysolution-api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -29,25 +29,25 @@ import {
   DETECTION_ENGINE_RULES_IMPORT_URL,
   DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/securitysolution-api';
 
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
-} from '../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionEditAlertSuppressionSchemaMock,
-} from '../../../../../common/api/detection_engine/rule_management/mocks';
+} from '@kbn/securitysolution-api';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '@kbn/securitysolution-api';
 
 import {
   getFinalizeSignalsMigrationSchemaMock,
   getSignalsMigrationStatusSchemaMock,
-} from '../../../../../common/api/detection_engine/signals_migration/mocks';
+} from '@kbn/securitysolution-api';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';

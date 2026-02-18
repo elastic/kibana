@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleResponse } from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import { applyRuleDefaults } from '../mergers/apply_rule_defaults';
 import { createDefaultExternalRuleSource } from '../mergers/rule_source/create_default_external_rule_source';

@@ -13,7 +13,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 
 /**
  * wrapHits is responsible for turning source events into alerts. Since we copy the source data into the alert, we are

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ISavedObjectsImporter, SavedObject } from '@kbn/core-saved-objects-server';
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import type { BulkError } from '../../../../routes/utils';
 
 export interface ImportRuleActionConnectorsResult {

@@ -10,11 +10,11 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
-} from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import { api } from './api_client';
 import type { FetchRuleExecutionEventsArgs } from './api_client_interface';

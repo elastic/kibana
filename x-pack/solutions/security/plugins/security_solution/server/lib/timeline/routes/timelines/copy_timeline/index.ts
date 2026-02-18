@@ -11,7 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   CopyTimelineRequestBody,
   type CopyTimelineResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';

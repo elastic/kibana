@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PINNED_EVENT_URL } from '../../../../common/constants';
-import type { PersistPinnedEventRouteResponse } from '../../../../common/api/timeline';
+import type { PersistPinnedEventRouteResponse } from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({

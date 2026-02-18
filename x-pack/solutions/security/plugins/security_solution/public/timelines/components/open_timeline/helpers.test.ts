@@ -26,7 +26,7 @@ import {
   type RowRendererId,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import {
   mockTemplate as mockSelectedTemplate,
   mockTimeline as mockSelectedTimeline,

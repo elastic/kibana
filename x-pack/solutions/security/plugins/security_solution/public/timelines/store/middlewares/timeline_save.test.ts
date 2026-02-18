@@ -10,7 +10,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock } from '../../../common/mock';

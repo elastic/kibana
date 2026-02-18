@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   HealthOverviewState,
   TotalEnabledDisabled,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import type { RawData } from '../../../utils/normalization';
 
 export const getRuleStatsAggregation = (): Record<

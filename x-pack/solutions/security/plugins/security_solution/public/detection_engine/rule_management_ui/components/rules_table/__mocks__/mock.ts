@@ -20,7 +20,7 @@ import {
   AlertSuppressionMissingFieldsStrategyEnum,
   type RuleResponse,
   type SavedQueryRule,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,

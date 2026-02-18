@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon, EuiFormRow } from '@elastic/eui';
 
 import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { AlertSuppressionDuration } from '../../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import type { AlertSuppressionDuration } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { useForm, UseMultiFields } from '../../../../../../shared_imports';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { ALERT_SUPPRESSION_DEFAULT_DURATION } from '../../../../../rule_creation/components/alert_suppression_edit';

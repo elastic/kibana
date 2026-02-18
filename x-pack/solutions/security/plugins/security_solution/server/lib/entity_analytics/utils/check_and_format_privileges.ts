@@ -11,7 +11,7 @@ import type {
   CheckPrivilegesResponse,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality/constants';
 const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{

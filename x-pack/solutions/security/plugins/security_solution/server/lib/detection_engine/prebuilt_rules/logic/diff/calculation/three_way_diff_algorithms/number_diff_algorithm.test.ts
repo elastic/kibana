@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ThreeVersionsOf } from '../../../../../../../../common/api/detection_engine';
+import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { numberDiffAlgorithm } from './number_diff_algorithm';
 
 describe('numberDiffAlgorithm', () => {

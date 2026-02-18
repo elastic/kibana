@@ -8,7 +8,7 @@
 import {
   getImportRulesSchemaMock,
   getValidatedRuleToImportMock,
-} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+} from '@kbn/securitysolution-api';
 import { convertRuleToImportToRuleResponse } from './convert_rule_to_import_to_rule_response';
 
 describe('convertRuleToImportToRuleResponse', () => {

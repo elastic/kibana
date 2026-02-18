@@ -18,7 +18,7 @@ import type {
   RuleResponse,
   RuleToImport,
   ValidatedRuleToImport,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed';

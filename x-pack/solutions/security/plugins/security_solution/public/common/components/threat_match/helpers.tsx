@@ -12,7 +12,7 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type {
   ThreatMapping,
   ThreatMappingEntry,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 import type { FormattedEntry } from './types';
 

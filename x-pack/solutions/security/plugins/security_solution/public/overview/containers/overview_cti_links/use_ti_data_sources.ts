@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import type { ThreatIntelSourceRequestOptionsInput } from '../../../../common/api/search_strategy';
+import type { ThreatIntelSourceRequestOptionsInput } from '@kbn/securitysolution-api';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   Bucket,

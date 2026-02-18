@@ -9,7 +9,7 @@ import {
   clusterHealthSnapshotMock,
   ruleHealthSnapshotMock,
   spaceHealthSnapshotMock,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
+} from '@kbn/securitysolution-api';
 
 import type { IDetectionEngineHealthClient } from '../detection_engine_health_client_interface';
 

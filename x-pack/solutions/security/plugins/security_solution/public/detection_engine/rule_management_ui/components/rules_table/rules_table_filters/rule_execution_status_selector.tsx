@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
-import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import { getCapitalizedStatusText } from '../../../../common/components/rule_execution_status/utils';
 import { RuleStatusBadge } from '../../../../common/components/rule_execution_status';
 

@@ -20,7 +20,7 @@ import {
   type PersistFavoriteRouteResponse,
   PersistFavoriteRouteRequestBody,
   TimelineTypeEnum,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

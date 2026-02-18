@@ -11,7 +11,7 @@ import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
   type EntityType,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { getEntitiesIndexName } from '../utils';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 

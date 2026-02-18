@@ -14,11 +14,11 @@ import {
   RULES_API_READ,
 } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
-import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { PatchRuleResponse } from '@kbn/securitysolution-api';
 import {
   PatchRuleRequestBody,
   validatePatchRuleRequestBody,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';

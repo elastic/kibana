@@ -13,7 +13,7 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   GetRuleManagementFiltersResponse,
   RULE_MANAGEMENT_FILTERS_URL,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';

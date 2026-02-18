@@ -20,7 +20,7 @@ import { FETCH_NOTES_ERROR, Notes } from './notes';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { ReqStatus } from '../../../../notes';
-import type { Note } from '../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';

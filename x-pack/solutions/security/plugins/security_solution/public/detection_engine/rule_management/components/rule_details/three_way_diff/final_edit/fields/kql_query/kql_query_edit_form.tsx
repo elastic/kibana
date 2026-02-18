@@ -17,13 +17,13 @@ import {
   RuleQuery,
   SavedQueryId,
   RuleKqlQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type {
   DiffableRule,
   DiffableRuleTypes,
   InlineKqlQuery,
   SavedKqlQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { isFilters } from '../../../../helpers';
 import { KqlQueryEdit } from './kql_query_edit';
 

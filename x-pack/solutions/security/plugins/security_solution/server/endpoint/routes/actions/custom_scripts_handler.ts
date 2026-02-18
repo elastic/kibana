@@ -12,8 +12,8 @@ import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { errorHandler } from '../error_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
-import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
-import { CustomScriptsRequestSchema } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import { CustomScriptsRequestSchema } from '@kbn/securitysolution-api';
 
 import type {
   SecuritySolutionPluginRouter,

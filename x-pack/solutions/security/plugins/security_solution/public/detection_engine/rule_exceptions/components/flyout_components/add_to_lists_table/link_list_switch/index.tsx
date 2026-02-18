@@ -7,7 +7,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/api/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '@kbn/securitysolution-api';
 
 import * as i18n from './translations';
 

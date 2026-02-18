@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import type { ListEntitiesResponse } from '../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { ListEntitiesResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/list_entities.gen';
 import type { FetchEntitiesListParams } from '../../../api/api';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 

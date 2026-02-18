@@ -14,8 +14,8 @@ import * as i18n from '../../../../../common/translations';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {

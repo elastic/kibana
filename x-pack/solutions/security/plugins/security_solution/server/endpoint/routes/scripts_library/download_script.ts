@@ -6,8 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { DownloadScriptRequestParams } from '../../../../common/api/endpoint/scripts_library/download_script';
-import { DownloadScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import type { DownloadScriptRequestParams } from '@kbn/securitysolution-api';
+import { DownloadScriptRequestSchema } from '@kbn/securitysolution-api';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

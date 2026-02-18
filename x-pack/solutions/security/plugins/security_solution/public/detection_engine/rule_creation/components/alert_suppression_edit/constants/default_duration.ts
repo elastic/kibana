@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertSuppressionDurationUnitEnum } from '../../../../../../common/api/detection_engine';
+import { AlertSuppressionDurationUnitEnum } from '@kbn/securitysolution-api';
 import {
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,

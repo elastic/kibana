@@ -16,7 +16,7 @@ import {
   type ERROR_CODE,
   FIELD_TYPES,
 } from '../../../../../../../../shared_imports';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { DataSourceType } from '@kbn/securitysolution-api';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { DataSourceEdit } from './data_source_edit';
 import { INDEX_HELPER_TEXT } from '../../../../../../../rule_creation_ui/components/step_define_rule/translations';

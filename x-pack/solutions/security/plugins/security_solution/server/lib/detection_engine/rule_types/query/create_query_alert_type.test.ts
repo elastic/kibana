@@ -18,7 +18,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { hasTimestampFields } from '../utils/utils';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 
 const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
 jest.mock('../utils/utils', () => ({

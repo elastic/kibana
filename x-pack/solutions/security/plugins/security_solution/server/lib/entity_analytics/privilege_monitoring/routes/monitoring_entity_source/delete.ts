@@ -16,7 +16,7 @@ import {
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { DeleteEntitySourceRequestParams } from '../../../../../../common/api/entity_analytics';
+import { DeleteEntitySourceRequestParams } from '@kbn/securitysolution-api';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const deleteMonitoringEntitySourceRoute = (

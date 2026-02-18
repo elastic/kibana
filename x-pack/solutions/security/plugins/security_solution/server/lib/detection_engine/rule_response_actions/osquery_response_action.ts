@@ -11,7 +11,7 @@ import { requiredOptional } from '@kbn/zod-helpers';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { ResponseActionAlerts } from './types';
 import type { SetupPlugins } from '../../../plugin_contract';
-import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import type { RuleResponseOsqueryAction } from '@kbn/securitysolution-api';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
 export const osqueryResponseAction = (

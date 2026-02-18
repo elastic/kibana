@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { Query } from '../../../../rule_definition_section';
-import type { RuleEsqlQuery } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleEsqlQuery } from '@kbn/securitysolution-api';
 
 interface EsqlQueryReadonlyProps {
   esqlQuery: RuleEsqlQuery;

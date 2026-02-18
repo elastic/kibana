@@ -8,7 +8,7 @@
 import type {
   RuleSignatureId,
   RuleVersion,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 export interface RuleVersionSpecifier {
   rule_id: RuleSignatureId;

@@ -10,12 +10,12 @@ import {
   ASSET_INVENTORY_ENABLE_API_PATH,
   ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH,
   ASSET_INVENTORY_STATUS_API_PATH,
-} from '../../../common/api/asset_inventory/constants';
+} from '@kbn/securitysolution-api';
 import type {
   AssetInventoryEnableResponse,
   AssetInventoryInstallDataViewResponse,
   AssetInventoryStatusResponse,
-} from '../../../common/api/asset_inventory/types';
+} from '@kbn/securitysolution-api';
 import { API_VERSIONS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 

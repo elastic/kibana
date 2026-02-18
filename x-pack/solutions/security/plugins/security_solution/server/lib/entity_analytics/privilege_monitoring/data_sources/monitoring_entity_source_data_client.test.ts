@@ -14,7 +14,7 @@ import {
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from '../saved_objects';
-import type { MonitoringEntitySourceAttributes } from '../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySourceAttributes } from '@kbn/securitysolution-api';
 import type { PartialMonitoringEntitySource } from '../types';
 
 describe('MonitoringEntitySourceDataClient', () => {

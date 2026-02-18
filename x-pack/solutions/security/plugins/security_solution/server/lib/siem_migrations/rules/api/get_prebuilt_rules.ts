@@ -12,7 +12,7 @@ import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../commo
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 import { getPrebuiltRulesForMigration } from './util/prebuilt_rules';
 
 export const registerSiemRuleMigrationsPrebuiltRulesRoute = (

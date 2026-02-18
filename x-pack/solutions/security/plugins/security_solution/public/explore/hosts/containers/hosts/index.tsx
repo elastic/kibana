@@ -8,7 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { HostsRequestOptionsInput } from '@kbn/securitysolution-api';
 import type { inputsModel, State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

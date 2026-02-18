@@ -27,7 +27,7 @@ import type {
   ThresholdRule,
   ThresholdRuleResponseFields,
   TypeSpecificResponse,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import {
   EqlRulePatchFields,
   EsqlRulePatchFields,
@@ -37,8 +37,8 @@ import {
   SavedQueryRulePatchFields,
   ThreatMatchRulePatchFields,
   ThresholdRulePatchFields,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { PatchRuleRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import type { PatchRuleRequestBody } from '@kbn/securitysolution-api';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,

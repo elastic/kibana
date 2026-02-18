@@ -14,7 +14,7 @@ import type {
   RuleResponse,
   RuleToImport,
   RuleSource,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';

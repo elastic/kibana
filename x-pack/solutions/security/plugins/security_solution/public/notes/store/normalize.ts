@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 
 /**
  * Interface to represent a normalized entity

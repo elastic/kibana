@@ -9,7 +9,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL, TIMELINE_COPY_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 

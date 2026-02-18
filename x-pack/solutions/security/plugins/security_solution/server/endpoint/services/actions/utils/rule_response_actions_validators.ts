@@ -20,7 +20,7 @@ import type {
   RuleResponseEndpointAction,
   RuleResponseOsqueryAction,
   RuleToImport,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../../common/endpoint/service/response_actions/constants';

@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import { isCustomizedPrebuiltRule } from '@kbn/securitysolution-api';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useFetchPrebuiltRuleBaseVersionQuery } from '../../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 import { RuleCustomizationsFlyout } from './rule_customizations_flyout';
 

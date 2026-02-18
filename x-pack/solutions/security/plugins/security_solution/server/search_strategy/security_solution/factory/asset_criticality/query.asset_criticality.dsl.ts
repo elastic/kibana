@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityRequestOptions } from '../../../../../common/api/search_strategy/asset_criticality/all';
+import type { AssetCriticalityRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const buildAssetCriticalityQuery = ({

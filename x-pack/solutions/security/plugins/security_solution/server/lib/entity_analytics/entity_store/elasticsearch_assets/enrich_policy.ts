@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import type { EntityType } from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import { getEntitiesIndexName } from '../utils';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
 

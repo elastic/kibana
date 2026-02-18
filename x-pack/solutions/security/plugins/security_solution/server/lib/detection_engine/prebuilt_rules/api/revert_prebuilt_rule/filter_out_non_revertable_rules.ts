@@ -8,12 +8,12 @@
 import {
   isCustomizedPrebuiltRule,
   isNonCustomizedPrebuiltRule,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
+} from '@kbn/securitysolution-api';
 import {
   BulkRevertSkipReasonEnum,
   type BulkActionReversionSkipResult,
   type RuleResponse,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export const filterOutNonRevertableRules = (rules: RuleResponse[]) => {
   const skipped: BulkActionReversionSkipResult[] = [];

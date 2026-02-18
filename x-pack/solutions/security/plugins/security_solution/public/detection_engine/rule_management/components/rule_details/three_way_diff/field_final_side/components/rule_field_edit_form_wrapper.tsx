@@ -14,7 +14,7 @@ import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
   DiffableRule,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { useFieldUpgradeContext } from '../../rule_upgrade/field_upgrade_context';
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';

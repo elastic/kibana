@@ -23,7 +23,7 @@ import { importTimelines } from './helpers';
 import {
   ImportTimelinesRequestBody,
   type ImportTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';

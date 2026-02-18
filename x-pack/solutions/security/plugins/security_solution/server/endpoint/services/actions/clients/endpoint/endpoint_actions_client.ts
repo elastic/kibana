@@ -10,8 +10,8 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
-import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
-import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -34,7 +34,7 @@ import type {
   UnisolationRouteRequestBody,
   RunScriptActionRequestBody,
   EndpointRunScriptActionRequestParams,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import {
   ResponseActionsClientImpl,
   type ResponseActionsClientValidateRequestResponse,

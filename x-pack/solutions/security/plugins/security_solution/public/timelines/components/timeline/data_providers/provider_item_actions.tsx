@@ -16,7 +16,7 @@ import {
   DataProviderTypeEnum,
   type TimelineType,
   TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 

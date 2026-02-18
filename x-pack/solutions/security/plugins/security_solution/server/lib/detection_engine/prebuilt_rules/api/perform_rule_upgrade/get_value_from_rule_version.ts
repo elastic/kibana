@@ -10,7 +10,7 @@ import {
   type AllThreeWayFieldsDiff,
   type UpgradeConflictResolution,
   UpgradeConflictResolutionEnum,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { RULE_DEFAULTS } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';

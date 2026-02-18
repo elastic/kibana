@@ -12,12 +12,12 @@ import type {
   TemplateTimelineType,
   TimelineStatus,
   TimelineType,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import {
   TemplateTimelineTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import * as i18n from './translations';
 import type { TemplateTimelineFilter } from './types';

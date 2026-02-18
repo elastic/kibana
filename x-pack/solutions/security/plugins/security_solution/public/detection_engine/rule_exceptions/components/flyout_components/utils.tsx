@@ -32,10 +32,10 @@ import {
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
-} from '../../../../../common/api/detection_engine/rule_exceptions';
+} from '@kbn/securitysolution-api';
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 /**
  * Adds user defined name to all new exceptionItems

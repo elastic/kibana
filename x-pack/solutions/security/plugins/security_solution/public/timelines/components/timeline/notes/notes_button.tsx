@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 const NOTES = i18n.translate('xpack.securitySolution.timeline.notes.notesButtonLabel', {
   defaultMessage: 'Notes',

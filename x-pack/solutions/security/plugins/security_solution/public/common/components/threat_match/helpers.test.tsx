@@ -13,7 +13,7 @@ import moment from 'moment-timezone';
 import type {
   ThreatMapping,
   ThreatMappingEntry,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import {
   getEntryOnFieldChange,
   getFormattedEntries,

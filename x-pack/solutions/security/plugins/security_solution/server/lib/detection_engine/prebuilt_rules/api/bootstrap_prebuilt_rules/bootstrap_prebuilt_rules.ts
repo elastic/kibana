@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
-import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { BOOTSTRAP_PREBUILT_RULES_URL } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { bootstrapPrebuiltRulesHandler } from './bootstrap_prebuilt_rules_handler';

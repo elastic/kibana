@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 
-import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
 import { RuleStatusBadge } from '../../../../../common/components/rule_execution_status';
 import {

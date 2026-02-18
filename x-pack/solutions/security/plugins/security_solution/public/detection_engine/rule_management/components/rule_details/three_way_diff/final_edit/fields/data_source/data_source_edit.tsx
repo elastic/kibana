@@ -9,7 +9,7 @@ import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { DataSourceType } from '@kbn/securitysolution-api';
 import { UseMultiFields } from '../../../../../../../../shared_imports';
 import type { RuleFieldEditComponentProps } from '../../../field_final_side';
 import { IndexPatternField } from './index_pattern_edit';

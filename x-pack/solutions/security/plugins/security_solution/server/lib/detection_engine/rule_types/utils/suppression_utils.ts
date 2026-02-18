@@ -14,7 +14,7 @@ import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import type { SearchTypes } from '../../../../../common/detection_engine/types';

@@ -13,7 +13,7 @@ import type {
 import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
-import type { Status } from '../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import type { inputsModel } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
 import { MissingPrivilegesCallout } from '../../missing_privileges_callout';
 
 export const EntityStoreMissingPrivilegesCallout = ({

@@ -8,7 +8,7 @@
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { EntityType } from '../../../../common/search_strategy';
-import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
 
 interface WriterBulkResponse {
   errors: string[];

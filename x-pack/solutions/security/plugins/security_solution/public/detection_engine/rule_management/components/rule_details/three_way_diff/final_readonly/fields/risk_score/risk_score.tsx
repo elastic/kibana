@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { RiskScore as RiskScoreType } from '../../../../../../../../../common/api/detection_engine';
+import type { RiskScore as RiskScoreType } from '@kbn/securitysolution-api';
 import { RiskScore } from '../../../../rule_about_section';
 
 interface RiskScoreReadOnlyProps {

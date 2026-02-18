@@ -19,7 +19,7 @@ import { getAllTimeline } from '../../../saved_object/timelines';
 import {
   GetTimelinesRequestQuery,
   type GetTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

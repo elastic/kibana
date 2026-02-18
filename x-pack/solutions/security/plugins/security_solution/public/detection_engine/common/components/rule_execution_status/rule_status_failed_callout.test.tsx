@@ -9,8 +9,8 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
 import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';

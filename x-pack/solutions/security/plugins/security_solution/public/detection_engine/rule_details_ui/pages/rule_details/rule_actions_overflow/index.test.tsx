@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
-import type { ExternalRuleSource } from '../../../../../../common/api/detection_engine';
+import type { ExternalRuleSource } from '@kbn/securitysolution-api';
 import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';

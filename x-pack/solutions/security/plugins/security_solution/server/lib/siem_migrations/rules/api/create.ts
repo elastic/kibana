@@ -13,9 +13,9 @@ import {
   CreateRuleMigrationRequestBody,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,

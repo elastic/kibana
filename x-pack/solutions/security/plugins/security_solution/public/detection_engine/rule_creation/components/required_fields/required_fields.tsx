@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
+import type { RequiredFieldInput } from '@kbn/securitysolution-api';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
 import { RequiredFieldsHelpInfo } from './required_fields_help_info';

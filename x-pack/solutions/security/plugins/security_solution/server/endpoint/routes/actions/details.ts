@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
+import { ActionDetailsRequestSchema } from '@kbn/securitysolution-api';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

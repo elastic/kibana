@@ -21,7 +21,7 @@ import {
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import * as i18n from './translations';
-import type { RiskScoreMapping } from '../../../../../common/api/detection_engine';
+import type { RiskScoreMapping } from '@kbn/securitysolution-api';
 
 const NestedContent = styled.div`
   margin-left: 24px;

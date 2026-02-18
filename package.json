@@ -1004,6 +1004,7 @@
     "@kbn/security-solution-upselling": "link:x-pack/solutions/security/packages/upselling",
     "@kbn/security-test-endpoints-plugin": "link:x-pack/platform/test/security_functional/plugins/test_endpoints",
     "@kbn/security-ui-components": "link:x-pack/platform/packages/private/security/ui_components",
+    "@kbn/securitysolution-api": "link:src/platform/packages/shared/kbn-securitysolution-api",
     "@kbn/securitysolution-autocomplete": "link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete",
     "@kbn/securitysolution-data-table": "link:x-pack/solutions/security/packages/data-table",
     "@kbn/securitysolution-ecs": "link:src/platform/packages/shared/kbn-securitysolution-ecs",

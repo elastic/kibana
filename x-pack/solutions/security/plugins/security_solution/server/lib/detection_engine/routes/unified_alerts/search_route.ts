@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
-import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
+import { SearchUnifiedAlertsRequestBody } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
 import { searchAlertsHandler } from '../common/search_alerts_handler';

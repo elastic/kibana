@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkTopNFlowRequestOptions } from '@kbn/securitysolution-api';
 import type {
   Direction,
   GeoItem,

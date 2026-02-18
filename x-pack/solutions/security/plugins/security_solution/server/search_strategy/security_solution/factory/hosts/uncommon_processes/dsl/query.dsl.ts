@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
-import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { HostUncommonProcessesRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';

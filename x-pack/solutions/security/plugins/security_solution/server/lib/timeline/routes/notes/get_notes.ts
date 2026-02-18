@@ -27,7 +27,7 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
 import { getAllSavedNote } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
-import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
+import { GetNotesRequestQuery, type GetNotesResponse } from '@kbn/securitysolution-api';
 
 /* eslint-disable complexity */
 export const getNotesRoute = (

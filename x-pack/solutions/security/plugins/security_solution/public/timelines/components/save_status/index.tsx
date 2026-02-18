@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 
 const UNSAVED = i18n.translate('xpack.securitySolution.timeline.saveStatus.unsavedLabel', {
   defaultMessage: 'Unsaved',

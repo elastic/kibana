@@ -11,7 +11,7 @@ import {
   type TimelineType,
   type TimelineResponse,
   TimelineStatusEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';

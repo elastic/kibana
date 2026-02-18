@@ -49,7 +49,7 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
-import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { FUNCTIONAL_FIELD_MAP } from '../detection_engine/rule_management/constants';
 
 /**

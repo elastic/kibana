@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   MonitoringEngineComponentResourceEnum,
   type MonitoringEngineDescriptor,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';

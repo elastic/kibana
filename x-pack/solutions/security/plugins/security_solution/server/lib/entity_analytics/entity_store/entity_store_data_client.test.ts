@@ -21,7 +21,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import type {
   EngineDescriptor,
   InitEntityEngineResponse,
-} from '../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultOptions } from './constants';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';

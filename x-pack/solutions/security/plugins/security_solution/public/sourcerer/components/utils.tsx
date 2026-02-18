@@ -8,7 +8,7 @@
 import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { Blockquote } from './helpers';
 import * as i18n from './translations';
 

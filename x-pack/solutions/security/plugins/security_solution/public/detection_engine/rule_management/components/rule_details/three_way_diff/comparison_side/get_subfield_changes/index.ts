@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import { stringifyToSortedJson } from '../utils';
 import { getSubfieldChangesForDataSource } from './data_source';
 import { getSubfieldChangesForKqlQuery } from './kql_query';

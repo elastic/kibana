@@ -8,7 +8,7 @@
 import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { AlertsMigrationCleanupRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
+import { AlertsMigrationCleanupRequestBody } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';

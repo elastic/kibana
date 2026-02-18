@@ -21,7 +21,7 @@ import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
 import { TimelineModalHeader } from '../modal/header';
 import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { sourcererSelectors } from '../../../common/store';

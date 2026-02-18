@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 interface ModifierTypeMap {
   asset_criticality: {

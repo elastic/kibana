@@ -9,7 +9,7 @@ import { useEffect, useState, useCallback } from 'react';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { usePreviewRule } from './use_preview_rule';
 import { formatPreviewRule } from '../../pages/rule_creation/helpers';
-import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
+import type { RulePreviewLogs } from '@kbn/securitysolution-api';
 import type {
   AboutStepRule,
   DefineStepRule,

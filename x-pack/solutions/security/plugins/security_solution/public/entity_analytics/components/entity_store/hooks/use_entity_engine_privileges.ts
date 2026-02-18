@@ -8,7 +8,7 @@
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
 export const GET_ENTITY_ENGINE_PRIVILEGES = ['get_entity_engine_privileges'] as const;

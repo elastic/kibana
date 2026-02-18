@@ -7,7 +7,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 
 export const LinkRuleSwitch = memo(

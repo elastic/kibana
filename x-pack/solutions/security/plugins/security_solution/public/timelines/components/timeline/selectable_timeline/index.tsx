@@ -20,7 +20,7 @@ import { debounce, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { SortFieldTimelineEnum, type TimelineType } from '../../../../../common/api/timeline';
+import { SortFieldTimelineEnum, type TimelineType } from '@kbn/securitysolution-api';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';

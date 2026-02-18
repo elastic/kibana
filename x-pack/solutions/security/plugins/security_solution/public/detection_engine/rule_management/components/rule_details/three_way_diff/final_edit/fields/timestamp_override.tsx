@@ -16,7 +16,7 @@ import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/fo
 import type {
   DiffableRule,
   TimestampOverrideObject,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export const timestampOverrideSchema = {
   timestampOverride: schema.timestampOverride,

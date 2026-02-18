@@ -13,7 +13,7 @@ import {
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {

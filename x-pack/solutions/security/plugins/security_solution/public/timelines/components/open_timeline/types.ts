@@ -14,7 +14,7 @@ import type {
   TemplateTimelineType,
   TimelineStatus,
   TimelineType,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

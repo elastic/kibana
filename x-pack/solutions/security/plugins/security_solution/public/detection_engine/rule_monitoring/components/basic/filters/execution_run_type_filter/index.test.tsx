@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ExecutionRunTypeFilter } from '.';
-import { RuleRunTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleRunTypeEnum } from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { EventLogEventTypes } from '../../../../../../common/lib/telemetry';
 

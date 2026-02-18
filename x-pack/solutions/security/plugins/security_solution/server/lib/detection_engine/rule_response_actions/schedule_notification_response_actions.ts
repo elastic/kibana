@@ -8,7 +8,7 @@
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
-import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 import { osqueryResponseAction } from './osquery_response_action';
 import { endpointResponseAction } from './endpoint_response_action';
 import type { ScheduleNotificationActions } from '../rule_types/types';

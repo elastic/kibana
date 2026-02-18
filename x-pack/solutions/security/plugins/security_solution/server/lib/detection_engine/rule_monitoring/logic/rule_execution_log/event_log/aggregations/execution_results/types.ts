@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { RuleRunType } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleRunType } from '@kbn/securitysolution-api';
 
 type AlertCounts = estypes.AggregationsMultiBucketAggregateBase & {
   buckets: {

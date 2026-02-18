@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { HostsFields } from '../../../../../../../common/api/search_strategy/hosts/model/sort';
+import type { HostsFields } from '@kbn/securitysolution-api';
 import type {
   HostDetailsRequestOptions,
   SortField,

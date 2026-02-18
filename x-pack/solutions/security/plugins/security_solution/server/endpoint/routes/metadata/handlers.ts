@@ -21,7 +21,7 @@ import type { EndpointAppContext } from '../../types';
 import type {
   GetMetadataListRequestQuery,
   GetMetadataRequestSchema,
-} from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,

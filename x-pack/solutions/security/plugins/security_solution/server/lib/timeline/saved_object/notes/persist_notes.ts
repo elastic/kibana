@@ -8,7 +8,7 @@
 import type { FrameworkRequest } from '../../../framework';
 import { persistNote, type InternalNoteResponse } from './saved_object';
 import { getOverridableNote } from './get_overridable_note';
-import type { Note } from '../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,

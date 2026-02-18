@@ -16,7 +16,7 @@ import { DeleteNoteButtonIcon } from './delete_note_button';
 import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {

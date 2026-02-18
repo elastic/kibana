@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import React from 'react';

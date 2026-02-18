@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryRuleCreateProps } from '../../../../../common/api/detection_engine';
+import type { QueryRuleCreateProps } from '@kbn/securitysolution-api';
 
 export const buildBasicQueryRule: () => QueryRuleCreateProps = () => ({
   type: 'query',

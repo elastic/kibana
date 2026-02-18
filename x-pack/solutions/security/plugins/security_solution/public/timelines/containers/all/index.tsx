@@ -24,8 +24,8 @@ import type {
   TimelineResponse,
   SortTimeline,
   GetTimelinesRequestQuery,
-} from '../../../../common/api/timeline';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {

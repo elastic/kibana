@@ -29,7 +29,7 @@ import { requiredOptional } from '@kbn/zod-helpers';
 import type {
   BuildingBlockType,
   RuleResponse,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';

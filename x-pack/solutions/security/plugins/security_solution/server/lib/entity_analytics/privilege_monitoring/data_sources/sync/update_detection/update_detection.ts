@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
-import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import type { MonitoringEntitySyncType, PrivMonBulkUser } from '../../../types';
 import { createPatternMatcherService } from './matchers/privileged_status_match';

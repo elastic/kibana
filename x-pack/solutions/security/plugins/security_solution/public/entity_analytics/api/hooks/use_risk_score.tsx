@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import { EntityRiskQueries } from '@kbn/securitysolution-api';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { createFilter } from '../../../common/containers/helpers';
 import type {

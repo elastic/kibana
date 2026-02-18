@@ -9,7 +9,7 @@ import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/compo
 import {
   ResponseActionTypes,
   ResponseActionTypesEnum,
-} from '../../../common/api/detection_engine/model/rule_response_actions';
+} from '@kbn/securitysolution-api';
 
 export interface ResponseActionType {
   id: ResponseActionTypes;

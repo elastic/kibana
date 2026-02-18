@@ -13,7 +13,7 @@ import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/co
 import type {
   RulePatchProps,
   RuleResponse,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getIdError } from '../../../utils/utils';

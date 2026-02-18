@@ -22,7 +22,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
+import type { ResponseActionsRequestBody } from '@kbn/securitysolution-api';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';

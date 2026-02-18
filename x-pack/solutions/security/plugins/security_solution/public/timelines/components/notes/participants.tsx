@@ -25,7 +25,7 @@ import {
   TIMELINE_AVATAR_WITH_NAME_TEST_ID,
   TIMELINE_PARTICIPANT_TITLE_TEST_ID,
 } from './test_ids';
-import { type Note } from '../../../../common/api/timeline';
+import { type Note } from '@kbn/securitysolution-api';
 
 export const PARTICIPANTS = i18n.translate(
   'xpack.securitySolution.timeline.notes.participantsTitle',

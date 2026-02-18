@@ -9,7 +9,7 @@ import React from 'react';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { Field, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { RuleTagArray } from '../../../../../../../../common/api/detection_engine';
+import type { RuleTagArray } from '@kbn/securitysolution-api';
 
 export const tagsSchema = { tags: schema.tags } as FormSchema<{ name: RuleTagArray }>;
 

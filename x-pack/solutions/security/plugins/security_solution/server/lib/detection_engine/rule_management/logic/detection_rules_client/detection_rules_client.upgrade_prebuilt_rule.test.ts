@@ -13,7 +13,7 @@ import {
   getCreateRulesSchemaMock,
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+} from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';

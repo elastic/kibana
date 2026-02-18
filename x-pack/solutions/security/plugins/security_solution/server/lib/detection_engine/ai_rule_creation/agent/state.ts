@@ -6,8 +6,8 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { EsqlRuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { RuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import type { EsqlRuleCreateProps } from '@kbn/securitysolution-api';
+import type { RuleSchedule } from '@kbn/securitysolution-api';
 
 export const defaultSchedule: RuleSchedule = {
   interval: '5m',

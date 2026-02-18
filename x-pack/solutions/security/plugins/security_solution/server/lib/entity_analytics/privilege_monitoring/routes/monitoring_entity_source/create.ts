@@ -19,7 +19,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   CreateEntitySourceRequestBody,
   type CreateEntitySourceResponse,
-} from '../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';

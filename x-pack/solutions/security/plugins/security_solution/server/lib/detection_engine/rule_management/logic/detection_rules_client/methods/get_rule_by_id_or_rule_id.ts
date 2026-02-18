@@ -10,7 +10,7 @@ import type {
   RuleObjectId,
   RuleResponse,
   RuleSignatureId,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { getRuleById } from './get_rule_by_id';
 import { getRuleByRuleId } from './get_rule_by_rule_id';

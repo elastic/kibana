@@ -10,7 +10,7 @@ import type { GetAllDashboardMigrationsStatsResponse } from '../../../../../comm
 import { SIEM_DASHBOARD_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 
 export const registerSiemDashboardMigrationsStatsAllRoute = (
   router: SecuritySolutionPluginRouter,

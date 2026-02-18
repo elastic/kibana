@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { DownloadScriptRequestParams } from '../../../../common/api/endpoint';
+import type { DownloadScriptRequestParams } from '@kbn/securitysolution-api';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
 import { registerDownloadScriptRoute } from './download_script';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';

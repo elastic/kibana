@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { UserAuthenticationsRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { authenticationsFields } from '../helpers';
 

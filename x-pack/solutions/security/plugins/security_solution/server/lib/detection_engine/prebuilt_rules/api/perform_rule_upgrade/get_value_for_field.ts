@@ -9,7 +9,7 @@ import type {
   PickVersionValues,
   PerformRuleUpgradeRequestBody,
   AllThreeWayFieldsDiff,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { createFieldUpgradeSpecifier } from './create_field_upgrade_specifier';

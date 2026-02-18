@@ -6,7 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { NetworkOverviewRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkOverviewRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildOverviewNetworkQuery = ({

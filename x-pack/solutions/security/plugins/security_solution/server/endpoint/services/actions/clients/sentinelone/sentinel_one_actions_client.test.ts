@@ -41,7 +41,7 @@ import type {
   GetProcessesRequestBody,
   RunScriptActionRequestBody,
   SentinelOneRunScriptActionRequestParams,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

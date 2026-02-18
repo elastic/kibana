@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { RelatedIntegrationArray } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RelatedIntegrationArray } from '@kbn/securitysolution-api';
 import type { IntegrationDetails } from './integration_details';
 import { calculateIntegrationDetails } from './integration_details';
 import { useIntegrations } from './use_integrations';

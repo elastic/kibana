@@ -6,8 +6,8 @@
  */
 
 import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
-import type { GetWorkflowInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
-import { GetWorkflowInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
+import type { GetWorkflowInsightsRequestQueryParams } from '@kbn/securitysolution-api';
+import { GetWorkflowInsightsRequestSchema } from '@kbn/securitysolution-api';
 import type {
   SearchParams,
   SecurityWorkflowInsight,

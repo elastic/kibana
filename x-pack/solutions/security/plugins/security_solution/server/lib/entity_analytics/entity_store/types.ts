@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HostEntity, UserEntity } from '../../../../common/api/entity_analytics';
+import type { HostEntity, UserEntity } from '@kbn/securitysolution-api';
 import type { CriticalityValues } from '../asset_criticality/constants';
 import type { EntityAnalyticsConfig } from '../types';
 

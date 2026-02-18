@@ -10,7 +10,7 @@ import {
   type EngineComponentStatus,
   EngineComponentResourceEnum,
   type EntityType,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { getEntitiesResetIndexName } from '../utils';
 
 interface Options {

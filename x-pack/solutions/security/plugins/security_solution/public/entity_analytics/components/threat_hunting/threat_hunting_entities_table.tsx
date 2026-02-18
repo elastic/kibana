@@ -44,7 +44,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useEntitiesListQuery } from '../entity_store/hooks/use_entities_list_query';
 import { useEntitiesListFilters } from '../entity_store/hooks/use_entities_list_filters';
 import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
-import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+import type { Entity } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 import type { CriticalityLevels } from '../../../../common/constants';
 import type { EntitySourceTag } from '../entity_store/types';
 import { EntityIconByType, getEntityType, sourceFieldToText } from '../entity_store/helpers';

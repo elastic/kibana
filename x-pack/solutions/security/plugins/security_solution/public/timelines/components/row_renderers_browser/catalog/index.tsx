@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { type RowRendererId, RowRendererIdEnum } from '../../../../../common/api/timeline';
+import { type RowRendererId, RowRendererIdEnum } from '@kbn/securitysolution-api';
 import {
   AlertsExample,
   AuditdExample,

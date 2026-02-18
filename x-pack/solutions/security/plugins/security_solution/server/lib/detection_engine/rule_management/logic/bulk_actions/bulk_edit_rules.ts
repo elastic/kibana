@@ -9,7 +9,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 

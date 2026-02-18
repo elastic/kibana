@@ -9,11 +9,11 @@ import type { HTTPError } from '../../../../../common/detection_engine/types';
 import type {
   BulkActionEditPayload,
   BulkActionType,
-} from '../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
-} from '../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import * as i18n from '../../../common/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 

@@ -9,8 +9,8 @@ import { useMutation } from '@kbn/react-query';
 import type {
   InitRiskEngineErrorResponse,
   InitRiskEngineResponse,
-} from '../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
-import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
+} from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { TaskManagerUnavailableResponse } from '@kbn/securitysolution-api';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 

@@ -8,7 +8,7 @@
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 
-import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { SortFieldTimelineEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';

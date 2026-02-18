@@ -6,7 +6,7 @@
  */
 
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../common/endpoint/service/response_actions/constants';
-import type { RuleResponseAction } from '../../../../common/api/detection_engine';
+import type { RuleResponseAction } from '@kbn/securitysolution-api';
 import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 

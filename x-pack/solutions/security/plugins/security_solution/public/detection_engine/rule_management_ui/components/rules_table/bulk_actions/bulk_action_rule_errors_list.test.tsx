@@ -10,7 +10,7 @@ import React from 'react';
 import {
   BulkActionTypeEnum,
   BulkActionsDryRunErrCodeEnum,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../../../common/mock';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import type { DryRunResult } from './types';

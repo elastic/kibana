@@ -12,14 +12,14 @@ import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
   RuleExecutionEvent,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   RuleRunTypeEnum,
   LogLevel,
   LogLevelEnum,
   RuleExecutionEventType,
   RuleExecutionEventTypeEnum,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   RUN_TYPE_FILTERS,
   STATUS_FILTERS,

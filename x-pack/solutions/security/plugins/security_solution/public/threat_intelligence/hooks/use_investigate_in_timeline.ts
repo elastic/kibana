@@ -23,7 +23,7 @@ import {
 import { timelineDefaults } from '../../timelines/store/defaults';
 import { APP_UI_ID } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { useStartTransaction } from '../../common/lib/apm/use_start_transaction';
 import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';

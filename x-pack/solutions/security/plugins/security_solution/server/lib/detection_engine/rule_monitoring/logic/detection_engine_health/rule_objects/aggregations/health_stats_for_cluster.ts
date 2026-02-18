@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ClusterHealthState } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { ClusterHealthState } from '@kbn/securitysolution-api';
 import { getRuleStatsAggregation, normalizeRuleStatsAggregation } from './rule_stats';
 
 export const getClusterHealthAggregation = (): Record<

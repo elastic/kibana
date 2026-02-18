@@ -9,7 +9,7 @@ import { isBoom } from '@hapi/boom';
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
+import type { WarningSchema } from '@kbn/securitysolution-api';
 import { mapSOErrorsToBulkErrors } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 import { createBulkErrorObject } from '../../../../routes/utils';

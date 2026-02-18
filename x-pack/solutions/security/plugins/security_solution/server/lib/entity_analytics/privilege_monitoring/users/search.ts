@@ -6,7 +6,7 @@
  */
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics';
+import type { MonitoredUserDoc } from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 
 export type SearchService = ReturnType<typeof createSearchService>;

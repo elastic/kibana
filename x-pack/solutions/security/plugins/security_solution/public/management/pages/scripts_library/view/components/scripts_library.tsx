@@ -13,7 +13,7 @@ import type {
   EndpointScript,
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
-import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';

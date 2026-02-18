@@ -10,11 +10,11 @@ import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type { RuleRangeTuple, SignalSearchResponse } from '../types';
 import type {
   ThresholdSignalHistory,

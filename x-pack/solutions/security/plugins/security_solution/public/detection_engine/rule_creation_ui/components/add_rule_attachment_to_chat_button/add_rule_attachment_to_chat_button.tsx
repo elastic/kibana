@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleCreateProps } from '@kbn/securitysolution-api';
 import type {
   AboutStepRule,
   ActionsStepRule,

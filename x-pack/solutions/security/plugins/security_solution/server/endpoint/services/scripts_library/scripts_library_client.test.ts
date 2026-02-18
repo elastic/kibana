@@ -11,7 +11,7 @@ import type { EndpointAppContextService } from '../../endpoint_app_context_servi
 import { ScriptsLibraryClient } from './scripts_library_client';
 import { createEsFileClient as _createEsFileClient } from '@kbn/files-plugin/server';
 import type { createFileMock, createFileClientMock } from '@kbn/files-plugin/server/mocks';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
+import type { CreateScriptRequestBody } from '@kbn/securitysolution-api';
 import { ScriptsLibraryMock } from './mocks';
 import { Readable, Transform } from 'stream';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';

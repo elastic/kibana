@@ -34,7 +34,7 @@ import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type { SuppressionTerm } from '../utils';
 
 export interface ExtraFieldsForShellAlert {

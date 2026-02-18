@@ -14,7 +14,7 @@ import { uniq, sortBy, isEqual } from 'lodash';
 
 import { RuleDiffTab } from '../rule_diff_tab';
 import { savedRuleMock } from '../../../logic/mock';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
+import type { RuleResponse } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { COLORS } from './constants';
 
 /*

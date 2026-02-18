@@ -6,7 +6,7 @@
  */
 
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { ImportTimelineResult } from '../../../../../common/api/timeline';
+import { ImportTimelineResult } from '@kbn/securitysolution-api';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 

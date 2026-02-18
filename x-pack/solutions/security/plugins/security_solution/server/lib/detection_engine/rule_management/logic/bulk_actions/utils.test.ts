@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
 import { hasAlertSuppressionBulkEditAction } from './utils';
 
 describe('hasAlertSuppressionBulkEditAction', () => {

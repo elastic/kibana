@@ -7,7 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 
-import type { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
+import type { SetUnifiedAlertsWorkflowStatusRequestBody } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { setUnifiedAlertsWorkflowStatus } from '../api';
 

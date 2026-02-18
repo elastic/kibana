@@ -27,11 +27,11 @@ import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';

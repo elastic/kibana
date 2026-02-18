@@ -15,7 +15,7 @@ import type {
   HealthInterval,
   RuleHealthParameters,
   SpaceHealthParameters,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import * as f from '../../event_log/event_log_fields';
 import {

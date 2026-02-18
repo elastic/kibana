@@ -7,7 +7,7 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
-import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { RiskScoreRequestOptions } from '@kbn/securitysolution-api';
 import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

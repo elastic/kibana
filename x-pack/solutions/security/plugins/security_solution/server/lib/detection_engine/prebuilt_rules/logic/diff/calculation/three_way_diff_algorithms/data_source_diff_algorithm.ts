@@ -10,7 +10,7 @@ import type {
   RuleDataSource,
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
@@ -20,7 +20,7 @@ import {
   ThreeWayDiffConflict,
   determineDiffOutcomeForDataSource,
   isIndexPatternDataSourceType,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
 /**

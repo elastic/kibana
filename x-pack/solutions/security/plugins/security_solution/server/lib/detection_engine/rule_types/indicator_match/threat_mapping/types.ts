@@ -30,7 +30,7 @@ import type {
   ThreatIndex,
   ThreatMatchRuleOptionalFields,
   ThreatIndicatorPath,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

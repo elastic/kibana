@@ -8,7 +8,7 @@
 import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 
-import type { ImportTimelineResult } from '../../../../../../common/api/timeline';
+import type { ImportTimelineResult } from '@kbn/securitysolution-api';
 
 import type { FrameworkRequest } from '../../../../framework';
 

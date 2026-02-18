@@ -15,7 +15,7 @@ import type {
   RuleCreateProps,
   RuleSource,
   TypeSpecificCreateProps,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,

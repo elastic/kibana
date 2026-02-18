@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedTimeline } from '../../../../common/api/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import type { ResolvedTimeline } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const mockResolvedSavedObject = {
   saved_object: {

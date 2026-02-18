@@ -10,11 +10,11 @@ import moment from 'moment';
 import type {
   HealthInterval,
   HealthIntervalParameters,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   HealthIntervalGranularity,
   HealthIntervalType,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 const DEFAULT_INTERVAL_PARAMETERS: HealthIntervalParameters = {

@@ -21,7 +21,7 @@ import { isEmpty } from 'lodash';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { sendAlertToTimelineAction } from '../actions';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';

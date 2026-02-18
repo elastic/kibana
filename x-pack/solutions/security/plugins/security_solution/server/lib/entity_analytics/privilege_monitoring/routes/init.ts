@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics';
+import type { InitMonitoringEngineResponse } from '@kbn/securitysolution-api';
 import { API_VERSIONS, APP_ID, MONITORING_ENGINE_INIT_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createInitialisationService } from '../engine/initialisation_service';

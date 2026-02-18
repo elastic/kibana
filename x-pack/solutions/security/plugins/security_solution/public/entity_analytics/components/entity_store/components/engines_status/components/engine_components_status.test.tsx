@@ -11,7 +11,7 @@ import { EngineComponentsStatusTable } from './engine_components_status';
 import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
-} from '../../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { TestProviders } from '../../../../../../common/mock';
 
 const uninstalledWithErrorsComponent = {

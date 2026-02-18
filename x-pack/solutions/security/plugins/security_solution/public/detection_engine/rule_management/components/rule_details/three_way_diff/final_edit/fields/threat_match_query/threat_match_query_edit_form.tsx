@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
 import {
   InlineKqlQuery,
   KqlQueryLanguage,
   KqlQueryType,
   RuleQuery,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { FormData } from '../../../../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';

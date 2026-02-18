@@ -16,7 +16,7 @@ import type { ConfigType } from '../../../../../config';
 import {
   InstallPrepackedTimelinesRequestBody,
   type InstallPrepackedTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './helpers';

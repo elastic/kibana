@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
+import { GetPolicyResponseSchema } from '@kbn/securitysolution-api';
 import { getESQueryPolicyResponseByAgentID, getPolicyResponseByAgentId } from './service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

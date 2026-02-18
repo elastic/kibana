@@ -6,7 +6,7 @@
  */
 
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 export type CriticalityValues = AssetCriticalityRecord['criticality_level'] | 'deleted';
 

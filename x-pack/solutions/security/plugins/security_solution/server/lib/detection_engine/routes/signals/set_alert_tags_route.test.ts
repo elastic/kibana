@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSetAlertTagsRequestMock } from '../../../../../common/api/detection_engine/alert_tags/mocks';
+import { getSetAlertTagsRequestMock } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';

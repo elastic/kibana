@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NewTimelineButton } from '../components/new_timeline';
-import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useUserPrivileges } from '../../common/components/user_privileges';

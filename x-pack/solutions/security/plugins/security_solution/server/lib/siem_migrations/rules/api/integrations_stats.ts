@@ -10,8 +10,8 @@ import { type GetRuleMigrationIntegrationsStatsResponse } from '../../../../../c
 import { SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { withLicense } from '../../common/api/util/with_license';
-import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { withLicense } from '@kbn/securitysolution-api';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,

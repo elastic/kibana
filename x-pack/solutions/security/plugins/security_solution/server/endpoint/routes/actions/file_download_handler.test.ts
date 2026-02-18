@@ -17,7 +17,7 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import type { EndpointActionFileDownloadParams } from '@kbn/securitysolution-api';
 import { Readable } from 'stream';
 import { createActionRequestsEsSearchResultsMock } from '../../services/actions/mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';

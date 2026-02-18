@@ -15,10 +15,10 @@ import {
 import { QradarRulesXmlParser } from '../../../../../../../common/siem_migrations/parsers/qradar/rules_xml';
 import { RuleResourceIdentifier } from '../../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { SiemMigrationAuditLogger } from '../../../../common/api/util/audit';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { authz } from '../../util/authz';
-import { withExistingMigration } from '../../../../common/api/util/with_existing_migration_id';
-import { withLicense } from '../../../../common/api/util/with_license';
+import { withExistingMigration } from '@kbn/securitysolution-api';
+import { withLicense } from '@kbn/securitysolution-api';
 import type { CreateSiemMigrationResourceInput } from '../../../../common/data/siem_migrations_data_resources_client';
 import { getVendorProcessor } from '../../../vendors/get_vendor_processor';
 

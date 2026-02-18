@@ -17,7 +17,7 @@ import type {
 import type {
   ThreatMapping,
   ThreatMappingEntry,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 

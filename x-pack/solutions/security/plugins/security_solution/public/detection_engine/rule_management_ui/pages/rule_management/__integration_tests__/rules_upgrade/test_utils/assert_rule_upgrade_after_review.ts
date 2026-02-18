@@ -11,7 +11,7 @@ import {
   PERFORM_RULE_UPGRADE_URL,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   acceptSuggestedFieldValue,
   saveFieldValue,

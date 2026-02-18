@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { AddToFavoritesButton } from '.';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/components/user_privileges');

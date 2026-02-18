@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../../common/api/timeline';
+import type { TimelineResponse } from '@kbn/securitysolution-api';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 

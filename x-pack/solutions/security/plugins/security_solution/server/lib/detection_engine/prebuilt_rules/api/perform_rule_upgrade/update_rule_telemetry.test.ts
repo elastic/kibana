@@ -9,7 +9,7 @@ import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,

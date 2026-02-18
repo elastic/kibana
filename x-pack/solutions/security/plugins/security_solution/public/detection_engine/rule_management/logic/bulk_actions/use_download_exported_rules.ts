@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import * as i18n from '../../../common/translations';
 import { getExportedRulesCounts } from '../../../rule_management_ui/components/rules_table/helpers';

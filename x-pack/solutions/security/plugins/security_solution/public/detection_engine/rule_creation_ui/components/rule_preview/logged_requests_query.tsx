@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiSpacer, EuiCodeBlock, useEuiPaddingSize, EuiFlexItem } from '@elastic/eui';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api';
 
 export const LoggedRequestsQueryComponent: FC<RulePreviewLoggedRequest> = ({
   description,

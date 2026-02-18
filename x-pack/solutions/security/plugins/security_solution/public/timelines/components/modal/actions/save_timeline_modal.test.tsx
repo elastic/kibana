@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 

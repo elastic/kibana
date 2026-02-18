@@ -15,7 +15,7 @@ import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import type { TimelineModel } from '../model';
 import { saveTimeline, updateTimeline } from '../actions';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { selectTimelineById } from '../selectors';
 
 /**

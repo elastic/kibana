@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type { RiskScoreBucket } from '../../types';
 
 import type { AssetCriticalityService } from '../../asset_criticality';

@@ -8,7 +8,7 @@
 import type {
   BulkActionTypeEnum,
   BulkActionsDryRunErrCode,
-} from '../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 
 /**
  * Only 4 bulk actions are supported for for confirmation dry run modal:

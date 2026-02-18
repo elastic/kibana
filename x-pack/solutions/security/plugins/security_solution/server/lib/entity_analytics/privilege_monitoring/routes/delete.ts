@@ -13,7 +13,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DeleteEntityEngineRequestQuery,
   type DeleteMonitoringEngineResponse,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import {
   API_VERSIONS,
   APP_ID,

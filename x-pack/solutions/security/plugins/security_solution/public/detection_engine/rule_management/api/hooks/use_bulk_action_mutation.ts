@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import type {
   BulkActionErrorResponse,
   BulkActionResponse,

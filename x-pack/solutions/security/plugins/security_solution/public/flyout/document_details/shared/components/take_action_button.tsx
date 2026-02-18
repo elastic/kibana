@@ -11,7 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { TakeActionDropdown } from './take_action_dropdown';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';

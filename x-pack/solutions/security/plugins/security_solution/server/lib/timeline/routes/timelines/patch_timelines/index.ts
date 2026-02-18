@@ -17,7 +17,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import {
   PatchTimelineRequestBody,
   type PatchTimelineResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';

@@ -16,7 +16,7 @@ import {
   RowRendererIdEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';

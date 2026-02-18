@@ -13,7 +13,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
+import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import {

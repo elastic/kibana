@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { UserAuthenticationsRequestOptionsInput } from '../../../../common/api/search_strategy';
+import type { UserAuthenticationsRequestOptionsInput } from '@kbn/securitysolution-api';
 import type {
   AuthenticationsEdges,
   AuthStackByField,

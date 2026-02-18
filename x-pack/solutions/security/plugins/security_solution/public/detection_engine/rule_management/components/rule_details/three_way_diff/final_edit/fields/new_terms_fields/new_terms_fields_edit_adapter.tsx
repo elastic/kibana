@@ -8,7 +8,7 @@
 import React from 'react';
 import { NewTermsFieldsEdit } from '../../../../../../../rule_creation/components/new_terms_fields_edit';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
 import { useTermsAggregationFields } from '../../../../../../../../common/hooks/use_terms_aggregation_fields';
 
 interface NewTermsFieldsEditAdapterProps {

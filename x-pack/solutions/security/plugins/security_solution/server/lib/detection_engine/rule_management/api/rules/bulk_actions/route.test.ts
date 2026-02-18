@@ -23,8 +23,8 @@ import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionDuplicateSchemaMock,
-} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import { BulkActionsDryRunErrCodeEnum } from '@kbn/securitysolution-api';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 

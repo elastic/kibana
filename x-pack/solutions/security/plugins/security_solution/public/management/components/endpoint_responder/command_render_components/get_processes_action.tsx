@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { GetProcessesRequestBody } from '../../../../../common/api/endpoint';
+import type { GetProcessesRequestBody } from '@kbn/securitysolution-api';
 import { RunningProcessesActionResults } from '../../running_processes_action_results';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { GetProcessesActionOutputContent } from '../../../../../common/endpoint/types';

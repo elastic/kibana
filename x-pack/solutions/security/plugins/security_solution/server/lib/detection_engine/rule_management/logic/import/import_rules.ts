@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine';
+import type { RuleToImport } from '@kbn/securitysolution-api';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { IRuleSourceImporter } from './rule_source_importer';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';

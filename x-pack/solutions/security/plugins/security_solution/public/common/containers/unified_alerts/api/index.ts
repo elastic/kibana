@@ -18,7 +18,7 @@ import type {
   SetUnifiedAlertsWorkflowStatusRequestBody,
   SetUnifiedAlertsTagsRequestBody,
   SetUnifiedAlertsAssigneesRequestBody,
-} from '../../../../../common/api/detection_engine/unified_alerts';
+} from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../lib/kibana';
 
 /**

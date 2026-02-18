@@ -15,10 +15,10 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../util/authz';
-import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
 import { transformToInternalUpdateRuleMigrationData } from '../util/update_rules';
-import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
+import { withLicense } from '@kbn/securitysolution-api';
+import { withExistingMigration } from '@kbn/securitysolution-api';
 
 export const registerSiemRuleMigrationsUpdateRulesRoute = (
   router: SecuritySolutionPluginRouter,

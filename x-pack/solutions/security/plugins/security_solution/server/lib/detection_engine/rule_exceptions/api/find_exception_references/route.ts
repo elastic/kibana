@@ -17,12 +17,12 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type {
   FindExceptionReferencesOnRuleSchemaDecoded,
   RuleReferencesSchema,
-} from '../../../../../../common/api/detection_engine/rule_exceptions';
+} from '@kbn/securitysolution-api';
 import {
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
   findExceptionReferencesOnRuleSchema,
   rulesReferencedByExceptionListsSchema,
-} from '../../../../../../common/api/detection_engine/rule_exceptions';
+} from '@kbn/securitysolution-api';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {

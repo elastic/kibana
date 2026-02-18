@@ -17,7 +17,7 @@ import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   ThreatMapping,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { buildRelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';

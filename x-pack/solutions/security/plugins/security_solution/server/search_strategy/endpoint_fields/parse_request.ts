@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { endpointFieldsRequestSchema } from '../../../common/api/search_strategy/endpoint_fields/endpoint_fields';
+import { endpointFieldsRequestSchema } from '@kbn/securitysolution-api';
 
 export const parseRequest = (request: unknown) => endpointFieldsRequestSchema.parse(request);

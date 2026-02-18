@@ -7,7 +7,7 @@
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../../rule_schema';
 import { normalizeCommonRuleFields } from './normalize_rule_fields_common';
 import { typeSpecificCamelToSnake } from './type_specific_camel_to_snake';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseActionTypesEnum } from '../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 
 export const getActionDetails = (actionTypeId: string) => {
   switch (actionTypeId) {

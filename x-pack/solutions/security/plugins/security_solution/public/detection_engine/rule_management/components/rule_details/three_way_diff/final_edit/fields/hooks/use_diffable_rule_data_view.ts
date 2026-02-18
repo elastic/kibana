@@ -6,8 +6,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
+import { DataSourceType } from '@kbn/securitysolution-api';
 import { useDefaultIndexPattern } from '../../../../../../hooks/use_default_index_pattern';
 import { useDataView } from './use_data_view';
 

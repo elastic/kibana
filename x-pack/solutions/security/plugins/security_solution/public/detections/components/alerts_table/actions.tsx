@@ -51,7 +51,7 @@ import {
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,

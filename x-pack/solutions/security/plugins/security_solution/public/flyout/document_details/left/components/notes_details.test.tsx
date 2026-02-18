@@ -24,7 +24,7 @@ import { Flyouts } from '../../shared/constants/flyouts';
 import { TimelineId } from '../../../../../common/types';
 import { ReqStatus } from '../../../../notes';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../../common/store';
 
 jest.mock('../../shared/hooks/use_which_flyout');

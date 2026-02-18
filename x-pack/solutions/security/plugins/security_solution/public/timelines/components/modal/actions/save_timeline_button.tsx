@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';

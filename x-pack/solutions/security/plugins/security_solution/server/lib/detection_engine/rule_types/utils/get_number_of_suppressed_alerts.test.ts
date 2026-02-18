@@ -9,7 +9,7 @@ import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
-import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 describe('getNumberOfSuppressedAlerts', () => {
   it('should count total number of suppressed alerts in created alerts', () => {
     const createdAlerts = [

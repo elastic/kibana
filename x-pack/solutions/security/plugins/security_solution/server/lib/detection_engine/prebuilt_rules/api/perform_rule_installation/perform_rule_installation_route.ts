@@ -10,7 +10,7 @@ import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   PERFORM_RULE_INSTALLATION_URL,
   PerformRuleInstallationRequestBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import {

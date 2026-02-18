@@ -11,7 +11,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERTS_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import type { ReadAlertsIndexExistsResponse } from '../../../../../common/api/detection_engine';
+import type { ReadAlertsIndexExistsResponse } from '@kbn/securitysolution-api';
 
 export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

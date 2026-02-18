@@ -8,8 +8,8 @@
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
-} from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 /**

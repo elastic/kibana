@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ImportRulesResponse } from '../../../../../common/api/detection_engine';
+import type { ImportRulesResponse } from '@kbn/securitysolution-api';
 
 export function mockImportResponse(
   overrides: Partial<ImportRulesResponse> = {}

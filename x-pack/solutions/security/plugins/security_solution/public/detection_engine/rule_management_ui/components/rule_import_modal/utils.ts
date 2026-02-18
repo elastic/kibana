@@ -10,7 +10,7 @@ import type { IToasts } from '@kbn/core/public';
 
 import * as i18n from './translations';
 
-import type { ErrorSchema, ImportRulesResponse } from '../../../../../common/api/detection_engine';
+import type { ErrorSchema, ImportRulesResponse } from '@kbn/securitysolution-api';
 import { showErrorToast } from '../../../../common/components/utils';
 
 export function getFailedConnectorsCount(actionConnectorsErrors: ErrorSchema[]) {

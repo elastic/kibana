@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { PrivMonPrivilegesResponse } from '../../../../common/api/entity_analytics';
+import type { PrivMonPrivilegesResponse } from '@kbn/securitysolution-api';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const usePrivilegedMonitoringPrivileges = () => {

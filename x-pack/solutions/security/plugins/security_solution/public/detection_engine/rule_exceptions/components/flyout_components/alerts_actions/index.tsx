@@ -13,7 +13,7 @@ import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import type { Status } from '../../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { shouldDisableBulkClose } from './utils';
 import * as i18n from './translations';

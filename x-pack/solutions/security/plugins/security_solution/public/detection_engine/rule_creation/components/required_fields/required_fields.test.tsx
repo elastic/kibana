@@ -12,7 +12,7 @@ import { Form, useForm } from '../../../../shared_imports';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { RequiredFields } from './required_fields';
-import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
+import type { RequiredFieldInput } from '@kbn/securitysolution-api';
 import {
   addRequiredFieldRow,
   createIndexPatternField,

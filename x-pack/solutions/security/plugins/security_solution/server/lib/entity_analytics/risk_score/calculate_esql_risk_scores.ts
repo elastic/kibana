@@ -24,12 +24,12 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type {
   EntityAfterKey,
   EntityRiskScoreRecord,
-} from '../../../../common/api/entity_analytics/common';
+} from '@kbn/securitysolution-api';
 
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 
-import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
+import type { RiskScoresPreviewResponse } from '@kbn/securitysolution-api';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { filterFromRange } from './helpers';

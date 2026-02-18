@@ -28,7 +28,7 @@ import {
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
-import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '@kbn/securitysolution-api';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';

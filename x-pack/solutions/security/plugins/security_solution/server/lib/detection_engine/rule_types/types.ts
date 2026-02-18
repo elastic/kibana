@@ -32,8 +32,8 @@ import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DocLinksServiceSetup } from '@kbn/core/server';
-import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import type { RulePreviewLoggedRequest } from '@kbn/securitysolution-api/api/detection_engine/rule_preview/rule_preview.gen';
+import type { RuleResponseAction } from '@kbn/securitysolution-api';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
@@ -42,18 +42,18 @@ import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
 
-import type { Status } from '../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   DetectionAlertLatest,
   DetectionAlert800,
   WrappedAlert,
-} from '../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import type {
   RuleAction,
   RuleResponse,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type { ThresholdResult } from './threshold/types';
 import type { ScheduleNotificationResponseActionsService } from '../rule_response_actions/schedule_notification_response_actions';
 

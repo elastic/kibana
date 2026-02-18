@@ -17,7 +17,7 @@ import * as i18n from '../translations';
 import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { TimelineId } from '../../../../../common/types';
 
 const LineClampTextContainer = styled.span`

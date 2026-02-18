@@ -11,7 +11,7 @@ import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   PERFORM_RULE_UPGRADE_URL,
   PerformRuleUpgradeRequestBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {

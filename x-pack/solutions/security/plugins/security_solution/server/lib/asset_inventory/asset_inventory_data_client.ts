@@ -10,10 +10,10 @@ import type { IScopedClusterClient, Logger, CoreStart } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
-import { EntityType } from '../../../common/api/entity_analytics';
-import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
-import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
+import { EntityType } from '@kbn/securitysolution-api';
+import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
+import type { InitEntityStoreRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 import { installDataView } from './saved_objects/data_view';
 import {

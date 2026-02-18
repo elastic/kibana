@@ -18,10 +18,10 @@ import type {
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import { addToSearchAfterReturn, buildShellAlertSuppressionTermsAndFields } from './utils';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 
 import type {
@@ -29,7 +29,7 @@ import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';

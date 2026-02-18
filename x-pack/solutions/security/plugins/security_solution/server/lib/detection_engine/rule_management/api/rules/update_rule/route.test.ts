@@ -13,7 +13,7 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
@@ -22,9 +22,9 @@ import {
   getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+} from '@kbn/securitysolution-api';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
+import { ResponseActionTypesEnum } from '@kbn/securitysolution-api';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import type {
   MockClients,

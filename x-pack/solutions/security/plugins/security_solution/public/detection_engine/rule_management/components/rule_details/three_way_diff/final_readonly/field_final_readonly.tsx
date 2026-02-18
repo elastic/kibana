@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
+import { DiffableCommonFields } from '@kbn/securitysolution-api';
 import type {
   DiffableCustomQueryFields,
   DiffableSavedQueryFields,
@@ -16,7 +16,7 @@ import type {
   DiffableNewTermsFields,
   DiffableEsqlFields,
   DiffableMachineLearningFields,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { CustomQueryRuleFieldReadOnly } from './custom_query_rule_field_readonly';

@@ -12,7 +12,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import {
   ASSET_INVENTORY_ENABLE_API_PATH,
   ASSET_INVENTORY_STATUS_API_PATH,
-} from '../../../common/api/asset_inventory/constants';
+} from '@kbn/securitysolution-api';
 
 jest.mock('../../common/lib/kibana');
 

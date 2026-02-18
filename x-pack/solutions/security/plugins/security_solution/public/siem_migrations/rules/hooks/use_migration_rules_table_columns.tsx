@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RelatedIntegration } from '../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TableColumn } from '../components/rules_table_columns';
 import {

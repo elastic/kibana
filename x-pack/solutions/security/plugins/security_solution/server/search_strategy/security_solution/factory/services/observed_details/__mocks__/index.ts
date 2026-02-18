@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { ObservedServiceDetailsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { ObservedServiceDetailsRequestOptions } from '@kbn/securitysolution-api';
 import { ServicesQueries } from '../../../../../../../common/search_strategy/security_solution/services';
 
 export const mockOptions: ObservedServiceDetailsRequestOptions = {

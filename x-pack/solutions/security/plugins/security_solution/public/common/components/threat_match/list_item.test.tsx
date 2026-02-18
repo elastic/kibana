@@ -13,7 +13,7 @@ import { useKibana } from '../../lib/kibana';
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { ListItemComponent } from './list_item';
-import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 

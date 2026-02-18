@@ -14,7 +14,7 @@ import type {
 import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
-} from '../../../../../common/api/entity_analytics/entity_store';
+} from '@kbn/securitysolution-api';
 import type { EntityEngineInstallationDescriptor, FieldDescription } from '../installation/types';
 
 const DEFAULT_MAPPINGS: Record<PropertyName, MappingProperty> = {

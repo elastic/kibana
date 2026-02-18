@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get, has } from 'lodash';
-import type { RuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import type { RuleSchedule } from '@kbn/securitysolution-api';
 import type {
   DataSourceIndexPatterns,
   DataSourceDataView,
@@ -13,7 +13,7 @@ import type {
   ThreeWayDiff,
   DiffableRuleTypes,
   AllThreeWayFieldsDiff,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 /**

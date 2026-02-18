@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Participants } from './participants';
-import type { Note } from '../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import {
   NOTE_AVATAR_WITH_NAME_TEST_ID,
   NOTES_PARTICIPANTS_TITLE_TEST_ID,

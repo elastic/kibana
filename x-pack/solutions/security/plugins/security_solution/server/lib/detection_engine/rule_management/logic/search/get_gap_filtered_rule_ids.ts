@@ -10,8 +10,8 @@ import { chunk } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 
-import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
-import type { SortOrder } from '../../../../../../common/api/detection_engine';
+import type { FindRulesSortField } from '@kbn/securitysolution-api';
+import type { SortOrder } from '@kbn/securitysolution-api';
 import { findRules } from './find_rules';
 
 /**

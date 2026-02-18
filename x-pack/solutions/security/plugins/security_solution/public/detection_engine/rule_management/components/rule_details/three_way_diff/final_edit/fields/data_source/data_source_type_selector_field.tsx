@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
-import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { DataSourceType } from '@kbn/securitysolution-api';
 import type { FieldHook } from '../../../../../../../../shared_imports';
 import type { ResetFormFn } from '../../../field_final_side';
 import * as i18n from './translations';

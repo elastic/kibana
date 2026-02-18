@@ -8,7 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { HostUncommonProcessesRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { HostUncommonProcessesRequestOptionsInput } from '@kbn/securitysolution-api';
 import type { inputsModel, State } from '../../../../common/store';
 
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';

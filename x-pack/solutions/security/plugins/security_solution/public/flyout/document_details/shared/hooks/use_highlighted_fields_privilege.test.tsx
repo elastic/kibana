@@ -11,7 +11,7 @@ import type { UseHighlightedFieldsPrivilegeParams } from './use_highlighted_fiel
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import {
   LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES,
   ML_RULES_DISABLED_MESSAGE,

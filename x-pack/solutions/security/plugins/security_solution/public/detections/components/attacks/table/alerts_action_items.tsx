@@ -6,7 +6,7 @@
  */
 
 import { memo } from 'react';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '@kbn/securitysolution-api';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { useUserData } from '../../user_info';

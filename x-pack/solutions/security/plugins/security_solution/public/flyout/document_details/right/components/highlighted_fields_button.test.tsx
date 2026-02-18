@@ -17,7 +17,7 @@ import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';

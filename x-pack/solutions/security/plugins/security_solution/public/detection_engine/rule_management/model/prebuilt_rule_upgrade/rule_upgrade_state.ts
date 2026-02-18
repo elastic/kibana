@@ -8,7 +8,7 @@
 import {
   type ThreeWayDiffConflict,
   type RuleUpgradeInfoForReview,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { FieldsUpgradeState } from './fields_upgrade_state';
 
 export interface RuleUpgradeState extends RuleUpgradeInfoForReview {

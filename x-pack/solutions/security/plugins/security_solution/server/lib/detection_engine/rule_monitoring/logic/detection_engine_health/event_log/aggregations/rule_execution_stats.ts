@@ -8,12 +8,12 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { mapValues } from 'lodash';
 
-import type { RuleExecutionStatus } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
   RuleExecutionStatusEnum,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import {
   ALERTING_PROVIDER,

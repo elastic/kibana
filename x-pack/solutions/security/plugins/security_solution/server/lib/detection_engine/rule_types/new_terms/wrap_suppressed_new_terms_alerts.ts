@@ -13,7 +13,7 @@ import type {
   DetectionAlertLatest,
   NewTermsAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';

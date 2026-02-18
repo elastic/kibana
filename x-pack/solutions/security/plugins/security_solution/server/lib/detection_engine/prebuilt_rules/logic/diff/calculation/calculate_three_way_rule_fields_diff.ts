@@ -31,11 +31,11 @@ import type {
   SavedQueryThreeWayFieldsDiff,
   ThreatMatchThreeWayFieldsDiff,
   ThresholdThreeWayFieldsDiff,
-} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 
-import type { ThreeWayFieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import type { ThreeWayFieldsDiffAlgorithmsFor } from '@kbn/securitysolution-api';
+import type { ThreeVersionsOf } from '@kbn/securitysolution-api';
+import { MissingVersion } from '@kbn/securitysolution-api';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import {
   dataSourceDiffAlgorithm,

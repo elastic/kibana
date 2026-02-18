@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RelatedIntegrationArray } from '@kbn/securitysolution-api';
 import type { ListItems } from '../../../../rule_creation_ui/components/description_step/types';
 import type { IntegrationDetails } from '../integration_details';
 import { useRelatedIntegrations } from '../use_related_integrations';

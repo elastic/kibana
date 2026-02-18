@@ -9,7 +9,7 @@ import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import type { RuleCustomizationStatus } from '../../../../../../common/api/detection_engine';
+import type { RuleCustomizationStatus } from '@kbn/securitysolution-api';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';

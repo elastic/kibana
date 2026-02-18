@@ -7,7 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
-import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
+import { SetAlertTagsRequestBody } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,

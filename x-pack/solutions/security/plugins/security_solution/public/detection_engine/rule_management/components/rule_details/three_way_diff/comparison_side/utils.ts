@@ -11,7 +11,7 @@ import {
   ThreeWayDiffOutcome,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import * as i18n from './translations';

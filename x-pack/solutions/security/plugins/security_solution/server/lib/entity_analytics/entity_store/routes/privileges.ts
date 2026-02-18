@@ -7,7 +7,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { EntityStoreGetPrivilegesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/get_privileges.gen';
+import type { EntityStoreGetPrivilegesResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/get_privileges.gen';
 import { ENTITY_STORE_INTERNAL_PRIVILEGES_URL } from '../../../../../common/entity_analytics/entity_store/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 

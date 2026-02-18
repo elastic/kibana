@@ -9,7 +9,7 @@ import type {
   RuleSource,
   RuleToImport,
   ValidatedRuleToImport,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 export interface CalculatedRuleSource {
   ruleSource: RuleSource;

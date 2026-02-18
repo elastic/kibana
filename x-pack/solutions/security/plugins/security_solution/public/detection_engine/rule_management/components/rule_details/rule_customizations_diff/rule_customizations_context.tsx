@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useRuleCustomizationsDiff } from './use_rule_customizations_diff';
 

@@ -28,7 +28,7 @@ import { MarkdownRenderer } from '../../../../common/components/markdown_editor'
 import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types';
 import * as i18n from './translations';
 import { fullHeight } from './styles';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
 
 const detailsOption: EuiButtonGroupOptionProps = {

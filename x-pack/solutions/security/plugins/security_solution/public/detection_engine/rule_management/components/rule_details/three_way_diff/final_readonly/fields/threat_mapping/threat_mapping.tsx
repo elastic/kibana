@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import type { ThreatMapping } from '../../../../../../../../../common/api/detection_engine';
+import type { ThreatMapping } from '@kbn/securitysolution-api';
 import { ThreatMapping as ThreatMappingComponent } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 

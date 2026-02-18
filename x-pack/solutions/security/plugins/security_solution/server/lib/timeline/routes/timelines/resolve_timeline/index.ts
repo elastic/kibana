@@ -19,7 +19,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import {
   ResolveTimelineRequestQuery,
   type ResolveTimelineResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 
 export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {

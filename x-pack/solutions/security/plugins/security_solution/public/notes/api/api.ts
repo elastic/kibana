@@ -9,7 +9,7 @@ import type {
   BareNote,
   GetNotesResponse,
   PersistNoteRouteResponse,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { AssociatedFilter } from '../../../common/notes/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { NOTE_URL } from '../../../common/constants';

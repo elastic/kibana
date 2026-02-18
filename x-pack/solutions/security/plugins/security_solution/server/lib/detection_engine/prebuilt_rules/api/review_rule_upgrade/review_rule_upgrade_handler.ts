@@ -7,12 +7,12 @@
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
+import type { ReviewPrebuiltRuleUpgradeFilter } from '@kbn/securitysolution-api';
 import type {
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
   ReviewRuleUpgradeSort,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations/model/integrations';
+import type { Integration } from '@kbn/securitysolution-api';
 
 /**
  * Sorts integrations in place

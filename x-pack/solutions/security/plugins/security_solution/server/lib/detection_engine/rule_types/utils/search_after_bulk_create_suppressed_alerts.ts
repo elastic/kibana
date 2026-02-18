@@ -11,7 +11,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
 } from '../types';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from '../../../common/translations';
 import { explainBulkEditSuccess } from './translations';
 import type { BulkActionSummary } from '../../api/api';

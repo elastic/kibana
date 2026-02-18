@@ -13,7 +13,7 @@ import type { Anomaly } from '../../../machine_learning';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
-import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 
 interface EcsAnomaly extends Anomaly {
   '@timestamp': string;

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';

@@ -8,7 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 import { get } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { MemoryDumpActionRequestBody } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointAuthorizationError } from '../../errors';
@@ -26,7 +26,7 @@ import type {
   UploadActionApiRequestBody,
   ScanActionRequestBody,
   RunScriptActionRequestBody,
-} from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,

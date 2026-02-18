@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { NetworkTopCountriesRequestOptions } from '@kbn/securitysolution-api';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { Direction } from '../../../../../../common/search_strategy';

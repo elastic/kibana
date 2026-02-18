@@ -8,11 +8,11 @@ import { useCallback } from 'react';
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { reviewRuleUpgrade } from '../../api';
-import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+import { REVIEW_RULE_UPGRADE_URL } from '@kbn/securitysolution-api';
 import type {
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';

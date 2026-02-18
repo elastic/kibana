@@ -6,7 +6,7 @@
  */
 
 import { validateInitializationRequestBody } from './validation';
-import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics';
+import type { InitEntityEngineRequestBody } from '@kbn/securitysolution-api';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
 describe('entity store initialization request validation', () => {

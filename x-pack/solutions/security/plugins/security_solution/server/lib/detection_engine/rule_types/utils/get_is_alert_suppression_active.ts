@@ -9,7 +9,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { firstValueFrom } from 'rxjs';
 
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertSuppressionCamel } from '@kbn/securitysolution-api';
 
 interface GetIsAlertSuppressionActiveParams {
   alertSuppression: AlertSuppressionCamel | undefined;

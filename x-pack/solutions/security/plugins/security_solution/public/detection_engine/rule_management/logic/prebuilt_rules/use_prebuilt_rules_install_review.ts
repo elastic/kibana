@@ -6,13 +6,13 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
-import type { ReviewRuleInstallationResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
+import type { ReviewRuleInstallationResponseBody } from '@kbn/securitysolution-api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useFetchPrebuiltRulesInstallReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import type { AddPrebuiltRulesTableFilterOptions } from '../../../rule_management_ui/components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
-import type { PrebuiltRuleAssetsSortItem } from '../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
-import type { PrebuiltRuleAssetsFilter } from '../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
+import type { PrebuiltRuleAssetsSortItem } from '@kbn/securitysolution-api';
+import type { PrebuiltRuleAssetsFilter } from '@kbn/securitysolution-api';
 
 interface UsePrebuiltRulesInstallReviewParams {
   page: number;

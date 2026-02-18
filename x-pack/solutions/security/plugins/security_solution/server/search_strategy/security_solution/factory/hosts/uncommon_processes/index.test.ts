@@ -14,7 +14,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { HostUncommonProcessesRequestOptions } from '@kbn/securitysolution-api';
 
 describe('uncommonProcesses search strategy', () => {
   const buildUncommonProcessesQuery = jest.spyOn(buildQuery, 'buildQuery');

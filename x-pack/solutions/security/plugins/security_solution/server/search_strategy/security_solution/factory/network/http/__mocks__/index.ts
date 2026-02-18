@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { NetworkHttpRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { NetworkHttpRequestOptions } from '@kbn/securitysolution-api';
 
 import type { SortField } from '../../../../../../../common/search_strategy';
 import {

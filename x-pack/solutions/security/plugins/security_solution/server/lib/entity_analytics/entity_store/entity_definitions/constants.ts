@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+import type { EntityType } from '@kbn/securitysolution-api';
 import {
   HOST_DEFINITION_VERSION,
   USER_DEFINITION_VERSION,

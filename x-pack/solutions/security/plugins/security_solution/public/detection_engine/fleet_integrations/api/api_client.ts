@@ -8,11 +8,11 @@
 import type {
   GetAllIntegrationsResponse,
   GetInstalledIntegrationsResponse,
-} from '../../../../common/api/detection_engine/fleet_integrations';
+} from '@kbn/securitysolution-api';
 import {
   GET_ALL_INTEGRATIONS_URL,
   GET_INSTALLED_INTEGRATIONS_URL,
-} from '../../../../common/api/detection_engine/fleet_integrations';
+} from '@kbn/securitysolution-api';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type {

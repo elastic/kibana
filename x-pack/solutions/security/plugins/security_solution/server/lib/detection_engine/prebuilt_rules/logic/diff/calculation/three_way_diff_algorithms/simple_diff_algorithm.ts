@@ -9,7 +9,7 @@ import { assertUnreachable } from '../../../../../../../../common/utility_types'
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
@@ -17,7 +17,7 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 
 /**
  * The default diff algorithm, diffs versions passed using a simple lodash `isEqual` comparison

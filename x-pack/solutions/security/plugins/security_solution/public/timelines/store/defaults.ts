@@ -10,7 +10,7 @@ import {
   RowRendererIdEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';

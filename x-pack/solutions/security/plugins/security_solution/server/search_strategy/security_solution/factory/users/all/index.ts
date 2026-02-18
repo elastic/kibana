@@ -31,7 +31,7 @@ import {
 } from '../../../../../../common/search_strategy';
 import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
-import type { AssetCriticalityRecord } from '../../../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
   buildDsl: (options) => {

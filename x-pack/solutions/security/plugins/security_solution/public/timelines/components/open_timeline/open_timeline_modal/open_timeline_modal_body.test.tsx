@@ -15,7 +15,7 @@ import type { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');

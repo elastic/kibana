@@ -7,8 +7,8 @@
 
 import { upperCase } from 'lodash';
 import type { IconColor } from '@elastic/eui';
-import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { LogLevel } from '@kbn/securitysolution-api';
+import { LogLevelEnum } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 export const getBadgeColor = (logLevel: LogLevel): IconColor => {

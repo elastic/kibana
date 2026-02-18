@@ -18,7 +18,7 @@ import type {
   BootstrapPrebuiltRulesResponse,
   PackageInstallStatus,
   RuleBootstrapResults,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+} from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { installEndpointPackage } from '../../logic/integrations/install_endpoint_package';

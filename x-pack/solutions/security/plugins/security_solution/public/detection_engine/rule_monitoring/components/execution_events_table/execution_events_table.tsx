@@ -15,7 +15,7 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 
-import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionEvent } from '@kbn/securitysolution-api';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EventTypeFilter } from '../basic/filters/event_type_filter';

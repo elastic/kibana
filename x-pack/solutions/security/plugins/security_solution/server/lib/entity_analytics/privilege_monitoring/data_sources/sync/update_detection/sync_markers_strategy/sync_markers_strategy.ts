@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySource } from '@kbn/securitysolution-api';
 import type { createSyncMarkersService } from '../../sync_markers';
 import { isTimestampGreaterThan } from '../../utils';
 

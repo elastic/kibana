@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { EntityDefinition, EntityStoreCapability } from '@kbn/entities-schema';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
+import type { EntityType } from '@kbn/securitysolution-api';
 
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
 

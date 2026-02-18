@@ -12,13 +12,13 @@ import type {
   GetRuleHealthResponse,
   GetSpaceHealthRequestBody,
   GetSpaceHealthResponse,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   HealthIntervalGranularity,
   HealthIntervalType,
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import type {
   FetchRuleExecutionEventsArgs,

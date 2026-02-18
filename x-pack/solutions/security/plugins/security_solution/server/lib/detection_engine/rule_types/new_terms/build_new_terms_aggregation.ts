@@ -9,7 +9,7 @@ import type { Moment } from 'moment';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { SignalSource } from '../types';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
-import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '@kbn/securitysolution-api';
 
 export type CompositeDocFetchAggResult = ESSearchResponse<
   SignalSource,

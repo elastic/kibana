@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExternalRuleSource } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ExternalRuleSource } from '@kbn/securitysolution-api';
 
 export const createDefaultExternalRuleSource = (): ExternalRuleSource => ({
   type: 'external',

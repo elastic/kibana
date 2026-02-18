@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KqlQueryType } from '../../../../../../../../../../common/api/detection_engine';
+import { KqlQueryType } from '@kbn/securitysolution-api';
 import { assertRuleUpgradePreview } from '../../../test_utils/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../../test_utils/assert_rule_upgrade_after_review';
 import { assertDiffAfterSavingUnchangedValue } from '../../../test_utils/assert_diff_after_saving_unchanged_value';

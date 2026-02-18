@@ -11,7 +11,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import type {
   InitRiskEngineResponse,
   InitRiskEngineResult,
-} from '../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { EntityAnalyticsRoutesDeps } from '../../types';

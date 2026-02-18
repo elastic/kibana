@@ -11,8 +11,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { EntityType } from '../../../../../common/search_strategy';
-import type { StopEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
-import { StopEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
+import type { StopEntityEngineResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/stop.gen';
+import { StopEntityEngineRequestParams } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/stop.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { ENGINE_STATUS } from '../constants';

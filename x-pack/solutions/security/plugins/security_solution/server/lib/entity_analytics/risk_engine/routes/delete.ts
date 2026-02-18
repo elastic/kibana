@@ -13,7 +13,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
+import type { CleanUpRiskEngineResponse } from '@kbn/securitysolution-api';
 
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

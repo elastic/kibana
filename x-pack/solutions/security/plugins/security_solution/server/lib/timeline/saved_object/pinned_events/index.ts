@@ -17,7 +17,7 @@ import type {
   BarePinnedEvent,
   PinnedEvent,
   PersistPinnedEventResponse,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { FrameworkRequest } from '../../../framework';

@@ -9,7 +9,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleResponse,
   RuleSignatureId,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import { findRules } from '../../search/find_rules';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 

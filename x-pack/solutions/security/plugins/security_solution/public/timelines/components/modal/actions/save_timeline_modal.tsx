@@ -26,7 +26,7 @@ import type { State } from '../../../../common/store';
 import { selectTimelineById } from '../../../store/selectors';
 import { Field, Form, getUseField, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { timelineActions } from '../../../store';
 import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';

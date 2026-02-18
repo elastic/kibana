@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
 import { _getMissingPrivilegesMessage } from './risk_engine_privileges';
 
 describe('_getMissingPrivilegesMessage', () => {

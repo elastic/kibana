@@ -17,7 +17,7 @@ import {
   formattedSearchStrategyLastResponse,
   formattedSearchStrategyFirstResponse,
 } from './__mocks__';
-import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { FirstLastSeenRequestOptionsInput } from '@kbn/securitysolution-api';
 
 describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const NEW_TIMELINE_BTN = i18n.translate(
   'xpack.securitySolution.timeline.modal.newTimelineBtn',

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { DetectionAlertLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 import type { EventsForEnrichment, GetEventValue, GetFieldValue } from '../types';
 
 export const getEventValue: GetEventValue = (event, path) => {

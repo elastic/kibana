@@ -16,7 +16,7 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { setInsertTimeline, showTimeline } from '../../../store/actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';

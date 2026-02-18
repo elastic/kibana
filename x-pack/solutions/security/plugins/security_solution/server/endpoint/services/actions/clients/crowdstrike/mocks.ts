@@ -23,7 +23,7 @@ import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
-import type { RunScriptActionRequestBody } from '../../../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;

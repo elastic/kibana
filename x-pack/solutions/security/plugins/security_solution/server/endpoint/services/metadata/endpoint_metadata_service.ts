@@ -43,7 +43,7 @@ import {
   wrapErrorIfNeeded,
 } from '../../utils';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
+import type { GetMetadataListRequestQuery } from '@kbn/securitysolution-api';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 

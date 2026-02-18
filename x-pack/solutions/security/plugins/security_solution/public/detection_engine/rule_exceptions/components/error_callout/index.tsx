@@ -20,7 +20,7 @@ import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpSetup } from '@kbn/core/public';
 import * as i18n from '../../utils/translations';
 import { useDisassociateExceptionList } from '../../../rule_management/logic/use_disassociate_exception_list';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 export interface ErrorInfo {
   reason: string | null;

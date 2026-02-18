@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServicesQueries } from '../../../../../common/api/search_strategy';
+import { ServicesQueries } from '@kbn/securitysolution-api';
 import type { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 
 import type { SecuritySolutionFactory } from '../types';

@@ -15,7 +15,7 @@ import {
   getCreateRulesSchemaMock,
   getRulesMlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+} from '@kbn/securitysolution-api';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';

@@ -24,7 +24,7 @@ import {
   type PinnedEvent,
   type TimelineResponse,
   TimelineTypeEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';

@@ -7,7 +7,7 @@
 import type {
   PerformRuleUpgradeRequestBody,
   PickVersionValues,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 interface AssertRuleTypeMatchProps {
   requestBody: PerformRuleUpgradeRequestBody;

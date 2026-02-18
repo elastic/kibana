@@ -20,7 +20,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 

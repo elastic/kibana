@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMappingEntry } from '@kbn/securitysolution-api';
 
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 

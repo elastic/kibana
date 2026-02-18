@@ -24,7 +24,7 @@ import {
 
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
+import { CREATE_RULE_EXCEPTIONS_URL } from '@kbn/securitysolution-api';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';

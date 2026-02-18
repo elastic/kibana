@@ -13,7 +13,7 @@ import * as Boom from '@hapi/boom';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import { internalFrameworkRequest } from '../../../framework';
-import type { Note } from '../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { requestContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 import { noteFieldsMigrator } from './field_migrator';
 import { pickSavedNote, persistNote, createNote, updateNote } from './saved_object';

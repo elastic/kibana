@@ -11,7 +11,7 @@ import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
+import type { SetAlertTagsRequestBody } from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../utils';
 import { validateAlertTagsArrays } from '../signals/helpers';
 

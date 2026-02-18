@@ -11,7 +11,7 @@ import { merge } from 'lodash';
 import type {
   EndpointRunScriptActionRequestParams,
   RunScriptActionRequestBody,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { responseActionsClientMock } from '../mocks';

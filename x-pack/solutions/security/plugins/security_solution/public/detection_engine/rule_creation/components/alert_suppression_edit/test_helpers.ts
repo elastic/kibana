@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { act, fireEvent, waitFor, within, screen } from '@testing-library/react';
-import type { AlertSuppressionDurationUnit } from '../../../../../common/api/detection_engine';
+import type { AlertSuppressionDurationUnit } from '@kbn/securitysolution-api';
 import { selectEuiComboBoxOption } from '../../../../common/test/eui/combobox';
 
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';

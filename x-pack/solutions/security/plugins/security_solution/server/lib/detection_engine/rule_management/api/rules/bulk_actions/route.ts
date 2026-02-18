@@ -12,12 +12,12 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
-import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { PerformRulesBulkActionResponse } from '@kbn/securitysolution-api';
 import {
   BulkActionTypeEnum,
   PerformRulesBulkActionRequestBody,
   PerformRulesBulkActionRequestQuery,
-} from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,

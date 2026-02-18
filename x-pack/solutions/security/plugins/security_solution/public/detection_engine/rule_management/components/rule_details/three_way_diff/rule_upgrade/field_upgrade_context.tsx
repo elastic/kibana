@@ -15,7 +15,7 @@ import {
   type DiffableRule,
   type ThreeWayFieldsDiff,
   type ThreeWayDiff,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { SetRuleFieldResolvedValueFn } from '../../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';

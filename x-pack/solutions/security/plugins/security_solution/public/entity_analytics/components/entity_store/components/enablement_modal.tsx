@@ -26,8 +26,8 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { RiskEngineStatus, StoreStatus } from '../../../../../common/api/entity_analytics';
-import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
+import type { RiskEngineStatus, StoreStatus } from '@kbn/securitysolution-api';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api';
 import { useContractComponents } from '../../../../common/hooks/use_contract_component';
 import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,

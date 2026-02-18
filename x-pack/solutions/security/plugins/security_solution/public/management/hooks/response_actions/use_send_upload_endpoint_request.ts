@@ -11,7 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import type { UploadActionUIRequestBody } from '../../../../common/api/endpoint';
+import type { UploadActionUIRequestBody } from '@kbn/securitysolution-api';
 
 export const useSendUploadEndpointRequest = (
   options?: UseMutationOptions<

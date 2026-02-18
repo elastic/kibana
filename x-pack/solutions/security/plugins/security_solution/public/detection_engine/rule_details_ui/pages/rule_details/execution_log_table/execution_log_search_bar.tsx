@@ -12,7 +12,7 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   RuleExecutionStatus,
   RuleRunType,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import {
   RUN_TYPE_FILTERS,

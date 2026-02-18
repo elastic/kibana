@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { EnableRiskEngineResponse } from '../../../../../common/api/entity_analytics';
+import type { EnableRiskEngineResponse } from '@kbn/securitysolution-api';
 import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';

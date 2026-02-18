@@ -6,7 +6,7 @@
  */
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 import { hasThreatMatchValue } from './helpers';
 import { renderThreatMatchRows } from './threat_match_rows';
 

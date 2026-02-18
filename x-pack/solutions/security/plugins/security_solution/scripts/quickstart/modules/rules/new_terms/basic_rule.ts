@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { NewTermsRuleCreateProps } from '../../../../../common/api/detection_engine';
+import type { NewTermsRuleCreateProps } from '@kbn/securitysolution-api';
 import { getEcsMapping, generateLargeMappingProperties, getSettings } from '../../mappings';
 
 export const basicRule: NewTermsRuleCreateProps = {

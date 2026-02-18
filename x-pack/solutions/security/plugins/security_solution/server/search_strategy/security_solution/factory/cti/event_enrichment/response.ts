@@ -8,7 +8,7 @@
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { getOr } from 'lodash/fp';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { EventEnrichmentRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { EventEnrichmentRequestOptions } from '@kbn/securitysolution-api';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildIndicatorEnrichments, getTotalCount } from './helpers';
 import { buildEventEnrichmentQuery } from './query';

@@ -8,7 +8,7 @@
 import {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 
 export const coverageOverviewPanelWidth = 160;

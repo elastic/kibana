@@ -19,7 +19,7 @@ import { AllRulesTabs } from '../rules_table_toolbar';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
-import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import type { RuleExecutionStatus } from '@kbn/securitysolution-api';
 import { GapFillStatusSelector } from './gap_fill_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`

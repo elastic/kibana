@@ -30,7 +30,7 @@ import {
   RuleOverviewTab,
   useOverviewTabSections,
 } from '../../../../detection_engine/rule_management/components/rule_details/rule_overview_tab';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 import * as logicI18n from '../../logic/translations';
 import * as i18n from './translations';

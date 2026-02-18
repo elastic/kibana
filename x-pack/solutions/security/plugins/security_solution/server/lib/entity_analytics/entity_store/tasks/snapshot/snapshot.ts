@@ -19,8 +19,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import { flow } from 'lodash';
-import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
-import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
+import type { EntityType } from '@kbn/securitysolution-api';
+import { EngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import {
   defaultState,
   stateSchemaByVersion,

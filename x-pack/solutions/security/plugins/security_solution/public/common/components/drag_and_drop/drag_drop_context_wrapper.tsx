@@ -26,7 +26,7 @@ import {
 } from '../../hooks/translations';
 import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,

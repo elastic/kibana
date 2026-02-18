@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
-import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { MemoryDumpActionRequestBody } from '@kbn/securitysolution-api';
+import type { CustomScriptsRequestQueryParams } from '@kbn/securitysolution-api';
 import type { ResponseActionRequestTag } from '../../constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
@@ -105,7 +105,7 @@ import type {
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
   CancelActionRequestBody,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';

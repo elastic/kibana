@@ -10,7 +10,7 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@el
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
 import { SaveTimelineButton } from '../../../../timelines/components/modal/actions/save_timeline_button';

@@ -10,7 +10,7 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { InitEntityStoreRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 import { AssetInventoryDataClient } from './asset_inventory_data_client';
 import type { CoreStart } from '@kbn/core/server';

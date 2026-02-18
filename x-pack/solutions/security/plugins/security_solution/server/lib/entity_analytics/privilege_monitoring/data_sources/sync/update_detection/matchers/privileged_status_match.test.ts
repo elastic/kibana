@@ -8,7 +8,7 @@
 import type {
   MonitoringEntitySource,
   MonitoringLabel,
-} from '../../../../../../../../common/api/entity_analytics';
+} from '@kbn/securitysolution-api';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PrivMatchersAggregation } from '../types';

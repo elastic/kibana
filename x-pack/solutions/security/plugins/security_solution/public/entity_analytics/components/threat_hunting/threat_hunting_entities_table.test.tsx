@@ -17,7 +17,7 @@ import { useEntitiesListQuery } from '../entity_store/hooks/use_entities_list_qu
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
-import type { ListEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import type { ListEntitiesResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/list_entities.gen';
 
 jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline');
 jest.mock('../../../common/components/user_privileges');

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
-import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
+import type { CoverageOverviewRuleActivity } from '@kbn/securitysolution-api';
+import { getCoverageOverviewFilterMock } from '@kbn/securitysolution-api';
 import { ruleActivityFilterDefaultOptions } from './constants';
 import { extractSelected, populateSelected } from './helpers';
 

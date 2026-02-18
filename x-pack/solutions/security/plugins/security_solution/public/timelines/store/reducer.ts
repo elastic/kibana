@@ -101,7 +101,7 @@ import {
 
 import type { TimelineState } from './types';
 import { EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

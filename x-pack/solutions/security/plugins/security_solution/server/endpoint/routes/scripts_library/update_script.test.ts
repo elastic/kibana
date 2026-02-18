@@ -10,7 +10,7 @@ import { createHttpApiTestSetupMock } from '../../mocks';
 import type {
   PatchUpdateRequestBody,
   PatchUpdateRequestParams,
-} from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';
 import { registerPatchUpdateScriptRoute } from './update_script';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';

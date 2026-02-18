@@ -18,7 +18,7 @@ import * as commonI18n from '../translations';
 import { getRulesTableColumn } from '../utils';
 import { LinkRuleSwitch } from './link_rule_switch';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 export interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: RuleResponse[];

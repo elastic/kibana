@@ -17,7 +17,7 @@ import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { InitialisationService } from './initialisation_service';
 import { createInitialisationService } from './initialisation_service';
-import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import { MonitoringEngineComponentResourceEnum } from '@kbn/securitysolution-api';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { allowedExperimentalValues } from '../../../../../common';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ImportTimelineResult } from '../../../../common/api/timeline';
+import type { ImportTimelineResult } from '@kbn/securitysolution-api';
 
 export const formatError = (importResponse: ImportTimelineResult) => {
   const formattedErrors = (importResponse.errors ?? [])

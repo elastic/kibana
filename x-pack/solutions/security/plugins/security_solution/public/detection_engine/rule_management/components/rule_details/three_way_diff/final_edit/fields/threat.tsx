@@ -8,7 +8,7 @@
 import React from 'react';
 import { type FormSchema, type FormData, UseField } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import type { ThreatArray } from '../../../../../../../../common/api/detection_engine';
+import type { ThreatArray } from '@kbn/securitysolution-api';
 import { AddMitreAttackThreat } from '../../../../../../rule_creation_ui/components/mitre';
 import { filterEmptyThreats } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
 

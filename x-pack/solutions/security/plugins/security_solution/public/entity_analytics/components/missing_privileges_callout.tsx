@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LineClamp } from '../../common/components/line_clamp';
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '@kbn/securitysolution-api';
 import { getAllMissingPrivileges } from '../../../common/entity_analytics/privileges';
 import { CommaSeparatedValues } from '../../common/components/missing_privileges';
 

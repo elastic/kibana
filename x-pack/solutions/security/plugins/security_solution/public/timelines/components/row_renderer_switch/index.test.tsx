@@ -11,7 +11,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { RowRendererSwitch } from '.';
 import { TimelineId } from '../../../../common/types';
-import { RowRendererValues } from '../../../../common/api/timeline';
+import { RowRendererValues } from '@kbn/securitysolution-api';
 
 const localState = structuredClone(mockGlobalState);
 

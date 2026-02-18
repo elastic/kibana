@@ -8,7 +8,7 @@
 import type {
   AlertSuppressionDuration,
   PatchRuleRequestBody,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   getEsqlRuleSchemaMock,
   getRulesEqlSchemaMock,
@@ -18,7 +18,7 @@ import {
   getRulesThresholdSchemaMock,
   getSavedQuerySchemaMock,
   getThreatMatchingSchemaMock,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+} from '@kbn/securitysolution-api';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { applyRulePatch } from './apply_rule_patch';
 

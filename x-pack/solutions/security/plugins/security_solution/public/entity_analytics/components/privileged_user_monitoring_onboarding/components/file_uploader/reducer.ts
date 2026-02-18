@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
+import type { PrivmonBulkUploadUsersCSVResponse } from '@kbn/securitysolution-api';
 import { FileUploaderSteps } from './types';
 import type { ValidatedFile } from './types';
 import { isFilePickerStep, isValidationStep } from './helpers';

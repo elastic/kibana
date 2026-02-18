@@ -12,7 +12,7 @@ import {
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
-} from '../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 
 interface PrebuiltRulesStatusResponse {
   stats: {

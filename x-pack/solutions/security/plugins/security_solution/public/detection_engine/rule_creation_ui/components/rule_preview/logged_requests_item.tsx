@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { useEuiPaddingSize, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
+import type { RulePreviewLogs } from '@kbn/securitysolution-api';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { OptimizedAccordion } from './optimized_accordion';

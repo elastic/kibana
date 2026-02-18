@@ -14,7 +14,7 @@ import { type DefineStepRule } from '../../../common/types';
 import {
   type NewTermsFields,
   type HistoryWindowStart,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 
 interface UsePersistentNewTermsStateParams {
   form: FormHook<DefineStepRule>;

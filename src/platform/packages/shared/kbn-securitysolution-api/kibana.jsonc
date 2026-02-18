@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-api",
+  "owner": "@elastic/security-solution",
+  "group": "platform",
+  "visibility": "shared"
+}

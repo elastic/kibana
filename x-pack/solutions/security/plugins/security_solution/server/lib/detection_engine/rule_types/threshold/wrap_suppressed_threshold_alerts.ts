@@ -21,7 +21,7 @@ import {
 import type {
   DetectionAlertLatest,
   WrappedAlert,
-} from '../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import type { ThresholdCompositeBucket } from './types';

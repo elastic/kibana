@@ -16,7 +16,7 @@ import type {
   OnOpenDeleteTimelineModal,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 type Action = EuiTableActionsColumnType<object>['actions'][number];
 /**

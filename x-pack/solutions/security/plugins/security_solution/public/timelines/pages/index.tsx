@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 
 import { TimelinesPage } from './timelines_page';
 

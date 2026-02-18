@@ -13,7 +13,7 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { act, renderHook } from '@testing-library/react';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { TestProviders } from '../../../../../common/mock';

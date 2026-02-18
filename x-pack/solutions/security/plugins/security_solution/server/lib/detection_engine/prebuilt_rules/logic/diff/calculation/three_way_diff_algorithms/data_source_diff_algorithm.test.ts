@@ -8,14 +8,14 @@
 import type {
   RuleDataSource,
   ThreeVersionsOf,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   DataSourceType,
   ThreeWayDiffConflict,
-} from '../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { dataSourceDiffAlgorithm } from './data_source_diff_algorithm';
 
 describe('dataSourceDiffAlgorithm', () => {

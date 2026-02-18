@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
-import type { SeverityMapping } from '../../../../../../../../../common/api/detection_engine';
+import type { SeverityMapping } from '@kbn/securitysolution-api';
 import * as ruleDetailsI18n from '../../../../translations';
 import { SeverityMappingItem } from '../../../../rule_about_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';

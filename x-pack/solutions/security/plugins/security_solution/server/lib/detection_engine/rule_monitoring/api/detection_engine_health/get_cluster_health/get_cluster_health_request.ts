@@ -9,7 +9,7 @@ import moment from 'moment';
 import type {
   GetClusterHealthRequest,
   GetClusterHealthRequestBody,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import { validateHealthInterval } from '../health_interval';
 
 export const validateGetClusterHealthRequest = (

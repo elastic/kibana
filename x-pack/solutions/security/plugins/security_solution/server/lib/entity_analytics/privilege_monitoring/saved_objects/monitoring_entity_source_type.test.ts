@@ -9,7 +9,7 @@ import type {
   SavedObjectModelTransformationContext,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import type { Matcher } from '../../../../../common/api/entity_analytics';
+import type { Matcher } from '@kbn/securitysolution-api';
 import {
   MANAGED_SOURCES_VERSION,
   monitoringEntitySourceType,

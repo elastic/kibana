@@ -12,7 +12,7 @@ import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 export const getQueryFilter = ({
   query,

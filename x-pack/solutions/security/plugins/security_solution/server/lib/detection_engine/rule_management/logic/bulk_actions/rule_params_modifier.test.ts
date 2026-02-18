@@ -6,8 +6,8 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {

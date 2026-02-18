@@ -20,11 +20,11 @@ import * as i18n from './translations';
 import { useBulkFillRuleGapsConfirmation } from '../bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
 import { BulkFillRuleGapsModal } from '../bulk_fill_rule_gaps';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
-import type { BulkActionsDryRunErrCode } from '../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionsDryRunErrCode } from '@kbn/securitysolution-api';
 import {
   BulkActionsDryRunErrCodeEnum,
   BulkActionTypeEnum,
-} from '../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
 import { useBulkActionsDryRun } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions_dry_run';
 import { useBulkActionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions_confirmation';
 import { useInvalidateFindGapsQuery } from '../../api/hooks/use_find_gaps_for_rule';

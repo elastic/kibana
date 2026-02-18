@@ -11,8 +11,8 @@ import type {
   DiffableAllFields,
   ThreeWayRuleFieldsDiff,
   ThreeWayDiff,
-} from '../../../../../common/api/detection_engine';
-import { DataSourceType, ThreeWayDiffOutcome } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import { DataSourceType, ThreeWayDiffOutcome } from '@kbn/securitysolution-api';
 import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import {
   ABOUT_UPGRADE_FIELD_ORDER,

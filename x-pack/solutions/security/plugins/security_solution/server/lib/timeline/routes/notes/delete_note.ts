@@ -15,7 +15,7 @@ import { NOTE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { DeleteNoteRequestBody } from '../../../../../common/api/timeline';
+import { DeleteNoteRequestBody } from '@kbn/securitysolution-api';
 import { deleteNote } from '../../saved_object/notes';
 
 export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {

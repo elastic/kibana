@@ -11,7 +11,7 @@ import {
   TimelineTypeEnum,
   type TimelineStatus,
   TimelineStatusEnum,
-} from '../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';

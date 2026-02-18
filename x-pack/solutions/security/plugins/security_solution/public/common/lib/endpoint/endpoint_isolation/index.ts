@@ -8,7 +8,7 @@
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
-} from '../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import type { ResponseActionApiResponse } from '../../../../../common/endpoint/types';
 import { KibanaServices } from '../../kibana';
 import {

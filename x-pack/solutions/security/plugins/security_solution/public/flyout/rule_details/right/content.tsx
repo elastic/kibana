@@ -21,7 +21,7 @@ import {
   DEFINITION_TEST_ID,
   SCHEDULE_TEST_ID,
 } from './test_ids';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 const panelViewStyle = css`

@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { ListEntityEnginesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/list.gen';
+import type { ListEntityEnginesResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/engine/list.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';

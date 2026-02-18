@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimelineSaveStatus } from '.';
-import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TimelineId } from '../../../../common/types';

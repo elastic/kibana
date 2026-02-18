@@ -15,13 +15,13 @@ import type {
   BulkEditActionSummary,
   NormalizedRuleError,
   RuleDetailsInError,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type {
   BulkActionType,
   BulkEditActionResponse,
   BulkActionsDryRunErrCode,
-} from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+} from '@kbn/securitysolution-api';
+import { BulkActionTypeEnum } from '@kbn/securitysolution-api';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import type { DryRunError } from '../../../logic/bulk_actions/dry_run';

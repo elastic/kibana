@@ -18,7 +18,7 @@ import { draftTimelineDefaults } from '../../../utils/default_timeline';
 import {
   GetDraftTimelinesRequestQuery,
   type GetDraftTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

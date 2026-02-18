@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@kbn/react-query';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useRiskEngineStatus } from './use_risk_engine_status';

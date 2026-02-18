@@ -9,7 +9,7 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { RiskEngineStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 

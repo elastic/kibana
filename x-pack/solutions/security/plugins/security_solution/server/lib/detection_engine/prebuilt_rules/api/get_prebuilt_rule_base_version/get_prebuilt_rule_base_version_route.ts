@@ -10,7 +10,7 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GetPrebuiltRuleBaseVersionRequest,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { getPrebuiltRuleBaseVersionHandler } from './get_prebuilt_rule_base_version_handler';
 

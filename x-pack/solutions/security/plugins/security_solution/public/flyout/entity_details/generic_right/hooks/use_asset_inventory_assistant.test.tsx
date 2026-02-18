@@ -14,7 +14,7 @@ import type {
 import { useAssetInventoryAssistant } from './use_asset_inventory_assistant';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import type { AssetCriticalityLevel } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { AssetCriticalityLevel } from '@kbn/securitysolution-api';
 
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('@kbn/elastic-assistant');

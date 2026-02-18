@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { AssetInventoryStatusResponse } from '../../../common/api/asset_inventory/types';
+import type { AssetInventoryStatusResponse } from '@kbn/securitysolution-api';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 
 const ASSET_INVENTORY_STATUS_KEY = ['GET', 'ASSET_INVENTORY_STATUS'];

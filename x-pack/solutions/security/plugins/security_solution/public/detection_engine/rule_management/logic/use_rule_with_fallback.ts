@@ -8,7 +8,7 @@
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useMemo } from 'react';
-import type { InvestigationFields, RuleResponse } from '../../../../common/api/detection_engine';
+import type { InvestigationFields, RuleResponse } from '@kbn/securitysolution-api';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { InvestigationFieldsCombined } from '../../../../server/lib/detection_engine/rule_schema';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

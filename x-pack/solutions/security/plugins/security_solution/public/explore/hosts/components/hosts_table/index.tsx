@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
-import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
+import { HostsFields } from '@kbn/securitysolution-api';
 import type {
   Columns,
   Criteria,

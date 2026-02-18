@@ -12,7 +12,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
+import type { EndpointActionListRequestQuery } from '@kbn/securitysolution-api';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';

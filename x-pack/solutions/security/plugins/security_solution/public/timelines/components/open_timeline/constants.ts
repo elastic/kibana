@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortFieldTimelineEnum } from '../../../../common/api/timeline';
+import { SortFieldTimelineEnum } from '@kbn/securitysolution-api';
 
 export const DEFAULT_SORT_FIELD = SortFieldTimelineEnum.updated;
 export const DEFAULT_SORT_DIRECTION = 'desc';

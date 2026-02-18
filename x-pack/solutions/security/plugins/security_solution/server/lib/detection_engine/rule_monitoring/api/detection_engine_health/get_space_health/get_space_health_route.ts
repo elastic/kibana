@@ -15,11 +15,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type {
   GetSpaceHealthRequest,
   GetSpaceHealthResponse,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   GET_SPACE_HEALTH_URL,
   GetSpaceHealthRequestBody,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetSpaceHealthRequest } from './get_space_health_request';

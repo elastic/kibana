@@ -10,7 +10,7 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   REVIEW_RULE_UPGRADE_URL,
   ReviewRuleUpgradeRequestBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import {

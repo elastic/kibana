@@ -11,11 +11,11 @@ import { convertRulesFilterToKQL } from '../../../../../../../common/detection_e
 import type {
   CoverageOverviewRequestBody,
   CoverageOverviewResponse,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   CoverageOverviewRuleSource,
   CoverageOverviewRuleActivity,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
 

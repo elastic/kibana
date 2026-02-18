@@ -9,7 +9,7 @@ import type { Duration } from 'moment';
 import type {
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 /**
  * Used from rule executors to log various information about the rule execution:

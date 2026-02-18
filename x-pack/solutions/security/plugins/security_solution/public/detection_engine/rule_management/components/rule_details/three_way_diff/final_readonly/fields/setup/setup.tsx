@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { SetupGuide } from '../../../../../../../../../common/api/detection_engine';
+import type { SetupGuide } from '@kbn/securitysolution-api';
 import { MarkdownRenderer } from '../../../../../../../../common/components/markdown_editor';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 

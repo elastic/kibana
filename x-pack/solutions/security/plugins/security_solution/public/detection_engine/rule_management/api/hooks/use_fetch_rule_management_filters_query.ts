@@ -7,8 +7,8 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import type { GetRuleManagementFiltersResponse } from '../../../../../common/api/detection_engine/rule_management';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
+import type { GetRuleManagementFiltersResponse } from '@kbn/securitysolution-api';
+import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/securitysolution-api';
 import { fetchRuleManagementFilters } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 

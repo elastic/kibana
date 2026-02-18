@@ -13,7 +13,7 @@ import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { RowRendererIdEnum } from '../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '@kbn/securitysolution-api';
 
 import { render } from '@testing-library/react';
 import { cloneDeep } from 'lodash';

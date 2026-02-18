@@ -11,21 +11,26 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 const { resolve, join } = require('path');
 
 const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
+const SECURITYSOLUTION_API_ROOT = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-securitysolution-api'
+);
+const SECURITYSOLUTION_API_SCHEMA_GLOB = join(SECURITYSOLUTION_API_ROOT, 'api/**/*.schema.yaml');
 
 // This script is also run in CI: to track down the scripts that run it in CI, code search for `yarn openapi:generate` in the `.buildkite` top level directory
 
 (async () => {
   await generate({
     title: 'API route schemas',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: './common/**/*.schema.yaml',
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: SECURITYSOLUTION_API_SCHEMA_GLOB,
     templateName: 'zod_operation_schema',
   });
 
   await generate({
     title: 'Detections API client for tests',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/detection_engine/**/*.schema.yaml'),
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/detection_engine/**/*.schema.yaml'),
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
@@ -38,8 +43,8 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
   await generate({
     title: 'Endpoint Management API client for tests',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/endpoint/**/*.schema.yaml'),
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/endpoint/**/*.schema.yaml'),
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
@@ -52,8 +57,8 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
   await generate({
     title: 'Entity Analytics API client for tests',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/entity_analytics/**/*.schema.yaml'),
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/entity_analytics/**/*.schema.yaml'),
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
@@ -66,8 +71,8 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
   await generate({
     title: 'Timelines API client for tests',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: join(SECURITY_SOLUTION_ROOT, 'common/api/timeline/**/*.schema.yaml'),
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: join(SECURITYSOLUTION_API_ROOT, 'api/timeline/**/*.schema.yaml'),
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
@@ -80,14 +85,14 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
 
   await generate({
     title: 'API client for quickstart',
-    rootDir: SECURITY_SOLUTION_ROOT,
-    sourceGlob: './common/**/*.schema.yaml',
+    rootDir: SECURITYSOLUTION_API_ROOT,
+    sourceGlob: SECURITYSOLUTION_API_SCHEMA_GLOB,
     templateName: 'api_client_quickstart',
     skipLinting: false,
     bundle: {
       outFile: join(
         REPO_ROOT,
-        'x-pack/solutions/security/plugins/security_solution/common/api/quickstart_client.gen.ts'
+        'src/platform/packages/shared/kbn-securitysolution-api/api/quickstart_client.gen.ts'
       ),
     },
   });

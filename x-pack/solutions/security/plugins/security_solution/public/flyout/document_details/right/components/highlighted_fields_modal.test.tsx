@@ -14,7 +14,7 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
-import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, RuleUpdateProps } from '@kbn/securitysolution-api';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import {
   HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID,

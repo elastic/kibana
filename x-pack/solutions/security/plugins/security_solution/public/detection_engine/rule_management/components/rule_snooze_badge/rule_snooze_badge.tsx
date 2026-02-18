@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleObjectId } from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from './use_rule_snooze_settings';

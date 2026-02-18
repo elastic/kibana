@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
+import type { RequiredFieldInput } from '@kbn/securitysolution-api/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { ERROR_CODE, FormData, FormHook, ValidationFunc } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { getFlattenedArrayFieldNames } from '../utils';

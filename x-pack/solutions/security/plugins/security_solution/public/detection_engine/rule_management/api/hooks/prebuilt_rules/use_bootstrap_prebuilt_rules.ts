@@ -6,8 +6,8 @@
  */
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import { BOOTSTRAP_PREBUILT_RULES_URL } from '@kbn/securitysolution-api';
+import type { BootstrapPrebuiltRulesResponse } from '@kbn/securitysolution-api/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { bootstrapPrebuiltRules } from '../../api';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';

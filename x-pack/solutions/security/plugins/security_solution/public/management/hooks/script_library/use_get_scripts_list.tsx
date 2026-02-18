@@ -8,7 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint';
+import type { ListScriptsRequestQuery } from '@kbn/securitysolution-api';
 import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointScriptListApiResponse } from '../../../../common/endpoint/types';

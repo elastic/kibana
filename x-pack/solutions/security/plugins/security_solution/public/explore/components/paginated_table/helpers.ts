@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PaginationInputPaginatedInput } from '../../../../common/api/search_strategy';
+import type { PaginationInputPaginatedInput } from '@kbn/securitysolution-api';
 
 export const generateTablePaginationOptions = (
   activePage: number,

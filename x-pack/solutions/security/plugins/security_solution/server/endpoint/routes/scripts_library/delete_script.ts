@@ -6,8 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { DeleteScriptRequestParams } from '../../../../common/api/endpoint/scripts_library';
-import { DeleteScriptRequestSchema } from '../../../../common/api/endpoint/scripts_library';
+import type { DeleteScriptRequestParams } from '@kbn/securitysolution-api';
+import { DeleteScriptRequestSchema } from '@kbn/securitysolution-api';
 import { errorHandler } from '../error_handler';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';

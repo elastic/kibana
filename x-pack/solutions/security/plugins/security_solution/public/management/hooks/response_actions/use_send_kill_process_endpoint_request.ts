@@ -8,7 +8,7 @@
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { KillProcessRequestBody } from '../../../../common/api/endpoint';
+import type { KillProcessRequestBody } from '@kbn/securitysolution-api';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { killProcess } from '../../../common/lib/process_actions';
 

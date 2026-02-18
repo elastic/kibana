@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash/fp';
-import type { RuleFilterArray } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleFilterArray } from '@kbn/securitysolution-api';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
 import type { SecuritySharedParams } from '../types';

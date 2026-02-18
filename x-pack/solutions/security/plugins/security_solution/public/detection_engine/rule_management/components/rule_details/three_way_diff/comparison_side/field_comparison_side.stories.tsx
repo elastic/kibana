@@ -12,13 +12,13 @@ import type {
   ThreeWayDiff,
   DiffableAllFields,
   RuleKqlQuery,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   ThreeWayDiffConflict,
   KqlQueryType,
-} from '../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 export default {
   component: FieldComparisonSide,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/ComparisonSide',

@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { ASSET_INVENTORY_STATUS_API_PATH } from '../../../../common/api/asset_inventory/constants';
+import { ASSET_INVENTORY_STATUS_API_PATH } from '@kbn/securitysolution-api';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
 

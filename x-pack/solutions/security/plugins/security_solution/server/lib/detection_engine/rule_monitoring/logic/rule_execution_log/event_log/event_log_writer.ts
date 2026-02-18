@@ -8,20 +8,20 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { LogLevel } from '@kbn/securitysolution-api';
 import {
   eventLogLevelFromExecutionStatus,
   logLevelToNumber,
   ruleExecutionStatusToNumber,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import type {
   RuleExecutionMetrics,
   RuleExecutionStatus,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+} from '@kbn/securitysolution-api';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+} from '@kbn/securitysolution-api';
 import {
   RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,

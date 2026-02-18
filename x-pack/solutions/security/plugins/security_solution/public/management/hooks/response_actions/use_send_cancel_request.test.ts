@@ -11,7 +11,7 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { CANCEL_ROUTE } from '../../../../common/endpoint/constants';
-import type { CancelActionRequestBody } from '../../../../common/api/endpoint';
+import type { CancelActionRequestBody } from '@kbn/securitysolution-api';
 import type {
   CancelRequestCustomOptions,
   UseSendCancelRequestResult,

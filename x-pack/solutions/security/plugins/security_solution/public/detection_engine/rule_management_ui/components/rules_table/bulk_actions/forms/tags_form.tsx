@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
 import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../../common/translations';
 import { caseInsensitiveSort } from '../../helpers';
 

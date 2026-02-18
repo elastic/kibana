@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
 const OPEN_TIMELINE = i18n.translate('xpack.securitySolution.notes.management.openTimelineButton', {

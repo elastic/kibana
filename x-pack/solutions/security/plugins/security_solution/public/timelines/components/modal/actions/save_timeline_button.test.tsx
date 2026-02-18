@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { SaveTimelineButton } from './save_timeline_button';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
 jest.mock('../../../../common/components/user_privileges');

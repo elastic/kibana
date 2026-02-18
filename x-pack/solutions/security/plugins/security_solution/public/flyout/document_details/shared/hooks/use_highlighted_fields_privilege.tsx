@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';

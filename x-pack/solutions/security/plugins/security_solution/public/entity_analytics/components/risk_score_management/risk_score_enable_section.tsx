@@ -19,8 +19,8 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import type { UseMutationResult } from '@kbn/react-query';
-import type { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { RiskEngineStatus } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '@kbn/securitysolution-api/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../../translations';
 import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../../api/hooks/use_init_risk_engine_mutation';

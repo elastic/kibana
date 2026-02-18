@@ -19,7 +19,7 @@ import {
 import type {
   AlertSuppressionDurationUnit,
   AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import { type FormSchema } from '../../../../../../../../shared_imports';
 

@@ -21,7 +21,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type {
   RunScriptActionRequestBody,
   SentinelOneRunScriptActionRequestParams,
-} from '../../../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../../common/endpoint/types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';

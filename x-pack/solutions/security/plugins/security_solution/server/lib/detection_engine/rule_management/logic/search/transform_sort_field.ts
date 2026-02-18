@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
+import type { FindRulesSortField } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 /**

@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { NetworkHttpRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { NetworkHttpRequestOptionsInput } from '@kbn/securitysolution-api';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

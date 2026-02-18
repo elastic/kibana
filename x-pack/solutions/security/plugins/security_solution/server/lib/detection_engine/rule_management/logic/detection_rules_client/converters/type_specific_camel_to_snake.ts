@@ -6,7 +6,7 @@
  */
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import type { TypeSpecificResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { TypeSpecificResponse } from '@kbn/securitysolution-api';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToSnakeCase } from '../../../../../../utils/object_case_converters';
 import type { TypeSpecificRuleParams } from '../../../../rule_schema';

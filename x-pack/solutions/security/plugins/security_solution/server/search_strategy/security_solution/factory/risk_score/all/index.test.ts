@@ -20,7 +20,7 @@ import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import {
   EntityRiskQueries,
   type RiskScoreRequestOptions,
-} from '../../../../../../common/api/search_strategy';
+} from '@kbn/securitysolution-api';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {

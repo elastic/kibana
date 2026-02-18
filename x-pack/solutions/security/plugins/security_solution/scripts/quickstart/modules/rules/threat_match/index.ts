@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreatMatchRuleCreateProps } from '../../../../../common/api/detection_engine';
+import type { ThreatMatchRuleCreateProps } from '@kbn/securitysolution-api';
 
 export const basicThreatMatchRule: ThreatMatchRuleCreateProps = {
   type: 'threat_match',

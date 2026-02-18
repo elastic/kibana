@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { AlertAgent, AlertsAction, AlertWithAgent } from './types';
-import type { ProcessesParams } from '../../../../common/api/detection_engine';
+import type { ProcessesParams } from '@kbn/securitysolution-api';
 
 interface ProcessAlertsAcc {
   [key: string]: Record<string, AlertsAction>;

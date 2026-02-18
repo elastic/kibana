@@ -8,8 +8,8 @@
 import type {
   CoverageOverviewResponse,
   CoverageOverviewRuleAttributes,
-} from '../../../../../common/api/detection_engine';
-import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
+import { CoverageOverviewRuleActivity } from '@kbn/securitysolution-api';
 
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';
 import type { CoverageOverviewRule } from '../../model/coverage_overview/rule';

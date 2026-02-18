@@ -15,7 +15,7 @@ import type {
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
   TypeSpecificCreatePropsInternal,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { PrebuiltRuleAsset, type PrebuiltAssetBaseProps } from './prebuilt_rule_asset';
 
 type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;

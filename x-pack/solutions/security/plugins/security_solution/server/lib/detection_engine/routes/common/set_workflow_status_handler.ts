@@ -15,12 +15,12 @@ import {
   ALERT_WORKFLOW_REASON,
 } from '@kbn/rule-data-utils';
 
-import { AlertStatusEnum } from '../../../../../common/api/model';
+import { AlertStatusEnum } from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   SetAlertsStatusByIds,
   type SetAlertsStatusRequestBody,
-} from '../../../../../common/api/detection_engine/signals';
+} from '@kbn/securitysolution-api';
 import { buildSiemResponse } from '../utils';
 
 interface SetWorkflowStatusProps {

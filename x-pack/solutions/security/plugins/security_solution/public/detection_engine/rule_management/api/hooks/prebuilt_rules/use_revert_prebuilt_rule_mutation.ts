@@ -10,8 +10,8 @@ import type { HTTPError } from '../../../../../../common/detection_engine/types'
 import type {
   RevertPrebuiltRulesResponseBody,
   RevertPrebuiltRulesRequest,
-} from '../../../../../../common/api/detection_engine';
-import { REVERT_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+} from '@kbn/securitysolution-api';
+import { REVERT_PREBUILT_RULES_URL } from '@kbn/securitysolution-api';
 import { revertPrebuiltRule } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';

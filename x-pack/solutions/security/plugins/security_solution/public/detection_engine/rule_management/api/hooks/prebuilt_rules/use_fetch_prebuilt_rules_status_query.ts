@@ -7,8 +7,8 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { GetPrebuiltRulesStatusResponseBody } from '@kbn/securitysolution-api';
+import { GET_PREBUILT_RULES_STATUS_URL } from '@kbn/securitysolution-api';
 import { getPrebuiltRulesStatus } from '../../api';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 

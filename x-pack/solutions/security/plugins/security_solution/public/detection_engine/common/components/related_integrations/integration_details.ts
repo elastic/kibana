@@ -8,11 +8,11 @@
 import { capitalize } from 'lodash';
 import semver from 'semver';
 
-import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
+import type { Integration } from '@kbn/securitysolution-api';
 import type {
   RelatedIntegration,
   RelatedIntegrationArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 
 export interface IntegrationDetails {
   packageName: string;

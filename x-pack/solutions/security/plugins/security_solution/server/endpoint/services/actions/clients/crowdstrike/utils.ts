@@ -6,7 +6,7 @@
  */
 
 import { upperFirst } from 'lodash';
-import type { RunScriptActionRequestBody } from '../../../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '@kbn/securitysolution-api';
 
 export const mapParametersToCrowdStrikeArguments = (
   commandName: string,

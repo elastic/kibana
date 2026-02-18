@@ -21,8 +21,8 @@ import { NOTES_LOADING_TEST_ID } from '../../../../notes/components/test_ids';
 import { NotesList } from '../../../../notes/components/notes_list';
 import { pinEvent } from '../../../../timelines/store/actions';
 import type { State } from '../../../../common/store';
-import type { Note } from '../../../../../common/api/timeline';
-import { TimelineStatusEnum } from '../../../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
+import { TimelineStatusEnum } from '@kbn/securitysolution-api';
 import {
   fetchNotesByDocumentIds,
   ReqStatus,

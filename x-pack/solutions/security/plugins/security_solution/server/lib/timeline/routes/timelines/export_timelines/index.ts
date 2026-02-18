@@ -15,7 +15,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import {
   ExportTimelinesRequestQuery,
   ExportTimelinesRequestBody,
-} from '../../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 import { getExportTimelineByObjectIds } from './helpers';

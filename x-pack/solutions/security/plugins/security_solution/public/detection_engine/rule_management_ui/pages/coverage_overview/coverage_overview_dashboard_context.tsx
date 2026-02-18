@@ -18,7 +18,7 @@ import {
   BulkActionTypeEnum,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
 import {
   SET_SHOW_EXPANDED_CELLS,

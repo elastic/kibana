@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionEventType } from '@kbn/securitysolution-api';
 import { EventTypeIndicator } from '../../indicators/event_type_indicator';
 import { MultiselectFilter } from '../multiselect_filter';
 

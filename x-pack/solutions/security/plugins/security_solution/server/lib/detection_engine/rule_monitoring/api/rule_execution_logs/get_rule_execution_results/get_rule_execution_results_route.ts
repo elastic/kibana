@@ -12,12 +12,12 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
 
-import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { GetRuleExecutionResultsResponse } from '@kbn/securitysolution-api';
 import {
   GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsRequestQuery,
   GET_RULE_EXECUTION_RESULTS_URL,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 /**
  * Returns execution results of a given rule (aggregated by execution UUID) from Event Log.

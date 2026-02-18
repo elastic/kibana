@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MigrationTranslationResult } from '../../../../../../../common/siem_migrations/constants';
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import {

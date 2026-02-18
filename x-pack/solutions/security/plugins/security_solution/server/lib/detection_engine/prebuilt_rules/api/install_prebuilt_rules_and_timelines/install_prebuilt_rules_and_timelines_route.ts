@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import { PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { PREBUILT_RULES_URL } from '@kbn/securitysolution-api';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';

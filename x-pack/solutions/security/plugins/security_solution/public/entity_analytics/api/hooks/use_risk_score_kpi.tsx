@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EntityRiskQueries } from '../../../../common/api/search_strategy';
+import { EntityRiskQueries } from '@kbn/securitysolution-api';
 import type { EntityType } from '../../../../common/search_strategy';
 import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';

@@ -18,7 +18,7 @@ import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
-import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
+import { IdentifierType } from '@kbn/securitysolution-api/api/entity_analytics/common/common.gen';
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';

@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { ensureUserHasAuthzToFilesForAction } from './utils';
-import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
-import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
+import type { EndpointActionFileDownloadParams } from '@kbn/securitysolution-api';
+import { EndpointActionFileDownloadSchema } from '@kbn/securitysolution-api';
 import type { ResponseActionsClient } from '../../services';
 import {
   getResponseActionsClient,

@@ -11,7 +11,7 @@ import type { AssigneesApplyPanelProps } from '../../../common/components/assign
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
-import type { AlertAssignees } from '../../../../common/api/detection_engine';
+import type { AlertAssignees } from '@kbn/securitysolution-api';
 import { useApplyAttackAssignees } from '../../../detections/hooks/attacks/bulk_actions/apply_actions/use_apply_attack_assignees';
 import { useAttacksPrivileges } from '../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
 import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';

@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '@kbn/securitysolution-api';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { assetCriticalityDataClientMock } from './asset_criticality_data_client.mock';
 import {

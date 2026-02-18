@@ -51,7 +51,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { DetectionAlertLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 
 import {
   ALERT_ANCESTORS,

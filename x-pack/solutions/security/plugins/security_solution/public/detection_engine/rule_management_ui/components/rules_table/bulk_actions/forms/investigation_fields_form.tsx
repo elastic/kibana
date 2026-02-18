@@ -16,8 +16,8 @@ import * as i18n from '../../../../../common/translations';
 
 import { useFetchIndex } from '../../../../../../common/containers/source';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '@kbn/securitysolution-api';
+import { BulkActionEditTypeEnum } from '@kbn/securitysolution-api';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {

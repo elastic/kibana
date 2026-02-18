@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { MachineLearningJobList } from '../../../../rule_definition_section';
-import type { MachineLearningJobId } from '../../../../../../../../../common/api/detection_engine';
+import type { MachineLearningJobId } from '@kbn/securitysolution-api';
 import * as ruleDetailsI18n from '../../../../translations';
 
 interface MachineLearningJobIdProps {

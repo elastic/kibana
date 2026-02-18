@@ -46,7 +46,7 @@ import type {
   RuleObjectId,
   RuleSignatureId,
   Status,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';

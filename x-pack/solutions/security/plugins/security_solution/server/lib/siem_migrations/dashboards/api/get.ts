@@ -12,8 +12,8 @@ import { GetDashboardMigrationRequestParams } from '../../../../../common/siem_m
 import { SIEM_DASHBOARD_MIGRATION_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
-import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
-import { withLicense } from '../../common/api/util/with_license';
+import { SiemMigrationAuditLogger } from '@kbn/securitysolution-api';
+import { withLicense } from '@kbn/securitysolution-api';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemDashboardMigrationsGetRoute = (

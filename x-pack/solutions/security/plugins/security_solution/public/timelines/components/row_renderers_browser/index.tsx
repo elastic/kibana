@@ -23,8 +23,8 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { State } from '../../../common/store';
-import { RowRendererValues } from '../../../../common/api/timeline';
-import type { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '@kbn/securitysolution-api';
+import type { RowRendererId } from '@kbn/securitysolution-api';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/actions';
 import { timelineSelectors } from '../../store';

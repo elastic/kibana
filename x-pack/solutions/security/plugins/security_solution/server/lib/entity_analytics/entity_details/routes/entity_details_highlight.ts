@@ -13,14 +13,14 @@ import {
   promptGroupId,
 } from '@kbn/elastic-assistant-plugin/server/lib/prompt/local_prompt_object';
 import { getPrompt } from '@kbn/elastic-assistant-plugin/server/lib/prompt/get_prompt';
-import type { EntityDetailsHighlightsResponse } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { EntityDetailsHighlightsRequestBody } from '../../../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type { EntityDetailsHighlightsResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_details/highlights.gen';
+import { EntityDetailsHighlightsRequestBody } from '@kbn/securitysolution-api/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { entityDetailsHighlightsServiceFactory } from '../entity_details_highlights_service';
-import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
+import { withLicense } from '@kbn/securitysolution-api';
 import { ENTITY_HIGHLIGHTS_USAGE_EVENT } from '../../../telemetry/event_based/events';
 
 export const entityDetailsHighlightsRoute = (

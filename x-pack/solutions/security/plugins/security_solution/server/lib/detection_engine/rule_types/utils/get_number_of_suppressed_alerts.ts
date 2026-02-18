@@ -7,7 +7,7 @@
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
-import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '@kbn/securitysolution-api';
 
 export const getNumberOfSuppressedAlerts = <
   T extends SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }

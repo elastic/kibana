@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from './translations';
 

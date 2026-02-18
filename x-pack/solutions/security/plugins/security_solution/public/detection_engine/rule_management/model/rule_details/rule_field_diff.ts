@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AllThreeWayFieldsDiff } from '../../../../../common/api/detection_engine';
+import type { AllThreeWayFieldsDiff } from '@kbn/securitysolution-api';
 
 export interface FieldDiff {
   currentVersion: string;

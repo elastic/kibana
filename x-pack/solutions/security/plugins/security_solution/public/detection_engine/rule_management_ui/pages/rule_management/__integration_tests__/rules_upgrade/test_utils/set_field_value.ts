@@ -9,7 +9,7 @@ import { act, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import { invariant } from '../../../../../../../../common/utils/invariant';
-import { toSimpleRuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+import { toSimpleRuleSchedule } from '@kbn/securitysolution-api';
 import {
   addEuiComboBoxOption,
   clearEuiComboBoxSelection,
@@ -41,8 +41,8 @@ import {
   type ThreatIndex,
   type Threshold,
   KqlQueryType,
-} from '../../../../../../../../common/api/detection_engine';
-import type { RuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+} from '@kbn/securitysolution-api';
+import type { RuleSchedule } from '@kbn/securitysolution-api';
 
 type ToDiscriminatedUnion<T> = {
   [K in keyof T]-?: { fieldName: K; value: T[K] };

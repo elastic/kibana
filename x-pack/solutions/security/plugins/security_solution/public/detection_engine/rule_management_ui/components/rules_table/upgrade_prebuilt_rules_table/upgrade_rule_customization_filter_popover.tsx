@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { RuleCustomizationStatus } from '../../../../../../common/api/detection_engine';
+import { RuleCustomizationStatus } from '@kbn/securitysolution-api';
 import * as i18n from '../../../../common/translations';
 
 interface RuleCustomizationFilterPopoverProps {

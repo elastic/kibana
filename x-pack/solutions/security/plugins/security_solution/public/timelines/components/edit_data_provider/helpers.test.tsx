@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderTypeEnum } from '../../../../common/api/timeline';
+import { DataProviderTypeEnum } from '@kbn/securitysolution-api';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {

@@ -6,7 +6,7 @@
  */
 
 import { range } from 'lodash';
-import type { RuleCreateProps } from '../../../../common/api/detection_engine';
+import type { RuleCreateProps } from '@kbn/securitysolution-api';
 
 export const duplicateRuleParams = (
   rule: RuleCreateProps,

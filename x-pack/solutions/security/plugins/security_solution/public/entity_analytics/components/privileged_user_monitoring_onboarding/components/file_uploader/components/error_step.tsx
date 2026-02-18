@@ -19,7 +19,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../../common/api/entity_analytics';
+import type { PrivmonBulkUploadUsersCSVResponse } from '@kbn/securitysolution-api';
 import { buildAnnotationsFromError } from '../helpers';
 
 export const PrivilegedUserMonitoringErrorStep: React.FC<{

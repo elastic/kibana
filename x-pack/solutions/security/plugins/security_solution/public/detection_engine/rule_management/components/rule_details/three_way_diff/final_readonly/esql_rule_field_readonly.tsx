@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DiffableEsqlFields } from '../../../../../../../common/api/detection_engine';
+import type { DiffableEsqlFields } from '@kbn/securitysolution-api';
 import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
 import { TypeReadOnly } from './fields/type/type';
 import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';

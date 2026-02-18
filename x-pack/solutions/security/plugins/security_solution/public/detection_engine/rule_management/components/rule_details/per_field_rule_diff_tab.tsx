@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type {
   PartialThreeWayRuleDiff,
   ThreeWayRuleFieldsDiff,
-} from '../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import type { RuleDiffHeaderBarProps } from './diff_components';

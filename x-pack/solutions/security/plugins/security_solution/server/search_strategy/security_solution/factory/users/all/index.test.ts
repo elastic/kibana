@@ -13,7 +13,7 @@ import { mockDeps, mockOptions, mockSearchStrategyResponse } from './__mocks__';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
+import type { UsersRequestOptions } from '@kbn/securitysolution-api';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };

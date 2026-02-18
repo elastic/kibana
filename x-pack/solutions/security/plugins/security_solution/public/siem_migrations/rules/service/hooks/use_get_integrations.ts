@@ -7,7 +7,7 @@
 
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
 

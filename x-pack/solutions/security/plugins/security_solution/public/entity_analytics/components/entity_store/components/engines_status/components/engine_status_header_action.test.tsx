@@ -10,10 +10,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatusHeaderAction } from './engine_status_header_action';
 import { useEnableEntityStoreMutation } from '../../../hooks/use_entity_store';
 import { isEngineLoading } from '../helpers';
-import type { GetEntityStoreStatusResponse } from '../../../../../../../common/api/entity_analytics/entity_store/status.gen';
+import type { GetEntityStoreStatusResponse } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/status.gen';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../../../../common/mock';
-import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
+import type { EngineComponentStatus } from '@kbn/securitysolution-api';
 import { defaultOptions } from '../../../../../../../server/lib/entity_analytics/entity_store/constants';
 
 jest.mock('../../../hooks/use_entity_store');

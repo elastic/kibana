@@ -17,14 +17,14 @@ import type {
   GetRuleHealthResponse,
   GetSpaceHealthRequestBody,
   GetSpaceHealthResponse,
-} from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 import {
   GET_RULE_HEALTH_URL,
   GET_SPACE_HEALTH_URL,
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
   SETUP_HEALTH_URL,
-} from '../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import type {
   FetchRuleExecutionEventsArgs,

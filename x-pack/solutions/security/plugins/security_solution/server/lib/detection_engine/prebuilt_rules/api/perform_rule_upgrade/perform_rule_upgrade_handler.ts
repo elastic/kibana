@@ -15,14 +15,14 @@ import type {
   RuleUpgradeSpecifier,
   SkippedRuleUpgrade,
   ThreeWayDiff,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import {
   ModeEnum,
   PickVersionValuesEnum,
   SkipRuleUpgradeReasonEnum,
   ThreeWayDiffConflict,
   UpgradeConflictResolutionEnum,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -37,7 +37,7 @@ import type {
   RuleResponse,
   RuleSignatureId,
   RuleVersion,
-} from '../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';

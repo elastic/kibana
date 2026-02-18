@@ -16,7 +16,7 @@ import {
   ENTITY_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   SUMMARY_VIEW,
 } from '../../shared/translations';
-import type { AssetCriticalityLevel } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { AssetCriticalityLevel } from '@kbn/securitysolution-api';
 
 // Fallback implementation when assistant is not available
 const useAssistantNoop = () => ({

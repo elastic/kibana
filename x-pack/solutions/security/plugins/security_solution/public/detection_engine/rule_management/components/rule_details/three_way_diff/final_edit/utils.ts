@@ -6,8 +6,8 @@
  */
 
 import { DataSourceType } from '../../../../../common/types';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
-import { DataSourceType as DataSourceTypeSnakeCase } from '../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '@kbn/securitysolution-api';
+import { DataSourceType as DataSourceTypeSnakeCase } from '@kbn/securitysolution-api';
 
 interface UseRuleIndexPatternParameters {
   dataSourceType: DataSourceType;

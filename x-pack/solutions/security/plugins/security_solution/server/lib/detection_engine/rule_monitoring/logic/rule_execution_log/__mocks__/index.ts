@@ -8,7 +8,7 @@
 import {
   getRuleExecutionEventsResponseMock,
   getRuleExecutionResultsResponseMock,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
+} from '@kbn/securitysolution-api';
 
 import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 import type {

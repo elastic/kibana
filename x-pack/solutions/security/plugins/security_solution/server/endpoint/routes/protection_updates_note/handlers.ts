@@ -16,7 +16,7 @@ import { protectionUpdatesNoteSavedObjectType } from '../../lib/protection_updat
 import type {
   CreateUpdateProtectionUpdatesNoteSchema,
   GetProtectionUpdatesNoteSchema,
-} from '../../../../common/api/endpoint/protection_updates_note';
+} from '@kbn/securitysolution-api';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';

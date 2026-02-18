@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MachineLearningJobId } from '../../../common/api/detection_engine';
+import type { MachineLearningJobId } from '@kbn/securitysolution-api';
 
 export function normalizeMachineLearningJobId(jobId: MachineLearningJobId): string[] {
   return typeof jobId === 'string' ? [jobId] : jobId;

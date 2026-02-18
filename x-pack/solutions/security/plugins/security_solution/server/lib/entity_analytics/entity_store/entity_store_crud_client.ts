@@ -15,13 +15,13 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { generatePivotGroup } from '@kbn/entityManager-plugin/server/lib/entities/transform/generate_latest_transform';
 import get from 'lodash/get';
-import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
-import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EntityContainer } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
+import type { EntityType as APIEntityType } from '@kbn/securitysolution-api/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
   Entity,
   EntityField,
-} from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
+} from '@kbn/securitysolution-api/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import {
   BadCRUDRequestError,

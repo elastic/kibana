@@ -17,8 +17,8 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   EndpointSuggestionsParams,
   EndpointSuggestionsBody,
-} from '../../../../common/api/endpoint';
-import { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
+} from '@kbn/securitysolution-api';
+import { EndpointSuggestionsSchema } from '@kbn/securitysolution-api';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

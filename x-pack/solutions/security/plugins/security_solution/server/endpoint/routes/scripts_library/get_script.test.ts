@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetOneScriptRequestParams } from '../../../../common/api/endpoint';
+import type { GetOneScriptRequestParams } from '@kbn/securitysolution-api';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { ScriptsLibraryMock } from '../../services/scripts_library/mocks';

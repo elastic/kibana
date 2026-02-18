@@ -10,7 +10,7 @@ import { cleanup, waitFor, renderHook } from '@testing-library/react';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
-} from '../../../../../common/api/detection_engine/rule_monitoring';
+} from '@kbn/securitysolution-api';
 
 import { useExecutionEvents } from './use_execution_events';
 import { useToasts } from '../../../../common/lib/kibana';

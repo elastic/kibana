@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiDescriptionList } from '@elastic/eui';
-import { type RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { type RuleExecutionEvent } from '@kbn/securitysolution-api';
 
 import * as i18n from './translations';
 

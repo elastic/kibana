@@ -16,7 +16,7 @@ import {
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
 } from '../actions';
-import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';

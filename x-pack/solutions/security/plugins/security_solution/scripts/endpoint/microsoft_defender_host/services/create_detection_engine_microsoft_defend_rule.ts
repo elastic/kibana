@@ -9,7 +9,7 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { dump } from '../../common/utils';
 import { createRule, findRules } from '../../common/detection_rules_services';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
+import type { RuleResponse } from '@kbn/securitysolution-api';
 
 export const createDetectionEngineMicrosoftDefenderRuleIfNeeded = async (
   kbnClient: KbnClient,

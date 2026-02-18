@@ -25,7 +25,7 @@ import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { TypeOf } from '@kbn/config-schema';
-import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
+import type { GetPolicyResponseSchema } from '@kbn/securitysolution-api';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;

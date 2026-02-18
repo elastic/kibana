@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { RuleNameOverrideObject } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleNameOverrideObject } from '@kbn/securitysolution-api';
 import { RuleNameOverride } from '../../../../rule_about_section';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 

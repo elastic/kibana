@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/securitysolution-api';
 import { RuleStatusBadge } from './rule_status_badge';
 
 describe('RuleStatusBadge', () => {

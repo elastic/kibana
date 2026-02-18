@@ -7,8 +7,8 @@
 
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
-import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
-import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
+import type { EntityRiskScoreRecord } from '@kbn/securitysolution-api';
+import { EntityRiskLevelsEnum } from '@kbn/securitysolution-api';
 import type { CalculationResults } from './calculate_and_persist_risk_scores';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({

@@ -19,7 +19,7 @@ import type {
   GetTimelinesRequestQuery,
   SavedTimeline,
   ImportTimelinesResponse,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import {
   ImportTimelineResult,
   TimelineErrorResponse,
@@ -30,7 +30,7 @@ import {
   ResolveTimelineResponse,
   GetTimelinesResponse,
   PersistTimelineResponse,
-} from '../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 import {
   TIMELINE_URL,
   TIMELINE_DRAFT_URL,

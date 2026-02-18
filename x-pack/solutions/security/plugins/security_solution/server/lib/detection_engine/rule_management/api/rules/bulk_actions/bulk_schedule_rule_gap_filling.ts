@@ -7,7 +7,7 @@
 import { identity, keyBy } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { BulkManualRuleFillGaps } from '../../../../../../../common/api/detection_engine';
+import type { BulkManualRuleFillGaps } from '@kbn/securitysolution-api';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { validateBulkRuleGapFilling } from '../../../logic/bulk_actions/validations';

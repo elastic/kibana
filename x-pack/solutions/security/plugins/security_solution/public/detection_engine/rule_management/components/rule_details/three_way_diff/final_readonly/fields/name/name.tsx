@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import type { RuleName } from '../../../../../../../../../common/api/detection_engine';
+import type { RuleName } from '@kbn/securitysolution-api';
 
 interface NameReadOnlyProps {
   name: RuleName;

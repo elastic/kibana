@@ -11,8 +11,8 @@ import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
-} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+} from '@kbn/securitysolution-api';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 
 import type { requestMock } from '../../../../routes/__mocks__';
 import { configMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';

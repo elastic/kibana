@@ -10,7 +10,7 @@ import {
   type ResolveTimelineResponse,
   TimelineStatusEnum,
   TimelineTypeEnum,
-} from '../../../../../common/api/timeline';
+} from '@kbn/securitysolution-api';
 
 export const mockTimeline: ResolveTimelineResponse = {
   timeline: {

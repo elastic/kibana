@@ -12,7 +12,7 @@ import type {
   SavedKqlQuery,
   RuleDataSource,
   DiffableRuleTypes,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';

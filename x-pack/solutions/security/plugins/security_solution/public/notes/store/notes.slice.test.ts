@@ -54,7 +54,7 @@ import {
   userFilterAssociatedNotes,
 } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
-import type { Note } from '../../../common/api/timeline';
+import type { Note } from '@kbn/securitysolution-api';
 import { AssociatedFilter } from '../../../common/notes/constants';
 
 const initalEmptyState = initialNotesState;

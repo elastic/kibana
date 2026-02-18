@@ -6,7 +6,7 @@
  */
 
 import { assertDiffableFieldsMatchRuleType } from './assert_diffable_fields_match_rule_type';
-import { DIFFABLE_RULE_TYPE_FIELDS_MAP } from '../../../../../../common/api/detection_engine';
+import { DIFFABLE_RULE_TYPE_FIELDS_MAP } from '@kbn/securitysolution-api';
 
 describe('assertDiffableFieldsMatchRuleType', () => {
   describe('valid scenarios -', () => {

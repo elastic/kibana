@@ -98,7 +98,7 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import type {
   AncestorLatest,
   DetectionAlertLatest,
-} from '../../../../../../common/api/detection_engine/model/alerts';
+} from '@kbn/securitysolution-api';
 
 export interface BuildAlertFieldsProps {
   docs: SimpleHit[];

@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMappingEntry } from '@kbn/securitysolution-api';
 import type { FormattedEntry } from './types';
 import * as i18n from './translations';
 import {

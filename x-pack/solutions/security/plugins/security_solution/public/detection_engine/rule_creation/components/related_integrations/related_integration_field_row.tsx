@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
+import type { RelatedIntegration } from '@kbn/securitysolution-api';
 import type { ArrayItem, FieldConfig } from '../../../../shared_imports';
 import { FIELD_TYPES, UseField } from '../../../../shared_imports';
 import { DEFAULT_RELATED_INTEGRATION } from './default_related_integration';

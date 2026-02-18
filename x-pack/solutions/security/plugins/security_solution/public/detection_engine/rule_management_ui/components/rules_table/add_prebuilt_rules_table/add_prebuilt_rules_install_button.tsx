@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
 import type { Rule } from '../../../../rule_management/logic';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '@kbn/securitysolution-api';
 import {
   useAddPrebuiltRulesTableContext,
   type AddPrebuiltRulesTableActions,

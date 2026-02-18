@@ -19,7 +19,7 @@ import type {
 import * as z from '@kbn/zod';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
-import { RuleResponseAction } from '../../../../../common/api/detection_engine';
+import { RuleResponseAction } from '@kbn/securitysolution-api';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -74,7 +74,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '@kbn/securitysolution-api';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
 
 // 8.10.x is mapped as an array of strings

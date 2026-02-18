@@ -12,7 +12,7 @@ import type {
   AlertSuppression,
   DiffableRuleTypes,
   ThresholdAlertSuppression,
-} from '../../../../../../../../../common/api/detection_engine';
+} from '@kbn/securitysolution-api';
 import { AlertSuppressionLabel } from '../../../../../../../rule_creation_ui/components/description_step/alert_suppression_label';
 import {
   MissingFieldsStrategy,

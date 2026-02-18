@@ -6,7 +6,7 @@
  */
 
 import { memo, useMemo } from 'react';
-import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
+import type { SuspendProcessRequestBody } from '@kbn/securitysolution-api';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
   SuspendProcessActionOutputContent,

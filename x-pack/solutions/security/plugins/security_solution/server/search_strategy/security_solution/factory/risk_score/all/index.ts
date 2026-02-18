@@ -11,7 +11,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
-import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
+import type { EntityRiskQueries } from '@kbn/securitysolution-api';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   BucketItem,

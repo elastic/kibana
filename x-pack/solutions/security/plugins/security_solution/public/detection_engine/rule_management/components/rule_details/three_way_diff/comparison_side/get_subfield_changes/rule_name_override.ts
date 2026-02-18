@@ -6,7 +6,7 @@
  */
 
 import { stringifyToSortedJson } from '../utils';
-import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
+import type { DiffableAllFields } from '@kbn/securitysolution-api';
 import type { SubfieldChange } from '../types';
 
 export const getSubfieldChangesForRuleNameOverride = (

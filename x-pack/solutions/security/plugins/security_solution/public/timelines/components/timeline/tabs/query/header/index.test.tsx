@@ -13,7 +13,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../../../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { QueryTabHeader } from '.';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '@kbn/securitysolution-api';
 import { waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';

@@ -7,7 +7,7 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleResponse } from '@kbn/securitysolution-api';
 import type { RuleParams } from '../../../../rule_schema';
 import { internalRuleToAPIResponse } from './internal_rule_to_api_response';
 import { RuleResponseValidationError } from '../utils';

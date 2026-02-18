@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { getRulesSchemaMock } from '@kbn/securitysolution-api';
 import { mergeExceptionLists, isKeyUpdateableWithReadPermission } from './utils';
 
 describe('utils', () => {
