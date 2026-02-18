@@ -115,9 +115,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 {(resizeRef) => (
                   <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
-                      <VerticalOverflowContent maxHeight={120}>
+                      <OverflowContent maxHeight={120}>
                         <RuleDescription description={stepDataDetails.description} />
-                      </VerticalOverflowContent>
+                      </OverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
                     <RuleAboutSection rule={rule} hideName hideDescription />
@@ -127,16 +127,16 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
             )}
             {selectedToggleOption === 'notes' && (
               <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
-                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
+                <OverflowContent maxHeight={aboutPanelHeight}>
                   <RuleInvestigationGuide note={stepDataDetails.note} />
-                </VerticalOverflowContent>
+                </OverflowContent>
               </VerticalOverflowContainer>
             )}
             {selectedToggleOption === 'setup' && (
               <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
-                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
+                <OverflowContent maxHeight={aboutPanelHeight}>
                   <RuleSetupGuide setup={stepDataDetails.setup} />
-                </VerticalOverflowContent>
+                </OverflowContent>
               </VerticalOverflowContainer>
             )}
           </EuiFlexItem>
@@ -169,17 +169,17 @@ function VerticalOverflowContainer({
   );
 }
 
-interface VerticalOverflowContentProps {
+interface OverflowContentProps {
   maxHeight: number;
 }
 
-function VerticalOverflowContent({
+function OverflowContent({
   maxHeight,
   children,
-}: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
+}: PropsWithChildren<OverflowContentProps>): JSX.Element {
   return (
     <div
-      className={`eui-yScroll ${css`
+      className={`eui-yScroll eui-xScroll ${css`
         max-height: ${maxHeight}px;
       `}`}
     >

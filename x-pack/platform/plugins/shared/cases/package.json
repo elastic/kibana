@@ -5,6 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "generate:cases": "node scripts/generate_cases.js"
+    "generate:cases": "node scripts/generate_cases.js",
+    "openapi": "yarn openapi:build && yarn openapi:generate",
+    "openapi:build": "npx @redocly/cli bundle docs/openapi/entrypoint.yaml --output docs/openapi/bundled-types.schema.yaml --ext yaml",
+    "openapi:generate": "node scripts/openapi_generate.js"
   }
 }

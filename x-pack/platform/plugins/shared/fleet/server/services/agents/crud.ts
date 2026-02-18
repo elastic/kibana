@@ -224,6 +224,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
+  pit?: string;
   statusSummary?: Record<AgentStatus, number>;
   aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
@@ -244,7 +245,7 @@ export async function getAgentsByKuery(
     aggregations,
     spaceId,
   } = options;
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -294,7 +295,9 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  const initialPitId =
+    pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  let currentPitId = initialPitId;
 
   const queryAgents = async (
     queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
@@ -334,10 +337,10 @@ export async function getAgentsByKuery(
       fields: Object.keys(runtimeFields),
       sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitIdToUse
+      ...(currentPitId
         ? {
             pit: {
-              id: pitIdToUse,
+              id: currentPitId,
               keep_alive: pitKeepAlive,
             },
           }
@@ -361,6 +364,8 @@ export async function getAgentsByKuery(
     throw err;
   }
 
+  currentPitId = res.pit_id ?? currentPitId;
+
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
@@ -372,6 +377,7 @@ export async function getAgentsByKuery(
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
       const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
+      currentPitId = response.pit_id ?? currentPitId;
       agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
@@ -404,7 +410,7 @@ export async function getAgentsByKuery(
     total,
     ...(searchAfter ? { page: 0 } : { page }),
     perPage,
-    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
+    ...(initialPitId ? { pit: currentPitId } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
@@ -457,7 +463,7 @@ export async function fetchAllAgentsByKuery(
     showInactive = true,
   } = options;
 
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
@@ -851,7 +857,7 @@ export async function getAgentPolicyForAgents(
   return agentPolicies;
 }
 
-async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+export async function getSpaceAwarenessFilterForAgents(spaceId: string | undefined) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !spaceId) {
     return [];
