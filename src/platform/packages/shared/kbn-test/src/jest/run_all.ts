@@ -215,6 +215,15 @@ async function runConfigs(
   let active = 0;
   let index = 0;
 
+  // Staggered warmup: start 1 process to populate the shared Babel transform
+  // cache (data/jest-cache) with common imports (EUI, React, etc.) before
+  // launching the remaining processes. This avoids redundant cold compilations
+  // when multiple processes start simultaneously with an empty cache.
+  // Set JEST_WARMUP_DELAY_MS=0 to disable.
+  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '120000', 10);
+  const useWarmup = maxParallel > 1 && configs.length > 1 && warmupDelayMs > 0;
+  let warmupComplete = !useWarmup;
+
   const slowTestsDir = `${tmpdir()}/kibana-jest-slow-tests`;
   await fs.mkdir(slowTestsDir, { recursive: true });
 
@@ -233,8 +242,10 @@ async function runConfigs(
     }, 60_000);
     heartbeat.unref(); // don't keep the process alive just for the timer
 
+    let warmupTimer: ReturnType<typeof setTimeout> | undefined;
+
     const launchNext = () => {
-      while (active < maxParallel && index < configs.length) {
+      while (active < (warmupComplete ? maxParallel : 1) && index < configs.length) {
         const config = configs[index++];
         const start = Date.now();
         active += 1;
@@ -268,66 +279,132 @@ async function runConfigs(
           stdio: ['ignore', 'pipe', 'pipe'],
         });
         let buffer = '';
+        let stdoutEnded = false;
+        let stderrEnded = false;
 
         proc.stdout.on('data', (d) => {
-          const output = d.toString();
-          buffer += output;
+          buffer += d.toString();
         });
-
         proc.stderr.on('data', (d) => {
-          const output = d.toString();
-          buffer += output;
+          buffer += d.toString();
+        });
+        proc.stdout.on('end', () => {
+          stdoutEnded = true;
+        });
+        proc.stderr.on('end', () => {
+          stderrEnded = true;
         });
 
+        // Use 'exit' (not 'close') to avoid hanging if a grandchild process
+        // inherits the stdio pipes and doesn't exit. However, 'exit' can fire
+        // before all pipe data has been delivered. To capture the complete output
+        // (including Jest's final summary), we wait briefly for the streams to
+        // drain after the process exits, with a timeout to prevent hangs.
         proc.on('exit', (c) => {
-          const code = c == null ? 1 : c;
-          const durationMs = Date.now() - start;
+          const DRAIN_TIMEOUT_MS = 3_000;
+          let settled = false;
 
-          // Parse failed tests from output if the run failed.
-          // Strip ANSI color codes first so regexes match on CI where Jest colorizes output.
-          const cleanBuffer = buffer.replace(/\x1b\[[0-9;]*m/g, '');
-          const failedTests = code !== 0 ? parseFailedTests(cleanBuffer) : [];
+          const onReady = () => {
+            if (settled) return;
+            settled = true;
 
-          results.push({ config, code, durationMs, slowTestsFile, failedTests });
+            const code = c == null ? 1 : c;
+            const durationMs = Date.now() - start;
 
-          const sec = Math.round(durationMs / 1000);
-          const relConfigPath = relative(REPO_ROOT, config);
+            // Parse failed tests from output if the run failed.
+            // Strip ANSI color codes first so regexes match on CI where Jest colorizes output.
+            const cleanBuffer = buffer.replace(/\x1b\[[0-9;]*m/g, '');
+            const failedTests = code !== 0 ? parseFailedTests(cleanBuffer) : [];
 
-          // Buildkite collapsible sections:
-          //   --- (collapsed) for passing configs — full output preserved but hidden
-          //   +++ (expanded) for failing configs — immediately visible
-          if (code === 0) {
-            log.write(`--- ✅ ${relConfigPath} (${sec}s)\n`);
-          } else {
-            log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
-          }
-          log.write(buffer + '\n');
+            results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
-          const proceed = () => {
-            // Log how many configs are left to complete (after checkpoint is written)
-            const remaining = configs.length - results.length;
-            log.info(`Configs left: ${remaining}`);
+            const sec = Math.round(durationMs / 1000);
+            const relConfigPath = relative(REPO_ROOT, config);
 
-            active -= 1;
-            if (index < configs.length) {
-              launchNext();
-            } else if (active === 0) {
-              clearInterval(heartbeat);
-              resolveAll();
+            // Buildkite collapsible sections:
+            //   --- (collapsed) for passing configs — full output preserved but hidden
+            //   +++ (expanded) for failing configs — immediately visible
+            if (code === 0) {
+              log.write(`--- ✅ ${relConfigPath} (${sec}s)\n`);
+            } else {
+              log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
+            }
+            log.write(buffer + '\n');
+
+            const proceed = () => {
+              // Log how many configs are left to complete (after checkpoint is written)
+              const remaining = configs.length - results.length;
+              log.info(`Configs left: ${remaining}`);
+
+              active -= 1;
+
+              // If warmup is still active and a config just completed, the shared
+              // transform cache is warm — ramp to full parallelism immediately.
+              if (!warmupComplete) {
+                warmupComplete = true;
+                if (warmupTimer) clearTimeout(warmupTimer);
+                log.info(
+                  `[jest-warmup] First config completed, ramping to ${maxParallel} parallel processes`
+                );
+              }
+
+              if (index < configs.length) {
+                launchNext();
+              } else if (active === 0) {
+                clearInterval(heartbeat);
+                resolveAll();
+              }
+            };
+
+            // Write checkpoint for successful configs before proceeding
+            // Use relative path for stable keys across CI agents
+            if (code === 0 && isInBuildkite()) {
+              log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
+              markConfigCompleted(relConfigPath).then(proceed, proceed);
+            } else {
+              proceed();
             }
           };
 
-          // Write checkpoint for successful configs before proceeding
-          // Use relative path for stable keys across CI agents
-          if (code === 0 && isInBuildkite()) {
-            log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
-            markConfigCompleted(relConfigPath).then(proceed, proceed);
+          // If streams already drained, proceed immediately
+          if (stdoutEnded && stderrEnded) {
+            onReady();
           } else {
-            proceed();
+            // Wait for streams to finish, with a timeout to avoid hangs
+            const timer = setTimeout(onReady, DRAIN_TIMEOUT_MS);
+            const checkStreams = () => {
+              if (stdoutEnded && stderrEnded) {
+                clearTimeout(timer);
+                onReady();
+              }
+            };
+            proc.stdout!.on('end', checkStreams);
+            proc.stderr!.on('end', checkStreams);
           }
         });
       }
     };
+
+    // Schedule warmup end: after the delay, ramp to full parallelism even if
+    // the first config hasn't finished yet (the cache is partially warm by then).
+    if (useWarmup) {
+      log.info(
+        `[jest-warmup] Starting 1 process to warm transform cache (${Math.round(
+          warmupDelayMs / 1000
+        )}s before full parallelism)`
+      );
+      warmupTimer = setTimeout(() => {
+        if (!warmupComplete) {
+          warmupComplete = true;
+          log.info(
+            `[jest-warmup] Warmup delay elapsed, ramping to ${maxParallel} parallel processes`
+          );
+          launchNext();
+        }
+      }, warmupDelayMs);
+      warmupTimer.unref();
+    }
+
     launchNext();
   });
 
