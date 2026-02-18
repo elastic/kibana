@@ -33,34 +33,23 @@ export const GroupOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('groups'),
 });
 
-export const legacySingleOverviewEmbeddableCustomSchema = schema.object({
-  sloId: schema.string(),
-  sloInstanceId: schema.maybe(schema.string()),
-  remoteName: schema.maybe(schema.string()),
-  overviewMode: schema.literal('single'),
-  showAllGroupByInstances: schema.maybe(schema.boolean()),
-});
+export interface LegacySingleOverviewEmbeddableState {
+  sloId: string;
+  sloInstanceId?: string;
+  remoteName?: string;
+  overviewMode: 'single';
+  showAllGroupByInstances?: boolean;
+}
 
-export const legacyGroupOverviewEmbeddableCustomSchema = schema.object({
-  overviewMode: schema.literal('groups'),
-  groupFilters: schema.object({
-    groupBy: schema.oneOf([
-      schema.literal('slo.tags'),
-      schema.literal('status'),
-      schema.literal('slo.indicator.type'),
-    ]),
-    groups: schema.maybe(schema.arrayOf(schema.string())),
-    filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-    kqlQuery: schema.maybe(schema.string()),
-  }),
-});
-
-export type LegacySingleOverviewEmbeddableState = TypeOf<
-  typeof legacySingleOverviewEmbeddableCustomSchema
->;
-export type LegacyGroupOverviewEmbeddableState = TypeOf<
-  typeof legacyGroupOverviewEmbeddableCustomSchema
->;
+export interface LegacyGroupOverviewEmbeddableState {
+  overviewMode: 'groups';
+  groupFilters: {
+    groupBy: 'slo.tags' | 'status' | 'slo.indicator.type';
+    groups?: string[];
+    filters?: unknown[];
+    kqlQuery?: string;
+  };
+}
 
 export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
 
