@@ -16,6 +16,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+  METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
 jest.mock('@kbn/shared-ux-toolbar-selector', () => {
@@ -54,7 +55,7 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
           {options.map((option) => (
             <div
               key={option.key}
-              data-test-subj={`${dataTestSubj}Option-${option.value}`}
+              data-test-subj={option['data-test-subj']}
               data-disabled={String(option.disabled)}
               data-checked={option.checked}
               onClick={() => !option.disabled && onChange?.(option)}
@@ -146,7 +147,7 @@ describe('DimensionsSelector', () => {
       renderWithIntl(<DimensionsSelector {...defaultProps} />);
       mockDimensions.forEach((dim) => {
         expect(
-          screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${dim.name}`)
+          screen.getByTestId(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${dim.name}`)
         ).toBeInTheDocument();
       });
     });
@@ -247,6 +248,31 @@ describe('DimensionsSelector', () => {
     });
   });
 
+  describe('Option sorting', () => {
+    it('sorts options correctly using helper functions', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          selectedDimensions={[mockDimensions[2], mockDimensions[0]]}
+        />
+      );
+      const options = screen.getAllByTestId(
+        new RegExp(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-`)
+      );
+
+      const firstUnselectedIndex = options.findIndex(
+        (opt) => opt.getAttribute('data-checked') !== 'on'
+      );
+      const lastSelectedIndex = options.findLastIndex(
+        (opt) => opt.getAttribute('data-checked') === 'on'
+      );
+
+      if (firstUnselectedIndex >= 0 && lastSelectedIndex >= 0) {
+        expect(lastSelectedIndex).toBeLessThan(firstUnselectedIndex);
+      }
+    });
+  });
+
   describe('Single selection mode', () => {
     it('calls onChange immediately when option is selected', () => {
       const onChange = jest.fn();
@@ -254,7 +280,7 @@ describe('DimensionsSelector', () => {
         <DimensionsSelector {...defaultProps} singleSelection={true} onChange={onChange} />
       );
       const option = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[0].name}`
       );
       fireEvent.click(option);
       expect(onChange).toHaveBeenCalledWith([mockDimensions[0]]);
@@ -269,7 +295,7 @@ describe('DimensionsSelector', () => {
         />
       );
       const option = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[1].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[1].name}`
       );
       expect(option).toHaveAttribute('data-disabled', 'false');
     });
@@ -284,9 +310,7 @@ describe('DimensionsSelector', () => {
       );
 
       mockDimensions.forEach((dim) => {
-        const option = screen.getByTestId(
-          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${dim.name}`
-        );
+        const option = screen.getByTestId(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${dim.name}`);
         expect(option).toHaveAttribute('data-disabled', 'false');
       });
     });
@@ -299,7 +323,7 @@ describe('DimensionsSelector', () => {
         <DimensionsSelector {...defaultProps} singleSelection={false} onChange={onChange} />
       );
       const option = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[0].name}`
       );
       fireEvent.click(option);
 
@@ -313,7 +337,7 @@ describe('DimensionsSelector', () => {
       renderWithIntl(<DimensionsSelector {...defaultProps} selectedDimensions={maxSelected} />);
 
       const unselectedOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[MAX_DIMENSIONS_SELECTIONS].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[MAX_DIMENSIONS_SELECTIONS].name}`
       );
       expect(unselectedOption).toHaveAttribute('data-disabled', 'true');
     });
@@ -323,9 +347,7 @@ describe('DimensionsSelector', () => {
       renderWithIntl(<DimensionsSelector {...defaultProps} selectedDimensions={maxSelected} />);
 
       maxSelected.forEach((dim) => {
-        const option = screen.getByTestId(
-          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${dim.name}`
-        );
+        const option = screen.getByTestId(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${dim.name}`);
         expect(option.getAttribute('data-disabled')).toBe('false');
       });
     });
@@ -335,7 +357,7 @@ describe('DimensionsSelector', () => {
       renderWithIntl(<DimensionsSelector {...defaultProps} onChange={onChange} />);
 
       const optionElements = screen.getAllByTestId(
-        new RegExp(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-`)
+        new RegExp(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-`)
       );
 
       optionElements.forEach((option) => {
@@ -355,9 +377,7 @@ describe('DimensionsSelector', () => {
     it('enables all dimensions when no dimensions are selected', () => {
       renderWithIntl(<DimensionsSelector {...defaultProps} />);
       mockDimensions.forEach((dim) => {
-        const option = screen.getByTestId(
-          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${dim.name}`
-        );
+        const option = screen.getByTestId(`${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${dim.name}`);
         expect(option).toHaveAttribute('data-disabled', 'false');
       });
     });
@@ -371,22 +391,22 @@ describe('DimensionsSelector', () => {
       );
 
       const hostNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[0].name}`
       );
       expect(hostNameOption).toHaveAttribute('data-disabled', 'false');
 
       const containerIdOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[1].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[1].name}`
       );
       expect(containerIdOption).toHaveAttribute('data-disabled', 'false');
 
       const serviceNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[2].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[2].name}`
       );
       expect(serviceNameOption).toHaveAttribute('data-disabled', 'false');
 
       const podNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[3].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[3].name}`
       );
       expect(podNameOption).toHaveAttribute('data-disabled', 'true');
     });
@@ -400,22 +420,22 @@ describe('DimensionsSelector', () => {
       );
 
       const hostNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[0].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[0].name}`
       );
       expect(hostNameOption).toHaveAttribute('data-disabled', 'false');
 
       const containerIdOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[1].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[1].name}`
       );
       expect(containerIdOption).toHaveAttribute('data-disabled', 'false');
 
       const serviceNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[2].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[2].name}`
       );
       expect(serviceNameOption).toHaveAttribute('data-disabled', 'false');
 
       const podNameOption = screen.getByTestId(
-        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${mockDimensions[3].name}`
+        `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${mockDimensions[3].name}`
       );
       expect(podNameOption).toHaveAttribute('data-disabled', 'true');
     });

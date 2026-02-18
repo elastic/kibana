@@ -28,6 +28,7 @@ import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+  METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ,
   DEBOUNCE_TIME,
 } from '../../common/constants';
 import { getOptionDisabledState } from './dimensions_selector_helpers';
@@ -121,6 +122,7 @@ export const DimensionsSelector = ({
         checked: isSelected ? 'on' : undefined,
         disabled: isDisabled,
         key: dimension.name,
+        'data-test-subj': `${METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ}-${dimension.name}`,
       };
 
       if (tooltipContent) {

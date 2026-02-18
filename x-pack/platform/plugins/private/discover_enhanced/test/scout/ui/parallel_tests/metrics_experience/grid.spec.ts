@@ -97,8 +97,10 @@ spaceTest.describe(
       await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
       await expect(metricsExperience.grid).toBeVisible();
 
+      const cardIndex = 0;
+
       await spaceTest.step('open context menu from first metric card', async () => {
-        await metricsExperience.openCardContextMenu(0);
+        await metricsExperience.openCardContextMenu(cardIndex);
       });
 
       await spaceTest.step('View details action is present', async () => {
@@ -110,7 +112,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('Explore action is present', async () => {
-        await expect(metricsExperience.chartActions.explore).toBeVisible();
+        await expect(metricsExperience.getQuickActionsForCard(cardIndex).explore).toBeVisible();
       });
     });
   }

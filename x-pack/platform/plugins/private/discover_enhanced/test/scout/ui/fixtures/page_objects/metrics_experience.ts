@@ -70,7 +70,7 @@ function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
     search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
     selectable: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable'),
     getOption: (dimensionName: string) =>
-      page.testSubj.locator(`metricsExperienceBreakdownSelectorOption-${dimensionName}`),
+      page.testSubj.locator(`metricsBreakdownOption-${dimensionName}`),
     getButtonWithSelectedDimension: (dimensionName: string) =>
       page.locator(
         `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
@@ -172,6 +172,21 @@ export class MetricsExperiencePage {
   }
 
   /**
+   * Returns quick actions scoped to a specific card by index.
+   * Quick actions (like Explore) are rendered in the hover bar inside the card.
+   * Use this instead of global locators to avoid strict mode violations
+   * when multiple cards have visible hover actions.
+   */
+  public getQuickActionsForCard(index: number): { explore: Locator } {
+    const card = this.getCardByIndex(index);
+    return {
+      explore: card.locator(
+        '[data-test-subj="embeddablePanelAction-ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB"]'
+      ),
+    };
+  }
+
+  /**
    * Searches for a metric by name using the toolbar search input.
    * Opens the search input if not already visible.
    */
@@ -200,8 +215,10 @@ export class MetricsExperiencePage {
    */
   public async openCardContextMenu(index: number): Promise<void> {
     const card = this.getCardByIndex(index);
+    const menuButton = card.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
     await card.hover();
-    await card.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+    await menuButton.waitFor({ state: 'visible' });
+    await menuButton.click();
   }
 
   /**
