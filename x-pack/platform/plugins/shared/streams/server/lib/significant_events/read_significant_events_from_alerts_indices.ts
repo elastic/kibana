@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
@@ -17,6 +16,7 @@ import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/queries';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
+import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
@@ -123,10 +123,10 @@ export async function readSignificantEventsFromAlertsIndices(
       },
     })
     .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      const { type, message } = parseError(err);
+      if (type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          `Cannot read significant events, insufficient privileges: ${message}`,
           { cause: err }
         );
       }

@@ -15,6 +15,8 @@ import {
   UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamRequestParams,
   DeleteDataStreamRequestParams,
+  ReanalyzeDataStreamRequestParams,
+  ReanalyzeDataStreamRequestBody,
 } from '../../common';
 
 export const registerDataStreamRoutes = (
@@ -24,6 +26,7 @@ export const registerDataStreamRoutes = (
   uploadSamplesRoute(router, logger);
   deleteDataStreamRoute(router, logger);
   getDataStreamResultsRoute(router, logger);
+  reanalyzeDataStreamRoute(router, logger);
 };
 
 const uploadSamplesRoute = (
@@ -163,6 +166,59 @@ const getDataStreamResultsRoute = (
               ? 400
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });
+        }
+      }
+    );
+
+const reanalyzeDataStreamRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .put({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/data_streams/{data_stream_id}/reanalyze',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ReanalyzeDataStreamRequestParams),
+            body: buildRouteValidationWithZod(ReanalyzeDataStreamRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
+          const { connectorId, langSmithOptions } = request.body;
+
+          await automaticImportService.reanalyzeDataStream(
+            {
+              integrationId,
+              dataStreamId,
+              connectorId,
+              langSmithOptions,
+            },
+            request
+          );
+
+          return response.ok({ body: { success: true } });
+        } catch (err) {
+          logger.error(`reanalyzeDataStreamRoute: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
         }
       }
     );
