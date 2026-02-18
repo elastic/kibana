@@ -22,7 +22,7 @@ test.describe('DataViewPermissions', { tag: tags.stateful.classic }, () => {
         id: 'synthetics_static_index_pattern_id_heartbeat_',
       });
     } catch (e) {
-      // Ignore - may not exist
+      console.error('Failed to delete data view', e);
     }
   });
 
