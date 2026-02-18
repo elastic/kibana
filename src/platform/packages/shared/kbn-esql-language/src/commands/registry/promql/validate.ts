@@ -156,9 +156,8 @@ export const validate = (
     }
 
     if (param === PromqlParamName.Buckets) {
-      const normalized = stripQuotes(value);
-
-      if (!/^\d+$/.test(normalized) || parseInt(normalized, 10) <= 0) {
+      const num = Number(value);
+      if (!Number.isInteger(num) || num <= 0) {
         messages.push({
           ...getMessageFromId({
             messageId: 'promqlInvalidBucketsParam',
