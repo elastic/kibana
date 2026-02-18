@@ -42,6 +42,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
 export interface ActionButton {
   /** Button label text */
   label: string;
+  /** Optional icon to display in the button (EUI icon name or custom React element) */
+  icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
   /** Handler function called when the button is clicked */
