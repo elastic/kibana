@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 
-/** Placeholder for API key in URL; must match @kbn/connector-schemas/mcp API_KEY_URL_PLACEHOLDER for MCP form serialization. */
-const API_KEY_URL_PLACEHOLDER = '{{apiKey}}';
+const FIRECRAWL_MCP_URL = `https://mcp.firecrawl.dev/${API_KEY_URL_PLACEHOLDER}/v2/mcp`;
 
 export const firecrawlDataSource: DataSource = {
   id: 'firecrawl',
@@ -25,11 +24,11 @@ export const firecrawlDataSource: DataSource = {
     {
       type: '.mcp',
       config: {
-        serverUrl: `https://mcp.firecrawl.dev/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
+        serverUrl: FIRECRAWL_MCP_URL,
         hasAuth: true,
         authType: MCPAuthType.ApiKeyInUrl,
       },
-      preloadUrl: `https://mcp.firecrawl.dev/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
+      preloadUrl: FIRECRAWL_MCP_URL,
       importedTools: [
         { name: 'firecrawl_scrape' },
         { name: 'firecrawl_batch_scrape' },

@@ -80,6 +80,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
     toggleIsOpen(hasHeaders);
   }, [isLoadingSecretHeaders, secretHeaderKeys, getFormData, updateFieldValues, toggleIsOpen]);
 
+  // When API key is in URL, server URL is a template (read-only); only required. Otherwise validate URL format.
+  const serverUrlValidations = [
+    { validator: emptyField(mcpErrorStrings.required(mcpFieldStrings.serverUrl.label)) },
+    ...(isApiKeyInUrlAuth ? [] : [{ validator: urlField(mcpErrorStrings.invalid(mcpFieldStrings.serverUrl.label)) }]),
+  ];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {/* Hidden field so config.authType is in form state (e.g. preload sets ApiKeyInUrl). */}
@@ -89,12 +95,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         component={TextField}
         config={{
           label: mcpFieldStrings.serverUrl.label,
-          validations: [
-            {
-              validator: emptyField(mcpErrorStrings.required(mcpFieldStrings.serverUrl.label)),
-            },
-            ...(isApiKeyInUrlAuth ? [] : [{ validator: urlField(mcpErrorStrings.invalid(mcpFieldStrings.serverUrl.label)) }]),
-          ],
+          validations: serverUrlValidations,
         }}
         componentProps={{
           euiFieldProps: {
