@@ -20,6 +20,124 @@
     "required": ["content"]
   },
   {
+    "description": "SLO Overview embeddable schema with drilldowns",
+    "anyOf": [
+      {
+        "type": "object",
+        "properties": {
+          "drilldowns": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          },
+          "slo_id": {
+            "type": "string"
+          },
+          "slo_instance_id": {
+            "type": "string"
+          },
+          "remote_name": {
+            "type": "string"
+          },
+          "show_all_group_by_instances": {
+            "type": "boolean"
+          },
+          "overview_mode": {
+            "type": "string",
+            "enum": [
+              "single"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "slo_id",
+          "overview_mode"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "drilldowns": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          },
+          "group_filters": {
+          "type": "object",
+          "properties": {
+            "group_by": {
+              "type": "string",
+              "enum": [
+                "slo.tags",
+                "status",
+                "slo.indicator.type"
+              ]
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            },
+            "kql_query": {
+            "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "group_by"
+          ]
+          },
+          "overview_mode": {
+            "type": "string",
+            "enum": [
+              "groups"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "overview_mode"
+        ]
+      }
+    ]
+  },
+  {
     "type": "object",
     "properties": {},
     "additionalProperties": true
