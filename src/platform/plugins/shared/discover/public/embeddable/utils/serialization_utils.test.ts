@@ -132,8 +132,8 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.title).toEqual('test panel title');
-      // Dashboard override should be applied on top of tab-1 defaults
-      expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
+      // For a valid/default tab, attributes come from the resolved tab
+      expect(deserializedState.sort).toEqual([['order_date', 'desc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
       expect(deserializedState.tabs).toEqual(sessionTabs);
@@ -230,9 +230,8 @@ describe('Serialization utils', () => {
         serializedState,
         discoverServices: discoverServiceMock,
       });
-      // Dashboard override should take precedence over tab-2 defaults
-      expect(deserializedState.columns).toEqual(['custom-col']);
-      // Other attributes should come from tab-2
+      // For a valid tab, attributes come from tab-2
+      expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
   });
@@ -344,11 +343,8 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            savedObjectId: 'test-id',
-            selectedTabId: 'tab-2',
-          },
-          references: [],
+          savedObjectId: 'test-id',
+          selectedTabId: 'tab-2',
         });
       });
 
@@ -367,10 +363,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          savedObjectId: 'test-id',
         });
       });
     });
