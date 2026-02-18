@@ -40,9 +40,13 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
-import { useOAuthAuthorize } from '../../../hooks/use_oauth_authorize';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
+import {
+  OAuthRedirectMode,
+  useConnectorOAuthConnect,
+} from '../../../hooks/oauth/use_connector_oauth_connect';
+import { useConnectorOAuthDisconnect } from '../../../hooks/oauth/use_connector_oauth_disconnect';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -132,7 +136,55 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
-  const { authorize, isAuthorizing } = useOAuthAuthorize();
+  const { connect, isConnecting, isAwaitingCallback } = useConnectorOAuthConnect({
+    connectorId: connector.id,
+    redirectMode: OAuthRedirectMode.NewTab,
+    onSuccess: () => {
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationSuccessTitle',
+          { defaultMessage: 'Authorization successful' }
+        ),
+        text: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationSuccessMessage',
+          { defaultMessage: 'Your connector has been authorized successfully.' }
+        ),
+      });
+    },
+    onError: (error) => {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationErrorTitle',
+          { defaultMessage: 'Authorization failed' }
+        ),
+        text: error.message,
+      });
+    },
+  });
+  const { disconnect, isDisconnecting } = useConnectorOAuthDisconnect({
+    connectorId: connector.id,
+    onSuccess: () => {
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectSuccessTitle',
+          { defaultMessage: 'Disconnected' }
+        ),
+        text: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectSuccessMessage',
+          { defaultMessage: 'Your connector has been disconnected from OAuth.' }
+        ),
+      });
+    },
+    onError: (error) => {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectErrorTitle',
+          { defaultMessage: 'Disconnect failed' }
+        ),
+        text: error.message,
+      });
+    },
+  });
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -241,35 +293,10 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     onFormModifiedChange,
   ]);
 
-  const handleAuthorize = useCallback(async () => {
+  const handleAuthorize = useCallback(() => {
     if (!connector) return;
-
-    try {
-      await authorize(connector.id);
-
-      toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeSuccessTitle',
-          { defaultMessage: 'Authorization window opened' }
-        ),
-        text: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeSuccessText',
-          {
-            defaultMessage:
-              'Complete the authorization in the new window, then test your connector.',
-          }
-        ),
-      });
-    } catch (error) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.authorizeErrorTitle',
-          { defaultMessage: 'Failed to start authorization' }
-        ),
-        text: error.message,
-      });
-    }
-  }, [connector, authorize, toasts]);
+    connect();
+  }, [connector, connect]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -415,7 +442,10 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           onClickSave={onClickSave}
           connector={connector}
           onAuthorize={handleAuthorize}
-          isAuthorizing={isAuthorizing}
+          isAuthorizing={isConnecting}
+          isAwaitingCallback={isAwaitingCallback}
+          onDisconnect={disconnect}
+          isDisconnecting={isDisconnecting}
         />
       </EuiFlyout>
       {showConfirmModal && (

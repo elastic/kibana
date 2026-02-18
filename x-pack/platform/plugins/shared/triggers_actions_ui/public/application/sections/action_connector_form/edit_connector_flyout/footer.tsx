@@ -28,6 +28,9 @@ interface Props {
   connector: ActionConnector;
   onAuthorize?: () => void;
   isAuthorizing?: boolean;
+  isAwaitingCallback?: boolean;
+  onDisconnect?: () => void;
+  isDisconnecting?: boolean;
 }
 
 const FlyoutFooterComponent: React.FC<Props> = ({
@@ -40,7 +43,11 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   connector,
   onAuthorize,
   isAuthorizing,
+  isAwaitingCallback,
+  onDisconnect,
+  isDisconnecting,
 }) => {
+  const isAuthorizeBusy = isAuthorizing || isAwaitingCallback;
   return (
     <EuiFlyoutFooter data-test-subj="edit-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -53,16 +60,38 @@ const FlyoutFooterComponent: React.FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
+            {usesOAuthAuthorizationCode(connector) && onDisconnect && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="danger"
+                  data-test-subj="edit-connector-flyout-disconnect-btn"
+                  onClick={onDisconnect}
+                  isLoading={isDisconnecting}
+                  disabled={isAuthorizeBusy}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.editConnectorForm.disconnectButtonLabel"
+                    defaultMessage="Disconnect"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
             {usesOAuthAuthorizationCode(connector) && onAuthorize && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="success"
                   data-test-subj="edit-connector-flyout-authorize-btn"
                   onClick={onAuthorize}
-                  isLoading={isAuthorizing}
-                  iconType="popout"
+                  isLoading={isAuthorizeBusy}
+                  disabled={isDisconnecting}
+                  iconType={isAuthorizeBusy ? undefined : 'popout'}
                 >
-                  {isAuthorizing ? (
+                  {isAwaitingCallback ? (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.editConnectorForm.awaitingAuthorizationButtonLabel"
+                      defaultMessage="Awaiting authorization..."
+                    />
+                  ) : isAuthorizing ? (
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.editConnectorForm.authorizingButtonLabel"
                       defaultMessage="Authorizing..."

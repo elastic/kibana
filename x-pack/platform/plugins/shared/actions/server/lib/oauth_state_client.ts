@@ -19,7 +19,7 @@ interface OAuthStateAttributes {
   state: string;
   codeVerifier: string;
   connectorId: string;
-  kibanaReturnUrl: string;
+  kibanaReturnUrl?: string;
   spaceId: string;
   createdAt: string;
   expiresAt: string;
@@ -38,7 +38,7 @@ interface ConstructorOptions {
 
 interface CreateStateOptions {
   connectorId: string;
-  kibanaReturnUrl: string;
+  kibanaReturnUrl?: string;
   spaceId: string;
   createdBy?: string;
 }

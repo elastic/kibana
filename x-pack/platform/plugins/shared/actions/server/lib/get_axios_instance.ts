@@ -169,34 +169,34 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
-      // add a response interceptor to clean up saved tokens if necessary
       if (connectorTokenClient) {
-        const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-          connectorTokenClient,
-          connectorId,
-        });
-        axiosInstance.interceptors.response.use(onFulfilled, onRejected);
-      }
-
-      // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
-      if (authTypeId === 'oauth_authorization_code' && connectorTokenClient) {
-        axiosInstance.interceptors.response.use(
-          (response) => response,
-          (error) => {
-            if (error.response?.status === 401) {
-              return handleOAuth401Error({
-                error,
-                connectorId,
-                secrets: secrets as OAuth2AuthCodeParams,
-                connectorTokenClient,
-                logger,
-                configurationUtilities,
-                axiosInstance,
-              });
+        if (authTypeId === 'oauth_authorization_code') {
+          // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
+          axiosInstance.interceptors.response.use(
+            (response) => response,
+            (error) => {
+              if (error.response?.status === 401) {
+                return handleOAuth401Error({
+                  error,
+                  connectorId,
+                  secrets: secrets as OAuth2AuthCodeParams,
+                  connectorTokenClient,
+                  logger,
+                  configurationUtilities,
+                  axiosInstance,
+                });
+              }
+              return Promise.reject(error);
             }
-            return Promise.reject(error);
-          }
-        );
+          );
+        } else {
+          // add a response interceptor to clean up saved tokens if necessary
+          const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
+            connectorTokenClient,
+            connectorId,
+          });
+          axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+        }
       }
 
       const configureCtx = {

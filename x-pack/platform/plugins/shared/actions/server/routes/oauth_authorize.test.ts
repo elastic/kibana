@@ -273,7 +273,7 @@ describe('oauthAuthorizeRoute', () => {
     });
   });
 
-  it('uses default return URL when not provided', async () => {
+  it('omits return URL when not provided', async () => {
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
       authorizationUrl: 'https://provider.example.com/authorize',
       clientId: 'client-id',
@@ -299,7 +299,7 @@ describe('oauthAuthorizeRoute', () => {
 
     expect(mockOAuthStateClientInstance.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        kibanaReturnUrl: `${KIBANA_URL}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`,
+        kibanaReturnUrl: undefined,
       })
     );
   });

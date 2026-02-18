@@ -6,12 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { escape } from 'lodash';
+import { capitalize, escape } from 'lodash';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
+import {
+  BASE_ACTION_API_PATH,
+  OAuthAuthorizationStatus,
+  OAUTH_CALLBACK_QUERY_PARAMS,
+  OAUTH_BROADCAST_CHANNEL_NAME,
+} from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
@@ -86,8 +91,32 @@ interface OAuthConnectorConfig {
   useBasicAuth?: boolean;
 }
 
+type RespondWithErrorOptions = {
+  details: string;
+} & (
+  | { connectorId: string; returnUrl?: string }
+  | { connectorId?: undefined; returnUrl?: undefined }
+);
+
+interface RespondWithSuccessOptions {
+  connectorId: string;
+  returnUrl?: string;
+}
+
+interface OAuthCallbackBroadcast {
+  connectorId: string;
+  status: OAuthAuthorizationStatus;
+  error?: string;
+}
+
 /**
- * Generates a styled OAuth callback page using EUI-like styling
+ * Path for the companion JS served by {@link oauthCallbackScriptRoute}.
+ * Loaded via `<script src>` to satisfy Kibana's `script-src 'self'` CSP.
+ */
+const OAUTH_CALLBACK_SCRIPT_PATH = `${BASE_ACTION_API_PATH}/connector/_oauth_callback_script`;
+
+/**
+ * Generates a styled OAuth callback page using EUI-like styling.
  */
 function generateOAuthCallbackPage({
   title,
@@ -96,6 +125,7 @@ function generateOAuthCallbackPage({
   details,
   isSuccess,
   autoClose,
+  broadcast,
 }: {
   title: string;
   heading: string;
@@ -103,6 +133,7 @@ function generateOAuthCallbackPage({
   details?: string;
   isSuccess: boolean;
   autoClose?: boolean;
+  broadcast?: OAuthCallbackBroadcast;
 }): string {
   const iconColor = isSuccess ? '#00BFB3' : '#BD271E';
   const icon = isSuccess ? '✓' : '✕';
@@ -110,6 +141,13 @@ function generateOAuthCallbackPage({
   const sanitisedHeading = escape(heading);
   const sanitisedMessage = escape(message);
   const sanitisedDetails = details ? escape(details) : '';
+
+  const dataAttributes = [
+    autoClose ? 'data-auto-close="true"' : '',
+    broadcast ? `data-broadcast="${escape(JSON.stringify(broadcast))}"` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return `
     <!DOCTYPE html>
@@ -180,21 +218,8 @@ function generateOAuthCallbackPage({
             border-radius: 4px;
           }
         </style>
-        ${
-          autoClose
-            ? `<script>
-          setTimeout(() => {
-            window.close();
-            // If window.close() doesn't work (not opened by script), show message
-            setTimeout(() => {
-              document.querySelector('.auto-close-message').style.display = 'block';
-            }, 100);
-          }, 3000);
-        </script>`
-            : ''
-        }
       </head>
-      <body>
+      <body ${dataAttributes}>
         <div class="container">
           <div class="icon">${icon}</div>
           <h1>${sanitisedHeading}</h1>
@@ -206,10 +231,108 @@ function generateOAuthCallbackPage({
               : ''
           }
         </div>
+        <script src="${OAUTH_CALLBACK_SCRIPT_PATH}"></script>
       </body>
     </html>
   `;
 }
+
+const GENERIC_OAUTH_ERROR = 'OAuth authorization failed';
+
+const buildOAuthReturnUrl = (
+  kibanaReturnUrl: string,
+  connectorId: string,
+  status: OAuthAuthorizationStatus,
+  errorMessage?: string
+): string => {
+  const returnUrl = new URL(kibanaReturnUrl);
+  returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.AUTHORIZATION_STATUS, status);
+  returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.CONNECTOR_ID, connectorId);
+  if (errorMessage) {
+    returnUrl.searchParams.set(OAUTH_CALLBACK_QUERY_PARAMS.ERROR, errorMessage);
+  }
+  return returnUrl.toString();
+};
+
+/**
+ * Returns an OAuth error response. Redirects when `returnUrl` and `connectorId`
+ * are set; otherwise renders an HTML callback page.
+ *
+ * @param res - Kibana response factory
+ * @param options.details - Error details
+ * @param options.connectorId - Connector ID; enables auto-close
+ * @param options.returnUrl - When set (with connectorId), triggers a redirect instead
+ */
+const respondWithError = (
+  res: KibanaResponseFactory,
+  { details, connectorId, returnUrl }: RespondWithErrorOptions
+) => {
+  if (returnUrl) {
+    return res.redirected({
+      headers: {
+        location: buildOAuthReturnUrl(
+          returnUrl,
+          connectorId,
+          OAuthAuthorizationStatus.Error,
+          details
+        ),
+      },
+    });
+  }
+  return res.ok({
+    headers: { 'content-type': 'text/html' },
+    body: generateOAuthCallbackPage({
+      title: 'OAuth Authorization Failed',
+      heading: 'Authorization Failed',
+      message: 'You can close this window and try again.',
+      details,
+      isSuccess: false,
+      broadcast: connectorId
+        ? {
+            connectorId,
+            status: OAuthAuthorizationStatus.Error,
+            error: details,
+          }
+        : undefined,
+    }),
+  });
+};
+
+/**
+ * Returns an OAuth success response. Same redirect-vs-page branching as
+ * {@link respondWithError}.
+ *
+ * @param res - Kibana response factory
+ * @param options.connectorId - Connector ID
+ * @param options.returnUrl - When set, triggers a redirect instead of rendering the page
+ */
+const respondWithSuccess = (
+  res: KibanaResponseFactory,
+  { connectorId, returnUrl }: RespondWithSuccessOptions
+) => {
+  if (returnUrl) {
+    return res.redirected({
+      headers: {
+        location: buildOAuthReturnUrl(returnUrl, connectorId, OAuthAuthorizationStatus.Success),
+      },
+    });
+  }
+  return res.ok({
+    headers: { 'content-type': 'text/html' },
+    body: generateOAuthCallbackPage({
+      title: 'OAuth Authorization Successful',
+      heading: 'Authorization Successful',
+      message:
+        'Your connector has been authorized successfully. This window will close automatically.',
+      isSuccess: true,
+      autoClose: true,
+      broadcast: {
+        connectorId,
+        status: OAuthAuthorizationStatus.Success,
+      },
+    }),
+  });
+};
 
 /**
  * OAuth2 callback endpoint - handles authorization code exchange
@@ -246,12 +369,13 @@ export const oauthCallbackRoute = (
         response: {
           302: {
             description: i18n.translate('xpack.actions.oauthCallback.response302Description', {
-              defaultMessage: 'Redirects to Kibana on successful authorization.',
+              defaultMessage:
+                'Redirects to the return URL with authorization result query parameters.',
             }),
           },
           200: {
             description: i18n.translate('xpack.actions.oauthCallback.response200Description', {
-              defaultMessage: 'Returns an HTML page with error details if authorization fails.',
+              defaultMessage: 'Returns an HTML callback page.',
             }),
           },
           401: {
@@ -267,7 +391,6 @@ export const oauthCallbackRoute = (
         const core = await context.core;
         const routeLogger = logger.get('oauth_callback');
 
-        // Check rate limit
         const currentUser = core.security.authc.getCurrentUser();
         if (!currentUser) {
           return res.unauthorized({
@@ -285,67 +408,54 @@ export const oauthCallbackRoute = (
         oauthRateLimiter.log(username, 'callback');
         if (oauthRateLimiter.isRateLimited(username, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);
-          return res.ok({
-            headers: { 'content-type': 'text/html' },
-            body: generateOAuthCallbackPage({
-              title: 'OAuth Authorization Failed',
-              heading: 'Too Many Requests',
-              message: 'You have made too many authorization attempts.',
-              details: 'Please wait before trying again.',
-              isSuccess: false,
-            }),
+          return respondWithError(res, {
+            details: 'Too many authorization attempts. Please wait before trying again.',
           });
         }
 
-        // Handle OAuth errors or missing parameters
         const { code, state: stateParam, error, error_description: errorDescription } = req.query;
-        if (error || !code || !stateParam) {
-          const errorMessage = error || 'Missing required OAuth parameters (code or state)';
-          const details = errorDescription
-            ? `${errorMessage}\n\n${errorDescription}`
-            : errorMessage;
 
-          return res.ok({
-            headers: { 'content-type': 'text/html' },
-            body: generateOAuthCallbackPage({
-              title: 'OAuth Authorization Failed',
-              heading: 'Authorization Failed',
-              message: 'You can close this window and try again.',
-              details,
-              isSuccess: false,
-            }),
+        if (!stateParam) {
+          return respondWithError(res, {
+            details: 'Missing required OAuth state parameter.',
+          });
+        }
+
+        const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
+
+        const oauthStateClient = new OAuthStateClient({
+          encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+            includedHiddenTypes: ['oauth_state'],
+          }),
+          unsecuredSavedObjectsClient: core.savedObjects.getClient({
+            includedHiddenTypes: ['oauth_state'],
+          }),
+          logger: routeLogger,
+        });
+        const oauthState = await oauthStateClient.get(stateParam);
+        if (!oauthState) {
+          return respondWithError(res, {
+            details:
+              'Invalid or expired state parameter. The authorization session may have timed out.',
+          });
+        }
+
+        const { connectorId: stateConnectorId, kibanaReturnUrl } = oauthState;
+
+        if (error || !code) {
+          const providerError = error || 'Missing required OAuth authorization code';
+          const details = errorDescription
+            ? `${providerError}\n\n${errorDescription}`
+            : providerError;
+          routeLogger.error(`OAuth provider error for connector ${stateConnectorId}: ${details}`);
+          return respondWithError(res, {
+            details,
+            connectorId: stateConnectorId,
+            returnUrl: kibanaReturnUrl,
           });
         }
 
         try {
-          const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
-
-          // Retrieve and validate state
-          const oauthStateClient = new OAuthStateClient({
-            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['oauth_state'],
-            }),
-            unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['oauth_state'],
-            }),
-            logger: routeLogger,
-          });
-          const oauthState = await oauthStateClient.get(stateParam);
-          if (!oauthState) {
-            return res.ok({
-              headers: { 'content-type': 'text/html' },
-              body: generateOAuthCallbackPage({
-                title: 'OAuth Authorization Failed',
-                heading: 'Authorization Failed',
-                message: 'You can close this window and try again.',
-                details:
-                  'Invalid or expired state parameter. The authorization session may have timed out.',
-                isSuccess: false,
-              }),
-            });
-          }
-
-          // Get connector with decrypted secrets using the spaceId from the OAuth state
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
           });
@@ -358,27 +468,24 @@ export const oauthCallbackRoute = (
             name: string;
             config: OAuthConnectorConfig;
             secrets: OAuthConnectorSecrets;
-          }>('action', oauthState.connectorId, { namespace });
+          }>('action', stateConnectorId, { namespace });
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
-          // Extract OAuth config - for connector specs, secrets are stored directly
           const clientId = secrets.clientId || config?.clientId;
           const clientSecret = secrets.clientSecret;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
-          const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true; // Default to true (OAuth 2.0 recommended practice)
+          const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
           if (!clientId || !clientSecret || !tokenUrl) {
             throw new Error(
               'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
             );
           }
 
-          // Build the redirect URI (must match the one sent to the authorization endpoint)
           const redirectUri = OAuthAuthorizationService.getRedirectUri(
             coreStart.http.basePath.publicBaseUrl
           );
 
-          // Exchange authorization code for tokens
           const tokenResult = await requestOAuthAuthorizationCodeToken(
             tokenUrl,
             logger,
@@ -393,10 +500,9 @@ export const oauthCallbackRoute = (
             useBasicAuth
           );
           routeLogger.debug(
-            `Successfully exchanged authorization code for access token for connectorId: ${oauthState.connectorId}`
+            `Successfully exchanged authorization code for access token for connectorId: ${stateConnectorId}`
           );
 
-          // Store tokens - first delete any existing tokens for this connector then create a new token record
           const connectorTokenClient = new ConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
               includedHiddenTypes: ['connector_token'],
@@ -407,12 +513,12 @@ export const oauthCallbackRoute = (
             logger: routeLogger,
           });
           await connectorTokenClient.deleteConnectorTokens({
-            connectorId: oauthState.connectorId,
+            connectorId: stateConnectorId,
             tokenType: 'access_token',
           });
-          const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
+          const formattedToken = `${capitalize(tokenResult.tokenType)} ${tokenResult.accessToken}`;
           await connectorTokenClient.createWithRefreshToken({
-            connectorId: oauthState.connectorId,
+            connectorId: stateConnectorId,
             accessToken: formattedToken,
             refreshToken: tokenResult.refreshToken,
             expiresIn: tokenResult.expiresIn,
@@ -420,16 +526,11 @@ export const oauthCallbackRoute = (
             tokenType: 'access_token',
           });
 
-          // Clean up state
           await oauthStateClient.delete(oauthState.id);
 
-          // Redirect to Kibana with success indicator
-          const returnUrl = new URL(oauthState.kibanaReturnUrl);
-          returnUrl.searchParams.set('oauth_authorization', 'success');
-          return res.redirected({
-            headers: {
-              location: returnUrl.toString(),
-            },
+          return respondWithSuccess(res, {
+            connectorId: stateConnectorId,
+            returnUrl: kibanaReturnUrl,
           });
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : String(err);
@@ -437,18 +538,70 @@ export const oauthCallbackRoute = (
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
-          return res.ok({
-            headers: { 'content-type': 'text/html' },
-            body: generateOAuthCallbackPage({
-              title: 'OAuth Authorization Failed',
-              heading: 'Authorization Failed',
-              message: 'You can close this window and try again.',
-              details: errorMessage,
-              isSuccess: false,
-            }),
+          return respondWithError(res, {
+            details: GENERIC_OAUTH_ERROR,
+            connectorId: stateConnectorId,
+            returnUrl: kibanaReturnUrl,
           });
         }
       })
     )
+  );
+};
+
+/**
+ * Companion JS for the OAuth callback HTML page.
+ *
+ * Reads `data-broadcast` and `data-auto-close` attributes from `<body>` and
+ * executes BroadcastChannel messaging and auto-close logic. Served as a
+ * separate route so it satisfies Kibana's `script-src 'self'` CSP.
+ */
+const OAUTH_CALLBACK_SCRIPT_BODY = `(() => {
+  const { broadcast, autoClose } = document.body.dataset;
+
+  if (broadcast) {
+    try {
+      const message = JSON.parse(broadcast);
+      const channel = new BroadcastChannel(${JSON.stringify(OAUTH_BROADCAST_CHANNEL_NAME)});
+      channel.postMessage(message);
+      channel.close();
+    } catch (_) {
+      // BroadcastChannel may not be supported in all browsers
+    }
+  }
+
+  if (autoClose === 'true') {
+    setTimeout(() => {
+      window.close();
+      setTimeout(() => {
+        const fallback = document.querySelector('.auto-close-message');
+        if (fallback) {
+          fallback.style.display = 'block';
+        }
+      }, 100);
+    }, 3000);
+  }
+})();
+`;
+
+export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerContext>) => {
+  router.get(
+    {
+      path: OAUTH_CALLBACK_SCRIPT_PATH,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      options: {
+        access: 'public',
+      },
+      validate: {},
+    },
+    (_context, _req, res) => {
+      return res.ok({
+        headers: {
+          'content-type': 'application/javascript',
+          'cache-control': 'public, max-age=86400',
+        },
+        body: OAUTH_CALLBACK_SCRIPT_BODY,
+      });
+    }
   );
 };

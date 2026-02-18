@@ -167,16 +167,26 @@ describe('oauthCallbackRoute', () => {
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: { 'content-type': 'text/html' },
-        body: expect.stringContaining('Too Many Requests'),
+        body: expect.stringContaining('Too many authorization attempts'),
       })
     );
   });
 
   it('returns error page when OAuth error parameter is present', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      spaceId: 'default',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+    });
+
     const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
-      query: { error: 'access_denied', error_description: 'User cancelled' },
+      query: { error: 'access_denied', error_description: 'User cancelled', state: 'valid-state' },
     });
     const res = httpServerMock.createResponseFactory();
 
@@ -185,12 +195,22 @@ describe('oauthCallbackRoute', () => {
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: { 'content-type': 'text/html' },
-        body: expect.stringContaining('Authorization Failed'),
+        body: expect.stringContaining('access_denied'),
       })
     );
   });
 
   it('returns error page when code is missing', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'some-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      spaceId: 'default',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+    });
+
     const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
@@ -203,7 +223,7 @@ describe('oauthCallbackRoute', () => {
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: { 'content-type': 'text/html' },
-        body: expect.stringContaining('Authorization Failed'),
+        body: expect.stringContaining('Missing required OAuth authorization code'),
       })
     );
   });
@@ -326,12 +346,13 @@ describe('oauthCallbackRoute', () => {
     // Verify redirect
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
-        location: 'https://kibana.example.com/app/connectors?oauth_authorization=success',
+        location:
+          'https://kibana.example.com/app/connectors?oauth_authorization=success&connector_id=connector-1',
       },
     });
   });
 
-  it('returns error page on token exchange failure', async () => {
+  it('redirects with error on token exchange failure', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -369,15 +390,15 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
-    expect(res.ok).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: { 'content-type': 'text/html' },
-        body: expect.stringContaining('Token exchange failed'),
-      })
-    );
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location:
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&error=OAuth+authorization+failed',
+      },
+    });
   });
 
-  it('returns error page when connector is missing required OAuth config', async () => {
+  it('redirects with error when connector is missing required OAuth config', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -409,13 +430,12 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
-    expect(res.ok).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.stringContaining(
-          'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
-        ),
-      })
-    );
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location:
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&error=OAuth+authorization+failed',
+      },
+    });
   });
 
   it('calls verifyAccessAndContext with the license state', () => {
