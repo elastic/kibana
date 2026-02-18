@@ -271,6 +271,10 @@ function getSuggestionsForLayer({
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
   };
+
+  if (changeType === 'initial' && xValue?.operation.dataType === 'date') {
+    return buildSuggestion({ ...options, seriesType: 'line' });
+  }
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // For TS/PromQL time series, prefer line as the visible default; otherwise bar_stacked
