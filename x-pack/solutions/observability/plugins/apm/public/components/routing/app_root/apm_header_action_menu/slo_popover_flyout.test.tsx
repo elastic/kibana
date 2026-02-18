@@ -12,8 +12,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const mockGetCreateSLOFormFlyout = jest.fn();
 
-const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/slos?search=test');
-
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
@@ -23,15 +21,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       http: {
         basePath: {
           prepend: (path: string) => path,
-        },
-      },
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              getRedirectUrl: mockGetRedirectUrl,
-            }),
-          },
         },
       },
     },
@@ -44,6 +33,15 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
       environment: 'production',
     },
   }),
+}));
+
+jest.mock('../../../../hooks/use_manage_slos_url', () => ({
+  useManageSlosUrl: () => '/app/slos?filters=apm',
+}));
+
+const mockUseServiceName = jest.fn().mockReturnValue(undefined);
+jest.mock('../../../../hooks/use_service_name', () => ({
+  useServiceName: () => mockUseServiceName(),
 }));
 
 function renderSloPopover(props: { canReadSlos: boolean; canWriteSlos: boolean }) {
@@ -250,24 +248,71 @@ describe('SloPopoverAndFlyout', () => {
   });
 
   describe('manage SLOs link', () => {
-    it('has correct href from SLO list locator', async () => {
+    it('has correct href from useManageSlosUrl', async () => {
       renderSloPopover({ canReadSlos: true, canWriteSlos: false });
 
       fireEvent.click(screen.getByTestId('apmSlosHeaderLink'));
 
       await waitFor(() => {
         const manageSlosLink = screen.getByTestId('apmSlosMenuItemManageSlos');
-        expect(manageSlosLink).toHaveAttribute('href', '/app/slos?search=test');
-        expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-          filters: [
-            expect.objectContaining({
-              meta: expect.objectContaining({
-                key: 'slo.indicator.type',
-                type: 'phrases',
+        expect(manageSlosLink).toHaveAttribute('href', '/app/slos?filters=apm');
+      });
+    });
+  });
+
+  describe('service name prefilling', () => {
+    it('prefills flyout with service name when on a service page', async () => {
+      mockUseServiceName.mockReturnValue('my-service');
+
+      renderSloPopover({ canReadSlos: true, canWriteSlos: true });
+
+      fireEvent.click(screen.getByTestId('apmSlosHeaderLink'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('apmSlosMenuItemCreateLatencySlo')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateLatencySlo'));
+
+      await waitFor(() => {
+        expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            initialValues: expect.objectContaining({
+              name: 'APM SLO for my-service',
+              indicator: expect.objectContaining({
+                params: expect.objectContaining({
+                  service: 'my-service',
+                }),
               }),
             }),
-          ],
-        });
+          })
+        );
+      });
+
+      mockUseServiceName.mockReturnValue(undefined);
+    });
+
+    it('does not prefill service name when not on a service page', async () => {
+      mockUseServiceName.mockReturnValue(undefined);
+
+      renderSloPopover({ canReadSlos: true, canWriteSlos: true });
+
+      fireEvent.click(screen.getByTestId('apmSlosHeaderLink'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('apmSlosMenuItemCreateLatencySlo')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('apmSlosMenuItemCreateLatencySlo'));
+
+      await waitFor(() => {
+        expect(mockGetCreateSLOFormFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            initialValues: expect.not.objectContaining({
+              name: expect.any(String),
+            }),
+          })
+        );
       });
     });
   });
