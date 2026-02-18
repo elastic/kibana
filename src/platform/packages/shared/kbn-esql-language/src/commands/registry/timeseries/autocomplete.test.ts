@@ -69,6 +69,16 @@ describe('TS Autocomplete', () => {
       }
       return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
     };
+
+    test('suggests Browse indices in empty source slots when enabled', async () => {
+      mockCallbacks.isResourceBrowserEnabled = jest.fn().mockResolvedValue(true);
+
+      const suggestions = await suggest('TS ');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels[0]).toEqual('Browse indices');
+    });
+
     test('can suggest timeseries indices (and aliases)', async () => {
       const suggestions = await suggest('TS ');
       const labels = suggestions.map((s) => s.label);

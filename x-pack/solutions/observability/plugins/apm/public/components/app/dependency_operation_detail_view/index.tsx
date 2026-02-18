@@ -152,6 +152,7 @@ export function DependencyOperationDetailView() {
     },
     [history]
   );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -193,6 +194,9 @@ export function DependencyOperationDetailView() {
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              traceId={selectedSample?.traceId}
             />
           </ResettingHeightRetainer>
         </EuiPanel>
