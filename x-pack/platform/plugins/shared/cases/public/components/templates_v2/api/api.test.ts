@@ -185,6 +185,7 @@ describe('templates_v2 api bulk actions', () => {
           templateId: 'template-1',
           name: 'My template',
           owner: 'securitySolution',
+          author: 'alice',
           definition: { name: 'My template', fields: [] },
           templateVersion: 1,
           deletedAt: null,
