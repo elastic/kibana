@@ -11,11 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
-import type {
-  SlackAssistantSearchContextResponse,
-  SlackErrorFields,
-  SlackSearchMatch,
-} from './types';
+import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
@@ -34,7 +30,8 @@ const SLACK_RETRY_JITTER_MAX_MS = 250;
 const SLACK_RETRY_MAX_DELAY_MS = 60_000;
 const SLACK_RETRY_EXPONENT_CAP = 6;
 
-const SLACK_BLOCKS_TRAVERSAL_MAX_NODES = 5000;
+// Tiny async sleep helper
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const SlackSearchMessagesInputSchema = z.object({
   query: z
@@ -381,8 +378,6 @@ function formatSlackApiErrorMessage(params: {
     : `Slack ${action} error: ${error}`;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 function getSlackRetryDelayMs(params: {
   responseHeaders?: unknown;
   attempt: number;
@@ -407,43 +402,6 @@ function getSlackRetryDelayMs(params: {
   const base = defaultBaseDelayMs * Math.pow(2, exp);
   const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
   return Math.min(SLACK_RETRY_MAX_DELAY_MS, base + jitterMs);
-}
-
-function extractMentionedUserIds(match: SlackSearchMatch): string[] {
-  const ids = new Set<string>();
-
-  const text = typeof match.text === 'string' ? match.text : '';
-  const re = /<@([A-Z0-9]+)(?:\\|[^>]+)?>/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    ids.add(m[1]);
-  }
-
-  const stack: unknown[] = match.blocks ? [match.blocks] : [];
-  const seen = new Set<unknown>();
-  let visited = 0;
-
-  // Walk the blocks tree to find user mentions like { type: 'user', user_id: 'U...' }.
-  while (stack.length > 0) {
-    const cur = stack.pop();
-    visited += 1;
-    if (visited > SLACK_BLOCKS_TRAVERSAL_MAX_NODES) break;
-    if (!cur || typeof cur !== 'object') continue;
-    if (seen.has(cur)) continue;
-    seen.add(cur);
-
-    const rec = cur as Record<string, unknown>;
-    if (rec.type === 'user' && typeof rec.user_id === 'string') {
-      ids.add(rec.user_id);
-    }
-
-    for (const v of Object.values(rec)) {
-      if (Array.isArray(v)) stack.push(...v);
-      else if (v && typeof v === 'object') stack.push(v);
-    }
-  }
-
-  return Array.from(ids);
 }
 
 async function slackRequestWithRateLimitRetry<TData>(params: {
@@ -629,10 +587,6 @@ export const Slack: ConnectorSpec = {
             total: messages.length,
             response_metadata: response.data.response_metadata,
             matches: limitedMessages.map((m) => {
-              const matchForMentionExtraction: SlackSearchMatch = {
-                text: m.content,
-                blocks: m.blocks,
-              };
               return {
                 ts: m.message_ts,
                 team: m.team_id,
@@ -640,7 +594,6 @@ export const Slack: ConnectorSpec = {
                 permalink: m.permalink,
                 channel: { id: m.channel_id, name: m.channel_name },
                 sender: { userId: m.author_user_id, username: m.author_name },
-                mentionedUserIds: extractMentionedUserIds(matchForMentionExtraction),
               };
             }),
           };
