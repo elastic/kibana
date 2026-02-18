@@ -19,6 +19,7 @@ import type {
   EntityNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
+  RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -89,14 +90,30 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Validation', () => {
-      it('should return 400 when missing `originEventIds` field', async () => {
-        await postGraph(supertest, {
-          // @ts-expect-error ignore error for testing
+      it('should return 200 with empty results when neither `originEventIds` nor `entityIds` is provided', async () => {
+        const resp = await postGraph(supertest, {
           query: {
             start: 'now-1d/d',
             end: 'now/d',
           },
-        }).expect(result(400, logger));
+        });
+        expect(resp.status).to.be(200);
+        expect(resp.body.nodes).to.have.length(0);
+        expect(resp.body.edges).to.have.length(0);
+      });
+
+      it('should return 200 with empty results when both `originEventIds` and `entityIds` are empty arrays', async () => {
+        const resp = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            entityIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        });
+        expect(resp.status).to.be(200);
+        expect(resp.body.nodes).to.have.length(0);
+        expect(resp.body.edges).to.have.length(0);
       });
 
       it('should return 400 when missing `esQuery` field is not of type bool', async () => {
@@ -533,14 +550,30 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5); // 2 entities + 2 labels + 1 group
-        expect(response.body).to.have.property('edges').length(6); // actor→group, group→target, group↔label1, group↔label2
+        // 2 entities + 2 labels + 1 group (labels are stacked since they share same actor-target pair)
+        expect(response.body).to.have.property('nodes').length(5);
+        // actor→group, group→target, plus 4 internal group edges (group↔label1, group↔label2)
+        expect(response.body).to.have.property('edges').length(6);
         expect(response.body).not.to.have.property('messages');
 
         const groupNodes = response.body.nodes.filter(
           (node: NodeDataModel) => node.shape === 'group'
         );
         expect(groupNodes).to.have.length(1);
+
+        // Find the group node
+        const groupNode = response.body.nodes.find((node: NodeDataModel) => node.shape === 'group');
+        expect(groupNode).to.be.ok();
+
+        // Find label nodes and verify they have parentId pointing to group
+        const labelNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape === 'label'
+        );
+        expect(labelNodes).to.have.length(2);
+        labelNodes.forEach((labelNode: LabelNodeDataModel) => {
+          expect(labelNode).to.have.property('parentId');
+          expect(labelNode.parentId).to.equal(groupNode.id);
+        });
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group' && node.shape !== 'relationship') {
@@ -1896,7 +1929,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 13,
+              expectedCount: 35,
             });
           });
 
@@ -1907,6 +1940,779 @@ export default function (providerContext: FtrProviderContext) {
           });
 
           runEnrichmentTests();
+
+          describe('Entity Relationships', () => {
+            it('should return both event and relationship nodes when originEventIds and entityIds are provided', async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'relationships-event-id-12345', isAlert: false }],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [{ id: 'relationships-test-user', isOrigin: false }],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              const userActorNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'relationships-test-user'
+              ) as EntityNodeDataModel;
+
+              expect(userActorNode).not.to.be(undefined);
+              expect(userActorNode.label).to.equal('Relationships Test User');
+              expect(userActorNode.shape).to.equal('ellipse');
+              expect(userActorNode.tag).to.equal('Identity');
+              expect(userActorNode.icon).to.equal('user');
+              expect(userActorNode!.documentsData!.length).to.equal(1);
+
+              expectExpect(userActorNode!.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-test-user',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'user',
+                    name: 'Relationships Test User',
+                    type: 'Identity',
+                    sub_type: 'AWS IAM User',
+                  }),
+                })
+              );
+
+              const serviceTargetNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'relationships-target-service'
+              ) as EntityNodeDataModel;
+              expect(serviceTargetNode).not.to.be(undefined);
+              expect(serviceTargetNode.label).to.equal('Relationships Target Service');
+              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.tag).to.equal('Service');
+              expect(serviceTargetNode.icon).to.equal('cloudStormy');
+              expect(serviceTargetNode!.documentsData!.length).to.equal(1);
+              expectExpect(serviceTargetNode!.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-target-service',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Relationships Target Service',
+                    type: 'Service',
+                    sub_type: 'AWS Lambda',
+                    ecsParentField: 'service',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              const relationshipGroupedNodeTarget = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === '2773bf5fc5525b52a7b79d31b59834d5'
+              ) as EntityNodeDataModel;
+              expect(relationshipGroupedNodeTarget).not.to.be(undefined);
+              expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
+              expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+              expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
+              expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
+
+              expect(relationshipGroupedNodeTarget.documentsData!.length).to.equal(2);
+              expectExpect(relationshipGroupedNodeTarget.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-target-host-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Relationships Target Host 1',
+                    type: 'Host',
+                    sub_type: 'AWS EC2 Instance',
+                    ecsParentField: 'entity',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Should have label nodes for events
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(1);
+
+              // Should have relationship nodes for entity relationships (Owns)
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              expect(relationshipNodes.length).to.equal(1);
+
+              // Verify relationship node properties
+              relationshipNodes.forEach((node: NodeDataModel) => {
+                expect(node.shape).to.equal('relationship');
+                expect(node.label).to.equal('Owns');
+              });
+            });
+
+            it('should return only relationship nodes when only entityIds are provided - grouped targets', async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [{ id: 'relationships-test-user', isOrigin: true }],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              // Should have no label nodes (no events)
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(0);
+
+              // Should have relationship nodes for entity relationships (Owns)
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              expect(relationshipNodes.length).to.equal(1);
+
+              // Should have entity nodes for source and targets
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              expect(entityNodes.length).to.equal(2);
+
+              const userActorNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'relationships-test-user'
+              ) as EntityNodeDataModel;
+
+              expect(userActorNode).not.to.be(undefined);
+              expect(userActorNode.label).to.equal('Relationships Test User');
+              expect(userActorNode.shape).to.equal('ellipse');
+              expect(userActorNode.tag).to.equal('Identity');
+              expect(userActorNode.icon).to.equal('user');
+              expect(userActorNode!.documentsData!.length).to.equal(1);
+
+              expectExpect(userActorNode!.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-test-user',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'entity',
+                    name: 'Relationships Test User',
+                    type: 'Identity',
+                    sub_type: 'AWS IAM User',
+                  }),
+                })
+              );
+
+              const relationshipGroupedNodeTarget = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === '2773bf5fc5525b52a7b79d31b59834d5'
+              ) as EntityNodeDataModel;
+              expect(relationshipGroupedNodeTarget).not.to.be(undefined);
+              expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
+              expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+              expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
+              expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
+
+              expect(relationshipGroupedNodeTarget.documentsData!.length).to.equal(2);
+              expectExpect(relationshipGroupedNodeTarget.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'relationships-target-host-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Relationships Target Host 1',
+                    type: 'Host',
+                    sub_type: 'AWS EC2 Instance',
+                    ecsParentField: 'entity',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+            });
+
+            it('should return multiple events with GCP targets and their relationships', async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [
+                      {
+                        id: 'multi-relationships-event-id-12345',
+                        isAlert: false,
+                      },
+                    ],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    esQuery: {
+                      bool: {
+                        filter: [
+                          {
+                            match_phrase: {
+                              'user.entity.id':
+                                'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    entityIds: [
+                      {
+                        id: 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                        isOrigin: false,
+                      },
+                      {
+                        id: 'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
+                        isOrigin: false,
+                      },
+                    ],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              expect(response.body).to.have.property('nodes').length(11);
+              expect(response.body).to.have.property('edges').length(12);
+
+              // Find the group node (stacking Owns and Communicates_with relationships from same source)
+              const groupNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.shape === 'group'
+              );
+              expect(groupNode).to.be.ok();
+
+              // Should have label nodes for events (SetIamPolicy and instances.start actions)
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(2);
+
+              // Verify SetIamPolicy label node
+              const setIamPolicyLabel = labelNodes.find(
+                (node: NodeDataModel) =>
+                  (node as LabelNodeDataModel).label === 'google.iam.admin.v1.SetIamPolicy'
+              ) as LabelNodeDataModel;
+              expect(setIamPolicyLabel).not.to.be(undefined);
+              expect(setIamPolicyLabel.shape).to.equal('label');
+              expect(setIamPolicyLabel.color).to.equal('primary');
+
+              // Verify instances.start label node
+              const instancesStartLabel = labelNodes.find(
+                (node: NodeDataModel) =>
+                  (node as LabelNodeDataModel).label === 'google.compute.instances.start'
+              ) as LabelNodeDataModel;
+              expect(instancesStartLabel).not.to.be(undefined);
+              expect(instancesStartLabel.shape).to.equal('label');
+              expect(instancesStartLabel.color).to.equal('primary');
+
+              // Should have 3 relationship nodes for Owns and Communicates_with relationships
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              expect(relationshipNodes.length).to.equal(3);
+
+              // Verify Owns relationship node from data-pipeline (stacked with parentId)
+              const ownsNode = relationshipNodes.find(
+                (node: NodeDataModel) =>
+                  node.id === 'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Owns)'
+              ) as RelationshipNodeDataModel;
+              expect(ownsNode).not.to.be(undefined);
+              expect(ownsNode.label).to.equal('Owns');
+              expect(ownsNode.shape).to.equal('relationship');
+              expect(ownsNode.parentId).to.equal(groupNode.id);
+
+              // Verify Communicates_with relationship node from data-pipeline (stacked with parentId)
+              const dataPipelineCommunicatesWithNode = relationshipNodes.find(
+                (node: NodeDataModel) =>
+                  node.id ===
+                  'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Communicates_with)'
+              ) as RelationshipNodeDataModel;
+              expect(dataPipelineCommunicatesWithNode).not.to.be(undefined);
+              expect(dataPipelineCommunicatesWithNode.label).to.equal('Communicates with');
+              expect(dataPipelineCommunicatesWithNode.shape).to.equal('relationship');
+              expect(dataPipelineCommunicatesWithNode.parentId).to.equal(groupNode.id);
+
+              // Verify Communicates_with relationship node from database-server (NOT stacked)
+              const dbServerCommunicatesWithNode = relationshipNodes.find(
+                (node: NodeDataModel) =>
+                  node.id ===
+                  'rel(projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1-Communicates_with)'
+              ) as RelationshipNodeDataModel;
+              expect(dbServerCommunicatesWithNode).not.to.be(undefined);
+              expect(dbServerCommunicatesWithNode.label).to.equal('Communicates with');
+              expect(dbServerCommunicatesWithNode.shape).to.equal('relationship');
+              expect(dbServerCommunicatesWithNode.parentId).to.be(undefined);
+
+              // Check for entity nodes - should have actors and targets
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              expect(entityNodes.length).to.be.greaterThan(0);
+
+              // Verify the first actor entity (user.entity.id from first event)
+              // Type: Service Account, Sub_type: GCP Service Account
+              const actorNode1 = response.body.nodes.find(
+                (node: NodeDataModel) =>
+                  node.id === 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com'
+              ) as EntityNodeDataModel;
+              expect(actorNode1).not.to.be(undefined);
+              expect(actorNode1.label).to.equal('GCP Admin User');
+              expect(actorNode1.shape).to.equal('ellipse');
+              expect(actorNode1.icon).to.equal('user');
+              expect(actorNode1.tag).to.equal('Service Account');
+              expect(actorNode1.documentsData!.length).to.equal(1);
+              expectExpect(actorNode1.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'user',
+                    name: 'GCP Admin User',
+                    type: 'Service Account',
+                    sub_type: 'GCP Service Account',
+                  }),
+                })
+              );
+
+              // Verify the second actor entity (user.entity.id from second event)
+              // Type: Identity, Sub_type: GCP IAM User
+              const actorNode2 = response.body.nodes.find(
+                (node: NodeDataModel) =>
+                  node.id === 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com'
+              ) as EntityNodeDataModel;
+              expect(actorNode2).not.to.be(undefined);
+              expect(actorNode2.label).to.equal('GCP Compute Operator');
+              expect(actorNode2.shape).to.equal('ellipse');
+              expect(actorNode2.icon).to.equal('user');
+              expect(actorNode2.tag).to.equal('Identity');
+              expect(actorNode2.documentsData!.length).to.equal(1);
+              expectExpect(actorNode2.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'user',
+                    name: 'GCP Compute Operator',
+                    type: 'Identity',
+                    sub_type: 'GCP IAM User',
+                  }),
+                })
+              );
+
+              // Verify the service target entity (service.target.entity.id from first event)
+              // Type: Service Account, Sub_type: GCP Service Account
+              const serviceTargetNode = response.body.nodes.find(
+                (node: NodeDataModel) =>
+                  node.id === 'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
+              ) as EntityNodeDataModel;
+              expect(serviceTargetNode).not.to.be(undefined);
+              expect(serviceTargetNode.label).to.equal('data-pipeline Service Account');
+              expect(serviceTargetNode.shape).to.equal('ellipse');
+              expect(serviceTargetNode.icon).to.equal('user');
+              expect(serviceTargetNode.tag).to.equal('Service Account');
+              expect(serviceTargetNode.documentsData!.length).to.equal(1);
+              expectExpect(serviceTargetNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'service',
+                    name: 'data-pipeline Service Account',
+                    type: 'Service Account',
+                    sub_type: 'GCP Service Account',
+                  }),
+                })
+              );
+
+              // Verify the host target entity (host.target.entity.id from second event)
+              // Type: Host, Sub_type: GCP Compute Instance
+              const hostTargetNode = response.body.nodes.find(
+                (node: NodeDataModel) =>
+                  node.id ===
+                  'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1'
+              ) as EntityNodeDataModel;
+              expect(hostTargetNode).not.to.be(undefined);
+              expect(hostTargetNode.label).to.equal('database-server-prod-1');
+              expect(hostTargetNode.shape).to.equal('hexagon');
+              expect(hostTargetNode.icon).to.equal('storage');
+              expect(hostTargetNode.tag).to.equal('Host');
+              expect(hostTargetNode.documentsData!.length).to.equal(1);
+              expectExpect(hostTargetNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'host',
+                    name: 'database-server-prod-1',
+                    type: 'Host',
+                    sub_type: 'GCP Compute Instance',
+                  }),
+                })
+              );
+
+              const relationshipsTargetNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'd4f3b950f4345da123745ee6c3806cf1'
+              ) as EntityNodeDataModel;
+              expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
+              expect(relationshipsTargetNode.shape).to.equal('hexagon');
+              expect(relationshipsTargetNode.icon).to.equal('storage');
+              expect(relationshipsTargetNode.tag).to.equal('Host');
+              expect(relationshipsTargetNode.count).to.equal(2);
+              expect(relationshipsTargetNode.documentsData!.length).to.equal(2);
+
+              expectExpect(relationshipsTargetNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'entity',
+                    name: 'web-server-prod-1',
+                    type: 'Host',
+                    sub_type: 'GCP Compute Instance',
+                  }),
+                })
+              );
+              expectExpect(relationshipsTargetNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    availableInEntityStore: true,
+                    ecsParentField: 'entity',
+                    name: 'api-gateway-prod-1',
+                    type: 'Host',
+                    sub_type: 'GCP Compute Instance',
+                  }),
+                })
+              );
+            });
+
+            it('should return hierarchical relationships with grouped targets and events', async () => {
+              // Test scenario:
+              // - Root user owns 3 entities (Host, Service, Identity) - each with different type
+              // - Each of those 3 entities communicates_with 2 entities of the same type
+              // - Identity-1 supervises AND depends_on delegate entity (different type: User)
+              // - Root user also performs an action (event) targeting host-1 and identity-1
+              // - Identity-1 performs 2 different actions targeting delegate-1
+              // - External-caller has Communicates_with relationship targeting identity-1
+              // Expected:
+              // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 delegate + 1 external-caller
+              // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervises + 1 Depends_on
+              // - 3 label nodes: 1 UpdatePolicy + 2 new events (AuditLog, UserOperation)
+              // - 1 group node: stacking 2 relationships + 2 labels with same source-target pair (identity-1 → delegate-1)
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [
+                      { id: 'rel-hierarchy-event-id-12345', isAlert: false },
+                      { id: 'rel-hierarchy-event-id-22222', isAlert: false },
+                      { id: 'rel-hierarchy-event-id-33333', isAlert: false },
+                    ],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [
+                      { id: 'rel-hierarchy-root-user', isOrigin: true },
+                      { id: 'rel-hierarchy-host-1', isOrigin: false },
+                      { id: 'rel-hierarchy-service-1', isOrigin: false },
+                      { id: 'rel-hierarchy-identity-1', isOrigin: false },
+                    ],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              // Verify label nodes count (3 event actions)
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(3);
+
+              // Verify the original UpdatePolicy label node
+              const updatePolicyLabel = labelNodes.find(
+                (node: LabelNodeDataModel) => node.label === 'google.iam.admin.v1.UpdatePolicy'
+              ) as LabelNodeDataModel;
+              expect(updatePolicyLabel).not.to.be(undefined);
+              expect(updatePolicyLabel.color).to.equal('primary');
+              expect(updatePolicyLabel.shape).to.equal('label');
+
+              // Verify the two new label nodes (from identity-1 to delegate-1)
+              const auditLogLabel = labelNodes.find(
+                (node: LabelNodeDataModel) => node.label === 'google.admin.reports.v1.AuditLog'
+              ) as LabelNodeDataModel;
+              expect(auditLogLabel).not.to.be(undefined);
+              expect(auditLogLabel.color).to.equal('primary');
+
+              const userOperationLabel = labelNodes.find(
+                (node: LabelNodeDataModel) =>
+                  node.label === 'google.admin.directory.v1.UserOperation'
+              ) as LabelNodeDataModel;
+              expect(userOperationLabel).not.to.be(undefined);
+              expect(userOperationLabel.color).to.equal('primary');
+
+              // Verify entity nodes count
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 delegate + 1 external-caller = 9
+              expect(entityNodes.length).to.equal(9);
+
+              // Verify relationship nodes count
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              // 1 Owns + 3 Communicates_with (original) + 1 Communicates_with (external-caller) + 1 Supervises + 1 Depends_on = 7
+              expect(relationshipNodes.length).to.equal(7);
+
+              // Verify group node exists (stacking 2 relationships + 2 labels with same source-target pair: identity-1 → delegate-1)
+              const groupNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'group'
+              );
+              expect(groupNodes.length).to.equal(1);
+              const groupNode = groupNodes[0];
+
+              // Verify the two label nodes are stacked in the group
+              expect(auditLogLabel.parentId).to.equal(groupNode.id);
+              expect(userOperationLabel.parentId).to.equal(groupNode.id);
+
+              // Verify UpdatePolicy label is NOT stacked (different source-target pair)
+              expect(updatePolicyLabel.parentId).to.be(undefined);
+
+              // Verify the Supervises and Depends_on relationship nodes are stacked in the same group
+              const supervisesNode = relationshipNodes.find(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Supervises'
+              ) as RelationshipNodeDataModel;
+              expect(supervisesNode.parentId).to.equal(groupNode.id);
+
+              const dependsOnNode = relationshipNodes.find(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Depends on'
+              ) as RelationshipNodeDataModel;
+              expect(dependsOnNode).not.to.be(undefined);
+              expect(dependsOnNode.parentId).to.equal(groupNode.id);
+
+              // Total nodes: 9 entity + 7 relationship + 3 label + 1 group = 20
+              expect(response.body).to.have.property('nodes').length(20);
+
+              // Edges calculation:
+              // root -> Owns -> (host, service, identity) = 1 + 3 = 4 edges
+              // host -> Communicates_with -> storage_grouped = 2 edges
+              // service -> Communicates_with -> database_grouped = 2 edges
+              // identity -> Communicates_with -> network_grouped = 2 edges
+              // external-caller -> Communicates_with -> identity = 2 edges
+              // root -> UpdatePolicy label -> (host, identity) = 1 + 2 = 3 edges
+              // identity -> group -> delegate = 2 edges
+              // Group internal edges: group↔AuditLog, group↔UserOperation, group↔Supervises, group↔Depends_on = 8 edges
+              // Total: 4 + 2 + 2 + 2 + 2 + 3 + 2 + 8 = 25 edges
+              expect(response.body).to.have.property('edges').length(25);
+
+              // Verify root user node
+              const rootNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-root-user'
+              ) as EntityNodeDataModel;
+              expect(rootNode).not.to.be(undefined);
+              expect(rootNode.label).to.equal('Hierarchy Root User');
+              expect(rootNode.shape).to.equal('ellipse');
+              expect(rootNode.tag).to.equal('Identity');
+              expect(rootNode.icon).to.equal('user');
+              expect(rootNode.documentsData!.length).to.equal(1);
+              expectExpect(rootNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-root-user',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Root User',
+                    type: 'Identity',
+                    sub_type: 'AWS IAM User',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Verify intermediate host node
+              const hostNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-host-1'
+              ) as EntityNodeDataModel;
+              expect(hostNode).not.to.be(undefined);
+              expect(hostNode.label).to.equal('Hierarchy Host 1');
+              expect(hostNode.shape).to.equal('hexagon');
+              expect(hostNode.tag).to.equal('Host');
+              expect(hostNode.icon).to.equal('storage');
+              expect(hostNode.count).to.be(undefined); // Single entity, no count
+              expectExpect(hostNode.ips).toEqual(['10.0.1.100']);
+
+              // Verify intermediate service node
+              const serviceNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-service-1'
+              ) as EntityNodeDataModel;
+              expect(serviceNode).not.to.be(undefined);
+              expect(serviceNode.label).to.equal('Hierarchy Service 1');
+              expect(serviceNode.shape).to.equal('rectangle');
+              expect(serviceNode.tag).to.equal('Service');
+              expect(serviceNode.icon).to.equal('cloudStormy');
+              expect(serviceNode.count).to.be(undefined);
+
+              // Verify intermediate identity node (different from root - AWS IAM Role)
+              const identityNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-identity-1'
+              ) as EntityNodeDataModel;
+              expect(identityNode).not.to.be(undefined);
+              expect(identityNode.label).to.equal('Hierarchy Identity 1');
+              expect(identityNode.shape).to.equal('ellipse');
+              expect(identityNode.tag).to.equal('Identity');
+              expect(identityNode.icon).to.equal('user');
+              expect(identityNode.count).to.be(undefined);
+
+              // Verify grouped storage target (2 S3 buckets with same type/subtype)
+              const storageGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Storage' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(storageGroupedNode).not.to.be(undefined);
+              expect(storageGroupedNode.label).to.equal('AWS S3 Bucket'); // Shows sub_type for grouped
+              expect(storageGroupedNode.shape).to.equal('rectangle');
+              expect(storageGroupedNode.documentsData!.length).to.equal(2);
+              expectExpect(storageGroupedNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-storage-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Storage Bucket 1',
+                    type: 'Storage',
+                    sub_type: 'AWS S3 Bucket',
+                  }),
+                })
+              );
+              expectExpect(storageGroupedNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-storage-2',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Storage Bucket 2',
+                    type: 'Storage',
+                    sub_type: 'AWS S3 Bucket',
+                  }),
+                })
+              );
+
+              // Verify grouped database target (2 RDS instances with same type/subtype)
+              const databaseGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Database' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(databaseGroupedNode).not.to.be(undefined);
+              expect(databaseGroupedNode.label).to.equal('AWS RDS Instance');
+              expect(databaseGroupedNode.shape).to.equal('rectangle');
+              expect(databaseGroupedNode.documentsData!.length).to.equal(2);
+
+              // Verify grouped network target (2 VPCs with same type/subtype)
+              const networkGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Networking' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(networkGroupedNode).not.to.be(undefined);
+              expect(networkGroupedNode.label).to.equal('AWS VPC');
+              expect(networkGroupedNode.shape).to.equal('rectangle');
+              expect(networkGroupedNode.icon).to.equal('globe');
+              expectExpect(networkGroupedNode.ips).toEqual(
+                expectExpect.arrayContaining(['172.16.0.1', '172.16.0.2'])
+              );
+
+              expect(networkGroupedNode.documentsData!.length).to.equal(2);
+
+              // Verify delegate node (different type: User, sub_type: AWS Organizations Admin)
+              const delegateNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-delegate-1'
+              ) as EntityNodeDataModel;
+              expect(delegateNode).not.to.be(undefined);
+              expect(delegateNode.label).to.equal('Hierarchy Delegate Agent');
+              expect(delegateNode.shape).to.equal('ellipse');
+              expect(delegateNode.tag).to.equal('User');
+              expect(delegateNode.icon).to.equal('user');
+              expect(delegateNode.count).to.be(undefined); // Single entity
+              expect(delegateNode.documentsData!.length).to.equal(1);
+              expectExpect(delegateNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-delegate-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Delegate Agent',
+                    type: 'User',
+                    sub_type: 'AWS Organizations Admin',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Verify external-caller entity (has Communicates_with relationship to identity-1)
+              const externalCallerNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-external-caller'
+              ) as EntityNodeDataModel;
+              expect(externalCallerNode).not.to.be(undefined);
+              expect(externalCallerNode.label).to.equal('Hierarchy External Caller');
+              expect(externalCallerNode.shape).to.equal('rectangle');
+              expect(externalCallerNode.tag).to.equal('Service');
+              expect(externalCallerNode.icon).to.equal('cloudStormy');
+              expect(externalCallerNode.count).to.be(undefined);
+              expect(externalCallerNode.documentsData!.length).to.equal(1);
+              expectExpect(externalCallerNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-external-caller',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy External Caller',
+                    type: 'Service',
+                    sub_type: 'AWS Lambda Function',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Verify Owns relationship node (1 node connecting root to 3 different target types)
+              const ownsNodes = relationshipNodes.filter(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Owns'
+              );
+              expect(ownsNodes.length).to.equal(1);
+              expect(ownsNodes[0].shape).to.equal('relationship');
+
+              // Verify Communicates_with relationship nodes (4 nodes - 3 from intermediate entities + 1 from external-caller)
+              const communicatesWithNodes = relationshipNodes.filter(
+                (node: NodeDataModel) =>
+                  (node as RelationshipNodeDataModel).label === 'Communicates with'
+              );
+              expect(communicatesWithNodes.length).to.equal(4);
+              communicatesWithNodes.forEach((node: NodeDataModel) => {
+                expect(node.shape).to.equal('relationship');
+              });
+
+              // Verify the external-caller's Communicates_with relationship node (NOT stacked)
+              const externalCallerRelNode = communicatesWithNodes.find(
+                (node: NodeDataModel) =>
+                  node.id === 'rel(rel-hierarchy-external-caller-Communicates_with)'
+              ) as RelationshipNodeDataModel;
+              expect(externalCallerRelNode).not.to.be(undefined);
+              expect(externalCallerRelNode.parentId).to.be(undefined);
+
+              // Verify Supervises relationship node count (1 node connecting identity-1 to delegate)
+              const supervisesNodes = relationshipNodes.filter(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Supervises'
+              );
+              expect(supervisesNodes.length).to.equal(1);
+              expect(supervisesNodes[0].shape).to.equal('relationship');
+
+              // Verify edges
+              response.body.edges.forEach((edge: EdgeDataModel) => {
+                expect(edge).to.have.property('color');
+                expect(edge.color).equal('subdued');
+                expect(edge.type).equal('solid');
+              });
+            });
+          });
         });
       });
 
