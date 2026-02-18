@@ -47,11 +47,11 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  onTabChange: (tabId: string) => void;
   enableDocumentViewer: boolean;
   stateManager: SearchEmbeddableStateManager;
   selectedTabId$: BehaviorSubject<string | undefined>;
   tabs: DiscoverSessionTab[];
-  onTabChange: (tabId: string) => void;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -74,11 +74,11 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  onTabChange,
   enableDocumentViewer,
   stateManager,
   selectedTabId$,
   tabs,
-  onTabChange,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
@@ -138,6 +138,7 @@ export function SearchEmbeddableGridComponent({
   );
 
   const isEditMode = viewMode === 'edit';
+
   const canShowDashboardWriteControls = Boolean(
     (
       discoverServices.capabilities as {
@@ -147,17 +148,20 @@ export function SearchEmbeddableGridComponent({
       }
     ).dashboard_v2?.showWriteControls
   );
+
   const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(api.parentApi)
     ? api.parentApi.isEditableByUser
     : true;
+
   const canSwitchToEditMode = apiCanSetViewMode(api.parentApi);
+
   const canEditPanelInViewMode =
     canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
+
   const onEditPanel = useCallback(() => {
-    if (apiCanSetViewMode(api.parentApi)) {
-      api.parentApi.setViewMode('edit');
-    }
+    if (apiCanSetViewMode(api.parentApi)) api.parentApi.setViewMode('edit');
   }, [api.parentApi]);
+
   const viewModeDeletedTabAction: ViewModeDeletedTabAction = canEditPanelInViewMode
     ? { type: 'editPanel', onClick: onEditPanel }
     : { type: 'contactAdmin' };
@@ -319,11 +323,11 @@ export function SearchEmbeddableGridComponent({
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
       isEditMode={isEditMode}
-      viewModeDeletedTabAction={viewModeDeletedTabAction}
-      selectedTabId={selectedTabId}
       isSelectedTabDeleted={isSelectedTabDeleted}
-      tabs={tabs}
       onTabChange={onTabChange}
+      selectedTabId={selectedTabId}
+      tabs={tabs}
+      viewModeDeletedTabAction={viewModeDeletedTabAction}
     />
   );
 }

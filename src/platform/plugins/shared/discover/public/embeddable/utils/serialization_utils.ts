@@ -42,11 +42,13 @@ export const deserializeState = async ({
       : undefined;
 
     const resolvedTab = selectedTab ?? session.tabs[0];
+
     const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
-    const resolvedSelectedTabId = isSelectedTabDeleted
-      ? selectedTabId
-      : selectedTabId ?? resolvedTab?.id;
+
+    const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
+
     const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
+
     const rawSavedObjectAttributes = isSelectedTabDeleted
       ? savedObjectOverride
       : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
@@ -63,7 +65,6 @@ export const deserializeState = async ({
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
       selectedTabId: resolvedSelectedTabId,
-      isSelectedTabDeleted,
       tabs: session.tabs,
 
       // Overwrite SO state with dashboard state for title, description, etc.
@@ -116,12 +117,15 @@ export const serializeState = ({
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
+    const isSelectedTabDeleted = Boolean(
+      selectedTabId && !initialState.tabs?.some((tab) => tab.id === selectedTabId)
+    );
     const attributes =
       savedSearchAttributes.tabs?.[0]?.attributes ??
       pick(savedSearchAttributes, EDITABLE_SAVED_SEARCH_KEYS);
 
     // only save the current state that is **different** than the saved object state
-    const overwriteState = initialState.isSelectedTabDeleted
+    const overwriteState = isSelectedTabDeleted
       ? pick(initialState, EDITABLE_SAVED_SEARCH_KEYS)
       : EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
           if (deepEqual(attributes[key], editableAttributesBackup[key])) {

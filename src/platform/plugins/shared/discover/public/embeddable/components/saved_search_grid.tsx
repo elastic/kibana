@@ -55,11 +55,11 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   savedSearchId?: string;
   enableDocumentViewer: boolean;
   isEditMode: boolean;
-  viewModeDeletedTabAction: ViewModeDeletedTabAction;
-  tabs: DiscoverSessionTab[];
   isSelectedTabDeleted: boolean;
-  onTabChange: (tabId: string) => void;
   selectedTabId: string | undefined;
+  tabs: DiscoverSessionTab[];
+  onTabChange: (tabId: string) => void;
+  viewModeDeletedTabAction: ViewModeDeletedTabAction;
 }
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
@@ -68,14 +68,14 @@ const DELETED_TAB_VALUE = '__deleted_tab__';
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const {
-    tabs,
     enableDocumentViewer,
     interceptedWarnings,
     isEditMode,
-    viewModeDeletedTabAction,
     isSelectedTabDeleted,
+    tabs,
     onTabChange,
     selectedTabId,
+    viewModeDeletedTabAction,
     ...gridProps
   } = props;
 
@@ -193,14 +193,129 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     }
 
     return options;
-  }, [tabs, isSelectedTabDeleted]);
+  }, [isSelectedTabDeleted, tabs]);
 
-  const gridContent = (
+  const deletedTabTitle = (
+    <h2>
+      <FormattedMessage
+        id={
+          isEditMode
+            ? 'discover.embeddable.deletedTab.editModeWarningTitle'
+            : 'discover.embeddable.deletedTab.viewModeWarningTitle'
+        }
+        defaultMessage="The Discover session tab saved with this panel no longer exists"
+      />
+    </h2>
+  );
+
+  const renderCenteredDeletedPrompt = (body: React.ReactNode) => (
+    <EuiFlexGroup
+      alignItems="center"
+      css={css({ height: '100%' })}
+      gutterSize="none"
+      justifyContent="center"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiEmptyPrompt
+          data-test-subj="discoverEmbeddableDeletedTabCallout"
+          icon={<EuiIcon color="warning" size="xxl" type="warning" />}
+          title={deletedTabTitle}
+          body={body}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const renderTabSelector = (valueOfSelected: string, isInvalid = false) => (
+    <EuiPanel
+      css={css({
+        maxWidth: 400,
+        minWidth: 0,
+        width: '100%',
+      })}
+      hasShadow={false}
+      paddingSize="s"
+    >
+      <EuiSuperSelect
+        aria-label={i18n.translate('discover.embeddable.tabSelector.ariaLabel', {
+          defaultMessage: 'Select displayed tab',
+        })}
+        compressed
+        data-test-subj="discoverEmbeddableTabSelector"
+        fullWidth
+        isInvalid={isInvalid}
+        prepend={i18n.translate('discover.embeddable.tabSelector.label', {
+          defaultMessage: 'Displayed tab',
+        })}
+        onChange={handleTabChange}
+        options={tabOptions}
+        valueOfSelected={valueOfSelected}
+      />
+    </EuiPanel>
+  );
+
+  if (!isEditMode && isSelectedTabDeleted) {
+    return renderCenteredDeletedPrompt(
+      viewModeDeletedTabAction.type === 'editPanel' ? (
+        <p>
+          <FormattedMessage
+            id="discover.embeddable.deletedTab.viewModeWarningDescriptionEditable"
+            defaultMessage="{editPanelLink} to fix it."
+            values={{
+              editPanelLink: (
+                <EuiLink onClick={viewModeDeletedTabAction.onClick}>
+                  {i18n.translate('discover.embeddable.deletedTab.editPanelLinkLabel', {
+                    defaultMessage: 'Edit the panel',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      ) : (
+        <p>
+          <FormattedMessage
+            id="discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly"
+            defaultMessage="Contact one of the dashboard's authors to fix it."
+          />
+        </p>
+      )
+    );
+  }
+
+  if (isEditMode && isSelectedTabDeleted) {
+    return (
+      <EuiFlexGroup
+        css={css({ height: '100%' })}
+        direction="column"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>{renderTabSelector(DELETED_TAB_VALUE, true)}</EuiFlexItem>
+        <EuiFlexItem>
+          {renderCenteredDeletedPrompt(
+            <p>
+              <FormattedMessage
+                id="discover.embeddable.deletedTab.editModeWarningDescription"
+                defaultMessage="Select a different tab"
+              />
+            </p>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  const showTabSelector = isEditMode && tabs.length > 1;
+
+  return (
     <SavedSearchEmbeddableBase
       totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
+      prepend={showTabSelector ? renderTabSelector(selectedTabId ?? tabs[0]?.id) : undefined}
     >
       <DiscoverGrid
         {...gridProps}
@@ -220,149 +335,5 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         className="unifiedDataTable"
       />
     </SavedSearchEmbeddableBase>
-  );
-
-  // View mode: deleted tab — show a centered warning message only
-  if (!isEditMode && isSelectedTabDeleted) {
-    return (
-      <EuiFlexGroup
-        alignItems="center"
-        css={css({ height: '100%' })}
-        gutterSize="none"
-        justifyContent="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiEmptyPrompt
-            body={
-              viewModeDeletedTabAction.type === 'editPanel' ? (
-                <p>
-                  <FormattedMessage
-                    id="discover.embeddable.deletedTab.viewModeWarningDescriptionEditable"
-                    defaultMessage="{editPanelLink} to fix it."
-                    values={{
-                      editPanelLink: (
-                        <EuiLink onClick={viewModeDeletedTabAction.onClick}>
-                          {i18n.translate('discover.embeddable.deletedTab.editPanelLinkLabel', {
-                            defaultMessage: 'Edit the panel',
-                          })}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              ) : (
-                <p>
-                  {i18n.translate(
-                    'discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly',
-                    {
-                      defaultMessage: "Contact one of the dashboard's authors to fix it.",
-                    }
-                  )}
-                </p>
-              )
-            }
-            data-test-subj="discoverEmbeddableDeletedTabCallout"
-            icon={<EuiIcon color="warning" size="xxl" type="warning" />}
-            title={
-              <h2>
-                {i18n.translate('discover.embeddable.deletedTab.viewModeWarningTitle', {
-                  defaultMessage:
-                    'This panel references a Discover session tab that no longer exists',
-                })}
-              </h2>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (isEditMode && isSelectedTabDeleted) {
-    return (
-      <EuiFlexGroup
-        css={css({ height: '100%' })}
-        direction="column"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasShadow={false} paddingSize="s">
-            <EuiSuperSelect
-              aria-label={i18n.translate('discover.embeddable.tabSelector.ariaLabel', {
-                defaultMessage: 'Select displayed tab',
-              })}
-              compressed
-              data-test-subj="discoverEmbeddableTabSelector"
-              isInvalid
-              prepend={i18n.translate('discover.embeddable.tabSelector.label', {
-                defaultMessage: 'Displayed tab',
-              })}
-              onChange={handleTabChange}
-              options={tabOptions}
-              valueOfSelected={DELETED_TAB_VALUE}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            css={css({ height: '100%' })}
-            gutterSize="none"
-            justifyContent="center"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiEmptyPrompt
-                body={
-                  <p>
-                    {i18n.translate('discover.embeddable.deletedTab.editModeWarningDescription', {
-                      defaultMessage: 'Select a different tab',
-                    })}
-                  </p>
-                }
-                data-test-subj="discoverEmbeddableDeletedTabCallout"
-                icon={<EuiIcon color="warning" size="xxl" type="warning" />}
-                title={
-                  <h2>
-                    {i18n.translate('discover.embeddable.deletedTab.editModeWarningTitle', {
-                      defaultMessage:
-                        'This panel references a Discover session tab that no longer exists',
-                    })}
-                  </h2>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  const showTabSelector = isEditMode && tabs.length > 1;
-
-  if (!showTabSelector) return gridContent;
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} paddingSize="s">
-          <EuiSuperSelect
-            aria-label={i18n.translate('discover.embeddable.tabSelector.ariaLabel', {
-              defaultMessage: 'Select displayed tab',
-            })}
-            compressed
-            data-test-subj="discoverEmbeddableTabSelector"
-            prepend={i18n.translate('discover.embeddable.tabSelector.label', {
-              defaultMessage: 'Displayed tab',
-            })}
-            onChange={handleTabChange}
-            options={tabOptions}
-            valueOfSelected={selectedTabId ?? tabs[0]?.id}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>{gridContent}</EuiFlexItem>
-    </EuiFlexGroup>
   );
 }

@@ -53,13 +53,19 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
       {Boolean(prepend || totalHitCount) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            justifyContent="flexEnd"
+            justifyContent={
+              prepend && totalHitCount ? 'spaceBetween' : prepend ? 'flexStart' : 'flexEnd'
+            }
             alignItems="center"
             gutterSize="xs"
             responsive={false}
             wrap={true}
           >
-            {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
+            {Boolean(prepend) && (
+              <EuiFlexItem css={{ minWidth: 0 }} grow={true}>
+                {prepend}
+              </EuiFlexItem>
+            )}
 
             {!!totalHitCount && (
               <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">

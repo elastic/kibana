@@ -83,7 +83,6 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
-    isSelectedTabDeleted?: boolean;
     selectedTabId?: string;
     tabs?: DiscoverSessionTab[];
   };

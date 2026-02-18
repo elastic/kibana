@@ -136,7 +136,6 @@ describe('Serialization utils', () => {
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
-      expect(deserializedState.isSelectedTabDeleted).toBe(false);
       expect(deserializedState.tabs).toEqual(sessionTabs);
     });
 
@@ -167,7 +166,6 @@ describe('Serialization utils', () => {
       });
       expect(deserializedState.savedObjectId).toEqual('savedSearch');
       expect(deserializedState.selectedTabId).toEqual('tab-2');
-      expect(deserializedState.isSelectedTabDeleted).toBe(false);
       // Attributes should come from tab-2
       expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
@@ -201,7 +199,6 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
       expect(deserializedState.selectedTabId).toEqual('deleted-tab-id');
-      expect(deserializedState.isSelectedTabDeleted).toBe(true);
       // Keep serialized dashboard overrides; no runtime fallback tab should be applied
       expect(deserializedState.columns).toEqual(['stale-col-a']);
       expect(deserializedState.sort).toEqual([['stale_field', 'asc']]);

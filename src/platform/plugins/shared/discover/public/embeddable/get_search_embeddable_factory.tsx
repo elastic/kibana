@@ -87,13 +87,15 @@ export const getSearchEmbeddableFactory = ({
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         runtimeState?.savedObjectDescription
       );
-      const isSelectedTabDeleted$ = new BehaviorSubject<boolean>(
-        runtimeState.isSelectedTabDeleted ?? false
-      );
       const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
 
       const tabs = runtimeState.tabs ?? [];
       let rawSavedObjectAttributes = runtimeState.rawSavedObjectAttributes;
+
+      const isSelectedTabDeleted = (
+        selectedTabId: string | undefined,
+        availableTabs: typeof tabs = tabs
+      ) => Boolean(selectedTabId && !availableTabs.some((tab) => tab.id === selectedTabId));
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -121,7 +123,6 @@ export const getSearchEmbeddableFactory = ({
           initialState: {
             ...runtimeState,
             rawSavedObjectAttributes,
-            isSelectedTabDeleted: isSelectedTabDeleted$.getValue(),
           },
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
@@ -138,7 +139,6 @@ export const getSearchEmbeddableFactory = ({
 
         dataLoading$.next(true);
         selectedTabId$.next(tabId);
-        isSelectedTabDeleted$.next(false);
 
         await searchEmbeddable.switchToTab(tab);
         rawSavedObjectAttributes = pick(tab, EDITABLE_SAVED_SEARCH_KEYS);
@@ -159,7 +159,7 @@ export const getSearchEmbeddableFactory = ({
           )
         ),
         getComparators: () => {
-          const isDeleted = isSelectedTabDeleted$.getValue();
+          const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
 
           return {
             ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
@@ -205,12 +205,16 @@ export const getSearchEmbeddableFactory = ({
             });
 
             selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-            isSelectedTabDeleted$.next(lastSavedRuntimeState.isSelectedTabDeleted ?? false);
             rawSavedObjectAttributes = lastSavedRuntimeState.rawSavedObjectAttributes;
 
-            const resolvedTabId = lastSavedRuntimeState.isSelectedTabDeleted
+            const isLastSavedSelectedTabDeleted = isSelectedTabDeleted(
+              lastSavedRuntimeState.selectedTabId,
+              lastSavedRuntimeState.tabs ?? tabs
+            );
+
+            const resolvedTabId = isLastSavedSelectedTabDeleted
               ? undefined
-              : lastSavedRuntimeState.selectedTabId ?? tabs[0]?.id;
+              : lastSavedRuntimeState.selectedTabId;
 
             if (currentTabId !== resolvedTabId && resolvedTabId) {
               const resolvedTab = tabs.find((t) => t.id === resolvedTabId);
