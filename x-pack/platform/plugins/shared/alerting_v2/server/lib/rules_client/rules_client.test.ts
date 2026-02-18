@@ -490,11 +490,20 @@ describe('RulesClient', () => {
       );
     });
 
-    it('throws when bulk get returns a non-404 error', async () => {
+    it('ignores documents with non-404 errors and returns valid documents', async () => {
       const client = createClient();
+      const validAttrs = createRuleSoAttributes({
+        metadata: { name: 'rule-get-many-valid' },
+      });
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
+          {
+            id: 'rule-id-get-many-valid',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: validAttrs,
+            references: [],
+          },
           {
             id: 'rule-id-get-many-failure',
             type: RULE_SAVED_OBJECT_TYPE,
@@ -509,9 +518,15 @@ describe('RulesClient', () => {
         ],
       });
 
-      await expect(client.getRules(['rule-id-get-many-failure'])).rejects.toMatchObject({
-        output: { statusCode: 500 },
-      });
+      const res = await client.getRules(['rule-id-get-many-valid', 'rule-id-get-many-failure']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-get-many-valid',
+          metadata: expect.objectContaining({ name: 'rule-get-many-valid' }),
+        })
+      );
     });
   });
 

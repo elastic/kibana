@@ -192,12 +192,7 @@ export class RulesClient {
 
     return result.flatMap((doc) => {
       if ('error' in doc) {
-        if (doc.error.statusCode === 404) {
-          return [];
-        }
-        throw Boom.boomify(new Error(doc.error.message), {
-          statusCode: doc.error.statusCode,
-        });
+        return [];
       }
 
       return [transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes)];
