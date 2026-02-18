@@ -57,7 +57,6 @@ groups:
         #   - option: OPTIONAL
         #     description: "" OPTIONAL
         # type: OPTIONAL ONe of static/dynamic
-        # platforms: OPTIONAL (legacy), list each supported platform
         #   - cloud
         #   - serverless
         #   - self-managed
