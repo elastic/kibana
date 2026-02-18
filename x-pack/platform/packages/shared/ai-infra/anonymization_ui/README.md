@@ -7,15 +7,23 @@ Shared UI package for anonymization profile configuration in Stack Management an
 This package provides reusable anonymization UI components, hooks, and shared contracts.
 
 - Reusable composition for Stack Management and solution-hosted surfaces.
-- Shared host context contracts (capabilities, services, and active space id).
+- Public section-level and form-level APIs for different host integration needs.
 
-## Host-provided services contract
+## Host integration contract
 
-Hosts are expected to provide:
+For the section-level API (`AnonymizationProfilesSection`), hosts provide:
 
-- `capabilities`: anonymization visibility and management capability flags.
-- `services`: browser services required by the package (for example HTTP and notifications).
-- `spaceId`: active Kibana space identifier.
+- `fetch`: `HttpSetup['fetch']`
+- `spaceId`: active Kibana space identifier
+- `canShow`: whether the section should be visible
+- `canManage`: whether create/edit/delete actions are enabled
+- optional callbacks:
+  - `listTrustedNerModels`
+  - `fetchPreviewDocument`
+  - `onCreateSuccess` / `onUpdateSuccess` / `onDeleteSuccess`
+  - `onCreateConflict` / `onOpenConflictError`
+
+Hosts are responsible for deriving these values from their capabilities/services context.
 
 ## Ownership boundaries
 
@@ -38,12 +46,58 @@ Package-owned:
 Host-owned:
 
 - app routing, page chrome, breadcrumbs, and navigation integration.
-- modal or sheet shell and close lifecycle integration.
+- modal, flyout, or inline page shell and close lifecycle integration.
 - host-specific telemetry and feature-flag wiring.
 
 ## Current status
 
 The package contains the active anonymization profile UI implementation used by GenAI Settings.
+
+## Public exports
+
+Import from `@kbn/anonymization-ui`:
+
+- section-level:
+  - `AnonymizationProfilesSection`
+  - `useProfilesListView`
+  - `useDeleteProfileFlow`
+- form-level:
+  - `ProfileFormProvider`
+  - `ProfileFormContent`
+  - `ProfileFormFooter`
+  - `ProfileForm`
+  - `ProfileFlyout`
+- shared UI primitives:
+  - `ProfilesToolbar`
+  - `ProfilesTable`
+  - `DeleteProfileModal`
+- services:
+  - `createAnonymizationProfilesClient`
+
+Avoid deep imports from `src/*`; use the package public surface.
+
+## Integration levels
+
+- section-level integration: use `AnonymizationProfilesSection` for the full profiles experience with host-provided capabilities/services wiring.
+- form-level integration: use `ProfileFormProvider` + `ProfileFormContent` + `ProfileFormFooter` when you need full control over container and orchestration.
+
+### Section-level example
+
+```tsx
+<AnonymizationProfilesSection
+  fetch={services.http.fetch}
+  spaceId={activeSpaceId}
+  canShow={canShowAnonymization}
+  canManage={canManageAnonymization}
+  listTrustedNerModels={listTrustedNerModels}
+  fetchPreviewDocument={fetchPreviewDocument}
+  onCreateSuccess={onCreateSuccess}
+  onUpdateSuccess={onUpdateSuccess}
+  onDeleteSuccess={onDeleteSuccess}
+  onCreateConflict={onCreateConflict}
+  onOpenConflictError={onOpenConflictError}
+/>
+```
 
 ## Composable profile form
 
