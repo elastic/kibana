@@ -17,7 +17,6 @@ const checkBundle = require('./check_bundles');
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.json`,
-      `${REPO_ROOT}/x-pack/platform/plugins/shared/alerting/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml`,
       `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/features/docs/openapi/feature_apis.yaml`,
