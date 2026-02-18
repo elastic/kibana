@@ -47,7 +47,7 @@ describe('UiActionsService', () => {
 
       const trigger = service.getTrigger(ON_OPEN_PANEL_MENU);
 
-      expect(trigger).toMatchObject(triggers.ON_OPEN_PANEL_MENU);
+      expect(trigger).toMatchObject(triggers[ON_OPEN_PANEL_MENU]);
     });
 
     test('throws if trigger does not exist', () => {
