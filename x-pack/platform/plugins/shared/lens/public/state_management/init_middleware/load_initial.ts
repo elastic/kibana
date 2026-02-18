@@ -49,19 +49,25 @@ export const getFromPreloaded = async ({
     const docFromSavedObject = await (initialInput.savedObjectId
       ? attributeService.loadFromLibrary(initialInput.savedObjectId)
       : undefined);
+
+    // By value - use initialInput.attributes
     if (!docFromSavedObject) {
+      // @TODO: it would be nice to address this type checks once for all
+      doc = {
+        ...initialInput.attributes,
+        type: LENS_EMBEDDABLE_TYPE,
+      } as LensDocument;
+
       return {
-        // @TODO: it would be nice to address this type checks once for all
-        doc: {
-          ...initialInput.attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-        } as LensDocument,
+        doc,
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
         managed: false,
       };
     }
+
+    // By ref - use docFromSavedObject
     const { sharingSavedObjectProps, attributes, managed } = docFromSavedObject;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
@@ -77,8 +83,10 @@ export const getFromPreloaded = async ({
         }),
       });
     }
+
+    const { id, ...initialInputWithoutPanelId } = initialInput;
     doc = {
-      ...initialInput,
+      ...initialInputWithoutPanelId,
       ...attributes,
       type: LENS_EMBEDDABLE_TYPE,
     };

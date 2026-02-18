@@ -24,6 +24,7 @@ import type {
   LensAppServices,
   LensStoreDeps,
   LensDocument,
+  LensSerializedState,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -216,17 +217,20 @@ const EditLensConfiguration: FC<
         : undefined,
     visualizationType: attributes.visualizationType,
   };
+
   const lensStore: LensRootStore = makeConfigureStore(
     storeDeps,
     undefined,
     updatingMiddleware(updatePanelState)
   );
+
   lensStore.dispatch(
     loadInitial({
       initialInput: {
-        attributes: currentAttributes,
         id: panelId ?? generateId(),
-      },
+        // Add specific Lens 'by reference' or 'by value' properties
+        ...(savedObjectId ? { savedObjectId } : { attributes: currentAttributes }),
+      } as LensSerializedState,
       inlineEditing: true,
       hideTextBasedEditor,
     })
