@@ -28,7 +28,6 @@ export const journey = new Journey({
       )
     );
     await kibanaPage.waitForHeader();
-    await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
     await page.locator(subj('ESQLEditor')).locator('textarea').first().waitFor();
   })
 
