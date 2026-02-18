@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createActor, fromEventObservable, fromObservable } from 'xstate5';
+import { createActor, fromEventObservable, fromObservable } from 'xstate';
 import type { Observable } from 'rxjs';
 import { EMPTY, of } from 'rxjs';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';

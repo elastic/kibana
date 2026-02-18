@@ -365,15 +365,22 @@ export class StreamsApp {
     // Use Monaco's model API to set value reliably (keyboard interactions can be flaky).
     // There can be multiple Monaco models on the page (e.g. YAML editor), so target the condition model.
     const conditionModelIndex = await this.page.evaluate(() => {
-      const monacoEnv = (window as any).MonacoEnvironment;
+      interface MonacoModel {
+        getValue(): string;
+      }
+      interface MonacoEditorApi {
+        getModels(): MonacoModel[];
+      }
+      interface MonacoEnv {
+        monaco?: { editor?: MonacoEditorApi };
+      }
+      const monacoEnv = (window as Window & { MonacoEnvironment?: MonacoEnv }).MonacoEnvironment;
       const editorApi = monacoEnv?.monaco?.editor;
       if (!editorApi) {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
 
-      const values: string[] = editorApi
-        .getModels()
-        .map((model: any) => model.getValue() as string);
+      const values: string[] = editorApi.getModels().map((model) => model.getValue());
       return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
     });
 

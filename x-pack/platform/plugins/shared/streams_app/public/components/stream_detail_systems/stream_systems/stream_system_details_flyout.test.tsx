@@ -68,14 +68,24 @@ jest.mock('../../../hooks/use_streams_app_fetch', () => ({
 jest.mock('../../data_management/shared', () => {
   const ReactMock = jest.requireActual('react') as typeof import('react');
 
-  return {
-    EditableConditionPanel: (props: any) => {
-      ReactMock.useEffect(() => {
-        if (!props.isEditingCondition) return;
+  interface MockEditableConditionPanelProps {
+    isEditingCondition: boolean;
+    setCondition: (condition: { field: string; eq: string }) => void;
+    onValidityChange?: (isValid: boolean) => void;
+  }
 
-        props.setCondition({ field: 'service.name', eq: 'updated' });
-        props.onValidityChange(false);
-      }, [props.isEditingCondition]);
+  return {
+    EditableConditionPanel: (props: MockEditableConditionPanelProps) => {
+      const { isEditingCondition, setCondition, onValidityChange } = props;
+      const callbacksRef = ReactMock.useRef({ setCondition, onValidityChange });
+      callbacksRef.current = { setCondition, onValidityChange };
+
+      ReactMock.useEffect(() => {
+        if (!isEditingCondition) return;
+
+        callbacksRef.current.setCondition({ field: 'service.name', eq: 'updated' });
+        callbacksRef.current.onValidityChange?.(false);
+      }, [isEditingCondition]);
       return ReactMock.createElement('div', { 'data-test-subj': 'mockEditableConditionPanel' });
     },
   };

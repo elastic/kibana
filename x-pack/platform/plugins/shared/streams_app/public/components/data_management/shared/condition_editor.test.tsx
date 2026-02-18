@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import type { FilterCondition } from '@kbn/streamlang';
+import type { Condition, FilterCondition } from '@kbn/streamlang';
 
 import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
@@ -355,7 +355,7 @@ describe('ConditionEditor', () => {
 
     it('should show error message when condition becomes invalid via syntax editor', () => {
       // Render with an invalid condition (simulating what happens after the fix)
-      const invalidCondition = {} as any;
+      const invalidCondition = {} as Condition;
 
       renderWithProviders(
         <ConditionEditor
