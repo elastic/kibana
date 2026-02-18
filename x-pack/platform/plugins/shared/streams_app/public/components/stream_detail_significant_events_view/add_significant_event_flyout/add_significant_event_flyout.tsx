@@ -42,6 +42,9 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
+const defaultTask: SignificantEventsQueriesGenerationTaskResult = {
+  status: TaskStatus.NotStarted,
+};
 interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
@@ -96,9 +99,7 @@ export function AddSignificantEventFlyout({
 
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
 
-  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>({
-    status: TaskStatus.NotStarted,
-  });
+  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
   const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
     useBoolean(false);
 
@@ -106,7 +107,7 @@ export function AddSignificantEventFlyout({
     useAsyncFn(scheduleGenerationTask);
 
   const scheduleTask = (connectorId: string, effectiveSystems: System[]) => {
-    setTask({ status: TaskStatus.NotStarted });
+    setTask(defaultTask);
     doScheduleGenerationTask(connectorId, effectiveSystems).then(setTask);
   };
 
