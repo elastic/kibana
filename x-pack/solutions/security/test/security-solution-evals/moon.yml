@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/security-entity-analytics'
   metadata:
-    sourceRoot: x-pack/solutions/security/test/security_solution_evals
+    sourceRoot: x-pack/solutions/security/test/security-solution-evals
 dependsOn:
   - '@kbn/evals'
   - '@kbn/tooling-log'
