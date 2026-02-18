@@ -31,7 +31,9 @@ export interface ProfileFormProps {
   nerRulesError?: string;
   submitError?: ProfilesApiError;
   hasConflict?: boolean;
+  conflictProfileId?: string;
   isSubmitting: boolean;
+  onOpenConflictProfile?: (profileId: string) => void;
   onNameChange: (name: string) => void;
   onDescriptionChange: (description: string) => void;
   onTargetTypeChange: (targetType: TargetType) => void;

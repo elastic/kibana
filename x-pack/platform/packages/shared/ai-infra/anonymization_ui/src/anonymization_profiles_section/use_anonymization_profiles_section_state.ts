@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import type { AnonymizationUiServices } from '../contracts';
 import { createAnonymizationProfilesClient } from '../common/services/profiles/client';
@@ -17,6 +17,11 @@ export type AnonymizationMode = 'manage' | 'readOnly' | 'hidden';
 
 interface ProfilesApiErrorLike {
   kind: string;
+}
+
+interface CreateConflictState {
+  profileId?: string;
+  targetKey: string;
 }
 
 export type FlyoutState =
@@ -57,17 +62,19 @@ export const useAnonymizationProfilesSectionState = ({
   onOpenConflictError,
 }: UseAnonymizationProfilesSectionStateParams) => {
   const [flyoutState, setFlyoutState] = useState<FlyoutState>(null);
-  const [createConflictProfileId, setCreateConflictProfileId] = useState<string | undefined>();
+  const [createConflict, setCreateConflict] = useState<CreateConflictState | null>(null);
 
   const profilesClient = useMemo(() => createAnonymizationProfilesClient({ fetch }), [fetch]);
   const context = useMemo(() => ({ spaceId }), [spaceId]);
-  const listView = useProfilesListView({ client: profilesClient, context });
+  const listView = useProfilesListView({ client: profilesClient, context, enabled: canShow });
   const deleteFlow = useDeleteProfileFlow({ client: profilesClient, context });
   const form = useProfileForm({
     client: profilesClient,
     context,
     initialProfile: flyoutState?.mode === 'edit' ? flyoutState.profile : undefined,
   });
+  const trimmedTargetId = form.values.targetId.trim();
+  const currentTargetKey = `${form.values.targetType}:${trimmedTargetId}`;
 
   const effectiveMode: AnonymizationMode = useMemo(() => {
     if (!canShow) {
@@ -81,9 +88,15 @@ export const useAnonymizationProfilesSectionState = ({
   const hasReadOnlyApiError = isReadOnlyApiError(listView.error);
   const isManageMode = effectiveMode === 'manage';
 
+  useEffect(() => {
+    if (createConflict && createConflict.targetKey !== currentTargetKey) {
+      setCreateConflict(null);
+    }
+  }, [createConflict, currentTargetKey]);
+
   const closeFlyout = useCallback(() => {
     setFlyoutState(null);
-    setCreateConflictProfileId(undefined);
+    setCreateConflict(null);
   }, []);
 
   const closeDeleteModal = useCallback(() => deleteFlow.cancel(), [deleteFlow]);
@@ -97,6 +110,7 @@ export const useAnonymizationProfilesSectionState = ({
 
   const openProfileById = useCallback(
     async (profileId: string) => {
+      setCreateConflict(null);
       try {
         const profile = await profilesClient.getProfile(profileId);
         setFlyoutState({ mode: 'edit', profile });
@@ -115,7 +129,7 @@ export const useAnonymizationProfilesSectionState = ({
     const result = await form.submit();
     if (result?.profile) {
       if (flyoutState.mode === 'create') {
-        setCreateConflictProfileId(undefined);
+        setCreateConflict(null);
         form.reset();
         closeFlyout();
         onCreateSuccess?.();
@@ -127,16 +141,47 @@ export const useAnonymizationProfilesSectionState = ({
     }
 
     if (flyoutState.mode === 'create' && result?.isConflict) {
-      setCreateConflictProfileId('conflict');
+      const matchingProfile = listView.profiles.find(
+        (profile) =>
+          profile.targetType === form.values.targetType && profile.targetId === trimmedTargetId
+      );
+      let conflictProfileId = matchingProfile?.id;
+      if (!conflictProfileId && trimmedTargetId) {
+        try {
+          const response = await profilesClient.findProfiles({
+            targetType: form.values.targetType,
+            targetId: trimmedTargetId,
+            page: 1,
+            perPage: 1,
+          });
+          conflictProfileId = response.data[0]?.id;
+        } catch {
+          conflictProfileId = undefined;
+        }
+      }
+      setCreateConflict({ profileId: conflictProfileId, targetKey: currentTargetKey });
       onCreateConflict?.();
     }
-  }, [closeFlyout, flyoutState, form, onCreateConflict, onCreateSuccess, onUpdateSuccess]);
+  }, [
+    closeFlyout,
+    currentTargetKey,
+    flyoutState,
+    form,
+    listView.profiles,
+    onCreateConflict,
+    onCreateSuccess,
+    onUpdateSuccess,
+    profilesClient,
+    trimmedTargetId,
+  ]);
 
   const onCreateProfile = useCallback(() => {
+    setCreateConflict(null);
     setFlyoutState({ mode: 'create' });
   }, []);
 
   const onEditProfile = useCallback((profile: AnonymizationProfile) => {
+    setCreateConflict(null);
     setFlyoutState({ mode: 'edit', profile });
   }, []);
 
@@ -153,7 +198,8 @@ export const useAnonymizationProfilesSectionState = ({
     deleteFlow,
     form,
     flyoutState,
-    createConflictProfileId,
+    createConflictProfileId: createConflict?.profileId,
+    hasCreateConflict: Boolean(createConflict),
     effectiveMode,
     hasReadOnlyApiError,
     isManageMode,

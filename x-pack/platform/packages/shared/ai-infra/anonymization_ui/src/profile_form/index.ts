@@ -15,8 +15,5 @@ export { ProfileFormProvider } from './profile_form_provider';
 export { ProfileFlyout } from '../profile_flyout/profile_flyout';
 export type { ProfileFlyoutProps } from '../profile_flyout/profile_flyout';
 export { ProfileFormFooter } from './profile_form_footer';
-export { ProfilesToolbar } from '../profiles_toolbar/profiles_toolbar';
-export { ProfilesTable } from '../profiles_table/profiles_table';
-export { DeleteProfileModal } from '../delete_profile_modal/delete_profile_modal';
 export { useProfileEditor } from './hooks/use_profile_editor';
 export { useProfileForm } from '../common/hooks/use_profile_form';

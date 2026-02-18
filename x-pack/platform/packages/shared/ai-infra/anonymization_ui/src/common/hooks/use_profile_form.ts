@@ -81,6 +81,10 @@ export const useProfileForm = ({
     isLoading: isUpdateLoading,
   } = updateMutation;
   const isEdit = Boolean(initialProfile);
+  const clearSubmitError = useCallback(() => {
+    createMutation.reset();
+    updateMutation.reset();
+  }, [createMutation, updateMutation]);
 
   const submitError = useMemo(() => {
     const mutationError = isEdit ? updateError : createError;
@@ -163,6 +167,7 @@ export const useProfileForm = ({
           return prev;
         }
 
+        clearSubmitError();
         return {
           ...prev,
           targetType,
@@ -172,12 +177,19 @@ export const useProfileForm = ({
           nerRules: [],
         };
       }),
-    []
+    [clearSubmitError]
   );
 
   const setTargetId = useCallback(
-    (targetId: string) => setValues((prev) => ({ ...prev, targetId })),
-    []
+    (targetId: string) =>
+      setValues((prev) => {
+        if (prev.targetId === targetId) {
+          return prev;
+        }
+        clearSubmitError();
+        return { ...prev, targetId };
+      }),
+    [clearSubmitError]
   );
 
   const setFieldRules = useCallback(

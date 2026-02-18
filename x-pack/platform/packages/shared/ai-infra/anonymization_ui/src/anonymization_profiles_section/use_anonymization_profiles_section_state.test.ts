@@ -6,7 +6,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { TARGET_TYPE_INDEX } from '../common/target_types';
+import type { ProfileFormValues } from '../common/hooks/profile_form_types';
 import { createAnonymizationProfilesClient } from '../common/services/profiles/client';
 import { useDeleteProfileFlow } from './hooks/use_delete_profile_flow';
 import { useProfileForm } from '../common/hooks/use_profile_form';
@@ -60,7 +62,8 @@ const createDeleteFlowMock = (
 const createProfileFormMock = (
   submit: jest.Mock = jest.fn().mockResolvedValue(undefined),
   submitError?: unknown,
-  reset: jest.Mock = jest.fn()
+  reset: jest.Mock = jest.fn(),
+  valuesOverrides: Partial<ProfileFormValues> = {}
 ): ReturnType<typeof useProfileForm> =>
   ({
     values: {
@@ -71,6 +74,7 @@ const createProfileFormMock = (
       fieldRules: [],
       regexRules: [],
       nerRules: [],
+      ...valuesOverrides,
     },
     validationErrors: {},
     submitError,
@@ -114,6 +118,7 @@ describe('useAnonymizationProfilesSectionState', () => {
 
     expect(result.current.effectiveMode).toBe('hidden');
     expect(result.current.isManageMode).toBe(false);
+    expect(useProfilesListView).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
   });
 
   it('returns readOnly mode for forbidden API errors', () => {
@@ -171,11 +176,23 @@ describe('useAnonymizationProfilesSectionState', () => {
 
   it('stores conflict profile id and calls onCreateConflict', async () => {
     const onCreateConflict = jest.fn();
+    const matchingProfile = {
+      id: 'profile-1',
+      targetType: TARGET_TYPE_INDEX,
+      targetId: 'logs-1',
+    } as AnonymizationProfile;
+    jest.mocked(useProfilesListView).mockReturnValue({
+      ...createListViewMock(undefined),
+      profiles: [matchingProfile],
+    });
     jest.mocked(useProfileForm).mockReturnValue(
       createProfileFormMock(
         jest.fn().mockResolvedValue({
           isConflict: true,
-        })
+        }),
+        undefined,
+        jest.fn(),
+        { targetId: 'logs-1' }
       )
     );
 
@@ -197,7 +214,8 @@ describe('useAnonymizationProfilesSectionState', () => {
       await result.current.submitFlyout();
     });
 
-    expect(result.current.createConflictProfileId).toBe('conflict');
+    expect(result.current.createConflictProfileId).toBe('profile-1');
+    expect(result.current.hasCreateConflict).toBe(true);
     expect(onCreateConflict).toHaveBeenCalledTimes(1);
   });
 

@@ -17,9 +17,6 @@ export {
   useProfileEditor,
   useProfileForm,
   ProfileFlyout,
-  ProfilesToolbar,
-  ProfilesTable,
-  DeleteProfileModal,
 } from './profile_form';
 export { useProfilesListView } from './anonymization_profiles_section/hooks/use_profiles_list_view';
 export { useDeleteProfileFlow } from './anonymization_profiles_section/hooks/use_delete_profile_flow';

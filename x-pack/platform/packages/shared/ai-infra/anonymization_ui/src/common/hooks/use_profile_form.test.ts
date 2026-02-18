@@ -28,30 +28,36 @@ const createUseCreateProfileMutationMock = ({
   mutateAsync = jest.fn(),
   error = null,
   isLoading = false,
+  reset = jest.fn(),
 }: {
   mutateAsync?: jest.Mock;
   error?: unknown;
   isLoading?: boolean;
+  reset?: jest.Mock;
 } = {}): ReturnType<typeof useCreateProfile> =>
   ({
     mutateAsync,
     error,
     isLoading,
+    reset,
   } as unknown as ReturnType<typeof useCreateProfile>);
 
 const createUseUpdateProfileMutationMock = ({
   mutateAsync = jest.fn(),
   error = null,
   isLoading = false,
+  reset = jest.fn(),
 }: {
   mutateAsync?: jest.Mock;
   error?: unknown;
   isLoading?: boolean;
+  reset?: jest.Mock;
 } = {}): ReturnType<typeof useUpdateProfile> =>
   ({
     mutateAsync,
     error,
     isLoading,
+    reset,
   } as unknown as ReturnType<typeof useUpdateProfile>);
 
 const createProfile = (id: string): AnonymizationProfile => ({

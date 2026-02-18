@@ -7,8 +7,10 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { act, renderHook } from '@testing-library/react';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
-import type { FindAnonymizationProfilesResponse } from '@kbn/anonymization-common';
+import type {
+  AnonymizationProfile,
+  FindAnonymizationProfilesResponse,
+} from '@kbn/anonymization-common';
 import { mapProfilesApiError } from '../../common/services/profiles/errors';
 import { useFindProfiles } from '../../common/services/profiles/hooks/use_find_profiles';
 import { TARGET_TYPE_INDEX } from '../../common/target_types';
@@ -125,6 +127,25 @@ describe('useProfilesListView', () => {
 
     await result.current.refetch();
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes enabled flag to the profiles query', () => {
+    jest.mocked(useFindProfiles).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    } as unknown as UseQueryResult<FindAnonymizationProfilesResponse>);
+
+    renderHook(() =>
+      useProfilesListView({
+        client,
+        context: { spaceId: 'default' },
+        enabled: false,
+      })
+    );
+
+    expect(useFindProfiles).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
   });
 
   it('normalizes unknown errors and preserves mapped API errors', () => {

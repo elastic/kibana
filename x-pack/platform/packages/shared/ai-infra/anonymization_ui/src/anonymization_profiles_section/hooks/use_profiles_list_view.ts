@@ -24,6 +24,7 @@ interface UseProfilesListViewParams {
   client: AnonymizationProfilesClient;
   context: ProfilesQueryContext;
   initialPerPage?: number;
+  enabled?: boolean;
 }
 
 interface ProfileListFilters {
@@ -58,6 +59,7 @@ export const useProfilesListView = ({
   client,
   context,
   initialPerPage = DEFAULT_PER_PAGE,
+  enabled = true,
 }: UseProfilesListViewParams): ProfilesListViewController => {
   const [targetType, setTargetType] = useState<'' | TargetType>('');
   const [targetId, setTargetId] = useState('');
@@ -79,7 +81,7 @@ export const useProfilesListView = ({
     isLoading,
     error: queryError,
     refetch: refetchProfiles,
-  } = useFindProfiles({ client, context, query });
+  } = useFindProfiles({ client, context, query, enabled });
 
   const error: ProfilesApiError | undefined = useMemo(
     () =>

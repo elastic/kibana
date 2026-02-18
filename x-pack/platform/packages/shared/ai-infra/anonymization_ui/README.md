@@ -32,7 +32,7 @@ Package-owned:
 - profile management UI primitives and behavior contracts.
 - mode derivation (`manage`, `readOnly`, `hidden`) from host context.
 - shared API and adapter layer for anonymization profiles endpoints.
-- composable profiles components (`ProfilesToolbar`, `ProfilesTable`, `ProfileFlyout`, `DeleteProfileModal`) that hosts can orchestrate.
+- internal profiles UI building blocks used by section and form compositions.
 
 ### Package structure
 
@@ -67,10 +67,6 @@ Import from `@kbn/anonymization-ui`:
   - `ProfileFormFooter`
   - `ProfileForm`
   - `ProfileFlyout`
-- shared UI primitives:
-  - `ProfilesToolbar`
-  - `ProfilesTable`
-  - `DeleteProfileModal`
 - services:
   - `createAnonymizationProfilesClient`
 
