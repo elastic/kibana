@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormData, ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import type { DslStepMetaFields, PreservedTimeUnit } from './types';
@@ -16,10 +16,10 @@ const { emptyField, isInteger } = fieldValidators;
 
 /**
  * `hook-form-lib` validators receive a *flattened* `formData` object (keys like
- * `_meta.downsampleSteps[0].afterValue`). We keep access centralized to reduce `any`/casts.
+ * `_meta.downsampleSteps[0].afterValue`). We keep access centralized to reduce casts.
  */
 type StreamsDslFlatFormData = Record<string, unknown>;
-type DslValidationFunc<V = unknown> = ValidationFunc<any, string, V>;
+type DslValidationFunc<V = unknown> = ValidationFunc<FormData, string, V>;
 type DslValidationArg<V = unknown> = Parameters<DslValidationFunc<V>>[0];
 
 type DslStepField = keyof DslStepMetaFields;
