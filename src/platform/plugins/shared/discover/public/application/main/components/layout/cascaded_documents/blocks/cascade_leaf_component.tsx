@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -34,8 +35,6 @@ interface ESQLDataCascadeLeafCellProps
       | 'renderDocumentView'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
-      | 'initialState'
-      | 'onInitialStateChange'
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
@@ -199,8 +198,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataView,
     showKeyboardShortcuts,
     externalCustomRenderers,
-    initialState,
-    onInitialStateChange,
     renderDocumentView,
     getScrollElement,
     getScrollMargin,
@@ -212,6 +209,30 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
+    );
+
+    const { getDataCascadeUiState, getDataGridUiStateMap, setDataGridUiState } =
+      useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
+
+    const getInformedScrollOffset = useCallback(() => {
+      // return the restorable scroll offset from the root virtualizer if it exists,
+      // otherwise return the current scroll offset,
+      // from the root virtualizer
+      return getDataCascadeUiState()?.scrollOffset ?? getScrollOffset();
+    }, [getDataCascadeUiState, getScrollOffset]);
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, newInitialGridState);
+      },
+      [cellId, setDataGridUiState]
     );
 
     // TODO: Implement column selection logic,
@@ -275,18 +296,18 @@ export const ESQLDataCascadeLeafCell = React.memo(
           setCustomGridBodyProps={setCustomGridBodyProps}
           getScrollElement={getScrollElement}
           preventSizeChangePropagation={preventSizeChangePropagation}
-          initialOffset={getScrollOffset}
+          initialOffset={getInformedScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
         />
       ),
       [
-        cellData,
-        cellId,
-        preventSizeChangePropagation,
-        getScrollElement,
-        getScrollMargin,
-        getScrollOffset,
         isCellInFullScreenMode,
+        cellId,
+        cellData,
+        getScrollMargin,
+        getScrollElement,
+        preventSizeChangePropagation,
+        getInformedScrollOffset,
       ]
     );
 
@@ -319,7 +340,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
           externalCustomRenderers={externalCustomRenderers}
           paginationMode="infinite"
           sampleSizeState={cellData.length}
-          initialState={initialState}
+          initialState={initialGridState}
           onInitialStateChange={onInitialStateChange}
         />
       </EuiPanel>
