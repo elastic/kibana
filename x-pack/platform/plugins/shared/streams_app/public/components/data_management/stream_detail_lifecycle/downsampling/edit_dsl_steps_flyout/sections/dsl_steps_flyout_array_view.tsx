@@ -27,6 +27,9 @@ import {
   toMilliseconds,
 } from '../form';
 import { TIME_UNIT_OPTIONS } from '../constants';
+import { useStyles } from '../use_styles';
+import { StepPanel } from './step_panel';
+import { StepTabsRow } from './step_tabs_row';
 
 /** Partial form update including internal __dslStepsFlyout flag for updateFieldValues */
 type DslStepsFlyoutFormFieldUpdate = Partial<DslStepsFlyoutFormInternal> & {
@@ -35,9 +38,6 @@ type DslStepsFlyoutFormFieldUpdate = Partial<DslStepsFlyoutFormInternal> & {
     downsampleSteps: DslStepMetaFields[];
   };
 };
-import { useStyles } from '../use_styles';
-import { StepPanel } from './step_panel';
-import { StepTabsRow } from './step_tabs_row';
 
 export interface DslStepsFlyoutArrayViewProps {
   arrayField: FormArrayField;
