@@ -66,7 +66,7 @@ describe('CreatePolicyModal', () => {
     await waitFor(() => expect(onSave).toHaveBeenCalledWith('new-policy'));
   });
 
-  it('pre-populates the policy name field with the original policy name', () => {
+  it('pre-populates with the default copy name', () => {
     renderWithI18n(
       <CreatePolicyModal
         policyNames={policyNames}
