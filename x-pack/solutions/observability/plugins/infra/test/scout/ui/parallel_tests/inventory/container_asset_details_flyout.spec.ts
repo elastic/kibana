@@ -278,7 +278,6 @@ test.describe(
     });
 
     test('Metrics Tab - Sections are accessible from overview tab section show all', async ({
-      page,
       pageObjects: { assetDetailsPage },
     }) => {
       const goBackToOverviewTab = async () => {
@@ -290,8 +289,6 @@ test.describe(
       };
 
       await test.step('cpu section', async () => {
-        await expect(page.locator('notExist')).toBeEnabled();
-
         await assetDetailsPage.dockerOverviewTab.metricsCpuShowAllButton.click();
         await expect(assetDetailsPage.dockerMetricsTab.tab).toHaveAttribute(
           'aria-selected',
