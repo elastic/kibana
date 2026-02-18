@@ -22,10 +22,30 @@ const defaultProps = {
   onFocusClick: jest.fn(),
 };
 
+function groupedNode(data: {
+  id: string;
+  label?: string;
+  groupedConnections: Array<Record<string, unknown>>;
+}) {
+  return {
+    id: data.id,
+    type: 'groupedResources' as const,
+    position: { x: 0, y: 0 },
+    data: {
+      id: data.id,
+      label: data.label ?? data.id,
+      isService: false as const,
+      isGrouped: true,
+      groupedConnections: data.groupedConnections,
+      count: data.groupedConnections.length,
+    },
+  };
+}
+
 describe('ExternalsListContents', () => {
-  describe('with Cytoscape data format (ES field names)', () => {
+  describe('with ES field names (span.type / span.subtype)', () => {
     it('renders grouped connections with span.type and span.subtype', () => {
-      const elementData = {
+      const selection = groupedNode({
         id: 'grouped-node',
         label: 'external (4)',
         groupedConnections: [
@@ -42,9 +62,9 @@ describe('ExternalsListContents', () => {
             [SPAN_SUBTYPE]: 'redis',
           },
         ],
-      };
+      });
 
-      render(<ExternalsListContents elementData={elementData} {...defaultProps} />);
+      render(<ExternalsListContents selection={selection} {...defaultProps} />);
 
       expect(screen.getByText('postgres:5432')).toBeInTheDocument();
       expect(screen.getByText('db (postgresql)')).toBeInTheDocument();
@@ -53,7 +73,7 @@ describe('ExternalsListContents', () => {
     });
 
     it('falls back to SPAN_DESTINATION_SERVICE_RESOURCE when label is missing', () => {
-      const elementData = {
+      const selection = groupedNode({
         id: 'grouped-node',
         groupedConnections: [
           {
@@ -63,9 +83,9 @@ describe('ExternalsListContents', () => {
             [SPAN_SUBTYPE]: 'elasticsearch',
           },
         ],
-      };
+      });
 
-      render(<ExternalsListContents elementData={elementData} {...defaultProps} />);
+      render(<ExternalsListContents selection={selection} {...defaultProps} />);
 
       expect(screen.getByText('elasticsearch:9200')).toBeInTheDocument();
     });
@@ -73,7 +93,7 @@ describe('ExternalsListContents', () => {
 
   describe('with React Flow data format (camelCase property names)', () => {
     it('renders grouped connections with spanType and spanSubtype', () => {
-      const elementData = {
+      const selection = groupedNode({
         id: 'grouped-node',
         label: 'external (3)',
         groupedConnections: [
@@ -90,9 +110,9 @@ describe('ExternalsListContents', () => {
             spanSubtype: 'http',
           },
         ],
-      };
+      });
 
-      render(<ExternalsListContents elementData={elementData} {...defaultProps} />);
+      render(<ExternalsListContents selection={selection} {...defaultProps} />);
 
       expect(screen.getByText('postgres:5432')).toBeInTheDocument();
       expect(screen.getByText('db (postgresql)')).toBeInTheDocument();
@@ -103,7 +123,7 @@ describe('ExternalsListContents', () => {
 
   describe('handles missing span type/subtype gracefully', () => {
     it('does not render description when spanType and spanSubtype are missing', () => {
-      const elementData = {
+      const selection = groupedNode({
         id: 'grouped-node',
         groupedConnections: [
           {
@@ -111,9 +131,9 @@ describe('ExternalsListContents', () => {
             label: 'unknown-resource',
           },
         ],
-      };
+      });
 
-      render(<ExternalsListContents elementData={elementData} {...defaultProps} />);
+      render(<ExternalsListContents selection={selection} {...defaultProps} />);
 
       expect(screen.getByText('unknown-resource')).toBeInTheDocument();
       // Should not render "undefined (undefined)"
@@ -121,7 +141,7 @@ describe('ExternalsListContents', () => {
     });
 
     it('does not render description when only spanType is present', () => {
-      const elementData = {
+      const selection = groupedNode({
         id: 'grouped-node',
         groupedConnections: [
           {
@@ -130,9 +150,9 @@ describe('ExternalsListContents', () => {
             spanType: 'db',
           },
         ],
-      };
+      });
 
-      render(<ExternalsListContents elementData={elementData} {...defaultProps} />);
+      render(<ExternalsListContents selection={selection} {...defaultProps} />);
 
       expect(screen.getByText('partial-resource')).toBeInTheDocument();
       // Should not render incomplete description

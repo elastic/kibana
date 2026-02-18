@@ -45,14 +45,15 @@ export const AgentPolicySummaryLine = memo<{
   }) => {
     const { getHref } = useLink();
     const { name, id, is_managed: isManaged, description } = policy;
+    const policyDisplayName = showPolicyId && name ? `${name} (${id})` : name || id;
 
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
 
     return (
       <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
+        <EuiFlexItem grow={true} css={MIN_WIDTH}>
+          <EuiFlexGroup direction="column" gutterSize="xs" wrap={true} css={MIN_WIDTH}>
             <EuiFlexItem>
               <EuiFlexGroup
                 direction={direction}
@@ -63,57 +64,54 @@ export const AgentPolicySummaryLine = memo<{
                 justifyContent={'flexStart'}
                 wrap={false}
               >
-                {isVersionSpecific && (
+                {/* Icons at start so they stay visible in constrained layouts */}
+                {(isVersionSpecific || isManaged) && (
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      type="branch"
-                      size="m"
-                      color="subdued"
-                      content={
-                        <FormattedMessage
-                          id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
-                          defaultMessage="This agent uses a version-specific policy because it doesn't meet the agent version requirements of some integrations."
-                        />
-                      }
-                    />
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      {isVersionSpecific && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            type="info"
+                            size="m"
+                            color="subdued"
+                            content={
+                              <FormattedMessage
+                                id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
+                                defaultMessage="This agent uses a version-specific policy because it doesn't meet the agent version requirements of some integrations."
+                              />
+                            }
+                          />
+                        </EuiFlexItem>
+                      )}
+                      {isManaged && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            title="Hosted agent policy"
+                            content={i18n.translate(
+                              'xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip',
+                              {
+                                defaultMessage:
+                                  'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+                              }
+                            )}
+                            type="lock"
+                            size="m"
+                            color="subdued"
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false} css={MIN_WIDTH}>
-                  <EuiFlexGroup
-                    css={MIN_WIDTH}
-                    gutterSize="s"
-                    alignItems="baseline"
-                    responsive={false}
+                  <EuiLink
+                    className="eui-textBreakNormal"
+                    href={getHref('policy_details', { policyId: id })}
+                    title={policyDisplayName}
+                    data-test-subj="agentPolicyNameLink"
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        className="eui-textBreakNormal"
-                        href={getHref('policy_details', { policyId: id })}
-                        title={name || id}
-                        data-test-subj="agentPolicyNameLink"
-                      >
-                        {showPolicyId && name ? `${name} (${id})` : name || id}
-                      </EuiLink>
-                    </EuiFlexItem>
-
-                    {isManaged && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          title="Hosted agent policy"
-                          content={i18n.translate(
-                            'xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip',
-                            {
-                              defaultMessage:
-                                'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
-                            }
-                          )}
-                          type="lock"
-                          size="m"
-                          color="subdued"
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
+                    {policyDisplayName}
+                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
