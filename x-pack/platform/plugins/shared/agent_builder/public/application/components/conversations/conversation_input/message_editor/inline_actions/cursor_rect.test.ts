@@ -57,10 +57,10 @@ describe('getRectAtOffset', () => {
     expect(rect).toBe(mockDOMRect);
   });
 
-  it('returns a DOMRect at the end of text', () => {
+  it('returns a DOMRect for the last character', () => {
     element.textContent = 'hello';
 
-    const rect = getRectAtOffset(element, 5);
+    const rect = getRectAtOffset(element, 4);
 
     expect(rect).toBe(mockDOMRect);
   });
@@ -93,9 +93,17 @@ describe('getRectAtOffset', () => {
     element.appendChild(document.createTextNode('abc'));
     element.appendChild(document.createTextNode('def'));
 
-    // Offset 3 = end of first node / start of second node
+    // Offset 3 resolves to the start of the second node ('d')
     const rect = getRectAtOffset(element, 3);
 
     expect(rect).toBe(mockDOMRect);
+  });
+
+  it('returns null when offset equals text length (no character at index)', () => {
+    element.textContent = 'hello';
+
+    const rect = getRectAtOffset(element, 5);
+
+    expect(rect).toBeNull();
   });
 });

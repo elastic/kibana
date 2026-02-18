@@ -11,21 +11,15 @@
  * then uses a collapsed Range to get the bounding rect.
  */
 export const getRectAtOffset = (element: HTMLElement, offset: number): DOMRect | null => {
+  // Filter for only text nodes
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
   let currentOffset = 0;
   let node: Node | null;
 
-  const getNodeLength = () => {
-    if (!node || !node.textContent) {
-      throw new Error('Node is not a Text Node');
-    }
-    return node.textContent.length;
-  };
-
   node = walker.nextNode();
   while (node) {
-    const length = getNodeLength();
-    if (currentOffset + length >= offset) {
+    const length = (node as Text).length;
+    if (currentOffset + length > offset) {
       const range = document.createRange();
       range.setStart(node, offset - currentOffset);
       range.collapse(true);
