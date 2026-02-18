@@ -127,8 +127,7 @@ const SlackSearchMessagesInputSchema = z.object({
       i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
         {
-          defaultMessage:
-            `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`,
+          defaultMessage: `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`,
         }
       )
     ),
@@ -389,18 +388,18 @@ function getSlackRetryDelayMs(params: {
   attempt: number;
   defaultBaseDelayMs?: number;
 }) {
-  const { responseHeaders, attempt, defaultBaseDelayMs = SLACK_RETRY_DEFAULT_BASE_DELAY_MS } =
-    params;
+  const {
+    responseHeaders,
+    attempt,
+    defaultBaseDelayMs = SLACK_RETRY_DEFAULT_BASE_DELAY_MS,
+  } = params;
   const retryAfter = getHeader(responseHeaders, 'retry-after');
   const retryAfterSeconds = typeof retryAfter === 'string' ? Number(retryAfter) : NaN;
 
   if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
     // Add a small jitter so multiple callers don't retry in lockstep.
     const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
-    return Math.min(
-      SLACK_RETRY_MAX_DELAY_MS,
-      Math.floor(retryAfterSeconds * 1000) + jitterMs
-    );
+    return Math.min(SLACK_RETRY_MAX_DELAY_MS, Math.floor(retryAfterSeconds * 1000) + jitterMs);
   }
 
   // Fallback exponential backoff with jitter.
@@ -707,8 +706,7 @@ export const Slack: ConnectorSpec = {
             ctx,
             action: 'resolveChannelId',
             maxRetries: 5,
-            request: () =>
-              ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
+            request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
           });
 
           if (!response.data.ok) {

@@ -55,4 +55,3 @@ export interface SlackSearchMatch {
   text?: string;
   blocks?: unknown;
 }
-

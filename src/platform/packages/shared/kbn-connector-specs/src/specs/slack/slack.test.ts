@@ -160,16 +160,13 @@ describe('Slack', () => {
         name: '#general',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list',
-        {
-          params: {
-            types: 'public_channel',
-            exclude_archived: true,
-            limit: 1000,
-          },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.list', {
+        params: {
+          types: 'public_channel',
+          exclude_archived: true,
+          limit: 1000,
+        },
+      });
       expect(result).toEqual({
         ok: true,
         found: true,
@@ -205,12 +202,20 @@ describe('Slack', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledTimes(2);
-      expect(mockClient.get).toHaveBeenNthCalledWith(1, 'https://slack.com/api/conversations.list', {
-        params: { types: 'public_channel', exclude_archived: true, limit: 1000 },
-      });
-      expect(mockClient.get).toHaveBeenNthCalledWith(2, 'https://slack.com/api/conversations.list', {
-        params: { types: 'public_channel', exclude_archived: true, limit: 1000, cursor: 'c2' },
-      });
+      expect(mockClient.get).toHaveBeenNthCalledWith(
+        1,
+        'https://slack.com/api/conversations.list',
+        {
+          params: { types: 'public_channel', exclude_archived: true, limit: 1000 },
+        }
+      );
+      expect(mockClient.get).toHaveBeenNthCalledWith(
+        2,
+        'https://slack.com/api/conversations.list',
+        {
+          params: { types: 'public_channel', exclude_archived: true, limit: 1000, cursor: 'c2' },
+        }
+      );
       expect(result).toMatchObject({
         ok: true,
         found: true,
