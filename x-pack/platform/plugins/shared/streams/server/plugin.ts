@@ -269,7 +269,7 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
-    this.createFromConfig(core);
+    void this.createFromConfig(core);
 
     return {};
   }
