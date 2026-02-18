@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
-import type { APMConfig } from '../../..';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import { parseDatemath } from '../../utils/time';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getTraceSampleIds } from '../../../routes/service_map/get_trace_sample_ids';
-import { fetchExitSpanSamplesFromTraceIds } from '../../../routes/service_map/fetch_exit_span_samples';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { buildApmResources } from '../../utils/build_apm_resources';
 import type { TopologyDirection, ServiceTopologyResponse, ConnectionWithKey } from './types';
 import { buildConnectionsFromSpans } from './build_connections_from_spans';
 import { getConnectionMetrics, finalizeConnections } from './get_connection_metrics';
@@ -19,21 +20,20 @@ import { filterDownstreamConnections, filterUpstreamConnections } from './filter
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 import { getImmediateDownstreamDependencies } from './get_immediate_downstream_dependencies';
 
-export type {
-  TopologyDirection,
-  ServiceTopologyNode,
-  ExternalNode,
-  ConnectionMetrics,
-  ServiceTopologyConnection,
-  ServiceTopologyResponse,
-} from './types';
+interface TopologyResources {
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
+  logger: Logger;
+}
 
 /**
  * Shared pipeline: fetch exit spans from trace IDs, build connections, filter by direction,
  * and enrich with service_destination metrics.
  */
 async function buildTopologyFromTraceIds({
-  apmEventClient,
+  resources,
   traceIds,
   serviceName,
   startMs,
@@ -41,7 +41,7 @@ async function buildTopologyFromTraceIds({
   maxDepth,
   filterFn,
 }: {
-  apmEventClient: APMEventClient;
+  resources: TopologyResources;
   traceIds: string[];
   serviceName: string;
   startMs: number;
@@ -57,18 +57,23 @@ async function buildTopologyFromTraceIds({
     return { connections: [] };
   }
 
-  const spans = await fetchExitSpanSamplesFromTraceIds({
-    apmEventClient,
+  const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
+    request: resources.request,
     traceIds,
     start: startMs,
     end: endMs,
   });
 
+  if (!spans) {
+    return { connections: [] };
+  }
+
   const filtered = filterFn(buildConnectionsFromSpans(spans), serviceName, maxDepth);
 
   const serviceNames = uniq(filtered.map((c) => c._sourceName));
   const metricsMap = await getConnectionMetrics({
-    apmEventClient,
+    dataRegistry: resources.dataRegistry,
+    request: resources.request,
     start: startMs,
     end: endMs,
     serviceNames,
@@ -78,17 +83,13 @@ async function buildTopologyFromTraceIds({
 }
 
 async function getDownstreamTopology({
-  apmEventClient,
-  config,
-  logger,
+  resources,
   serviceName,
   startMs,
   endMs,
   maxDepth,
 }: {
-  apmEventClient: APMEventClient;
-  config: APMConfig;
-  logger: Logger;
+  resources: TopologyResources;
   serviceName: string;
   startMs: number;
   endMs: number;
@@ -97,27 +98,28 @@ async function getDownstreamTopology({
   // Fast path: depth=1 uses pre-aggregated metrics instead of trace scanning
   if (maxDepth === 1) {
     return getImmediateDownstreamDependencies({
-      apmEventClient,
-      logger,
+      dataRegistry: resources.dataRegistry,
+      request: resources.request,
+      logger: resources.logger,
       serviceName,
       startMs,
       endMs,
     });
   }
 
-  const { traceIds } = await getTraceSampleIds({
-    config,
-    apmEventClient,
+  const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
+    request: resources.request,
     serviceName,
-    environment: ENVIRONMENT_ALL.value,
     start: startMs,
     end: endMs,
   });
 
-  logger.debug(`Found ${traceIds.length} traces for downstream topology`);
+  const traceIds = result?.traceIds ?? [];
+
+  resources.logger.debug(`Found ${traceIds.length} traces for downstream topology`);
 
   return buildTopologyFromTraceIds({
-    apmEventClient,
+    resources,
     traceIds,
     serviceName,
     startMs,
@@ -128,17 +130,13 @@ async function getDownstreamTopology({
 }
 
 async function getUpstreamTopology({
-  apmEventClient,
-  config,
-  logger,
+  resources,
   serviceName,
   startMs,
   endMs,
   maxDepth,
 }: {
-  apmEventClient: APMEventClient;
-  config: APMConfig;
-  logger: Logger;
+  resources: TopologyResources;
   serviceName: string;
   startMs: number;
   endMs: number;
@@ -148,20 +146,22 @@ async function getUpstreamTopology({
   // If the service has transactions (it's an instrumented service like "checkout-service"),
   // those traces will contain the full call chain including upstream callers.
   // This is reliable — no field matching needed.
-  const { traceIds } = await getTraceSampleIds({
-    config,
-    apmEventClient,
+  const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
+    request: resources.request,
     serviceName,
-    environment: ENVIRONMENT_ALL.value,
     start: startMs,
     end: endMs,
   });
 
+  const traceIds = result?.traceIds ?? [];
+
   if (traceIds.length > 0) {
-    logger.debug(`Found ${traceIds.length} traces for upstream topology via service transactions`);
+    resources.logger.debug(
+      `Found ${traceIds.length} traces for upstream topology via service transactions`
+    );
 
     return buildTopologyFromTraceIds({
-      apmEventClient,
+      resources,
       traceIds,
       serviceName,
       startMs,
@@ -173,9 +173,16 @@ async function getUpstreamTopology({
 
   // Fallback: the service has no transactions, so it's an external dependency (e.g., "postgres").
   // Find traces by exact match on span.destination.service.resource.
-  logger.debug(
+  resources.logger.debug(
     `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
   );
+
+  const { apmEventClient } = await buildApmResources({
+    core: resources.core,
+    plugins: resources.plugins,
+    request: resources.request,
+    logger: resources.logger,
+  });
 
   const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
     apmEventClient,
@@ -184,10 +191,10 @@ async function getUpstreamTopology({
     end: endMs,
   });
 
-  logger.debug(`Found ${depTraceIds.length} traces for upstream topology via exit spans`);
+  resources.logger.debug(`Found ${depTraceIds.length} traces for upstream topology via exit spans`);
 
   return buildTopologyFromTraceIds({
-    apmEventClient,
+    resources,
     traceIds: depTraceIds,
     serviceName,
     startMs,
@@ -205,37 +212,40 @@ async function getUpstreamTopology({
  * would otherwise execute identical queries for both downstream and upstream.
  */
 async function getBothTopology({
-  apmEventClient,
-  config,
-  logger,
+  resources,
   serviceName,
   startMs,
   endMs,
   maxDepth,
 }: {
-  apmEventClient: APMEventClient;
-  config: APMConfig;
-  logger: Logger;
+  resources: TopologyResources;
   serviceName: string;
   startMs: number;
   endMs: number;
   maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
-  const { traceIds } = await getTraceSampleIds({
-    config,
-    apmEventClient,
+  const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
+    request: resources.request,
     serviceName,
-    environment: ENVIRONMENT_ALL.value,
     start: startMs,
     end: endMs,
   });
 
+  const traceIds = result?.traceIds ?? [];
+
   // External dependency (no transactions): downstream is empty, only upstream applies.
   // Fall back to finding traces via exit spans targeting this dependency.
   if (traceIds.length === 0) {
-    logger.debug(
+    resources.logger.debug(
       `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
     );
+
+    const { apmEventClient } = await buildApmResources({
+      core: resources.core,
+      plugins: resources.plugins,
+      request: resources.request,
+      logger: resources.logger,
+    });
 
     const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
       apmEventClient,
@@ -244,10 +254,12 @@ async function getBothTopology({
       end: endMs,
     });
 
-    logger.debug(`Found ${depTraceIds.length} traces for upstream topology via exit spans`);
+    resources.logger.debug(
+      `Found ${depTraceIds.length} traces for upstream topology via exit spans`
+    );
 
     return buildTopologyFromTraceIds({
-      apmEventClient,
+      resources,
       traceIds: depTraceIds,
       serviceName,
       startMs,
@@ -257,15 +269,19 @@ async function getBothTopology({
     });
   }
 
-  logger.debug(`Found ${traceIds.length} traces for both-direction topology`);
+  resources.logger.debug(`Found ${traceIds.length} traces for both-direction topology`);
 
   // Fetch exit spans once, build connection graph once
-  const spans = await fetchExitSpanSamplesFromTraceIds({
-    apmEventClient,
+  const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
+    request: resources.request,
     traceIds,
     start: startMs,
     end: endMs,
   });
+
+  if (!spans) {
+    return { connections: [] };
+  }
 
   const allConnections = buildConnectionsFromSpans(spans);
   const downFiltered = filterDownstreamConnections(allConnections, serviceName, maxDepth);
@@ -278,7 +294,8 @@ async function getBothTopology({
   ]);
 
   const metricsMap = await getConnectionMetrics({
-    apmEventClient,
+    dataRegistry: resources.dataRegistry,
+    request: resources.request,
     start: startMs,
     end: endMs,
     serviceNames,
@@ -292,9 +309,11 @@ async function getBothTopology({
   };
 }
 
-export async function getApmServiceTopology({
-  apmEventClient,
-  config,
+export async function getServiceTopology({
+  core,
+  plugins,
+  dataRegistry,
+  request,
   logger,
   serviceName,
   direction = 'downstream',
@@ -302,8 +321,10 @@ export async function getApmServiceTopology({
   start,
   end,
 }: {
-  apmEventClient: APMEventClient;
-  config: APMConfig;
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  request: KibanaRequest;
   logger: Logger;
   serviceName: string;
   direction?: TopologyDirection;
@@ -314,7 +335,8 @@ export async function getApmServiceTopology({
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
 
-  const params = { apmEventClient, config, logger, serviceName, startMs, endMs, maxDepth: depth };
+  const resources: TopologyResources = { dataRegistry, core, plugins, request, logger };
+  const params = { resources, serviceName, startMs, endMs, maxDepth: depth };
 
   if (direction === 'downstream') {
     return getDownstreamTopology(params);

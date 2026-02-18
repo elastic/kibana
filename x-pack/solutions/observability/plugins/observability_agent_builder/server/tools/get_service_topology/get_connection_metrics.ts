@@ -7,9 +7,9 @@
 
 import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { termQuery } from '@kbn/observability-plugin/server';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getConnectionStatsItems } from '../../../lib/connections/get_connection_stats/get_connection_stats_items';
+import type { KibanaRequest } from '@kbn/core/server';
+import { SERVICE_NAME } from '@kbn/apm-types';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { buildConnectionKey } from './build_connections_from_spans';
 import type { ConnectionMetrics, ConnectionWithKey, ServiceTopologyConnection } from './types';
 
@@ -18,12 +18,14 @@ interface MetricsMap {
 }
 
 export async function getConnectionMetrics({
-  apmEventClient,
+  dataRegistry,
+  request,
   start,
   end,
   serviceNames,
 }: {
-  apmEventClient: APMEventClient;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  request: KibanaRequest;
   start: number;
   end: number;
   serviceNames: string[];
@@ -32,8 +34,8 @@ export async function getConnectionMetrics({
     return {};
   }
 
-  const statsItems = await getConnectionStatsItems({
-    apmEventClient,
+  const statsItems = await dataRegistry.getData('apmConnectionStats', {
+    request,
     start,
     end,
     filter:
@@ -43,6 +45,10 @@ export async function getConnectionMetrics({
     numBuckets: 1,
     withTimeseries: false,
   });
+
+  if (!statsItems) {
+    return {};
+  }
 
   const metricsEntries = statsItems.flatMap((item) => {
     const serviceName = item.from.serviceName;

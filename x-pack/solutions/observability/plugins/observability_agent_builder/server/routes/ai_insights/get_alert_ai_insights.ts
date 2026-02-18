@@ -20,6 +20,7 @@ import type {
 } from '../../types';
 import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
 import { getToolHandler as getRuntimeMetrics } from '../../tools/get_runtime_metrics/handler';
+import { getServiceTopology } from '../../tools/get_service_topology/get_service_topology';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -127,11 +128,6 @@ async function fetchAlertContext({
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
-      key: 'apmServiceTopology' as const,
-      startOffset: START_TIME_OFFSETS.downstream,
-      params: { serviceName, direction: 'downstream' as const, depth: 1 },
-    },
-    {
       key: 'apmServiceChangePoints' as const,
       startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
@@ -196,6 +192,29 @@ async function fetchAlertContext({
     }
   }
 
+  async function fetchServiceTopology() {
+    try {
+      const start = getStart(START_TIME_OFFSETS.downstream);
+      const end = alertStart;
+      const data = await getServiceTopology({
+        core,
+        plugins,
+        dataRegistry,
+        request,
+        logger,
+        serviceName,
+        direction: 'downstream',
+        depth: 1,
+        start,
+        end,
+      });
+      return isEmpty(data) ? null : { key: 'apmServiceTopology' as const, start, end, data };
+    } catch (err) {
+      logger.debug(`AI insight: apmServiceTopology failed: ${err}`);
+      return null;
+    }
+  }
+
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
@@ -213,6 +232,7 @@ async function fetchAlertContext({
         return null;
       }
     }),
+    fetchServiceTopology(),
     fetchLogGroups(),
     fetchRuntimeMetrics(),
   ];

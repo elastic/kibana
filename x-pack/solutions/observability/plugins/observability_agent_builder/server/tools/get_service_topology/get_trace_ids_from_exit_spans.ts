@@ -6,10 +6,9 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
+import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 
 /**
  * Get trace IDs from exit spans that target a specific external dependency.

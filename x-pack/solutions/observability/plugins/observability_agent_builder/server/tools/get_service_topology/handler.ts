@@ -5,40 +5,49 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { ServiceTopologyResponse } from '../../data_registry/data_registry_types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
+import type { ServiceTopologyResponse } from './types';
 import type { TopologyDirection } from './tool';
+import { getServiceTopology } from './get_service_topology';
 
 export async function getToolHandler({
+  core,
+  plugins,
   request,
   dataRegistry,
+  logger,
   serviceName,
   direction,
   depth,
   start,
   end,
 }: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  logger: Logger;
   serviceName: string;
   direction: TopologyDirection;
   depth?: number;
   start: string;
   end: string;
 }): Promise<ServiceTopologyResponse> {
-  const topology = await dataRegistry.getData('apmServiceTopology', {
+  return getServiceTopology({
+    core,
+    plugins,
+    dataRegistry,
     request,
+    logger,
     serviceName,
     direction,
     depth,
     start,
     end,
   });
-
-  if (!topology) {
-    return { connections: [] };
-  }
-
-  return topology;
 }

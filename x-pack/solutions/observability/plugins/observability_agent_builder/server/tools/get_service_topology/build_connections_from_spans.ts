@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ServiceMapSpan } from '../../../../common/service_map/types';
+import type { ExitSpanSample } from '../../data_registry/data_registry_types';
 import type { ServiceTopologyNode, ExternalNode, ConnectionWithKey } from './types';
 
 export const buildConnectionKey = (sourceName: string, dependencyName: string): string =>
   `${sourceName}::${dependencyName}`;
 
-export function buildConnectionsFromSpans(spans: ServiceMapSpan[]): ConnectionWithKey[] {
+export function buildConnectionsFromSpans(spans: ExitSpanSample[]): ConnectionWithKey[] {
   const connectionMap = new Map<string, ConnectionWithKey>();
 
   for (const span of spans) {

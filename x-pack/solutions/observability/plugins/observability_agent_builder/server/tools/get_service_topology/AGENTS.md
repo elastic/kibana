@@ -6,7 +6,9 @@ Surface upstream and downstream service dependencies for a given service, enabli
 
 ## Implementation
 
-Core logic: `x-pack/solutions/observability/plugins/apm/server/agent_builder/data_provider/get_apm_service_topology/index.ts`
+Core logic: `x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_service_topology/get_service_topology.ts`
+
+Data providers (registered in APM plugin): `apmTraceSampleIds`, `apmExitSpanSamples`, `apmConnectionStats`
 
 ## Direction Semantics
 

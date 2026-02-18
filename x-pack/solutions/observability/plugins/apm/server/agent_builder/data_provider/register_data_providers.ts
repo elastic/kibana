@@ -11,7 +11,9 @@ import type { APMConfig } from '../..';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from './get_apm_service_summary';
-import { getApmServiceTopology } from './get_apm_service_topology';
+import { getTraceSampleIds } from '../../routes/service_map/get_trace_sample_ids';
+import { fetchExitSpanSamplesFromTraceIds } from '../../routes/service_map/fetch_exit_span_samples';
+import { getConnectionStatsItems } from '../../lib/connections/get_connection_stats/get_connection_stats_items';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -153,8 +155,8 @@ export function registerDataProviders({
   );
 
   observabilityAgentBuilder.registerDataProvider(
-    'apmServiceTopology',
-    async ({ request, serviceName, direction, depth, start, end }) => {
+    'apmTraceSampleIds',
+    async ({ request, serviceName, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({
         core,
         plugins,
@@ -162,16 +164,74 @@ export function registerDataProviders({
         logger,
       });
 
-      return getApmServiceTopology({
-        apmEventClient,
+      return getTraceSampleIds({
         config,
-        logger,
+        apmEventClient,
         serviceName,
-        direction: direction ?? 'downstream',
-        depth,
+        environment: ENVIRONMENT_ALL.value,
         start,
         end,
       });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmExitSpanSamples',
+    async ({ request, traceIds, start, end }) => {
+      const { apmEventClient } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
+
+      const spans = await fetchExitSpanSamplesFromTraceIds({
+        apmEventClient,
+        traceIds,
+        start,
+        end,
+      });
+
+      return spans.map((s) => ({
+        serviceName: s.serviceName,
+        spanDestinationServiceResource: s.spanDestinationServiceResource,
+        spanType: s.spanType,
+        spanSubtype: s.spanSubtype,
+        destinationService: s.destinationService
+          ? { serviceName: s.destinationService.serviceName }
+          : undefined,
+      }));
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmConnectionStats',
+    async ({ request, start, end, filter, numBuckets, withTimeseries }) => {
+      const { apmEventClient } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
+
+      const items = await getConnectionStatsItems({
+        apmEventClient,
+        start,
+        end,
+        filter,
+        numBuckets,
+        withTimeseries,
+      });
+
+      return items.map((item) => ({
+        from: { serviceName: item.from.serviceName },
+        to: {
+          dependencyName: item.to.dependencyName,
+          spanType: item.to.spanType,
+          spanSubtype: item.to.spanSubtype,
+        },
+        value: item.value,
+      }));
     }
   );
 }

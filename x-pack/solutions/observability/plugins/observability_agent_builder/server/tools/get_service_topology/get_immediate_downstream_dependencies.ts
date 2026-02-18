@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getConnectionStatsItems } from '../../../lib/connections/get_connection_stats/get_connection_stats_items';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SERVICE_NAME } from '@kbn/apm-types';
+import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServiceTopologyResponse, ExternalNode, ServiceTopologyNode } from './types';
 
 /**
@@ -24,13 +24,15 @@ import type { ServiceTopologyResponse, ExternalNode, ServiceTopologyNode } from 
  * the resource name + span.type/subtype clearly identifies the dependency.
  */
 export async function getImmediateDownstreamDependencies({
-  apmEventClient,
+  dataRegistry,
+  request,
   logger,
   serviceName,
   startMs,
   endMs,
 }: {
-  apmEventClient: APMEventClient;
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  request: KibanaRequest;
   logger: Logger;
   serviceName: string;
   startMs: number;
@@ -38,14 +40,18 @@ export async function getImmediateDownstreamDependencies({
 }): Promise<ServiceTopologyResponse> {
   logger.debug(`Using metrics-based fast path for immediate downstream of "${serviceName}"`);
 
-  const statsItems = await getConnectionStatsItems({
-    apmEventClient,
+  const statsItems = await dataRegistry.getData('apmConnectionStats', {
+    request,
     start: startMs,
     end: endMs,
     filter: termQuery(SERVICE_NAME, serviceName),
     numBuckets: 1,
     withTimeseries: false,
   });
+
+  if (!statsItems) {
+    return { connections: [] };
+  }
 
   const connections = statsItems.map((item) => {
     const { latency_count, latency_sum, error_count, success_count } = item.value;

@@ -10,7 +10,10 @@ import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -48,10 +51,12 @@ const getServiceTopologyToolSchema = z.object({
 
 export function createGetServiceTopologyTool({
   core,
+  plugins,
   dataRegistry,
   logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getServiceTopologyToolSchema> {
@@ -88,8 +93,11 @@ After reviewing topology results, consider:
 
       try {
         const topology = await getToolHandler({
+          core,
+          plugins,
           request,
           dataRegistry,
+          logger,
           serviceName,
           direction,
           depth,

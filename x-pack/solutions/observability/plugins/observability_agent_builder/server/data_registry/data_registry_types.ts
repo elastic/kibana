@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
 
@@ -36,12 +37,6 @@ interface ServiceSummary {
   anomalies: unknown;
   alerts: Array<{ type?: string; started: string }>;
   deployments: Array<{ '@timestamp': string }>;
-}
-
-interface ConnectionMetricValues {
-  errorRate?: number;
-  latencyMs?: number;
-  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -128,24 +123,29 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
-interface ServiceTopologyNode {
-  'service.name': string;
+export interface ExitSpanSample {
+  serviceName: string;
+  spanDestinationServiceResource: string;
+  spanType: string;
+  spanSubtype: string;
+  destinationService?: {
+    serviceName: string;
+  };
 }
 
-interface ExternalNode {
-  'span.destination.service.resource': string;
-  'span.type': string;
-  'span.subtype': string;
-}
-
-interface ServiceTopologyConnection {
-  source: ServiceTopologyNode | ExternalNode;
-  target: ServiceTopologyNode | ExternalNode;
-  metrics?: ConnectionMetricValues;
-}
-
-export interface ServiceTopologyResponse {
-  connections: ServiceTopologyConnection[];
+export interface ConnectionStatsItem {
+  from: { serviceName: string };
+  to: {
+    dependencyName: string;
+    spanType: string;
+    spanSubtype: string;
+  };
+  value: {
+    latency_count: number;
+    latency_sum: number;
+    error_count: number;
+    success_count: number;
+  };
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
@@ -204,12 +204,26 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
 
-  apmServiceTopology: (params: {
+  apmTraceSampleIds: (params: {
     request: KibanaRequest;
     serviceName: string;
-    direction?: 'downstream' | 'upstream' | 'both';
-    depth?: number;
-    start: string;
-    end: string;
-  }) => Promise<ServiceTopologyResponse>;
+    start: number;
+    end: number;
+  }) => Promise<{ traceIds: string[] }>;
+
+  apmExitSpanSamples: (params: {
+    request: KibanaRequest;
+    traceIds: string[];
+    start: number;
+    end: number;
+  }) => Promise<ExitSpanSample[]>;
+
+  apmConnectionStats: (params: {
+    request: KibanaRequest;
+    start: number;
+    end: number;
+    filter: QueryDslQueryContainer[];
+    numBuckets: number;
+    withTimeseries: boolean;
+  }) => Promise<ConnectionStatsItem[]>;
 }

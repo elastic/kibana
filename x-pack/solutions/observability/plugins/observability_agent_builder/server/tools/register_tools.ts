@@ -112,7 +112,7 @@ export async function registerTools({
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
-    createGetServiceTopologyTool({ core, dataRegistry, logger }),
+    createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
   ];
 
   for (const tool of observabilityTools) {
