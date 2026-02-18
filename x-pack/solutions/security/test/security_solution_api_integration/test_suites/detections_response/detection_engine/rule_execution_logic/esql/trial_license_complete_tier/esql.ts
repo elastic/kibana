@@ -1717,7 +1717,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
             query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
               id
-            )} | mv_expand agent.name | sort @timestamp asc, _index asc`, // sort by timestamp and index to ensure deterministic results, see https://github.com/elastic/kibana/pull/252936
+            )} | mv_expand agent.name | sort @timestamp asc, _index asc`, // sort by timestamp and index to ensure deterministic results, see https://github.com/elastic/kibana/issues/253849
             from: '2020-10-28T05:15:00.000Z',
             to: '2020-10-28T06:00:00.000Z',
             interval: '45m',
