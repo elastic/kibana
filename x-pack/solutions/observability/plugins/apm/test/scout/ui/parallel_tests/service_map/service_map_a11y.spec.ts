@@ -14,7 +14,8 @@ import {
   SERVICE_OPBEANS_NODE,
 } from '../../fixtures/constants';
 
-test.describe(
+// FLAKY: https://github.com/elastic/kibana/issues/253809
+test.describe.skip(
   'Service map - accessibility',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
