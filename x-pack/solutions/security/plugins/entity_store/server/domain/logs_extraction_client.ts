@@ -207,7 +207,9 @@ export class LogsExtractionClient {
     logExtractionState: LogExtractionState,
     delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
-    this.logger.debug(`Getting extraction window for log extraction state: ${JSON.stringify(logExtractionState)}`);
+    this.logger.debug(
+      `Getting extraction window for log extraction state: ${JSON.stringify(logExtractionState)}`
+    );
     const fromDateISO =
       logExtractionState.paginationTimestamp ||
       logExtractionState.lastExecutionTimestamp ||
