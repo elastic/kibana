@@ -7,8 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+
+const gcsCredentials = process.env.GCS_CREDENTIALS;
+let gcsSecureFile: string | undefined;
+
+if (gcsCredentials) {
+  const gcsCredentialsFilePath = join(
+    tmpdir(),
+    `gcs-credentials-${Date.now()}-${process.pid}.json`
+  );
+  writeFileSync(gcsCredentialsFilePath, gcsCredentials);
+  gcsSecureFile = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+  process.on('exit', () => {
+    try {
+      unlinkSync(gcsCredentialsFilePath);
+    } catch {
+      // Ignore errors if file was already deleted
+    }
+  });
+}
+const defaultExporters = JSON.stringify([
+  {
+    http: {
+      url: 'http://localhost:4318/v1/traces',
+    },
+  },
+  {
+    phoenix: {
+      base_url: 'http://localhost:6006',
+      public_url: 'http://localhost:6006',
+      project_name: 'kibana-evals',
+    },
+  },
+]);
+
+// When TRACING_EXPORTERS is set (e.g. in CI), use it instead of the localhost defaults.
+const { TRACING_EXPORTERS: tracingExporters } = process.env;
+if (tracingExporters) {
+  JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
+}
+const exporters = tracingExporters ?? defaultExporters;
 
 /**
  * Custom Scout stateful server configuration that enables OTLP trace exporting
@@ -19,6 +62,10 @@ import { defaultConfig } from '../../default/stateful/base.config';
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    secureFiles: [...(gcsSecureFile ? [gcsSecureFile] : [])],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     env: {
@@ -28,24 +75,10 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
 
-      // Enable Kibana OpenTelemetry tracing and export to the local EDOT collector
       '--telemetry.enabled=true',
       '--telemetry.tracing.enabled=true',
       '--telemetry.tracing.sample_rate=1',
-      `--telemetry.tracing.exporters=${JSON.stringify([
-        {
-          http: {
-            url: 'http://localhost:4318/v1/traces',
-          },
-        },
-        {
-          phoenix: {
-            base_url: 'http://localhost:6006',
-            public_url: 'http://localhost:6006',
-            project_name: 'kibana-evals',
-          },
-        },
-      ])}`,
+      `--telemetry.tracing.exporters=${exporters}`,
     ],
   },
 };
