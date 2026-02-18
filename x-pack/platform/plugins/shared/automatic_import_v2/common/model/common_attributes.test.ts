@@ -585,6 +585,7 @@ describe('common attributes schemas', () => {
       title: 'Test Integration',
       totalDataStreamCount: 5,
       successfulDataStreamCount: 3,
+      createdBy: 'test-user',
       status: 'processing' as const,
     };
 
@@ -624,6 +625,7 @@ describe('common attributes schemas', () => {
         'title',
         'totalDataStreamCount',
         'successfulDataStreamCount',
+        'createdBy',
         'status',
       ];
 

@@ -170,6 +170,9 @@ components:
             createdBy:
               description: The username of the user who created the integration
               type: string
+            createdByProfileUid:
+              description: The profile UID of the user who created the integration
+              type: string
             dataStreams:
               type: array
               description: The data streams of the integration
