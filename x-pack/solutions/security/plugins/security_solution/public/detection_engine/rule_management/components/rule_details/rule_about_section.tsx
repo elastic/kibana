@@ -515,10 +515,10 @@ export const RuleAboutSection = ({
   });
 
   return (
-    <div className={'eui-xScroll'}>
+    <div className="eui-xScroll">
       <EuiSpacer size="m" />
       <EuiDescriptionList
-        type={descriptionListProps.type ?? 'responsiveColumn'}
+        type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
         columnWidths={columnWidths}
