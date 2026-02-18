@@ -8,7 +8,7 @@
 import type { GrokCollection } from '@kbn/grok-ui';
 import { ALWAYS_CONDITION, type StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
-import { createActor } from 'xstate5';
+import { createActor } from 'xstate';
 import { interactiveModeMachine } from './interactive_mode_machine';
 import type { InteractiveModeParentRef } from './types';
 
