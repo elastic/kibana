@@ -685,9 +685,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
-              const span = await renderedValueContainer.findByTagName('span');
-              expect(await span.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
-              expect(await span.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+              // The color formatter wraps styled values in nested spans - find the inner styled span
+              const spans = await renderedValueContainer.findAllByTagName('span');
+              const styledSpan = spans[spans.length - 1];
+              expect(await styledSpan.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
+              expect(await styledSpan.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
             },
           },
           {
@@ -729,9 +731,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
-              const span = await renderedValueContainer.findByTagName('span');
-              expect(await span.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
-              expect(await span.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+              // The color formatter wraps styled values in nested spans - find the inner styled span
+              const spans = await renderedValueContainer.findAllByTagName('span');
+              const styledSpan = spans[spans.length - 1];
+              expect(await styledSpan.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
+              expect(await styledSpan.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
             },
           },
           {
