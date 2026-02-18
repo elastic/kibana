@@ -75,6 +75,7 @@ const querySchema = schema.object({
 });
 
 interface OAuthConnectorSecrets {
+  authType?: string;
   clientId?: string;
   clientSecret?: string;
   tokenUrl?: string;
@@ -82,8 +83,6 @@ interface OAuthConnectorSecrets {
 }
 
 interface OAuthConnectorConfig {
-  authType?: string;
-  auth?: { type?: string };
   clientId?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
@@ -365,7 +364,7 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
-          const authType = config?.authType || config?.auth?.type;
+          const authType = secrets.authType;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
 
           if (!tokenUrl) {
