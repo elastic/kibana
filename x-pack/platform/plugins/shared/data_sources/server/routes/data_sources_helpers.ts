@@ -257,7 +257,7 @@ export async function createDataSourceAndRelatedResources(
         basePath: 'skills/platform',
         description: `Tools for the "${name}" ${dataSource.name} connection. Load this skill to use the ${dataSource.name} tools.`,
         content: skillMarkdown,
-        getDynamicToolIds: () => toolIds,
+        getRegistryTools: () => toolIds,
       });
     } catch (err) {
       logger.warn(`Failed to register instance skill: ${(err as Error).message}`);
