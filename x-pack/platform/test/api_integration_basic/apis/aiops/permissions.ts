@@ -6,6 +6,7 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 import type {
@@ -20,12 +21,12 @@ const API_VERSIONS: ApiVersion[] = ['3'];
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServer = new URL(config.get('servers.kibana'));
+  const kibanaServer = config.get('servers.kibana');
   // Native fetch doesn't support credentials in URLs, so we need to extract them
   const { username, password } = kibanaServer;
   kibanaServer.username = '';
   kibanaServer.password = '';
-  const kibanaServerUrl = kibanaServer.toString();
+  const kibanaServerUrl = formatUrl(kibanaServer);
   const authHeader: Record<string, string> =
     username && password
       ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }

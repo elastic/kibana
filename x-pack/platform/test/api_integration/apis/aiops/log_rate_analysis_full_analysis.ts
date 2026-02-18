@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
-
+import { format as formatUrl } from 'url';
 import { orderBy } from 'lodash';
 
 import expect from '@kbn/expect';
@@ -29,12 +29,12 @@ export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServer = new URL(config.get('servers.kibana'));
+  const kibanaServer = config.get('servers.kibana');
   // Native fetch doesn't support credentials in URLs, so we need to extract them
   const { username, password } = kibanaServer;
   kibanaServer.username = '';
   kibanaServer.password = '';
-  const kibanaServerUrl = kibanaServer.toString();
+  const kibanaServerUrl = formatUrl(kibanaServer);
   const authHeader: Record<string, string> =
     username && password
       ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
