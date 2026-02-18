@@ -45,7 +45,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       responseType: 'json',
       body: {},
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(201);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -89,7 +89,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         expect(hits.length).toBeGreaterThan(0);
 
         for (const hit of hits) {
-          const expectedEuid = getEuidFromObject(entityType, hit._source);
+          const expectedEuid = getEuidFromObject(entityType, hit);
           const actualEuid = (hit.fields?.entity_id as string[] | undefined)?.[0];
 
           expect(actualEuid).toBe(expectedEuid);
