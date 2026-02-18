@@ -21,6 +21,12 @@ export interface ReferenceRule {
   riskScore: number;
   from: string;
   category: string;
+  /** Always 'esql' for AI-generated rules */
+  type?: string;
+  /** Always 'esql' for AI-generated rules */
+  language?: string;
+  /** Polling interval, e.g. '5m' */
+  interval?: string;
 }
 
 /**

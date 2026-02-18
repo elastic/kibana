@@ -248,6 +248,7 @@ export class EvaluationScoreRepository {
           onDocument: (doc) => {
             const docId = [
               doc.run_id,
+              doc.task.model.id,
               doc.example.dataset.id,
               doc.example.id,
               doc.evaluator.name,

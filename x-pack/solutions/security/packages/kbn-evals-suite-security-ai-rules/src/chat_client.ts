@@ -203,15 +203,49 @@ const extractRuleDataFromToolResults = (results?: ToolResult[]): {
   return {};
 };
 
+/**
+ * The agent returns threat objects in the Kibana standard format:
+ *   { framework, tactic: { id, name, reference }, technique?: [{ id, name, reference, subtechnique? }] }
+ *
+ * We flatten these into the simpler RuleThreat format used throughout the eval suite.
+ */
+const mapThreat = (raw: unknown): ReferenceRule['threat'] => {
+  if (!Array.isArray(raw)) return [];
+
+  return raw.flatMap((entry: Record<string, unknown>) => {
+    const tacticId =
+      entry.tactic && typeof entry.tactic === 'object'
+        ? (entry.tactic as Record<string, unknown>).id as string
+        : (entry.tactic as string);
+
+    const techniques = Array.isArray(entry.technique) ? entry.technique : [];
+
+    if (techniques.length === 0) {
+      return tacticId ? [{ technique: '', tactic: tacticId }] : [];
+    }
+
+    return techniques.map((tech: Record<string, unknown>) => ({
+      technique: tech.id as string,
+      tactic: tacticId,
+      subtechnique: Array.isArray(tech.subtechnique)
+        ? (tech.subtechnique[0] as Record<string, unknown>)?.id as string | undefined
+        : undefined,
+    }));
+  });
+};
+
 const mapGeneratedRule = (ruleData: Record<string, unknown>): Partial<ReferenceRule> => ({
   name: ruleData.name as string,
   description: ruleData.description as string,
   query: ruleData.query as string,
-  threat: (ruleData.threat as ReferenceRule['threat']) || [],
+  language: (ruleData.language as string) ?? 'esql',
+  type: (ruleData.type as string) ?? 'esql',
+  threat: mapThreat(ruleData.threat),
   severity: ruleData.severity as string,
   tags: (ruleData.tags as string[]) || [],
   riskScore: (ruleData.risk_score ?? ruleData.riskScore) as number,
   from: ruleData.from as string,
+  interval: ruleData.interval as string,
   category: extractCategory((ruleData.name as string) || ''),
 });
 

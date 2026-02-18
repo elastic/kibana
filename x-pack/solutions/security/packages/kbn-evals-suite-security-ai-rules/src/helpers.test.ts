@@ -6,15 +6,23 @@
  */
 
 import { validateEsqlSyntax, hasRequiredFields, calculateSetMetrics, extractMitreTechniques } from './helpers';
+
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 describe('helpers', () => {
   describe('validateEsqlSyntax', () => {
-    it('should validate correct ESQL query', () => {
-      const query = 'process where host.os.type == "windows" and event.type == "start"';
+    it('should validate a correct ES|QL query', () => {
+      const query =
+        'FROM logs-* | WHERE host.os.type == "windows" AND event.type == "start" | LIMIT 100';
       const result = validateEsqlSyntax(query);
       expect(result.valid).toBe(true);
       expect(result.error).toBeUndefined();
+    });
+
+    it('should validate a minimal ES|QL FROM query', () => {
+      const query = 'FROM .alerts-security.* METADATA _id | WHERE agent.type == "endpoint"';
+      const result = validateEsqlSyntax(query);
+      expect(result.valid).toBe(true);
     });
 
     it('should reject empty query', () => {
@@ -23,15 +31,15 @@ describe('helpers', () => {
       expect(result.error).toBeDefined();
     });
 
-    it('should reject query without where clause', () => {
-      const query = 'process';
+    it('should reject EQL-style query that lacks a source command', () => {
+      const query = 'process where host.os.type == "windows"';
       const result = validateEsqlSyntax(query);
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('WHERE');
+      expect(result.error).toContain('source command');
     });
 
     it('should detect unbalanced parentheses', () => {
-      const query = 'process where (host.os.type == "windows"';
+      const query = 'FROM logs-* | WHERE (host.os.type == "windows"';
       const result = validateEsqlSyntax(query);
       expect(result.valid).toBe(false);
       expect(result.error).toContain('parentheses');

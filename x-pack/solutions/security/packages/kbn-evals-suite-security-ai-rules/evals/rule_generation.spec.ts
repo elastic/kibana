@@ -7,8 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
-import { evaluateDataset } from '../src/evaluate_dataset';
-import { createRuleEvaluators } from '../src/evaluators';
+import { createEvaluateDataset } from '../src/evaluate_dataset';
 import { sampleRules } from '../datasets/sample_rules';
 
 evaluate.describe(
@@ -17,14 +16,14 @@ evaluate.describe(
   () => {
     evaluate('generates accurate detection rules', async ({
       executorClient,
-      inferenceClient,
+      evaluators,
       chatClient,
       log,
     }) => {
+      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+
       log.info(`Running AI rule generation evaluation with ${sampleRules.length} examples`);
       await evaluateDataset({
-        executorClient,
-        log,
         dataset: {
           name: 'security-ai-rules: rule-generation-basic',
           description:
@@ -35,22 +34,20 @@ evaluate.describe(
             metadata: { category: rule.category, difficulty: 'medium', expectedName: rule.name },
           })),
         },
-        chatClient,
-        evaluators: createRuleEvaluators({ inferenceClient }),
       });
       log.info('AI rule generation evaluation complete');
     });
 
     evaluate('handles edge cases and errors gracefully', async ({
       executorClient,
-      inferenceClient,
+      evaluators,
       chatClient,
       log,
     }) => {
+      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+
       log.info('Running edge case evaluation');
       await evaluateDataset({
-        executorClient,
-        log,
         dataset: {
           name: 'security-ai-rules: edge-cases',
           description: 'Tests AI rule generation with edge cases and challenging prompts',
@@ -60,7 +57,7 @@ evaluate.describe(
               output: {
                 name: 'Generic Suspicious Activity',
                 description: 'Detects suspicious activity',
-                query: 'process where true',
+                query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
                 threat: [],
                 severity: 'low',
                 tags: [],
@@ -78,7 +75,7 @@ evaluate.describe(
               output: {
                 name: 'Complex APT Detection',
                 description: 'Detects advanced persistent threats',
-                query: 'process where true',
+                query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
                 threat: [],
                 severity: 'critical',
                 tags: [],
@@ -90,8 +87,6 @@ evaluate.describe(
             },
           ],
         },
-        chatClient,
-        evaluators: createRuleEvaluators({ inferenceClient }),
       });
       log.info('Edge case evaluation complete');
     });

@@ -12,12 +12,13 @@ import { doctorCmd } from './commands/doctor';
 import { envCmd } from './commands/env';
 import { ciMapCmd } from './commands/ci_map';
 import { compareCmd } from './commands/compare';
+import { summaryCmd } from './commands/summary';
 
 export async function run() {
   await new RunWithCommands(
     {
       description: 'Evals CLI',
     },
-    [listSuitesCmd, runSuiteCmd, doctorCmd, envCmd, ciMapCmd, compareCmd]
+    [listSuitesCmd, runSuiteCmd, doctorCmd, envCmd, ciMapCmd, compareCmd, summaryCmd]
   ).execute();
 }

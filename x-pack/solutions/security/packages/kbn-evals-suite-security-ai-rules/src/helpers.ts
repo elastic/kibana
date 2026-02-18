@@ -30,18 +30,6 @@ export function extractCategory(ruleName: string): string {
 }
 
 /**
- * Normalize query strings for comparison
- * Removes extra whitespace, normalizes line breaks
- */
-export function normalizeQuery(query: string): string {
-  return query
-    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-    .replace(/\n/g, ' ') // Replace newlines with spaces
-    .replace(/\r/g, '') // Remove carriage returns
-    .trim();
-}
-
-/**
  * Extract MITRE ATT&CK techniques from a rule
  */
 export function extractMitreTechniques(
@@ -61,32 +49,26 @@ export function extractMitreTechniques(
 }
 
 /**
- * Basic ESQL syntax validation
- * Checks for common syntax patterns and keywords
+ * ES|QL syntax validation.
+ * Checks that the query starts with a valid ES|QL source command and has balanced delimiters.
  */
 export function validateEsqlSyntax(query: string): { valid: boolean; error?: string } {
   if (!query || query.trim().length === 0) {
     return { valid: false, error: 'Query is empty' };
   }
 
-  const normalizedQuery = query.toLowerCase().trim();
+  const trimmed = query.trim().toUpperCase();
 
-  // Check for valid query types
-  const validQueryTypes = ['process', 'network', 'file', 'registry', 'dns', 'sequence'];
-  const hasValidQueryType = validQueryTypes.some((type) => normalizedQuery.startsWith(type));
+  // ES|QL queries must start with a source command
+  const validSourceCommands = ['FROM ', 'ROW ', 'SHOW ', 'METRICS '];
+  const hasValidSourceCommand = validSourceCommands.some((cmd) => trimmed.startsWith(cmd));
 
-  if (!hasValidQueryType) {
+  if (!hasValidSourceCommand) {
     return {
       valid: false,
-      error: `Query must start with a valid query type: ${validQueryTypes.join(', ')}`,
-    };
-  }
-
-  // Check for basic 'where' clause (most queries should have one)
-  if (!normalizedQuery.includes('where')) {
-    return {
-      valid: false,
-      error: 'Query should contain a WHERE clause',
+      error: `ES|QL query must start with a source command: ${validSourceCommands
+        .map((c) => c.trim())
+        .join(', ')}`,
     };
   }
 
@@ -106,7 +88,7 @@ export function validateEsqlSyntax(query: string): { valid: boolean; error?: str
   // Check for balanced quotes
   const singleQuoteCount = (query.match(/'/g) || []).length;
   const doubleQuoteCount = (query.match(/"/g) || []).length;
-  
+
   if (singleQuoteCount % 2 !== 0) {
     return { valid: false, error: 'Unbalanced single quotes' };
   }
