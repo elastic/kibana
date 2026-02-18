@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-phoenix-executor'
   - '@kbn/object-utils'
   - '@kbn/grok-heuristics'
   - '@kbn/tooling-log'
