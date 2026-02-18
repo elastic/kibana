@@ -20,6 +20,7 @@ node scripts/scout discover-playwright-configs \
   --include-custom-servers \
   --target "$SCOUT_DISCOVERY_TARGET" \
   --save
+
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 

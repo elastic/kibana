@@ -14,7 +14,8 @@ const timeRange = {
   rangeTo: testData.SPAN_LINKS_END_DATE,
 };
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/253040
+test.describe.skip(
   'Span links',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

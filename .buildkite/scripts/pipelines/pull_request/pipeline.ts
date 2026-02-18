@@ -20,8 +20,8 @@ import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
-  getAgentImageConfig,
   emitPipeline,
+  getAgentImageConfig,
   getPipeline,
   prHasFIPSLabel,
 } from '#pipeline-utils';

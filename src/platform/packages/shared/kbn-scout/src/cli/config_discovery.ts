@@ -12,7 +12,10 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
-import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
+import {
+  filterModulesByScoutCiConfig,
+  getScoutCiExcludedConfigs,
+} from '../tests_discovery/search_configs';
 import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
@@ -78,6 +81,45 @@ const filterModulesByTargetTags = (
             serverRunFlags: getServerRunFlagsFromTags(filteredTags),
           };
         }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const CUSTOM_SERVERS_PATH_PATTERN = /\/test\/scout_[^/]+/;
+
+const filterModulesByCustomServerPaths = (
+  modules: ModuleDiscoveryInfo[],
+  includeCustomServers: boolean
+): ModuleDiscoveryInfo[] => {
+  if (includeCustomServers) {
+    return modules;
+  }
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => {
+        const isCustomServerConfig = CUSTOM_SERVERS_PATH_PATTERN.test(config.path);
+        return !isCustomServerConfig;
+      }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const filterModulesByExcludedConfigPaths = (
+  modules: ModuleDiscoveryInfo[],
+  excludedConfigPaths: string[]
+): ModuleDiscoveryInfo[] => {
+  if (excludedConfigPaths.length === 0) {
+    return modules;
+  }
+
+  const excludedSet = new Set(excludedConfigPaths);
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => !excludedSet.has(config.path)),
     }))
     .filter((module) => module.configs.length > 0);
 };
@@ -163,16 +205,24 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
+  const includeCustomServers = flagsReader.boolean('include-custom-servers');
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
   // Filter modules by target tags and compute server run flags
-  const filteredModules = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModules = filterModulesByCustomServerPaths(
+    filteredModulesByTags,
+    includeCustomServers
+  );
+  const filteredModulesWithExcludedConfigs = process.env.CI
+    ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
+    : filteredModules;
   // Handle output based on flatten flag
   if (flatten) {
-    handleFlattenedOutput(filteredModules, flagsReader, log);
+    handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModules, flagsReader, log);
+    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   }
 };
 
@@ -246,8 +296,14 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   `,
   flags: {
     string: ['target'],
-    boolean: ['save', 'validate', 'flatten'],
-    default: { target: 'all', save: false, validate: false, flatten: false },
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
+    default: {
+      target: 'all',
+      save: false,
+      validate: false,
+      flatten: false,
+      'include-custom-servers': false,
+    },
   },
   run: ({ flagsReader, log }) => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
