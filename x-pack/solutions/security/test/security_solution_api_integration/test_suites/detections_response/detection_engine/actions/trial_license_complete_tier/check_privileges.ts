@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `No matching indices found for rule ${rule.name}. This warning will continue to appear until a matching index is created or this rule is disabled.`
+            `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
           const lastExecution = body?.execution_summary?.last_execution;
 
           expect(lastExecution.message).to.contain(
-            'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["non-existent-index"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+            `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
           );
 
           // no metrics == no work performed, presumably

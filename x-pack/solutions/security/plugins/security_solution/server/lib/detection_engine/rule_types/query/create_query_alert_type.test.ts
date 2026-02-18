@@ -124,7 +124,7 @@ describe('Custom Query Alerts', () => {
     (checkForNoReadableIndices as jest.Mock).mockImplementationOnce(async () => ({
       foundNoIndices: true,
       warningMessage:
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+        'Unable to find indices matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.',
     }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
@@ -163,7 +163,7 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message: expect.stringContaining(
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+          'Unable to find indices matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
         ),
       })
     );

@@ -520,7 +520,7 @@ describe('utils', () => {
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+          'Unable to find indices matching ["logs-endpoint.alerts-*"]. This warning will persist until one of the following occurs: a matching index is created, the rule is disabled, or an Elastic agent with Endpoint Security and enrolled in Fleet sends an alert.',
       });
     });
 
@@ -546,7 +546,7 @@ describe('utils', () => {
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+          'Unable to find indices matching: ["logs-endpoint.alerts-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.',
       });
     });
   });

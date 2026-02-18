@@ -102,13 +102,15 @@ export const checkForNoReadableIndices = async (args: {
   });
 
   if (isEmpty(fieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
+    const errorStringGeneric = `Unable to find indices matching: ${JSON.stringify(
       inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
-      ruleName === 'Endpoint Security'
-        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
-        : ''
-    }`;
+    )}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`.trimEnd();
+    const errorStringEndpointSecurity = `Unable to find indices matching ${JSON.stringify(
+      inputIndices
+    )}. This warning will persist until one of the following occurs: a matching index is created, the rule is disabled, or an Elastic agent with Endpoint Security and enrolled in Fleet sends an alert.`;
+    const errorString =
+      ruleName === 'Endpoint Security' ? errorStringEndpointSecurity : errorStringGeneric;
+
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString.trimEnd(),

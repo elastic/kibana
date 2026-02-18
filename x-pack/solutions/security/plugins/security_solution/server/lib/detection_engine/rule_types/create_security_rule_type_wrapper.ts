@@ -306,7 +306,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               );
 
               if (indexPatternsWithMatches.length === 0) {
-                const warningMessage = `No matching indices found for rule ${rule.name}. This warning will continue to appear until a matching index is created or this rule is disabled.`;
+                const warningMessage = `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`;
                 wrapperWarnings.push(warningMessage);
               } else {
                 ruleExecutionLogger.debug(
