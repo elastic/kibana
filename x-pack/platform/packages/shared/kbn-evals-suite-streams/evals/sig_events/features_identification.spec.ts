@@ -10,8 +10,8 @@ import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/sig_events/features/prompt';
 import { get } from 'lodash';
 import { tags } from '@kbn/scout';
-import { evaluate } from '../src/evaluate';
-import type { StreamsEvaluationWorkerFixtures } from '../src/types';
+import { evaluate } from '../../src/evaluate';
+import type { StreamsEvaluationWorkerFixtures } from '../../src/types';
 import type {
   FeatureIdentificationEvaluationDataset,
   FeatureIdentificationEvaluationExample,

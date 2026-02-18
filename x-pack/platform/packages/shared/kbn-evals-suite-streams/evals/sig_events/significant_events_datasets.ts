@@ -6,7 +6,7 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
-import { GROK_PATTERN_DATASETS } from './pattern_extraction_datasets';
+import { GROK_PATTERN_DATASETS } from '../stream_management/pattern_extraction_datasets';
 
 /**
  * Ground truth data for significant events evaluation.

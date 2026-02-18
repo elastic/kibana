@@ -21,7 +21,7 @@ import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
 import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
 

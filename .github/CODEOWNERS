@@ -1711,6 +1711,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_management/ @elastic/obs-onboarding-team
 /x-pack/platform/packages/shared/kbn-streams-ai/src/stream_management/ @elastic/obs-onboarding-team
 /x-pack/platform/packages/shared/kbn-streams-schema/src/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/stream_management/ @elastic/obs-onboarding-team
 
 # Streams parts owned by obs-sig-events-team
 /x-pack/platform/plugins/shared/streams/server/lib/sig_events/ @elastic/obs-sig-events-team
@@ -1720,6 +1721,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/sig_events/ @elastic/obs-sig-events-team
 /x-pack/platform/packages/shared/kbn-streams-ai/src/sig_events/ @elastic/obs-sig-events-team
 /x-pack/platform/packages/shared/kbn-streams-schema/src/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/sig_events/ @elastic/obs-sig-events-team
 
 # Streams parts owned by Kibana Management
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling/ @elastic/kibana-management

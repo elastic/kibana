@@ -16,7 +16,7 @@ import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
 import { extractGrokPatternDangerouslySlow } from '@kbn/grok-heuristics';
 import { groupMessagesByPattern as groupMessagesByDissectPattern } from '@kbn/dissect-heuristics';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import {
   PIPELINE_SUGGESTION_DATASETS,
   type PipelineSuggestionEvaluationExample,

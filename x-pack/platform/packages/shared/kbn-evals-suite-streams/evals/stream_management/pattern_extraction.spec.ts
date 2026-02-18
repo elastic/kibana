@@ -19,7 +19,7 @@ import {
 } from '@kbn/dissect-heuristics';
 import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import {
   GROK_PATTERN_DATASETS,
   DISSECT_PATTERN_DATASETS,

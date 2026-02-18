@@ -17,8 +17,8 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { WiredIngest } from '@kbn/streams-schema';
 import { descriptionPrompt } from '@kbn/streams-ai/src/sig_events/description/prompt';
 import { systemsPrompt } from '@kbn/streams-ai/src/sig_events/systems/prompt';
-import { evaluate } from '../src/evaluate';
-import type { StreamsEvaluationWorkerFixtures } from '../src/types';
+import { evaluate } from '../../src/evaluate';
+import type { StreamsEvaluationWorkerFixtures } from '../../src/types';
 import type { SystemIdentificationEvaluationDataset } from './system_identification_datasets';
 import { SYSTEM_IDENTIFICATION_DATASETS } from './system_identification_datasets';
 
