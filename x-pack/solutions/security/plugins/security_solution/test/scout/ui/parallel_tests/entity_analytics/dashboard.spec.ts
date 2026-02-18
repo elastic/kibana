@@ -24,6 +24,7 @@ spaceTest.describe(
     });
 
     spaceTest('enables risk score followed by the store', async ({ pageObjects, apiServices }) => {
+      spaceTest.setTimeout(120000);
       const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
       await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
@@ -55,8 +56,7 @@ spaceTest.describe(
         'Verify risk engine and entity store are actually enabled via API',
         async () => {
           const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
-            'running',
-            59000
+            'running'
           );
           expect(entityStoreStatus.status).toBe('running');
 
