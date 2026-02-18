@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsMetadata, FieldMap } from './types';
 
