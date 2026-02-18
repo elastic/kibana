@@ -23,6 +23,7 @@ import {
   type ESQLColumn,
   isBinaryExpression,
   Walker,
+  isInlineCast,
 } from '@kbn/esql-language';
 import type {
   BinaryExpressionComparisonOperator,
@@ -141,10 +142,14 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     }
 
     const groupFieldDefinition = getFieldDefinitionFromArg(groupFieldNode.arg);
+
     if (
-      isFunctionExpression(groupFieldDefinition) &&
-      (!isSupportedStatsFunction(groupFieldDefinition.name) ||
-        isCategorizeFunctionWithFunctionArgument(groupFieldDefinition))
+      (isFunctionExpression(groupFieldDefinition) &&
+        (!isSupportedStatsFunction(groupFieldDefinition.name) ||
+          isCategorizeFunctionWithFunctionArgument(groupFieldDefinition))) ||
+      (isInlineCast(groupFieldDefinition) &&
+        isFunctionExpression(groupFieldDefinition.value) &&
+        !isSupportedStatsFunction(groupFieldDefinition.value.name))
     ) {
       // if the group field has a grouping function that is not supported,
       // this nullifies the entire query to count as a valid query for the cascade experience
