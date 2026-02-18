@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiTextColor,
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -115,6 +116,32 @@ const ActionsTableComponent = () => {
     (_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>,
     []
   );
+
+  const renderHistoryAgentsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails | undefined;
+    const counts = action?.result_counts;
+
+    if (!counts || counts.successful_agents == null) {
+      return <>{item.fields?.agents?.length ?? action?.agents?.length ?? 0}</>;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="check" color="success" size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="success">{counts.successful_agents}</EuiTextColor>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="cross" color="danger" size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="danger">{counts.error_agents ?? 0}</EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
 
   const renderCreatedByColumn = useCallback(
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
@@ -268,8 +295,8 @@ const ActionsTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: '100px',
-        render: renderAgentsColumn,
+        width: isHistoryEnabled ? '120px' : '100px',
+        render: isHistoryEnabled ? renderHistoryAgentsColumn : renderAgentsColumn,
       },
       {
         field: 'created_at',
@@ -309,6 +336,7 @@ const ActionsTableComponent = () => {
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
+      renderHistoryAgentsColumn,
       renderPlayButton,
       renderQueryColumn,
       renderTimestampColumn,
