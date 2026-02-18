@@ -36,7 +36,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         defaultMessage: 'Name',
       }),
       platform: i18n.translate('xpack.securitySolution.scriptsLibrary.table.platformColumnTitle', {
-        defaultMessage: 'Platforms',
+        defaultMessage: 'Operating systems',
       }),
       tags: i18n.translate('xpack.securitySolution.scriptsLibrary.table.tagsColumnTitle', {
         defaultMessage: 'Types',
@@ -244,13 +244,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           label: i18n.translate(
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.platformsLabel',
             {
-              defaultMessage: 'Platforms',
+              defaultMessage: 'Operating systems',
             }
           ),
           validationErrorMessage: i18n.translate(
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.platforms.validationErrorMessage',
             {
-              defaultMessage: 'At least one platform must be selected.',
+              defaultMessage: 'At least one operating system must be selected.',
             }
           ),
         },

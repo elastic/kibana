@@ -58,7 +58,7 @@ describe('EndpointScriptEditForm', () => {
 
     expect(visibleRowLabels).toEqual([
       'Name',
-      'Platforms',
+      'Operating systems',
       'Types',
       'Path to executable file (only for archive files)',
       'Description',
@@ -172,7 +172,9 @@ describe('EndpointScriptEditForm', () => {
       waitFor(() => {
         expect(platformsInput).toHaveAttribute('aria-invalid', 'true');
         const euiFormErrorText = platformsRow.querySelector('.euiFormErrorText');
-        expect(euiFormErrorText?.textContent).toEqual('At least one platform must be selected.');
+        expect(euiFormErrorText?.textContent).toEqual(
+          'At least one operating system must be selected.'
+        );
         expect(onChangeMock).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
