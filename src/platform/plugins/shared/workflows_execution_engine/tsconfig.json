@@ -19,6 +19,7 @@
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
+    "@kbn/eval-kql",
     "@kbn/datemath",
     "@kbn/core-elasticsearch-server",
     "@kbn/cloud-plugin",
@@ -29,9 +30,7 @@
     "@kbn/es-mappings",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
-    "@kbn/logging-mocks",
+    "@kbn/logging-mocks"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
