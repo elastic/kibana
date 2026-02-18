@@ -6301,6 +6301,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-activity-server-internal@link:src/core/packages/user-activity/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-activity-server-mocks@link:src/core/packages/user-activity/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-activity-server@link:src/core/packages/user-activity/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-profile-browser-internal@link:src/core/packages/user-profile/browser-internal":
   version "0.0.0"
   uid ""
@@ -9617,6 +9629,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/user-activity-example-plugin@link:examples/user_activity_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:src/platform/packages/shared/kbn-user-profile-components":
   version "0.0.0"
   uid ""
@@ -10359,10 +10375,10 @@
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
 
-"@mswjs/interceptors@^0.40.0":
-  version "0.40.0"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.40.0.tgz#1b45f215ba8c2983ed133763ca03af92896083d6"
-  integrity sha512-EFd6cVbHsgLa6wa4RljGj6Wk75qoHxUSyc5asLyyPSyuhIcdS2Q3Phw6ImS1q+CkALthJRShiYfKANcQMuMqsQ==
+"@mswjs/interceptors@^0.41.0":
+  version "0.41.3"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.3.tgz#d766dc1a168aa315a6a0b2d0f2e0cf1b74f23c82"
+  integrity sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -27059,13 +27075,13 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.12.7:
-  version "2.12.7"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.7.tgz#755fa4a0df51133bf76ebc9b7d4bdcc4355f0c8e"
-  integrity sha512-retd5i3xCZDVWMYjHEVuKTmhqY8lSsxujjVrZiGbbdoxxIBg5S7rCuYy/YQpfrTYIxpd/o0Kyb/3H+1udBMoYg==
+msw@2.12.8:
+  version "2.12.8"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.8.tgz#3cd23324c73cba70f8adef6c03bbd402c77bc6bf"
+  integrity sha512-KOriJUhjefCO+liF7Ie1KlSXcBAQEzuLhPZ4EKuEUSEmAR4YhuuzT9YuGxTipjqDrg6eWQ6oMoGVhvEnqukFGg==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
-    "@mswjs/interceptors" "^0.40.0"
+    "@mswjs/interceptors" "^0.41.0"
     "@open-draft/deferred-promise" "^2.2.0"
     "@types/statuses" "^2.0.6"
     cookie "^1.0.2"
@@ -27075,7 +27091,7 @@ msw@2.12.7:
     outvariant "^1.4.3"
     path-to-regexp "^6.3.0"
     picocolors "^1.1.1"
-    rettime "^0.7.0"
+    rettime "^0.10.1"
     statuses "^2.0.2"
     strict-event-emitter "^0.5.1"
     tough-cookie "^6.0.0"
@@ -30852,10 +30868,10 @@ retry@^0.13.1:
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.13.1.tgz#185b1587acf67919d63b357349e03537b2484658"
   integrity sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==
 
-rettime@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/rettime/-/rettime-0.7.0.tgz#c040f1a65e396eaa4b8346dd96ed937edc79d96f"
-  integrity sha512-LPRKoHnLKd/r3dVxcwO7vhCW+orkOGj9ViueosEBK6ie89CijnfRlhaDhHq/3Hxu4CkWQtxwlBG0mzTQY6uQjw==
+rettime@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/rettime/-/rettime-0.10.1.tgz#cc8bb9870343f282b182e5a276899c08b94914be"
+  integrity sha512-uyDrIlUEH37cinabq0AX4QbgV4HbFZ/gqoiunWQ1UqBtRvTTytwhNYjE++pO/MjPTZL5KQCf2bEoJ/BJNVQ5Kw==
 
 reusify@^1.0.4:
   version "1.0.4"
@@ -32955,10 +32971,10 @@ tar-stream@^3.0.0, tar-stream@^3.1.5:
     fast-fifo "^1.2.0"
     streamx "^2.15.0"
 
-tar@7.5.7:
-  version "7.5.7"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-7.5.7.tgz#adf99774008ba1c89819f15dbd6019c630539405"
-  integrity sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==
+tar@7.5.8:
+  version "7.5.8"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-7.5.8.tgz#6bbdfdb487914803d401bab6a2abb100aaa253d5"
+  integrity sha512-SYkBtK99u0yXa+IWL0JRzzcl7RxNpvX/U08Z+8DKnysfno7M+uExnTZH8K+VGgShf2qFPKtbNr9QBl8n7WBP6Q==
   dependencies:
     "@isaacs/fs-minipass" "^4.0.0"
     chownr "^3.0.0"
