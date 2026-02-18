@@ -149,11 +149,19 @@ describe('SkillRegistry', () => {
     });
 
     it('frees the path so the same path+name can be re-registered', async () => {
-      const skill = createMockSkill({ id: 'skill-1', name: 'my-skill', basePath: 'skills/platform' });
+      const skill = createMockSkill({
+        id: 'skill-1',
+        name: 'my-skill',
+        basePath: 'skills/platform',
+      });
       await registry.register(skill);
       await registry.unregister('skill-1');
 
-      const newSkill = createMockSkill({ id: 'skill-2', name: 'my-skill', basePath: 'skills/platform' });
+      const newSkill = createMockSkill({
+        id: 'skill-2',
+        name: 'my-skill',
+        basePath: 'skills/platform',
+      });
       await expect(registry.register(newSkill)).resolves.not.toThrow();
       expect(registry.has('skill-2')).toBe(true);
     });
