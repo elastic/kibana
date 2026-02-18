@@ -249,7 +249,7 @@ const SavedQueriesPageComponent = () => {
     setPageSize(page.size);
     setSortField(sort.field);
     setSortDirection(sort.direction);
-  }, []);
+  }, [setPageSize]);
 
   const pagination = useMemo(
     () => ({

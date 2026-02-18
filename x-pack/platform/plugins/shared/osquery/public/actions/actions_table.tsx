@@ -85,7 +85,7 @@ const ActionsTableComponent = () => {
 
     setPageIndex(index);
     setPageSize(size);
-  }, []);
+  }, [setPageSize]);
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {

@@ -6,7 +6,7 @@
  */
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 const STORAGE_KEY = 'osquery:pageSize';
 
@@ -21,10 +21,7 @@ const isValidPageSize = (value: unknown): value is PageSize =>
 export const usePersistedPageSize = (): [number, (size: number) => void] => {
   const [storedValue, setStoredValue] = useLocalStorage<number>(STORAGE_KEY, DEFAULT_PAGE_SIZE);
 
-  const pageSize = useMemo(
-    () => (isValidPageSize(storedValue) ? storedValue : DEFAULT_PAGE_SIZE),
-    [storedValue]
-  );
+  const pageSize = isValidPageSize(storedValue) ? storedValue : DEFAULT_PAGE_SIZE;
 
   const setPageSize = useCallback(
     (size: number) => {
