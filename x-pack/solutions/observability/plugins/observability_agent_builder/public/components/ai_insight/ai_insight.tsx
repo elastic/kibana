@@ -85,7 +85,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   // Report the response generated event when the stream finishes (completely or stopped)
   useEffect(() => {
     const hasContent = Boolean(summary && summary.trim());
-    const hasGeneratedInsight = !isLoading && hasContent && !error;
+    const hasGeneratedInsight = !isLoading && hasContent && !error && connectorInfo;
 
     if (hasGeneratedInsight) {
       reportTelemetryEvent(analytics, {
@@ -107,6 +107,8 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
+      if (!connectorInfo) return;
+
       reportTelemetryEvent(analytics, {
         type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback,
         payload: { feedback, insightType, connector: connectorInfo },
