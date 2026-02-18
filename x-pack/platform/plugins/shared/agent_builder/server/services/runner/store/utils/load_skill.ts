@@ -35,10 +35,9 @@ export async function loadSkillTools({
 
     const registryToolIds = (await skill.getRegistryTools?.()) ?? [];
     if (registryToolIds.length > 25) {
-      logger.warn(
-        `Skill '${skill.id}' returned ${registryToolIds.length} registry tools, exceeding the 25-tool limit. Truncating.`
+      throw new Error(
+        `Skill '${skill.id}' returned ${registryToolIds.length} registry tools, exceeding the 25-tool limit.`
       );
-      registryToolIds.length = 25;
     }
     const registryExecutableTools =
       registryToolIds.length > 0
