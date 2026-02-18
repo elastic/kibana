@@ -21,10 +21,15 @@ export interface ActiveFilters {
  * Parameters for the `findItems` function.
  */
 export interface FindItemsParams {
-  /** Search query text with filter syntax already extracted. */
+  /**
+   * Search query text with filter syntax already extracted.
+   *
+   * This is a convenience alias for `filters.search ?? ''`. When building
+   * queries, prefer this over accessing `filters.search` directly.
+   */
   searchQuery: string;
 
-  /** Active filters. */
+  /** Active filters (includes the raw `search` text and any structured filters). */
   filters: ActiveFilters;
 
   /**
