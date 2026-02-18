@@ -25,15 +25,7 @@ export interface GetStreamFeaturesInput {
 
 export type LlmFeature = Pick<
   Feature,
-  | 'id'
-  | 'type'
-  | 'subtype'
-  | 'title'
-  | 'description'
-  | 'confidence'
-  | 'properties'
-  | 'evidence'
-  | 'tags'
+  'type' | 'subtype' | 'title' | 'description' | 'confidence' | 'properties' | 'evidence' | 'tags'
 >;
 
 export function resolveFeatureTypeFilters(
@@ -63,7 +55,6 @@ export function getFeatureTypesFromToolArgs(
 
 export function toFeatureForLlmContext(feature: Feature): LlmFeature {
   return pick(feature, [
-    'id',
     'type',
     'subtype',
     'title',
