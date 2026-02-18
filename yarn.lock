@@ -9365,7 +9365,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security_solution_evals":
+"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security-solution-evals":
   version "0.0.0"
   uid ""
 
