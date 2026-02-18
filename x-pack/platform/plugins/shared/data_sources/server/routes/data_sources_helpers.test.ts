@@ -132,8 +132,8 @@ describe('createConnectorAndRelatedResources', () => {
       getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     },
     skills: {
-      register: jest.fn(),
-      unregister: jest.fn(),
+      register: jest.fn().mockResolvedValue(undefined),
+      unregister: jest.fn().mockReturnValue(true),
     },
   };
 

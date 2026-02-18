@@ -1,0 +1,1 @@
+Google Drive connects to documents, spreadsheets, presentations, and folders. Use when the user asks about business documents, meeting notes, reports, proposals, design docs, shared spreadsheets, slide decks, or file organization in Google Workspace.

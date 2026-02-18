@@ -478,6 +478,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           workflowManagement,
           request,
           logger,
+          unregisterSkill: agentBuilder.skills.unregister,
         });
 
         return response.ok({

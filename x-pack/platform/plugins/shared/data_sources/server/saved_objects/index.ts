@@ -19,6 +19,7 @@ export interface DataSourceAttributes {
   workflowIds: string[];
   toolIds: string[];
   kscIds: string[];
+  skillId?: string;
 }
 
 export const dataSourceSchemaV1 = schema.object({
@@ -31,6 +32,10 @@ export const dataSourceSchemaV1 = schema.object({
   workflowIds: schema.arrayOf(schema.string()),
   toolIds: schema.arrayOf(schema.string()),
   kscIds: schema.arrayOf(schema.string()),
+});
+
+export const dataSourceSchemaV2 = dataSourceSchemaV1.extends({
+  skillId: schema.maybe(schema.string()),
 });
 
 export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
@@ -54,6 +59,9 @@ export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     kscIds: {
+      type: 'keyword',
+    },
+    skillId: {
       type: 'keyword',
     },
   },
@@ -80,6 +88,22 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
         schemas: {
           forwardCompatibility: dataSourceSchemaV1.extends({}, { unknowns: 'ignore' }),
           create: dataSourceSchemaV1,
+        },
+      },
+      2: {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              skillId: {
+                type: 'keyword',
+              },
+            },
+          },
+        ],
+        schemas: {
+          forwardCompatibility: dataSourceSchemaV2.extends({}, { unknowns: 'ignore' }),
+          create: dataSourceSchemaV2,
         },
       },
     },

@@ -1,0 +1,1 @@
+Jira Cloud connects to projects, issues, sprints, and users. Use when the user asks about issue tracking, bugs, feature requests, project status, sprint planning, release management, JQL queries, team workload, or task assignments.
