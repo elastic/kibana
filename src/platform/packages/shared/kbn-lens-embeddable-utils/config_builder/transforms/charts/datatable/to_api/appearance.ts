@@ -9,8 +9,7 @@
 
 import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import { LENS_ROW_HEIGHT_MODE, LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
-import { initial } from 'lodash';
-import { TRANSPOSE_SEPARATOR, getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { parseTransposeId } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 import { stripUndefined } from '../../utils';
@@ -75,28 +74,28 @@ function parseDensityToAPI(
 }
 
 /**
- * Parses split_metrics_by sorting format: value1---value2---...---metricColumnId
+ * Parses pivoted metric sorting information from a column ID
+ * Pivoted metrics are stored using transposed column IDs with format: value1---value2---...---metricColumnId
  */
-function parseSplitMetricsBySorting(
+function parsePivotedSorting(
   columnId: string,
   columnIdMapping: ColumnIdMapping
-): { values: string[]; metricIndex: number } | undefined {
-  if (!isTransposeId(columnId)) {
+): { values: string[]; index: number } | undefined {
+  const info = parseTransposeId(columnId);
+
+  if (!info) {
     return undefined;
   }
 
-  const parts = columnId.split(TRANSPOSE_SEPARATOR);
-  // The last part is the metric column ID
-  const metricColumnId = getOriginalId(columnId);
-  const mapped = metricColumnId ? columnIdMapping.get(metricColumnId) : undefined;
+  const mapped = columnIdMapping.get(info.id);
 
   if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
   return {
-    values: initial(parts),
-    metricIndex: mapped.index,
+    values: info.values,
+    index: mapped.index,
   };
 }
 
@@ -115,17 +114,14 @@ function parseSortingToAPI(
   // Old SOs can have a missing direction, so we default to asc
   const DEFAULT_DIRECTION = 'asc' as const;
 
-  // Split_metrics_by sorting (contains ---)
-  if (columnId.includes(TRANSPOSE_SEPARATOR)) {
-    const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
-    return parsed
-      ? {
-          column_type: 'split_metrics_by',
-          metric_index: parsed.metricIndex,
-          values: parsed.values,
-          direction: direction ?? DEFAULT_DIRECTION,
-        }
-      : undefined;
+  const pivotedSorting = parsePivotedSorting(columnId, columnIdMapping);
+  if (pivotedSorting) {
+    return {
+      column_type: 'pivoted_metric',
+      index: pivotedSorting.index,
+      values: pivotedSorting.values,
+      direction: direction ?? DEFAULT_DIRECTION,
+    };
   }
 
   // Look up the columnId in the mapping

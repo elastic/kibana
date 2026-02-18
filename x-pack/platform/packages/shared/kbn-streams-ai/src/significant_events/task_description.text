@@ -15,7 +15,7 @@ These queries will use KQL and an additional filter will be added to only includ
 
 ## Context
 
-You will be provided with a name (`name`), a written description (`description`) and sample values of the data from the system (`dataset_analysis`). This data could include things like:
+You will be provided with a name (`name`), a written description (`description`), and sampled dataset context in `dataset_analysis` when available. Use this sampled context as grounding signal, and use tools (especially `get_stream_features`) to enrich/validate your understanding with extracted features.
 
 ### 1. **System Runtime and Execution Context**
 
@@ -193,4 +193,8 @@ Use KQL to generate the queries.
 
 ## Tool usage
 
-The available tool to call is `add_queries`. Each query consists of a `title` and `kql`. Every time you call this tool, the queries will be added to a list of suggestions for the user. The tool will return the queries that were successfully added, and those that failed validation. You can and should add multiple queries in one go. Only call the tool again if you wish to retry adding queries that are invalid (due to syntax or other reasons). Once you're satisfied with the result, call `complete()`.
+Available tools:
+- `get_stream_features`: Fetch stream features. For incremental retrieval, prefer `min_confidence` and `limit` (for example top 5 by confidence), and optionally pass `feature_types` to narrow by type. Returned features can include computed features (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) when they match the request. Supported `feature_types` values are injected at runtime in `available_feature_types`: `{{{available_feature_types}}}`.
+- `add_queries`: Add one or more query suggestions (`title`, `kql`, `category`, `severity_score`, optional `evidence`).
+
+Every call to `add_queries` returns success/failure details for each query, including syntax errors. You can and should add multiple queries in one go. Only call `add_queries` again if you wish to retry invalid queries or add additional high-value queries. Once you're satisfied with the result, call `complete()`.
