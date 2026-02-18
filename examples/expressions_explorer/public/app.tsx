@@ -34,8 +34,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
-import { ActionsExpressionsExample } from './actions_and_expressions';
-import { ActionsExpressionsExample2 } from './actions_and_expressions2';
 
 interface Props {
   expressions: ExpressionsStart;
@@ -92,14 +90,6 @@ const ExpressionsExplorer = ({
                 <EuiSpacer />
 
                 <RenderExpressionsExample expressions={expressions} inspector={inspector} />
-
-                <EuiSpacer />
-
-                <ActionsExpressionsExample expressions={expressions} actions={actions} />
-
-                <EuiSpacer />
-
-                <ActionsExpressionsExample2 expressions={expressions} actions={actions} />
               </EuiPageSection>
             </EuiPageTemplate.Section>
           </EuiPageBody>
