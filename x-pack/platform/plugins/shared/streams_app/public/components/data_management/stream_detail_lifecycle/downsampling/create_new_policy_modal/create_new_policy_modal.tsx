@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -161,11 +161,6 @@ export function CreatePolicyModal({
     () => createPolicyNameValidations({ policies: policyNames }),
     [policyNames]
   );
-
-  useEffect(() => {
-    // Ensure the pre-populated value updates form.isValid so Save enables when appropriate.
-    void form.validate();
-  }, [form]);
 
   const handleSave = async () => {
     const { isValid, data } = await form.submit();
