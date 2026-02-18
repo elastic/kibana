@@ -208,7 +208,6 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
 
   const getSuggestionsForStream = (connectorId: string) => {
     fetchSuggestions({
-      streamName: definition.stream.name,
       connectorId,
       start: timeState.start,
       end: timeState.end,
