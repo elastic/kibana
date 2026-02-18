@@ -26,7 +26,7 @@ import {
 
 import { ListResponseSchema } from '../schema/utils';
 import { agentPolicyService } from '../../services';
-import { fullAgentPolicyToYaml } from '../../../common/services';
+import { fullAgentPolicyToYaml, toYaml } from '../../../common/services';
 
 import {
   getAgentPoliciesHandler,
@@ -675,7 +675,7 @@ describe('schema validation', () => {
   });
 
   it('download full agent policy should return valid response', async () => {
-    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy);
+    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy, toYaml);
     (agentPolicyService.getFullAgentPolicy as jest.Mock).mockResolvedValue(fullAgentPolicy);
     await downloadFullAgentPolicy(
       context,

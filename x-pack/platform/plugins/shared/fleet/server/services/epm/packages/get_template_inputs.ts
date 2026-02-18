@@ -10,7 +10,11 @@ import { merge } from 'lodash';
 import { Document } from 'yaml';
 import yamlDoc from 'yaml';
 
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+import {
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+  createYamlKeysSorter,
+} from '../../../../common/services';
 
 import {
   getStreamsForInputType,
@@ -28,7 +32,6 @@ import type {
   PackagePolicyConfigRecordEntry,
   RegistryInput,
 } from '../../../../common/types';
-import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
@@ -39,6 +42,27 @@ import { getPackageInfo } from '.';
 import { getAgentTemplateAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
+
+const POLICY_KEYS_ORDER = [
+  'id',
+  'name',
+  'revision',
+  'dataset',
+  'type',
+  'outputs',
+  'fleet',
+  'output_permissions',
+  'agent',
+  'inputs',
+  'enabled',
+  'use_output',
+  'meta',
+  'input',
+  'download',
+  'signed',
+];
+
+const _sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER);
 
 type PackageWithInputAndStreamIndexed = Record<
   string,

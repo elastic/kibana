@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Pair } from 'yaml';
-import { Document, isScalar } from 'yaml';
-
 import type { FullAgentPolicy } from '../types';
+
+import { createYamlKeysSorter } from './yaml_utils';
 
 const POLICY_KEYS_ORDER = [
   'id',
@@ -29,37 +28,20 @@ const POLICY_KEYS_ORDER = [
   'signed',
 ];
 
-export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, apiKey?: string): string => {
-  const doc = new Document(policy, { sortMapEntries: _sortYamlKeys, strict: false });
-  const yaml = doc.toString();
+const _sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER);
+
+export const fullAgentPolicyToYaml = (
+  policy: FullAgentPolicy,
+  toYaml: (data: any, options: any) => string,
+  apiKey?: string
+): string => {
+  const yaml = toYaml(policy, { sortMapEntries: _sortYamlKeys, strict: false });
   const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;
 
   if (!policy?.secret_references?.length) return formattedYml;
 
   return _formatSecrets(policy.secret_references, formattedYml);
 };
-
-export function _sortYamlKeys(a: Pair, b: Pair): number {
-  if (!isScalar(a.key) || !isScalar(b.key)) {
-    return 0;
-  }
-  const keyA = a.key.value;
-  const keyB = b.key.value;
-  if (typeof keyA !== 'string' || typeof keyB !== 'string') {
-    return 0;
-  }
-  const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
-  const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
-  if (indexA >= 0 && indexB < 0) {
-    return -1;
-  }
-
-  if (indexA < 0 && indexB >= 0) {
-    return 1;
-  }
-
-  return indexA - indexB;
-}
 
 function _formatSecrets(
   secretRefs: NonNullable<FullAgentPolicy['secret_references']>,

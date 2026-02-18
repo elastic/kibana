@@ -8,6 +8,7 @@
 import type { FullAgentPolicy } from '../types';
 
 import { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
+import { toYaml } from './yaml_utils';
 
 describe('fullAgentPolicyToYaml', () => {
   it('should replace secrets', () => {
@@ -45,7 +46,7 @@ describe('fullAgentPolicyToYaml', () => {
       fleet: {},
     } as unknown as FullAgentPolicy;
 
-    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets);
+    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets, toYaml);
 
     expect(yaml).toMatchInlineSnapshot(`
       "id: \\"1234\\"
