@@ -251,6 +251,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
 
       {showDiscardChangesModal && (
         <DiscardChangesModal
+          data-test-subj={getTestId('discard-changes-modal')}
           show={
             showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete' | 'details'>
           }

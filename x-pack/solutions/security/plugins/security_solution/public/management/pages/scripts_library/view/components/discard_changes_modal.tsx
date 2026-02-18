@@ -66,7 +66,7 @@ export const DiscardChangesModal = memo<DiscardChangesModalProps>(
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClickCancel} data-test-subj={getTestId('cancelButton')}>
+          <EuiButtonEmpty onClick={onClickCancel} data-test-subj={getTestId('cancel-button')}>
             {isEditing
               ? discardChangesLabels.discardChangesModal.edit.cancelButtonLabel
               : discardChangesLabels.discardChangesModal.upload.cancelButtonLabel}
@@ -76,7 +76,7 @@ export const DiscardChangesModal = memo<DiscardChangesModalProps>(
             fill
             color="danger"
             onClick={onConfirm}
-            data-test-subj={getTestId('submitButton')}
+            data-test-subj={getTestId('confirm-button')}
           >
             {isEditing
               ? discardChangesLabels.discardChangesModal.edit.discardButtonLabel
