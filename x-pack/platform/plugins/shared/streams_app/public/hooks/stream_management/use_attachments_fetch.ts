@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  Attachment,
-  AttachmentType,
-} from '@kbn/streams-plugin/server/lib/stream_management/attachments/types';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/stream_management/attachments/types';
 import { useKibana } from '../common/use_kibana';
 import { useStreamsAppFetch } from '../common/use_streams_app_fetch';
 

@@ -7,7 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { SignificantEventsResponse, StreamQuery, StreamQueryKql } from '@kbn/streams-schema';
+import type { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from '../common/use_kibana';
 import { useTimefilter } from '../common/use_timefilter';

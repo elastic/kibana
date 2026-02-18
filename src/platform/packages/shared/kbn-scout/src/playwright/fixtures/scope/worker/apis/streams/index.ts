@@ -14,7 +14,7 @@ import type {
 } from '@kbn/streams-schema/src/stream_management/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/stream_management/models/ingest/wired';
 import { ClassicStream } from '@kbn/streams-schema/src/stream_management/models/ingest/classic';
-import type { RoutingDefinition, RoutingStatus } from '@kbn/streams-schema';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
