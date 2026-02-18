@@ -59,9 +59,12 @@ export interface CompletionContext {
 }
 
 /**
- * Default property names that should be treated as ES|QL queries
+ * YAML property names whose values contain ES|QL queries.
+ * The editor enables ES|QL syntax highlighting and auto-completion for these fields.
+ *
+ * TODO: with zod4 upgrade we can add a metadata tag to the schema to mark these fields as ES|QL queries.
  */
-export const DEFAULT_ESQL_PROPERTY_NAMES = ['query'];
+export const DEFAULT_ESQL_PROPERTY_NAMES = ['base'];
 
 /**
  * Props for the YamlRuleEditor component
