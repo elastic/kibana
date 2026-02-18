@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./converse'));
     loadTestFile(require.resolve('./tools/builtin_tools.ts'));
     loadTestFile(require.resolve('./tools/builtin_tools_internal.ts'));
+    loadTestFile(require.resolve('./tools/tool_delete_force.ts'));
     loadTestFile(require.resolve('./tools/esql_tools.ts'));
     loadTestFile(require.resolve('./tools/esql_tools_internal.ts'));
     loadTestFile(require.resolve('./tools/legacy_tool_types_migration.ts'));
