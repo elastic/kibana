@@ -165,9 +165,8 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       setSearchTerm(value.trim());
     }, []);
 
-    const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(
-      migrationStats,
-    );
+    const { mutateAsync: installMigrationDashboards } =
+      useInstallMigrationDashboards(migrationStats);
     const { mutateAsync: installMigrationDashboard } = useInstallMigrationDashboard(migrationId);
 
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
