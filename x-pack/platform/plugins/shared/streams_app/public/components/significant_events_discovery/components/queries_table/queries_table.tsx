@@ -38,6 +38,7 @@ import {
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
 } from '../../../../hooks/use_unbacked_queries_count';
+import { getFormattedError } from '../../../../util/errors';
 import { LoadingPanel } from '../../../loading_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
@@ -128,7 +129,7 @@ export function QueriesTable() {
       await invalidateQueriesData();
     },
     onError: (error) => {
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: PROMOTE_ALL_ERROR_TOAST_TITLE,
       });
     },

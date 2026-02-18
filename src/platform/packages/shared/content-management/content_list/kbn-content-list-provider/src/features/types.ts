@@ -9,6 +9,7 @@
 
 import type { SortingConfig } from './sorting';
 import type { PaginationConfig } from './pagination';
+import type { SearchConfig } from './search';
 
 /**
  * Feature configuration for enabling/customizing content list capabilities.
@@ -18,6 +19,8 @@ export interface ContentListFeatures {
   sorting?: SortingConfig | boolean;
   /** Pagination configuration. Set to `false` to disable pagination entirely. */
   pagination?: PaginationConfig | boolean;
+  /** Search configuration. */
+  search?: SearchConfig | boolean;
 }
 
 /**
@@ -34,6 +37,13 @@ export const isPaginationConfig = (
   pagination?: PaginationConfig | boolean
 ): pagination is PaginationConfig => {
   return typeof pagination === 'object' && pagination !== null;
+};
+
+/**
+ * Type guard to check if search config is a `SearchConfig` object (not boolean).
+ */
+export const isSearchConfig = (search: ContentListFeatures['search']): search is SearchConfig => {
+  return typeof search === 'object' && search !== null;
 };
 
 /**
@@ -64,4 +74,6 @@ export interface ContentListSupports {
   sorting: boolean;
   /** Whether pagination is supported. */
   pagination: boolean;
+  /** Whether search is supported. */
+  search: boolean;
 }
