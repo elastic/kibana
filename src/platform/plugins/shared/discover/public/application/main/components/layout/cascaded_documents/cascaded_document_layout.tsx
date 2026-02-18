@@ -33,7 +33,10 @@ import {
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
-import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import {
+  type DataCascadeUiState,
+  useCascadedDocumentsContext,
+} from './cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from './telemetry';
 
 export interface ESQLDataCascadeProps
@@ -62,9 +65,7 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
       viewModeToggle,
       getDataCascadeUiState,
-      getDataGridUiStateMap,
       setDataCascadeUiState,
-      setDataGridUiState,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
@@ -112,10 +113,6 @@ const ESQLDataCascade = React.memo(
       ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
-          initialState={getDataGridUiStateMap()?.[cellId]}
-          onInitialStateChange={(initialState) => {
-            setDataGridUiState(cellId, initialState);
-          }}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
@@ -123,15 +120,20 @@ const ESQLDataCascade = React.memo(
           rowIndex={rowIndex}
         />
       ),
-      [getDataGridUiStateMap, dataView, props, setDataGridUiState]
+      [dataView, props]
     );
 
-    const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialTableState']>(
-      () => ({
-        expanded: getDataCascadeUiState()?.expanded,
-        rowSelection: getDataCascadeUiState()?.rowSelection,
-      }),
+    const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(
+      () => getDataCascadeUiState(),
       [getDataCascadeUiState]
+    );
+
+    const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialState']>(
+      () => ({
+        expanded: dataCascadeUiState?.expanded,
+        rowSelection: dataCascadeUiState?.rowSelection,
+      }),
+      [dataCascadeUiState]
     );
 
     const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
@@ -165,9 +167,9 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
-        initialScrollOffset={getDataCascadeUiState()?.scrollOffset}
+        initialAnchorItemIndex={dataCascadeUiState?.scrollAnchorItemIndex ?? 0}
         initialTableState={initialTableState}
-        initialRect={getDataCascadeUiState()?.scrollRect}
+        initialRect={dataCascadeUiState?.scrollRect}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
@@ -196,7 +198,7 @@ export type CascadedDocumentsLayoutProps = Omit<
 
 export const CascadedDocumentsLayout = React.memo(
   ({ dataView, ...props }: CascadedDocumentsLayoutProps) => {
-    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab } =
+    const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab, setDataCascadeUiState } =
       useCascadedDocumentsContext();
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -216,8 +218,10 @@ export const CascadedDocumentsLayout = React.memo(
     const updateESQLQuery = useCallback(
       (...args: Parameters<typeof onUpdateESQLQuery>) => {
         onUpdateESQLQuery(...args);
+        // reset data cascade ui state, on query change
+        setDataCascadeUiState(undefined);
       },
-      [onUpdateESQLQuery]
+      [onUpdateESQLQuery, setDataCascadeUiState]
     );
 
     const openInNewTabWithTracking = useCallback<typeof openInNewTab>(
