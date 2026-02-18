@@ -41,6 +41,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CreateWatchlistResponse:
+                  summary: Created watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-01-28T12:00:00.000Z'
               schema:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist created successfully
@@ -61,6 +72,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                GetWatchlistResponse:
+                  summary: Watchlist details
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
               schema:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist details
@@ -103,6 +125,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                UpdateWatchlistResponse:
+                  summary: Updated watchlist
+                  value:
+                    createdAt: '2026-01-28T12:00:00.000Z'
+                    description: High risk vendor watchlist
+                    id: watchlist-123
+                    managed: false
+                    name: High Risk Vendors
+                    riskModifier: 1.5
+                    updatedAt: '2026-02-18T12:00:00.000Z'
               schema:
                 $ref: '#/components/schemas/WatchlistObject'
           description: Watchlist updated successfully
@@ -116,6 +149,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ListWatchlistsResponse:
+                  summary: List of watchlists
+                  value:
+                    - createdAt: '2026-01-28T12:00:00.000Z'
+                      description: High risk vendor watchlist
+                      id: watchlist-123
+                      managed: false
+                      name: High Risk Vendors
+                      riskModifier: 1.5
+                      updatedAt: '2026-02-18T12:00:00.000Z'
+                    - createdAt: '2026-01-10T09:30:00.000Z'
+                      description: Privileged user monitoring watchlist
+                      id: watchlist-456
+                      managed: true
+                      name: Privileged Accounts
+                      riskModifier: 2
+                      updatedAt: '2026-02-01T15:45:00.000Z'
               schema:
                 items:
                   $ref: '#/components/schemas/WatchlistObject'
@@ -127,6 +178,14 @@ paths:
 components:
   schemas:
     WatchlistObject:
+      example:
+        createdAt: '2026-01-28T12:00:00.000Z'
+        description: High risk vendor watchlist
+        id: watchlist-123
+        managed: false
+        name: High Risk Vendors
+        riskModifier: 1.5
+        updatedAt: '2026-02-18T12:00:00.000Z'
       type: object
       properties:
         createdAt:
