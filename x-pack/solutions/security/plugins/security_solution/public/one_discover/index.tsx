@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getCellRendererForGivenRecord } from './cell_renderers';
 export { AlertFlyoutOverviewTab } from './alert_flyout_overview_tab_component';
+export { getCellRendererForGivenRecord } from './cell_renderers';

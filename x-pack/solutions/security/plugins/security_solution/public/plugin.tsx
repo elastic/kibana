@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
-import type * as H from 'history';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -18,16 +15,20 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { Logger } from '@kbn/logging';
-import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
+import type * as H from 'history';
+import React from 'react';
+import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
+import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
   PluginSetup,
@@ -39,38 +40,37 @@ import type {
   StartServices,
   SubPlugins,
 } from './types';
-import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
 import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
-import type { AppLinkItems } from './common/links';
 import {
   type ApplicationLinksUpdateParams,
   applicationLinksUpdater,
 } from './app/links/application_links_updater';
+import type { AppLinkItems } from './common/links';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
-import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
-import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
-import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
-import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
-import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
-import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { LazyAssetInventoryReplaceDefineStepExtension } from './asset_inventory/components/fleet_extensions/lazy_asset_inventory_replacestep_extension';
+import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
+import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
+import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
+import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import { LazyCustomCriblExtension } from './security_integrations/cribl/components/lazy_custom_cribl_extension';
 
-import type { SecurityAppStore } from './common/store/types';
-import { PluginContract } from './plugin_contract';
-import { PluginServices } from './plugin_services';
-import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
-import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
-import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
+import { defaultDeepLinks } from './app/links/default_deep_links';
+import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
+import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
+import type { SecurityAppStore } from './common/store/types';
+import { isSecuritySolutionAccessible } from './helpers_access';
+import { PluginContract } from './plugin_contract';
+import { PluginServices } from './plugin_services';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;

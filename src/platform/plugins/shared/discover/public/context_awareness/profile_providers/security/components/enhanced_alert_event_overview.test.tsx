@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EnhancedAlertEventOverview } from './enhanced_alert_event_overview';
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { EnhancedAlertEventOverview } from './enhanced_alert_event_overview';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

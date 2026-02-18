@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import type React from 'react';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { Query, TimeRange } from '@kbn/es-query';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
@@ -22,7 +17,12 @@ import type {
 } from '@kbn/apm-types';
 import type { HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { IndicatorType } from '@kbn/slo-schema';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type React from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
