@@ -13,9 +13,7 @@ import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_BLOCKLISTS_LIST_NAME,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -101,10 +99,10 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
 
 const ensureCreateEndpointBlocklistsList = async (kbn: KbnClient) => {
   const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+    description: ENDPOINT_ARTIFACT_LISTS.blocklists.description,
+    list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
     meta: undefined,
-    name: ENDPOINT_BLOCKLISTS_LIST_NAME,
+    name: ENDPOINT_ARTIFACT_LISTS.blocklists.name,
     os_types: [],
     tags: [],
     type: 'endpoint',

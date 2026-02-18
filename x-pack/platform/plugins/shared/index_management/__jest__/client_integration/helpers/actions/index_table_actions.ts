@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { EuiSuperSelectTestHarness, EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
 /**
@@ -53,14 +53,35 @@ export const createIndexTableActions = () => {
     // Button should be visible after selecting an index
     const button = await screen.findByTestId('indexActionsContextMenuButton');
     fireEvent.click(button);
-    // Wait for menu to open
-    await screen.findByTestId('indexContextMenu');
+    // Wait for popover panel to actually be open
+    await waitFor(() => {
+      const menu = screen.queryByTestId('indexContextMenu');
+      const panel = menu?.closest('[data-popover-panel="true"]');
+      expect(panel?.getAttribute('data-popover-open')).toBe('true');
+    });
   };
 
   const clickContextMenuOption = async (optionDataTestSubject: string) => {
-    const menu = screen.getByTestId('indexContextMenu');
+    const menu = await screen.findByTestId('indexContextMenu');
     const option = within(menu).getByTestId(optionDataTestSubject);
     fireEvent.click(option);
+
+    // Best-effort cleanup: close the popover if it remains open after the action is chosen.
+    const panel = menu.closest('[data-popover-panel="true"]');
+    if (panel?.getAttribute('data-popover-open') === 'true') {
+      const toggle = screen.queryByTestId('indexActionsContextMenuButton');
+      if (toggle) {
+        fireEvent.click(toggle);
+      } else {
+        // If the toggle button is already gone (e.g. due to rerender), try Escape as a fallback.
+        fireEvent.keyDown(document.body, { key: 'Escape', code: 'Escape' });
+      }
+      await waitFor(() => {
+        const currentMenu = screen.queryByTestId('indexContextMenu');
+        const currentPanel = currentMenu?.closest('[data-popover-panel="true"]');
+        expect(currentPanel?.getAttribute('data-popover-open')).not.toBe('true');
+      });
+    }
   };
 
   const clickModalConfirm = async () => {

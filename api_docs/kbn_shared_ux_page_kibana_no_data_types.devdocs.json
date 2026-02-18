@@ -12,6 +12,8 @@
         "label": "KibanaDependencies",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,6 +28,8 @@
               "{ hasData: { hasESData: () => Promise<boolean>; hasUserDataView: () => Promise<boolean>; }; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -42,6 +46,8 @@
           "\nProps for `KibanaNoDataPage`."
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +64,8 @@
               "(dataView: unknown) => void"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,6 +80,8 @@
                   "unknown"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -98,6 +108,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,6 +126,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -127,6 +141,8 @@
               "Set to true if the kibana is customly branded"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,6 +159,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -161,6 +179,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,6 +197,8 @@
         "label": "Services",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -193,6 +215,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -211,6 +235,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -229,6 +255,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -266,6 +294,8 @@
           " & KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -305,6 +335,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_no_data/types/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -46,6 +46,7 @@ const mockDefinition = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const mockDataStreamStats = {
@@ -104,11 +105,13 @@ beforeEach(() => {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockUseTimefilter.mockReturnValue({
     timeState: {},
     timeState$: of({ kind: 'initial' }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockDataStreamsClient.getDataStreamsStats.mockResolvedValue({
@@ -152,6 +155,7 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2500000, // mockDataStreamStats.sizeBytes - mockFailureStoreStats.stats.size
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {
@@ -162,6 +166,7 @@ describe('useDataStreamStats', () => {
             creationDate: '2023-01-01T00:00:00Z',
             size: 50000,
             count: 100,
+            perDayDocs: 100,
           },
         },
       });
@@ -217,6 +222,7 @@ describe('useDataStreamStats', () => {
             size: '1.0 KB',
             sizeBytes: 1000,
             totalDocs: 0,
+            perDayDocs: 0,
           },
         },
         fs: {
@@ -227,6 +233,7 @@ describe('useDataStreamStats', () => {
             creationDate: '2023-01-01T00:00:00Z',
             size: 0,
             count: 0,
+            perDayDocs: 0,
           },
         },
       });
@@ -244,6 +251,7 @@ describe('useDataStreamStats', () => {
         effective_failure_store: {
           disabled: {},
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const { result } = renderHook(() =>
@@ -266,6 +274,7 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2550000,
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {

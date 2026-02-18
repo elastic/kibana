@@ -14,7 +14,7 @@ import type {
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
@@ -133,17 +133,13 @@ export function initializeDashboardServices(
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
-          rawState: {
-            ...currentState,
-            savedObjectId: newId,
-          },
+          ...currentState,
+          savedObjectId: newId,
         };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return {
-          rawState: transformToApiConfig(byValueRuntimeState),
-        };
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(

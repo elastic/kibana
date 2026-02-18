@@ -6,14 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBetaBadge,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { useMutation, useQuery } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -136,27 +129,13 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
               toggleQuery={setToggleStatus}
               id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
               title={
-                <EuiFlexGroup gutterSize="s">
+                <>
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
                     defaultMessage="Top privileged access anomalies"
                   />
-                  <EuiBetaBadge
-                    tooltipContent={i18n.translate(
-                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabelTooltip',
-                      {
-                        defaultMessage:
-                          'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                      }
-                    )}
-                    label={i18n.translate(
-                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabel',
-                      { defaultMessage: 'TECHNICAL PREVIEW' }
-                    )}
-                    iconType="flask"
-                  />
                   <PrivilegedAccessInfoPopover />
-                </EuiFlexGroup>
+                </>
               }
               titleSize="m"
               outerDirection="column"

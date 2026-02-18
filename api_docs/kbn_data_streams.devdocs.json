@@ -36,6 +36,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10956,6 +10958,8 @@
               " = never>(args: { ...; }) => Promise<...>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10967,6 +10971,8 @@
                 "label": "args",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 55,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -10988,6 +10994,8 @@
                       "<MappingsInDefinition, FullDocumentType, SRM>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 56,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -11079,7 +11087,7 @@
                       "TransportRequestOptions",
                       " | undefined): Promise<",
                       "WriteResponseBase",
-                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                       "default",
                       "; helpers: ",
                       "default",
@@ -11643,6 +11651,8 @@
                       "TransportRequestOptions",
                       " | undefined): Promise<boolean>; }; profiling: ",
                       "default",
+                      "; project: ",
+                      "default",
                       "; putScript: { (this: That, params: ",
                       "PutScriptRequest",
                       ", options?: ",
@@ -11988,6 +11998,8 @@
                       "; }"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 57,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12008,6 +12020,8 @@
                       }
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 58,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12022,6 +12036,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 59,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -12038,6 +12054,8 @@
             "label": "helpers",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12054,6 +12072,8 @@
                   "<unknown>) => Record<keyof SRM, unknown[]>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -12069,6 +12089,8 @@
                       "<unknown>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 71,
+                    "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -12099,6 +12121,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12120,6 +12144,8 @@
                   "<FullDocumentType>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 77,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12148,6 +12174,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12169,6 +12197,8 @@
                   "<FullDocumentType>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 84,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12197,6 +12227,8 @@
               "<FullDocumentType>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12217,6 +12249,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 91,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12235,6 +12269,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -12265,6 +12301,8 @@
               "<FullDocumentType, Agg>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12286,6 +12324,8 @@
                   "<SRM>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12302,6 +12342,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -12323,6 +12365,8 @@
         "label": "BaseSearchRuntimeMappings",
         "description": [],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12338,6 +12382,8 @@
               "MappingRuntimeField"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12364,6 +12410,8 @@
           ", \"index\" | \"size\" | \"fields\" | \"track_total_hits\">"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12378,6 +12426,8 @@
               "Exclude<keyof SearchRuntimeMappings, number | symbol>[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12392,6 +12442,8 @@
               "number | boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12406,6 +12458,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12430,6 +12484,8 @@
           "<Mappings, FullMappings, SearchRuntimeMappings>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12441,6 +12497,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12455,6 +12513,8 @@
               "SearchRuntimeMappings | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12473,6 +12533,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12484,6 +12546,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12512,6 +12576,8 @@
               " | undefined; composedOf?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12538,6 +12604,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12555,6 +12623,8 @@
               "<SRM>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12582,6 +12652,8 @@
           "<any, any, any>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12604,6 +12676,8 @@
           "<any, any, any>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12627,6 +12701,8 @@
           "<TDocument, Partial<TDocument>>)[]; }"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12642,6 +12718,8 @@
           "BulkResponse"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12666,9 +12744,9 @@
           "QueryDslFieldAndFormat",
           ")[] | undefined; query?: ",
           "QueryDslQueryContainer",
-          " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+          " | undefined; timeout?: string | undefined; project_routing?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
           "MappingRuntimeFields",
-          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
           "QueryDslOperator",
           " | undefined; df?: string | undefined; expand_wildcards?: ",
           "ExpandWildcards",
@@ -12678,7 +12756,7 @@
           "SuggestMode",
           " | undefined; suggest_size?: number | undefined; suggest_text?: string | undefined; typed_keys?: boolean | undefined; rest_total_hits_as_int?: boolean | undefined; _source_excludes?: ",
           "Fields",
-          " | undefined; _source_includes?: ",
+          " | undefined; _source_exclude_vectors?: boolean | undefined; _source_includes?: ",
           "Fields",
           " | undefined; q?: string | undefined; force_synthetic_source?: boolean | undefined; aggregations?: Record<string, ",
           "AggregationsAggregationContainer",
@@ -12723,6 +12801,8 @@
           " | undefined; realtime?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12739,6 +12819,8 @@
           "<TDocument>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12764,6 +12846,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12779,6 +12863,8 @@
           "WriteResponseBase"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12795,6 +12881,8 @@
           "<TDocument, TSearchRequest>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/es_api.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

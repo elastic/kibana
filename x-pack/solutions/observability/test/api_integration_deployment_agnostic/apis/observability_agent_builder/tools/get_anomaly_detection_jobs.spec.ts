@@ -6,14 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { generateApmDataWithAnomalies } from '@kbn/synthtrace';
 import type { GetAnomalyDetectionJobsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_anomaly_detection_jobs/tool';
 import { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_anomaly_detection_jobs/tool';
 import datemath from '@elastic/datemath';
-import moment from 'moment';
+import { duration as momentDuration } from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticApmDataWithAnomalies } from '../utils/synthtrace_scenarios/create_synthetic_apm_data_with_anomalies';
 
 const SERVICE_NAME = 'service-a';
 const ENVIRONMENT = 'production';
@@ -22,8 +23,9 @@ const END = 'now';
 
 const startUnix = datemath.parse(START)!;
 const endUnix = datemath.parse(END)!;
-const SPIKE_START = endUnix.valueOf() - moment.duration(2, 'hours').asMilliseconds();
-const SPIKE_END = endUnix.valueOf() - moment.duration(1, 'hours').asMilliseconds();
+
+// The generator places the spike in the last 2 hours of the range
+const SPIKE_START = endUnix.valueOf() - momentDuration(2, 'hours').asMilliseconds();
 
 const START_ISO = new Date(startUnix.valueOf()).toISOString();
 const END_ISO = new Date(endUnix.valueOf()).toISOString();
@@ -43,17 +45,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-      await createSyntheticApmDataWithAnomalies({
-        getService,
-        apmSynthtraceEsClient,
+      // Clean up before generating data
+      await Promise.all([apmSynthtraceEsClient.clean(), ml.api.cleanMlIndices()]);
+      await ml.api.deleteAllAnomalyDetectionJobs();
+
+      // Generate APM data with anomalies using timerange
+      const range = timerange(startUnix.toDate(), endUnix.toDate());
+      const { client, generator } = generateApmDataWithAnomalies({
+        apmEsClient: apmSynthtraceEsClient,
+        range,
         serviceName: SERVICE_NAME,
         environment: ENVIRONMENT,
         language: 'nodejs',
-        start: startUnix,
-        end: endUnix,
-        spikeStart: SPIKE_START,
-        spikeEnd: SPIKE_END,
       });
+      await client.index(generator);
+
+      // Create anomaly detection job
+      const editorClient = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
+      });
+
+      await editorClient
+        .post('/internal/apm/settings/anomaly-detection/jobs')
+        .send({ environments: [ENVIRONMENT] })
+        .expect(200);
 
       await retry.waitFor('ML job to have anomalies', async () => {
         const toolResults =
@@ -147,6 +163,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
       });
+
+      it('should include job stats', async () => {
+        const jobs = toolResults[0].data.jobs;
+        const job = jobs[0];
+
+        // jobStats should be present with state and data coverage
+        expect(job).to.have.property('jobStats');
+        expect(job.jobStats.state).to.be('opened');
+
+        expect(job.jobStats.lastRecordTimestamp).to.be.a('number');
+        expect(job.jobStats.lastRecordTimestamp).to.be.greaterThan(0);
+
+        expect(job.jobStats.processedRecordCount).to.be.a('number');
+        expect(job.jobStats.processedRecordCount).to.be.greaterThan(0);
+      });
     });
 
     it('filters by specific job ID', async () => {
@@ -180,10 +211,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('returns job without anomalies when time range excludes them', async () => {
       // Start check 4 hours before spike to avoid start of dataset initialization noise
       const EARLY_START_ISO = new Date(
-        SPIKE_START - moment.duration(4, 'hours').asMilliseconds()
+        SPIKE_START - momentDuration(4, 'hours').asMilliseconds()
       ).toISOString();
       const EARLY_END_ISO = new Date(
-        SPIKE_START - moment.duration(30, 'minutes').asMilliseconds()
+        SPIKE_START - momentDuration(30, 'minutes').asMilliseconds()
       ).toISOString();
 
       const toolResults =

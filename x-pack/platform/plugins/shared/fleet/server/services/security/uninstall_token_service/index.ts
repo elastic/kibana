@@ -21,8 +21,7 @@ import type {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach, asyncMap } from '@kbn/std';
 
 import type {
@@ -715,17 +714,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return this._soClient;
     }
 
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-
-    this._soClient = appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+    this._soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
     });
 

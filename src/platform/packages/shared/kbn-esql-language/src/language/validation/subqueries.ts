@@ -8,13 +8,16 @@
  */
 
 import { Builder, isSubQuery } from '../../ast';
-import type { ESQLAstForkCommand, ESQLCommand } from '../../types';
+import type { ESQLAstForkCommand, ESQLAstHeaderCommand, ESQLCommand } from '../../types';
 import { expandEvals } from '../shared/expand_evals';
 /**
  * Returns a list of subqueries to validate
  * @param rootCommands
  */
-export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
+export function getSubqueriesToValidate(
+  rootCommands: ESQLCommand[],
+  headerCommands: ESQLAstHeaderCommand[]
+) {
   const subsequences = [];
   const expandedCommands = expandEvals(rootCommands);
   for (let i = 0; i < expandedCommands.length; i++) {
@@ -40,7 +43,9 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
     subsequences.push(expandedCommands.slice(0, i + 1));
   }
 
-  return subsequences.map((subsequence) => Builder.expression.query(subsequence));
+  return subsequences.map((subsequence) =>
+    Builder.expression.query(subsequence, undefined, headerCommands)
+  );
 }
 
 /**

@@ -28,6 +28,7 @@
       "share",
       "spaces",
       "stackConnectors",
+      "taskManager",
       "licensing",
       "triggersActionsUi",
       "esUiShared",
@@ -40,7 +41,8 @@
       "cloud",
       "licenseManagement",
       "workflowsManagement",
-      "usageCollection"
+      "usageCollection",
+      "home",
     ],
     "extraPublicDirs": []
   }

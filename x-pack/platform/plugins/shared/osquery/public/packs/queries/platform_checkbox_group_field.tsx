@@ -20,6 +20,7 @@ type Props = Omit<FormFieldProps<string[]>, 'name' | 'label'>;
 
 export const PlatformCheckBoxGroupField = (props: Props) => {
   const { euiFieldProps = {}, idAria, helpText, ...rest } = props;
+  const { isDisabled, ...restEuiFieldProps } = euiFieldProps;
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -138,7 +139,8 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
         options={options}
         onChange={handleChange}
         data-test-subj="osquery-platform-checkbox-group"
-        {...euiFieldProps}
+        disabled={!!isDisabled}
+        {...restEuiFieldProps}
       />
     </EuiFormRow>
   );

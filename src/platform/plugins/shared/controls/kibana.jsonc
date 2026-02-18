@@ -15,7 +15,7 @@
       "embeddable",
       "dataViews",
       "data",
-      "unifiedSearch",
+      "kql",
       "uiActions",
       "kibanaReact"
     ]

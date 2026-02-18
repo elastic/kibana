@@ -56,6 +56,7 @@ const IntervalFieldComponent = ({ euiFieldProps }: IntervalFieldProps) => {
     [onChange]
   );
   const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const { isDisabled, ...restEuiFieldProps } = euiFieldProps ?? {};
 
   return (
     <EuiFormRow
@@ -73,7 +74,8 @@ const IntervalFieldComponent = ({ euiFieldProps }: IntervalFieldProps) => {
         fullWidth
         type="number"
         data-test-subj="osquery-interval-field"
-        {...euiFieldProps}
+        disabled={!!isDisabled}
+        {...restEuiFieldProps}
       />
     </EuiFormRow>
   );

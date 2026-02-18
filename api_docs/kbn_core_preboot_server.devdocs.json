@@ -22,6 +22,8 @@
           "\nKibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.\n"
         ],
         "path": "src/core/packages/preboot/server/src/contracts.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "() => boolean"
             ],
             "path": "src/core/packages/preboot/server/src/contracts.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -56,6 +60,8 @@
               "(reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>) => void"
             ],
             "path": "src/core/packages/preboot/server/src/contracts.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,6 +78,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/preboot/server/src/contracts.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -89,6 +97,8 @@
                   "Promise<{ shouldReloadConfig: boolean; } | undefined>"
                 ],
                 "path": "src/core/packages/preboot/server/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

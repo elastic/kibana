@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -21,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
+  const globalNav = getService('globalNav');
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
     'dashboard',
@@ -61,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
     });
 
-    const addSearchEmbeddableToDashboard = async () => {
-      await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+    const addSearchEmbeddableToDashboard = async (title = 'Rendering Test: saved search') => {
+      await dashboardAddPanel.addSavedSearch(title);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
@@ -195,6 +197,132 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(2);
       });
+    });
+
+    it('can edit a session and return to the dashboard', async () => {
+      await addSearchEmbeddableToDashboard('logstash hits');
+      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing logstash hits')),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+      ]);
+      await queryBar.setQuery('test');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      await discover.saveSearch('logstash hits');
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('35 documents');
+    });
+
+    it('can edit a by-value session and return to the dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Editing Rendering Test: saved search')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+      ]);
+      await queryBar.setQuery('test');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      await discover.clickSaveSearchButton();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
+    });
+
+    it('can cancel a By Value edit and return to the dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      // Have to unlink else the cancel flow fails?
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await queryBar.setQuery('test');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('13');
+      await discover.clickCancelButton();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+    });
+
+    it('can edit a by-value session without it affecting the reference session', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await queryBar.setQuery('test');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+      await discover.clickSaveSearchButton();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      await addSearchEmbeddableToDashboard();
+      expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+        '13 documents',
+        '4,633 documents',
+      ]);
+    });
+
+    it('resets back to a normal Discover session if navigated away from an edit session', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Editing Rendering Test: saved search')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+      ]);
+      // Navigate to/Refresh page to reset Discover state
+      await discover.navigateToApp();
+      await header.waitUntilLoadingHasFinished();
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be(undefined)),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
     });
   });
 }

@@ -23,6 +23,8 @@
         "label": "renderingServiceMock",
         "description": [],
         "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "RenderingServiceMock"
             ],
             "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,6 +60,8 @@
               ">"
             ],
             "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -74,6 +80,8 @@
               ">"
             ],
             "path": "src/core/packages/rendering/server-mocks/src/rendering_service.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

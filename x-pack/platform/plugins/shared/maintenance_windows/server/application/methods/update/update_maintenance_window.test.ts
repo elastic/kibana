@@ -38,6 +38,18 @@ const updatedAttributes = {
     count: 2,
     byweekday: ['-1MO', 'WE'],
   },
+  schedule: {
+    custom: {
+      start: '2023-03-26T00:00:00.000Z',
+      duration: '2h',
+      timezone: 'CET',
+      recurring: {
+        every: '1w',
+        occurrences: 2,
+        onWeekDay: ['-1MO', 'WE'],
+      },
+    },
+  },
 };
 
 const updatedMetadata = {
@@ -96,6 +108,7 @@ describe('MaintenanceWindowClient - update', () => {
       data: {
         ...updatedAttributes,
         rRule: updatedAttributes.rRule as UpdateMaintenanceWindowParams['data']['rRule'],
+        schedule: updatedAttributes.schedule,
         categoryIds: ['observability', 'securitySolution'],
       },
     });
@@ -183,12 +196,16 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
       data: {
         ...updatedAttributes,
-        rRule: {
-          ...updatedAttributes.rRule,
-          freq: undefined,
-          dtstart: updatedStartTime,
-        } as UpdateMaintenanceWindowParams['data']['rRule'],
+        rRule: updatedAttributes.rRule as UpdateMaintenanceWindowParams['data']['rRule'],
         duration: updatedDuration,
+        schedule: {
+          custom: {
+            ...updatedAttributes.schedule.custom,
+            duration: '24h',
+            start: updatedStartTime,
+            recurring: undefined,
+          },
+        },
         categoryIds: ['observability', 'securitySolution'],
       },
     });
@@ -203,10 +220,13 @@ describe('MaintenanceWindowClient - update', () => {
       {
         ...updatedAttributes,
         duration: updatedDuration,
-        rRule: {
-          ...updatedAttributes.rRule,
-          freq: undefined, // needs to be undefined for the expiration date to be recalculated internally
-          dtstart: updatedStartTime,
+        schedule: {
+          custom: {
+            ...updatedAttributes.schedule.custom,
+            start: updatedStartTime,
+            duration: '24h',
+            recurring: undefined, // needs to be undefined for the expiration date to be recalculated internally
+          },
         },
         events: [{ gte: updatedStartTime, lte: updatedExpirationDate }],
         expirationDate: updatedExpirationDate,
@@ -224,7 +244,7 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
-  it('should not regenerate all events if rrule and duration did not change', async () => {
+  it('should not regenerate all events if schedule did not change', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
@@ -232,14 +252,19 @@ describe('MaintenanceWindowClient - update', () => {
       { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
     ];
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      rRule: {
-        tzid: 'CET',
-        dtstart: '2023-03-26T00:00:00.000Z',
-        freq: Frequency.WEEKLY,
-        count: 5,
-      } as MaintenanceWindow['rRule'],
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
     });
 
     savedObjectsClient.get.mockResolvedValue({
@@ -272,15 +297,20 @@ describe('MaintenanceWindowClient - update', () => {
       }
     );
 
-    // Update with changing rrule
+    // Update with changing schedule
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
-        rRule: {
-          tzid: 'CET',
-          dtstart: '2023-03-26T00:00:00.000Z',
-          freq: Frequency.WEEKLY,
-          count: 2,
+        schedule: {
+          custom: {
+            start: '2023-03-26T00:00:00.000Z',
+            duration: '1h',
+            timezone: 'CET',
+            recurring: {
+              every: '1w',
+              occurrences: 2,
+            },
+          },
         },
       },
     });
@@ -301,7 +331,7 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
-  it('should update maintenance window with scoped query', async () => {
+  it('should update maintenance window with scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
@@ -309,12 +339,17 @@ describe('MaintenanceWindowClient - update', () => {
       { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
     ];
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      rRule: {
-        tzid: 'CET',
-        dtstart: '2023-03-26T00:00:00.000Z',
-        freq: Frequency.WEEKLY,
-        count: 5,
-      } as MaintenanceWindow['rRule'],
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
       categoryIds: ['observability'],
@@ -338,41 +373,43 @@ describe('MaintenanceWindowClient - update', () => {
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
-        scopedQuery: {
-          kql: "_id: '1234'",
-          filters: [
-            {
-              meta: {
-                disabled: false,
-                negate: false,
-                alias: null,
-                key: 'kibana.alert.action_group',
-                field: 'kibana.alert.action_group',
-                params: {
-                  query: 'test',
+        scope: {
+          alerting: {
+            kql: "_id: '1234'",
+            filters: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  key: 'kibana.alert.action_group',
+                  field: 'kibana.alert.action_group',
+                  params: {
+                    query: 'test',
+                  },
+                  type: 'phrase',
                 },
-                type: 'phrase',
-              },
-              $state: {
-                store: FilterStateStore.APP_STATE,
-              },
-              query: {
-                match_phrase: {
-                  'kibana.alert.action_group': 'test',
+                $state: {
+                  store: FilterStateStore.APP_STATE,
+                },
+                query: {
+                  match_phrase: {
+                    'kibana.alert.action_group': 'test',
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       },
     });
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.kql
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.kql
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -388,13 +425,13 @@ describe('MaintenanceWindowClient - update', () => {
     });
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.dsl
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.dsl
     ).toMatchInlineSnapshot(
       `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"_id\\":\\"'1234'\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"kibana.alert.action_group\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
   });
 
-  it('should remove maintenance window with scoped query', async () => {
+  it('should remove maintenance window with scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
 
     const modifiedEvents = [
@@ -402,12 +439,17 @@ describe('MaintenanceWindowClient - update', () => {
       { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
     ];
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      rRule: {
-        tzid: 'CET',
-        dtstart: '2023-03-26T00:00:00.000Z',
-        freq: Frequency.WEEKLY,
-        count: 5,
-      } as MaintenanceWindow['rRule'],
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
     });
@@ -430,16 +472,21 @@ describe('MaintenanceWindowClient - update', () => {
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
-        scopedQuery: null,
+        scope: { alerting: null },
       },
     });
 
-    expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery
-    ).toBeNull();
+    expect((savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting)
+      .toMatchInlineSnapshot(`
+      Object {
+        "dsl": "",
+        "filters": Array [],
+        "kql": "",
+      }
+    `);
   });
 
-  it('should throw if updating a maintenance window with invalid scoped query', async () => {
+  it('should throw if updating a maintenance window with invalid scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
@@ -455,14 +502,16 @@ describe('MaintenanceWindowClient - update', () => {
       await updateMaintenanceWindow(mockContext, {
         id: 'test-id',
         data: {
-          scopedQuery: {
-            kql: 'invalid: ',
-            filters: [],
+          scope: {
+            alerting: {
+              kql: 'invalid: ',
+              filters: [],
+            },
           },
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating update maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);
@@ -484,11 +533,16 @@ describe('MaintenanceWindowClient - update', () => {
       await updateMaintenanceWindow(mockContext, {
         id: 'test-id',
         data: {
-          rRule: {
-            tzid: 'CET',
-            dtstart: '2023-03-26T00:00:00.000Z',
-            freq: Frequency.WEEKLY,
-            count: 2,
+          schedule: {
+            custom: {
+              start: '2023-03-26T00:00:00.000Z',
+              duration: '2h',
+              timezone: 'CET',
+              recurring: {
+                every: '1w',
+                occurrences: 2,
+              },
+            },
           },
         },
       });
@@ -505,11 +559,16 @@ describe('MaintenanceWindowClient - update', () => {
         id: 'test-id',
         data: {
           categoryIds: ['invalid_id'] as unknown as MaintenanceWindow['categoryIds'],
-          rRule: {
-            tzid: 'CET',
-            dtstart: '2023-03-26T00:00:00.000Z',
-            freq: Frequency.WEEKLY,
-            count: 2,
+          schedule: {
+            custom: {
+              start: '2023-03-26T00:00:00.000Z',
+              duration: '2h',
+              timezone: 'CET',
+              recurring: {
+                every: '1w',
+                occurrences: 2,
+              },
+            },
           },
         },
       });

@@ -38,6 +38,8 @@
           ") => { patterns: string[]; fields: Record<string, { type: string; }>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 35,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,6 +81,8 @@
           "(rootDir: string, filepath: string) => \"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,6 +135,8 @@
           "(rootDir: string, filepath: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +151,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 27,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +168,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 27,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +204,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,6 +226,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+            "lineNumber": 28,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -227,6 +247,8 @@
           "(index: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +263,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 27,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +284,8 @@
           "(type: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,6 +300,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +321,8 @@
           "(rootDir: string, filepath: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,6 +337,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -322,6 +354,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -341,6 +375,8 @@
           "(type: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,6 +391,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 32,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -391,6 +429,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -413,6 +453,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -447,6 +489,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,6 +511,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -482,6 +528,8 @@
               "Record<string, string>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -517,6 +565,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -538,6 +588,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -552,6 +604,8 @@
         "label": "ContentPackIncludeAll",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -566,6 +620,8 @@
               "{ all: {}; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -580,6 +636,8 @@
         "label": "ContentPackManifest",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,6 +649,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,6 +662,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +675,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -644,6 +708,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +731,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -679,6 +747,8 @@
         "label": "ContentPackPreviewEntry",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -690,6 +760,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,6 +773,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,6 +786,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -726,6 +802,8 @@
               "{ severity: \"warning\" | \"fatal\"; message: string; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -740,6 +818,8 @@
         "label": "ContentPackSavedObjectLinks",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -761,6 +841,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -775,6 +857,8 @@
         "label": "ContentPackStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -789,6 +873,8 @@
               "\"stream\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,6 +886,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -817,6 +905,8 @@
               ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -831,6 +921,8 @@
         "label": "SavedObjectLink",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -842,6 +934,8 @@
             "label": "source_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -853,6 +947,8 @@
             "label": "target_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -882,6 +978,8 @@
           "> & { type: \"dashboard\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -906,6 +1004,8 @@
           "> & { type: \"index-pattern\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -935,6 +1035,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -965,6 +1067,8 @@
           ")[]; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1735,6 +1839,8 @@
           " | undefined; }; visualization: unknown; }; }> & { type: \"lens\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1772,6 +1878,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1787,6 +1895,8 @@
           "\"<stream_name_placeholder>\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1802,6 +1912,8 @@
           "\"__ROOT__\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1832,6 +1944,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1847,6 +1961,8 @@
           "\"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1883,6 +1999,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1917,6 +2035,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1929,6 +2049,8 @@
         "label": "SUPPORTED_ENTRY_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1943,6 +2065,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1954,6 +2078,8 @@
             "label": "stream",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1968,6 +2094,8 @@
         "label": "SUPPORTED_SAVED_OBJECT_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1979,6 +2107,8 @@
             "label": "dashboard",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1990,6 +2120,8 @@
             "label": "'index-pattern'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2001,6 +2133,8 @@
             "label": "lens",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

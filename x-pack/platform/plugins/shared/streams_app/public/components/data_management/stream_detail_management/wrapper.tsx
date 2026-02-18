@@ -16,7 +16,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { FeedbackButton } from '../../feedback_button';
 import {
@@ -27,7 +27,6 @@ import {
 } from '../../stream_badges';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../streams_tour';
-import { GroupStreamControls } from './group_stream_controls';
 
 export type ManagementTabs = Record<
   string,
@@ -49,10 +48,8 @@ export function Wrapper({
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
   const { services } = useKibana();
-  const {
-    features: { groupStreams },
-  } = useStreamsPrivileges();
   const { getStepPropsByStepId } = useStreamsTour();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const lastTrackedRef = useRef<string | null>(null);
 
@@ -87,6 +84,7 @@ export function Wrapper({
         {
           href: router.link('/{key}/management/{tab}', {
             path: { key: streamId, tab: tabName },
+            query: { rangeFrom, rangeTo },
           }),
           label: currentTab.label,
           content: currentTab.content,
@@ -139,17 +137,11 @@ export function Wrapper({
             justifyContent="spaceBetween"
             wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
               {streamId}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton
-                        definition={definition}
-                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
-                      />
-                    )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
@@ -166,13 +158,27 @@ export function Wrapper({
                     />
                   </EuiFlexGroup>
                 </EuiFlexItem>
-
-                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
-                  <GroupStreamControls />
-                )}
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <FeedbackButton />
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton
+                      stream={definition.stream}
+                      hasDataStream={
+                        Streams.WiredStream.GetResponse.is(definition) ||
+                        definition.data_stream_exists
+                      }
+                      spellOut
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FeedbackButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {

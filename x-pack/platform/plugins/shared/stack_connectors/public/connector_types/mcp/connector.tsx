@@ -42,10 +42,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const [isOpen, toggleIsOpen] = useToggle(false);
 
   const form = useFormContext();
-  const { getFormData, updateFieldValues } = form;
+  const { getFormData, updateFieldValues, getFieldDefaultValue } = form;
   const [{ id: connectorId }] = useFormData({
     watch: ['id'],
   });
+
+  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
   const {
     data: secretHeaderKeys = [],
@@ -107,7 +109,11 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         <EuiSpacer size="m" />
         <EuiPanel hasShadow={false} hasBorder={true}>
           {/* Workaround to resolve updates to the headers field for secrets */}
-          <Field path="__internal__.hasHeaders" component={HiddenField} />
+          <Field
+            path="__internal__.hasHeaders"
+            component={HiddenField}
+            config={{ defaultValue: hasHeadersDefaultValue }}
+          />
           <HeaderFields readOnly={readOnly} required={false} />
         </EuiPanel>
       </EuiAccordion>

@@ -59,14 +59,14 @@ describe('useCreateMigration', () => {
       await result.current.createMigration({
         rules,
         migrationName: 'test-migration',
-        migrationSource: MigrationSource.SPLUNK,
+        vendor: MigrationSource.SPLUNK,
       });
     });
 
     expect(createRuleMigration).toHaveBeenCalledWith({
       rules,
       migrationName: 'test-migration',
-      migrationSource: MigrationSource.SPLUNK,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(getRuleMigrationStats).toHaveBeenCalledWith({ migrationId: 'migration-id' });
     expect(addSuccess).toHaveBeenCalled();
@@ -84,7 +84,7 @@ describe('useCreateMigration', () => {
       await result.current.createMigration({
         migrationName: 'test-migration',
         rules,
-        migrationSource: MigrationSource.SPLUNK,
+        vendor: MigrationSource.SPLUNK,
       });
     });
 

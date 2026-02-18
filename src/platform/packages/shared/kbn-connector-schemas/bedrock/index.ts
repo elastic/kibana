@@ -25,6 +25,7 @@ export {
   BedrockClientSendResponseSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
+  ConverseResponseSchema,
   BedrockMessageSchema,
   BedrockToolChoiceSchema,
 } from './schemas/latest';
@@ -47,5 +48,6 @@ export type {
   ConverseActionParams,
   ConverseActionResponse,
   ConverseParams,
+  ConverseResponse,
   ConverseStreamParams,
 } from './types/latest';

@@ -12,11 +12,13 @@ import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../types';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 
 const fromCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const fromCommand = {
@@ -25,6 +27,7 @@ export const fromCommand = {
   metadata: {
     type: 'source' as const,
     subquerySupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
+    viewsSupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     description: i18n.translate('kbn-esql-language.esql.definitions.fromDoc', {
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',

@@ -52,6 +52,7 @@ export const getDetectionRules = async ({
 
   const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: 'alert',
+    fields: ['actions', 'createdAt', 'enabled', 'muteAll', 'name', 'params', 'updatedAt'],
     perPage: maxPerPage,
     namespaces: ['*'],
     filter,

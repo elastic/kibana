@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSwitchEvent, EuiPopoverProps } from '@elastic/eui';
 import {
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiWrappingPopover,
-  EuiFormRow,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiPopoverFooter,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanLockHoverActions,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
-import type { PinnableControlApi } from './types';
+import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
+import type { PinnableControlApi } from './types';
 
 interface Props {
   api: PinnableControlApi;
@@ -36,135 +36,118 @@ interface Props {
 }
 
 export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayName, iconType }) => {
-  // When the user changes a setting and the new layout is applied, the popover gets destroyed and re-rendered
-  // Make sure it reopens if the user hasn't closed it
-  const isPopoverOpenInitialState = useMemo(
-    () => (apiCanLockHoverActions(api) ? api.hasLockedHoverActions$.value : false),
-    [api]
-  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
-
-  const layoutState = useStateFromPublishingSubject(api.parentApi.layout$);
-  const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
-  const isToRightOfGrowControl = useMemo(
-    () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
-    [layoutEntry.order, layoutState.controls]
-  );
-
-  const grow = useMemo(() => layoutEntry.grow ?? DEFAULT_CONTROL_GROW, [layoutEntry]);
-  const width = useMemo(() => layoutEntry.width ?? DEFAULT_CONTROL_WIDTH, [layoutEntry]);
-
-  const applyNextLayout = useCallback(
-    (nextGrow: boolean, nextWidth: ControlWidth) => {
-      const currentLayout = api.parentApi.layout$.getValue();
-      api.parentApi.layout$.next({
-        ...currentLayout,
-        controls: {
-          ...currentLayout.controls,
-          [api.uuid]: {
-            ...layoutEntry,
-            grow: nextGrow,
-            width: nextWidth,
-          },
-        },
-      });
+  const initialState = useMemo(
+    () => {
+      return {
+        width: DEFAULT_CONTROL_WIDTH,
+        grow: DEFAULT_CONTROL_GROW,
+        ...api.parentApi.getLayout(api.uuid),
+      };
     },
-    [api.parentApi.layout$, api.uuid, layoutEntry]
+    // We should re-calculate `initialState` when the popover opens/closes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [api, isPopoverOpen]
   );
+
+  const [width, setWidth] = useState<ControlWidth>(initialState.width as ControlWidth);
+  const [grow, setGrow] = useState<boolean>(initialState.grow);
 
   const onClose = useCallback(() => {
+    setIsPopoverOpen(false);
     if (apiCanLockHoverActions(api)) {
       api.lockHoverActions(false);
     }
-    setIsPopoverOpen(false);
   }, [api]);
 
   const onClickButton = useCallback(() => {
-    if (isPopoverOpen) onClose();
-    else if (apiCanLockHoverActions(api)) {
-      api.lockHoverActions(true);
+    if (isPopoverOpen) {
+      onClose();
+      return;
     }
     setIsPopoverOpen(true);
+    if (apiCanLockHoverActions(api)) {
+      api.lockHoverActions(true);
+    }
   }, [api, isPopoverOpen, onClose]);
 
-  const onWidthChange = useCallback(
-    (id: string) => {
-      applyNextLayout(grow, id as ControlWidth);
-    },
-    [applyNextLayout, grow]
-  );
-
-  const onGrowChange = useCallback(
-    (e: EuiSwitchEvent) => {
-      applyNextLayout(e.target.checked, width);
-    },
-    [applyNextLayout, width]
-  );
-
-  const settingsButton = (
-    <EuiToolTip disableScreenReaderOutput content={displayName}>
-      <EuiButtonIcon
-        data-test-subj={`embeddablePanelAction-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
-        iconType={iconType}
-        color="text"
-        aria-label={displayName}
-        onClick={onClickButton}
-      />
-    </EuiToolTip>
-  );
-
-  const popoverProps: Omit<EuiPopoverProps, 'button'> = {
-    repositionOnScroll: true,
-    panelPaddingSize: 'm',
-    anchorPosition: isToRightOfGrowControl ? 'downRight' : 'downLeft',
-    isOpen: isPopoverOpen,
-    closePopover: onClose,
-    focusTrapProps: {
-      closeOnMouseup: true,
-      clickOutsideDisables: false,
-      onClickOutside: onClose,
-    },
-    panelStyle:
-      /* Prevent popover from visually bouncing if it's being re-rendered already open */
-      isPopoverOpenInitialState ? { transition: 'none' } : undefined,
-  };
-
-  const PopoverComponent: React.FC<React.PropsWithChildren> = ({ children }) =>
-    isToRightOfGrowControl ? (
-      <EuiPopover {...popoverProps} button={settingsButton} children={children} />
-    ) : api.prependWrapperRef.current ? (
-      <EuiWrappingPopover
-        {...popoverProps}
-        button={api.prependWrapperRef.current}
-        children={children}
-      />
-    ) : null;
-
   return (
-    <>
-      {!isToRightOfGrowControl && settingsButton}
-      <PopoverComponent data-test-subj={`controlDisplaySettings-${api.uuid}`}>
-        <EuiFormRow label={strings.minimumWidth} fullWidth>
-          <EuiButtonGroup
-            legend={strings.minimumWidth}
-            options={widthOptions}
-            idSelected={width}
-            onChange={onWidthChange}
-            type="single"
-            isFullWidth
+    <EuiPopover
+      button={
+        <EuiToolTip disableScreenReaderOutput content={displayName}>
+          <EuiButtonIcon
+            data-test-subj={`embeddablePanelAction-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
+            iconType={iconType}
+            color="text"
+            aria-label={displayName}
+            onClick={onClickButton}
           />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiSwitch
-          compressed
-          label={strings.grow}
-          color="primary"
-          checked={grow}
-          onChange={(e) => onGrowChange(e)}
+        </EuiToolTip>
+      }
+      repositionOnScroll
+      panelPaddingSize="m"
+      isOpen={isPopoverOpen}
+      closePopover={onClose}
+      focusTrapProps={{
+        closeOnMouseup: true,
+        clickOutsideDisables: false,
+        onClickOutside: onClose,
+      }}
+      data-test-subj={`controlDisplaySettings-${api.uuid}`}
+    >
+      <EuiFormRow label={strings.minimumWidth} fullWidth>
+        <EuiButtonGroup
+          legend={strings.minimumWidth}
+          options={widthOptions}
+          idSelected={width}
+          onChange={(newWidth) => setWidth(newWidth as ControlWidth)}
+          type="single"
+          isFullWidth
         />
-      </PopoverComponent>
-    </>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiSwitch
+        compressed
+        label={strings.grow}
+        color="primary"
+        checked={grow}
+        onChange={(e) => setGrow(Boolean(e.target.checked))}
+      />
+      <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              size="s"
+              onClick={() => {
+                onClose();
+                setWidth(initialState.width as ControlWidth);
+                setGrow(initialState.grow);
+              }}
+            >
+              {i18n.translate('controls.displaySettingsPopover.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              size="s"
+              fill
+              disabled={grow === initialState.grow && width === initialState.width}
+              onClick={() => {
+                onClose();
+                api.parentApi.setLayout(api.uuid, { ...initialState, grow, width });
+              }}
+            >
+              {i18n.translate('controls.displaySettingsPopover.applyButton', {
+                defaultMessage: 'Apply',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
+    </EuiPopover>
   );
 };
 

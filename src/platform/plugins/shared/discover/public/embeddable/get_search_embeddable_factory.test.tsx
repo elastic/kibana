@@ -14,7 +14,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
@@ -122,7 +122,7 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -156,7 +156,7 @@ describe('saved search embeddable', () => {
       });
 
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -181,7 +181,7 @@ describe('saved search embeddable', () => {
         partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
       });
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -219,7 +219,7 @@ describe('saved search embeddable', () => {
       );
       runtimeState = getInitialRuntimeState();
       await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -243,7 +243,7 @@ describe('saved search embeddable', () => {
         },
       };
       await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -269,7 +269,7 @@ describe('saved search embeddable', () => {
         .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -297,7 +297,7 @@ describe('saved search embeddable', () => {
         partialState: { columns: ['rootProfile', 'message', 'extension'] },
       });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: { savedObjectId: 'id' } }, // runtimeState passed via mocked deserializeState
+        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,

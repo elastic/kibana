@@ -512,7 +512,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -932,6 +932,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -943,7 +950,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1363,6 +1370,13 @@ exports[`LoginForm renders as expected 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -2544,6 +2558,9 @@ exports[`LoginForm renders as expected 1`] = `
               loginAssistanceMessage=""
               notifications={
                 Object {
+                  "feedback": Object {
+                    "isEnabled": [MockFunction],
+                  },
                   "showErrorDialog": [MockFunction],
                   "toasts": Object {
                     "add": [MockFunction],
@@ -2554,6 +2571,9 @@ exports[`LoginForm renders as expected 1`] = `
                     "addWarning": [MockFunction],
                     "get$": [MockFunction],
                     "remove": [MockFunction],
+                  },
+                  "tours": Object {
+                    "isEnabled": [MockFunction],
                   },
                 }
               }

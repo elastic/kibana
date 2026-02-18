@@ -12,7 +12,7 @@ import {
   getInheritedSettings,
   findInheritedFailureStore,
 } from '@kbn/streams-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type {
   DataStreamWithFailureStore,
@@ -28,6 +28,7 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
+import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 
 export async function readStream({
   name,
@@ -35,16 +36,18 @@ export async function readStream({
   attachmentClient,
   streamsClient,
   scopedClusterClient,
+  logger,
 }: {
   name: string;
   queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    queryClient.getQueryLinks([name]),
+    queryClient.getStreamToQueryLinksMap([name]),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -64,13 +67,31 @@ export async function readStream({
     return query.query;
   });
 
-  if (Streams.GroupStream.Definition.is(streamDefinition)) {
-    return {
-      stream: streamDefinition,
+  if (Streams.QueryStream.Definition.is(streamDefinition)) {
+    // Fetch the actual ES|QL from the view (source of truth)
+    const esqlView = await getEsqlView({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+      name: streamDefinition.query.view,
+    });
+
+    // Build response with both view reference and resolved esql
+    // query_streams is already part of the stream definition (from BaseStream.Definition)
+    const queryStreamResponse: Streams.QueryStream.GetResponse = {
+      stream: {
+        ...streamDefinition,
+        query: {
+          view: streamDefinition.query.view,
+          esql: esqlView.query,
+        },
+      },
       dashboards,
       rules,
       queries,
+      inherited_fields: {},
     };
+
+    return queryStreamResponse;
   }
 
   const privileges = await streamsClient.getPrivileges(name);
@@ -100,6 +121,7 @@ export async function readStream({
     return {
       stream: streamDefinition,
       privileges,
+      index_mode: dataStream?.index_mode,
       elasticsearch_assets:
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
@@ -139,6 +161,7 @@ export async function readStream({
     rules,
     privileges,
     queries,
+    index_mode: dataStream?.index_mode,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,

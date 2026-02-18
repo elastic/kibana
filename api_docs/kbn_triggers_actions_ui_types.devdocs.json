@@ -46,6 +46,8 @@
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +85,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -113,6 +119,8 @@
           "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"minimumLicenseRequired\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\" | \"autoRecoverAlerts\">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +135,8 @@
               "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -141,6 +151,8 @@
               "{ [x: string]: { read: boolean; all: boolean; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,6 +164,8 @@
             "label": "enabledInLicense",
             "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,6 +180,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +193,8 @@
             "label": "isInternallyManaged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -197,6 +215,8 @@
           "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,6 +232,8 @@
           "\"all\" | \"keepContext\""
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -235,6 +257,8 @@
           "<string, string>>"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -258,6 +282,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -280,6 +306,8 @@
           "<string, string> & { description?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -297,6 +325,8 @@
           "readonly [\"context\"]"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,6 +342,8 @@
           "readonly [\"context\", \"state\"]"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,6 +359,8 @@
           "readonly [\"params\"]"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -552,7 +552,8 @@ export function registerConnectorRoutes({
               rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
         }),
         params: schema.object({
@@ -597,7 +598,8 @@ export function registerConnectorRoutes({
                 rule: schema.string(),
                 updated_at: schema.string(),
                 value: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             ),
           })
         ),
@@ -1109,7 +1111,7 @@ export function registerConnectorRoutes({
 
         const savedObjects = _core.savedObjects;
 
-        const agentPolicyService = start.fleet!.agentPolicyService;
+        const agentlessPolicyService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
 
@@ -1119,7 +1121,7 @@ export function registerConnectorRoutes({
           soClient,
           client.asCurrentUser,
           packagePolicyService,
-          agentPolicyService,
+          agentlessPolicyService,
           agentService,
           log
         );

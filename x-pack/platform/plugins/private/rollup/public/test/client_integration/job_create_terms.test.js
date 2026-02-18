@@ -5,95 +5,102 @@
  * 2.0.
  */
 
-import { pageHelpers, mockHttpRequest } from './helpers';
+import { fireEvent, screen, within } from '@testing-library/react';
 
+import { mockHttpRequest, renderJobCreate } from './helpers';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
-const { setup } = pageHelpers.jobCreate;
-
 describe('Create Rollup Job, step 3: Terms', () => {
-  let find;
-  let exists;
-  let actions;
-  let getEuiStepsHorizontalActive;
-  let goToStep;
-  let table;
   let startMock;
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  const setInputValue = (testId, value) => {
+    const input = screen.getByTestId(testId);
+    fireEvent.change(input, { target: { value } });
+    fireEvent.blur(input);
+  };
+
+  const clickNext = () => fireEvent.click(screen.getByTestId('rollupJobNextButton'));
+  const clickBack = () => fireEvent.click(screen.getByTestId('rollupJobBackButton'));
+
+  const goToStep3 = async () => {
+    // Step 1: Logistics (required)
+    setInputValue('rollupJobName', 'test-job');
+    setInputValue('rollupIndexPattern', 'kibana*');
+    setInputValue('rollupIndexName', 'rollup-index');
+    await screen.findByTestId('fieldIndexPatternSuccessMessage');
+    clickNext();
+    await screen.findByTestId('rollupJobCreateDateHistogramTitle');
+
+    // Step 2: Date histogram (required)
+    setInputValue('rollupJobInterval', '10m');
+    clickNext();
+    await screen.findByTestId('rollupJobCreateTermsTitle');
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
-  });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    // Set "default" mock responses by not providing any arguments
     mockHttpRequest(startMock.http);
-
-    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table } = setup());
-  });
-
-  afterEach(() => {
-    startMock.http.get.mockClear();
+    renderJobCreate();
+    await screen.findByTestId('rollupJobCreateLogisticsTitle');
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
   const keywordFields = ['b-keywordField', 'd-keywordField'];
 
   const goToStepAndOpenFieldChooser = async () => {
-    await goToStep(3);
-    find('rollupJobShowFieldChooserButton').simulate('click');
+    await goToStep3();
+    fireEvent.click(screen.getByTestId('rollupJobShowFieldChooserButton'));
+    await screen.findByTestId('rollupJobTermsFieldChooser');
   };
 
   describe('layout', () => {
     beforeEach(async () => {
-      await goToStep(3);
+      await goToStep3();
     });
 
     it('should have the horizontal step active on "Terms"', () => {
-      expect(getEuiStepsHorizontalActive()).toContain('Terms');
+      expect(screen.getByTestId(/createRollupStep3--active/)).toHaveTextContent('Terms');
     });
 
     it('should have the title set to "Terms"', () => {
-      expect(exists('rollupJobCreateTermsTitle')).toBe(true);
+      expect(screen.getByTestId('rollupJobCreateTermsTitle')).toBeInTheDocument();
     });
 
     it('should have a link to the documentation', () => {
-      expect(exists('rollupJobCreateTermsDocsButton')).toBe(true);
+      expect(screen.getByTestId('rollupJobCreateTermsDocsButton')).toBeInTheDocument();
     });
 
     test('should have a deprecation callout', () => {
-      expect(exists('rollupDeprecationCallout')).toBe(true);
+      expect(screen.getByTestId('rollupDeprecationCallout')).toBeInTheDocument();
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(exists('rollupJobBackButton')).toBe(true);
-      expect(exists('rollupJobNextButton')).toBe(true);
-      expect(exists('rollupJobSaveButton')).toBe(false);
+      expect(screen.getByTestId('rollupJobBackButton')).toBeInTheDocument();
+      expect(screen.getByTestId('rollupJobNextButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('rollupJobSaveButton')).not.toBeInTheDocument();
     });
 
     it('should go to the "Date histogram" step when clicking the back button', async () => {
-      actions.clickPreviousStep();
-      expect(getEuiStepsHorizontalActive()).toContain('Date histogram');
+      clickBack();
+      expect(await screen.findByTestId('rollupJobCreateDateHistogramTitle')).toBeInTheDocument();
     });
 
     it('should go to the "Histogram" step when clicking the next button', async () => {
-      actions.clickNextStep();
-      expect(getEuiStepsHorizontalActive()).toContain('Histogram');
+      clickNext();
+      expect(await screen.findByTestId('rollupJobCreateHistogramTitle')).toBeInTheDocument();
     });
 
     it('should have a button to display the list of terms to chose from', () => {
-      expect(exists('rollupJobTermsFieldChooser')).toBe(false);
+      expect(screen.queryByTestId('rollupJobTermsFieldChooser')).not.toBeInTheDocument();
 
-      find('rollupJobShowFieldChooserButton').simulate('click');
+      fireEvent.click(screen.getByTestId('rollupJobShowFieldChooserButton'));
 
-      expect(exists('rollupJobTermsFieldChooser')).toBe(true);
+      expect(screen.getByTestId('rollupJobTermsFieldChooser')).toBeInTheDocument();
     });
   });
 
@@ -104,15 +111,17 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should have the title set to "Add terms fields"', async () => {
-        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add terms fields');
+        expect(screen.getByTestId('rollupJobCreateFlyoutTitle')).toHaveTextContent(
+          'Add terms fields'
+        );
       });
 
       it('should have a button to close the flyout', () => {
-        expect(exists('rollupJobTermsFieldChooser')).toBe(true);
+        expect(screen.getByTestId('rollupJobTermsFieldChooser')).toBeInTheDocument();
 
-        find('euiFlyoutCloseButton').simulate('click');
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
-        expect(exists('rollupJobTermsFieldChooser')).toBe(false);
+        expect(screen.queryByTestId('rollupJobTermsFieldChooser')).not.toBeInTheDocument();
       });
     });
 
@@ -125,10 +134,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
           },
         });
         await goToStepAndOpenFieldChooser();
-
-        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
-
-        expect(tableCellsValues).toEqual([['No items found']]);
+        expect(screen.getByText('No items found')).toBeInTheDocument();
       });
     });
 
@@ -144,38 +150,33 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should display the numeric & keyword fields available', async () => {
-        const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');
-
-        expect(tableCellsValues).toEqual([
-          ['a-numericField', 'numeric'],
-          ['b-keywordField', 'keyword'],
-          ['c-numericField', 'numeric'],
-          ['d-keywordField', 'keyword'],
-        ]);
+        const chooserTable = screen.getByTestId('rollupJobTermsFieldChooser-table');
+        [
+          'a-numericField',
+          'numeric',
+          'b-keywordField',
+          'keyword',
+          'c-numericField',
+          'd-keywordField',
+        ].forEach((t) => expect(chooserTable).toHaveTextContent(t));
       });
 
       it('should add term to the field list when clicking on it', () => {
-        let { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
-        expect(tableCellsValues).toEqual([['No terms fields added']]); // make sure the field list is empty
+        expect(screen.getByText('No terms fields added')).toBeInTheDocument();
 
-        const { rows } = table.getMetaData('rollupJobTermsFieldChooser-table');
-        rows[0].reactWrapper.simulate('click'); // Select first row
+        fireEvent.click(screen.getByText('a-numericField'));
 
-        ({ tableCellsValues } = table.getMetaData('rollupJobTermsFieldList'));
-        const [firstRow] = tableCellsValues;
-        const [term, type] = firstRow;
-        expect(term).toEqual('a-numericField');
-        expect(type).toEqual('numeric');
+        const fieldList = screen.getByTestId('rollupJobTermsFieldList');
+        expect(fieldList).toHaveTextContent('a-numericField');
+        expect(fieldList).toHaveTextContent('numeric');
       });
     });
   });
 
   describe('fields list', () => {
     it('should have an empty field list', async () => {
-      await goToStep(3);
-
-      const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldList');
-      expect(tableCellsValues).toEqual([['No terms fields added']]);
+      await goToStep3();
+      expect(screen.getByText('No terms fields added')).toBeInTheDocument();
     });
 
     it('should have a delete button on each row to remove a term', async () => {
@@ -187,20 +188,16 @@ describe('Create Rollup Job, step 3: Terms', () => {
         },
       });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = table.getMetaData('rollupJobTermsFieldChooser-table');
-      fieldChooserRows[0].reactWrapper.simulate('click');
 
-      // Make sure rows value has been set
-      let { rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList');
-      expect(fieldListRows[0].columns[0].value).not.toEqual('No terms fields added');
+      fireEvent.click(screen.getByText('a-numericField'));
+      const fieldList = screen.getByTestId('rollupJobTermsFieldList');
+      expect(fieldList).toHaveTextContent('a-numericField');
 
-      const columnsFirstRow = fieldListRows[0].columns;
-      // The last column is the eui "actions" column
-      const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
-      deleteButton.simulate('click');
+      // EuiInMemoryTable actions render "Remove" buttons; click the first one.
+      const removeButtons = within(fieldList).getAllByRole('button', { name: /remove/i });
+      fireEvent.click(removeButtons[0]);
 
-      ({ rows: fieldListRows } = table.getMetaData('rollupJobTermsFieldList'));
-      expect(fieldListRows[0].columns[0].value).toEqual('No terms fields added');
+      expect(screen.getByText('No terms fields added')).toBeInTheDocument();
     });
   });
 });

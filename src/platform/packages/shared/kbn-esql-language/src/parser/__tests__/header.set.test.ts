@@ -441,11 +441,7 @@ describe('SET instruction parsing', () => {
             type: 'function',
             subtype: 'binary-expression',
             name: '=',
-            args: [
-              { type: 'identifier', name: 'timezone' },
-              // Missing value should be represented as an incomplete unknown node
-              { type: 'unknown', incomplete: true },
-            ],
+            args: [{ type: 'identifier', name: 'timezone' }, []],
             incomplete: true,
           },
         ],

@@ -262,7 +262,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({});
+      expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
       expect(mockOnClose).toHaveBeenCalled();
     });
 
@@ -288,10 +288,12 @@ describe('WorkflowExecuteModal', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
-          definition={{
-            ...baseWorkflowDefinition,
-            inputs: [{ name: 'test-input', type: 'string', required: true }],
-          }}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              inputs: [{ name: 'test-input', type: 'string', required: true }],
+            } as WorkflowYaml
+          }
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -328,11 +330,13 @@ describe('WorkflowExecuteModal', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
-          definition={{
-            ...baseWorkflowDefinition,
-            triggers: [{ type: 'manual' }],
-            inputs: [{ name: 'test-input', type: 'string', required: true }],
-          }}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [{ type: 'manual' }],
+              inputs: [{ name: 'test-input', type: 'string', required: true }],
+            } as WorkflowYaml
+          }
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />

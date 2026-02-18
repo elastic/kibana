@@ -8,9 +8,7 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   areTriggersDisabled,
   initializeTimeRangeManager,
@@ -18,10 +16,14 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';
@@ -53,7 +55,7 @@ export function getControlledBy(id: string) {
 export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const savedMap = new SavedMap({ mapEmbeddableState: state });
     await savedMap.whenReady();
 
@@ -66,7 +68,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -106,17 +108,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     }
 
     function serializeByReference(libraryId: string) {
-      return {
-        rawState: getByReferenceState(getLatestState(), libraryId),
-        references: [],
-      };
+      return getByReferenceState(getLatestState(), libraryId);
     }
 
     function serializeByValue() {
-      return {
-        rawState: getByValueState(getLatestState(), savedMap.getAttributes()),
-        references: [],
-      };
+      return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
     function serializeState() {
@@ -138,7 +134,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
@@ -148,12 +144,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (lastSaved) {
-          await savedMap.reset(lastSaved.rawState);
+          await savedMap.reset(lastSaved);
         }
       },
     });
@@ -214,6 +210,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
             crossPanelActions.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
+            projectRoutingManager.cleanup();
             maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);

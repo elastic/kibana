@@ -93,6 +93,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
     },
     flyoutProps: {
       triggerId: 'dashboard-controls-menu-button',
+      focusedPanelId: controlId,
     },
   });
 };

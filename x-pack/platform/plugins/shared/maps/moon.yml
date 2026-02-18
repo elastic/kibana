@@ -93,7 +93,6 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/react-kibana-context-render'
   - '@kbn/embeddable-enhanced-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/field-utils'
   - '@kbn/react-hooks'
   - '@kbn/scout'
@@ -107,6 +106,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/crypto-browser'
   - '@kbn/cps'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

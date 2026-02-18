@@ -13,10 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { DiscoverServices } from '../../../../build_services';
 
-export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ badgeText }) => {
-  const services = useDiscoverServices();
+export const SolutionsViewBadge: FunctionComponent<{
+  badgeText: string;
+  services: DiscoverServices;
+}> = ({ badgeText, services }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const activeSpace$ = useMemo(
     () => services.spaces?.getActiveSpace$() ?? of(undefined),

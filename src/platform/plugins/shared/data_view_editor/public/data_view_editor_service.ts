@@ -25,6 +25,7 @@ import type {
   DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { ICPSManager } from '@kbn/cps-utils';
 
 import type {
   RollupIndicesCapsResponse,
@@ -52,6 +53,7 @@ export interface DataViewEditorServiceConstructorArgs {
   services: {
     http: HttpSetup;
     dataViews: DataViewsServicePublic;
+    cpsManager?: ICPSManager;
   };
   /**
    * Whether service requires requireTimestampField
@@ -93,7 +95,7 @@ export const stateSelectorFactory =
 
 export class DataViewEditorService {
   constructor({
-    services: { http, dataViews },
+    services: { http, dataViews, cpsManager },
     initialValues: {
       type: initialType = INDEX_PATTERN_TYPE.DEFAULT,
       indexPattern: initialIndexPattern = '',
@@ -106,6 +108,7 @@ export class DataViewEditorService {
     this.requireTimestampField = requireTimestampField;
     this.type = initialType;
     this.indexPattern = removeSpaces(initialIndexPattern);
+    this.cpsManager = cpsManager;
 
     // fire off a couple of requests that we know we'll need
     this.rollupCapsResponse = this.getRollupIndexCaps();
@@ -140,12 +143,20 @@ export class DataViewEditorService {
       this.rollupIndexForProvider$.next(rollupIndex);
       this.rollupIndexForProvider$.next(undefined);
     });
+
+    // Subscribe to CPS project routing changes
+    if (cpsManager) {
+      this.cpsProjectRoutingSub = cpsManager.getProjectRouting$().subscribe(() => {
+        this.loadIndices();
+      });
+    }
   }
 
   private http: HttpSetup;
   private dataViews: DataViewsServicePublic;
   // config
   private requireTimestampField: boolean;
+  private cpsManager?: ICPSManager;
   private type = INDEX_PATTERN_TYPE.DEFAULT;
 
   private indexPattern = '';
@@ -157,6 +168,7 @@ export class DataViewEditorService {
   private loadTimestampFieldsSub: Subscription;
   private matchedIndicesForProviderSub: Subscription;
   private rollupIndexForProviderSub: Subscription;
+  private cpsProjectRoutingSub?: Subscription;
 
   private state$: BehaviorSubject<DataViewEditorState>;
 
@@ -316,7 +328,8 @@ export class DataViewEditorService {
     pattern: string;
     showAllIndices?: boolean | undefined;
   }) => {
-    const key = JSON.stringify(props);
+    const projectRouting = this.cpsManager?.getProjectRouting();
+    const key = JSON.stringify({ ...props, projectRouting });
 
     this.getIndicesMemory[key] =
       this.getIndicesMemory[key] ||
@@ -348,7 +361,8 @@ export class DataViewEditorService {
     getFieldsOptions: GetFieldsOptions,
     requireTimestampField: boolean
   ) => {
-    const key = JSON.stringify(getFieldsOptions) + requireTimestampField;
+    const projectRouting = this.cpsManager?.getProjectRouting();
+    const key = JSON.stringify({ getFieldsOptions, requireTimestampField, projectRouting });
 
     const getTimestampOptionsPromise = this.getTimestampOptionsForWildcard(
       getFieldsOptions,
@@ -423,5 +437,6 @@ export class DataViewEditorService {
     this.loadTimestampFieldsSub.unsubscribe();
     this.matchedIndicesForProviderSub.unsubscribe();
     this.rollupIndexForProviderSub.unsubscribe();
+    this.cpsProjectRoutingSub?.unsubscribe();
   };
 }

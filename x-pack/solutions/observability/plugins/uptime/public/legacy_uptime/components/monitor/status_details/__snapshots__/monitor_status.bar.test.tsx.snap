@@ -10,7 +10,7 @@ Array [
     </h2>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <dl
     class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"

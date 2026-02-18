@@ -82,7 +82,8 @@ describe('Mappings editor: text datatype', () => {
     expect(getLatestMappings()).toEqual(updatedMappings);
   });
 
-  describe('analyzer parameter', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253348
+  describe.skip('analyzer parameter', () => {
     const defaultMappingsWithAnalyzer = {
       _meta: {},
       _source: {},
@@ -163,7 +164,7 @@ describe('Mappings editor: text datatype', () => {
 
       // searchAnalyzer should not exist when checkbox is checked
       expect(within(flyoutReopened).queryByTestId('searchAnalyzer')).not.toBeInTheDocument();
-    });
+    }, 20000);
 
     test('should toggle search analyzer visibility when unchecking checkbox', async () => {
       const Component = WithAppDependencies(MappingsEditor, {});

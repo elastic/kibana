@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
-      await dashboard.expectUnsavedChangesBadge();
+      await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
       expect(await pieChart.getPieSliceCount()).to.be(4);
       await dashboard.clickDiscardChanges();
     });
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(4);
       });
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         expect(await dashboardControls.optionsListGetSelectionsString(optionsListId)).to.be('Any');
       });
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(4);
       });
 
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         expect(
           await dashboardControls.rangeSliderGetLowerBoundAttribute(rangeSliderId, 'value')
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await pieChart.expectEmptyPieChart();
       });
 
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
         expect(await pieChart.getPieSliceCount()).to.be(5);
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);

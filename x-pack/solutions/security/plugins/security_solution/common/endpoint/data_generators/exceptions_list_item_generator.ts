@@ -13,7 +13,7 @@ import {
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
@@ -149,7 +149,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): ExceptionListItemSchema {
     return this.generate({
       name: `Endpoint exception (${this.randomString(5)})`,
-      list_id: ENDPOINT_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       entries: this.randomEndpointExceptionEntries(1),
       tags: [],
       ...overrides,

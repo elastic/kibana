@@ -50,7 +50,15 @@ interface MockCallToolResult {
 
 interface MockCallToolError {
   isError: true;
-  error: string | { message?: string; code?: number };
+  content: Array<
+    | {
+        type: string;
+        text?: string | null | number | object;
+        [key: string]: unknown;
+      }
+    | null
+    | undefined
+  >;
 }
 
 type MockCallToolResponse = MockCallToolResult | MockCallToolError;
@@ -704,24 +712,42 @@ describe('McpClient', () => {
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: 'Tool execution failed',
+        content: [{ type: 'text', text: 'Tool execution failed' }],
       });
 
-      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: Tool execution failed'
+      await expect(
+        client.callTool({ name: 'test-tool', arguments: { arg1: 'value1' } })
+      ).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{"arg1":"value1"}': Tool execution failed`
       );
     });
 
-    it('handles error response with non-string error', async () => {
+    it('throws error with multiple text parts joined by newlines', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: { message: 'Error message', code: 500 },
+        content: [
+          { type: 'text', text: 'Error line 1' },
+          { type: 'text', text: 'Error line 2' },
+        ],
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: [object Object]'
+        `Error calling tool 'test-tool' with arguments '{}': Error line 1\nError line 2`
+      );
+    });
+
+    it('throws error with empty message when no text content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: true,
+        content: [{ type: 'image', data: 'base64data' }],
+      });
+
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{}': `
       );
     });
 

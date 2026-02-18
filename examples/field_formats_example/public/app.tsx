@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiCallOut,
@@ -62,6 +63,9 @@ const UsingAnExistingFieldFormatExample: React.FC<{ deps: Deps }> = (props) => {
       <EuiSpacer size={'s'} />
       <EuiBasicTable
         data-test-subj={'example1 sample table'}
+        tableCaption={i18n.translate('fieldFormatsExamples.existingFieldFormatSampleTableCaption', {
+          defaultMessage: 'Sample values formatted with the existing field format.',
+        })}
         items={sample}
         columns={[
           {
@@ -102,6 +106,9 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
       <EuiBasicTable
         items={sample}
         data-test-subj={'example2 sample table'}
+        tableCaption={i18n.translate('fieldFormatsExamples.customFieldFormatSampleTableCaption', {
+          defaultMessage: 'Sample values formatted with the custom field format.',
+        })}
         columns={[
           {
             field: 'raw',

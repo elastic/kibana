@@ -24,6 +24,7 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -45,6 +46,7 @@ const createStartContract = (): VisualizationsStart => ({
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
   showNewVisModal: jest.fn(),
+  findListItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
 });
 
 const createInstance = async () => {
@@ -83,6 +85,7 @@ const createInstance = async () => {
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       usageCollection: {
         reportUiCounter: jest.fn(),
       },

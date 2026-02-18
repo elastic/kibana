@@ -9,7 +9,7 @@
   "plugin": {
     "id": "dashboardEnhanced",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
       "xpack",
       "dashboardEnhanced"
@@ -24,11 +24,8 @@
     ],
     "requiredBundles": [
       "dashboard",
-      "embeddable",
       "embeddableEnhanced",
       "kibanaUtils",
-      "imageEmbeddable",
-      "presentationUtil",
       "uiActions"
     ]
   }

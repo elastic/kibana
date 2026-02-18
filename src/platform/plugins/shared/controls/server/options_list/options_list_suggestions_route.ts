@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import type { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
@@ -21,7 +21,7 @@ import { getSuggestionAggregationBuilder } from './suggestion_queries';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
-  getAutocompleteSettings: UnifiedSearchPluginSetup['autocomplete']['getAutocompleteSettings']
+  getAutocompleteSettings: KqlPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = http.createRouter();
 

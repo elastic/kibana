@@ -7,12 +7,12 @@
 
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE, getSLOResponseSchema } from '@kbn/slo-schema';
-import type { SloDefinitionClient } from './slo_definition_client';
+import type { SLODefinitionClient } from './slo_definition_client';
 import type { SummaryClient } from './summary_client';
 
 export class GetSLO {
   constructor(
-    private definitionClient: SloDefinitionClient,
+    private definitionClient: SLODefinitionClient,
     private summaryClient: SummaryClient
   ) {}
 

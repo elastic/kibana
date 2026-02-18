@@ -70,7 +70,11 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   }
 
   // Enrich context with expression type and signature analysis
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const signatureAnalysis = functionParameterContext
     ? SignatureAnalyzer.from(functionParameterContext)
     : null;

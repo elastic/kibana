@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { IngestionRatePanel } from '../common/ingestion_rate_panel';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
@@ -41,61 +32,25 @@ export function IngestionRate({
   const { isServerless } = useKibana();
 
   return (
-    <>
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={3}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h5>
-                    {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
-                      defaultMessage: 'Ingestion over time',
-                    })}
-                  </h5>
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                {isLoadingStats && aggregations && <EuiLoadingSpinner size="s" />}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={{ width: '100%', minHeight: '250px' }}
-        direction="column"
-        gutterSize="xs"
-      >
-        {isServerless ? (
-          <ChartBarSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-            statsError={statsError}
-            aggregations={aggregations}
-          />
-        ) : (
-          <ChartBarPhasesSeries
-            definition={definition}
-            stats={stats}
-            timeState={timeState}
-            isLoadingStats={isLoadingStats}
-            statsError={statsError}
-          />
-        )}
-      </EuiFlexGroup>
-    </>
+    <IngestionRatePanel isLoading={isLoadingStats} hasAggregations={Boolean(aggregations)}>
+      {isServerless ? (
+        <ChartBarSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+          statsError={statsError}
+          aggregations={aggregations}
+        />
+      ) : (
+        <ChartBarPhasesSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+          statsError={statsError}
+        />
+      )}
+    </IngestionRatePanel>
   );
 }

@@ -21,7 +21,6 @@
  * ```
  */
 
-import fetch from 'node-fetch';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import chalk from 'chalk';

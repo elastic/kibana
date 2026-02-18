@@ -18,7 +18,7 @@ import { getStorageExplorerFeedbackHref } from '../../../app/storage_explorer/ge
 const APM_FEEDBACK_LINK = 'https://ela.st/services-feedback';
 
 export function GiveFeedbackHeaderLink() {
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
   const location = useLocation();
   const { pathname } = window.location;
   const { featureFlags } = config;
@@ -28,6 +28,9 @@ export function GiveFeedbackHeaderLink() {
   const sanitizedPath = getPathForFeedback(pathname);
   const isStorageExplorerFeedback =
     location.pathname.includes('/storage-explorer') && featureFlags.storageExplorerAvailable;
+  const isFeedbackEnabled = core.notifications.feedback.isEnabled();
+
+  if (!isFeedbackEnabled) return null;
 
   return isStorageExplorerFeedback ? (
     <EuiHeaderLink

@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
@@ -81,6 +82,7 @@ const AgentSelectPopoverButton: React.FC<{
 };
 
 const AgentListFooter: React.FC = () => {
+  const { manageAgents } = useUiPrivileges();
   const { createAgentBuilderUrl } = useNavigation();
   const createAgentHref = createAgentBuilderUrl(appPaths.agents.new);
   const manageAgentsHref = createAgentBuilderUrl(appPaths.agents.list);
@@ -94,6 +96,7 @@ const AgentListFooter: React.FC = () => {
             color="text"
             aria-label={manageAgentsAriaLabel}
             href={manageAgentsHref}
+            disabled={!manageAgents}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
@@ -107,6 +110,7 @@ const AgentListFooter: React.FC = () => {
             iconType="plus"
             aria-label={createAgentAriaLabel}
             href={createAgentHref}
+            disabled={!manageAgents}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.createNewAgent"

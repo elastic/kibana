@@ -7,9 +7,11 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, HookLifecycle } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
+  AfterToolCallHookContext,
+  BeforeToolCallHookContext,
   RunToolReturn,
   ToolHandlerContext,
   ToolHandlerReturn,
@@ -18,13 +20,21 @@ import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
 } from '@kbn/agent-builder-server/runner';
+import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
-import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
+import {
+  forkContextForToolRun,
+  createToolEventEmitter,
+  createToolProvider,
+  createSkillsService,
+} from './utils';
+import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
 
 export const runTool = async <TParams = Record<string, unknown>>({
@@ -62,11 +72,54 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { tool, toolParams } = toolExecutionParams;
+  const {
+    tool,
+    toolParams: initialToolParams,
+    toolCallId = generateFakeToolCallId(),
+    source = 'unknown',
+  } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
   const manager = parentManager.createChild(context);
-  const { resultStore } = manager.deps;
+  const { resultStore, promptManager } = manager.deps;
+
+  let toolParams = initialToolParams as unknown as Record<string, unknown>;
+  const hooks = manager.deps.hooks;
+
+  const hookContext: BeforeToolCallHookContext = {
+    toolId: tool.id,
+    toolCallId,
+    toolParams,
+    source,
+    request: manager.deps.request,
+    abortSignal: manager.deps.abortSignal,
+  };
+  const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
+  toolParams = beforeToolHooksResult.toolParams;
+
+  // only perform pre-call confirmation prompt when the agent is calling the tool
+  if (tool.confirmation && source === 'agent') {
+    if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
+      const confirmationId = toolConfirmationId({
+        toolId: tool.id,
+        toolCallId,
+        policyMode: tool.confirmation.askUser,
+      });
+      const { status: confirmStatus } = promptManager.getConfirmationStatus(confirmationId);
+
+      if (confirmStatus === ConfirmationStatus.rejected) {
+        return {
+          results: [createErrorResult('User denied access to this tool.')],
+        };
+      }
+
+      if (confirmStatus === ConfirmationStatus.unprompted) {
+        return {
+          prompt: createToolConfirmationPrompt({ confirmationId, tool }),
+        };
+      }
+    }
+  }
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
@@ -81,13 +134,21 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams: { ...toolExecutionParams, toolId: tool.id },
+        toolExecutionParams: {
+          ...toolExecutionParams,
+          toolId: tool.id,
+          toolParams: toolParams as TParams,
+        },
         manager,
       });
 
       try {
         const toolHandler = await tool.getHandler();
-        return await toolHandler(validation.data as Record<string, any>, toolHandlerContext);
+        const result = await toolHandler(
+          validation.data as Record<string, unknown>,
+          toolHandlerContext
+        );
+        return result;
       } catch (err) {
         return {
           results: [createErrorResult(err.message)],
@@ -96,6 +157,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
+  let runToolReturn: RunToolReturn;
   if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
       (result) =>
@@ -104,19 +166,34 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           tool_result_id: result.tool_result_id ?? getToolResultId(),
         } as ToolResult)
     );
-
-    resultsWithIds.forEach((result) => {
-      resultStore.add(result);
-    });
-
-    return {
-      results: resultsWithIds,
-    };
+    runToolReturn = { results: resultsWithIds };
   } else {
-    return {
-      prompt: toolReturn.prompt,
-    };
+    runToolReturn = { prompt: toolReturn.prompt };
   }
+
+  const postContext: AfterToolCallHookContext = {
+    toolId: tool.id,
+    toolCallId,
+    toolParams,
+    source,
+    request: manager.deps.request,
+    toolReturn: runToolReturn,
+    abortSignal: manager.deps.abortSignal,
+  };
+  const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
+  runToolReturn = afterToolHooksResult.toolReturn;
+
+  if (runToolReturn.results) {
+    runToolReturn.results.forEach((result) => {
+      resultStore.add({
+        tool_id: tool.id,
+        tool_call_id: toolCallId,
+        result,
+      });
+    });
+  }
+
+  return runToolReturn;
 };
 
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({
@@ -130,13 +207,18 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   const {
     request,
     elasticsearch,
+    savedObjects,
     spaces,
     modelProvider,
     toolsService,
     resultStore,
+    attachmentStateManager,
     logger,
     promptManager,
     stateManager,
+    filestore,
+    skillServiceStart,
+    toolManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
@@ -144,6 +226,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     spaceId,
     logger,
     esClient: elasticsearch.client.asScoped(request),
+    savedObjectsClient: savedObjects.getScopedClient(request),
     modelProvider,
     runner: manager.getRunner(),
     toolProvider: createToolProvider({
@@ -158,6 +241,16 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
+    attachments: attachmentStateManager,
+    skills: createSkillsService({
+      skillServiceStart,
+      toolsServiceStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    toolManager,
+    filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

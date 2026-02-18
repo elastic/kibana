@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
@@ -39,4 +40,5 @@ export interface SloDetailsHistoryLocatorParams extends SerializableRecord {
 
 export interface SloListLocatorParams extends SerializableRecord {
   kqlQuery?: string;
+  filters?: Filter[];
 }

@@ -21,7 +21,10 @@
       "target": 0.95
     },
     "tags": ["nginx"],
-    "groupBy": ["url.domain"]
+    "groupBy": ["url.domain"],
+    "artifacts": {
+      "dashboards": [{ "id": "nginx-overview-dashboard" }]
+    }
   },
   "id": "sample_slo_template",
   "type": "slo_template"

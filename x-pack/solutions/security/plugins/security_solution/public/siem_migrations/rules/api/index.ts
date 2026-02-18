@@ -184,6 +184,7 @@ export const upsertMigrationResources = async ({
 export interface StartRuleMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
+
   settings: {
     /** The connector id to use for the migration */
     connectorId: string;

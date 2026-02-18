@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createTopNav, createTopNavBeta } from './create_top_nav_menu';
+export { createTopNav } from './create_top_nav_menu';
 export type { TopNavMenuProps } from './top_nav_menu';
 export { TopNavMenu } from './top_nav_menu';
 export type { TopNavMenuData } from './top_nav_menu_data';

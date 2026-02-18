@@ -16,6 +16,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
   return {
     authc: {
       getCurrentUser: () => null,
+      getRedactedSessionId: () => Promise.resolve(undefined),
       apiKeys: {
         areAPIKeysEnabled: () => Promise.resolve(false),
         areCrossClusterAPIKeysEnabled: () => Promise.resolve(false),
@@ -25,6 +26,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         validate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidateAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
+        uiam: null,
       },
     },
     audit: {

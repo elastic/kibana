@@ -96,6 +96,7 @@ export async function getUnprocessedOtelErrors({
           message: event[EXCEPTION_MESSAGE],
         },
       },
+      index: hit._index,
     };
 
     return error;

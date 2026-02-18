@@ -27,11 +27,7 @@ type HostMetricsField =
   | 'system.memory.used.pct';
 
 const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
-  sourceFilter: {
-    term: {
-      'event.module': 'system',
-    },
-  },
+  sourceFilter: `event.module: "system"`,
   groupByField: 'host.name',
   metricsMap: {
     'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
@@ -60,7 +56,7 @@ export interface HostNodeMetricsRow {
 
 export function useHostMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -70,8 +66,8 @@ export function useHostMetricsTable({
   });
 
   const { options: hostMetricsOptions } = useMemo(
-    () => metricsToApiOptions(hostsMetricsQueryConfig, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(hostsMetricsQueryConfig, kuery),
+    [kuery]
   );
 
   const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({

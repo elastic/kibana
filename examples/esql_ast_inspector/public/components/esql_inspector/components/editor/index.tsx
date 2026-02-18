@@ -37,8 +37,8 @@ export const Editor: React.FC = () => {
           <span
             style={{
               display: 'inline-block',
-              margin: -4,
-              padding: 4,
+              margin: -2,
+              padding: 2,
               borderRadius: 4,
               background: 'rgb(190, 237, 224)',
             }}
@@ -62,8 +62,8 @@ export const Editor: React.FC = () => {
             <span
               style={{
                 display: 'inline-block',
-                margin: -4,
-                padding: 4,
+                margin: -2,
+                padding: 2,
                 borderRadius: 4,
                 background: 'rgb(255, 243, 191)',
               }}
@@ -91,8 +91,8 @@ export const Editor: React.FC = () => {
         <span
           style={{
             display: 'inline-block',
-            margin: -4,
-            padding: 4,
+            margin: -2,
+            padding: 2,
             borderRadius: 4,
             background: 'rgb(255, 243, 191)',
           }}

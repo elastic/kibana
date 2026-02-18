@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isFunctionExpression, isLiteral } from '../../../../../ast/is';
+import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '../../../../../ast/is';
 import { within } from '../../../../../ast/location';
 import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../types';
 import type { ESQLColumnData } from '../../../../registry/types';
@@ -20,12 +20,15 @@ export type ExpressionPosition =
   | 'after_not'
   | 'after_operator'
   | 'after_complete'
+  | 'after_cast'
   | 'empty_expression';
 
 /** Matches " not" at end of string (case insensitive) */
 const NOT_PATTERN = / not$/i;
 /** Matches all regex special characters: . * + ? ^ $ { } ( ) | [ ] \ */
 const REGEX_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
+/** Matches "::" or "::bool" at end of string */
+const INLINE_CAST_PATTERN = /::\s*([\w]*)$/;
 
 /** Determines the position of the cursor within an expression */
 export function getPosition(
@@ -44,6 +47,10 @@ export function getPosition(
     return 'after_not';
   }
 
+  if (INLINE_CAST_PATTERN.test(innerText)) {
+    return 'after_cast';
+  }
+
   if (!expressionRoot) {
     return 'empty_expression';
   }
@@ -56,6 +63,10 @@ export function getPosition(
     if (!endsWithColumnName) {
       return 'after_complete';
     }
+  }
+
+  if (isInlineCast(expressionRoot) && !expressionRoot.incomplete) {
+    return 'after_complete';
   }
 
   // Function expression (operators or variadic functions like CONCAT)

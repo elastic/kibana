@@ -17,5 +17,5 @@ export type {
   ControlPanelsState,
   ControlPanelState,
 } from './types';
-export { apiHasEditorConfig } from './types';
+export { isControlGroupRendererApi, apiHasEditorConfig } from './utils';
 export { controlGroupStateBuilder } from './control_group_state_builder';

@@ -50,6 +50,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
       size="s"
       aria-labelledby={titleId}
       data-test-subj="diagnosticsFlyout"
+      session="start"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

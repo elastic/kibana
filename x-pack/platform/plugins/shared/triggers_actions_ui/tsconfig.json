@@ -77,8 +77,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-browser",
-    "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
     "@kbn/esql-language",
@@ -92,7 +90,10 @@
     "@kbn/react-query",
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/actions-types"
+    "@kbn/actions-types",
+    "@kbn/kql",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/deeplinks-observability",
   ],
   "exclude": ["target/**/*"]
 }

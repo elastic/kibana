@@ -15,7 +15,7 @@ export const fieldHistogramsRequestSchema = schema.object({
   /** Query to match documents in the index. */
   query: schema.any(),
   /** The fields to return histogram data. */
-  fields: schema.arrayOf(schema.any()),
+  fields: schema.arrayOf(schema.any(), { maxSize: 1000 }),
   /** Optional runtime fields */
   runtimeMappings: runtimeMappingsSchema,
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */

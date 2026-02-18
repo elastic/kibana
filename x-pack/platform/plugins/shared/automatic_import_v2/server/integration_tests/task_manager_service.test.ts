@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClient } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClient,
+} from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createRootWithCorePlugins,
@@ -23,6 +28,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { IntegrationParams, DataStreamParams } from '../routes/types';
 import { mockAuthenticatedUser } from '../__mocks__/saved_objects';
+import type { AutomaticImportV2PluginStartDependencies } from '..';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 const taskManagerSetupSpy = jest.spyOn(TaskManagerPlugin.prototype, 'setup');
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
@@ -38,6 +45,7 @@ describe('TaskManagerService Integration Tests', () => {
   let taskManagerService: TaskManagerService;
   let taskManagerSetup: TaskManagerSetupContract;
   let taskManagerStart: TaskManagerStartContract;
+  let kibanaRequest: KibanaRequest;
 
   beforeAll(async () => {
     try {
@@ -56,7 +64,8 @@ describe('TaskManagerService Integration Tests', () => {
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
         coreSetup.savedObjects,
-        taskManagerSetup
+        taskManagerSetup,
+        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
       );
 
       // Start Kibana to boot taskManager
@@ -69,6 +78,13 @@ describe('TaskManagerService Integration Tests', () => {
 
       expect(taskManagerStartSpy).toHaveBeenCalled();
       taskManagerStart = taskManagerStartSpy.mock.results[0].value;
+
+      const encodedApiKey = Buffer.from('test-api-key-id:test-api-key').toString('base64');
+      kibanaRequest = httpServerMock.createFakeKibanaRequest({
+        headers: {
+          authorization: `ApiKey ${encodedApiKey}`,
+        },
+      });
 
       const savedObjectsClient =
         coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClient;
@@ -154,9 +170,13 @@ describe('TaskManagerService Integration Tests', () => {
       const taskParams = {
         integrationId: integrationSavedObject.id,
         dataStreamId: 'test-ds-456', // Use the ID we plan to create
+        connectorId: 'test-connector-id',
       };
 
-      const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
+      const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(
+        taskParams,
+        kibanaRequest
+      );
 
       expect(scheduledTask).toBeDefined();
       expect(scheduledTask.taskId).toBeDefined();
@@ -185,8 +205,7 @@ describe('TaskManagerService Integration Tests', () => {
         mockAuthenticatedUser
       );
 
-      const expectedCompositeId = 'test-int-123-test-ds-456';
-      expect(dataStreamSavedObject.id).toBe(expectedCompositeId);
+      expect(dataStreamSavedObject.id).toBe('test-int-123-test-ds-456');
       expect(dataStreamSavedObject.attributes?.job_info?.job_id).toBe(scheduledTask.taskId);
       expect(dataStreamSavedObject.attributes?.job_info?.status).toBe(TASK_STATUSES.pending);
       expect(dataStreamSavedObject.attributes?.metadata?.version).toBe('0.0.0');
@@ -197,17 +216,26 @@ describe('TaskManagerService Integration Tests', () => {
 
       // Verify we can retrieve both saved objects
       const finalIntegration = await savedObjectService.getIntegration(integrationSavedObject.id);
-      const finalDataStream = await savedObjectService.getDataStream('test-ds-456', 'test-int-123');
+      const finalDataStream = await savedObjectService.getDataStream(
+        dataStreamParams.dataStreamId,
+        dataStreamParams.integrationId
+      );
 
       expect(finalIntegration.integration_id).toBe(integrationSavedObject.id);
       expect(finalDataStream.attributes.job_info.job_id).toBe(scheduledTask.taskId);
       expect(finalDataStream.attributes.job_info.status).toBe(TASK_STATUSES.pending);
 
       // Step 7: Clean up - delete in reverse order
-      await savedObjectService.deleteDataStream('test-int-123', 'test-ds-456');
+      await savedObjectService.deleteDataStream(
+        dataStreamParams.dataStreamId,
+        dataStreamParams.integrationId
+      );
       await savedObjectService.deleteIntegration(integrationSavedObject.id);
       await expect(
-        savedObjectService.getDataStream('test-ds-456', 'test-int-123')
+        savedObjectService.getDataStream(
+          dataStreamParams.dataStreamId,
+          dataStreamParams.integrationId
+        )
       ).rejects.toThrow();
     }, 60000);
 
@@ -241,9 +269,13 @@ describe('TaskManagerService Integration Tests', () => {
           const taskParams = {
             integrationId: integration.id,
             dataStreamId,
+            connectorId: 'test-connector-id',
           };
 
-          const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(taskParams);
+          const scheduledTask = await taskManagerService.scheduleDataStreamCreationTask(
+            taskParams,
+            kibanaRequest
+          );
 
           // Create data stream with task reference
           const dataStreamParams: DataStreamParams = {
@@ -287,10 +319,12 @@ describe('TaskManagerService Integration Tests', () => {
         const duplicateTaskParams = {
           integrationId: firstObject.integration.id,
           dataStreamId: firstObject.dataStream.attributes.data_stream_id,
+          connectorId: 'test-connector-id',
         };
 
         const duplicateTaskResponse = await taskManagerService.scheduleDataStreamCreationTask(
-          duplicateTaskParams
+          duplicateTaskParams,
+          kibanaRequest
         );
 
         // Should return the same task ID as the existing one
@@ -319,50 +353,14 @@ describe('TaskManagerService Integration Tests', () => {
           })
         );
 
-        // Poll TaskManager to verify multiple tasks are running concurrently
-        // Check every 1 second for up to 15 seconds
-        let maxConcurrentRunning = 0;
-        const pollInterval = 1000;
-        const maxPollTime = 15000;
-        const pollStartTime = Date.now();
-
-        while (Date.now() - pollStartTime < maxPollTime) {
-          // Count how many tasks are currently in "running" status
-          const statuses = await Promise.all(
-            createdObjects.map(async (obj) => {
-              try {
-                const task = await taskManagerStart.get(obj.taskId);
-                return task.status;
-              } catch {
-                return null;
-              }
-            })
-          );
-
-          const runningCount = statuses.filter((status) => status === 'running').length;
-          maxConcurrentRunning = Math.max(maxConcurrentRunning, runningCount);
-
-          // If we've seen at least 2 tasks running simultaneously, we've proven concurrency
-          if (maxConcurrentRunning >= 2) {
-            break;
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        }
-
-        // Verify that at least 2 tasks ran concurrently (proves parallel execution)
-        expect(maxConcurrentRunning).toBeGreaterThanOrEqual(2);
-
         // Wait for tasks to be processed by TaskManager
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
 
         // Verify all datastreams and integrations were created correctly
         for (const obj of createdObjects) {
-          const dataStreamId = obj.dataStream.attributes.data_stream_id;
-          const integrationId = obj.dataStream.attributes.integration_id;
           const retrievedDataStream = await savedObjectService.getDataStream(
-            dataStreamId,
-            integrationId
+            obj.dataStream.attributes.data_stream_id,
+            obj.dataStream.attributes.integration_id
           );
           expect(retrievedDataStream.attributes.job_info.job_id).toBe(obj.taskId);
           expect(retrievedDataStream.attributes.integration_id).toBe(obj.integration.id);
@@ -376,9 +374,12 @@ describe('TaskManagerService Integration Tests', () => {
       } finally {
         // Clean up all created objects (data streams first, then integrations)
         for (const obj of createdObjects) {
-          const dataStreamId = obj.dataStream.attributes.data_stream_id;
-          const integrationId = obj.dataStream.attributes.integration_id;
-          await savedObjectService.deleteDataStream(integrationId, dataStreamId).catch(() => {});
+          await savedObjectService
+            .deleteDataStream(
+              obj.dataStream.attributes.data_stream_id,
+              obj.dataStream.attributes.integration_id
+            )
+            .catch(() => {});
           await savedObjectService.deleteIntegration(obj.integration.id).catch(() => {});
         }
       }

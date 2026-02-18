@@ -32,6 +32,9 @@ describe('Attachment Routes', () => {
       conversations: {
         getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
       };
+      attachments: {
+        getTypeDefinition: jest.MockedFunction<(type: string) => any>;
+      };
     }
   >;
   let mockResponse: {
@@ -41,6 +44,9 @@ describe('Attachment Routes', () => {
     conflict: jest.MockedFunction<(params?: any) => any>;
     customError: jest.MockedFunction<(params?: any) => any>;
     forbidden: jest.MockedFunction<(params?: any) => any>;
+  };
+  let mockCoreSetup: {
+    getStartServices: jest.MockedFunction<() => Promise<any[]>>;
   };
   let routeHandlers: Record<string, { config: any; handler: Function }>;
 
@@ -91,6 +97,13 @@ describe('Attachment Routes', () => {
     mockGetInternalServices = jest.fn().mockReturnValue({
       conversations: {
         getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
+      },
+      attachments: {
+        getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        })),
       },
     });
 
@@ -166,10 +179,21 @@ describe('Attachment Routes', () => {
       forbidden: jest.fn((params) => ({ type: 'forbidden', ...params })),
     };
 
+    mockCoreSetup = {
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          savedObjects: {
+            getScopedClient: jest.fn().mockReturnValue({}),
+          },
+        },
+      ]),
+    };
+
     // Register routes
     registerAttachmentRoutes({
       router: mockRouter,
       getInternalServices: mockGetInternalServices,
+      coreSetup: mockCoreSetup,
       logger: mockLogger,
     } as unknown as RouteDependencies);
   });
@@ -186,6 +210,11 @@ describe('Attachment Routes', () => {
       license: {
         status: 'active',
         hasAtLeast: jest.fn().mockReturnValue(true),
+      },
+    }),
+    agentBuilder: Promise.resolve({
+      spaces: {
+        getSpaceId: jest.fn().mockReturnValue('default'),
       },
     }),
   });

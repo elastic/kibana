@@ -103,7 +103,10 @@ describe('AddPrebuiltRulesTable', () => {
   it('disables `Install all` button if user has no write permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
     });
 
     render(
@@ -124,7 +127,10 @@ describe('AddPrebuiltRulesTable', () => {
   it('disables `Install all` button if prebuilt package is being installed', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
     });
 
     (useIsUpgradingSecurityPackages as jest.Mock).mockReturnValueOnce(true);
@@ -147,7 +153,10 @@ describe('AddPrebuiltRulesTable', () => {
   it('enables Install all` button when user has permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
     });
 
     render(
@@ -173,7 +182,10 @@ describe('AddPrebuiltRulesTable', () => {
     async (_permissions, canEdit) => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
-        rulesPrivileges: { read: true, edit: canEdit },
+        rulesPrivileges: {
+          ...initialUserPrivilegesState().rulesPrivileges,
+          rules: { read: true, edit: canEdit },
+        },
       });
 
       (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
@@ -210,7 +222,10 @@ describe('AddPrebuiltRulesTable', () => {
   it('does not render `Install rule` on rule rows for users with no write permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
     });
 
     const id = 'rule-1';
@@ -258,7 +273,10 @@ describe('AddPrebuiltRulesTable', () => {
   it('renders `Install rule` on rule rows for users with write permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
     });
 
     const id = 'rule-1';

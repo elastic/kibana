@@ -182,6 +182,18 @@ describe('map expression', () => {
   test('comments around multiple map fields', () => {
     assertPrint('ROW F(0, /*1*/ {/*2*/ "a": /*3*/ "b" /*4*/, /*5*/ "c": /*6*/ "d" /*7*/} /*8*/)');
   });
+
+  describe('representation: assignment', () => {
+    test('one entry', () => {
+      assertPrint('PROMQL /*0*/ index /*1*/ = /*2*/ my_index /*3*/ bytes[5m]');
+    });
+
+    test('two entries', () => {
+      assertPrint(
+        'PROMQL /*0*/ index /*1*/ = /*2*/ my_index /*3*/ /*4*/ a /*5*/ = /*6*/ b /*7*/ bytes[5m]'
+      );
+    });
+  });
 });
 
 describe('binary expressions', () => {
@@ -305,6 +317,14 @@ describe('commands', () => {
     test('comments around all elements, two fields', () => {
       assertPrint(
         'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ {"id1": "value1"} /*8*/'
+      );
+    });
+  });
+
+  describe('MMR', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ MMR /*1*/ ([0.5, 0.4, 0.3, 0.2])::DENSE_VECTOR /*2*/ ON /*3*/ genre /*4*/ LIMIT /*5*/ 10 /*6*/ WITH /*7*/ {"lambda": 0.5} /*8*/'
       );
     });
   });

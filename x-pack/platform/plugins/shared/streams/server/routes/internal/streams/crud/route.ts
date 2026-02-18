@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -36,10 +37,25 @@ export const listStreamsRoute = createServerRoute({
     request,
     getScopedClients,
   }): Promise<{ streams: ListStreamDetail[]; canReadFailureStore: boolean }> => {
-    const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
-    const streams = await streamsClient.listStreamsWithDataStreamExistence();
+    const { streamsClient, scopedClusterClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
-    const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
+    const [allStreams, isQueryStreamsEnabled] = await Promise.all([
+      streamsClient.listStreamsWithDataStreamExistence(),
+      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
+    ]);
+
+    const availableStreams = allStreams.filter(({ stream }) => {
+      const isQueryStream = Streams.QueryStream.Definition.is(stream);
+
+      // Only include query streams if query streams are enabled
+      return !isQueryStream || (isQueryStream && isQueryStreamsEnabled);
+    });
+
+    const streamNames = availableStreams
+      .filter(({ exists }) => exists)
+      .map(({ stream }) => stream.name);
 
     let canReadFailureStore = true;
 
@@ -59,20 +75,18 @@ export const listStreamsRoute = createServerRoute({
       return dataStreamsChunk;
     });
 
-    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
-      if (Streams.GroupStream.Definition.is(stream)) {
-        acc.push({ stream });
-        return acc;
+    const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
+      if (Streams.QueryStream.Definition.is(stream)) {
+        return { stream };
       }
 
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
-      acc.push({
+      return {
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
-      });
-      return acc;
-    }, []);
+      };
+    });
 
     return { streams: enrichedStreams, canReadFailureStore };
   },
@@ -104,14 +118,6 @@ export const streamDetailRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
-
-    if (Streams.GroupStream.Definition.is(streamEntity)) {
-      return {
-        details: {
-          count: 0,
-        },
-      };
-    }
 
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({

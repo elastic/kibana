@@ -206,6 +206,123 @@ describe('global query string', () => {
     });
   });
 
+  describe('useGlobalQueryString with overrides', () => {
+    it.each([
+      ['undefined', undefined],
+      ['empty object', {}],
+    ])('returns global query string without modifications when overrides is %s', (_, overrides) => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        globalUrlParam: {
+          testNumber: 123,
+          testObject: { testKey: 321 },
+        },
+      });
+      const wrapper = ({ children }: React.PropsWithChildren) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      );
+
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
+        wrapper,
+      });
+
+      expect(result.current).toEqual(`testNumber=123&testObject=(testKey:321)`);
+    });
+
+    it('overrides existing global URL param with provided override value', () => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        globalUrlParam: {
+          timeline: { isOpen: true },
+          testNumber: 123,
+        },
+      });
+      const wrapper = ({ children }: React.PropsWithChildren) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      );
+
+      const overrides = { timeline: { isOpen: false } };
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
+        wrapper,
+      });
+
+      expect(result.current).toContain(`testNumber=123`);
+      expect(result.current).toContain(`timeline=(isOpen:!f)`);
+    });
+
+    it('overrides multiple existing global URL params', () => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        globalUrlParam: {
+          timeline: { isOpen: true },
+          testNumber: 123,
+          testObject: { key: 'original' },
+        },
+      });
+      const wrapper = ({ children }: React.PropsWithChildren) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      );
+
+      const overrides = {
+        timeline: { isOpen: false },
+        testObject: { key: 'overridden' },
+      };
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
+        wrapper,
+      });
+
+      expect(result.current).toContain(`testNumber=123`);
+      expect(result.current).toContain(`testObject=(key:overridden)`);
+      expect(result.current).toContain(`timeline=(isOpen:!f)`);
+    });
+
+    it('does not add override if key does not exist in global URL params', () => {
+      const store = createMockStore({
+        ...mockGlobalState,
+        globalUrlParam: {
+          testNumber: 123,
+        },
+      });
+      const wrapper = ({ children }: React.PropsWithChildren) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      );
+
+      const overrides = { nonExistentKey: { value: 'test' } };
+      const { result } = renderHook(() => useGlobalQueryString(overrides), {
+        wrapper,
+      });
+
+      expect(result.current).toEqual(`testNumber=123`);
+    });
+
+    it.each([
+      ['null value', 'originalValue', null],
+      ['empty object', { value: 'original' }, {}],
+      ['empty array', ['item1', 'item2'], []],
+    ])(
+      'excludes parameter from query string when override is %s',
+      (_, originalValue, overrideValue) => {
+        const store = createMockStore({
+          ...mockGlobalState,
+          globalUrlParam: {
+            testKey: originalValue,
+            otherKey: 123,
+          },
+        });
+        const wrapper = ({ children }: React.PropsWithChildren) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        );
+
+        const overrides = { testKey: overrideValue };
+        const { result } = renderHook(() => useGlobalQueryString(overrides), {
+          wrapper,
+        });
+
+        expect(result.current).toEqual(`otherKey=123`);
+      }
+    );
+  });
+
   describe('useSyncGlobalQueryString', () => {
     it("doesn't delete other URL params when updating one", async () => {
       const urlParamKey = 'testKey';
@@ -219,6 +336,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: `firstKey=111&${urlParamKey}='${value}'&lastKey=999`,
+        state: '',
       });
     });
 
@@ -237,6 +355,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: `${urlParamKey1}='${value1}'&${urlParamKey2}='${value2}'`,
+        state: '',
       });
     });
 
@@ -251,6 +370,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: '',
+        state: '',
       });
     });
 
@@ -267,6 +387,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: '',
+        state: '',
       });
     });
 
@@ -320,7 +441,8 @@ describe('global query string', () => {
 
       await waitFor(() =>
         expect(mockHistory.replace).toHaveBeenCalledWith({
-          search: ``,
+          search: '',
+          state: '',
         })
       );
     });

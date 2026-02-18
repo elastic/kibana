@@ -14,12 +14,18 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
@@ -36,7 +42,7 @@ import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
@@ -44,6 +50,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
+import { OTHER_SERVICE_NAME } from '../../../shared/links/apm/max_groups_message';
 import { ListMetric } from '../../../shared/list_metric';
 import type {
   ITableColumn,
@@ -54,6 +61,15 @@ import type {
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
+import { SloStatusBadge } from '../../../shared/slo_status_badge';
+import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
+import { useServiceActions } from './service_actions';
+import {
+  APM_SLO_INDICATOR_TYPES,
+  type ApmIndicatorType,
+} from '../../../../../common/slo_indicator_types';
+import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -66,18 +82,22 @@ export function getServiceColumns({
   breakpoints,
   showHealthStatusColumn,
   showAlertsColumn,
+  showSlosColumn,
   link,
   serviceOverflowCount,
+  onSloBadgeClick,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
   showAlertsColumn: boolean;
+  showSlosColumn: boolean;
   comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
+  onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -130,6 +150,39 @@ export function getServiceColumns({
                     {alertsCount}
                   </EuiBadge>
                 </EuiToolTip>
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
+    ...(showSlosColumn
+      ? [
+          {
+            field: ServiceInventoryFieldName.SloStatus,
+            name: (
+              <ColumnHeaderWithTooltip
+                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
+                  defaultMessage: 'The status of APM SLOs for this service',
+                })}
+                label={i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
+                  defaultMessage: 'SLOs',
+                })}
+              />
+            ),
+            width: `${unit * 8}px`,
+            sortable: true,
+            render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
+              if (!sloStatus) {
+                return null;
+              }
+
+              return (
+                <SloStatusBadge
+                  sloStatus={sloStatus}
+                  sloCount={sloCount}
+                  serviceName={serviceName}
+                  onClick={() => onSloBadgeClick(serviceName, agentName)}
+                />
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -200,7 +253,7 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
               defaultMessage: 'Transaction type',
             }),
-            width: `${unit * 8}px`,
+            width: `${unit * 6}px`,
             sortable: true,
           },
         ]
@@ -293,6 +346,7 @@ interface Props {
   noItemsMessage?: React.ReactNode;
   displayHealthStatus: boolean;
   displayAlerts: boolean;
+  displaySlos: boolean;
   initialSortField: ServiceInventoryFieldName;
   initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
@@ -303,6 +357,7 @@ interface Props {
   onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
   onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 }
+
 export function ApmServicesTable({
   status,
   items,
@@ -311,6 +366,7 @@ export function ApmServicesTable({
   comparisonData,
   displayHealthStatus,
   displayAlerts,
+  displaySlos,
   initialSortField,
   initialSortDirection,
   initialPageSize,
@@ -322,16 +378,109 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
+  const { core, share } = useApmPluginContext();
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
-  const { kuery } = query;
+  const { kuery, environment } = query;
+
+  const { data: indexSettingsData = { apmIndexSettings: [] } } = useFetcher(
+    (_callApmApi, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+    [apmSourcesAccess]
+  );
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
+
+  const [alertFlyoutState, setAlertFlyoutState] = useState<{
+    isOpen: boolean;
+    ruleType: ApmRuleType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    ruleType: null,
+    serviceName: undefined,
+  });
+
+  const [sloFlyoutState, setSloFlyoutState] = useState<{
+    isOpen: boolean;
+    indicatorType: ApmIndicatorType | null;
+    serviceName: string | undefined;
+  }>({
+    isOpen: false,
+    indicatorType: null,
+    serviceName: undefined,
+  });
+
+  const openAlertFlyout = useCallback((ruleType: ApmRuleType, serviceName: string) => {
+    setAlertFlyoutState({
+      isOpen: true,
+      ruleType,
+      serviceName,
+    });
+  }, []);
+
+  const closeAlertFlyout = useCallback(() => {
+    setAlertFlyoutState({
+      isOpen: false,
+      ruleType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
+  const openSloFlyout = useCallback((indicatorType: ApmIndicatorType, serviceName: string) => {
+    setSloFlyoutState({
+      isOpen: true,
+      indicatorType,
+      serviceName,
+    });
+  }, []);
+
+  const closeSloFlyout = useCallback(() => {
+    setSloFlyoutState({
+      isOpen: false,
+      indicatorType: null,
+      serviceName: undefined,
+    });
+  }, []);
+
+  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
+    serviceName: string;
+    agentName?: AgentName;
+  } | null>(null);
+
+  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: AgentName) => {
+    setSloOverviewFlyout({ serviceName, agentName });
+  }, []);
+
+  const closeSloOverviewFlyout = useCallback(() => {
+    setSloOverviewFlyout(null);
+  }, []);
+
+  const CreateSloFlyout =
+    sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
+      ? slo?.getCreateSLOFormFlyout({
+          initialValues: {
+            name: `APM SLO for ${sloFlyoutState.serviceName}`,
+            indicator: {
+              type: sloFlyoutState.indicatorType,
+              params: {
+                service: sloFlyoutState.serviceName,
+                environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
+              },
+            },
+          },
+          onClose: closeSloFlyout,
+          formSettings: {
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+          },
+        })
+      : null;
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
@@ -343,8 +492,10 @@ export function ApmServicesTable({
       breakpoints,
       showHealthStatusColumn: displayHealthStatus,
       showAlertsColumn: displayAlerts,
+      showSlosColumn: displaySlos,
       link,
       serviceOverflowCount,
+      onSloBadgeClick: openSloOverviewFlyout,
     });
   }, [
     query,
@@ -354,8 +505,10 @@ export function ApmServicesTable({
     breakpoints,
     displayHealthStatus,
     displayAlerts,
+    displaySlos,
     link,
     serviceOverflowCount,
+    openSloOverviewFlyout,
   ]);
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
@@ -375,6 +528,42 @@ export function ApmServicesTable({
       techPreview: true,
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
+
+  const getDiscoverHref = useCallback(
+    (item: ServiceListItem, indexType: IndexType) => {
+      const esqlQuery = getESQLQuery({
+        indexType,
+        params: {
+          kuery,
+          serviceName: item.serviceName,
+          transactionType: indexType === 'traces' ? item.transactionType : undefined,
+          environment,
+        },
+        indexSettings: indexSettingsData.apmIndexSettings,
+      });
+
+      if (!esqlQuery) return undefined;
+
+      return discoverLocator?.getRedirectUrl({
+        timeRange: { from: query.rangeFrom, to: query.rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [
+      kuery,
+      environment,
+      indexSettingsData.apmIndexSettings,
+      query.rangeFrom,
+      query.rangeTo,
+      discoverLocator,
+    ]
+  );
+
+  const serviceActions = useServiceActions({
+    openAlertFlyout,
+    openSloFlyout,
+    getDiscoverHref,
+  });
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -432,8 +621,28 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
+          actions={serviceActions}
+          isActionsDisabled={(item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME}
         />
       </EuiFlexItem>
+      <AlertingFlyout
+        addFlyoutVisible={alertFlyoutState.isOpen}
+        setAddFlyoutVisibility={(visible) => {
+          if (!visible) {
+            closeAlertFlyout();
+          }
+        }}
+        ruleType={alertFlyoutState.ruleType}
+        serviceName={alertFlyoutState.serviceName}
+      />
+      {CreateSloFlyout}
+      {sloOverviewFlyout && (
+        <SloOverviewFlyout
+          serviceName={sloOverviewFlyout.serviceName}
+          agentName={sloOverviewFlyout.agentName}
+          onClose={closeSloOverviewFlyout}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

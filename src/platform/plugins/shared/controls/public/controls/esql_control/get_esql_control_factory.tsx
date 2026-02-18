@@ -14,10 +14,10 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   type PublishingSubject,
   initializeStateManager,
+  initializeUnsavedChanges,
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
@@ -35,7 +35,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titlesManager = initializeTitleManager(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -45,10 +45,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       function serializeState() {
         return {
-          rawState: {
-            ...selections.getLatestState(),
-          },
-          references: [],
+          ...selections.getLatestState(),
         };
       }
 
@@ -64,8 +61,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
           };
         },
         onReset: (lastSaved) => {
-          selections.reinitializeState(lastSaved?.rawState);
-          titlesManager.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved);
+          titlesManager.reinitializeState(lastSaved);
         },
       });
 
@@ -101,7 +98,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             titlesManager.reinitializeState(updatedState);
           };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
               queryString: nextState.esqlQuery,
               variableType: nextState.variableType,
               controlType: nextState.controlType,

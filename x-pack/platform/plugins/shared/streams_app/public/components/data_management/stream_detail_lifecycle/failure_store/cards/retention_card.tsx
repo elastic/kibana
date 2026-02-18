@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useFailureStoreRedirectLink } from '../../hooks/use_failure_store_redirect_link';
+import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
 import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
@@ -22,7 +22,6 @@ export const RetentionCard = ({
   streamName: string;
   failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
-  const { href } = useFailureStoreRedirectLink({ streamName });
   const {
     failureStoreEnabled,
     customRetentionPeriod,
@@ -43,7 +42,7 @@ export const RetentionCard = ({
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.title',
     {
-      defaultMessage: 'Failure retention',
+      defaultMessage: 'Retention',
     }
   );
 
@@ -103,40 +102,6 @@ export const RetentionCard = ({
     ? getTimeSizeAndUnitLabel(customRetentionPeriod)
     : getTimeSizeAndUnitLabel(defaultRetentionPeriod);
 
-  const viewInDiscover = i18n.translate(
-    'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.discoverButton',
-    {
-      defaultMessage: 'View in discover',
-    }
-  );
-  const editFailureStore = i18n.translate(
-    'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editButton',
-    {
-      defaultMessage: 'Edit failure store',
-    }
-  );
-
-  const getActions = () => {
-    const actions = [];
-    if (canManageFailureStore) {
-      actions.push({
-        iconType: 'pencil',
-        ariaLabel: editFailureStore,
-        tooltip: editFailureStore,
-        onClick: () => openModal(true),
-        'data-test-subj': 'streamFailureStoreEditRetention',
-      });
-    }
-    actions.push({
-      iconType: 'discoverApp',
-      ariaLabel: viewInDiscover,
-      tooltip: viewInDiscover,
-      href,
-      'data-test-subj': 'streamFailureStoreViewInDiscover',
-    });
-    return actions;
-  };
-
   const subtitles = retentionOrigin
     ? [retentionTypeApplied, retentionOrigin]
     : [retentionTypeApplied];
@@ -149,5 +114,34 @@ export const RetentionCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} actions={getActions()} metrics={metric} />;
+  return (
+    <BaseMetricCard
+      title={title}
+      actions={
+        canManageFailureStore ? (
+          <EuiButton
+            data-test-subj="streamFailureStoreEditRetention"
+            size="s"
+            color="text"
+            onClick={() => openModal(true)}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editFailureStoreRetentionMethodAriaLabel',
+              {
+                defaultMessage: 'Edit failure store retention method',
+              }
+            )}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editRetentionMethodButton',
+              {
+                defaultMessage: 'Edit retention method',
+              }
+            )}
+          </EuiButton>
+        ) : undefined
+      }
+      metrics={metric}
+      data-test-subj="failureStoreRetentionCard"
+    />
+  );
 };

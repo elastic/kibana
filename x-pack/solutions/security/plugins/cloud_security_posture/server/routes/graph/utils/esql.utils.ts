@@ -52,28 +52,82 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL CASE statement that conditionally concatenates a JSON property.
- * If the value is NOT NULL, it returns the concatenated string, otherwise returns empty string.
+ * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * If the value is NOT NULL, it returns the full property with quoted value.
+ * If the value is NULL, it returns an empty string (property is omitted entirely).
+ *
+ * Always includes comma prefix - place required properties first in the JSON
+ * object so optional properties using this function come after.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
- * @param includeComma - Whether to include a comma prefix (default: true)
- * @returns ESQL CASE statement string
+ * @returns ESQL expression that outputs a JSON property or empty string
  *
  * @example
  * ```typescript
- * concatPropIfExists('name', 'actorEntityName', false)
- * // Returns: CASE(actorEntityName IS NOT NULL, CONCAT("\"name\":\"", actorEntityName, "\""), "")
+ * formatJsonProperty('type', 'actorEntityType')
+ * // If actorEntityType = "user" → ,"type":"user"
+ * // If actorEntityType = null   → "" (empty, property omitted)
  *
- * concatPropIfExists('type', 'actorEntityType')
- * // Returns: CASE(actorEntityType IS NOT NULL, CONCAT(",\"type\":\"", actorEntityType, "\""), "")
+ * // Usage: put required fields first, then optional fields
+ * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
-export const concatPropIfExists = (
-  propertyName: string,
-  valueVar: string,
-  includeComma: boolean = true
-): string => {
-  const comma = includeComma ? ',' : '';
-  return `CASE(${valueVar} IS NOT NULL, CONCAT("${comma}\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+  // CONCAT returns null if any argument is null, so if valueVar is null,
+  // the entire CONCAT returns null, and COALESCE returns empty string
+  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+};
+
+/**
+ * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
+ * This is the preferred method for enriching actor and target entities with entity store data.
+ *
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_generic_default')
+ * @returns ESQL statements for LOOKUP JOIN enrichment
+ *
+ * @example
+ * ```typescript
+ * buildLookupJoinEsql('.entities.v2.latest.security_generic_default')
+ * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
+ * ```
+ */
+export const buildLookupJoinEsql = (lookupIndexName: string): string => {
+  return `| DROP entity.id
+| DROP entity.target.id  
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| RENAME actorHostIp        = host.ip
+| RENAME actorLookupEntityId = entity.id 
+
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| RENAME targetHostIp        = host.ip
+| RENAME targetLookupEntityId = entity.id`;
+};
+
+/**
+ * Generates ESQL statements for entity enrichment using ENRICH policy.
+ * This is the deprecated fallback method when LOOKUP JOIN is not available.
+ *
+ * @param enrichPolicyName - The name of the enrich policy
+ * @returns ESQL statements for ENRICH policy enrichment
+ *
+ * @example
+ * ```typescript
+ * buildEnrichPolicyEsql('entity_store_field_retention_generic_default_v1.0.0')
+ * // Returns ESQL with ENRICH for actor and target enrichment
+ * ```
+ */
+export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
+  return `// Use ENRICH policy for entity enrichment (deprecated fallback)
+| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
 };

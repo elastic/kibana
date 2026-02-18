@@ -33,9 +33,12 @@ describe('RetentionCard', () => {
   const mockOpenEditModal = jest.fn();
 
   const createMockDefinition = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effectiveLifecycle: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ingestLifecycle: any = { inherit: {} },
     streamName: string = 'logs-test',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     privileges: any = { lifecycle: true }
   ): Streams.ingest.all.GetResponse =>
     ({
@@ -47,6 +50,7 @@ describe('RetentionCard', () => {
       },
       effective_lifecycle: effectiveLifecycle,
       privileges,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
   beforeEach(() => {
@@ -270,7 +274,7 @@ describe('RetentionCard', () => {
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       const editButton = screen.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton');
-      expect(editButton).toHaveAttribute('aria-label', 'Edit data retention');
+      expect(editButton).toHaveAttribute('aria-label', 'Edit retention method');
     });
   });
 

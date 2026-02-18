@@ -277,7 +277,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     if (suggestFunctions) {
       builder.addFunctions({
         types: acceptedTypes,
-        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 

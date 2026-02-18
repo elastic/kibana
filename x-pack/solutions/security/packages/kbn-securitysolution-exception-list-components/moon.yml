@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-security

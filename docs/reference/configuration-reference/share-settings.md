@@ -2,9 +2,7 @@
 navigation_title: "Sharing settings"
 applies_to:
   stack: ga 9.1
-  deployment:
-    ess: ga
-    self: ga
+  serverless: unavailable
 ---
 
 # Sharing settings in {{kib}} [share-settings-kb]

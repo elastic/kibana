@@ -31,6 +31,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/categorize_fields.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,6 +56,8 @@
               ", string | number | boolean | (string | number)[] | null | undefined>[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/categorize_fields.ts",
+            "lineNumber": 13,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +96,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_counts.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +123,8 @@
               ", string | number | boolean | (string | number)[] | null | undefined>[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_counts.ts",
+            "lineNumber": 19,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,6 +146,8 @@
           "(category: string | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_name.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -152,6 +162,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/category/get_category_name.ts",
+            "lineNumber": 102,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -173,6 +185,8 @@
           "(field: F<\"array\">, change: C<\"array\"> | undefined) => [string[], boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,6 +203,8 @@
               "F<\"array\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 26,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,6 +222,8 @@
               "C<\"array\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 26,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -227,6 +245,8 @@
           "(field: F<\"color\">, change: C<\"color\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +263,8 @@
               "F<\"color\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 33,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +282,8 @@
               "C<\"color\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 33,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -281,6 +305,8 @@
           "(field: F<\"boolean\">, change: C<\"boolean\"> | undefined) => [boolean, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -297,6 +323,8 @@
               "F<\"boolean\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 40,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -314,6 +342,8 @@
               "C<\"boolean\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 40,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -335,6 +365,8 @@
           "(field: F<\"image\">, change: C<\"image\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -351,6 +383,8 @@
               "F<\"image\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 47,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -368,6 +402,8 @@
               "C<\"image\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 47,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -389,6 +425,8 @@
           "(field: F<\"json\">, change: C<\"json\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -405,6 +443,8 @@
               "F<\"json\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 54,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -422,6 +462,8 @@
               "C<\"json\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 54,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -443,6 +485,8 @@
           "(field: F<\"markdown\">, change: C<\"markdown\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -459,6 +503,8 @@
               "F<\"markdown\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 61,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -476,6 +522,8 @@
               "C<\"markdown\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 61,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -497,6 +545,8 @@
           "(field: F<\"number\">, change: C<\"number\"> | undefined) => [number, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -513,6 +563,8 @@
               "F<\"number\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 68,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -530,6 +582,8 @@
               "C<\"number\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 68,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -551,6 +605,8 @@
           "(field: F<\"select\">, change: C<\"select\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -567,6 +623,8 @@
               "F<\"select\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 75,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -584,6 +642,8 @@
               "C<\"select\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 75,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -605,6 +665,8 @@
           "(field: F<\"string\">, change: C<\"string\"> | undefined) => [string, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -621,6 +683,8 @@
               "F<\"string\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 82,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -638,6 +702,8 @@
               "C<\"string\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 82,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -659,6 +725,8 @@
           "(field: F<\"undefined\">, change: C<\"undefined\"> | undefined) => [string | null | undefined, boolean]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -675,6 +743,8 @@
               "F<\"undefined\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -692,6 +762,8 @@
               "C<\"undefined\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -721,6 +793,8 @@
           "<S> | null | undefined)[]"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -737,6 +811,8 @@
               "F<S>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 101,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -754,6 +830,8 @@
               "C<S> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/get_input_value.ts",
+            "lineNumber": 101,
+            "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -801,6 +879,8 @@
           "<T>, \"unsavedValue\"> | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,6 +913,8 @@
               "<T> | null>, \"defaultValue\" | \"savedValue\">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -858,6 +940,8 @@
               "<T>, \"unsavedValue\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/has_unsaved_change.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -879,6 +963,8 @@
           "(field: F<S>, change: C<S> | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -895,6 +981,8 @@
               "F<S>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
+            "lineNumber": 29,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -912,6 +1000,8 @@
               "C<S> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/is_default_value.ts",
+            "lineNumber": 29,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -951,6 +1041,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -976,6 +1068,8 @@
               ", string | number | boolean | (string | number)[] | null | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -999,6 +1093,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/is_default_value.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1032,6 +1128,8 @@
           ", string | number | boolean | (string | number)[] | null | undefined>>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/normalize_settings.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1048,6 +1146,8 @@
               "RawSettings"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/setting/normalize_settings.ts",
+            "lineNumber": 105,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1089,6 +1189,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1112,6 +1214,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1142,6 +1246,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1166,6 +1272,8 @@
               "<T> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1188,6 +1296,8 @@
                   "<T> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1222,6 +1332,8 @@
               "<T> | null | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/utilities/field/use_update.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

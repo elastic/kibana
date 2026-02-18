@@ -16,6 +16,7 @@ describe('convertSecurityApi', () => {
     const source: CoreSecurityDelegateContract = {
       authc: {
         getCurrentUser: jest.fn(),
+        getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
           areCrossClusterAPIKeysEnabled: jest.fn(),
@@ -25,6 +26,10 @@ describe('convertSecurityApi', () => {
           grantAsInternalUser: jest.fn(),
           create: jest.fn(),
           update: jest.fn(),
+          uiam: {
+            grant: jest.fn(),
+            invalidate: jest.fn(),
+          },
         },
       },
       audit: {

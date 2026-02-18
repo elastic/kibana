@@ -90,7 +90,7 @@ export function formatZodError(
         }
         // Return original message for other errors
         else {
-          formattedMessage = issue.message;
+          formattedMessage = `${issue.message} at ${issue.path.join('.')}`;
         }
       }
     }
@@ -137,7 +137,7 @@ export function formatZodError(
       }
       // Return original message for other errors
       else {
-        formattedMessage = issue.message;
+        formattedMessage = `${issue.message} at ${issue.path.join('.')}`;
       }
     }
 

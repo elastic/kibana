@@ -126,3 +126,17 @@ export interface AgentAnswerStepConfiguration {
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
  */
 export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+
+/**
+ * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
+ * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
+ * (like research/answer step configs) are internal implementation details.
+ *
+ * This type is used for:
+ * - API input validation (converse endpoint)
+ * - Auditing: stored on ConversationRound to record what overrides were applied
+ */
+export type RuntimeAgentConfigurationOverrides = Pick<
+  AgentConfigurationOverrides,
+  'instructions' | 'tools'
+>;

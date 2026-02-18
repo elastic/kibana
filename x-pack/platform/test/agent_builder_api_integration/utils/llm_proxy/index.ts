@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { createLlmProxy, type LlmProxy } from './proxy';
-export { createToolCallMessage } from './mocks';
+export {
+  createToolCallMessage,
+  createInterceptors,
+  createLlmProxy,
+  type LlmProxy,
+} from '@kbn/ftr-llm-proxy';
+export { createLlmProxyActionConnector, deleteActionConnector } from './llm_proxy_action_connector';

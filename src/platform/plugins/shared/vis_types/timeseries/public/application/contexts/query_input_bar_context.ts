@@ -10,15 +10,15 @@
 import React from 'react';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 export interface ICoreStartContext {
   appName: string;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   core: CoreStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   data: DataPublicPluginStart;
 }
 

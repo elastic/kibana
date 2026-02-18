@@ -113,7 +113,9 @@ export const UploadDashboardsPanel = React.memo<UploadDashboardsPanelProps>(
     const { telemetry } = useKibana().services.siemMigrations.dashboards;
     const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
       openFlyout(migrationStats);
-      telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
+      telemetry.reportSetupMigrationOpen({
+        isFirstMigration: !isUploadMore,
+      });
     }, [openFlyout, migrationStats, telemetry, isUploadMore]);
 
     return (

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apm from 'elastic-apm-node';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -27,7 +28,10 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
@@ -174,6 +178,7 @@ describe('Agent policy', () => {
     jest
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    jest.spyOn(apm, 'startTransaction').mockReturnValue({ end: jest.fn() } as any);
   });
 
   afterEach(() => {
@@ -408,7 +413,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -484,7 +489,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -566,7 +571,10 @@ describe('Agent policy', () => {
         enabled: true,
       };
 
-      mockedCreateAgentPolicyWithPackages.mockResolvedValue(mockAgentPolicy as any);
+      mockedCreateAgentPolicyWithPackages.mockResolvedValue({
+        ...mockAgentPolicy,
+        id: 'test-agent-policy',
+      } as any);
       mockedPackagePolicyService.create.mockResolvedValue(mockPackagePolicy as any);
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
@@ -984,6 +992,93 @@ describe('Agent policy', () => {
       await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
 
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle package policies using output when space awareness is not enabled', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Mock find for agent policies
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              revision: 1,
+              data_output_id: 'output-id-123',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      // Mock find for package policies
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'package-policy-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              output_id: 'output-id-123',
+              policy_ids: ['policy-2'],
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      // Mock bulkGet for agent policies of package policies
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-2',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              revision: 2,
+            },
+            references: [],
+          },
+        ],
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      // Verify bulkGet was called without namespaces parameter when space awareness is disabled
+      expect(soClient.bulkGet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            id: 'policy-2',
+            fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
+          }),
+        ])
+      );
+      expect(soClient.bulkGet).toHaveBeenCalledWith(
+        expect.not.arrayContaining([
+          expect.objectContaining({
+            namespaces: expect.anything(),
+          }),
+        ])
+      );
     });
   });
 

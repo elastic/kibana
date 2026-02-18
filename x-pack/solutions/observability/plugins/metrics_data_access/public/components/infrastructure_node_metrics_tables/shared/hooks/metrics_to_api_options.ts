@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,
@@ -46,7 +45,7 @@ Then this code would no longer be needed.
 // sourceFilter is used to define filter to get only relevant docs that contain metrics info
 // e.g: { 'source.module': 'system' }
 export interface MetricsQueryOptions<T extends string> {
-  sourceFilter: QueryDslQueryContainer;
+  sourceFilter: string;
   groupByField: string | string[];
   metricsMap: MetricsMap<T>;
 }
@@ -70,7 +69,7 @@ export interface NodeMetricsExplorerOptionsMetric<Field extends string>
 
 export function metricsToApiOptions<T extends string>(
   metricsQueryOptions: MetricsQueryOptions<T>,
-  filterClauseDsl?: QueryDslQueryContainer
+  kuery?: string
 ) {
   const metrics = Object.values(metricsQueryOptions.metricsMap) as Array<
     NodeMetricsExplorerOptionsMetric<T>
@@ -80,9 +79,7 @@ export function metricsToApiOptions<T extends string>(
     aggregation: 'avg',
     groupBy: metricsQueryOptions.groupByField,
     metrics,
-    filterQuery: JSON.stringify(
-      buildFilterClause(metricsQueryOptions.sourceFilter, filterClauseDsl)
-    ),
+    kuery: buildFilterKuery(metricsQueryOptions.sourceFilter, kuery),
   };
 
   return {
@@ -90,15 +87,8 @@ export function metricsToApiOptions<T extends string>(
   };
 }
 
-function buildFilterClause(
-  sourceFilter: QueryDslQueryContainer,
-  filterClauseDsl?: QueryDslQueryContainer
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      filter: !!filterClauseDsl ? [sourceFilter, filterClauseDsl] : [sourceFilter],
-    },
-  };
+function buildFilterKuery(sourceFilter: string, kuery?: string): string {
+  return !!kuery ? `${sourceFilter} AND (${kuery})` : sourceFilter;
 }
 
 export function createMetricByFieldLookup<T extends string>(metricMap: MetricsMap<T>) {

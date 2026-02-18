@@ -39,22 +39,13 @@ interface ServiceSummary {
 }
 
 export interface APMDownstreamDependency {
-  'service.name'?: string | undefined;
+  'service.name'?: string;
   'span.destination.service.resource': string;
-  'span.type'?: string | undefined;
-  'span.subtype'?: string | undefined;
-}
-
-interface APMError {
-  downstreamServiceResource: string | undefined;
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-  traceId: string | undefined;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -142,14 +133,6 @@ interface InfraHostsResponse {
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
-  apmErrors: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<APMError[]>;
-
   apmErrorDetails: (params: {
     request: KibanaRequest;
     errorId: string;

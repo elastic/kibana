@@ -10,3 +10,12 @@ export interface MeteringStats {
   num_docs: number;
   size_in_bytes: number;
 }
+
+export interface MeteringStatsResponse {
+  indices: MeteringStats[];
+}
+export interface UserStartPrivilegesResponse {
+  privileges: {
+    canManageIndex: boolean;
+  };
+}

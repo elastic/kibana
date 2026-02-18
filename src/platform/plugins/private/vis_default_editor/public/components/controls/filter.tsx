@@ -45,9 +45,7 @@ function FilterRow({
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const {
     data,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
     appName,
   } = services;
 

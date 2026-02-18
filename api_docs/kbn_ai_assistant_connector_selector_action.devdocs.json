@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+            "lineNumber": 26,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -90,6 +96,8 @@
               "<T>"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,6 +125,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,6 +147,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "lineNumber": 26,
+            "columnNumber": 85,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -167,6 +179,8 @@
           "<T>"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,6 +203,8 @@
               ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,6 +227,8 @@
               ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +245,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -243,6 +263,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,6 +281,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -275,6 +299,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -297,6 +323,8 @@
               "<T>>) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -311,6 +339,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+                "lineNumber": 31,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -331,6 +361,8 @@
                   "<T>>"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+                "lineNumber": 31,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -351,6 +383,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,6 +421,8 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }), searchValue: string) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -401,6 +437,8 @@
         "label": "ConnectorSelectableFooterProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -417,6 +455,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -435,6 +475,8 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_footer.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -473,6 +515,8 @@
           ", \"onAddConnectorClick\" | \"onManageConnectorsClick\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

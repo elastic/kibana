@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowJsonSchemaRoute({
   router,
@@ -30,7 +31,7 @@ export function registerGetWorkflowJsonSchemaRoute({
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { loose } = request.query;
         const spaceId = spaces.getSpaceId(request);
@@ -50,6 +51,6 @@ export function registerGetWorkflowJsonSchemaRoute({
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

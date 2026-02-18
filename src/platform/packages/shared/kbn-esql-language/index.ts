@@ -31,8 +31,10 @@ export type {
   ESQLAstChangePointCommand,
   ESQLAstForkCommand,
   ESQLForkParens,
+  ESQLAstPromqlCommand,
 } from './src/types';
 
+export * from './src/constants';
 export * from './src/parser';
 export * from './src/ast';
 export * from './src/composer';
@@ -43,4 +45,4 @@ export * from './src/language';
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
 // temporary export to ease migration
-export * from './src/shared';
+export * from './src/language/autocomplete/utils';

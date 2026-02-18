@@ -53,7 +53,10 @@ export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof rende
   );
   (useUserPrivileges as jest.Mock).mockReturnValue({
     ...initialUserPrivilegesState(),
-    rulesPrivileges: { read: true, edit: true },
+    rulesPrivileges: {
+      ...initialUserPrivilegesState().rulesPrivileges,
+      rules: { read: true, edit: true },
+    },
   });
 
   mockKibanaFetchResponse(GET_PREBUILT_RULES_STATUS_URL, {

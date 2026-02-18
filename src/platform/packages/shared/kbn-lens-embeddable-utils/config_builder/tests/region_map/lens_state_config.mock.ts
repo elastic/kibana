@@ -185,7 +185,7 @@ export const regionMapAttributesWithEms = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -271,7 +271,7 @@ export const regionMapAttributesWithFilterForRegion = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -380,7 +380,7 @@ export const regionMapESQLAttributes = {
       },
     },
   },
-  version: 1,
+  version: 2,
   references: [],
 } satisfies LensAttributes;
 
@@ -485,6 +485,6 @@ export const regionmapESQLAttributesWithEms = {
       },
     },
   },
-  version: 1,
+  version: 2,
   references: [],
 } satisfies LensAttributes;

@@ -8,7 +8,7 @@
 import type { Filter, RangeFilter, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
-import type { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import type { DashboardDrilldownConfig } from '../abstract_dashboard_drilldown';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import type { StartDependencies } from '../../../plugin';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
@@ -23,9 +23,9 @@ describe('.isConfigValid()', () => {
     expect(
       drilldown.isConfigValid({
         dashboardId: '',
-        useCurrentDateRange: false,
-        useCurrentFilters: false,
-        openInNewTab: false,
+        use_time_range: false,
+        use_filters: false,
+        open_in_new_tab: false,
       })
     ).toBe(false);
   });
@@ -34,9 +34,9 @@ describe('.isConfigValid()', () => {
     expect(
       drilldown.isConfigValid({
         dashboardId: 'id',
-        useCurrentDateRange: false,
-        useCurrentFilters: false,
-        openInNewTab: false,
+        use_time_range: false,
+        use_filters: false,
+        open_in_new_tab: false,
       })
     ).toBe(true);
   });
@@ -49,9 +49,9 @@ test('config component exist', () => {
 
 test('initial config: switches are ON', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);
-  const { useCurrentDateRange, useCurrentFilters } = drilldown.createConfig();
-  expect(useCurrentDateRange).toBe(true);
-  expect(useCurrentFilters).toBe(true);
+  const { use_time_range, use_filters } = drilldown.createConfig();
+  expect(use_time_range).toBe(true);
+  expect(use_filters).toBe(true);
 });
 
 test('getHref is defined', () => {
@@ -59,15 +59,9 @@ test('getHref is defined', () => {
   expect(drilldown.getHref).toBeDefined();
 });
 
-test('inject/extract are defined', () => {
-  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
-  expect(drilldown.extract).toBeDefined();
-  expect(drilldown.inject).toBeDefined();
-});
-
 describe('.execute() & getHref', () => {
   async function setupTestBed(
-    config: Partial<Config>,
+    config: Partial<DashboardDrilldownConfig>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
     filtersFromEvent: Filter[],
     timeFieldName?: string
@@ -108,11 +102,11 @@ describe('.execute() & getHref', () => {
       >,
     });
 
-    const completeConfig: Config = {
+    const completeConfig: DashboardDrilldownConfig = {
       dashboardId: 'id',
-      useCurrentFilters: false,
-      useCurrentDateRange: false,
-      openInNewTab: false,
+      use_filters: false,
+      use_time_range: false,
+      open_in_new_tab: false,
       ...config,
     };
 
@@ -170,7 +164,7 @@ describe('.execute() & getHref', () => {
     const queryLanguage = 'kuery';
     const { href } = await setupTestBed(
       {
-        useCurrentFilters: false,
+        use_filters: false,
       },
       {
         query: { query: queryString, language: queryLanguage },
@@ -187,7 +181,7 @@ describe('.execute() & getHref', () => {
     const queryLanguage = 'kuery';
     const { getLocationSpy } = await setupTestBed(
       {
-        useCurrentFilters: true,
+        use_filters: true,
       },
       {
         query: { query: queryString, language: queryLanguage },
@@ -210,7 +204,7 @@ describe('.execute() & getHref', () => {
 
     const { getLocationSpy } = await setupTestBed(
       {
-        useCurrentFilters: true,
+        use_filters: true,
       },
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
@@ -237,7 +231,7 @@ describe('.execute() & getHref', () => {
 
     const { getLocationSpy } = await setupTestBed(
       {
-        useCurrentFilters: false,
+        use_filters: false,
       },
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
@@ -260,7 +254,7 @@ describe('.execute() & getHref', () => {
   test('when user chooses to keep current time range, current time range is passed in url', async () => {
     const { href } = await setupTestBed(
       {
-        useCurrentDateRange: true,
+        use_time_range: true,
       },
       {
         timeRange: {
@@ -277,7 +271,7 @@ describe('.execute() & getHref', () => {
   test('when user chooses to not keep current time range, no current time range is passed in url', async () => {
     const { href } = await setupTestBed(
       {
-        useCurrentDateRange: false,
+        use_time_range: false,
       },
       {
         timeRange: {
@@ -294,7 +288,7 @@ describe('.execute() & getHref', () => {
   test('if range filter contains date, then it is passed as time', async () => {
     const { href } = await setupTestBed(
       {
-        useCurrentDateRange: true,
+        use_time_range: true,
       },
       {
         timeRange: {

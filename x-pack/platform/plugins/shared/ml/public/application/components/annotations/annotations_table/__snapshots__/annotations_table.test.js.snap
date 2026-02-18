@@ -10,7 +10,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
 
 exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceAround-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceAround-stretch-row"
 >
   <div
     class="euiFlexItem emotion-euiFlexItem-growZero"

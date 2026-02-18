@@ -63,7 +63,6 @@ export class SuggestionBuilder {
     types?: FunctionParameterType[];
     addComma?: boolean;
     addSpaceAfterFunction?: boolean;
-    openSuggestions?: boolean;
     constantGeneratingOnly?: boolean;
     excludeParentFunctions?: boolean;
   }): this {
@@ -71,7 +70,6 @@ export class SuggestionBuilder {
     const excludeParentFunctions = options?.excludeParentFunctions ?? false;
     const ignored = this.resolveIgnoredFunctions(excludeParentFunctions);
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
-    const openSuggestions = options?.openSuggestions;
     const constantGeneratingOnly = options?.constantGeneratingOnly ?? false;
 
     const functionSuggestions = getFunctionsSuggestions({
@@ -80,8 +78,8 @@ export class SuggestionBuilder {
       options: {
         ignored,
         addComma: options?.addComma,
+        suggestOnlyName: this.context.options.isCursorFollowedByParens,
         addSpaceAfterFunction,
-        openSuggestions,
         constantGeneratingOnly,
       },
       context: this.context.context,

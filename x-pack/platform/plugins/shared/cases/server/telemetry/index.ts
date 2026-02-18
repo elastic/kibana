@@ -15,12 +15,13 @@ import {
   CASE_TELEMETRY_SAVED_OBJECT,
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
-  SAVED_OBJECT_TYPES,
   CASE_RULES_SAVED_OBJECT,
 } from '../../common/constants';
 import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../../common';
 
 export { scheduleCasesTelemetryTask } from './schedule_telemetry_task';
 
@@ -30,6 +31,7 @@ interface CreateCasesTelemetryArgs {
   usageCollection: UsageCollectionSetup;
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  templatesConfig?: ConfigType['templates'];
 }
 
 export const createCasesTelemetry = ({
@@ -37,11 +39,12 @@ export const createCasesTelemetry = ({
   taskManager,
   usageCollection,
   logger,
+  templatesConfig,
 }: CreateCasesTelemetryArgs) => {
   const getInternalSavedObjectClient = async (): Promise<TelemetrySavedObjectsClient> => {
     const [coreStart] = await core.getStartServices();
     const soClient = coreStart.savedObjects.createInternalRepository([
-      ...SAVED_OBJECT_TYPES,
+      ...getSavedObjectsTypes({ templates: templatesConfig }),
       FILE_SO_TYPE,
       CASE_RULES_SAVED_OBJECT,
     ]);

@@ -482,19 +482,16 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
       const state = {
         serializedState: {
-          rawState: {
-            title: newTitle,
-            description: newDescription,
-            viewType: dashboardAttachment.viewType,
-            dataViewId: dataView.id,
-            metricField: fieldConfig.metricField,
-            splitField: fieldConfig.splitField,
-            fn: fieldConfig.fn,
-            ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-            maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-            ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-          },
-          references: [],
+          title: newTitle,
+          description: newDescription,
+          viewType: dashboardAttachment.viewType,
+          dataViewId: dataView.id,
+          metricField: fieldConfig.metricField,
+          splitField: fieldConfig.splitField,
+          fn: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
+          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };

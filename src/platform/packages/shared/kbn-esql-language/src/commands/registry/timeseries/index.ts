@@ -11,12 +11,14 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
 
 const timeseriesCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const timeseriesCommand = {
@@ -26,6 +28,7 @@ export const timeseriesCommand = {
     type: 'source' as const,
     hidden: false,
     preview: true,
+    isTimeseries: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +

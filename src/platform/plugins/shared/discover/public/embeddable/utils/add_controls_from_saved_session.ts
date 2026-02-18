@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { ESQLControlState, PublishesESQLVariables } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -32,9 +32,7 @@ export const addControlsFromSavedSession = async (
         {
           panelType: ESQL_CONTROL,
           serializedState: {
-            rawState: {
-              ...omit(panel, ['width', 'grow', 'order']),
-            },
+            ...omit(panel, ['width', 'grow', 'order']),
           },
         },
         { beside: uuid, scrollToPanel: false }

@@ -57,6 +57,9 @@ export abstract class AbstractWorkspace implements IWorkspace {
       dir: this.state.dir,
     });
 
+    this.state.tasks.bootstrap = { cacheKey };
+    this.state.tasks.build = null;
+
     await this.controller.updateEntry(this.getState(), (e) => {
       e.tasks.bootstrap = { cacheKey };
       e.tasks.build = null;
@@ -77,6 +80,8 @@ export abstract class AbstractWorkspace implements IWorkspace {
       dir: this.getDir(),
       options,
     });
+
+    this.state.tasks.build = { cacheKey };
 
     await this.controller.updateEntry(this.getState(), (e) => {
       e.tasks.build = { cacheKey };

@@ -23,6 +23,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               "\"siemMigrationSetupTour\""
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
+            "lineNumber": 35,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
           "\nTour object returned by the queue when registering a tour.\nProvides methods to control the tour's lifecycle."
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/state/tour_queue_state.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/state/tour_queue_state.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -95,6 +103,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/state/tour_queue_state.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -113,6 +123,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/state/tour_queue_state.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -131,6 +143,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/state/tour_queue_state.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -149,6 +163,8 @@
           "\nResult object returned by useTourQueue"
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -162,6 +178,8 @@
               "Whether this tour is currently active and should be shown"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,6 +196,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-tour-queue/hooks/use_tour_queue.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -202,6 +222,8 @@
           "\"siemMigrationSetupTour\""
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,6 +243,8 @@
           "{ readonly SECURITY_SIEM_MIGRATION: \"siemMigrationSetupTour\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-tour-queue/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

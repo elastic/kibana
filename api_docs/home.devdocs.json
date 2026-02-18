@@ -10,6 +10,8 @@
         "label": "FeatureCatalogueRegistry",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               ") => void; }"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -58,6 +62,8 @@
               "; }) => void"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -69,6 +75,8 @@
                 "label": "{ capabilities }",
                 "description": [],
                 "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "lineNumber": 92,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -83,6 +91,8 @@
                       "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
                     ],
                     "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                    "lineNumber": 92,
+                    "columnNumber": 36,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -120,6 +130,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [],
@@ -143,6 +155,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "lineNumber": 100,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -171,6 +185,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -195,6 +211,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -211,6 +229,8 @@
               "(appId: string) => void"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -225,6 +245,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "lineNumber": 130,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -253,6 +275,8 @@
           "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => string"
         ],
         "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,6 +291,8 @@
               "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
             ],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 71,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -287,6 +313,8 @@
         "label": "AddDataTab",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/add_data/add_data_service.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,6 +326,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/add_data/add_data_service.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,6 +339,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/add_data/add_data_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -323,6 +355,8 @@
               "() => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/home/public/services/add_data/add_data_service.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -339,6 +373,8 @@
         "label": "CustomComponentProps",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -353,6 +389,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -364,6 +402,8 @@
             "label": "basePath",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -375,6 +415,8 @@
             "label": "isDarkTheme",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -386,6 +428,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -397,6 +441,8 @@
             "label": "variantId",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,6 +454,8 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -422,6 +470,8 @@
         "label": "Environment",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/environment/environment.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -435,6 +485,8 @@
               "\nFlag whether the home app should advertise cloud features"
             ],
             "path": "src/platform/plugins/shared/home/public/services/environment/environment.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -448,6 +500,8 @@
               "\nFlag whether the home app should advertise apm features"
             ],
             "path": "src/platform/plugins/shared/home/public/services/environment/environment.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -461,6 +515,8 @@
               "\nFlag whether the home app should advertise ml features"
             ],
             "path": "src/platform/plugins/shared/home/public/services/environment/environment.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -475,6 +531,8 @@
         "label": "FeatureCatalogueEntry",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -488,6 +546,8 @@
               "Unique string identifier for this feature."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,6 +561,8 @@
               "Title of feature displayed to the user."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -517,6 +579,8 @@
               "\"other\" | \"data\" | \"admin\""
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -533,6 +597,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,6 +612,8 @@
               "One-line description of feature displayed to the user."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -562,6 +630,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -575,6 +645,8 @@
               "URL path to link to this future. Should not include the basePath."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -588,6 +660,8 @@
               "Whether or not this link should be shown on the front page of Kibana."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -604,6 +678,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,6 +696,8 @@
               "(() => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -638,6 +716,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -652,6 +732,8 @@
         "label": "FeatureCatalogueSolution",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +747,8 @@
               "Unique string identifier for this solution."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -678,6 +762,8 @@
               "Title of solution displayed to the user."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -691,6 +777,8 @@
               "One-line description of the solution displayed to the user."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +795,8 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,6 +810,8 @@
               "URL path to link to this future. Should not include the basePath."
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -733,6 +825,8 @@
               "An ordinal used to sort solutions relative to one another for display on the home page"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -751,6 +845,8 @@
               ") => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -765,6 +861,8 @@
                   "Capabilities"
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+                "lineNumber": 59,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -783,6 +881,8 @@
         "label": "WelcomeServiceSetup",
         "description": [],
         "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -799,6 +899,8 @@
               "(onRendered: () => void) => void"
             ],
             "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -813,6 +915,8 @@
                   "() => void"
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+                "lineNumber": 17,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -841,6 +945,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -861,6 +967,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+                "lineNumber": 21,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -893,6 +1001,8 @@
           ">) => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
+        "lineNumber": 181,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -908,6 +1018,8 @@
           "\"other\" | \"data\" | \"admin\""
         ],
         "path": "src/platform/plugins/shared/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -939,6 +1051,8 @@
           ") => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
+        "lineNumber": 178,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -954,6 +1068,8 @@
           "React.FunctionComponent<{}>"
         ],
         "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -969,6 +1085,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,6 +1101,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1000,6 +1120,8 @@
           "React.FunctionComponent<{ moduleName: string; }>"
         ],
         "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1015,6 +1137,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1029,6 +1153,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1064,6 +1190,8 @@
           ") => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
         ],
         "path": "src/platform/plugins/shared/home/public/plugin.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1079,6 +1207,8 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/plugins/shared/home/public/services/tutorials/tutorial_service.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1094,6 +1224,8 @@
           "() => JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/home/public/services/welcome/welcome_service.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1110,6 +1242,8 @@
         "label": "INSTRUCTION_VARIANT",
         "description": [],
         "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1121,6 +1255,8 @@
             "label": "ESC",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1132,6 +1268,8 @@
             "label": "OSX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1143,6 +1281,8 @@
             "label": "DEB",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1154,6 +1294,8 @@
             "label": "RPM",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1165,6 +1307,8 @@
             "label": "DOCKER",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1176,6 +1320,8 @@
             "label": "WINDOWS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1187,6 +1333,8 @@
             "label": "NODE",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1198,6 +1346,8 @@
             "label": "DJANGO",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1209,6 +1359,8 @@
             "label": "FLASK",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,6 +1372,8 @@
             "label": "RAILS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1231,6 +1385,8 @@
             "label": "RACK",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1242,6 +1398,8 @@
             "label": "JS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1253,6 +1411,8 @@
             "label": "GO",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1264,6 +1424,8 @@
             "label": "JAVA",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1275,6 +1437,8 @@
             "label": "DOTNET",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1286,6 +1450,8 @@
             "label": "LINUX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1297,6 +1463,8 @@
             "label": "PHP",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1308,6 +1476,8 @@
             "label": "FLEET",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1319,6 +1489,8 @@
             "label": "OPEN_TELEMETRY",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,6 +1502,8 @@
             "label": "OTHER_LINUX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1345,6 +1519,8 @@
       "label": "HomePublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/home/public/plugin.ts",
+      "lineNumber": 190,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1377,6 +1553,8 @@
             ") => void; registerCustomComponent: (name: string, component: CustomComponent) => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 192,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1399,6 +1577,8 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 193,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1429,6 +1609,8 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 194,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1449,6 +1631,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 195,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1475,6 +1659,8 @@
             ">) => void; }"
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 196,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -1492,6 +1678,8 @@
       "label": "HomePublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/home/public/plugin.ts",
+      "lineNumber": 205,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1512,6 +1700,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/home/public/plugin.ts",
+          "lineNumber": 206,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1534,6 +1724,8 @@
           "\nThis type is used by consumers to register a new app link for a sample dataset."
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1557,6 +1749,8 @@
               " | null"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1573,6 +1767,8 @@
               "(objectId: string) => string"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1587,6 +1783,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+                "lineNumber": 58,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1604,6 +1802,8 @@
               "\nThe label for this app link."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1617,6 +1817,8 @@
               "\nThe icon for this app link."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1633,6 +1835,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1647,6 +1851,8 @@
         "label": "SampleDatasetDashboardPanel",
         "description": [],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1658,6 +1864,8 @@
             "label": "sampleDataId",
             "description": [],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1669,6 +1877,8 @@
             "label": "dashboardId",
             "description": [],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1680,6 +1890,8 @@
             "label": "oldEmbeddableId",
             "description": [],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1691,6 +1903,8 @@
             "label": "embeddableId",
             "description": [],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1711,6 +1925,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1725,6 +1941,8 @@
               "object"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1741,6 +1959,8 @@
           "This type is used to identify an object in a sample dataset."
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1754,6 +1974,8 @@
               "The type of the sample object."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1767,6 +1989,8 @@
               "The ID of the sample object."
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1781,6 +2005,8 @@
         "label": "TutorialContext",
         "description": [],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1792,6 +2018,8 @@
             "label": "kibanaBranch",
             "description": [],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1806,6 +2034,8 @@
               "IStaticAssets"
             ],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1820,6 +2050,8 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1836,6 +2068,8 @@
         "label": "EmbeddableTypes",
         "description": [],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1848,6 +2082,8 @@
         "label": "TutorialsCategory",
         "description": [],
         "path": "src/platform/plugins/shared/home/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1865,6 +2101,8 @@
           "{ readonly application?: Readonly<{} & { path: string; label: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1880,6 +2118,8 @@
           "{ readonly title?: string | undefined; readonly textPre?: string | undefined; readonly commands?: string[] | undefined; readonly textPost?: string | undefined; readonly customComponentName?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1895,6 +2135,8 @@
           "{ readonly title?: string | undefined; readonly callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; readonly statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; readonly instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1910,6 +2152,8 @@
           "{ readonly instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1925,6 +2169,8 @@
           "{ readonly initialSelected?: boolean | undefined; readonly id: string; readonly instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1966,6 +2212,8 @@
           ") => void; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/sample_data_registry.ts",
+        "lineNumber": 192,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1991,6 +2239,8 @@
           "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; iconPath?: string | undefined; statusMsg?: string | undefined; } & { id: string; name: string; description: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { id: string; type: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; defaultIndex: string; dataIndices: Readonly<{ indexSettings?: Record<string, any> | undefined; isDataStream?: boolean | undefined; } & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
         "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2006,6 +2256,8 @@
               "SampleDatasetProviderContext"
             ],
             "path": "src/platform/plugins/shared/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2023,6 +2275,8 @@
           "(...args: any[]) => any"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2038,6 +2292,8 @@
               "any[]"
             ],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2055,6 +2311,8 @@
           "{ readonly error?: string | undefined; readonly text?: string | undefined; readonly title?: string | undefined; readonly success?: string | undefined; readonly btnLabel?: string | undefined; readonly esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2078,6 +2336,8 @@
           ") => Readonly<{ artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; euiIconType?: string | undefined; isBeta?: boolean | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; omitServerless?: boolean | undefined; customStatusCheckName?: string | undefined; integrationBrowserCategories?: string[] | undefined; eprPackageOverlap?: string | undefined; } & { id: string; name: string; category: \"security\" | \"other\" | \"metrics\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2099,6 +2359,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2116,6 +2378,8 @@
           "{ readonly artifacts?: Readonly<{ application?: Readonly<{} & { path: string; label: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; readonly euiIconType?: string | undefined; readonly isBeta?: boolean | undefined; readonly previewImagePath?: string | undefined; readonly moduleName?: string | undefined; readonly completionTimeMinutes?: number | undefined; readonly elasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly onPremElasticCloud?: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; readonly omitServerless?: boolean | undefined; readonly customStatusCheckName?: string | undefined; readonly integrationBrowserCategories?: string[] | undefined; readonly eprPackageOverlap?: string | undefined; readonly id: string; readonly name: string; readonly category: \"security\" | \"other\" | \"metrics\" | \"logging\"; readonly shortDescription: string; readonly longDescription: string; readonly onPrem: Readonly<{} & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ message?: string | undefined; iconType?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ error?: string | undefined; text?: string | undefined; title?: string | undefined; success?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { index: string | string[]; query: Record<string, any>; }>; }> | undefined; } & { instructionVariants: Readonly<{ initialSelected?: boolean | undefined; } & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; customComponentName?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }"
         ],
         "path": "src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts",
+        "lineNumber": 153,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2130,6 +2394,8 @@
         "label": "INSTRUCTION_VARIANT",
         "description": [],
         "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2141,6 +2407,8 @@
             "label": "ESC",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2152,6 +2420,8 @@
             "label": "OSX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2163,6 +2433,8 @@
             "label": "DEB",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2174,6 +2446,8 @@
             "label": "RPM",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2185,6 +2459,8 @@
             "label": "DOCKER",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2196,6 +2472,8 @@
             "label": "WINDOWS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2207,6 +2485,8 @@
             "label": "NODE",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2218,6 +2498,8 @@
             "label": "DJANGO",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2229,6 +2511,8 @@
             "label": "FLASK",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2240,6 +2524,8 @@
             "label": "RAILS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2251,6 +2537,8 @@
             "label": "RACK",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2262,6 +2550,8 @@
             "label": "JS",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2273,6 +2563,8 @@
             "label": "GO",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2284,6 +2576,8 @@
             "label": "JAVA",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2295,6 +2589,8 @@
             "label": "DOTNET",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2306,6 +2602,8 @@
             "label": "LINUX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2317,6 +2615,8 @@
             "label": "PHP",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2328,6 +2628,8 @@
             "label": "FLEET",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2339,6 +2641,8 @@
             "label": "OPEN_TELEMETRY",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2350,6 +2654,8 @@
             "label": "OTHER_LINUX",
             "description": [],
             "path": "src/platform/plugins/shared/home/common/instruction_variant.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2365,6 +2671,8 @@
       "label": "HomeServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/home/server/plugin.ts",
+      "lineNumber": 72,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2403,6 +2711,8 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/server/plugin.ts",
+          "lineNumber": 74,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2443,6 +2753,8 @@
             ") => void; }"
           ],
           "path": "src/platform/plugins/shared/home/server/plugin.ts",
+          "lineNumber": 75,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2458,6 +2770,8 @@
       "label": "HomeServerPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/home/server/plugin.ts",
+      "lineNumber": 78,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2472,6 +2786,8 @@
             "{}"
           ],
           "path": "src/platform/plugins/shared/home/server/plugin.ts",
+          "lineNumber": 80,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2486,6 +2802,8 @@
             "{}"
           ],
           "path": "src/platform/plugins/shared/home/server/plugin.ts",
+          "lineNumber": 81,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

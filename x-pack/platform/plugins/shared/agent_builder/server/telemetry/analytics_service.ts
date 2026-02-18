@@ -12,6 +12,8 @@ import {
   agentBuilderServerEbtEvents,
   type ConversationRound,
   ConversationRoundStepType,
+  type ToolSelection,
+  type ToolType,
 } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/inference-common';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
@@ -33,6 +35,64 @@ export class AnalyticsService {
     agentBuilderServerEbtEvents.forEach((eventConfig) => {
       this.analytics.registerEventType(eventConfig);
     });
+  }
+
+  reportAgentCreated({
+    agentId,
+    toolSelection,
+  }: {
+    agentId: string;
+    toolSelection: ToolSelection[];
+  }): void {
+    try {
+      const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+      const toolIds = toolSelection.flatMap((selection) => selection.tool_ids);
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
+        agent_id: normalizedAgentId,
+        tool_ids: toolsIncluded,
+      });
+    } catch (error) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report AgentCreated telemetry event', { error });
+    }
+  }
+
+  reportAgentUpdated({
+    agentId,
+    toolSelection,
+  }: {
+    agentId: string;
+    toolSelection: ToolSelection[];
+  }): void {
+    try {
+      const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
+      const toolIds = toolSelection.flatMap((selection) => selection.tool_ids);
+      const toolsIncluded = Array.from(new Set(toolIds)).map((toolId) =>
+        normalizeToolIdForTelemetry(toolId)
+      );
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentUpdated, {
+        agent_id: normalizedAgentId,
+        tool_ids: toolsIncluded,
+      });
+    } catch (error) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report AgentUpdated telemetry event', { error });
+    }
+  }
+
+  reportToolCreated({ toolId, toolType }: { toolId: string; toolType: ToolType | string }): void {
+    try {
+      this.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ToolCreated, {
+        tool_id: normalizeToolIdForTelemetry(toolId),
+        tool_type: toolType,
+      });
+    } catch (error) {
+      // Do not fail the request if telemetry fails
+      this.logger.debug('Failed to report ToolCreated telemetry event', { error });
+    }
   }
 
   reportRoundComplete({

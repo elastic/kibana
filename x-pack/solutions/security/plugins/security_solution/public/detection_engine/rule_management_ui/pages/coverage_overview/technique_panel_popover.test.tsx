@@ -39,7 +39,10 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
     });
   });
 
@@ -114,7 +117,10 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
   test('"Enable all disabled" button is disabled when user does not have CRUD permissions', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
     });
     const wrapper = renderTechniquePanelPopover();
 

@@ -78,6 +78,7 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
+  has_agent_version_conditions?: boolean;
 }
 
 export interface AgentSOAttributes {
@@ -153,6 +154,7 @@ export interface PackagePolicySOAttributes {
   secret_references?: SecretReference[];
   package?: PackagePolicyPackage;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -162,6 +164,7 @@ export interface PackagePolicySOAttributes {
   overrides?: any | null;
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
+  inputs_for_versions?: Record<string, PackagePolicyInput[]>;
 }
 
 export interface OutputSoBaseAttributes {
@@ -274,6 +277,7 @@ export interface SettingsSOAttributes {
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
+  download_source_auth_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -300,9 +304,14 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field
+  auth?: string | null; // encrypted auth field
   secrets?: {
     ssl?: {
       key?: { id: string };
+    };
+    auth?: {
+      password?: { id: string };
+      api_key?: { id: string };
     };
   };
 }

@@ -17,9 +17,10 @@ import {
   apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
@@ -53,7 +54,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
   return {
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
@@ -235,11 +236,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...timeRangePercentage.getLatestState(),
-            isAnchored: isAnchored$.value,
-          },
-          references: [],
+          ...timeRangePercentage.getLatestState(),
+          isAnchored: isAnchored$.value,
         };
       }
 
@@ -259,8 +257,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           };
         },
         onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved?.rawState);
-          setIsAnchored(lastSaved?.rawState?.isAnchored);
+          timeRangePercentage.reinitializeState(lastSaved);
+          setIsAnchored(lastSaved?.isAnchored);
         },
       });
 
