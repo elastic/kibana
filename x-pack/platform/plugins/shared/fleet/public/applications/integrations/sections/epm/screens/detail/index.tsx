@@ -60,6 +60,8 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { SideBarColumn } from '../../components/side_bar_column';
 import { PermissionsError } from '../../../../layouts';
 
+import { wrapTitleWithDeprecated } from '../../components/utils';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 
@@ -364,7 +366,7 @@ export function Detail() {
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      <h1>{wrapTitleWithDeprecated({ packageInfo, integrationInfo })}</h1>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -585,7 +587,10 @@ export function Detail() {
                                   : {}),
                               })}
                               missingSecurityConfiguration={missingSecurityConfiguration}
-                              packageName={integrationInfo?.title || packageInfo.title}
+                              packageName={wrapTitleWithDeprecated({
+                                packageInfo,
+                                integrationInfo,
+                              })}
                               onClick={handleAddIntegrationPolicyClick}
                             />
                           </EuiFlexItem>
@@ -612,22 +617,22 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      updateAvailable,
-      isInstalled,
-      pkgkey,
-      userCanInstallPackages,
-      getHref,
-      integration,
-      agentPolicyIdFromContext,
-      missingSecurityConfiguration,
-      integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
-      onVersionChange,
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditIntegrationClick,
+      updateAvailable,
+      isInstalled,
       isCustomPackage,
+      handleEditIntegrationClick,
+      userCanInstallPackages,
+      getHref,
+      pkgkey,
+      integration,
+      agentPolicyIdFromContext,
+      missingSecurityConfiguration,
+      integrationInfo,
+      handleAddIntegrationPolicyClick,
+      onVersionChange,
     ]
   );
 
@@ -818,7 +823,7 @@ export function Detail() {
       `}
     >
       {integrationInfo || packageInfo ? (
-        <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
+        <Breadcrumbs packageTitle={wrapTitleWithDeprecated({ packageInfo, integrationInfo })} />
       ) : null}
       {packageInfoError ? (
         <EuiFlexGroup alignItems="flexStart">
@@ -882,7 +887,11 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          integrationName={packageInfo?.title || 'Integration'}
+          integrationName={wrapTitleWithDeprecated({
+            packageInfo,
+            integrationInfo,
+            defaultTitle: 'Integration',
+          })}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

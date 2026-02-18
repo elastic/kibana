@@ -764,6 +764,164 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Returns additional logs permissions for OTel traces span events', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-456',
+        name: 'otel-traces-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'otel-traces' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-456': {
+        indices: [
+          {
+            names: ['traces-otel-traces-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-generic.otel-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Returns additional logs permissions with dynamic_namespace for OTel traces span events', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-789',
+        name: 'otel-traces-dynamic-ns',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-traces',
+                enabled: true,
+                data_stream: {
+                  type: 'traces',
+                  dataset: 'otel-traces',
+                  elasticsearch: { dynamic_namespace: true },
+                },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-789': {
+        indices: [
+          {
+            names: ['traces-otel-traces-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-generic.otel-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Does not add additional logs permissions for non-OTel traces inputs', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-101',
+        name: 'non-otel-traces-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-traces',
+                enabled: true,
+                data_stream: { type: 'traces', dataset: 'some-traces' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-101': {
+        indices: [
+          {
+            names: ['traces-some-traces-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+    // Should only have one index permission, no additional logs permission
+    expect(permissions!['package-policy-uuid-test-101'].indices).toHaveLength(1);
+  });
+
   it('returns the correct permissions for the APM package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
