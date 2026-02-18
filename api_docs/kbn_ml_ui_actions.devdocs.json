@@ -28,7 +28,7 @@
         "label": "CategorizeFieldContext",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "lineNumber": 13,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +50,7 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 14,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -72,7 +72,7 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 15,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -85,7 +85,7 @@
             "label": "originatingApp",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 16,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -101,7 +101,7 @@
               "{ from: number; to: number; field?: { name: string; value: string; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 17,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +119,7 @@
               ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 22,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -233,24 +233,7 @@
           "\"ACTION_CATEGORIZE_FIELD\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "lineNumber": 25,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "lineNumber": 27,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -272,81 +255,8 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
-        ],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
-        "lineNumber": 21,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/ml-ui-actions",
-        "id": "def-common.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-        "lineNumber": 28,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 29,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-ui-actions",
-            "id": "def-common.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
-            "lineNumber": 33,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

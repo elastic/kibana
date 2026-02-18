@@ -569,7 +569,7 @@
             "label": "titlesTextAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 54,
@@ -585,7 +585,7 @@
             "label": "primaryAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 55,
@@ -601,7 +601,7 @@
             "label": "secondaryAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 56,
@@ -617,7 +617,7 @@
             "label": "iconAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\""
+              "\"left\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 57,
@@ -633,7 +633,7 @@
             "label": "valueFontSize",
             "description": [],
             "signature": [
-              "number | \"default\" | \"fit\""
+              "number | \"fit\" | \"default\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 58,
@@ -786,7 +786,7 @@
             "label": "secondaryLabelPosition",
             "description": [],
             "signature": [
-              "\"after\" | \"before\" | undefined"
+              "\"before\" | \"after\" | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 67,
@@ -1091,7 +1091,7 @@
             "label": "titlesTextAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 38,
@@ -1107,7 +1107,7 @@
             "label": "primaryAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 39,
@@ -1123,7 +1123,7 @@
             "label": "secondaryAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"center\" | \"left\""
+              "\"left\" | \"center\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 40,
@@ -1139,7 +1139,7 @@
             "label": "iconAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\""
+              "\"left\" | \"right\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 41,
@@ -1155,7 +1155,7 @@
             "label": "valueFontSize",
             "description": [],
             "signature": [
-              "number | \"default\" | \"fit\""
+              "number | \"fit\" | \"default\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 42,
@@ -1248,7 +1248,7 @@
             "label": "secondaryLabelPosition",
             "description": [],
             "signature": [
-              "\"after\" | \"before\" | undefined"
+              "\"before\" | \"after\" | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "lineNumber": 48,
@@ -1368,7 +1368,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+              "(Partial<Record<\"settings\", { legendSize?: number | undefined; onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -1400,13 +1400,13 @@
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
-              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+              "[] | undefined>; legendMaxDepth?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
+              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "lineNumber": 77,
@@ -1530,7 +1530,7 @@
         "label": "AvailableMetricIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"compute\" | \"editorComment\" | \"empty\" | \"flag\" | \"globe\" | \"heart\" | \"mapMarker\" | \"pin\" | \"sortDown\" | \"sortUp\" | \"starEmpty\" | \"temperature\""
+          "\"alert\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\" | \"tag\" | \"compute\" | \"empty\" | \"globe\" | \"pin\" | \"sortDown\" | \"sortUp\" | \"temperature\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "lineNumber": 39,

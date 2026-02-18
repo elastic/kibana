@@ -1583,7 +1583,7 @@
           ">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1599,7 +1599,7 @@
               "ReadWithPitParams"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/read_with_pit.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,

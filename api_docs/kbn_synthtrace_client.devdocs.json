@@ -868,7 +868,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-        "lineNumber": 17,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -885,7 +885,7 @@
               "Transaction"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 18,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -901,7 +901,7 @@
                   "[string] | [string, string] | [{ transactionName: string; transactionType?: string | undefined; }]"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 19,
+                "lineNumber": 24,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -924,7 +924,7 @@
               "Span"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 43,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -942,7 +942,7 @@
                   "]"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 43,
+                "lineNumber": 48,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -963,7 +963,7 @@
               "ApmError"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 67,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -976,7 +976,7 @@
                 "label": "{ message, type }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 67,
+                "lineNumber": 72,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -989,7 +989,7 @@
                     "label": "message",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 67,
+                    "lineNumber": 72,
                     "columnNumber": 30,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1005,7 +1005,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 67,
+                    "lineNumber": 72,
                     "columnNumber": 47,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1023,11 +1023,19 @@
             "label": "error",
             "description": [],
             "signature": [
-              "({ message, type, culprit, groupingKey, withoutErrorId, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; withoutErrorId?: boolean | undefined; }) => ",
+              "({ message, type, culprit, groupingKey, stacktrace, withoutErrorId, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; stacktrace?: ",
+              {
+                "pluginId": "@kbn/synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnSynthtraceClientPluginApi",
+                "section": "def-common.APMStacktrace",
+                "text": "APMStacktrace"
+              },
+              "[] | undefined; withoutErrorId?: boolean | undefined; }) => ",
               "ApmError"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 74,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1037,10 +1045,10 @@
                 "id": "def-common.Instance.error.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n    withoutErrorId = false,\n  }",
+                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n    stacktrace,\n    withoutErrorId = false,\n  }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 80,
+                "lineNumber": 86,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1053,7 +1061,7 @@
                     "label": "message",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 81,
+                    "lineNumber": 87,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1069,7 +1077,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 82,
+                    "lineNumber": 88,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1085,7 +1093,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 83,
+                    "lineNumber": 89,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1101,7 +1109,30 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 84,
+                    "lineNumber": 90,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/synthtrace-client",
+                    "id": "def-common.Instance.error.$1.stacktrace",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "stacktrace",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/synthtrace-client",
+                        "scope": "common",
+                        "docId": "kibKbnSynthtraceClientPluginApi",
+                        "section": "def-common.APMStacktrace",
+                        "text": "APMStacktrace"
+                      },
+                      "[] | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
+                    "lineNumber": 91,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1117,7 +1148,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                    "lineNumber": 85,
+                    "lineNumber": 92,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1138,7 +1169,7 @@
               "(containerId: string) => this"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 98,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1154,7 +1185,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 98,
+                "lineNumber": 111,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1174,7 +1205,7 @@
               "(hostName: string) => this"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 103,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1190,7 +1221,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 103,
+                "lineNumber": 116,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1210,7 +1241,7 @@
               "(podId: string) => this"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 108,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1226,7 +1257,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 108,
+                "lineNumber": 121,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1243,7 +1274,7 @@
             "label": "appMetrics",
             "description": [],
             "signature": [
-              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
               "Metricset",
               "<",
               {
@@ -1256,7 +1287,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-            "lineNumber": 113,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1269,10 +1300,10 @@
                 "label": "metrics",
                 "description": [],
                 "signature": [
-                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/instance.ts",
-                "lineNumber": 113,
+                "lineNumber": 126,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1751,7 +1782,7 @@
             "label": "appMetrics",
             "description": [],
             "signature": [
-              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
               "Metricset",
               "<",
               {
@@ -1777,7 +1808,7 @@
                 "label": "metrics",
                 "description": [],
                 "signature": [
-                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_device.ts",
                 "lineNumber": 251,
@@ -2293,7 +2324,7 @@
             "label": "appMetrics",
             "description": [],
             "signature": [
-              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
               "OtelMetricset",
               "<",
               {
@@ -2319,7 +2350,7 @@
                 "label": "metrics",
                 "description": [],
                 "signature": [
-                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
                 "lineNumber": 115,
@@ -3534,6 +3565,198 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/synthtrace-client",
+        "id": "def-common.APMStacktrace",
+        "type": "Interface",
+        "tags": [],
+        "label": "APMStacktrace",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.abs_path",
+            "type": "string",
+            "tags": [],
+            "label": "abs_path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.classname",
+            "type": "string",
+            "tags": [],
+            "label": "classname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "{ post?: string[] | undefined; pre?: string[] | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.exclude_from_grouping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exclude_from_grouping",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.filename",
+            "type": "string",
+            "tags": [],
+            "label": "filename",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.function",
+            "type": "string",
+            "tags": [],
+            "label": "function",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.module",
+            "type": "string",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.library_frame",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "library_frame",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.line",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "{ column?: number | undefined; number: number; } | { context?: string | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.sourcemap",
+            "type": "Object",
+            "tags": [],
+            "label": "sourcemap",
+            "description": [],
+            "signature": [
+              "{ error?: string | undefined; updated?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.APMStacktrace.vars",
+            "type": "Object",
+            "tags": [],
+            "label": "vars",
+            "description": [],
+            "signature": [
+              "{ [key: string]: unknown; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace-client",
         "id": "def-common.DeviceInfo",
         "type": "Interface",
         "tags": [],
@@ -3753,7 +3976,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"unknown\" | \"cell\" | \"wifi\" | \"unavailable\" | \"wired\""
+              "\"unknown\" | \"cell\" | \"wifi\" | \"wired\" | \"unavailable\""
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_device.ts",
             "lineNumber": 33,
@@ -3976,12 +4199,18 @@
           "GeoLocation",
           "; 'client.geo.region_iso_code': string; 'client.geo.region_name': string; 'client.ip': string; 'cloud.account.id': string; 'cloud.account.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.project.id': string; 'cloud.project.name': string; 'cloud.provider': string; 'cloud.region': string; 'cloud.service.name': string; 'code.stacktrace': string; 'container.id': string; 'destination.address': string; 'destination.port': number; 'device.id': string; 'device.manufacturer': string; 'device.model.identifier': string; 'device.model.name': string; 'ecs.version': string; 'error.exception': ",
           "ApmException",
-          "[]; 'error.grouping_key': string; 'error.grouping_name': string; 'error.id': string; 'error.type': string; 'error.culprit': string; 'event.ingested': string; 'event.name': string; 'event.action': string; 'event.outcome': string; 'event.outcome_numeric': number | { sum: number; value_count: number; }; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.id': string; 'faas.name': string; 'faas.trigger.type': string; 'faas.version': string; 'host.architecture': string; 'host.hostname': string; 'host.name': string; 'host.os.full': string; 'host.os.name': string; 'host.os.platform': string; 'host.os.type': string; 'host.os.version': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.name': string; 'kubernetes.pod.uid': string; 'kubernetes.namespace': string; 'labels.name': string; 'labels.telemetry_auto_version': string; 'labels.lifecycle_state': string; 'metricset.name': string; 'network.carrier.icc': string; 'network.carrier.mcc': string; 'network.carrier.mnc': string; 'network.carrier.name': string; 'network.connection.subtype': string; 'network.connection.type': string; 'observer.type': string; 'observer.version_major': number; 'observer.version': string; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'session.id': string; 'trace.id': string; 'transaction.aggregation.overflow_count': number; 'transaction.duration.us': number; 'transaction.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.result': string; 'transaction.sampled': boolean; 'service.environment': string; 'service.framework.name': string; 'service.framework.version': string; 'service.language.name': string; 'service.language.version': string; 'service.name': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.target.name': string; 'service.target.type': string; 'service.version': string; 'span.action': string; 'span.destination.service.resource': string; 'span.destination.service.response_time.count': number; 'span.destination.service.response_time.sum.us': number; 'span.duration.us': number; 'span.id': string; 'span.name': string; 'span.stacktrace': ",
-          "APMStacktrace",
-          "[]; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.subtype': string; 'span.type': string; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'url.original': string; 'url.domain': string; 'url.full': string; 'url.path': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }> & Partial<{ 'metricset.interval': string; 'transaction.duration.summary': string; }>"
+          "[]; 'error.grouping_key': string; 'error.grouping_name': string; 'error.id': string; 'error.type': string; 'error.culprit': string; 'error.stack_trace': string; 'event.ingested': string; 'event.name': string; 'event.action': string; 'event.outcome': string; 'event.outcome_numeric': number | { sum: number; value_count: number; }; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.id': string; 'faas.name': string; 'faas.trigger.type': string; 'faas.version': string; 'host.architecture': string; 'host.hostname': string; 'host.name': string; 'host.os.full': string; 'host.os.name': string; 'host.os.platform': string; 'host.os.type': string; 'host.os.version': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.name': string; 'kubernetes.pod.uid': string; 'kubernetes.namespace': string; 'labels.name': string; 'labels.telemetry_auto_version': string; 'labels.lifecycle_state': string; 'metricset.name': string; 'network.carrier.icc': string; 'network.carrier.mcc': string; 'network.carrier.mnc': string; 'network.carrier.name': string; 'network.connection.subtype': string; 'network.connection.type': string; 'observer.type': string; 'observer.version_major': number; 'observer.version': string; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'session.id': string; 'trace.id': string; 'transaction.aggregation.overflow_count': number; 'transaction.duration.us': number; 'transaction.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.result': string; 'transaction.sampled': boolean; 'service.environment': string; 'service.framework.name': string; 'service.framework.version': string; 'service.language.name': string; 'service.language.version': string; 'service.name': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.target.name': string; 'service.target.type': string; 'service.version': string; 'span.action': string; 'span.destination.service.resource': string; 'span.destination.service.response_time.count': number; 'span.destination.service.response_time.sum.us': number; 'span.duration.us': number; 'span.id': string; 'span.name': string; 'span.stacktrace': ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.APMStacktrace",
+            "text": "APMStacktrace"
+          },
+          "[]; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.subtype': string; 'span.type': string; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'url.original': string; 'url.domain': string; 'url.full': string; 'url.path': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.heap.max': number; 'jvm.memory.non_heap.used': number; 'jvm.memory.non_heap.max': number; 'jvm.thread.count': number; 'jvm.gc.time': number; 'jvm.gc.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }> & Partial<{ 'metricset.interval': string; 'transaction.duration.summary': string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/apm_fields.ts",
-        "lineNumber": 88,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4137,7 +4366,7 @@
         "label": "LogDocument",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'service.version'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'event.ingested': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'client.ip'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception'?: unknown; 'error.log'?: unknown; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.geo.city_name'?: string | undefined; 'host.geo.country_name'?: string | undefined; 'host.geo.country_iso_code'?: string | undefined; 'host.geo.continent_name'?: string | undefined; 'host.geo.region_name'?: string | undefined; 'host.geo.timezone'?: string | undefined; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; 'event.category'?: string | undefined; 'event.type'?: string | undefined; 'event.outcome'?: string | undefined; 'event.action'?: string | undefined; 'event.sequence'?: number | undefined; 'source.ip'?: string | undefined; 'rule.name'?: string | undefined; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; 'http.response.status_code'?: number | undefined; 'http.response.bytes'?: number | undefined; 'http.request.method'?: string | undefined; 'http.request.referrer'?: string | undefined; 'http.version'?: string | undefined; 'url.path'?: string | undefined; 'process.name'?: string | undefined; 'kubernetes.namespace'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; 'kubernetes.container.name'?: string | undefined; 'kubernetes.deployment.name'?: string | undefined; 'kubernetes.replicaset.name'?: string | undefined; 'kubernetes.statefulset.name'?: string | undefined; 'kubernetes.daemonset.name'?: string | undefined; 'orchestrator.resource.name'?: string | undefined; tags?: string | string[] | undefined; 'user.name'?: string | undefined; 'user_agent.name'?: string | undefined; 'orchestrator.type'?: string | undefined; 'orchestrator.resource.type'?: string | undefined; 'container.image.name'?: string | undefined; 'container.image.tag'?: string | undefined; 'container.runtime'?: string | undefined; 'host.os.platform'?: string | undefined; 'host.os.name'?: string | undefined; 'host.os.version'?: string | undefined; 'host.architecture'?: string | undefined; 'cloud.instance.name'?: string | undefined; 'kubernetes.container.image'?: string | undefined; 'kubernetes.container.image_id'?: string | undefined; 'kubernetes.node.name'?: string | undefined; 'kubernetes.node.uid'?: string | undefined; 'kubernetes.labels.app'?: string | undefined; 'kubernetes.labels.version'?: string | undefined; 'kubernetes.labels.tier'?: string | undefined; 'kubernetes.annotations.deployment'?: string | undefined; 'process.pid'?: number | undefined; 'deployment.name'?: string | undefined; 'network.protocol'?: string | undefined; 'network.transport'?: string | undefined; 'network.type'?: string | undefined; 'tls.version'?: string | undefined; 'tls.cipher'?: string | undefined; 'tls.server.subject'?: string | undefined; 'tls.client.subject'?: string | undefined; 'session.id'?: string | undefined; 'span.id'?: string | undefined; 'error.type'?: string | undefined; 'error.code'?: string | undefined; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'service.version'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'event.ingested': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'client.ip'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception'?: unknown; 'error.exception.type'?: string | undefined; 'error.exception.message'?: string | undefined; 'error.log'?: unknown; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.geo.city_name'?: string | undefined; 'host.geo.country_name'?: string | undefined; 'host.geo.country_iso_code'?: string | undefined; 'host.geo.continent_name'?: string | undefined; 'host.geo.region_name'?: string | undefined; 'host.geo.timezone'?: string | undefined; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; 'event.category'?: string | undefined; 'event.type'?: string | undefined; 'event.outcome'?: string | undefined; 'event.action'?: string | undefined; 'event.sequence'?: number | undefined; 'event.name'?: string | undefined; 'source.ip'?: string | undefined; 'rule.name'?: string | undefined; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; 'http.response.status_code'?: number | undefined; 'http.response.bytes'?: number | undefined; 'http.request.method'?: string | undefined; 'http.request.referrer'?: string | undefined; 'http.version'?: string | undefined; 'url.path'?: string | undefined; 'process.name'?: string | undefined; 'kubernetes.namespace'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; 'kubernetes.container.name'?: string | undefined; 'kubernetes.deployment.name'?: string | undefined; 'kubernetes.replicaset.name'?: string | undefined; 'kubernetes.statefulset.name'?: string | undefined; 'kubernetes.daemonset.name'?: string | undefined; 'orchestrator.resource.name'?: string | undefined; tags?: string | string[] | undefined; 'user.name'?: string | undefined; 'user_agent.name'?: string | undefined; 'orchestrator.type'?: string | undefined; 'orchestrator.resource.type'?: string | undefined; 'container.image.name'?: string | undefined; 'container.image.tag'?: string | undefined; 'container.runtime'?: string | undefined; 'host.os.platform'?: string | undefined; 'host.os.name'?: string | undefined; 'host.os.version'?: string | undefined; 'host.architecture'?: string | undefined; 'cloud.instance.name'?: string | undefined; 'kubernetes.container.image'?: string | undefined; 'kubernetes.container.image_id'?: string | undefined; 'kubernetes.node.name'?: string | undefined; 'kubernetes.node.uid'?: string | undefined; 'kubernetes.labels.app'?: string | undefined; 'kubernetes.labels.version'?: string | undefined; 'kubernetes.labels.tier'?: string | undefined; 'kubernetes.annotations.deployment'?: string | undefined; 'process.pid'?: number | undefined; 'deployment.name'?: string | undefined; 'network.protocol'?: string | undefined; 'network.transport'?: string | undefined; 'network.type'?: string | undefined; 'tls.version'?: string | undefined; 'tls.cipher'?: string | undefined; 'tls.server.subject'?: string | undefined; 'tls.client.subject'?: string | undefined; 'session.id'?: string | undefined; 'span.id'?: string | undefined; 'error.type'?: string | undefined; 'error.code'?: string | undefined; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
         "lineNumber": 25,
@@ -4856,7 +5085,7 @@
         "label": "log",
         "description": [],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-        "lineNumber": 253,
+        "lineNumber": 260,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4872,7 +5101,7 @@
               "(logsOptions?: LogsOptions) => Log"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-            "lineNumber": 254,
+            "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4889,7 +5118,7 @@
                   "LogsOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-                "lineNumber": 210,
+                "lineNumber": 217,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4907,7 +5136,7 @@
               "(index: string) => Log"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-            "lineNumber": 255,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4921,7 +5150,7 @@
                 "label": "index",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-                "lineNumber": 224,
+                "lineNumber": 231,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4939,7 +5168,7 @@
               "({ dataset, namespace, }?: { dataset?: string | undefined; namespace?: string | undefined; }) => Log"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-            "lineNumber": 256,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4956,7 +5185,7 @@
                   "{ dataset?: string | undefined; namespace?: string | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/logs/index.ts",
-                "lineNumber": 234,
+                "lineNumber": 241,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false

@@ -1,0 +1,776 @@
+{
+  "id": "@kbn/dashboard-agent-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.isGenericAttachmentPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "isGenericAttachmentPanel",
+        "description": [
+          "\nType guard to check if a panel is a generic (non-Lens) panel."
+        ],
+        "signature": [
+          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.isGenericAttachmentPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "panel",
+            "description": [],
+            "signature": [
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.isLensAttachmentPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "isLensAttachmentPanel",
+        "description": [
+          "\nType guard to check if a panel is a Lens panel."
+        ],
+        "signature": [
+          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.isLensAttachmentPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "panel",
+            "description": [],
+            "signature": [
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.PanelAddedEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelAddedEventData",
+        "description": [
+          "\nData payload for a panel added event."
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelAddedEventData.dashboardAttachmentId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardAttachmentId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelAddedEventData.panel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "panel",
+            "description": [],
+            "signature": [
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.PanelsRemovedEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelsRemovedEventData",
+        "description": [
+          "\nData payload for a panel removed event."
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelsRemovedEventData.dashboardAttachmentId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardAttachmentId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-agent-common",
+            "id": "def-common.PanelsRemovedEventData.panelIds",
+            "type": "Array",
+            "tags": [],
+            "label": "panelIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.AttachmentPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "AttachmentPanel",
+        "description": [
+          "\nUnion type for dashboard panel entries.\n- LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')\n- GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)"
+        ],
+        "signature": [
+          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DASHBOARD_AGENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_AGENT_ID",
+        "description": [
+          "\nDashboard agent ID"
+        ],
+        "signature": [
+          "\"platform.dashboard.dashboard_agent\""
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DASHBOARD_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_ATTACHMENT_TYPE",
+        "description": [
+          "\nAttachment type identifier for dashboard state"
+        ],
+        "signature": [
+          "\"platform.dashboard.dashboard_state\""
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DASHBOARD_PANEL_ADDED_EVENT",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_PANEL_ADDED_EVENT",
+        "description": [
+          "\nUI event type for panel added"
+        ],
+        "signature": [
+          "\"dashboard:panel_added\""
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DASHBOARD_PANELS_REMOVED_EVENT",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_PANELS_REMOVED_EVENT",
+        "description": [
+          "\nUI event type for panel removed"
+        ],
+        "signature": [
+          "\"dashboard:panels_removed\""
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardAttachmentData",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardAttachmentData",
+        "description": [
+          "\nData for a dashboard attachment."
+        ],
+        "signature": [
+          "{ description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardSection",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardSection",
+        "description": [
+          "\nA dashboard section containing panels."
+        ],
+        "signature": [
+          "{ title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.DashboardUiEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardUiEvent",
+        "description": [
+          "\nUnion type for dashboard UI events."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolUiEvent",
+            "text": "ToolUiEvent"
+          },
+          "<\"dashboard:panel_added\", ",
+          {
+            "pluginId": "@kbn/dashboard-agent-common",
+            "scope": "common",
+            "docId": "kibKbnDashboardAgentCommonPluginApi",
+            "section": "def-common.PanelAddedEventData",
+            "text": "PanelAddedEventData"
+          },
+          "> | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ToolUiEvent",
+            "text": "ToolUiEvent"
+          },
+          "<\"dashboard:panels_removed\", ",
+          {
+            "pluginId": "@kbn/dashboard-agent-common",
+            "scope": "common",
+            "docId": "kibKbnDashboardAgentCommonPluginApi",
+            "section": "def-common.PanelsRemovedEventData",
+            "text": "PanelsRemovedEventData"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.GenericAttachmentPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericAttachmentPanel",
+        "description": [
+          "\nA non-Lens panel entry containing the raw embeddable configuration.\nUsed for markdown, maps, TSVB, and other panel types, as well as\nLens panels with unsupported chart types that can't be converted to API format."
+        ],
+        "signature": [
+          "{ type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.LensAttachmentPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "LensAttachmentPanel",
+        "description": [
+          "\nA Lens panel entry containing full visualization configuration in API format.\nAll Lens panels (whether created by the agent or extracted from existing dashboards)\nare stored in this unified format using LensApiSchemaType."
+        ],
+        "signature": [
+          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.attachmentPanelSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "attachmentPanelSchema",
+        "description": [
+          "\nZod schema for dashboard panel entries."
+        ],
+        "signature": [
+          "ZodUnion",
+          "<[",
+          "ZodObject",
+          "<{ type: ",
+          "ZodLiteral",
+          "<\"lens\">; panelId: ",
+          "ZodString",
+          "; visualization: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; query: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; esql: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ type: ",
+          "ZodString",
+          "; panelId: ",
+          "ZodString",
+          "; rawConfig: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.dashboardAttachmentDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardAttachmentDataSchema",
+        "description": [
+          "\nZod schema for dashboard attachment data."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ title: ",
+          "ZodString",
+          "; description: ",
+          "ZodString",
+          "; savedObjectId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; panels: ",
+          "ZodArray",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodObject",
+          "<{ type: ",
+          "ZodLiteral",
+          "<\"lens\">; panelId: ",
+          "ZodString",
+          "; visualization: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; query: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; esql: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ type: ",
+          "ZodString",
+          "; panelId: ",
+          "ZodString",
+          "; rawConfig: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>, \"many\">; sections: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ title: ",
+          "ZodString",
+          "; panels: ",
+          "ZodArray",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodObject",
+          "<{ type: ",
+          "ZodLiteral",
+          "<\"lens\">; panelId: ",
+          "ZodString",
+          "; visualization: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; query: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; esql: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ type: ",
+          "ZodString",
+          "; panelId: ",
+          "ZodString",
+          "; rawConfig: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>, \"many\">>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }, { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.dashboardSectionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardSectionSchema",
+        "description": [
+          "\nZod schema for a dashboard section containing panels."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ title: ",
+          "ZodString",
+          "; panels: ",
+          "ZodArray",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodObject",
+          "<{ type: ",
+          "ZodLiteral",
+          "<\"lens\">; panelId: ",
+          "ZodString",
+          "; visualization: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; query: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; esql: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          "ZodObject",
+          "<{ type: ",
+          "ZodString",
+          "; panelId: ",
+          "ZodString",
+          "; rawConfig: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 93,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.genericAttachmentPanelSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "genericAttachmentPanelSchema",
+        "description": [
+          "\nZod schema for generic (non-Lens) panel entries.\nThe `type` field contains the actual embeddable type."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ type: ",
+          "ZodString",
+          "; panelId: ",
+          "ZodString",
+          "; rawConfig: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dashboard-agent-common",
+        "id": "def-common.lensAttachmentPanelSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "lensAttachmentPanelSchema",
+        "description": [
+          "\nZod schema for Lens panel entries."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ type: ",
+          "ZodLiteral",
+          "<\"lens\">; panelId: ",
+          "ZodString",
+          "; visualization: ",
+          "ZodRecord",
+          "<",
+          "ZodString",
+          ", ",
+          "ZodUnknown",
+          ">; title: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; query: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; esql: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -58,7 +58,7 @@
                     "label": "children",
                     "description": [],
                     "signature": [
-                      "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                      "React.ReactNode"
                     ],
                     "path": "src/core/packages/i18n/browser/src/types.ts",
                     "lineNumber": 22,
