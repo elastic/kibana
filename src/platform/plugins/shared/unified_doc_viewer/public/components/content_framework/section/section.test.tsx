@@ -101,35 +101,4 @@ describe('ContentFrameworkSection', () => {
     await userEvent.click(toggleBtn);
     expect(onToggle).toHaveBeenCalled();
   });
-
-  describe('onPanelClick', () => {
-    it('calls onPanelClick when the panel content is clicked', () => {
-      const onPanelClick = jest.fn();
-      render(<ContentFrameworkSection {...defaultProps} onPanelClick={onPanelClick} />);
-      fireEvent.click(screen.getByText('Section children'));
-      expect(onPanelClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls onPanelClick when Enter is pressed on the panel content', () => {
-      const onPanelClick = jest.fn();
-      render(<ContentFrameworkSection {...defaultProps} onPanelClick={onPanelClick} />);
-      const clickableWrapper = screen.getByText('Section children').parentElement!;
-      fireEvent.keyDown(clickableWrapper, { key: 'Enter' });
-      expect(onPanelClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls onPanelClick when Space is pressed on the panel content', () => {
-      const onPanelClick = jest.fn();
-      render(<ContentFrameworkSection {...defaultProps} onPanelClick={onPanelClick} />);
-      const clickableWrapper = screen.getByText('Section children').parentElement!;
-      fireEvent.keyDown(clickableWrapper, { key: ' ' });
-      expect(onPanelClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not wrap children in a clickable div when onPanelClick is not provided', () => {
-      render(<ContentFrameworkSection {...defaultProps} />);
-      const childEl = screen.getByText('Section children');
-      expect(childEl.parentElement).not.toHaveAttribute('tabindex');
-    });
-  });
 });
