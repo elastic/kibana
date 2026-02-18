@@ -17,7 +17,8 @@
       "licensing"
     ],
     "optionalPlugins": [
-      "usageApi"
+      "usageApi",
+      "cloud",
     ],
   }
 }
