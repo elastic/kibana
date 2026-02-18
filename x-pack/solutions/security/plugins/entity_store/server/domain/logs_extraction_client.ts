@@ -36,6 +36,7 @@ import type {
 } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -319,7 +320,7 @@ export class LogsExtractionClient {
       const cleanIndices = secSolDataView
         .getIndexPattern()
         .split(',')
-        .filter((index) => index !== alertsIndex);
+        .filter((index) => index !== alertsIndex && !isCCSRemoteIndexName(index));
       indexPatterns.push(...cleanIndices);
     } catch (error) {
       this.logger.warn(
