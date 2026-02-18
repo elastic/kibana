@@ -80,12 +80,15 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
+  const onTableChange = useCallback(
+    ({ page = {} }: any) => {
+      const { index, size } = page;
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, [setPageSize]);
+      setPageIndex(index);
+      setPageSize(size);
+    },
+    [setPageSize]
+  );
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {

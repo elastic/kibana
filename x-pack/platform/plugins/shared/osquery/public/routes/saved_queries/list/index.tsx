@@ -244,12 +244,15 @@ const SavedQueriesPageComponent = () => {
     ]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-    setSortField(sort.field);
-    setSortDirection(sort.direction);
-  }, [setPageSize]);
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }: any) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    },
+    [setPageSize]
+  );
 
   const pagination = useMemo(
     () => ({
