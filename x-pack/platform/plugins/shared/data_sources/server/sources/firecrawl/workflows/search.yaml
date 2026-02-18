@@ -1,7 +1,7 @@
 version: '1'
 name: 'sources.firecrawl.search'
 description: 'Search or crawl web content via Firecrawl'
-tags: ['agent-builder-tool']
+tags: []
 enabled: true
 triggers:
   - type: 'manual'
