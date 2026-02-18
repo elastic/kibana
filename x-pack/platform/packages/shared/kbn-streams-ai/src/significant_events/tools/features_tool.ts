@@ -13,6 +13,7 @@ export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
   'technology',
   'dependency',
   'entity',
+  'schema',
   ...COMPUTED_FEATURE_TYPES,
 ] as const;
 
