@@ -132,16 +132,7 @@ Open `<KIBANA_ROOT>/.scout/servers/cloud_mki.json`:
 
 - `projectType` values: `es`, `security`, `oblt`
 - `cloudHostName`: the Cloud environment hostname (for example `console.qa.cld.elstc.co` or `cloud.elastic.co`)
-
-Run tests with `--project mki`:
-
-```bash
-npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
-  --project mki \
-  --grep @cloud-serverless-<domain>
-```
-
-Example `--grep` values: `@cloud-serverless-search`, `@cloud-serverless-observability_complete`, `@cloud-serverless-security_ease`.
+- More information on how to get the `<operator_password>` in the info box below
 
 :::::::{note}
 Internal (Elasticians): `testing-internal` is an operator user with `superuser` privileges plus additional [operator privileges](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/operator-privileges).
@@ -163,13 +154,25 @@ curl -XPOST \
 
 :::::
 
+Run tests with `--project mki`:
+
+```bash
+npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
+  --project mki \
+  --grep @cloud-serverless-<domain>
+```
+
+Example `--grep` values: `@cloud-serverless-search`, `@cloud-serverless-observability_complete`, `@cloud-serverless-security_ease`.
+
 :::::::{note}
 Internal (Elasticians): provisioning Cloud users/roles and populating `<kibana root>/.ftr/role_users.json` is internal-only; see [internal AppEx QA documentation](https://docs.elastic.dev/appex-qa/create-cloud-users).
 :::::::
 
 ### Run on Cloud with the Scout CLI [scout-run-tests-cloud-cli]
 
-ECH:
+:::::{tab-set}
+
+::::{tab-item} ECH (stateful)
 
 ```bash
 node scripts/scout.js run-tests \
@@ -179,7 +182,9 @@ node scripts/scout.js run-tests \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
-MKI:
+::::
+
+::::{tab-item} MKI (serverless)
 
 ```bash
 node scripts/scout.js run-tests \
@@ -188,6 +193,10 @@ node scripts/scout.js run-tests \
   --location cloud \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
+
+::::
+
+:::::
 
 ## Run Scout tests with QAF (internal) [scout-run-tests-qaf]
 
