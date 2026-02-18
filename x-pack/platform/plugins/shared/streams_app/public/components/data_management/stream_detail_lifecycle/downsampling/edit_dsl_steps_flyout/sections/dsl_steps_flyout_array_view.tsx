@@ -22,6 +22,7 @@ import type { FormArrayField } from '@kbn/es-ui-shared-plugin/static/forms/hook_
 import {
   MAX_DOWNSAMPLE_STEPS,
   type DslStepMetaFields,
+  type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
   toMilliseconds,
 } from '../form';
@@ -29,6 +30,14 @@ import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
 import { StepTabsRow } from './step_tabs_row';
+
+/** Partial form update including internal __dslStepsFlyout flag for updateFieldValues */
+type DslStepsFlyoutFormFieldUpdate = Partial<DslStepsFlyoutFormInternal> & {
+  _meta?: Partial<DslStepsFlyoutFormInternal['_meta']> & {
+    __dslStepsFlyout?: boolean;
+    downsampleSteps: DslStepMetaFields[];
+  };
+};
 
 export interface DslStepsFlyoutArrayViewProps {
   arrayField: FormArrayField;
@@ -143,10 +152,10 @@ export const DslStepsFlyoutArrayView = ({
         nextSteps.push(createNextStepFromPrevious(nextSteps[nextSteps.length - 1]));
       }
 
-      form.updateFieldValues(
-        { _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps } } as any,
-        { runDeserializer: false }
-      );
+      const payload: DslStepsFlyoutFormFieldUpdate = {
+        _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
+      };
+      form.updateFieldValues(payload, { runDeserializer: false });
     },
     [
       clampStepIndex,
@@ -243,10 +252,10 @@ export const DslStepsFlyoutArrayView = ({
     const nextStep = createNextStepFromPrevious(previousStep);
 
     const nextSteps: DslStepMetaFields[] = [...currentSteps, nextStep];
-    form.updateFieldValues(
-      { _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps } } as any,
-      { runDeserializer: false }
-    );
+    const payload: DslStepsFlyoutFormFieldUpdate = {
+      _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
+    };
+    form.updateFieldValues(payload, { runDeserializer: false });
     setSelectedStepIndex(nextIndex);
   }, [createNextStepFromPrevious, form, getCurrentSteps, items.length, setSelectedStepIndex]);
 
@@ -255,10 +264,10 @@ export const DslStepsFlyoutArrayView = ({
       const oldLength = items.length;
 
       const nextSteps = getCurrentSteps().filter((_, index) => index !== stepIndex);
-      form.updateFieldValues(
-        { _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps } } as any,
-        { runDeserializer: false }
-      );
+      const payload: DslStepsFlyoutFormFieldUpdate = {
+        _meta: { __dslStepsFlyout: true, downsampleSteps: nextSteps },
+      };
+      form.updateFieldValues(payload, { runDeserializer: false });
 
       if (selectedStepIndex === undefined) return;
       const newLength = oldLength - 1;
