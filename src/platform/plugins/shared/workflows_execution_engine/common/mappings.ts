@@ -18,7 +18,16 @@ export const WORKFLOWS_EXECUTION_STATE_INDEX = '.workflows-execution-state';
 export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    id: {
+      type: 'keyword',
+    },
+    type: {
+      type: 'keyword',
+    },
     status: {
+      type: 'keyword',
+    },
+    concurrencyGroupKey: {
       type: 'keyword',
     },
   },
@@ -70,6 +79,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
+    type: {
+      type: 'keyword',
+    },
   },
 };
 
@@ -103,6 +115,9 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     duration: {
       // milliseconds
       type: 'long',
+    },
+    type: {
+      type: 'keyword',
     },
   },
 };
