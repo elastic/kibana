@@ -5,7 +5,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 99345
   aiops: 15227
-  alerting: 122384
+  alerting: 22371
   alertingVTwo: 361715
   apm: 38573
   apmSourcesAccess: 11772
@@ -45,9 +45,9 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 288957
   dataVisualizer: 32778
-  developerToolbar: 22749
-  devTools: 52720
-  discover: 28131
+  developerToolbar: 4467
+  devTools: 8109
+  discover: 28284
   discoverEnhanced: 5517
   discoverShared: 17308
   elasticAssistant: 338870
@@ -57,7 +57,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 4488
   enterpriseSearch: 37566
   entityStore: 71717
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 92471
@@ -110,8 +110,8 @@ pageLoadAssetSize:
   lists: 5093
   logsDataAccess: 79104
   logsShared: 101273
-  logstash: 78202
-  maintenanceWindows: 38395
+  logstash: 15882
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 34798
@@ -119,9 +119,9 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 48811
   monitoring: 28983
-  navigation: 153388
-  newsfeed: 64810
-  noDataPage: 8765
+  navigation: 11814
+  newsfeed: 11369
+  noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 7077
   observabilityAIAssistant: 531533
@@ -210,7 +210,7 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizationListing: 5148
   visualizations: 52268
-  watcher: 60145
-  workflowsExtensions: 90040
+  watcher: 10485
+  workflowsExtensions: 89952
   workflowsManagement: 21318
   workplaceAIApp: 65547
