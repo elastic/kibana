@@ -10,7 +10,7 @@
 import { CurrencyFormat } from './currency';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import type { FieldFormatsGetConfigFn } from '../types';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('CurrencyFormat', () => {
   const config: { [key: string]: string } = {
@@ -36,11 +36,12 @@ describe('CurrencyFormat', () => {
 
     expect(formatter.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(formatter.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(formatter.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(formatter.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+  });
+
+  test('htmlConvert throws an error', () => {
+    const formatter = new CurrencyFormat({ pattern: '$0.[0]' }, getConfig);
+    expect(() => formatter.convert(12000, 'html')).toThrow(
+      'NumeralFormat does not support HTML rendering'
     );
   });
 });

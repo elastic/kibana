@@ -70,13 +70,10 @@ export class DateFormat extends FieldFormat {
     return this.memoizedConverter(val);
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'DateFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (val, options) => {

@@ -8,7 +8,7 @@
  */
 
 import { TruncateFormat } from './truncate';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('String TruncateFormat', () => {
   test('truncate large string', () => {
@@ -48,14 +48,12 @@ describe('String TruncateFormat', () => {
     expect(truncate.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(truncate.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(truncate.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
-    expect(truncate.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(truncate.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(truncate.convert('', HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(blank)</span>'
+  });
+
+  test('htmlConvert throws an error', () => {
+    const truncate = new TruncateFormat({ fieldLength: 4 }, jest.fn());
+    expect(() => truncate.convert('test', 'html')).toThrow(
+      'TruncateFormat does not support HTML rendering'
     );
   });
 });

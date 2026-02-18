@@ -35,15 +35,6 @@ describe('NumberFormat', () => {
     expect(
       formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 })
     ).toMatchInlineSnapshot(`"{\\"min\\":150,\\"max\\":1000,\\"sum\\":5000,\\"value_count\\":10}"`);
-    expect(formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 }, 'html'))
-      .toMatchInlineSnapshot(`
-      "{
-        \\"min\\": 150,
-        \\"max\\": 1000,
-        \\"sum\\": 5000,
-        \\"value_count\\": 10
-      }"
-    `);
   });
 
   test('object input stringified', () => {
@@ -53,18 +44,17 @@ describe('NumberFormat', () => {
     ).toMatchInlineSnapshot(
       `"{\\"min\\":-302.5,\\"max\\":702.3,\\"sum\\":200.0,\\"value_count\\":25}"`
     );
-    expect(
-      formatter.convert('{"min":-302.5,"max":702.3,"sum":200.0,"value_count":25}', 'html')
-    ).toMatchInlineSnapshot(
-      `"{\\"min\\":-302.5,\\"max\\":702.3,\\"sum\\":200.0,\\"value_count\\":25}"`
-    );
   });
 
   test('null input', () => {
     const formatter = new NumberFormat({}, getConfig);
     expect(formatter.convert(null)).toMatchInlineSnapshot(`"${NULL_LABEL}"`);
-    expect(formatter.convert(null, 'html')).toMatchInlineSnapshot(
-      `"<span class=\\"ffString__emptyValue\\">${NULL_LABEL}</span>"`
+  });
+
+  test('htmlConvert throws an error', () => {
+    const formatter = new NumberFormat({}, getConfig);
+    expect(() => formatter.convert(123, 'html')).toThrow(
+      'NumeralFormat does not support HTML rendering'
     );
   });
 });

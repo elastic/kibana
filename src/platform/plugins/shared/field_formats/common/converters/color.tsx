@@ -9,8 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
-import { findLast, cloneDeep, escape } from 'lodash';
+import { findLast, cloneDeep } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type {
@@ -89,22 +88,9 @@ export class ColorFormat extends FieldFormat {
     return asPrettyString(val, options);
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
-
-    const displayVal = escape(asPrettyString(val, options));
-    if (!color) return displayVal;
-
-    return ReactDOM.renderToStaticMarkup(
-      <span
-        style={getBadgeStyles(color.text, color.background)}
-        dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
-      />
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'ColorFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
     );
   };
 

@@ -49,13 +49,10 @@ export class BoolFormat extends FieldFormat {
     }
   };
 
-  htmlConvert: HtmlContextTypeConvert = (value, options) => {
-    const missing = this.checkForMissingValueHtml(value);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(value, options);
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'BoolFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (value, options) => {

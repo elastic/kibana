@@ -119,13 +119,10 @@ export class DurationFormat extends FieldFormat {
     return humanPrecise ? precise : prefix + precise + suffix;
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'DurationFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (val, options) => {

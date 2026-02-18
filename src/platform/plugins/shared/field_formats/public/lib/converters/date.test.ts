@@ -9,11 +9,7 @@
 
 import moment from 'moment-timezone';
 import { DateFormat } from './date';
-import {
-  type FieldFormatsGetConfigFn,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-} from '../../../common';
+import { type FieldFormatsGetConfigFn, TEXT_CONTEXT_TYPE } from '../../../common';
 
 describe('Date Format', () => {
   let convert: Function;
@@ -39,12 +35,6 @@ describe('Date Format', () => {
   test('decoding an undefined or null date should return an empty string', () => {
     expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
   });
 
   test('should clear the memoization cache after changing the date', () => {
@@ -67,5 +57,11 @@ describe('Date Format', () => {
   test('should return the value itself when it cannot successfully be formatted', () => {
     const dateMath = 'now+1M/d';
     expect(convert(dateMath)).toBe(dateMath);
+  });
+
+  test('htmlConvert throws an error', () => {
+    expect(() => convert('2017-01-01', 'html')).toThrow(
+      'DateFormat does not support HTML rendering'
+    );
   });
 });

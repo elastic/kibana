@@ -10,7 +10,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BoolFormat } from './boolean';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 import { EMPTY_VALUE_CLASS } from '../components';
 
 describe('Boolean Format', () => {
@@ -72,11 +72,11 @@ describe('Boolean Format', () => {
   test('handles a missing value', () => {
     expect(boolean.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(boolean.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(boolean.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(boolean.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+  });
+
+  test('htmlConvert throws an error', () => {
+    expect(() => boolean.convert(true, 'html')).toThrow(
+      'BoolFormat does not support HTML rendering'
     );
   });
 

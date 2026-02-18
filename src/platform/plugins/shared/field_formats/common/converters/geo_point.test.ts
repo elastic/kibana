@@ -8,7 +8,7 @@
  */
 
 import { GeoPointFormat } from './geo_point';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('GeoPoint Format', () => {
   describe('output format', () => {
@@ -99,12 +99,18 @@ describe('GeoPoint Format', () => {
       );
       expect(geoPointFormat.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
       expect(geoPointFormat.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-      expect(geoPointFormat.convert(null, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="ffString__emptyValue">(null)</span>'
+    });
+
+    test('htmlConvert throws an error', () => {
+      const geoPointFormat = new GeoPointFormat(
+        {
+          transform: 'lat_lon_string',
+        },
+        jest.fn()
       );
-      expect(geoPointFormat.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-        '<span class="ffString__emptyValue">(null)</span>'
-      );
+      expect(() =>
+        geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] }, 'html')
+      ).toThrow('GeoPointFormat does not support HTML rendering');
     });
   });
 });

@@ -9,7 +9,7 @@
 
 import moment from 'moment-timezone';
 import { RelativeDateFormat } from './relative_date';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('Relative Date Format', () => {
   let convert: Function;
@@ -22,12 +22,6 @@ describe('Relative Date Format', () => {
   test('decoding a missing value', () => {
     expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
   });
 
   test('decoding invalid date should echo invalid value', () => {
@@ -37,5 +31,11 @@ describe('Relative Date Format', () => {
   test('should parse date values', () => {
     const val = '2017-08-13T20:24:09.904Z';
     expect(convert(val)).toBe(moment(val).fromNow());
+  });
+
+  test('htmlConvert throws an error', () => {
+    expect(() => convert('test', 'html')).toThrow(
+      'RelativeDateFormat does not support HTML rendering'
+    );
   });
 });

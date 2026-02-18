@@ -42,13 +42,10 @@ export class RelativeDateFormat extends FieldFormat {
     }
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'RelativeDateFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (val, options) => {

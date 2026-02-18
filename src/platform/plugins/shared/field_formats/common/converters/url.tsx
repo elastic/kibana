@@ -9,9 +9,9 @@
 
 import React, { type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { escape, memoize } from 'lodash';
+import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightHtml, getHighlightReact } from '../utils';
+import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
   TextContextTypeConvert,
@@ -126,17 +126,6 @@ export class UrlFormat extends FieldFormat {
     };
   }
 
-  private generateImgHtml(url: string, imageLabel: string): string {
-    const parsedWidth = parseInt(this.param('width'), 10);
-    const parsedHeight = parseInt(this.param('height'), 10);
-    const isValidWidth = !isNaN(parsedWidth);
-    const isValidHeight = !isNaN(parsedHeight);
-    const maxWidth = isValidWidth ? `${parsedWidth}px` : 'none';
-    const maxHeight = isValidHeight ? `${parsedHeight}px` : 'none';
-
-    return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
-  }
-
   private getImgStyle(): React.CSSProperties {
     const parsedWidth = parseInt(this.param('width'), 10);
     const parsedHeight = parseInt(this.param('height'), 10);
@@ -153,7 +142,6 @@ export class UrlFormat extends FieldFormat {
 
   /**
    * Calculate the URL prefix for relative URLs based on parsedUrl context.
-   * This is shared between htmlConvert and reactConvert.
    */
   private getUrlPrefix(url: string): string {
     const { parsedUrl } = this._params;
@@ -192,77 +180,10 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
-    const missing = this.checkForMissingValueHtml(rawValue);
-    if (missing) {
-      return missing;
-    }
-
-    const { field, hit } = options;
-    const { parsedUrl } = this._params;
-    const { basePath, pathname, origin } = parsedUrl || {};
-
-    const url = escape(this.formatUrl(rawValue));
-    const label = escape(this.formatLabel(rawValue, url));
-
-    switch (this.param('type')) {
-      case 'audio':
-        return `<audio controls preload="none" src="${url}">`;
-
-      case 'img':
-        // If the URL hasn't been formatted to become a meaningful label then the best we can do
-        // is tell screen readers where the image comes from.
-        const imageLabel =
-          label === url ? `A dynamically-specified image located at ${url}` : label;
-
-        return this.generateImgHtml(url, imageLabel);
-      default:
-        const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
-        if (!allowed && !parsedUrl) {
-          return url;
-        }
-
-        let prefix = '';
-        /**
-         * This code attempts to convert a relative url into a kibana absolute url
-         *
-         * SUPPORTED:
-         *  - /app/kibana/
-         *  - ../app/kibana
-         *  - #/discover
-         *
-         * UNSUPPORTED
-         *  - app/kibana
-         */
-        if (!allowed) {
-          // Handles urls like: `#/discover`
-          if (url[0] === '#') {
-            prefix = `${origin}${pathname}`;
-          }
-          // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-          else if (url.indexOf(basePath || '/') === 0) {
-            prefix = `${origin}`;
-          }
-          // Handle urls like: `../app/kibana`
-          else {
-            const prefixEnd = url[0] === '/' ? '' : '/';
-
-            prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
-          }
-        }
-
-        let linkLabel;
-
-        if (hit && hit.highlight && hit.highlight[field?.name!]) {
-          linkLabel = getHighlightHtml(label, hit.highlight[field!.name]);
-        } else {
-          linkLabel = label;
-        }
-
-        const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
-
-        return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
-    }
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'UrlFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (rawValue: string, options = {}) => {

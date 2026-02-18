@@ -81,14 +81,10 @@ export abstract class NumeralFormat extends FieldFormat {
     return formatted;
   }
 
-  htmlConvert: HtmlContextTypeConvert = (val) => {
-    if (val == null || val === MISSING_TOKEN) {
-      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
-    }
-    if (typeof val === 'object' && !Array.isArray(val)) {
-      return asPrettyString(val);
-    }
-    return this.getConvertedValue(val);
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'NumeralFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   textConvert: TextContextTypeConvert = (val) => {

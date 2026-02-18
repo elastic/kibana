@@ -8,10 +8,9 @@
  */
 
 import React from 'react';
-import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { asPrettyString, getHighlightHtml, getHighlightReact, shortenDottedString } from '../utils';
+import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
   TextContextTypeConvert,
@@ -137,15 +136,10 @@ export class StringFormat extends FieldFormat {
     }
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return hit?.highlight?.[field?.name!]
-      ? getHighlightHtml(escape(val), hit.highlight[field!.name])
-      : escape(this.textConvert(val));
+  htmlConvert: HtmlContextTypeConvert = () => {
+    throw new Error(
+      'StringFormat does not support HTML rendering. Use reactConvert() or the FormattedValue component instead.'
+    );
   };
 
   reactConvert: ReactContextTypeConvert = (val, { hit, field } = {}) => {
