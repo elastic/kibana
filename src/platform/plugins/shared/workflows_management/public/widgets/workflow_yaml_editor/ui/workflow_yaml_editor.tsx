@@ -61,6 +61,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import {
   buildExecutionContext,
@@ -485,7 +486,7 @@ export const WorkflowYAMLEditor = ({
       if (!model || !editor) {
         return;
       }
-      if (isTriggerType(action.id)) {
+      if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
         insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
