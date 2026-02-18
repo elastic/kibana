@@ -42,17 +42,21 @@ export const getNLToESQLQuery: NodeHelperCreator<
       input.indexPattern ? `${indexPatternPrompt}\n${mainPrompt}` : mainPrompt
     );
 
+    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
+
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
+
     if (!esqlQuery) {
       logger.warn('Failed to extract ESQL query from translation response');
       const comment =
         '## Translation Summary\n\nFailed to extract ESQL query from translation response';
       return {
-        comments: [generateAssistantComment(comment)],
+        comments: [
+          generateAssistantComment(cleanMarkdown(translationSummary)),
+          generateAssistantComment(comment),
+        ],
       };
     }
-
-    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
 
     return {
       esqlQuery,

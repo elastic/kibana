@@ -11,7 +11,19 @@ export const NL_TO_ESQL_TRANSLATION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     `system`,
     `You are a helpful assistant that translates Natural language queries into ESQL queries.
-If the query cannot be translated, you must provide a summary of the reasons why it cannot be translated.  See the example output below for formatting.
+
+Try to translate to ESQL as much as possible. Keep in mind below when translating ESQL.
+
+- Make assumptions on the fields based on ECS mapping if no explicit mapping is provided.
+- If the query is asking to search for something in event payload, source payload and no specific field is mentioned, use KQL or QSTR command to search in the entire payload. For example, if instruction is search for "malware*" in event payload when use KQL command like so: \`where kql\("malware*"\)\`.
+- Correctness and completeness of the translation is more important that the performance of the query.
+- If even 20% of the detection logic can be translated, provide the ESQL query for that part and explain in the summary which parts of the query were not translated and why.
+- If not even 20% of the detection logic can be translated, you must:
+  - Provide a summary of the reasons why it cannot be translated.
+  - NOT provide any dummy/example or simple ESQL query.
+- Use LOOKUP JOIN to enrich data with lookup indices.
+
+See the example output below for formatting.
 
 <example_output>
 
@@ -29,9 +41,9 @@ This is going to be a detailed summary of the translation process, including any
   ],
   [
     'user',
-    `Translate the following Natural Language query into an ESQL query.\n 
-    --- 
-    \n 
+    `Translate the following Natural Language query into an ESQL query.\n
+    ---
+    \n
     {nl_query}
     \n
     ------------
@@ -45,8 +57,8 @@ export const NL_TO_ESQL_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromMessages<{
   [
     'system',
     `When translating a Natural Language query into an ESQL query,  give preference to below provided index pattern.
-    
-    Index Pattern: {index_pattern}  
+
+     Index Pattern: {index_pattern}
 
 `,
   ],
