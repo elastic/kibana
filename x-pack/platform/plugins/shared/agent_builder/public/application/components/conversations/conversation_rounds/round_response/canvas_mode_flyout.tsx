@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiButtonIcon,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -36,18 +29,12 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
   children,
   isSidebar,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   // Only apply custom width in full-screen context (not sidebar)
   const flyoutStyles = !isSidebar
     ? css`
         width: 50vw;
       `
     : undefined;
-
-  const headerStyles = css`
-    padding: ${euiTheme.size.m} ${euiTheme.size.l};
-  `;
 
   if (!isOpen) {
     return null;
@@ -60,8 +47,9 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
       ownFocus={false}
       outsideClickCloses={true}
       css={flyoutStyles}
+      type="push"
     >
-      <EuiFlyoutHeader hasBorder css={headerStyles}>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="canvasModeFlyoutTitle">
             {title ||
@@ -70,18 +58,6 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
               })}
           </h2>
         </EuiTitle>
-        <EuiButtonIcon
-          onClick={onClose}
-          iconType="cross"
-          aria-label={i18n.translate('xpack.agentBuilder.canvasMode.closeButton', {
-            defaultMessage: 'Close canvas mode',
-          })}
-          css={css`
-            position: absolute;
-            right: ${euiTheme.size.m};
-            top: ${euiTheme.size.m};
-          `}
-        />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
     </EuiFlyout>
