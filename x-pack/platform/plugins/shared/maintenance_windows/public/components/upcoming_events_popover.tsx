@@ -23,14 +23,14 @@ import {
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
 import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
-import type { MaintenanceWindow } from '../../common';
+import type { MaintenanceWindowUI } from '../../common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../common';
 import * as i18n from '../translations';
 import { useUiSetting } from '../utils/kibana_react';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 
 interface UpcomingEventsPopoverProps {
-  maintenanceWindowFindResponse: MaintenanceWindow;
+  maintenanceWindowFindResponse: MaintenanceWindowUI;
 }
 
 export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React.memo(

@@ -13,9 +13,9 @@ import {
   EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -150,46 +150,6 @@ export class StreamsApp {
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
-  }
-
-  /**
-   * Set absolute time range using the first date picker on the page.
-   * Uses .first() to handle pages with multiple date pickers (e.g., Retention tab).
-   * For pages with single date picker, prefer using pageObjects.datePicker.setAbsoluteRange().
-   */
-  async setAbsoluteTimeRange(range: { from: string; to: string }) {
-    const showDatesBtn = this.page.testSubj.locator('superDatePickerShowDatesButton').first();
-    const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton').first();
-    const startBtn = this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first();
-    const dateInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-
-    // Expand the date picker if it's in compact mode
-    if (await showDatesBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await showDatesBtn.click();
-    }
-
-    await expect(endBtn).toBeVisible();
-
-    // Set end date
-    await endBtn.click();
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    await dateInput.click();
-    await dateInput.clear();
-    await dateInput.fill(range.to);
-    await dateInput.press('Enter');
-    await endBtn.click();
-
-    // Set start date
-    await startBtn.click();
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    await dateInput.click();
-    await dateInput.clear();
-    await dateInput.fill(range.from);
-    await dateInput.press('Enter');
-    await this.page.keyboard.press('Escape');
-
-    // Apply the time range
-    await this.page.testSubj.locator('querySubmitButton').first().click();
   }
 
   async verifyDocCount(streamName: string, expectedCount: number) {
@@ -329,7 +289,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('columns').click();
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
   }
 
   async saveRoutingRule() {

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import type { LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
@@ -57,11 +57,12 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
+      const dynamicActionsManager =
+        await services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState
+        );
 
       const initialRuntimeState = await deserializeState(services, initialState);
 

@@ -73,7 +73,6 @@ const configSchema = schema.object({
     infrastructureTabAvailable: disabledOnServerless,
     infraUiAvailable: disabledOnServerless,
     migrationToFleetAvailable: disabledOnServerless,
-    serviceMapUseReactFlow: schema.boolean({ defaultValue: false }),
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
     // to be removed in https://github.com/elastic/kibana/issues/221904

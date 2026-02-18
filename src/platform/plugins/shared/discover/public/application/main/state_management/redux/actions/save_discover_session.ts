@@ -91,7 +91,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           updatedTab = cloneDeep(
             fromTabStateToSavedObjectTab({
               tab,
-              timeRestore: newTimeRestore,
+              overridenTimeRestore: newTimeRestore,
               services,
             })
           );

@@ -1,8 +1,6 @@
 # MV_DEDUPE
 
-Removes duplicate values from a multivalued field.
-
-**Note:** `MV_DEDUPE` may, but won’t always, sort the values in the column.
+Removes duplicate values from a multivalued field. Note that MV_DEDUPE may, but won’t always, sort the values in the column.
 
 ## Syntax
 
@@ -10,15 +8,19 @@ Removes duplicate values from a multivalued field.
 
 ### Parameters
 
-#### `field`
+#### field
 
-A multivalue expression.
+A multivalue expression containing the values from which duplicates will be removed.
 
 ## Examples
+
+Removes duplicate entries from the array in field `a` and stores the result in a new field `dedupe_a`:
 
 ```esql
 ROW a=["foo", "foo", "bar", "foo"]
 | EVAL dedupe_a = MV_DEDUPE(a)
 ```
 
-This example removes duplicate values from the multivalued column `a`.
+Limitations
+
+MV_DEDUPE may, but won’t always, sort the values in the column.

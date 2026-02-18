@@ -6,108 +6,109 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
 import { hostname } from 'os';
-import {
-  EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-  parseScoreDocuments,
-} from './score_repository';
-import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
-import type { EvaluationReport, RanExperiment } from '../types';
+import type { Model } from '@kbn/inference-common';
+import type { EvaluationScoreRepository } from './score_repository';
+import { type EvaluationScoreDocument } from './score_repository';
+import { getGitMetadata } from './git_metadata';
+import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
 
-export async function buildEvaluationReport({
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+  return runs[evalRun.experimentRunId];
+}
+
+export async function mapToEvaluationScoreDocuments({
   experiments,
-  model,
+  taskModel,
   evaluatorModel,
-  repetitions,
   runId,
+  totalRepetitions,
 }: {
   experiments: RanExperiment[];
-  model: Model;
+  taskModel: Model;
   evaluatorModel: Model;
-  repetitions: number;
-  runId?: string;
-}): Promise<EvaluationReport> {
-  const { datasetScores } = await buildEvaluationResults(experiments);
+  runId: string;
+  totalRepetitions: number;
+}): Promise<EvaluationScoreDocument[]> {
+  const documents: EvaluationScoreDocument[] = [];
+  const timestamp = new Date().toISOString();
+  const gitMetadata = getGitMetadata();
+  const hostName = hostname();
 
-  const datasetScoresWithStats = datasetScores.map((dataset) => ({
-    ...dataset,
-    evaluatorStats: new Map(
-      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
-        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
-        return [evaluatorName, stats];
-      })
-    ),
-  }));
+  for (const experiment of experiments) {
+    const { datasetId, evaluationRuns, runs = {} } = experiment;
+    if (!evaluationRuns) {
+      continue;
+    }
 
-  const currentRunId = runId || process.env.TEST_RUN_ID;
+    const datasetName = experiment.datasetName ?? datasetId;
 
-  if (!currentRunId) {
-    throw new Error(
-      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
-    );
+    for (const evalRun of evaluationRuns) {
+      const taskRun = getTaskRun(evalRun, runs);
+      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
+
+      documents.push({
+        '@timestamp': timestamp,
+        run_id: runId,
+        experiment_id: experiment.id ?? '',
+        example: {
+          id: exampleId,
+          index: taskRun.exampleIndex,
+          dataset: {
+            id: datasetId,
+            name: datasetName,
+          },
+        },
+        task: {
+          trace_id: taskRun.traceId ?? null,
+          repetition_index: taskRun.repetition,
+          model: taskModel,
+        },
+        evaluator: {
+          name: evalRun.name,
+          score: evalRun.result?.score ?? null,
+          label: evalRun.result?.label ?? null,
+          explanation: evalRun.result?.explanation ?? null,
+          metadata: evalRun.result?.metadata ?? null,
+          trace_id: evalRun.traceId ?? null,
+          model: evaluatorModel,
+        },
+        run_metadata: {
+          git_branch: gitMetadata.branch,
+          git_commit_sha: gitMetadata.commitSha,
+          total_repetitions: totalRepetitions,
+        },
+        environment: {
+          hostname: hostName,
+        },
+      });
+    }
   }
 
-  return {
-    datasetScoresWithStats,
-    model,
-    evaluatorModel,
-    repetitions,
-    runId: currentRunId,
-  };
+  return documents;
 }
 
 export async function exportEvaluations(
-  report: EvaluationReport,
-  esClient: EsClient,
+  documents: EvaluationScoreDocument[],
+  scoreRepository: EvaluationScoreRepository,
   log: SomeDevLog
 ): Promise<void> {
-  if (report.datasetScoresWithStats.length === 0) {
-    log.warning('No dataset scores available to export to Elasticsearch');
+  if (documents.length === 0) {
+    log.warning('No evaluation scores to export');
     return;
   }
 
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  const exporter = new EvaluationScoreRepository(esClient, log);
+  await scoreRepository.exportScores(documents);
 
-  await exporter.exportScores({
-    datasetScoresWithStats: report.datasetScoresWithStats,
-    model: report.model,
-    evaluatorModel: report.evaluatorModel,
-    runId: report.runId,
-    repetitions: report.repetitions,
-  });
+  const { run_id: docRunId, task, environment } = documents[0];
 
-  const modelId = report.model.id || 'unknown';
-
-  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(chalk.green('✅ Evaluation scores exported successfully!'));
   log.info(
     chalk.gray(
-      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${
-        report.runId
-      }"`
+      `You can query the data using: environment.hostname:"${environment.hostname}" AND task.model.id:"${task.model.id}" AND run_id:"${docRunId}"`
     )
   );
-}
-
-export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
-  if (scores.length === 0) {
-    throw new Error('No documents to format');
-  }
-
-  const scoresWithStats = parseScoreDocuments(scores);
-
-  const repetitions = scores[0].repetitions ?? 1;
-
-  return {
-    datasetScoresWithStats: scoresWithStats,
-    model: scores[0].model as Model,
-    evaluatorModel: scores[0].evaluator_model as Model,
-    repetitions,
-    runId: scores[0].run_id,
-  };
 }
