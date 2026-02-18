@@ -6,10 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
 import { overviewEmbeddableSchema } from './schema';
 import { registerOverviewEmbeddableTransforms } from './register_overview_embeddable_transforms';
+
+const createMockDrilldownTransforms = (): DrilldownTransforms => ({
+  transformIn: (state) => ({ state, references: [] }),
+  transformOut: (state) => state,
+});
 
 describe('registerOverviewEmbeddableTransforms', () => {
   let embeddableSetupMock: ReturnType<typeof createEmbeddableSetupMock>;
@@ -65,11 +71,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
     const { getTransforms: getTransformsFromSetup } = callArgs[1];
-    const drilldownTransforms = {
-      transformIn: (state: object) => ({ state, references: [] }),
-      transformOut: (state: object) => state,
-    };
-    const transforms = getTransformsFromSetup!(drilldownTransforms);
+    const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
     // Check that transforms have both transformIn and transformOut (required for drilldowns)
     expect(transforms).toHaveProperty('transformIn');
@@ -224,11 +226,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const drilldownTransforms = {
-        transformIn: (state: object) => ({ state, references: [] }),
-        transformOut: (state: object) => state,
-      };
-      const transforms = getTransformsFromSetup!(drilldownTransforms);
+      const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
       expect(transforms).toHaveProperty('transformIn');
       expect(transforms).toHaveProperty('transformOut');
@@ -240,11 +238,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const drilldownTransforms = {
-        transformIn: (state: object) => ({ state, references: [] }),
-        transformOut: (state: object) => state,
-      };
-      const transforms = getTransformsFromSetup!(drilldownTransforms);
+      const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
       const legacyState = {
         sloId: 'legacy-slo-id',
@@ -272,11 +266,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const drilldownTransforms = {
-        transformIn: (state: object) => ({ state, references: [] }),
-        transformOut: (state: object) => state,
-      };
-      const transforms = getTransformsFromSetup!(drilldownTransforms);
+      const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
       const newState = {
         slo_id: 'new-slo-id',
