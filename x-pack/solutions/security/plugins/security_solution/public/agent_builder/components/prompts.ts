@@ -84,8 +84,8 @@ export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
 Analyze the attached Security detection rule and provide actionable insights.
 
 Important:
-- Always read the rule from the attachment data(attachment type: security.rule)
-- If the attachment data not found, use the dedicated attachment read tool(attachment type: security.rule)
+- Always read the rule from the attachment data (attachment type: security.rule)
+- If the attachment data is not found, use the dedicated attachment read tool (attachment type: security.rule)
 
 Analysis Framework:
 1. Detection Intent & Strategy
@@ -122,7 +122,7 @@ Analysis Framework:
    - Provide context on expected vs. suspicious behavior
 
 When Suggesting Improvements:
-- Be specific and practical—focus on what will improve detection quality
+- Be specific and practical - focus on what will improve detection quality
 - Put each suggested field value in a separate, copyable code block with a clear label
 - If you need more context, ask concise follow-up questions
 `;
