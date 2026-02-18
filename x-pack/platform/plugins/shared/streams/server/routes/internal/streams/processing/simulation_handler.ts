@@ -529,13 +529,13 @@ const computePipelineSimulationResult = (
       conditionProcessorTags
     );
 
-    const diff = computeSimulationDocDiff(
-      sampleDocs[id]._source,
-      pipelineDocResult,
+    const diff = computeSimulationDocDiff({
+      base: sampleDocs[id]._source,
+      docResult: pipelineDocResult,
       isWiredStream,
       forbiddenFields,
-      conditionProcessorTags
-    );
+      conditionProcessorTags,
+    });
 
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
@@ -710,6 +710,14 @@ const getLastDoc = (
   }
 };
 
+interface ComputeSimulationDocDiffParams {
+  base: FlattenRecord;
+  docResult: SuccessfulPipelineSimulateDocumentResult;
+  isWiredStream: boolean;
+  forbiddenFields: string[];
+  conditionProcessorTags: Set<string>;
+}
+
 /**
  * To improve tracking down the errors and the fields detection to the individual processor,
  * this function computes the detected fields and the errors for each processor.
@@ -719,13 +727,13 @@ const getLastDoc = (
  * - `detected_fields`: Only fields that exist in the final output compared to input (for overall detection)
  * - `errors`: Processing errors detected during comparison
  */
-export const computeSimulationDocDiff = (
-  base: FlattenRecord,
-  docResult: SuccessfulPipelineSimulateDocumentResult,
-  isWiredStream: boolean,
-  forbiddenFields: string[],
-  conditionProcessorTags: Set<string>
-) => {
+export const computeSimulationDocDiff = ({
+  base,
+  docResult,
+  isWiredStream,
+  forbiddenFields,
+  conditionProcessorTags,
+}: ComputeSimulationDocDiffParams) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
   const successfulProcessors = filterOutConditionNoopProcessorResults(
     docResult.processor_results,
