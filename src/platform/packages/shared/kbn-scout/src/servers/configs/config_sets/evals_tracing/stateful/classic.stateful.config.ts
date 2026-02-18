@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
@@ -23,6 +23,13 @@ if (gcsCredentials) {
   );
   writeFileSync(gcsCredentialsFilePath, gcsCredentials);
   gcsSecureFile = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+  process.on('exit', () => {
+    try {
+      unlinkSync(gcsCredentialsFilePath);
+    } catch {
+      // Ignore errors if file was already deleted
+    }
+  });
 }
 const defaultExporters = JSON.stringify([
   {
