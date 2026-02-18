@@ -39,9 +39,10 @@ const mockRoutingContext = {
 jest.mock(
   '../data_management/stream_detail_routing/state_management/stream_routing_state_machine',
   () => ({
-    useStreamsRoutingSelector: (
-      selector: (snapshot: { context: typeof mockRoutingContext }) => any
-    ) => selector({ context: mockRoutingContext }),
+    // Note: `<T,>` syntax avoids TSX parsing this as JSX
+    useStreamsRoutingSelector: <TSelected,>(
+      selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
+    ): TSelected => selector({ context: mockRoutingContext }),
   })
 );
 
