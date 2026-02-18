@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dump } from 'js-yaml';
@@ -28,10 +28,12 @@ import {
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../hooks';
-import { Loading } from '.';
+
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../services';
 import { API_VERSIONS } from '../../../../common/constants';
 import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
+
+import { Loading } from '.';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -65,8 +67,8 @@ export const AgentPolicyYamlFlyout = memo<{
       announceOnMount
       title={
         <FormattedMessage
-          id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
-          defaultMessage="Error loading agent policy"
+          id="xpack.fleet.policyDetails.errorGettingFullAgentPolicy"
+          defaultMessage="Error loading agent policy yaml"
         />
       }
       color="danger"
@@ -84,6 +86,21 @@ export const AgentPolicyYamlFlyout = memo<{
   const downloadLink =
     core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
     `?apiVersion=${API_VERSIONS.public.v1}${revisionQueryParam}`;
+
+  const downloadYaml = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!yamlData?.item) {
+        return;
+      }
+      const yaml = fullAgentPolicyToYaml(yamlData.item, dump);
+      const link = document.createElement('a');
+      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(yaml)}`;
+      link.download = 'elastic-agent.yml';
+      link.click();
+    },
+    [yamlData]
+  );
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
@@ -164,10 +181,12 @@ export const AgentPolicyYamlFlyout = memo<{
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
               href={downloadLink}
               iconType="download"
-              isDisabled={Boolean(isLoadingYaml && !yamlData)}
+              onClick={downloadYaml}
+              isDisabled={Boolean(isLoadingYaml || !yamlData)}
             >
               <FormattedMessage
                 id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"
