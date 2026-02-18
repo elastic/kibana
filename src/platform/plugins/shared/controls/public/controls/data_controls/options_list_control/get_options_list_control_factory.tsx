@@ -354,8 +354,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       return {
         api,
         Component: () => {
-          // const sectionId = useStateFromPublishingSubject(sectionId$);
-          // console.log({ sectionId });
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions

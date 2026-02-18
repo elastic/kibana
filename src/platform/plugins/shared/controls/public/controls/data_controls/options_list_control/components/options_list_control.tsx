@@ -227,7 +227,6 @@ export const OptionsListControl = ({
       badgeColor="success"
       isLoading={loading}
       iconType={'arrowDown'}
-      // iconSize={'s'}
       className={isPinned ? `optionsList--pinned` : undefined}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
       css={styles.filterButton}
@@ -236,7 +235,7 @@ export const OptionsListControl = ({
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={Boolean(selectedOptionsCount)}
       textProps={{ css: styles.filterButtonText }}
-      aria-label={label ?? fieldName}
+      aria-label={label}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
       role="combobox"
@@ -248,7 +247,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <ConditionalLabelWrapper label={label ?? fieldName} isPinned={isPinned}>
+    <ConditionalLabelWrapper label={label} isPinned={isPinned}>
       <EuiFilterGroup
         className={'kbnGridLayout--hideDragHandle'}
         fullWidth
@@ -271,8 +270,8 @@ export const OptionsListControl = ({
           closePopover={() => setPopoverOpen(false)}
           panelClassName="optionsList__popoverOverride"
           panelProps={{
-            title: label ?? fieldName,
-            'aria-label': OptionsListStrings.popover.getAriaLabel(label ?? fieldName!),
+            title: label,
+            'aria-label': OptionsListStrings.popover.getAriaLabel(label),
           }}
         >
           <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />

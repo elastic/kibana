@@ -23,8 +23,6 @@ import type { ControlLabelStateManager } from './types';
 /**
  * Controls handle their own label rendering, so we cannot rely on the normal titles manager because
  * the other properties (description, hide title, default title, etc.) are not applicable for controls.
- * For the API, we refer to this piece of state as `title` to avoid confusion across embeddable types;
- * however, for the UI, we refer to it as `label`
  */
 
 export const defaultControlLabelComparators: StateComparators<Pick<DataControlState, 'title'>> = {

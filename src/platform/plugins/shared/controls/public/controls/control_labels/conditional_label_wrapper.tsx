@@ -23,34 +23,24 @@ export const ConditionalLabelWrapper = ({
   return isPinned ? (
     children
   ) : (
-    <EuiFlexGroup
-      direction="column"
-      css={css`
-        gap: 1px;
-        padding: 4px 8px 1px 8px;
-        overflow: hidden;
-      `}
-    >
-      <EuiFlexItem
-        css={css`
-          flex-grow: 0;
-        `}
-      >
-        <EuiText
-          size="s"
-          color="subdued"
-          css={css`
-            line-height: 1.2rem;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-          `}
-          component="p"
-        >
+    <EuiFlexGroup direction="column" css={styles.flexGroup}>
+      <EuiFlexItem css={styles.disableGrow}>
+        <EuiText size="s" color="subdued" css={styles.truncatedText} component="p">
           {label}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+const styles = {
+  flexGroup: css({ gap: '1px', padding: '4px 8px 1px 8px', overflow: 'hidden' }),
+  disableGrow: css({ flexGrow: 0 }),
+  truncatedText: css({
+    lineHeight: '1.2rem',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  }),
 };
