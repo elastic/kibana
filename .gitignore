@@ -21,6 +21,7 @@ target
 .idea
 .claude
 .cursor
+!x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml
