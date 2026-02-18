@@ -249,6 +249,13 @@ export function FeatureDetailsFlyout({
               )}
             </InfoPanel>
           </EuiFlexItem>
+          <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutRawDocument">
+            <InfoPanel title={RAW_DOCUMENT_LABEL}>
+              <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                {JSON.stringify(feature, null, 2)}
+              </EuiCodeBlock>
+            </InfoPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       {isDeleteModalVisible && onDelete && (
@@ -341,3 +348,8 @@ const META_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.metaLabel'
 const NO_META_AVAILABLE = i18n.translate('xpack.streams.featureDetailsFlyout.noMetaAvailable', {
   defaultMessage: 'No meta information',
 });
+
+const RAW_DOCUMENT_LABEL = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.rawDocumentLabel',
+  { defaultMessage: 'Raw document' }
+);
