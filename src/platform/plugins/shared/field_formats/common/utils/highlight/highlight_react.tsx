@@ -11,10 +11,19 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { highlightTags } from './highlight_tags';
 
+// Intermediate markers used to bridge iterative string replacement with React output.
+// Null-byte delimiters won't appear in ES field values or highlight snippets.
+const MARK_PRE = '\x00HL_PRE\x00';
+const MARK_POST = '\x00HL_POST\x00';
+
 /**
  * React equivalent of getHighlightHtml().
  * Takes a field value and ES highlight snippets, returns a ReactNode
  * with <mark> elements around highlighted segments.
+ *
+ * Mirrors the HTML version's iterative approach: all highlight snippets are
+ * applied (not just the first match), so multi-snippet highlighting works.
+ *
  * No HTML string concatenation or escaping needed — React handles XSS natively.
  */
 export function getHighlightReact(
@@ -27,51 +36,42 @@ export function getHighlightReact(
     return text;
   }
 
-  // Process each highlight snippet: extract the untagged text and build a mapping
-  // of plain text -> segments with <mark> tags
+  let result = text;
+
   for (const highlight of highlights) {
     const untagged = highlight.split(highlightTags.pre).join('').split(highlightTags.post).join('');
 
-    // Skip empty/no-op highlights to avoid splitting on an empty string
     if (!untagged) {
       continue;
     }
 
-    // Build the replacement segments from the highlight
-    const segments = parseHighlightSegments(highlight);
+    const tagged = highlight
+      .split(highlightTags.pre)
+      .join(MARK_PRE)
+      .split(highlightTags.post)
+      .join(MARK_POST);
 
-    // Replace all occurrences of the untagged text in the field value with the highlighted version
-    const parts = text.split(untagged);
-    if (parts.length > 1) {
-      const result: ReactNode[] = [];
-      parts.forEach((part, idx) => {
-        if (idx > 0) {
-          segments.forEach((segment, segIdx) => {
-            result.push(<React.Fragment key={`hl-${idx}-${segIdx}`}>{segment}</React.Fragment>);
-          });
-        }
-        if (part) {
-          result.push(<React.Fragment key={`txt-${idx}`}>{part}</React.Fragment>);
-        }
-      });
-      return <>{result}</>;
-    }
+    result = result.split(untagged).join(tagged);
   }
 
-  return text;
+  if (result === text) {
+    return text;
+  }
+
+  return parseMarkedString(result);
 }
 
 /**
- * Parses a highlight string with highlight tags into an array of ReactNodes,
- * wrapping highlighted portions in <mark> elements.
+ * Parses a string containing MARK_PRE/MARK_POST markers into React nodes,
+ * wrapping marked portions in <mark> elements.
  */
-function parseHighlightSegments(highlight: string): ReactNode[] {
+function parseMarkedString(input: string): ReactNode {
   const segments: ReactNode[] = [];
-  let remaining = highlight;
+  let remaining = input;
   let keyIdx = 0;
 
   while (remaining.length > 0) {
-    const preIdx = remaining.indexOf(highlightTags.pre);
+    const preIdx = remaining.indexOf(MARK_PRE);
 
     if (preIdx === -1) {
       segments.push(remaining);
@@ -82,23 +82,28 @@ function parseHighlightSegments(highlight: string): ReactNode[] {
       segments.push(remaining.slice(0, preIdx));
     }
 
-    const afterPre = remaining.slice(preIdx + highlightTags.pre.length);
-    const postIdx = afterPre.indexOf(highlightTags.post);
+    const afterPre = remaining.slice(preIdx + MARK_PRE.length);
+    const postIdx = afterPre.indexOf(MARK_POST);
 
     if (postIdx === -1) {
       segments.push(remaining.slice(preIdx));
       break;
     }
 
-    const highlightedText = afterPre.slice(0, postIdx);
     segments.push(
       <mark key={`mark-${keyIdx++}`} className="ffSearch__highlight">
-        {highlightedText}
+        {afterPre.slice(0, postIdx)}
       </mark>
     );
 
-    remaining = afterPre.slice(postIdx + highlightTags.post.length);
+    remaining = afterPre.slice(postIdx + MARK_POST.length);
   }
 
-  return segments;
+  return (
+    <>
+      {segments.map((seg, i) => (
+        <React.Fragment key={`seg-${i}`}>{seg}</React.Fragment>
+      ))}
+    </>
+  );
 }

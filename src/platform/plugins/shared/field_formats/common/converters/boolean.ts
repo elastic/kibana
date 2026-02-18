@@ -63,7 +63,6 @@ export class BoolFormat extends FieldFormat {
       return missing;
     }
 
-    // TODO: REMOVE — temporary emoji to verify React content type is active
-    return `🟢 ${this.textConvert(value, options)}`;
+    return this.textConvert(value, options);
   };
 }
