@@ -54,7 +54,7 @@ const ActionTypeFieldComponent = ({
       [
         ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
         ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-      ] as ['isolate', 'kill-process', 'suspend-process'],
+      ] as ['isolate'],
     [automatedProcessActionsEnabled]
   );
 
