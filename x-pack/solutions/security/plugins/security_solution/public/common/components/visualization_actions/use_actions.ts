@@ -38,8 +38,8 @@ export const INSPECT_ACTION: VisualizationContextMenuActions[] = [
   VisualizationContextMenuActions.inspect,
 ];
 
-export const VISUALIZATION_ON_OPEN_PANEL_MENU: Trigger = {
-  id: 'VISUALIZATION_ON_OPEN_PANEL_MENU',
+export const VISUALIZATION_CONTEXT_MENU_TRIGGER: Trigger = {
+  id: 'VISUALIZATION_CONTEXT_MENU_TRIGGER',
 };
 
 const ACTION_DEFINITION: Record<

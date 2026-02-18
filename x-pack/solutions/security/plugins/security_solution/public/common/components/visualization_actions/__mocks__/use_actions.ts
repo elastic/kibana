@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const VISUALIZATION_ON_OPEN_PANEL_MENU = 'VISUALIZATION_ON_OPEN_PANEL_MENU';
+export const VISUALIZATION_CONTEXT_MENU_TRIGGER = 'VISUALIZATION_CONTEXT_MENU_TRIGGER';
 export const DEFAULT_ACTIONS = [
   'inspect',
   'addToNewCase',
