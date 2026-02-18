@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';

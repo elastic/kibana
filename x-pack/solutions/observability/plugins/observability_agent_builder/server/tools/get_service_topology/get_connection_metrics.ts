@@ -6,7 +6,7 @@
  */
 
 import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
