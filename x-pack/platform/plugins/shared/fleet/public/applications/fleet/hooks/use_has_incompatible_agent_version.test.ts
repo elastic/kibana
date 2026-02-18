@@ -19,9 +19,7 @@ const createAgentPolicy = (
 
 const createPackageInfo = (agentVersionCondition?: string): PackageInfo =>
   ({
-    conditions: agentVersionCondition
-      ? { agent: { version: agentVersionCondition } }
-      : undefined,
+    conditions: agentVersionCondition ? { agent: { version: agentVersionCondition } } : undefined,
   } as unknown as PackageInfo);
 
 describe('getIncompatibleAgentVersionStatus', () => {
