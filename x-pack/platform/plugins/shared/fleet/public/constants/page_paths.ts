@@ -101,6 +101,7 @@ export const FLEET_ROUTING_PATHS = {
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
+export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
@@ -134,11 +135,13 @@ export const pagePathGetters: {
     category,
     subCategory,
     onlyAgentless,
+    showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
     onlyAgentless?: boolean;
+    showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
@@ -152,6 +155,9 @@ export const pagePathGetters: {
     }
     if (onlyAgentless) {
       queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    if (showDeprecated === true) {
+      queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
     const queryString = queryParams.toString();
     return [
