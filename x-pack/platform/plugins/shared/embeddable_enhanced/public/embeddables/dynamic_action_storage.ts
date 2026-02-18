@@ -10,7 +10,11 @@ import type {
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { UiActionsEnhancedAbstractActionStorage as AbstractActionStorage } from '@kbn/ui-actions-enhanced-plugin/public';
-import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export type DynamicActionStorageApi = Pick<
@@ -121,9 +125,9 @@ export class DynamicActionStorage extends AbstractActionStorage {
         );
         if (
           migratedTriggers.length !== event.triggers.length &&
-          !migratedTriggers.includes(`FILTER_TRIGGER`)
+          !migratedTriggers.includes(ON_APPLY_FILTER)
         ) {
-          migratedTriggers.push(`FILTER_TRIGGER`);
+          migratedTriggers.push(ON_APPLY_FILTER);
         }
 
         return {
