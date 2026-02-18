@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
@@ -18,9 +17,10 @@ import {
   type HasUniqueId,
   type HasParentApi,
   type HasSupportedTriggers,
+  type PresentationContainer,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasDynamicActions,
   type HasDynamicActions,

@@ -6,6 +6,7 @@
  */
 
 import type { DataStreamResponse } from '../../../../../../common';
+import * as i18n from '../translations';
 
 export const STATUS_COLOR_MAP: Record<DataStreamResponse['status'], string> = {
   pending: 'default',
@@ -14,6 +15,7 @@ export const STATUS_COLOR_MAP: Record<DataStreamResponse['status'], string> = {
   failed: 'danger',
   cancelled: 'warning',
   approved: 'success',
+  deleting: 'default',
 };
 
 export const STATUS_ICON_MAP: Record<DataStreamResponse['status'], string> = {
@@ -23,13 +25,15 @@ export const STATUS_ICON_MAP: Record<DataStreamResponse['status'], string> = {
   failed: 'cross',
   cancelled: 'minusInCircle',
   approved: 'check',
+  deleting: '',
 };
 
 export const STATUS_TEXT_MAP: Record<DataStreamResponse['status'], string> = {
-  pending: 'Analyzing',
-  processing: 'Analyzing',
-  completed: 'Success',
-  failed: 'Failed',
-  cancelled: 'Cancelled',
-  approved: 'Approved',
+  pending: i18n.STATUS_LABELS.analyzing,
+  processing: i18n.STATUS_LABELS.analyzing,
+  completed: i18n.STATUS_LABELS.success,
+  failed: i18n.STATUS_LABELS.failed,
+  cancelled: i18n.STATUS_LABELS.cancelled,
+  approved: i18n.STATUS_LABELS.approved,
+  deleting: i18n.STATUS_LABELS.deleting,
 };

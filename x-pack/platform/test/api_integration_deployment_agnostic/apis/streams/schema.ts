@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -55,6 +56,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.lastField',
           'attributes.some.field',
         ]);
+      });
+
+      it('Returns error for non-existent stream', async () => {
+        const response = await apiClient.fetch(
+          'GET /internal/streams/{name}/schema/unmapped_fields',
+          {
+            params: {
+              path: {
+                name: 'non-existent-stream',
+              },
+            },
+          }
+        );
+        // May return 403 (no permission) or 404 (not found) depending on auth check order
+        expect([403, 404]).to.contain(response.status);
       });
 
       describe('Geo point subfield filtering', () => {
@@ -186,6 +202,113 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.status).to.be('unknown');
         expect(response.body.simulationError).to.be(null);
         expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
+      });
+
+      it('Works when time_series_dimension is present on non-TSDB mappings (no runtime_mappings fallback)', async () => {
+        const dataStreamName = 'logs';
+        const componentTemplateName = 'streams_tsdim_non_tsdb_test';
+        const shadowedField = 'attributes.tsdim_runtime_shadow';
+        // Streams index templates use a max-long priority; keep it as a string to avoid JS precision loss.
+        const safeMaxPriority = `${MAX_PRIORITY}` as unknown as number;
+
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+          name: dataStreamName,
+        });
+        const indexTemplateName = dataStreams[0].template;
+
+        const existingIndexTemplateResponse = await esClient.indices.getIndexTemplate({
+          name: indexTemplateName,
+        });
+        const existingIndexTemplate =
+          existingIndexTemplateResponse.index_templates[0].index_template;
+
+        const ignoreMissingComponentTemplates: string[] | undefined = Array.isArray(
+          existingIndexTemplate.ignore_missing_component_templates
+        )
+          ? existingIndexTemplate.ignore_missing_component_templates
+          : existingIndexTemplate.ignore_missing_component_templates
+          ? [existingIndexTemplate.ignore_missing_component_templates]
+          : undefined;
+
+        // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
+        // when updating templates. Build a "put-safe" body from the known writable properties.
+        const putSafeIndexTemplateBody = {
+          index_patterns: existingIndexTemplate.index_patterns,
+          template: existingIndexTemplate.template,
+          composed_of: existingIndexTemplate.composed_of,
+          priority: safeMaxPriority,
+          version: existingIndexTemplate.version,
+          _meta: existingIndexTemplate._meta,
+          data_stream: existingIndexTemplate.data_stream,
+          allow_auto_create: existingIndexTemplate.allow_auto_create,
+          ignore_missing_component_templates: ignoreMissingComponentTemplates,
+        };
+
+        await esClient.cluster.putComponentTemplate({
+          name: componentTemplateName,
+          template: {
+            mappings: {
+              properties: {
+                [shadowedField]: {
+                  type: 'keyword',
+                  time_series_dimension: true,
+                },
+              },
+            },
+          },
+          _meta: {
+            description:
+              'Test-only component template for non-TSDB indices with time_series_dimension: true',
+          },
+        });
+
+        const patchedIndexTemplateBody = {
+          ...putSafeIndexTemplateBody,
+          composed_of: [...(existingIndexTemplate.composed_of ?? []), componentTemplateName],
+        };
+
+        // NOTE: `getIndexTemplate` wraps the response under `index_template`, but `putIndexTemplate`
+        // expects the template fields at the top-level request body.
+        await esClient.indices.putIndexTemplate({
+          name: indexTemplateName,
+          ...patchedIndexTemplateBody,
+        });
+
+        try {
+          // Force a new backing index so the updated template is applied.
+          await esClient.indices.rollover({ alias: dataStreamName });
+
+          await indexDocument(esClient, dataStreamName, {
+            '@timestamp': '2024-01-01T00:00:17.000Z',
+            message: 'time_series_dimension runtime shadow test',
+            tsdim_runtime_shadow: 'abc',
+          });
+
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: {
+                  name: dataStreamName,
+                },
+                body: {
+                  field_definitions: [{ name: shadowedField, type: 'keyword' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body.status).to.be('success');
+          expect(response.body.simulationError).to.be(null);
+          expect(response.body.documentsWithRuntimeFieldsApplied).to.be.an('array');
+          expect(response.body.documentsWithRuntimeFieldsApplied).not.to.be.empty();
+        } finally {
+          await esClient.indices.putIndexTemplate({
+            name: indexTemplateName,
+            ...putSafeIndexTemplateBody,
+            composed_of: existingIndexTemplate.composed_of,
+          });
+          await esClient.cluster.deleteComponentTemplate({ name: componentTemplateName });
+        }
       });
 
       describe('Geo point fields', () => {
@@ -430,6 +553,504 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.simulationError).to.be(null);
           expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
         });
+      });
+
+      describe('Field type tests', () => {
+        it('simulates field mapping with keyword type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'service.name', type: 'keyword' },
+                    { name: 'host.name', type: 'keyword' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+          expect(['unknown', 'success', 'failure']).to.contain(response.body.status);
+        });
+
+        it('simulates single keyword field', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'user.id', type: 'keyword' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with match_only_text type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'description', type: 'match_only_text' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with long type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'http.response.status_code', type: 'long' },
+                    { name: 'process.pid', type: 'long' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates single long field', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'event.duration', type: 'long' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with double type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'metrics.cpu_percent', type: 'double' },
+                    { name: 'metrics.memory_percent', type: 'double' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates single double field', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'transaction.duration.us', type: 'double' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with boolean type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'event.success', type: 'boolean' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates multiple boolean fields', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'event.success', type: 'boolean' },
+                    { name: 'user.active', type: 'boolean' },
+                    { name: 'process.running', type: 'boolean' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with date type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'event.created', type: 'date' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates multiple date fields', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'event.created', type: 'date' },
+                    { name: 'event.start', type: 'date' },
+                    { name: 'event.end', type: 'date' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates field mapping with ip type', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'source.ip', type: 'ip' },
+                    { name: 'destination.ip', type: 'ip' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('simulates single ip field', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'client.ip', type: 'ip' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+      });
+
+      describe('Mixed and nested fields', () => {
+        it('simulates multiple field definitions of different types', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'field_keyword', type: 'keyword' },
+                    { name: 'field_long', type: 'long' },
+                    { name: 'field_boolean', type: 'boolean' },
+                    { name: 'field_double', type: 'double' },
+                    { name: 'field_ip', type: 'ip' },
+                    { name: 'field_date', type: 'date' },
+                    { name: 'field_geo', type: 'geo_point' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('handles deeply nested field names', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'deeply.nested.field.name', type: 'keyword' },
+                    { name: 'another.nested.field', type: 'long' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+
+        it('handles ECS-style field names', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [
+                    { name: 'http.request.method', type: 'keyword' },
+                    { name: 'http.response.status_code', type: 'long' },
+                    { name: 'http.response.body.bytes', type: 'long' },
+                    { name: 'url.full', type: 'keyword' },
+                    { name: 'user_agent.original', type: 'keyword' },
+                  ],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body).to.have.property('status');
+        });
+      });
+
+      describe('Error handling', () => {
+        it('returns error for invalid field type', async () => {
+          await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'test.field', type: 'invalid_type' }] as any,
+                },
+              },
+            })
+            .expect(400);
+        });
+
+        it('handles empty field definitions', async () => {
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [],
+                },
+              },
+            })
+            .expect(200);
+
+          // Empty field definitions returns success since there's nothing to fail
+          expect(['unknown', 'success']).to.contain(response.body.status);
+        });
+
+        it('returns error for non-existent stream', async () => {
+          const response = await apiClient.fetch(
+            'POST /internal/streams/{name}/schema/fields_simulation',
+            {
+              params: {
+                path: { name: 'non-existent-stream' },
+                body: {
+                  field_definitions: [{ name: 'test.field', type: 'keyword' }],
+                },
+              },
+            }
+          );
+
+          // May return 403 (no permission) or 404 (not found) depending on auth check order
+          expect([403, 404]).to.contain(response.status);
+        });
+
+        it('returns error for missing field name', async () => {
+          await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ type: 'keyword' }] as any,
+                },
+              },
+            })
+            .expect(400);
+        });
+
+        it('returns error for missing field type', async () => {
+          await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  field_definitions: [{ name: 'test.field' }] as any,
+                },
+              },
+            })
+            .expect(400);
+        });
+      });
+    });
+
+    describe('Fields conflicts API', () => {
+      it('Returns empty conflicts for fields with no conflicts', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'unique.field.name', type: 'keyword' }],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
+      });
+
+      it('Returns empty conflicts for empty field definitions', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body).to.eql({ conflicts: [] });
+      });
+
+      it('Returns error for non-existent stream', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'non-existent-stream' },
+              body: {
+                field_definitions: [{ name: 'test.field', type: 'keyword' }],
+              },
+            },
+          })
+          .expect(404);
+      });
+
+      it('Returns error for missing field name', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ type: 'keyword' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Returns error for missing field type', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'test.field' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Returns error for invalid field type', async () => {
+        await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'test.field', type: 'invalid_type' }] as any,
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('Checks conflicts for multiple field definitions', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [
+                  { name: 'field.one', type: 'keyword' },
+                  { name: 'field.two', type: 'long' },
+                  { name: 'field.three', type: 'boolean' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
+      });
+
+      it('Filters out system type fields', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [{ name: 'system.field', type: 'system' }],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body).to.eql({ conflicts: [] });
+      });
+
+      it('Handles all valid field types', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
+            params: {
+              path: { name: 'logs' },
+              body: {
+                field_definitions: [
+                  { name: 'field.keyword', type: 'keyword' },
+                  { name: 'field.long', type: 'long' },
+                  { name: 'field.double', type: 'double' },
+                  { name: 'field.date', type: 'date' },
+                  { name: 'field.boolean', type: 'boolean' },
+                  { name: 'field.ip', type: 'ip' },
+                  { name: 'field.geo_point', type: 'geo_point' },
+                  { name: 'field.match_only_text', type: 'match_only_text' },
+                ],
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.body.conflicts).to.be.an('array');
       });
     });
   });

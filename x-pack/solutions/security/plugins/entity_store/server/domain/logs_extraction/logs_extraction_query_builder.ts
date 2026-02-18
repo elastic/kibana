@@ -95,16 +95,16 @@ export const buildLogsExtractionEsqlQuery = ({
 function recentFieldStats(fields: EntityField[]) {
   return fields
     .map((field) => {
-      const { retention, destination: dest } = field;
+      const { retention, destination: dest, source } = field;
       const recentDest = recentData(dest);
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
+          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
@@ -116,14 +116,16 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
   return fields
     .map((field) => {
       const { retention, destination: dest } = field;
-      const recentDest = castDestType(recentData(dest), field);
+      const recentDest = recentData(dest);
       if (dest === idFieldName) {
         return null; // id field should not be merged
       }
 
       switch (retention.operation) {
         case 'collect_values':
-          return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
+          return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
+            retention.maxLength - 1
+          })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
         case 'prefer_oldest_value':
@@ -164,34 +166,20 @@ function castSrcType(field: EntityField) {
     case 'keyword':
       return `TO_STRING(${field.source})`;
     case 'date':
-      return `TO_STRING(${field.source})`;
+      return `TO_DATETIME(${field.source})`;
     case 'boolean':
-      return `TO_STRING(${field.source})`;
+      return `TO_BOOLEAN(${field.source})`;
     case 'long':
       return `TO_LONG(${field.source})`;
+    case 'integer':
+      return `TO_INTEGER(${field.source})`;
     case 'ip':
-      return `TO_STRING(${field.source})`;
+      return `TO_IP(${field.source})`;
     // explicit no cast because it doesn't exist in ESQl
     // and it's a breaking point
     case 'scaled_float':
       return `${field.source}`;
     default:
       return field.source;
-  }
-}
-
-function castDestType(fieldName: string, field: EntityField) {
-  // We only to cast boolean, date and ip to string and back to the original type
-  // because of a limitation in ESQL.
-  // This should not be needed after https://github.com/elastic/elasticsearch/issues/141101
-  switch (field.mapping?.type) {
-    case 'boolean':
-      return `TO_BOOLEAN(${fieldName})`;
-    case 'date':
-      return `TO_DATETIME(${fieldName})`;
-    case 'ip':
-      return `TO_IP(${fieldName})`;
-    default:
-      return fieldName;
   }
 }

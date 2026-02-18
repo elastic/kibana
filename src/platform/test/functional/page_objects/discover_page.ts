@@ -522,8 +522,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
@@ -696,7 +700,14 @@ export class DiscoverPageObject extends FtrService {
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.moveMouseTo('kbnQueryBar');
+        } catch {
+          // Ignore if query bar is not present
+        }
+        await this.testSubjects.click('app-menu-overflow-button');
+      });
 
       if (await this.testSubjects.exists('select-text-based-language-btn')) {
         await this.testSubjects.click('select-text-based-language-btn');

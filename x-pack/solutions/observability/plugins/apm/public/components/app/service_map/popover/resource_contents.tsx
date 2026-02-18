@@ -9,9 +9,10 @@ import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import type { NodeDataDefinition } from 'cytoscape';
-import type { ContentsProps } from '.';
-import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
+import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 
 const ItemRow = styled.div`
   line-height: 2;
@@ -23,23 +24,28 @@ const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
   }
 `;
 
-export function ResourceContents({ elementData }: ContentsProps) {
-  const nodeData = elementData as NodeDataDefinition;
-  const subtype = nodeData[SPAN_SUBTYPE];
-  const type = nodeData[SPAN_TYPE];
+export function ResourceContents({ selection }: ContentsProps) {
+  if (isEdge(selection)) {
+    return null;
+  }
+  const node = selection;
+  if (!isDependencyNodeData(node.data)) {
+    return null;
+  }
+  const data: DependencyNodeData = node.data;
 
   const listItems = [
     {
       title: i18n.translate('xpack.apm.serviceMap.typePopoverStat', {
         defaultMessage: 'Type',
       }),
-      description: type,
+      description: data.spanType || NOT_AVAILABLE_LABEL,
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.subtypePopoverStat', {
         defaultMessage: 'Subtype',
       }),
-      description: subtype,
+      description: data.spanSubtype || NOT_AVAILABLE_LABEL,
     },
   ];
 
