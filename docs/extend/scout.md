@@ -17,7 +17,8 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
-- **Deployment-agnostic**: write once and run across stateful and serverless.
+- **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
+- **Deployment-agnostic**: write once and run across stateful and serverless ().
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
 - **Reporting**: the [Scout Reporter](./scout/reporting.md) captures run metrics.
@@ -70,4 +71,4 @@ Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-Not at the moment.
+If your feature is behind a feature flag, you can use the `coreApi` [fixture](https://github.com/elastic/kibana/blob/e4f12d39154fe286ce92217e00a7d8bd758ee02d/src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/core/index.ts#L17-L30) to enable it during test execution (recommended). Alternatively, you can create a [custom config directory](https://github.com/elastic/kibana/pull/244306) and link your Scout tests (reach out for more info).
