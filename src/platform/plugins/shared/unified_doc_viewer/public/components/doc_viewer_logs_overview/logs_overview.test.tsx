@@ -30,13 +30,9 @@ jest.mock('@kbn/presentation-panel-plugin/public/kibana_services', () => ({
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({
-    children,
-    dangerouslySetInnerHTML,
-  }: {
-    children?: string;
-    dangerouslySetInnerHTML?: { __html: string };
-  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+    <code data-test-subj="codeBlock">{children}</code>
+  ),
 }));
 
 jest.mock('./utils/has_error_fields', () => ({

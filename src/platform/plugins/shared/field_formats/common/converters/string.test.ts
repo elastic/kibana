@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isValidElement } from 'react';
+import React, { isValidElement } from 'react';
+import { render } from '@testing-library/react';
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
 
@@ -143,19 +144,15 @@ describe('String Format', () => {
   });
 
   describe('react content type', () => {
-    test('convert returns plain text for simple values', () => {
-      const string = new StringFormat({ transform: 'lower' }, jest.fn());
-      const result = string.convert('Kibana', 'react');
-      // Plain text values are returned as strings (no wrapping element)
-      expect(result).toBe('kibana');
+    test('returns plain text for simple values with transform', () => {
+      const lower = new StringFormat({ transform: 'lower' }, jest.fn());
+      expect(lower.convert('Kibana', 'react')).toBe('kibana');
+
+      const upper = new StringFormat({ transform: 'upper' }, jest.fn());
+      expect(upper.convert('Kibana', 'react')).toBe('KIBANA');
     });
 
-    test('convert returns plain text for upper case transform', () => {
-      const string = new StringFormat({ transform: 'upper' }, jest.fn());
-      expect(string.convert('Kibana', 'react')).toBe('KIBANA');
-    });
-
-    test('convert returns ReactNode with <mark> for highlighted values', () => {
+    test('returns highlighted <mark> elements for matching highlights', () => {
       const string = new StringFormat({}, jest.fn());
       const result = string.convert('test value', 'react', {
         field: { name: 'foo' },
@@ -165,30 +162,36 @@ describe('String Format', () => {
           },
         },
       });
-      // Should return a React element (not a plain string) when highlights are present
       expect(isValidElement(result)).toBe(true);
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      const mark = container.querySelector('mark.ffSearch__highlight');
+      expect(mark).not.toBeNull();
+      expect(mark!.textContent).toBe('test value');
     });
 
-    test('convert returns missing value ReactNode for empty string', () => {
+    test('returns empty-value span with correct label for empty string', () => {
       const string = new StringFormat();
       const result = string.convert('', 'react');
-      // Missing values are rendered as React elements with the empty label
       expect(isValidElement(result)).toBe(true);
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      const span = container.querySelector('.ffString__emptyValue');
+      expect(span).not.toBeNull();
+      expect(span!.textContent).toBe(EMPTY_LABEL);
     });
 
-    test('convert returns missing value ReactNode for null', () => {
+    test('returns null-value span with correct label for null/undefined', () => {
       const string = new StringFormat();
-      const result = string.convert(null, 'react');
-      expect(isValidElement(result)).toBe(true);
+      for (const val of [null, undefined]) {
+        const result = string.convert(val, 'react');
+        expect(isValidElement(result)).toBe(true);
+        const { container } = render(React.createElement(React.Fragment, null, result));
+        const span = container.querySelector('.ffString__emptyValue');
+        expect(span).not.toBeNull();
+        expect(span!.textContent).toBe(NULL_LABEL);
+      }
     });
 
-    test('convert returns missing value ReactNode for undefined', () => {
-      const string = new StringFormat();
-      const result = string.convert(undefined, 'react');
-      expect(isValidElement(result)).toBe(true);
-    });
-
-    test('highlighted react output does not contain raw HTML strings', () => {
+    test('escapes XSS in highlighted react output', () => {
       const string = new StringFormat({}, jest.fn());
       const result = string.convert('<script>alert("xss")</script>', 'react', {
         field: { name: 'foo' },
@@ -200,9 +203,21 @@ describe('String Format', () => {
           },
         },
       });
-      // The result should be a React element, never a raw HTML string
       expect(isValidElement(result)).toBe(true);
-      expect(typeof result).not.toBe('string');
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      expect(container.querySelector('script')).toBeNull();
+      const mark = container.querySelector('mark.ffSearch__highlight');
+      expect(mark).not.toBeNull();
+      expect(mark!.textContent).toBe('<script>alert("xss")</script>');
+    });
+
+    test('returns plain string when no highlights match', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('no match', 'react', {
+        field: { name: 'foo' },
+        hit: { highlight: {} },
+      });
+      expect(result).toBe('no match');
     });
   });
 });

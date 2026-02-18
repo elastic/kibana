@@ -11,7 +11,12 @@ import React, { createElement } from 'react';
 import type { ReactNode } from 'react';
 import { isFunction } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
-import type { IFieldFormat, ReactContextTypeConvert, FieldFormatsContentType } from '../types';
+import type {
+  IFieldFormat,
+  ReactContextTypeConvert,
+  ReactContextTypeOptions,
+  FieldFormatsContentType,
+} from '../types';
 
 export const REACT_CONTEXT_TYPE: FieldFormatsContentType = 'react';
 
@@ -63,53 +68,50 @@ export const setup = (
   const convert = getConvertFn(format, reactContextTypeConvert);
   const highlight = (text: string) => <span className="ffArray__highlight">{text}</span>;
 
-  const recurse: ReactContextTypeConvert = (value, options = {}) => {
-    if (!value || !isFunction(value.map)) {
-      return convert.call(format, value, options);
+  interface RecurseResult {
+    node: React.ReactNode;
+    hasNewlines: boolean;
+  }
+
+  const recurse = (value: unknown, options: ReactContextTypeOptions = {}): RecurseResult => {
+    if (!value || !isFunction((value as { map?: unknown }).map)) {
+      const node = convert.call(format, value, options);
+      const hasNewlines = typeof node === 'string' && node.includes('\n');
+      return { node, hasNewlines };
     }
 
-    const subValues: React.ReactNode[] = value.map((v: unknown, idx: number) =>
-      recurse(v, options)
-    );
-
-    const useMultiLine = subValues.some((sub) => typeof sub === 'string' && sub.indexOf('\n') > -1);
+    const subResults: RecurseResult[] = (value as unknown[]).map((v) => recurse(v, options));
+    const hasNewlines = subResults.some((r) => r.hasNewlines);
 
     const result: React.ReactNode[] = [];
-    subValues.forEach((sub, idx) => {
+    for (let idx = 0; idx < subResults.length; idx++) {
       if (idx > 0) {
         result.push(
           <React.Fragment key={`sep-${idx}`}>
             {highlight(',')}
-            {useMultiLine ? '\n' : ' '}
+            {hasNewlines ? '\n' : ' '}
           </React.Fragment>
         );
       }
-      result.push(<React.Fragment key={`val-${idx}`}>{sub}</React.Fragment>);
-    });
+      result.push(<React.Fragment key={`val-${idx}`}>{subResults[idx].node}</React.Fragment>);
+    }
 
-    return <>{result}</>;
+    return { node: <>{result}</>, hasNewlines };
   };
 
   const wrap: ReactContextTypeConvert = (value, options) => {
-    const convertedValue = recurse(value, options);
+    const { node, hasNewlines } = recurse(value, options);
 
     if (!Array.isArray(value) || value.length < 2) {
-      return convertedValue;
+      return node;
     }
-
-    // Check individual array items for newlines to decide formatting,
-    // since recurse() returns a JSX fragment (not a string) for arrays.
-    const hasNewlines = value.some((v: unknown) => {
-      const converted = convert.call(format, v, options);
-      return typeof converted === 'string' && converted.includes('\n');
-    });
 
     if (hasNewlines) {
       return (
         <>
           {highlight('[')}
           {'\n  '}
-          {convertedValue}
+          {node}
           {'\n'}
           {highlight(']')}
         </>
@@ -119,7 +121,7 @@ export const setup = (
     return (
       <>
         {highlight('[')}
-        {convertedValue}
+        {node}
         {highlight(']')}
       </>
     );

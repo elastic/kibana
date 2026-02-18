@@ -151,7 +151,6 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       convert = (val: string, type?: FieldFormatsContentType): string => {
-        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
         const params = this._params;
         const format = this.getCachedFormat(
           params as SerializedFieldFormat<{}, SerializableRecord>
@@ -164,7 +163,8 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return `${params.missingBucketLabel}`;
         }
 
-        return format.convert(val, resolvedType);
+        const stringType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
+        return format.convert(val, stringType);
       };
       getConverterFor = (type?: FieldFormatsContentType) => (val: string) =>
         this.convert(val, type);
@@ -174,7 +174,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       convert = (val: unknown, type?: FieldFormatsContentType): string => {
-        const resolvedType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
+        const stringType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
         const params = this._params;
         const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
           return this.getCachedFormat(fieldParams);
@@ -188,7 +188,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         return (
           (val as MultiFieldKey)?.keys
-            ?.map((valPart, i) => formats[i].convert(valPart, resolvedType))
+            ?.map((valPart, i) => formats[i].convert(valPart, stringType))
             .join(joinTemplate) ?? ''
         );
       };

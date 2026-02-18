@@ -6,6 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { makeHighContrastColor } from '@elastic/eui';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
@@ -44,7 +45,7 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+    const content: ReactNode = formatter?.convert(rawValue, filterOnClick ? 'text' : 'react');
     const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {
@@ -111,18 +112,15 @@ export const createGridCell = (
 
     return (
       <div
-        /*
-         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-         * which is produced in a safe way.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
         className={classNames({
           'lnsTableCell--multiline': fitRowToContent,
           'lnsTableCell--colored': colorMode !== 'none',
           [`lnsTableCell--${currentAlignment}`]: true,
         })}
-      />
+      >
+        {content}
+      </div>
     );
   };
 };

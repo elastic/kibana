@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
@@ -74,7 +75,7 @@ export type FormattedHit = FormattedHitPair[];
 
 type FormattedHitReactPair = readonly [
   fieldDisplayName: string,
-  formattedValue: import('react').ReactNode,
+  formattedValue: ReactNode,
   fieldName: string | null
 ];
 
