@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { evaluate } from '@kbn/evals';
+import { evaluate, tags } from '@kbn/evals';
 import { table } from 'table';
 import chalk from 'chalk';
 
 evaluate.describe(
   'OneChat Evaluation Results and Historical Analysis',
-  { tag: '@svlSearch' },
+  { tag: tags.serverless.search },
   () => {
     // Run-to-Run Comparison
     evaluate('Evaluation Run Comparison', async ({ evaluationAnalysisService, log }) => {
