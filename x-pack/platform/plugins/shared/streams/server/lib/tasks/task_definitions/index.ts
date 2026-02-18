@@ -17,6 +17,7 @@ import { createStreamsFeaturesIdentificationTask } from './features_identificati
 import { createStreamsPipelineSuggestionTask } from './pipeline_suggestion';
 import { createStreamsOnboardingTask } from './onboarding';
 import { createStreamsDashboardSuggestionTask } from './dashboard_suggestion';
+import { createStreamsPartitionSuggestionTask } from './partition_suggestion';
 
 export interface TaskContext {
   logger: Logger;
@@ -34,6 +35,7 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsPipelineSuggestionTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
     ...createStreamsDashboardSuggestionTask(taskContext),
+    ...createStreamsPartitionSuggestionTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 
