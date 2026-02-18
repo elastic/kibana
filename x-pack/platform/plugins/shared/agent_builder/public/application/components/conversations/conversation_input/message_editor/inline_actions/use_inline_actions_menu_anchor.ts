@@ -17,8 +17,8 @@ interface UseInlineActionsMenuAnchorOptions {
 
 /**
  * Computes the popover anchor position from the active trigger's character
- * offset. Returns `null` when no trigger is active or the position cannot
- * be resolved.
+ * offset. Retains the last known position when the trigger becomes inactive
+ * so the popover can animate closed in place.
  */
 export const useInlineActionsMenuAnchor = ({
   triggerMatch,
@@ -31,7 +31,6 @@ export const useInlineActionsMenuAnchor = ({
   // Update anchor position
   useEffect(() => {
     if (typeof triggerStartOffset !== 'number' || !editorRef.current || !containerRef.current) {
-      setAnchorPosition(null);
       return;
     }
 
