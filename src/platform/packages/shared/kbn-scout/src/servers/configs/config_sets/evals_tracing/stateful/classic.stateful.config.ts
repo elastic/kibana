@@ -53,6 +53,8 @@ const { TRACING_EXPORTERS: tracingExporters } = process.env;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
 }
+const isCi = Boolean(process.env.CI);
+const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
 const exporters = tracingExporters ?? defaultExporters;
 
 /**
@@ -76,15 +78,18 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     env: {
       ...defaultConfig.kbnTestServer.env,
-      KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true',
+      ...(shouldEnableTracing ? { KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true' } : {}),
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-
-      '--telemetry.enabled=true',
-      '--telemetry.tracing.enabled=true',
-      '--telemetry.tracing.sample_rate=1',
-      `--telemetry.tracing.exporters=${exporters}`,
+      ...(shouldEnableTracing
+        ? [
+            '--telemetry.enabled=true',
+            '--telemetry.tracing.enabled=true',
+            '--telemetry.tracing.sample_rate=1',
+            `--telemetry.tracing.exporters=${exporters}`,
+          ]
+        : []),
     ],
   },
 };
