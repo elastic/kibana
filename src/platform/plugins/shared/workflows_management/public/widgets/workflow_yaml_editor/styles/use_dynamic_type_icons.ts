@@ -14,8 +14,8 @@ import type { ConnectorsResponse } from '../../../entities/connectors/model/type
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   getIconBase64,
-  getTriggerBoltFallbackDataUrl,
   type GetIconBase64Params,
+  getTriggerBoltFallbackDataUrl,
 } from '../../../shared/ui/step_icons/get_icon_base64';
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
