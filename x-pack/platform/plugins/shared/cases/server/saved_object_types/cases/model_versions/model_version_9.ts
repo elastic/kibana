@@ -38,6 +38,18 @@ export const modelVersion9: SavedObjectsModelVersion = {
     forwardCompatibility: casesSchemaV9.extends({}, { unknowns: 'ignore' }),
     create: casesSchemaV9.extends(
       {
+        connector: schema.object({
+          name: schema.string(),
+          type: schema.string(),
+          fields: schema.nullable(
+            schema.arrayOf(
+              schema.object({
+                key: schema.string(),
+                value: schema.nullable(schema.any()),
+              })
+            )
+          ),
+        }),
         // NOTE: this aligns the SO schema with persisted severity here
         // x-pack/platform/plugins/shared/cases/server/common/types/case.ts
         severity: schema.oneOf([
