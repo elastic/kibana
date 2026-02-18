@@ -59,7 +59,9 @@ describe('selectTabSavedSearch', () => {
     const { internalState, runtimeStateManager, services, getCurrentTab } = await setup();
     const currentTab = getCurrentTab();
 
-    const savedSearch = await selectTabSavedSearch(internalState.getState(), currentTab.id, {
+    const savedSearch = await selectTabSavedSearch({
+      tabId: currentTab.id,
+      getState: internalState.getState,
       runtimeStateManager,
       services,
     });
@@ -97,7 +99,9 @@ describe('selectTabSavedSearch', () => {
       }),
     });
 
-    const savedSearch = await selectTabSavedSearch(internalState.getState(), 'new-tab', {
+    const savedSearch = await selectTabSavedSearch({
+      tabId: 'new-tab',
+      getState: internalState.getState,
       runtimeStateManager,
       services,
     });
@@ -127,14 +131,12 @@ describe('selectTabSavedSearch', () => {
 
     await addNewTab({ tab: tabWithTimeRestore });
 
-    const savedSearch = await selectTabSavedSearch(
-      internalState.getState(),
-      tabWithTimeRestore.id,
-      {
-        runtimeStateManager,
-        services,
-      }
-    );
+    const savedSearch = await selectTabSavedSearch({
+      tabId: tabWithTimeRestore.id,
+      getState: internalState.getState,
+      runtimeStateManager,
+      services,
+    });
 
     expect(savedSearch?.timeRestore).toBe(true);
     expect(savedSearch?.timeRange).toEqual({ from: 'now-15m', to: 'now' });
@@ -160,14 +162,12 @@ describe('selectTabSavedSearch', () => {
 
     await addNewTab({ tab: tabWithoutTimeRestore });
 
-    const savedSearch = await selectTabSavedSearch(
-      internalState.getState(),
-      tabWithoutTimeRestore.id,
-      {
-        runtimeStateManager,
-        services,
-      }
-    );
+    const savedSearch = await selectTabSavedSearch({
+      tabId: tabWithoutTimeRestore.id,
+      getState: internalState.getState,
+      runtimeStateManager,
+      services,
+    });
 
     expect(savedSearch?.timeRestore).toBe(false);
     expect(savedSearch?.timeRange).toBeUndefined();
@@ -198,14 +198,12 @@ describe('selectTabSavedSearch', () => {
 
     await addNewTab({ tab: tabWithViewSettings });
 
-    const savedSearch = await selectTabSavedSearch(
-      internalState.getState(),
-      tabWithViewSettings.id,
-      {
-        runtimeStateManager,
-        services,
-      }
-    );
+    const savedSearch = await selectTabSavedSearch({
+      tabId: tabWithViewSettings.id,
+      getState: internalState.getState,
+      runtimeStateManager,
+      services,
+    });
 
     expect(savedSearch?.hideChart).toBe(true);
     expect(savedSearch?.rowHeight).toBe(3);
@@ -224,7 +222,9 @@ describe('selectTabSavedSearch', () => {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
     tabRuntimeState.currentDataView$.next(dataViewWithNoTimefieldMock);
 
-    const savedSearch = await selectTabSavedSearch(internalState.getState(), currentTab.id, {
+    const savedSearch = await selectTabSavedSearch({
+      tabId: currentTab.id,
+      getState: internalState.getState,
       runtimeStateManager,
       services,
     });
@@ -253,7 +253,9 @@ describe('selectTabSavedSearch', () => {
     // Add tab but don't initialize it (no stateContainer)
     await addNewTab({ tab: newTab });
 
-    const savedSearch = await selectTabSavedSearch(internalState.getState(), newTab.id, {
+    const savedSearch = await selectTabSavedSearch({
+      tabId: newTab.id,
+      getState: internalState.getState,
       runtimeStateManager,
       services,
     });

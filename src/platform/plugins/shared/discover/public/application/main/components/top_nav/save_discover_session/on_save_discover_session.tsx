@@ -43,11 +43,12 @@ export const onSaveDiscoverSession = async ({
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
   if (services.embeddableEditor.isByValueEditor()) {
-    const savedSearch = await selectTabSavedSearch(
-      state.internalState.getState(),
-      state.getCurrentTab().id,
-      { runtimeStateManager: state.runtimeStateManager, services }
-    );
+    const savedSearch = await selectTabSavedSearch({
+      tabId: state.getCurrentTab().id,
+      getState: state.internalState.getState,
+      runtimeStateManager: state.runtimeStateManager,
+      services,
+    });
 
     const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
     const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);

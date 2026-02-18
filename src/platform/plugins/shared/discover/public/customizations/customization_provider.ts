@@ -51,47 +51,45 @@ export interface ConnectedCustomizationService extends DiscoverCustomizationServ
 export const getExtendedDiscoverStateContainer = (
   stateContainer: DiscoverStateContainer,
   services: DiscoverServices
-): ExtendedDiscoverStateContainer => {
-  const tabId = stateContainer.getCurrentTab().id;
-
-  return {
-    ...stateContainer,
-    createAppStateObservable: () =>
-      createTabAppStateObservable({
-        tabId,
-        internalState$: from(stateContainer.internalState),
-        getState: stateContainer.internalState.getState,
-      }),
-    createTabPersistableStateObservable: () =>
-      createTabPersistableStateObservable({
-        tabId,
-        internalState$: from(stateContainer.internalState),
-        getState: stateContainer.internalState.getState,
-      }),
-    getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
-      return getInitialAppState({
-        initialUrlState: undefined,
-        persistedTab: fromSavedSearchToSavedObjectTab({
-          tab: stateContainer.getCurrentTab(),
-          savedSearch: newSavedSearch,
-          services,
-        }),
-        dataView: newSavedSearch.searchSource.getField('index'),
+): ExtendedDiscoverStateContainer => ({
+  ...stateContainer,
+  createAppStateObservable: () =>
+    createTabAppStateObservable({
+      tabId: stateContainer.getCurrentTab().id,
+      internalState$: from(stateContainer.internalState),
+      getState: stateContainer.internalState.getState,
+    }),
+  createTabPersistableStateObservable: () =>
+    createTabPersistableStateObservable({
+      tabId: stateContainer.getCurrentTab().id,
+      internalState$: from(stateContainer.internalState),
+      getState: stateContainer.internalState.getState,
+    }),
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+    return getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: fromSavedSearchToSavedObjectTab({
+        tab: stateContainer.getCurrentTab(),
+        savedSearch: newSavedSearch,
         services,
-      });
-    },
-    internalActions: {
-      fetchData: internalStateActions.fetchData,
-      openDiscoverSession: internalStateActions.openDiscoverSession,
-    },
-    getSavedSearchFromCurrentTab: async () => {
-      return await selectTabSavedSearch(stateContainer.internalState.getState(), tabId, {
-        services,
-        runtimeStateManager: stateContainer.runtimeStateManager,
-      });
-    },
-  };
-};
+      }),
+      dataView: newSavedSearch.searchSource.getField('index'),
+      services,
+    });
+  },
+  getSavedSearchFromCurrentTab: async () => {
+    return await selectTabSavedSearch({
+      tabId: stateContainer.getCurrentTab().id,
+      getState: stateContainer.internalState.getState,
+      runtimeStateManager: stateContainer.runtimeStateManager,
+      services,
+    });
+  },
+  internalActions: {
+    fetchData: internalStateActions.fetchData,
+    openDiscoverSession: internalStateActions.openDiscoverSession,
+  },
+});
 
 export const getConnectedCustomizationService = async ({
   customizationCallbacks,

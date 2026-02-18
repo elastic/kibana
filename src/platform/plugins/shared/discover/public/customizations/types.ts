@@ -30,10 +30,15 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
     Pick<TabState, 'appState' | 'globalState' | 'attributes'>
   >;
 
-  /*
+  /**
    * Get updated AppState when given a saved search
    */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
+
+  /**
+   * Builds a SavedSearch object from the current tab's state
+   */
+  getSavedSearchFromCurrentTab: () => Promise<SavedSearch>;
 
   /**
    * A selection of prodived Redux actions from the internal state
@@ -42,11 +47,6 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
     fetchData: typeof internalStateActions.fetchData;
     openDiscoverSession: typeof internalStateActions.openDiscoverSession;
   };
-
-  /**
-   * Builds a SavedSearch object from the current tab's state
-   */
-  getSavedSearchFromCurrentTab: () => Promise<SavedSearch>;
 }
 
 export interface CustomizationCallbackContext {

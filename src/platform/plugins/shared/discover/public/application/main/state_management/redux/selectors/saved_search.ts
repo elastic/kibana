@@ -17,18 +17,19 @@ import {
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
-export const selectTabSavedSearch = async (
-  state: DiscoverInternalState,
-  tabId: string,
-  {
-    runtimeStateManager,
-    services,
-  }: {
-    runtimeStateManager: RuntimeStateManager;
-    services: DiscoverServices;
-  }
-): Promise<SavedSearch> => {
-  const tabState = selectTab(state, tabId);
+export const selectTabSavedSearch = async ({
+  tabId,
+  getState,
+  runtimeStateManager,
+  services,
+}: {
+  tabId: string;
+  getState: () => DiscoverInternalState;
+  runtimeStateManager: RuntimeStateManager;
+  services: DiscoverServices;
+}): Promise<SavedSearch> => {
+  const currentState = getState();
+  const tabState = selectTab(currentState, tabId);
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
@@ -38,7 +39,7 @@ export const selectTabSavedSearch = async (
       currentDataView,
       services,
     }),
-    discoverSession: state.persistedDiscoverSession,
+    discoverSession: currentState.persistedDiscoverSession,
     services,
   });
 };
