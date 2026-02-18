@@ -659,7 +659,7 @@ export const getXyVisualization = ({
     }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
-    let stateWithSmartXTitleVisibility = prevState;
+    let stateWithRecommendedXAxisTitleVisibility = prevState;
 
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
@@ -672,7 +672,7 @@ export const getXyVisualization = ({
         prevState.xTitle
       );
       if (recommendedAxisSettings) {
-        stateWithSmartXTitleVisibility = {
+        stateWithRecommendedXAxisTitleVisibility = {
           ...prevState,
           axisTitlesVisibilitySettings: recommendedAxisSettings,
         };
@@ -692,8 +692,8 @@ export const getXyVisualization = ({
       }
     }
     return {
-      ...stateWithSmartXTitleVisibility,
-      layers: stateWithSmartXTitleVisibility.layers.map((l) =>
+      ...stateWithRecommendedXAxisTitleVisibility,
+      layers: stateWithRecommendedXAxisTitleVisibility.layers.map((l) =>
         l.layerId === layerId ? newLayer : l
       ),
     };

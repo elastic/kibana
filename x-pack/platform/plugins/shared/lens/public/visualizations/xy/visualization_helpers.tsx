@@ -152,32 +152,29 @@ export function getRecommendedXAxisTitleVisibility(
   operation: OperationMetadata | null | undefined,
   xTitle: string | undefined
 ): AxesSettingsConfig | undefined {
-  // Don't change visibility if user has set a custom title
-  if (xTitle) {
+  // Align with toolbar title modes:
+  // - none: hidden title
+  // - auto: visible title with generated text
+  // - custom: visible title with user-defined text
+  const currentTitleMode = xTitle ? 'custom' : currentSettings?.x === false ? 'none' : 'auto';
+
+  // Keep user custom title unchanged.
+  if (currentTitleMode === 'custom') {
     return undefined;
   }
 
-  const isDateHistogram = isDateHistogramOperation(operation);
-  const currentXAxisTitleSetting = currentSettings?.x;
+  const recommendedTitleMode = isDateHistogramOperation(operation) ? 'none' : 'auto';
 
-  // Only change if switching between expected defaults:
-  // - Date histogram with Auto (true) or undefined → set to None (false)
-  // - Non-date histogram with None (false) → set to Auto (true)
-  const shouldSetToNone =
-    isDateHistogram &&
-    (currentXAxisTitleSetting === true || currentXAxisTitleSetting === undefined);
-  const shouldSetToAuto = !isDateHistogram && currentXAxisTitleSetting === false;
-
-  if (shouldSetToNone || shouldSetToAuto) {
-    return {
-      ...currentSettings,
-      x: !shouldSetToNone,
-      yLeft: currentSettings?.yLeft ?? true,
-      yRight: currentSettings?.yRight ?? true,
-    };
+  if (currentTitleMode === recommendedTitleMode) {
+    return undefined;
   }
 
-  return undefined;
+  return {
+    ...currentSettings,
+    x: recommendedTitleMode !== 'none',
+    yLeft: currentSettings?.yLeft ?? true,
+    yRight: currentSettings?.yRight ?? true,
+  };
 }
 
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>

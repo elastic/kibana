@@ -53,6 +53,7 @@ export const {
   cloneLayer,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,
