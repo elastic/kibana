@@ -21,7 +21,6 @@ export type {
   EvalsExecutorClient,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
-export { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';

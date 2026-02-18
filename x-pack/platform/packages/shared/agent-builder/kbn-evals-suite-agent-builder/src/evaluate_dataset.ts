@@ -215,13 +215,13 @@ function configureExperiment({
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -248,7 +248,7 @@ export function createEvaluateDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task,
@@ -260,13 +260,13 @@ export function createEvaluateDataset({
 
 export function createEvaluateExternalDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -279,7 +279,7 @@ export function createEvaluateExternalDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset: {
           name: datasetName,

@@ -6,7 +6,9 @@
  */
 
 import { diffExamples } from './diff_examples';
-import type { Example, ExampleWithId } from '../types';
+import type { Example } from '@kbn/evals';
+
+type ExampleWithId = Example & { id: string };
 
 function withId(example: Example, id: string): ExampleWithId {
   return { ...(example as ExampleWithId), id };

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import Path from 'path';
-import { getPhoenixConfig } from '../../src/utils/get_phoenix_config';
+import { getPhoenixConfig } from '../../src/get_phoenix_config';
 
 const phoenixConfig = getPhoenixConfig();
 
-const phoenixClientDir = Path.join(__dirname, '../../kibana_phoenix_client');
+const phoenixClientDir = Path.join(__dirname, '../../src');
 
 const generatedGraphQlTypesDir = Path.join(phoenixClientDir, '__generated__');
 

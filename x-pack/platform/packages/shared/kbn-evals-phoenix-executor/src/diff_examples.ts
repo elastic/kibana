@@ -7,7 +7,9 @@
 
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
-import type { Example, ExampleWithId } from '../types';
+import type { Example } from '@kbn/evals';
+
+type ExampleWithId = Example & { id: string };
 
 function normaliseExample(example: Example | ExampleWithId) {
   return {

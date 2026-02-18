@@ -6,8 +6,10 @@
  */
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
-import type { Example, ExampleWithId } from '../types';
+import type { Example } from '@kbn/evals';
 import { diffExamples } from './diff_examples';
+
+type ExampleWithId = Example & { id: string };
 
 const UPSERT_DATASET = /* GraphQL */ `
   mutation UpsertDataset(
