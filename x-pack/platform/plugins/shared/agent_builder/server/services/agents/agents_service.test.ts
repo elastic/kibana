@@ -19,14 +19,17 @@ import { AgentsService } from './agents_service';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
+import { createClient } from './persisted/client';
 import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
 jest.mock('@kbn/agent-builder-server/allow_lists');
+jest.mock('./persisted/client');
 jest.mock('./persisted/tool_reference_cleanup');
 
 const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
   typeof isAllowedBuiltinAgent
 >;
+const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 
 const createStartDeps = (): AgentsServiceStartDeps => ({
@@ -50,6 +53,7 @@ describe('AgentsService', () => {
 
   afterEach(() => {
     isAllowedBuiltinAgentMock.mockReset();
+    createClientMock.mockReset();
     runToolRefCleanupMock.mockReset();
   });
 
@@ -81,6 +85,23 @@ describe('AgentsService', () => {
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
       service.setup({ logger });
+      createClientMock.mockResolvedValue({
+        getAgentsUsingTools: (params: { toolIds: string[] }) =>
+          runToolRefCleanupMock({
+            storage: {} as any,
+            spaceId: 'default',
+            toolIds: params.toolIds,
+            logger: undefined,
+            checkOnly: true,
+          }),
+        removeToolRefsFromAgents: (params: { toolIds: string[] }) =>
+          runToolRefCleanupMock({
+            storage: {} as any,
+            spaceId: 'default',
+            toolIds: params.toolIds,
+            logger: undefined,
+          }),
+      } as any);
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
     });

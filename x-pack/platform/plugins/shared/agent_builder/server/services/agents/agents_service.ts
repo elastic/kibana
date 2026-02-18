@@ -28,8 +28,7 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
-import { createStorage } from './persisted/client/storage';
-import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
+import { createClient } from './persisted/client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -79,11 +78,6 @@ export class AgentsService {
     const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
       startDeps;
 
-    const internalStorage = createStorage({
-      logger,
-      esClient: elasticsearch.client.asInternalUser,
-    });
-
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
@@ -91,6 +85,18 @@ export class AgentsService {
       toolsService,
       logger,
     });
+
+    const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      return createClient({
+        elasticsearch,
+        logger,
+        request,
+        security,
+        space,
+        toolsService,
+      });
+    };
 
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
       const space = getCurrentSpaceId({ request, spaces });
@@ -108,28 +114,16 @@ export class AgentsService {
       request,
       toolIds,
     }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
-      const spaceId = getCurrentSpaceId({ request, spaces });
-      return runToolRefCleanup({
-        storage: internalStorage,
-        spaceId,
-        toolIds,
-        logger,
-      });
+      const client = await getAgentClient({ request });
+      return client.removeToolRefsFromAgents({ toolIds });
     };
 
     const getAgentsUsingTools = async ({
       request,
       toolIds,
     }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
-      const spaceId = getCurrentSpaceId({ request, spaces });
-      const result = await runToolRefCleanup({
-        storage: internalStorage,
-        spaceId,
-        toolIds,
-        logger,
-        checkOnly: true,
-      });
-      return result as AgentsUsingToolsResult;
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingTools({ toolIds });
     };
 
     return {
