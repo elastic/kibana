@@ -436,7 +436,7 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('fails if cannot create database', async () => {
-    fetchSpy.mockResolvedValue({
+    fetchSpy.mockResolvedValueOnce({
       ok: false,
       status: 500,
       text: () => Promise.resolve('Some server error'),
