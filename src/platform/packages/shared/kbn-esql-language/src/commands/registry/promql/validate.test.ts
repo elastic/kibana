@@ -69,16 +69,11 @@ describe('PROMQL Validation', () => {
       ['buckets=-1', 'PROMQL buckets=-1 start=?_tstart end=?_tend (avg(doubleField))'],
       ['buckets=abc', 'PROMQL buckets=abc start=?_tstart end=?_tend (avg(doubleField))'],
     ])('invalid buckets value: %s', (_title, query) => {
-      promqlExpectErrors(query, [
-        '[PROMQL] Invalid buckets value. Must be a positive integer',
-      ]);
+      promqlExpectErrors(query, ['[PROMQL] Invalid buckets value. Must be a positive integer']);
     });
 
     test('valid buckets value', () => {
-      promqlExpectErrors(
-        'PROMQL buckets=6 start=?_tstart end=?_tend (avg(doubleField))',
-        []
-      );
+      promqlExpectErrors('PROMQL buckets=6 start=?_tstart end=?_tend (avg(doubleField))', []);
     });
   });
 
