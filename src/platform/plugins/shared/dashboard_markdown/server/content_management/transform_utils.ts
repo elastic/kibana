@@ -9,11 +9,11 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { SOWithMetadata } from '@kbn/content-management-utils/src/types';
-import type { MarkdownSavedObjectAttributes } from '../markdown_saved_object';
+import type { MarkdownAttributes } from '../markdown_saved_object';
 
-export type MarkdownItem = SOWithMetadata<MarkdownSavedObjectAttributes>;
+export type MarkdownItem = SOWithMetadata<MarkdownAttributes>;
 
-export function savedObjectToItem(savedObject: SavedObject<MarkdownSavedObjectAttributes>) {
+export function savedObjectToItem(savedObject: SavedObject<MarkdownAttributes>) {
   const {
     attributes,
     updated_at: updatedAt,

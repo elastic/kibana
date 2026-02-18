@@ -38,7 +38,7 @@ import { MarkdownRenderer } from './components/markdown_renderer';
 import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
-import type { MarkdownSavedObjectAttributes } from '../server/markdown_saved_object';
+import type { MarkdownAttributes } from '../server/markdown_saved_object';
 
 const defaultMarkdownState: MarkdownByValueState = {
   content: '',
@@ -63,7 +63,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isByReference = savedObjectId !== undefined;
     const initialStoredState = isByReference
       ? await loadFromLibrary(savedObjectId)
-      : ({} as MarkdownSavedObjectAttributes);
+      : ({} as MarkdownAttributes);
 
     const titleManager = initializeTitleManager(initialState);
     const markdownStateManager = initializeStateManager<MarkdownByValueState>(

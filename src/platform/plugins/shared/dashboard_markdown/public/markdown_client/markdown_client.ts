@@ -22,10 +22,10 @@ import type {
   MarkdownUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
-import type { MarkdownSavedObjectAttributes } from '../../server/markdown_saved_object';
+import type { MarkdownAttributes } from '../../server/markdown_saved_object';
 
 export const markdownClient = {
-  create: async (markdownState: MarkdownSavedObjectAttributes) => {
+  create: async (markdownState: MarkdownAttributes) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       body: JSON.stringify(markdownState),
@@ -59,7 +59,7 @@ export const markdownClient = {
       }),
     });
   },
-  update: async (id: string, markdownState: MarkdownSavedObjectAttributes) => {
+  update: async (id: string, markdownState: MarkdownAttributes) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
       `${MARKDOWN_API_PATH}/${id}`,
       {

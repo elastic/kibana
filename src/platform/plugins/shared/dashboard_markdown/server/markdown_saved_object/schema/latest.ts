@@ -8,7 +8,4 @@
  */
 
 // Latest model version for markdown saved objects is v3
-export {
-  markdownAttributesSchema as markdownSavedObjectSchema,
-  type MarkdownAttributes as MarkdownSavedObjectAttributes,
-} from './v1';
+export { markdownAttributesSchema, type MarkdownAttributes } from './v1';
