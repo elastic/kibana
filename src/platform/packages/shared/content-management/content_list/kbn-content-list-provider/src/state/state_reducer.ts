@@ -8,12 +8,12 @@
  */
 
 import type { ContentListClientState, ContentListAction } from './types';
-import { CONTENT_LIST_ACTIONS } from './types';
+import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 
 /**
  * State reducer for client-controlled state.
  *
- * Handles only user-driven state mutations (filters, sort).
+ * Handles user-driven state mutations (search, filters, sort, pagination).
  * Query data (items, loading, error) is managed by React Query directly.
  *
  * @param state - Current client state.
@@ -25,6 +25,24 @@ export const reducer = (
   action: ContentListAction
 ): ContentListClientState => {
   switch (action.type) {
+    case CONTENT_LIST_ACTIONS.SET_SEARCH:
+      return {
+        ...state,
+        search: { queryText: action.payload.queryText },
+        filters: action.payload.filters,
+        // Reset to first page when search changes to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
+    case CONTENT_LIST_ACTIONS.CLEAR_FILTERS:
+      return {
+        ...state,
+        filters: { ...DEFAULT_FILTERS },
+        search: { queryText: '' },
+        // Reset to first page when filters are cleared to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
     case CONTENT_LIST_ACTIONS.SET_SORT:
       return {
         ...state,
@@ -32,6 +50,20 @@ export const reducer = (
           field: action.payload.field,
           direction: action.payload.direction,
         },
+        // Reset to first page when sort changes to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_PAGE_INDEX:
+      return {
+        ...state,
+        page: { ...state.page, index: action.payload.index },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_PAGE_SIZE:
+      return {
+        ...state,
+        page: { index: 0, size: action.payload.size },
       };
 
     default:

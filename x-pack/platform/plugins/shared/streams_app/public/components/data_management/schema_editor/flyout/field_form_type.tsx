@@ -90,14 +90,16 @@ export const FieldFormType = ({
             enableGeoPointSuggestions={enableGeoPointSuggestions}
           />
         ) : field.type ? (
-          <FieldType type={field.type} />
+          <FieldType type={field.type} aliasFor={field.alias_for} />
         ) : (
           EMPTY_CONTENT
         )}
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EcsRecommendation isLoading={loading} recommendation={recommendation} />
-      </EuiFlexItem>
+      {!field.alias_for && (
+        <EuiFlexItem>
+          <EcsRecommendation isLoading={loading} recommendation={recommendation} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
