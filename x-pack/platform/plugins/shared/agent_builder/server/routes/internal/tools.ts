@@ -83,10 +83,16 @@ export function registerInternalToolsRoutes({
           });
         }
       } else {
-        await agentsService.removeToolRefsFromAgents({
+        const { agents } = await agentsService.removeToolRefsFromAgents({
           request,
           toolIds: ids,
         });
+        for (const agent of agents) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: agent.id,
+            agentName: agent.name,
+          });
+        }
       }
 
       const registry = await toolService.getRegistry({ request });

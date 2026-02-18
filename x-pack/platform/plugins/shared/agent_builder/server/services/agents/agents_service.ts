@@ -107,9 +107,9 @@ export class AgentsService {
     const removeToolRefsFromAgents = async ({
       request,
       toolIds,
-    }: ToolRefsParams): Promise<void> => {
+    }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
       const spaceId = getCurrentSpaceId({ request, spaces });
-      await runToolRefCleanup({
+      return runToolRefCleanup({
         storage: internalStorage,
         spaceId,
         toolIds,

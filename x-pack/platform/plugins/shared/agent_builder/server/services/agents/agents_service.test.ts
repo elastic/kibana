@@ -134,12 +134,13 @@ describe('AgentsService', () => {
     });
 
     describe('#removeToolRefsFromAgents', () => {
-      it('calls runToolRefCleanup without checkOnly and resolves', async () => {
-        runToolRefCleanupMock.mockResolvedValue(undefined);
+      it('calls runToolRefCleanup without checkOnly and returns updated agents', async () => {
+        const agents = [{ id: 'agent-1', name: 'Agent 1' }];
+        runToolRefCleanupMock.mockResolvedValue({ agents });
 
         await expect(
           started.removeToolRefsFromAgents({ request, toolIds: ['tool-1', 'tool-2'] })
-        ).resolves.toBeUndefined();
+        ).resolves.toEqual({ agents });
 
         expect(runToolRefCleanupMock).toHaveBeenCalledTimes(1);
         expect(runToolRefCleanupMock).toHaveBeenCalledWith(

@@ -24,7 +24,7 @@ export interface ToolRefCleanupParams {
   checkOnly?: boolean;
 }
 
-export type ToolRefCleanupRunResult = AgentsUsingToolsResult | void;
+export type ToolRefCleanupRunResult = AgentsUsingToolsResult;
 
 function getToolsFromSource(source: AgentProperties): ToolSelection[] {
   return source.configuration?.tools ?? source.config?.tools ?? [];
@@ -110,4 +110,6 @@ export async function runToolRefCleanup({
       throw err;
     }
   }
+
+  return { agents };
 }

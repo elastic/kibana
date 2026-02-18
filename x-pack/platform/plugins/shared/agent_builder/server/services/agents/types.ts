@@ -23,6 +23,6 @@ export interface ToolRefsParams {
 export interface AgentsServiceStart {
   execute: RunAgentFn;
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
-  removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<void>;
+  removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
 }

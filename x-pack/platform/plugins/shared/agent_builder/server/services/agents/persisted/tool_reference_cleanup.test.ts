@@ -57,7 +57,7 @@ describe('runToolRefCleanup', () => {
       spaceId: SPACE_ID,
       toolIds: ['tool-a'],
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ agents: [] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
   });
 
@@ -70,7 +70,7 @@ describe('runToolRefCleanup', () => {
       spaceId: SPACE_ID,
       toolIds: ['tool-x'],
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ agents: [] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
   });
 
@@ -90,7 +90,7 @@ describe('runToolRefCleanup', () => {
       spaceId: SPACE_ID,
       toolIds: ['tool-a', 'tool-b'],
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ agents: [] });
     expect(storage.getClient().bulk).not.toHaveBeenCalled();
   });
 
@@ -110,7 +110,7 @@ describe('runToolRefCleanup', () => {
       spaceId: SPACE_ID,
       toolIds: ['tool-a'],
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ agents: [{ id: 'agent-1', name: 'Test Agent' }] });
     expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
     const [bulkCall] = (storage.getClient().bulk as jest.Mock).mock.calls;
     const operations = bulkCall[0].operations;
@@ -140,7 +140,12 @@ describe('runToolRefCleanup', () => {
       spaceId: SPACE_ID,
       toolIds: ['tool-a'],
     });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({
+      agents: [
+        { id: 'agent-1', name: 'Test Agent' },
+        { id: 'agent-2', name: 'Test Agent' },
+      ],
+    });
     expect(storage.getClient().bulk).toHaveBeenCalledTimes(1);
     const [bulkCall] = (storage.getClient().bulk as jest.Mock).mock.calls;
     const operations = bulkCall[0].operations;
