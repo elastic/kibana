@@ -244,14 +244,13 @@ async function updateScoutFailureIssue(
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
   const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
-  const newErrorMessage = failure.errorMessage
-    ? (() => {
-        const currentFailureBody = truncateFailureBody(failure.errorMessage).trim();
-        return previousFailureBody && previousFailureBody !== currentFailureBody
-          ? currentFailureBody
-          : undefined;
-      })()
-    : undefined;
+  let newErrorMessage: string | undefined;
+  if (failure.errorMessage && previousFailureBody) {
+    const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
+    if (!previousFailureBody.includes(currentErrorMsg)) {
+      newErrorMessage = currentErrorMsg;
+    }
+  }
 
   const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);

@@ -49,7 +49,8 @@ run(
         branch = process.env.BUILDKITE_BRANCH || '';
         pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
         // isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
-        updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
+        // TODO(temp): restore after PR testing — original line:
+        // updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
         prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
       } else {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others

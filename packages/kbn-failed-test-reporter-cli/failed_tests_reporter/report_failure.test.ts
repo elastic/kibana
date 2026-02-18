@@ -274,6 +274,55 @@ describe('updateFailureIssue()', () => {
     expect(comment).not.toContain('New error message');
   });
 
+  it('does not include new error message when error.message matches issue body', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1112',
+          number: 1112,
+          nodeId: 'mnop',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            TimeoutError: locator.click: Timeout 10000ms exceeded.
+              at /path/to/test.ts:42:10
+              at async Runner.run (/node_modules/runner.js:100:5)
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure:
+          'TimeoutError: locator.click: Timeout 10000ms exceeded.\n  at /path/to/test.ts:42:10',
+        errorMessage: 'TimeoutError: locator.click: Timeout 10000ms exceeded.',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-1112',
+        target: 'serverless=es',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).not.toContain('New error message');
+  });
+
   it('includes new error message when error.message changed', async () => {
     const api = new GithubApi();
 
