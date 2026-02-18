@@ -6,7 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { esqlIsNullOrEmpty } from '../../../common/esql/strings';
+import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
@@ -120,9 +120,8 @@ export const buildLogsExtractionEsqlQuery = ({
     `
   | LOOKUP JOIN ${latestIndex}
       ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}
-  | EVAL
-    ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
-    ${customFieldEvalLogic(type, entityTypeFallback)}` +
+  | EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}
+  | EVAL ${customFieldEvalLogic(type, entityTypeFallback)}` +
     // Rename the fields to the original names
     `
   | RENAME
@@ -191,9 +190,9 @@ function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
     `${TIMESTAMP_FIELD} = ${recentData('timestamp')}`,
 
     // Fallback to the untyped id if the name is empty
-    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNullOrEmpty(recentData(ENTITY_NAME_FIELD))}, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )}, ${recentData(ENTITY_NAME_FIELD)})`,
+    `${ENTITY_NAME_FIELD} = CASE(${esqlIsNotNullOrEmpty(
+      ENTITY_NAME_FIELD
+    )}, ${ENTITY_NAME_FIELD}, ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)})`,
 
     // Save the engine type
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
@@ -286,8 +285,8 @@ export function extractPaginationParams(
   }
 
   const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
-  const timestampCursor = String(lastResult[timestampFieldIdx]);
-  const idCursor = String(lastResult[idFieldIdx]);
+  const timestampCursor = lastResult[timestampFieldIdx] as string;
+  const idCursor = lastResult[idFieldIdx] as string;
   return {
     timestampCursor,
     idCursor,

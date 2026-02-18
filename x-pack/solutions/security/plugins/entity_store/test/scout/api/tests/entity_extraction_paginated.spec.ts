@@ -39,7 +39,7 @@ apiTest.describe(
           },
         },
       });
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(201);
 
       await esArchiver.loadIfNeeded(
         'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'

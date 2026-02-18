@@ -98,8 +98,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | EVAL recent.entity.id = CONCAT(\\"generic:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  entity.source = COALESCE(recent.entity.source, entity.source),
  entity.type = COALESCE(recent.entity.type, entity.type),
  entity.sub_type = COALESCE(recent.entity.sub_type, entity.sub_type),
@@ -179,9 +178,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  asset.business_unit = COALESCE(recent.asset.business_unit, asset.business_unit),
  entity.risk.calculated_level = COALESCE(recent.entity.risk.calculated_level, entity.risk.calculated_level),
  entity.risk.calculated_score = COALESCE(recent.entity.risk.calculated_score, entity.risk.calculated_score),
- entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id)
   | RENAME
@@ -345,8 +344,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
   | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
  host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
@@ -391,9 +389,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
  entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
  entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
- entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -525,8 +523,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
  host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
@@ -571,9 +568,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
  entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
  entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
- entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -705,8 +702,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
  host.domain = MV_SLICE(MV_UNION(recent.host.domain, host.domain), 0, 9),
@@ -751,9 +747,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
  entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
  entity.relationships.Owned_by = MV_SLICE(MV_UNION(recent.entity.relationships.Owned_by, entity.relationships.Owned_by), 0, 9),
- entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.relationships.Accessed_frequently_by = MV_SLICE(MV_UNION(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Host\\")
@@ -878,8 +874,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
   | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
  service.name = MV_SLICE(MV_UNION(recent.service.name, service.name), 0, 9),
  service.address = MV_SLICE(MV_UNION(recent.service.address, service.address), 0, 9),
@@ -923,9 +918,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  entity.relationships.Communicates_with = MV_SLICE(MV_UNION(recent.entity.relationships.Communicates_with, entity.relationships.Communicates_with), 0, 9),
  entity.relationships.Depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.Depends_on, entity.relationships.Depends_on), 0, 9),
- entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.relationships.Dependent_of = MV_SLICE(MV_UNION(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Service\\")
@@ -1055,8 +1050,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
-  | EVAL
-    entity.name = COALESCE(recent.entity.name, entity.name),
+  | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  user.entity.id = COALESCE(user.entity.id, recent.user.entity.id),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
@@ -1100,9 +1094,9 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.relationships.Accesses_frequently = MV_SLICE(MV_UNION(recent.entity.relationships.Accesses_frequently, entity.relationships.Accesses_frequently), 0, 9),
  entity.relationships.Owns = MV_SLICE(MV_UNION(recent.entity.relationships.Owns, entity.relationships.Owns), 0, 9),
  entity.relationships.Supervises = MV_SLICE(MV_UNION(recent.entity.relationships.Supervises, entity.relationships.Supervises), 0, 9),
- entity.relationships.Supervised_by = MV_SLICE(MV_UNION(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), 0, 9),
-    @timestamp = recent.timestamp,
- entity.name = CASE((recent.entity.name IS NULL OR recent.entity.name == \\"\\"), recent.entity.EngineMetadata.UntypedId, recent.entity.name),
+ entity.relationships.Supervised_by = MV_SLICE(MV_UNION(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), 0, 9)
+  | EVAL @timestamp = recent.timestamp,
+ entity.name = CASE(entity.name IS NOT NULL AND entity.name != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
  entity.hashedId = HASH(\\"MD5\\", recent.entity.id),
  entity.type = COALESCE(entity.type, \\"Identity\\")
