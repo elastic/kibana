@@ -93,9 +93,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       task.registerTaskDefinition(mockTaskManager as any);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
-          title: 'Synthetics Sync Global Params Task',
+          title: 'Synthetics Sync Private Location Monitors Task',
           description:
-            'This task is executed so that we can sync private location monitors for example when global params are updated',
+            'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
           timeout: '10m',
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
