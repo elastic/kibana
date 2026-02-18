@@ -22,6 +22,7 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'rule_editing'
     | 'rule_details'
     | 'rule_failure'
+    | 'rule_query_error'
     | 'attack_discovery_take_action'
     | 'attack_discovery_top'
     | 'attack_discovery_bottom';

@@ -136,7 +136,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               onClick={openAgentBuilderFlyout}
               size="xs"
               telemetry={{
-                pathway: 'rule_creation',
+                pathway: 'rule_query_error',
                 attachments: ['rule'],
               }}
             />
