@@ -391,7 +391,7 @@ service:
     # Accept metrics from OTLP and span metrics connector, export to debug
     # (Elasticsearch metrics export not yet enabled)
     metrics:
-      receivers: [otlp, spanmetrics]
+      receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [debug]
     # Collect Kubernetes metrics (cluster, kubelet, host)

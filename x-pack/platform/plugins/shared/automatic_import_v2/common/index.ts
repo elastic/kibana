@@ -39,4 +39,5 @@ export type {
   AllIntegrationsResponseIntegration,
   OriginalSource,
   OriginalSourceType,
+  LangSmithOptions,
 } from './model/common_attributes.gen';

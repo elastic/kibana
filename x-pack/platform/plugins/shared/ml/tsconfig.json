@@ -77,7 +77,6 @@
     "@kbn/ml-date-utils",
     "@kbn/ml-error-utils",
     "@kbn/ml-field-stats-flyout",
-    "@kbn/ml-in-memory-table",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-local-storage",
@@ -96,7 +95,6 @@
     "@kbn/ml-validators",
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-context-render",
@@ -146,6 +144,6 @@
     "@kbn/file-upload-plugin",
     "@kbn/file-upload",
     "@kbn/file-upload-common",
-    "@kbn/kql",
+    "@kbn/kql"
   ]
 }

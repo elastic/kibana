@@ -15,8 +15,8 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ESQLLangEditor } from '@kbn/esql/public';
-import { type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLLangEditor, useESQLQueryStats } from '@kbn/esql/public';
+import { type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -121,6 +121,7 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
+  const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
 
   const dispatch = useLensDispatch();
 
@@ -227,6 +228,7 @@ export function ESQLEditor({
         isVisualizationLoading={isVisualizationLoading}
         setIsVisualizationLoading={setIsVisualizationLoading}
         esqlVariables={esqlVariables}
+        queryStats={esqlQueryStats}
         closeFlyout={closeFlyout}
         panelId={panelId}
         attributes={attributes}
@@ -274,6 +276,7 @@ type InnerEditorProps = Simplify<
     suggestsLimitedColumns: boolean;
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
+    queryStats?: ESQLQueryStats;
   } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
 >;
 
@@ -292,6 +295,7 @@ function InnerESQLEditor({
   prevQuery,
   runQuery,
   esqlVariables,
+  queryStats,
 }: InnerEditorProps) {
   const { euiTheme } = useEuiTheme();
   const { onSaveControl, onCancelControl } = useESQLVariables({
@@ -306,7 +310,6 @@ function InnerESQLEditor({
       <div
         css={css`
           border-top: ${euiTheme.border.thin};
-          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
         `}
       >
         <ESQLLangEditor
@@ -322,7 +325,6 @@ function InnerESQLEditor({
               : undefined
           }
           editorIsInline
-          hideRunQueryText
           onTextLangQuerySubmit={async (q, a) => {
             // do not run the suggestions if the query is the same as the previous one
             if (q && !isEqual(q, prevQuery.current)) {
@@ -339,6 +341,7 @@ function InnerESQLEditor({
             onCancelControl,
           }}
           esqlVariables={esqlVariables}
+          queryStats={queryStats}
         />
       </div>
     </EuiFlexItem>
