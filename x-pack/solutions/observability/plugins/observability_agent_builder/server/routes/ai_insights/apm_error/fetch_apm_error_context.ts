@@ -8,14 +8,52 @@
 import dedent from 'dedent';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import {
+  AT_TIMESTAMP,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  EVENT_OUTCOME,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  PARENT_ID,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_ID,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+  URL_FULL,
+} from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
-import { getApmIndices } from '../../../utils/get_apm_indices';
-import { parseDatemath } from '../../../utils/time';
-import { fetchDistributedTrace } from './fetch_distributed_trace';
+import { getToolHandler as getTraces } from '../../../tools/get_traces/handler';
+import { getObservabilityDataSources } from '../../../utils/get_observability_data_sources';
+
+const ERROR_INSIGHT_TRACE_FIELDS = [
+  AT_TIMESTAMP,
+  SERVICE_NAME,
+  SPAN_ID,
+  PARENT_ID,
+  SPAN_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRANSACTION_NAME,
+  TRANSACTION_DURATION,
+  EVENT_OUTCOME,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  HTTP_RESPONSE_STATUS_CODE,
+  HTTP_REQUEST_METHOD,
+  URL_FULL,
+];
 
 export interface FetchApmErrorContextParams {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -49,9 +87,6 @@ export async function fetchApmErrorContext({
   environment = '',
   logger,
 }: FetchApmErrorContextParams): Promise<string> {
-  const parsedStart = parseDatemath(start);
-  const parsedEnd = parseDatemath(end, { roundUp: true });
-
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
@@ -95,36 +130,39 @@ export async function fetchApmErrorContext({
   ];
 
   if (traceId) {
-    const traceContextPromise = (async () => {
-      const apmIndices = await getApmIndices({ core, plugins, logger });
-      return fetchDistributedTrace({
-        esClient,
-        apmIndices,
-        traceId,
-        start: parsedStart,
-        end: parsedEnd,
-        logger,
-      });
-    })();
+    const dataSources = await getObservabilityDataSources({ core, plugins, logger });
+    const apmIndices = [
+      dataSources.apmIndexPatterns.transaction,
+      dataSources.apmIndexPatterns.span,
+      dataSources.apmIndexPatterns.error,
+    ].join(',');
 
     contextParts.push({
       name: 'TraceDocuments',
       start,
       end,
       handler: async () => {
-        const { traceDocuments, isPartialTrace } = await traceContextPromise;
+        const result = await getTraces({
+          core,
+          plugins,
+          logger,
+          esClient,
+          start,
+          end,
+          index: apmIndices,
+          kqlFilter: `trace.id: "${traceId}"`,
+          fields: ERROR_INSIGHT_TRACE_FIELDS,
+          maxTraces: 1,
+        });
+        const trace = result.traces[0];
+        if (!trace || trace.items.length === 0) {
+          return undefined;
+        }
         return {
-          isPartialTrace,
-          documents: traceDocuments,
+          documents: trace.items,
+          isTruncated: trace.isTruncated,
         };
       },
-    });
-
-    contextParts.push({
-      name: 'TraceServices',
-      start,
-      end,
-      handler: async () => (await traceContextPromise).services,
     });
   }
 

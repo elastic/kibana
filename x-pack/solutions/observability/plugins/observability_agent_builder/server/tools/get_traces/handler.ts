@@ -20,6 +20,7 @@ import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { getTraceIds } from './get_trace_ids';
+import { DEFAULT_TRACE_FIELDS, DEFAULT_MAX_TRACES, DEFAULT_MAX_DOCS_PER_TRACE } from './constants';
 
 export async function fetchTraceDocuments({
   esClient,
@@ -91,9 +92,9 @@ export async function getToolHandler({
   end,
   index,
   kqlFilter,
-  fields,
-  maxTraces,
-  maxDocsPerTrace,
+  fields = DEFAULT_TRACE_FIELDS,
+  maxTraces = DEFAULT_MAX_TRACES,
+  maxDocsPerTrace = DEFAULT_MAX_DOCS_PER_TRACE,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -103,9 +104,9 @@ export async function getToolHandler({
   end: string;
   index?: string;
   kqlFilter: string;
-  fields: string[];
-  maxTraces: number;
-  maxDocsPerTrace: number;
+  fields?: string[];
+  maxTraces?: number;
+  maxDocsPerTrace?: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
   const apmIndexPatterns = [
