@@ -26,11 +26,7 @@ test.describe('DataViewPermissions', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('renders exploratory view for viewer user', async ({
-    pageObjects,
-    browserAuth,
-    page,
-  }) => {
+  test('renders exploratory view for viewer user', async ({ pageObjects, browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.uptimeOverview.goto(queryParams);
 

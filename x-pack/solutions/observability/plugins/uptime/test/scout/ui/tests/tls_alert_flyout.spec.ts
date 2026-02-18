@@ -17,9 +17,7 @@ test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
     kbnUrl,
   }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(
-      kbnUrl.get('/app/management/insightsAndAlerting/triggersActions/rules')
-    );
+    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/triggersActions/rules'));
 
     await page.click('text=Create rule');
     await pageObjects.uptimeOverview.waitForLoadingToFinish();

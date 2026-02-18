@@ -38,8 +38,6 @@ test.describe('MonitorDetails', { tag: tags.stateful.classic }, () => {
       'zJtkHm0B0I9WX_CzftsN',
     ];
 
-    await Promise.all(
-      pingIds.map((id) => pageObjects.monitorDetails.waitForPingListItem(id))
-    );
+    await Promise.all(pingIds.map((id) => pageObjects.monitorDetails.waitForPingListItem(id)));
   });
 });

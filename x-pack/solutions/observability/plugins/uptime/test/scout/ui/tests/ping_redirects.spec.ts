@@ -56,7 +56,7 @@ test.describe('MonitorPingRedirects', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.waitForLoadingToFinish();
 
     const redirectCount = await pageObjects.monitorDetails.getMonitorRedirects();
-    expect(redirectCount).toEqual(`${testMonitor.redirects.length}`);
+    expect(redirectCount).toBe(`${testMonitor.redirects.length}`);
 
     await pageObjects.monitorDetails.expandPingDetails();
     await pageObjects.monitorDetails.waitForLoadingToFinish();

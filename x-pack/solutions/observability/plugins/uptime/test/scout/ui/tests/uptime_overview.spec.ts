@@ -9,11 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 test.describe('UptimeOverview', { tag: tags.stateful.classic }, () => {
-  test('navigates to overview and clicks monitor', async ({
-    pageObjects,
-    browserAuth,
-    page,
-  }) => {
+  test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.uptimeOverview.goto('dateRangeStart=2018-01-01&dateRangeEnd=now');
 

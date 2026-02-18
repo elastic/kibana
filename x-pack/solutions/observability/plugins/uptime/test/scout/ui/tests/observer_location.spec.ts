@@ -31,24 +31,8 @@ test.describe('Observer location', { tag: tags.stateful.classic }, () => {
       mogrifyNoLocation
     );
 
-    await makeChecksWithStatus(
-      esClient,
-      LESS_AVAIL_MONITOR_ID,
-      5,
-      2,
-      10000,
-      {},
-      'up'
-    );
-    await makeChecksWithStatus(
-      esClient,
-      LESS_AVAIL_MONITOR_ID,
-      5,
-      2,
-      10000,
-      {},
-      'down'
-    );
+    await makeChecksWithStatus(esClient, LESS_AVAIL_MONITOR_ID, 5, 2, 10000, {}, 'up');
+    await makeChecksWithStatus(esClient, LESS_AVAIL_MONITOR_ID, 5, 2, 10000, {}, 'down');
   });
 
   test('displays the overall availability for no location monitor', async ({
@@ -62,10 +46,7 @@ test.describe('Observer location', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.assertText('100.00 %');
   });
 
-  test('displays less monitor availability', async ({
-    pageObjects,
-    browserAuth,
-  }) => {
+  test('displays less monitor availability', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(LESS_AVAIL_MONITOR_ID);

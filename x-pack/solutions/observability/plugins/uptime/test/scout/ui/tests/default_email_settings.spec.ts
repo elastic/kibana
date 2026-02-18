@@ -30,9 +30,7 @@ test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
 
     if (toEmailInput) {
       await page
-        .locator(
-          '[data-test-subj=toEmailAddressInput] >> [data-test-subj=comboBoxClearButton]'
-        )
+        .locator('[data-test-subj=toEmailAddressInput] >> [data-test-subj=comboBoxClearButton]')
         .click();
       await page
         .locator(
@@ -58,9 +56,7 @@ test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('default-connectors-input-loaded');
     await page.testSubj.click('"Test connector"');
     await expect(page.locator('text=Bcc')).toBeVisible();
-    await expect(
-      page.locator('text=To email is required for email connector')
-    ).toBeVisible();
+    await expect(page.locator('text=To email is required for email connector')).toBeVisible();
     await pageObjects.uptimeSettings.assertApplyDisabled();
     await pageObjects.uptimeSettings.fillToEmail('test@gmail.com');
     await pageObjects.uptimeSettings.assertApplyEnabled();
