@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
 import { overviewEmbeddableSchema } from './schema';
-import { getTransforms } from '../../../common/embeddables/overview/transforms/transforms';
 import { registerOverviewEmbeddableTransforms } from './register_overview_embeddable_transforms';
 
 describe('registerOverviewEmbeddableTransforms', () => {
@@ -58,9 +57,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
     };
     expect(() => schemaWithDrilldowns.validate(validState)).not.toThrow();
     // Schema should allow drilldowns key (fixes "definition for this key is missing" when saving)
-    expect(() =>
-      schemaWithDrilldowns.validate({ ...validState, drilldowns: [] })
-    ).not.toThrow();
+    expect(() => schemaWithDrilldowns.validate({ ...validState, drilldowns: [] })).not.toThrow();
   });
 
   it('should register the correct transforms with drilldownTransforms', () => {

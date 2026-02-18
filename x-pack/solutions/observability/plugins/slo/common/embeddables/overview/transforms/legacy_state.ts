@@ -84,13 +84,13 @@ export const legacyStoredStateToOverviewState = (
         group_filters: state.group_filters
           ? state.group_filters
           : legacyGroupFilters
-            ? {
-                group_by: legacyGroupFilters.groupBy,
-                groups: legacyGroupFilters.groups,
-                filters: legacyGroupFilters.filters,
-                kql_query: legacyGroupFilters.kqlQuery,
-              }
-            : undefined,
+          ? {
+              group_by: legacyGroupFilters.groupBy,
+              groups: legacyGroupFilters.groups,
+              filters: legacyGroupFilters.filters,
+              kql_query: legacyGroupFilters.kqlQuery,
+            }
+          : undefined,
       } as OverviewEmbeddableState;
     }
 
