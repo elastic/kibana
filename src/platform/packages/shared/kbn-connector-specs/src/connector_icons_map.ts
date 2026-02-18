@@ -88,6 +88,6 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.slack2',
-    lazy(() => import(/* webpackChunkName: "connectorIconslack2" */ './specs/slack/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
 ]);

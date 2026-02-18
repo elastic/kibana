@@ -11,10 +11,30 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import type {
+  SlackAssistantSearchContextResponse,
+  SlackErrorFields,
+  SlackSearchMatch,
+} from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
+
+// Slack API/connector constants (avoid magic numbers)
+const SLACK_MAX_SEARCH_RESULTS_PER_PAGE = 20;
+const SLACK_SEARCH_DEFAULT_COUNT = SLACK_MAX_SEARCH_RESULTS_PER_PAGE;
+const SLACK_MAX_CONVERSATIONS_LIST_LIMIT = 1000;
+const SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT = SLACK_MAX_CONVERSATIONS_LIST_LIMIT;
+const SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES = 10;
+const SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES = 100;
+
+const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
+const SLACK_RETRY_JITTER_MAX_MS = 250;
+const SLACK_RETRY_MAX_DELAY_MS = 60_000;
+const SLACK_RETRY_EXPONENT_CAP = 6;
+
+const SLACK_BLOCKS_TRAVERSAL_MAX_NODES = 5000;
 
 const SlackSearchMessagesInputSchema = z.object({
   query: z
@@ -101,14 +121,14 @@ const SlackSearchMessagesInputSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(20)
+    .max(SLACK_MAX_SEARCH_RESULTS_PER_PAGE)
     .optional()
     .describe(
       i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
         {
           defaultMessage:
-            'Number of results to return (1-20). Slack returns up to 20 results per page.',
+            `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`,
         }
       )
     ),
@@ -174,33 +194,6 @@ const SlackSearchMessagesInputSchema = z.object({
 });
 type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
 
-interface SlackAssistantSearchContextMessage {
-  author_name?: string;
-  author_user_id?: string;
-  team_id?: string;
-  channel_id?: string;
-  channel_name?: string;
-  message_ts?: string;
-  content?: string;
-  is_author_bot?: boolean;
-  permalink?: string;
-  blocks?: unknown;
-  context_messages?: unknown;
-}
-
-interface SlackAssistantSearchContextResponse {
-  ok: boolean;
-  error?: string;
-  needed?: string;
-  provided?: string;
-  results?: {
-    messages?: SlackAssistantSearchContextMessage[];
-    files?: unknown[];
-    channels?: unknown[];
-  };
-  response_metadata?: { next_cursor?: string };
-}
-
 const SlackResolveChannelIdInputSchema = z.object({
   name: z
     .string()
@@ -260,13 +253,13 @@ const SlackResolveChannelIdInputSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(1000)
+    .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
     .optional()
     .describe(
       i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.limit.description',
         {
-          defaultMessage: 'Channels per page to request (1-1000). Defaults to 1000.',
+          defaultMessage: `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`,
         }
       )
     ),
@@ -274,13 +267,13 @@ const SlackResolveChannelIdInputSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES)
     .optional()
     .describe(
       i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
         {
-          defaultMessage: 'Maximum number of pages to scan before giving up. Defaults to 10.',
+          defaultMessage: `Maximum number of pages to scan before giving up. Defaults to ${SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES}.`,
         }
       )
     ),
@@ -360,11 +353,6 @@ function getHeader(headers: unknown, headerName: string): string | undefined {
   return undefined;
 }
 
-interface SlackErrorFields {
-  error?: string;
-  needed?: string;
-  provided?: string;
-}
 function getSlackErrorFields(responseData: unknown): SlackErrorFields {
   if (!isRecord(responseData)) return {};
   return {
@@ -401,33 +389,25 @@ function getSlackRetryDelayMs(params: {
   attempt: number;
   defaultBaseDelayMs?: number;
 }) {
-  const { responseHeaders, attempt, defaultBaseDelayMs = 1000 } = params;
+  const { responseHeaders, attempt, defaultBaseDelayMs = SLACK_RETRY_DEFAULT_BASE_DELAY_MS } =
+    params;
   const retryAfter = getHeader(responseHeaders, 'retry-after');
   const retryAfterSeconds = typeof retryAfter === 'string' ? Number(retryAfter) : NaN;
 
   if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
     // Add a small jitter so multiple callers don't retry in lockstep.
-    const jitterMs = Math.floor(Math.random() * 250);
-    return Math.min(60_000, Math.floor(retryAfterSeconds * 1000) + jitterMs);
+    const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
+    return Math.min(
+      SLACK_RETRY_MAX_DELAY_MS,
+      Math.floor(retryAfterSeconds * 1000) + jitterMs
+    );
   }
 
   // Fallback exponential backoff with jitter.
-  const exp = Math.min(6, Math.max(0, attempt)); // cap at 2^6
+  const exp = Math.min(SLACK_RETRY_EXPONENT_CAP, Math.max(0, attempt)); // cap at 2^cap
   const base = defaultBaseDelayMs * Math.pow(2, exp);
-  const jitterMs = Math.floor(Math.random() * 250);
-  return Math.min(60_000, base + jitterMs);
-}
-
-interface SlackSearchMatch {
-  /**
-   * Minimal shape we use for mention extraction.
-   *
-   * Historically this interface mirrored Slack `search.messages` matches (which included many more
-   * fields like `iid`, `score`, etc.). Now that we use `assistant.search.context`, we only need the
-   * rendered text content and (optionally) Block Kit blocks.
-   */
-  text?: string;
-  blocks?: unknown;
+  const jitterMs = Math.floor(Math.random() * SLACK_RETRY_JITTER_MAX_MS);
+  return Math.min(SLACK_RETRY_MAX_DELAY_MS, base + jitterMs);
 }
 
 function extractMentionedUserIds(match: SlackSearchMatch): string[] {
@@ -448,7 +428,7 @@ function extractMentionedUserIds(match: SlackSearchMatch): string[] {
   while (stack.length > 0) {
     const cur = stack.pop();
     visited += 1;
-    if (visited > 5000) break;
+    if (visited > SLACK_BLOCKS_TRAVERSAL_MAX_NODES) break;
     if (!cur || typeof cur !== 'object') continue;
     if (seen.has(cur)) continue;
     seen.add(cur);
@@ -475,9 +455,8 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 }): Promise<AxiosResponse<TData>> {
   const { ctx, action, request, maxRetries = 3 } = params;
 
-  let attempt = 0;
-
-  while (true) {
+  // Total attempts = maxRetries + 1 (initial attempt + retries)
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await request();
     } catch (error) {
@@ -490,7 +469,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
         slackError === 'ratelimited' ||
         (typeof err.message === 'string' && err.message.includes('ratelimited'));
 
-      if (!isRateLimited || attempt >= maxRetries) {
+      if (!isRateLimited || attempt === maxRetries) {
         throw error;
       }
 
@@ -504,9 +483,10 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
         }/${maxRetries}). Sleeping ${delayMs}ms before retry.`
       );
       await sleep(delayMs);
-      attempt += 1;
     }
   }
+
+  throw new Error(`Slack ${action} failed after ${maxRetries + 1} attempts`);
 }
 
 /**
@@ -599,7 +579,7 @@ export const Slack: ConnectorSpec = {
         if (typedInput.before) queryParts.push(`before:${typedInput.before}`);
         const finalQuery = queryParts.filter(Boolean).join(' ');
 
-        const count = typedInput.count ?? 20;
+        const count = typedInput.count ?? SLACK_SEARCH_DEFAULT_COUNT;
         const requestBody: Record<string, unknown> = {
           query: finalQuery,
           channel_types: ['public_channel', 'private_channel', 'mpim', 'im'],
@@ -701,18 +681,19 @@ export const Slack: ConnectorSpec = {
             : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
         const match = typedInput.match ?? 'exact';
         const excludeArchived = typedInput.excludeArchived ?? true;
-        const limit = typedInput.limit ?? 1000;
-        const maxPages = typedInput.maxPages ?? 10;
+        const limit = typedInput.limit ?? SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT;
+        const maxPages = typedInput.maxPages ?? SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES;
 
         let cursor = typedInput.cursor;
         let pagesFetched = 0;
 
         while (pagesFetched < maxPages) {
-          const params = new URLSearchParams();
-          params.append('types', types.join(','));
-          params.append('exclude_archived', excludeArchived ? 'true' : 'false');
-          params.append('limit', limit.toString());
-          if (cursor) params.append('cursor', cursor);
+          const params: Record<string, string | number | boolean> = {
+            types: types.join(','),
+            exclude_archived: excludeArchived,
+            limit,
+            ...(cursor ? { cursor } : {}),
+          };
 
           ctx.log.debug(`Slack resolveChannelId scan (page ${pagesFetched + 1})`);
           const response = await slackRequestWithRateLimitRetry<{
@@ -727,7 +708,7 @@ export const Slack: ConnectorSpec = {
             action: 'resolveChannelId',
             maxRetries: 5,
             request: () =>
-              ctx.client.get(`${SLACK_API_BASE}/conversations.list?${params.toString()}`),
+              ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
           });
 
           if (!response.data.ok) {

@@ -8,7 +8,7 @@ triggers:
 inputs:
   - name: channel
     type: string
-    description: 'Public channel conversation ID to send the message to (e.g. C123...).'
+    description: 'Public channel name or conversation ID to send the message to (e.g. #general or C123...).'
   - name: text
     type: string
     description: 'Message text.'

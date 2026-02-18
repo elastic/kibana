@@ -17,7 +17,7 @@ inputs:
   - name: from_user
     type: string
     required: false
-    description: 'Optional constraint. Appends `from:<@UserID>` or `from:username` to the query. Keep in mind that Slack usernames may need space characters replaced by periods. John Doe becomes john.doe'
+    description: 'Optional constraint. Slack usernames require space characters replaced by periods, for example John Doe becomes john.doe.'
   - name: after
     type: string
     required: false
@@ -30,12 +30,12 @@ inputs:
     type: string
     required: false
     default: "score"
-    description: 'Sort order. Valid values: score, timestamp.'
+    description: 'Sort order. Valid values: [score, timestamp].'
   - name: sort_dir
     type: string
     required: false
     default: "desc"
-    description: 'Sort direction. Valid values: asc, desc.'
+    description: 'Sort direction. Valid values: [asc, desc].'
   - name: count
     type: number
     required: false
