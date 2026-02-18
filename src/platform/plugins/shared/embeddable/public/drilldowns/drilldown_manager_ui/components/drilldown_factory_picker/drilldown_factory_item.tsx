@@ -25,7 +25,7 @@ export const DrilldownFactoryItem: React.FC<Props> = ({ factory, onSelect }) => 
   let content = (
     <EuiKeyPadMenuItem
       css={css`
-        .euikeypadmenuitem__label: {
+        .euikeypadmenuitem__label {
           height: ${euiTheme.size.xl};
         }
       `}
