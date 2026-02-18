@@ -6,7 +6,7 @@ navigation_title: Best practices
 
 This guide covers best practices for writing Scout UI and API tests that are reliable, maintainable, and fast. Since Scout is built on Playwright, we also recommend reading the official [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
-**New to Scout?** Start with [What is Scout?](./introduction.md)
+**New to Scout?** Start with [Scout](../scout.md)
 
 ## Quick reference [scout-best-practices-quick-ref]
 
@@ -1084,7 +1084,7 @@ This catches issues like missing fields, wrong types, or empty collections that 
 
 ## Contribute to Scout when possible [contribute-to-scout-when-possible]
 
-We welcome contributions to one of the [Scout packages](./introduction.md#scout-modular-and-extensible). This includes page objects, EUI wrappers, API helpers, and more.
+We welcome contributions to one of the [Scout packages](../scout.md#scout-modular-and-extensible). This includes page objects, EUI wrappers, API helpers, and more.
 
 | If your code... | Then... |
 |-----------------|---------|

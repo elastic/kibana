@@ -4,27 +4,74 @@ navigation_title: Scout
 
 # Scout [scout]
 
-Scout is Kibana’s modern test orchestration framework for writing **UI** and **API** integration tests with **Playwright**.
-
-This section is a practical guide to setting up Scout in a plugin/package and authoring maintainable tests.
+Scout is Kibana’s UI and API test orchestration framework built on [Playwright](https://playwright.dev). It focuses on **fast test execution**, a good **developer experience**, and **reusable** test building blocks (e.g., [fixtures](./scout/fixtures.md), [page objects](./scout/page-objects.md) and [API services](./scout/api-services.md)).
 
 ## Start here [scout-start-here]
 
-- [What is Scout?](./scout/introduction.md)
 - [Getting started](./scout/getting-started.md)
-- [Best practices for Scout tests](./scout/best-practices.md)
-
-## Core concepts [scout-core-concepts]
-
-- [Core Scout concepts](./scout/core-concepts.md)
-
-## Guides [scout-guides]
-
+- [Best practices](./scout/best-practices.md)
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
-- [Skip tests](./scout/skip-tests.md)
 
-:::::{note}
-Some Scout workflows and tools are internal-only (Elasticians). When applicable, pages call that out explicitly and point to internal AppEx QA documentation for more details.
-:::::
+## Why Scout? [scout-main-features]
 
+- **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
+- **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
+- **Deployment-agnostic**: write once and run across stateful and serverless.
+- **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
+- **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
+- **Reporting**: the [Scout Reporter](./scout/reporting.md) captures run metrics.
+- **Reusability**: reuse shared fixtures/page objects/helpers when they exist to reduce duplication.
+- **Follows modern best practices**: check out our [Scout best practices](./scout/best-practices.md).
+
+## Scout packages [scout-packages]
+
+**Pick your import:**
+
+- **Platform-owned tests** → `@kbn/scout`
+- **Solution-owned tests** → your solution Scout package (it builds on `@kbn/scout`)
+
+| Package               | Use in tests               |
+| --------------------- | -------------------------- |
+| `@kbn/scout`          | Platform (shared baseline) |
+| `@kbn/scout-oblt`     | Observability solution     |
+| `@kbn/scout-security` | Security solution          |
+| `@kbn/scout-search`   | Search solution            |
+
+Other Scout packages exist, but are mainly for internals/tooling:
+
+| Package                      | Purpose                        |
+| ---------------------------- | ------------------------------ |
+| `@kbn/scout-info`            | Scout internals/tooling        |
+| `@kbn/scout-reporting`       | Reporting / result ingestion   |
+| `@kbn/scout-release-testing` | Release testing infrastructure |
+
+::::::{note}
+Helpers in `@kbn/scout` are shared; helpers added in a solution package or a plugin test folder are scoped to that solution/plugin.
+::::::
+
+## FAQ [scout-faq]
+
+#### Q: Does Scout prevent flaky tests? [scout-faq-flakes]
+
+No—good test design still matters.
+
+#### Q: Is Scout designed to be _just_ a Playwright UI test runner? [scout-faq-ui-only]
+
+No. Scout supports UI and API testing with Playwright.
+
+#### Q: Are test runs going to be faster? [scout-faq-faster]
+
+Often, yes—especially with [parallel test execution](./scout/parallelism.md).
+
+#### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
+
+It’s easier to iterate and maintain, and it can enable smarter test selection in the future.
+
+#### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
+
+Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
+
+#### Q: Does Scout support feature flags? [scout-faq-feature-flags]
+
+Not at the moment.

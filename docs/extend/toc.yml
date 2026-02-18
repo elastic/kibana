@@ -61,7 +61,6 @@ toc:
       - file: testing-kibana-plugin.md
   - file: scout.md
     children:
-      - file: scout/introduction.md
       - file: scout/getting-started.md
         children:
           - file: scout/setup-plugin.md
