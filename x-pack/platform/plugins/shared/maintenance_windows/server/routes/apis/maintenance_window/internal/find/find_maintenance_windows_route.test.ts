@@ -81,7 +81,7 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => {
-          const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+          const { schedule, rRule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
           return {
             ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
             r_rule: {
@@ -149,7 +149,7 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => {
-          const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+          const { schedule, rRule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
           return {
             ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
             r_rule: {

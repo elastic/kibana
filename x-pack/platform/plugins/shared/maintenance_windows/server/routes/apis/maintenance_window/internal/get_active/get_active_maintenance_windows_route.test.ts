@@ -77,7 +77,7 @@ describe('getActiveMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
       body: mockMaintenanceWindows.map((data) => {
-        const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+        const { schedule, rRule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
         return {
           ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
           r_rule: {
@@ -166,7 +166,7 @@ describe('getActiveMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenCalledWith({
       body: mockMaintenanceWindowWithCategories.map((data) => {
-        const { schedule, categoryIds, ...mwWithoutScheduleAndCategoryIds } = data; // internal api response doesn't have schedule, and categoryIds is transformed to category_ids
+        const { schedule, categoryIds, rRule, ...mwWithoutScheduleAndCategoryIds } = data; // internal api response doesn't have schedule, and categoryIds is transformed to category_ids
         return {
           ...rewritePartialMaintenanceBodyRes(mwWithoutScheduleAndCategoryIds),
           r_rule: {

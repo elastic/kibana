@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { MaintenanceWindow } from '../server/application/types';
-import type { RRule } from '../server/application/types';
 import type { MaintenanceWindowCategoryIds } from '../server/routes/schemas/maintenance_window/shared';
-import type { ScopedQueryAttributes } from './types';
+import type { ScopedQueryAttributes, RRuleRecord } from './types';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -19,6 +17,9 @@ export type {
   MaintenanceWindowClientContext,
   ScopedQueryAttributes,
   MaintenanceWindowDeepLinkIds,
+  RRuleRecord,
+  Schedule,
+  ScheduleRecurring,
 } from './types';
 
 export type { MaintenanceWindow } from '../server/application/types';
@@ -38,9 +39,12 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
-export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'> & {
+export type MaintenanceWindowUI = Omit<
+  import('../server/application/types').MaintenanceWindow,
+  'schedule' | 'scope'
+> & {
   duration: number;
-  rRule: RRule;
+  rRule: RRuleRecord;
   categoryIds?: MaintenanceWindowCategoryIds | null;
   scopedQuery?: ScopedQueryAttributes | null;
 };

@@ -6,9 +6,8 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import type { RRuleRequestV1 } from '../../../server/routes/schemas/r_rule';
-import type { ScheduleRequest } from '../../../server/routes/schemas/schedule/types/v1';
 import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
+import type { RRuleRecord, Schedule } from '../../types';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {
@@ -28,9 +27,9 @@ const transformEveryToFrequency = (frequency?: string) => {
 };
 
 export const transformCustomScheduleToRRule = (
-  schedule: ScheduleRequest
+  schedule: Schedule
 ): {
-  rRule: RRuleRequestV1;
+  rRule: RRuleRecord;
 } => {
   const { recurring, start, timezone } = schedule;
 

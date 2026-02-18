@@ -73,7 +73,7 @@ describe('archiveMaintenanceWindowRoute', () => {
     `);
 
     await handler(context, req, res);
-    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
+    const { schedule, rRule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
 
     expect(maintenanceWindowClient.archive).toHaveBeenLastCalledWith({
       id: 'test-id',

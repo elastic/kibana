@@ -32,17 +32,6 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
     ...(maintenanceWindow.categoryIds !== undefined
       ? { categoryIds: maintenanceWindow.categoryIds }
       : {}),
-    ...(maintenanceWindow.scope?.alerting !== undefined
-      ? maintenanceWindow?.scope?.alerting == null
-        ? { scopedQuery: maintenanceWindow?.scope?.alerting }
-        : {
-            scopedQuery: {
-              filters: maintenanceWindow?.scope?.alerting?.filters ?? [],
-              kql: maintenanceWindow?.scope?.alerting?.kql ?? '',
-              dsl: maintenanceWindow?.scope?.alerting?.dsl ?? '',
-            },
-          }
-      : {}),
     ...(maintenanceWindow.scope !== undefined
       ? maintenanceWindow.scope == null
         ? { scope: maintenanceWindow.scope }

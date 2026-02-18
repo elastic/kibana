@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus, maintenanceWindowCategoryIdTypes } from '../constants';
 import { alertsFilterQuerySchema } from './alerts_filter_query_schemas';
-import { scheduleSchema } from '../../saved_objects/schema/v2';
+import { scheduleSchema } from './schedule';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),

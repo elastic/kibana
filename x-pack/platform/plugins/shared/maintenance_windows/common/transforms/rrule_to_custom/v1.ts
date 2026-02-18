@@ -8,8 +8,7 @@
 import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
-import type { RRule } from '../../../server/application/types';
-import type { ScheduleRequest } from '../../../server/routes/schemas/schedule/types/v1';
+import type { RRuleParams, Schedule } from '../../types';
 
 const DEFAULT_INTERVAL = 1;
 
@@ -54,8 +53,8 @@ const getDurationInString = (duration: number): string => {
 
 export const transformRRuleToCustomSchedule = (snoozeSchedule: {
   duration: number;
-  rRule: RRule;
-}): ScheduleRequest => {
+  rRule: RRuleParams;
+}): Schedule => {
   const { rRule, duration } = snoozeSchedule;
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
   const transformedDuration = getDurationInString(duration);

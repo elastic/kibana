@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Frequency } from '@kbn/rrule';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
+import { Frequency } from '@kbn/rrule';
 
 export const getMockMaintenanceWindow = (
   overwrites?: Partial<MaintenanceWindowAttributes>
