@@ -79,7 +79,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
   eventLogger,
-  isServerless: false,
 };
 
 beforeEach(() => {

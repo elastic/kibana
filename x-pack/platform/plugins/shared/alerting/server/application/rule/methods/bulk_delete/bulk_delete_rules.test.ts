@@ -98,7 +98,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
-  isServerless: false,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -245,7 +244,7 @@ describe('bulkDelete', () => {
   });
 
   test('invalidates UIAM ApiKeys as well', async () => {
-    rulesClient = new RulesClient({ ...rulesClientParams, isServerless: true });
+    rulesClient = new RulesClient({ ...rulesClientParams, isUiamSupported: true });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -283,7 +282,7 @@ describe('bulkDelete', () => {
   });
 
   test('does not invalidate API keys created by user', async () => {
-    rulesClient = new RulesClient({ ...rulesClientParams, isServerless: true });
+    rulesClient = new RulesClient({ ...rulesClientParams, isUiamSupported: true });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
