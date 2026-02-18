@@ -35,6 +35,9 @@ export const GCP_ACCOUNT_TYPE_VAR_NAME = 'gcp.account_type';
 export const SINGLE_ACCOUNT = 'single-account';
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 
+// Default account type for cloud connectors when not explicitly specified
+export const CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE = SINGLE_ACCOUNT;
+
 export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   AWS_ROLE_ARN_VAR_NAME,
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,

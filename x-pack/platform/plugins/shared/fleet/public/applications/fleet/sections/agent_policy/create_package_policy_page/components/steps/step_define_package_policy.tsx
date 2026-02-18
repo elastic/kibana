@@ -316,6 +316,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   cloudProvider={cloudProvider}
                   templateName={packageInfo.name}
                   iacTemplateUrl={iacTemplateUrl}
+                  accountType="single-account"
                 />
               </EuiFlexItem>
             )}

@@ -176,8 +176,7 @@ async function savePackagePolicy(
         'supports_agentless',
         'supports_cloud_connector',
         'cloud_connector_id',
-        'cloud_connector_name',
-        'cloud_connector_account_type'
+        'cloud_connector_name'
       ),
       id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
       inputs: formatInputs(pkgPolicy.inputs),
@@ -196,10 +195,6 @@ async function savePackagePolicy(
             pkgPolicy.cloud_connector_name && {
               name: pkgPolicy.cloud_connector_name,
             }),
-          // Pass account type if set (from CloudConnectorSetup UI selector)
-          ...(pkgPolicy.cloud_connector_account_type && {
-            account_type: pkgPolicy.cloud_connector_account_type,
-          }),
         },
       }),
     };
