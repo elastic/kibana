@@ -216,6 +216,9 @@ EOF
     if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
     fi
+
+    # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
+    export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
 }
 
