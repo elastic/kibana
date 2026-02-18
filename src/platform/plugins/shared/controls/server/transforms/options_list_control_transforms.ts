@@ -15,6 +15,7 @@ import {
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { omitBy } from 'lodash';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
@@ -70,20 +71,22 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
           state as LegacyStoredOptionsListExplicitInput
         );
 
-        // Optional legacy props may have been stored as `null` instead of `undefined`, so convert
-        // all nulls to `undefined`
-        return {
-          ...dataControlState,
-          exclude: exclude ?? undefined,
-          ...{ sort: (sort as OptionsListDSLControlState['sort']) ?? undefined },
-          exists_selected: exists_selected ?? undefined,
-          display_settings: display_settings ?? undefined,
-          run_past_timeout: run_past_timeout ?? undefined,
-          search_technique:
-            (search_technique as OptionsListDSLControlState['search_technique']) ?? undefined,
-          selected_options: selected_options ?? undefined,
-          single_select: single_select ?? undefined,
-        };
+        // Optional legacy props may have been stored as `null` instead of `undefined`, so drop all
+        // null or undefined keys
+        return omitBy(
+          {
+            ...dataControlState,
+            exclude,
+            sort,
+            exists_selected,
+            display_settings,
+            run_past_timeout,
+            search_technique,
+            selected_options,
+            single_select,
+          },
+          (v) => v === null || v === undefined
+        ) as OptionsListDSLControlState;
       },
     }),
   });
