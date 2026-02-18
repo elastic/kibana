@@ -290,10 +290,11 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlInvalidStepParam':
+    case 'promqlInvalidDurationParam':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
-          defaultMessage: '[PROMQL] Invalid step value',
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDurationParam', {
+          defaultMessage: '[PROMQL] Invalid {param} value',
+          values: { param: out.param },
         }),
         type: 'error',
       };

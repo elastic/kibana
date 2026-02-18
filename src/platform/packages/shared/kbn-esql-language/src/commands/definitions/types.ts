@@ -379,9 +379,9 @@ export interface ValidationErrors {
     message: string;
     type: { param: string };
   };
-  promqlInvalidStepParam: {
+  promqlInvalidDurationParam: {
     message: string;
-    type: {};
+    type: { param: string };
   };
   promqlMutuallyExclusiveParams: {
     message: string;

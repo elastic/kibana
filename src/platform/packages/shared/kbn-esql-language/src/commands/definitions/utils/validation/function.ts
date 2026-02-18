@@ -308,6 +308,16 @@ export function getPromqlFunctionArityCheck(
   return null;
 }
 
+/* Treats instant_vector as compatible with range_vector (implicit range selector). */
+function isPromqlParamTypeCompatible(
+  expected: PromQLFunctionParamType,
+  actual: PromQLFunctionParamType
+): boolean {
+  return (
+    expected === actual || (expected === 'range_vector' && actual === 'instant_vector')
+  );
+}
+
 /* Filters signatures compatible by arity and argument types. */
 export function getPromqlMatchingSignatures(
   signatures: PromQLSignature[],
@@ -320,7 +330,10 @@ export function getPromqlMatchingSignatures(
   const matchingArity = filterByMatchingArity(signatures, argTypes.length);
 
   return matchingArity.filter(({ params }) =>
-    argTypes.every((argType, idx) => params[idx]?.type === argType)
+    argTypes.every(
+      (argType, idx) =>
+        params[idx]?.type && argType && isPromqlParamTypeCompatible(params[idx]!.type, argType)
+    )
   );
 }
 
@@ -341,9 +354,14 @@ export function getPromqlSignatureMismatch(
     .slice(0, argCount)
     .map(({ name, type }) => `${name}=${type}`)
     .join(', ');
-  const mismatchIdx = argTypes.findIndex((argType, idx) => refParams[idx]?.type !== argType);
+  const mismatchIdx = argTypes.findIndex(
+    (argType, idx) =>
+      !refParams[idx]?.type ||
+      !argType ||
+      !isPromqlParamTypeCompatible(refParams[idx]!.type, argType)
+  );
 
-  return { required, mismatchIdx };
+  return mismatchIdx >= 0 ? { required, mismatchIdx } : null;
 }
 
 /* Filters signatures whose required/max param count includes argCount. */

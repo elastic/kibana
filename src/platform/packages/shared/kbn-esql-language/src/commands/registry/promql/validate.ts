@@ -51,9 +51,9 @@ import {
 // ISO 8601 with Z, optional milliseconds (e.g. 2024-01-15T10:00:00Z or ...00.000Z).
 const FORMAT_DATE_LITERAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 // Prometheus duration format (one or more number+unit segments).
-const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
-// Catches split step values like "step= 1 m" which the parser drops from params.
-const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
+const FORMAT_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
+// Catches split duration param values like "step= 1 m" which the parser drops from params.
+const DURATION_PARAM_WITH_SPACES_REGEX = /\b(step|scrape_interval)\s*=\s*\d+\s+[a-z]+/i;
 // Extracts "param = value" from the query field when the last param is mis-parsed.
 const PROMQL_QUERY_PARAM_VALUE_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(\\S*)`);
 
@@ -72,11 +72,13 @@ export const validate = (
     usedParams.add(param);
   }
 
-  if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has(PromqlParamName.Step)) {
+  const durationSpaceMatch = command.text.match(DURATION_PARAM_WITH_SPACES_REGEX);
+
+  if (durationSpaceMatch && !paramValues.has(durationSpaceMatch[1].toLowerCase())) {
     messages.push(
       getMessageFromId({
-        messageId: 'promqlInvalidStepParam',
-        values: {},
+        messageId: 'promqlInvalidDurationParam',
+        values: { param: durationSpaceMatch[1].toLowerCase() },
         locations: command.location,
       })
     );
@@ -141,14 +143,14 @@ export const validate = (
       }
     }
 
-    if (param === PromqlParamName.Step) {
+    if (param === PromqlParamName.Step || param === PromqlParamName.ScrapeInterval) {
       const normalized = stripQuotes(value);
 
-      if (!FORMAT_STEP_DURATION_REGEX.test(normalized)) {
+      if (!FORMAT_DURATION_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidStepParam',
-            values: {},
+            messageId: 'promqlInvalidDurationParam',
+            values: { param },
             locations: keyLocation ?? location,
           }),
         });
@@ -157,6 +159,7 @@ export const validate = (
 
     if (param === PromqlParamName.Buckets) {
       const num = Number(value);
+
       if (!Number.isInteger(num) || num <= 0) {
         messages.push({
           ...getMessageFromId({

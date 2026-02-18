@@ -349,12 +349,12 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  if (param === PromqlParamName.Step) {
+  if (param === PromqlParamName.Step || param === PromqlParamName.ScrapeInterval) {
     return [
       {
         ...valuePlaceholderConstant,
         label: 'Insert duration',
-        text: '"${0:5m}"',
+        text: '"${0:1m}"',
         detail: 'Use units like s, m, h, d',
       },
     ];
