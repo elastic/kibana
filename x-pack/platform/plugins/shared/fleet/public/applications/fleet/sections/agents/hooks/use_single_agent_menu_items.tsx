@@ -81,6 +81,26 @@ export function useSingleAgentMenuItems({
   const menuItems = useMemo(() => {
     const items: MenuItem[] = [];
 
+    const viewAgentJsonMenuItem: MenuItem = {
+      id: 'view-json',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+          defaultMessage="View agent JSON"
+        />
+      ),
+      icon: 'code',
+      onClick: () => {
+        callbacks.onViewAgentJsonClick();
+      },
+      'data-test-subj': 'viewAgentDetailsJsonBtn',
+    };
+
+    if (agent.type === 'OPAMP') {
+      items.push(viewAgentJsonMenuItem);
+      return items;
+    }
+
     // View agent - only shown when onViewAgentClick is provided (table row context)
     if (callbacks.onViewAgentClick) {
       items.push({
@@ -209,20 +229,7 @@ export function useSingleAgentMenuItems({
       panelTitle: 'Maintenance and diagnostics',
       children: [
         // View agent JSON - always available
-        {
-          id: 'view-json',
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentList.viewAgentDetailsJsonText"
-              defaultMessage="View agent JSON"
-            />
-          ),
-          icon: 'code',
-          onClick: () => {
-            callbacks.onViewAgentJsonClick();
-          },
-          'data-test-subj': 'viewAgentDetailsJsonBtn',
-        },
+        viewAgentJsonMenuItem,
       ],
     };
 
