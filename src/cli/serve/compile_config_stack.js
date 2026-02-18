@@ -38,6 +38,9 @@ export function compileConfigStack({
   const cliConfigs = configOverrides || [];
   const envConfigs = getEnvConfigs();
   const defaultConfig = getConfigPath();
+  const hasCliConfigs = cliConfigs.length > 0;
+  const hasEnvConfigs = !hasCliConfigs && envConfigs.length > 0;
+  const userSuppliedConfigs = hasCliConfigs ? cliConfigs : hasEnvConfigs ? envConfigs : [];
 
   let configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
 
@@ -88,7 +91,19 @@ export function compileConfigStack({
     }
   }
 
-  return configs.filter(isNotNull);
+  configs = configs.filter(isNotNull);
+
+  // Keep explicit user-provided config files at the highest precedence.
+  if (userSuppliedConfigs.length > 0) {
+    const userSuppliedConfigsSet = new Set(userSuppliedConfigs.filter(isNotNull));
+    const autoConfigs = configs.filter((configPath) => !userSuppliedConfigsSet.has(configPath));
+    const orderedUserSuppliedConfigs = configs.filter((configPath) =>
+      userSuppliedConfigsSet.has(configPath)
+    );
+    return [...autoConfigs, ...orderedUserSuppliedConfigs];
+  }
+
+  return configs;
 }
 
 /**
