@@ -13,7 +13,8 @@ import type {
   Plugin,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import { registerDataSources } from './sources';
+import { registerDataSources, dataSources } from './sources';
+import { registerDataSourceSkills } from './skills/register_data_source_skills';
 import type {
   DataSourcesServerSetup,
   DataSourcesServerSetupDependencies,
@@ -44,10 +45,15 @@ export class DataSourcesServerPlugin
     plugins: DataSourcesServerSetupDependencies
   ): DataSourcesServerSetup {
     const { savedObjects, uiSettings } = core;
-    const { dataCatalog, workflowsManagement } = plugins;
+    const { dataCatalog, agentBuilder, workflowsManagement } = plugins;
 
     // Register WorkplaceAI-owned data sources
     registerDataSources(dataCatalog);
+
+    // Register skills for each data source type
+    registerDataSourceSkills(agentBuilder, dataSources).catch((err) => {
+      this.logger.error(`Failed to register data source skills: ${err.message}`);
+    });
 
     registerUISettings({ uiSettings });
 

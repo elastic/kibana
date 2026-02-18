@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -26,6 +27,7 @@ import type { ImportedTool } from '@kbn/data-catalog-plugin/common/data_source_s
 import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createStackConnector } from '../utils/create_stack_connector';
+import { readSkillMarkdown } from '../skills/generate_skill_content';
 
 import type {
   DataSourcesServerSetupDependencies,
@@ -173,7 +175,7 @@ export async function createDataSourceAndRelatedResources(
         request,
         finalStackConnectorId,
         stackConnectorConfig.importedTools,
-        name,
+        slugify(name),
         logger
       );
       toolIds.push(...importedToolIds);
@@ -242,6 +244,27 @@ export async function createDataSourceAndRelatedResources(
     }
   });
 
+  // Register an instance skill for this data source connection
+  let instanceSkillId: string | undefined;
+  if (toolIds.length > 0) {
+    const soId = v4();
+    instanceSkillId = `data-source-instance-${soId}`;
+    try {
+      const skillMarkdown = await readSkillMarkdown(dataSource);
+      await agentBuilder.skills.register({
+        id: instanceSkillId,
+        name: `${slugify(name)}-${soId.slice(0, 8)}`,
+        basePath: 'skills/platform',
+        description: `Tools for the "${name}" ${dataSource.name} connection. Load this skill to use the ${dataSource.name} tools.`,
+        content: skillMarkdown,
+        getDynamicToolIds: () => toolIds,
+      });
+    } catch (err) {
+      logger.warn(`Failed to register instance skill: ${(err as Error).message}`);
+      instanceSkillId = undefined;
+    }
+  }
+
   // Create the data source saved object
   const now = new Date().toISOString();
   logger.info(`Creating ${DATA_SOURCE_SAVED_OBJECT_TYPE} SO at ${now}`);
@@ -254,6 +277,7 @@ export async function createDataSourceAndRelatedResources(
     workflowIds,
     toolIds,
     kscIds: Object.values(stackConnectorIds),
+    ...(instanceSkillId ? { skillId: instanceSkillId } : {}),
   });
 
   return savedObject.id;
@@ -442,6 +466,7 @@ interface DeleteDataSourceAndRelatedResourcesParams {
   workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;
   logger: Logger;
+  unregisterSkill?: (skillId: string) => boolean;
 }
 
 interface DeleteDataSourceAndRelatedResourcesResult {
@@ -469,9 +494,20 @@ export async function deleteDataSourceAndRelatedResources(
     workflowManagement,
     request,
     logger,
+    unregisterSkill,
   } = params;
 
-  const { kscIds, toolIds, workflowIds } = dataSource.attributes;
+  const { kscIds, toolIds, workflowIds, skillId } = dataSource.attributes;
+
+  // Unregister the instance skill if one was registered
+  if (skillId && unregisterSkill) {
+    try {
+      unregisterSkill(skillId);
+      logger.info(`Unregistered instance skill ${skillId}`);
+    } catch (err) {
+      logger.warn(`Failed to unregister instance skill ${skillId}: ${(err as Error).message}`);
+    }
+  }
   const spaceId = getSpaceId(savedObjectsClient);
 
   // Delete all related resources

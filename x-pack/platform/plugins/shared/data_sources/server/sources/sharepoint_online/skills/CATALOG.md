@@ -1,0 +1,1 @@
+SharePoint Online connects to sites, document libraries, and intranet content. Use when the user asks about enterprise documents, policies, procedures, intranet pages, news posts, shared file libraries, or cross-site search in Microsoft SharePoint.

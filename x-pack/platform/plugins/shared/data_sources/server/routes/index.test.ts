@@ -74,6 +74,10 @@ describe('registerRoutes', () => {
         tools: {
           getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
         },
+        skills: {
+          register: jest.fn().mockResolvedValue(undefined),
+          unregister: jest.fn().mockReturnValue(true),
+        },
       },
     },
   ]);
@@ -648,6 +652,10 @@ describe('registerRoutes', () => {
             tools: {
               getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
             },
+            skills: {
+              register: jest.fn().mockResolvedValue(undefined),
+              unregister: jest.fn().mockReturnValue(true),
+            },
           },
           taskManager: mockTaskManager,
         },
@@ -709,6 +717,10 @@ describe('registerRoutes', () => {
             tools: {
               getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
             },
+            skills: {
+              register: jest.fn().mockResolvedValue(undefined),
+              unregister: jest.fn().mockReturnValue(true),
+            },
           },
           taskManager: undefined,
         },
@@ -745,6 +757,10 @@ describe('registerRoutes', () => {
           agentBuilder: {
             tools: {
               getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            },
+            skills: {
+              register: jest.fn().mockResolvedValue(undefined),
+              unregister: jest.fn().mockReturnValue(true),
             },
           },
           taskManager: mockTaskManager,

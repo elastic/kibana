@@ -1,0 +1,1 @@
+GitHub connects to repositories, issues, pull requests, commits, and code search. Use when the user asks about source code, pull requests, code reviews, issues, bugs, commits, branches, releases, repository structure, or development history.

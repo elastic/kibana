@@ -1,0 +1,1 @@
+Notion connects to workspaces, pages, and databases. Use when the user asks about knowledge bases, wikis, documentation, runbooks, project tracking, sprint planning, roadmaps, OKRs, or structured data stored in Notion.
