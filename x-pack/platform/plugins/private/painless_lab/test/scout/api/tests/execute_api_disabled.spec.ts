@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RoleApiCredentials, apiTest } from '@kbn/scout';
+import { RoleApiCredentials, apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   '[search serverless] POST api/painless_lab/execute',
-  { tag: ['@svlSearch'] },
+  { tag: tags.serverless.search },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
 
 globalSetupHook(
   'Set up Profiling Resources and Data',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   async ({ profilingSetup, apiServices, log }) => {
     try {
       // Create APM agent policy via Fleet API
