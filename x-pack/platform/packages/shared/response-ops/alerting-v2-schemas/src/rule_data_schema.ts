@@ -189,6 +189,10 @@ export const createRuleDataSchema = z
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
+  .refine((data) => data.kind === 'alert' || data.evaluation.query.condition == null, {
+    message: 'evaluation.query.condition is only allowed when kind is "alert".',
+    path: ['evaluation', 'query', 'condition'],
+  })
   .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
     message: 'evaluation.query.condition is required when no_data is configured.',
     path: ['evaluation', 'query', 'condition'],

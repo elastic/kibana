@@ -11,6 +11,11 @@ const validCreateData = {
   kind: 'alert',
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
+  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+};
+
+const validCreateDataWithCondition = {
+  ...validCreateData,
   evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
 };
 
@@ -24,13 +29,25 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule' },
         time_field: '@timestamp',
         schedule: { every: '5m' },
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+      });
+    });
+
+    it('accepts a minimal valid payload with condition', () => {
+      const result = createRuleDataSchema.parse(validCreateDataWithCondition);
+
+      expect(result).toEqual({
+        kind: 'alert',
+        metadata: { name: 'test rule' },
+        time_field: '@timestamp',
+        schedule: { every: '5m' },
         evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
       });
     });
 
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
-        ...validCreateData,
+        ...validCreateDataWithCondition,
         metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
@@ -153,7 +170,7 @@ describe('createRuleDataSchema', () => {
     it('rejects an empty query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: '', condition: 'count > 0' } },
+        evaluation: { query: { base: '' } },
       });
       expect(result.success).toBe(false);
     });
@@ -161,7 +178,63 @@ describe('createRuleDataSchema', () => {
     it('rejects an invalid ES|QL query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: 'FROM |', condition: 'count > 0' } },
+        evaluation: { query: { base: 'FROM |' } },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('evaluation.query.condition', () => {
+    it('accepts an alert rule without condition', () => {
+      const result = createRuleDataSchema.safeParse(validCreateData);
+      expect(result.success).toBe(true);
+      expect(result.data?.evaluation.query.condition).toBeUndefined();
+    });
+
+    it('accepts an alert rule with condition', () => {
+      const result = createRuleDataSchema.safeParse(validCreateDataWithCondition);
+      expect(result.success).toBe(true);
+      expect(result.data?.evaluation.query.condition).toBe('count > 0');
+    });
+
+    it('accepts a signal rule without condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a signal rule with condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateDataWithCondition,
+        kind: 'signal',
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
+    });
+
+    it('requires condition when no_data is configured', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        no_data: { behavior: 'no_data', timeframe: '10m' },
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
+    });
+
+    it('accepts no_data with condition present', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateDataWithCondition,
+        no_data: { behavior: 'no_data', timeframe: '10m' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an empty condition string', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: '' } },
       });
       expect(result.success).toBe(false);
     });
