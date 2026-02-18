@@ -127,7 +127,7 @@ function validateGcsCredentials(config) {
   const gcsCreds = config.gcsDatasetAccessCredentials;
   if (gcsCreds === undefined || gcsCreds === null) return;
 
-  if (!gcsCreds || typeof gcsCreds !== 'object' || Array.isArray(gcsCreds)) {
+  if (typeof gcsCreds !== 'object' || Array.isArray(gcsCreds)) {
     die(
       'Invalid kbn-evals CI config: "gcsDatasetAccessCredentials" must be an object when provided'
     );
@@ -152,7 +152,7 @@ function validateTracingEs(config) {
   const tracingEs = config.tracingEs;
   if (tracingEs === undefined || tracingEs === null) return;
 
-  if (!tracingEs || typeof tracingEs !== 'object' || Array.isArray(tracingEs)) {
+  if (typeof tracingEs !== 'object' || Array.isArray(tracingEs)) {
     die('Invalid kbn-evals CI config: "tracingEs" must be an object when provided');
   }
   assertNonEmptyString(config, 'tracingEs.url');
