@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  selectAllTabs,
-  selectRecentlyClosedTabs,
-  selectTab,
-  selectTabAppState,
-  selectTabCombinedFilters,
-  selectIsTabsBarHidden,
-} from './tabs';
-export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';
+import { createPlaywrightConfig } from '../../..';
+
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+});
