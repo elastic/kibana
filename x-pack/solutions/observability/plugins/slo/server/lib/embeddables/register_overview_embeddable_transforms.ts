@@ -7,7 +7,7 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
-import { overviewEmbeddableSchema } from './schema';
+import { getOverviewEmbeddableSchema } from './schema';
 import { getTransforms } from '../../../common/embeddables/overview/transforms/transforms';
 
 /**
@@ -15,7 +15,7 @@ import { getTransforms } from '../../../common/embeddables/overview/transforms/t
  */
 export const registerOverviewEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
   embeddable.registerTransforms(SLO_OVERVIEW_EMBEDDABLE_ID, {
-    getSchema: () => overviewEmbeddableSchema,
+    getSchema: (getDrilldownsSchema) => getOverviewEmbeddableSchema(getDrilldownsSchema),
     getTransforms,
   });
 };

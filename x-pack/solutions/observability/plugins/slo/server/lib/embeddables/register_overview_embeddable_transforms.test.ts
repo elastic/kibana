@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
 import { overviewEmbeddableSchema } from './schema';
@@ -31,7 +32,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
     );
   });
 
-  it('should register the correct schema', () => {
+  it('should register the correct schema including drilldowns', () => {
     registerOverviewEmbeddableTransforms(embeddableSetupMock);
 
     expect(embeddableSetupMock.registerTransforms).toHaveBeenCalledWith(
@@ -42,31 +43,48 @@ describe('registerOverviewEmbeddableTransforms', () => {
       })
     );
 
-    // Extract the registered configuration object
+    // getSchema receives getDrilldownsSchema and returns schema that includes drilldowns
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
     const config = callArgs[1] as any;
-    const schema = config.getSchema(['VALUE_CLICK_TRIGGER']);
+    const mockGetDrilldownsSchema = (triggers: string[]) =>
+      schema.object({ drilldowns: schema.maybe(schema.arrayOf(schema.any())) });
+    const schemaWithDrilldowns = config.getSchema(mockGetDrilldownsSchema);
 
-    expect(schema).toBe(overviewEmbeddableSchema);
+    expect(schemaWithDrilldowns).toBeDefined();
+    // Schema should validate overview state
+    const validState = {
+      slo_id: 'test-slo-id',
+      overview_mode: 'single' as const,
+    };
+    expect(() => schemaWithDrilldowns.validate(validState)).not.toThrow();
+    // Schema should allow drilldowns key (fixes "definition for this key is missing" when saving)
+    expect(() =>
+      schemaWithDrilldowns.validate({ ...validState, drilldowns: [] })
+    ).not.toThrow();
   });
 
-  it('should register the correct transforms', () => {
+  it('should register the correct transforms with drilldownTransforms', () => {
     registerOverviewEmbeddableTransforms(embeddableSetupMock);
 
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
     const { getTransforms: getTransformsFromSetup } = callArgs[1];
-    const transforms = getTransformsFromSetup!({} as any);
+    const drilldownTransforms = {
+      transformIn: (state: object) => ({ state, references: [] }),
+      transformOut: (state: object) => state,
+    };
+    const transforms = getTransformsFromSetup!(drilldownTransforms);
 
-    // Check that transforms have the expected structure
+    // Check that transforms have both transformIn and transformOut (required for drilldowns)
+    expect(transforms).toHaveProperty('transformIn');
     expect(transforms).toHaveProperty('transformOut');
+    expect(typeof transforms.transformIn).toBe('function');
     expect(typeof transforms.transformOut).toBe('function');
 
-    // Verify it's the same function by checking behavior
-    const expectedTransforms = getTransforms();
-    const testState = { slo_id: 'test' };
-    expect((transforms as any).transformOut(testState)).toEqual(
-      (expectedTransforms as any).transformOut(testState)
-    );
+    const testState = { slo_id: 'test', overview_mode: 'single' as const };
+    expect((transforms as any).transformOut(testState)).toMatchObject({
+      slo_id: 'test',
+      overview_mode: 'single',
+    });
   });
 
   describe('schema validation', () => {
@@ -209,8 +227,13 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup!({} as any);
+      const drilldownTransforms = {
+        transformIn: (state: object) => ({ state, references: [] }),
+        transformOut: (state: object) => state,
+      };
+      const transforms = getTransformsFromSetup!(drilldownTransforms);
 
+      expect(transforms).toHaveProperty('transformIn');
       expect(transforms).toHaveProperty('transformOut');
       expect(typeof transforms.transformOut).toBe('function');
     });
@@ -220,7 +243,11 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup!({} as any);
+      const drilldownTransforms = {
+        transformIn: (state: object) => ({ state, references: [] }),
+        transformOut: (state: object) => state,
+      };
+      const transforms = getTransformsFromSetup!(drilldownTransforms);
 
       const legacyState = {
         sloId: 'legacy-slo-id',
@@ -248,7 +275,11 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup!({} as any);
+      const drilldownTransforms = {
+        transformIn: (state: object) => ({ state, references: [] }),
+        transformOut: (state: object) => state,
+      };
+      const transforms = getTransformsFromSetup!(drilldownTransforms);
 
       const newState = {
         slo_id: 'new-slo-id',
@@ -259,7 +290,12 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const transformed = (transforms as any).transformOut(newState as any);
 
-      expect(transformed).toEqual(newState);
+      expect(transformed).toMatchObject({
+        slo_id: 'new-slo-id',
+        slo_instance_id: 'new-instance-id',
+        overview_mode: 'single',
+        title: 'Test Title',
+      });
     });
   });
 });
