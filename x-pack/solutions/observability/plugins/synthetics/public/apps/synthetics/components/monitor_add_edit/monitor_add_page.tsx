@@ -45,6 +45,7 @@ export const MonitorAddPage = () => {
   const {
     locations,
     locationsLoaded,
+    loading: locationsLoading,
     error: locationsError,
   } = useSelector(selectServiceLocationsState);
 
@@ -52,7 +53,7 @@ export const MonitorAddPage = () => {
     return <LocationsLoadingError />;
   }
 
-  if (!locationsLoaded || cloneMonitorLoading) {
+  if (!locationsLoaded || locationsLoading || cloneMonitorLoading) {
     return <LoadingState />;
   }
 
