@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  selectAllTabs,
-  selectRecentlyClosedTabs,
-  selectTab,
-  selectTabAppState,
-  selectTabCombinedFilters,
-  selectIsTabsBarHidden,
-} from './tabs';
-export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';
+/**
+ * Search configuration.
+ *
+ * Controls the search input behavior in the toolbar.
+ */
+export interface SearchConfig {
+  /** Initial search text to populate on mount. */
+  initialSearch?: string;
+}
