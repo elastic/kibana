@@ -7,6 +7,7 @@
 
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { isEuidField } from './commons';
 
 export interface IdentitySourceFields {
   /** At least one must be present for identity to be valid.
@@ -33,7 +34,11 @@ export function getIdentitySourceFields(entityType: EntityType): IdentitySourceF
   return {
     requiresOneOf: requiresOneOfFields,
     identitySourceFields: Array.from(
-      new Set(euidFields.flatMap((composedField) => composedField.map((attr) => attr.field)))
+      new Set(
+        euidFields.flatMap((composedField) =>
+          composedField.filter(isEuidField).map((attr) => attr.field)
+        )
+      )
     ),
   };
 }
