@@ -284,6 +284,10 @@ const PROPERTIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.prop
   defaultMessage: 'Properties',
 });
 
+const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
+  defaultMessage: 'Raw document',
+});
+
 const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
 });
@@ -347,8 +351,4 @@ const META_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.metaLabel'
 
 const NO_META_AVAILABLE = i18n.translate('xpack.streams.featureDetailsFlyout.noMetaAvailable', {
   defaultMessage: 'No meta information',
-});
-
-const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
-  defaultMessage: 'Raw document',
 });
