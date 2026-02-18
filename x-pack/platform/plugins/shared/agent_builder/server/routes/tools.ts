@@ -322,7 +322,7 @@ export function registerToolsRoutes({
                 defaultValue: false,
                 meta: {
                   description:
-                    'If true, remove the tool from agents that use it and then delete. If false and any agent uses the tool, the request returns 409 with the list of agents.',
+                    'If true, removes the tool from agents that use it and then deletes it. If false and any agent uses the tool, the request returns 409 Conflict with the list of agents.',
                 },
               }),
             }),

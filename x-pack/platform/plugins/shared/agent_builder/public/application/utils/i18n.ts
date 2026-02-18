@@ -298,7 +298,7 @@ export const labels = {
     deleteToolUsedByAgentsDescription: i18n.translate(
       'xpack.agentBuilder.tools.deleteToolUsedByAgentsDescription',
       {
-        defaultMessage: 'Remove this tool from the agents that use it and then delete the tool?',
+        defaultMessage: 'Remove this tool from all agents that use it and delete the tool?',
       }
     ),
     deleteToolUsedByAgentsAgentListLabel: i18n.translate(
