@@ -11,11 +11,10 @@ import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import type { ServiceTopologyResponse } from './types';
-import type { TopologyDirection } from './tool';
+import type { TopologyDirection, ServiceTopologyResponse } from './types';
 import { getServiceTopology } from './get_service_topology';
 
-export async function getToolHandler({
+export function getToolHandler({
   core,
   plugins,
   request,

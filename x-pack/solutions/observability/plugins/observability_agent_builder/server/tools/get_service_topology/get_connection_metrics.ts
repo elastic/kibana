@@ -17,6 +17,33 @@ interface MetricsMap {
   [key: string]: ConnectionMetrics;
 }
 
+export function computeConnectionMetrics({
+  latencyCount,
+  latencySum,
+  errorCount,
+  successCount,
+  start,
+  end,
+}: {
+  latencyCount: number;
+  latencySum: number;
+  errorCount: number;
+  successCount: number;
+  start: number;
+  end: number;
+}): ConnectionMetrics {
+  const totalCount = errorCount + successCount;
+  return {
+    errorRate: totalCount > 0 ? errorCount / totalCount : undefined,
+    latencyMs: latencyCount > 0 ? latencySum / latencyCount / 1000 : undefined,
+    throughputPerMin:
+      latencyCount > 0
+        ? Math.round(calculateThroughputWithRange({ start, end, value: latencyCount }) * 1000) /
+          1000
+        : undefined,
+  };
+}
+
 export async function getConnectionMetrics({
   dataRegistry,
   request,
@@ -59,21 +86,18 @@ export async function getConnectionMetrics({
 
     const key = buildConnectionKey(serviceName, dependencyName);
     const { error_count, success_count, latency_count, latency_sum } = item.value;
-    const totalCount = error_count + success_count;
 
     return [
       [
         key,
-        {
-          errorRate: totalCount > 0 ? error_count / totalCount : undefined,
-          latencyMs: latency_count > 0 ? latency_sum / latency_count / 1000 : undefined,
-          throughputPerMin:
-            latency_count > 0
-              ? Math.round(
-                  calculateThroughputWithRange({ start, end, value: latency_count }) * 1000
-                ) / 1000
-              : undefined,
-        },
+        computeConnectionMetrics({
+          latencyCount: latency_count,
+          latencySum: latency_sum,
+          errorCount: error_count,
+          successCount: success_count,
+          start,
+          end,
+        }),
       ] as const,
     ];
   });

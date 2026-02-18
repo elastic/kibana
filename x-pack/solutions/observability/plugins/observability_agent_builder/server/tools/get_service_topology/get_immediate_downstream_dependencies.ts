@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServiceTopologyResponse, ExternalNode, ServiceTopologyNode } from './types';
+import { computeConnectionMetrics } from './get_connection_metrics';
 
 /**
  * Fast path for depth=1 downstream: queries pre-aggregated service_destination
@@ -55,7 +54,6 @@ export async function getImmediateDownstreamDependencies({
 
   const connections = statsItems.map((item) => {
     const { latency_count, latency_sum, error_count, success_count } = item.value;
-    const totalCount = error_count + success_count;
 
     return {
       source: { 'service.name': item.from.serviceName } as ServiceTopologyNode,
@@ -64,17 +62,14 @@ export async function getImmediateDownstreamDependencies({
         'span.type': item.to.spanType,
         'span.subtype': item.to.spanSubtype,
       } as ExternalNode,
-      metrics: {
-        errorRate: totalCount > 0 ? error_count / totalCount : undefined,
-        latencyMs: latency_count > 0 ? latency_sum / latency_count / 1000 : undefined,
-        throughputPerMin:
-          latency_count > 0
-            ? Math.round(
-                calculateThroughputWithRange({ start: startMs, end: endMs, value: latency_count }) *
-                  1000
-              ) / 1000
-            : undefined,
-      },
+      metrics: computeConnectionMetrics({
+        latencyCount: latency_count,
+        latencySum: latency_sum,
+        errorCount: error_count,
+        successCount: success_count,
+        start: startMs,
+        end: endMs,
+      }),
     };
   });
 

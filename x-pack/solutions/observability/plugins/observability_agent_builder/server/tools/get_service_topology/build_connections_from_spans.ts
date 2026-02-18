@@ -6,7 +6,7 @@
  */
 
 import type { ExitSpanSample } from '../../data_registry/data_registry_types';
-import type { ServiceTopologyNode, ExternalNode, ConnectionWithKey } from './types';
+import type { ConnectionWithKey } from './types';
 
 export const buildConnectionKey = (sourceName: string, dependencyName: string): string =>
   `${sourceName}::${dependencyName}`;
@@ -15,25 +15,15 @@ export function buildConnectionsFromSpans(spans: ExitSpanSample[]): ConnectionWi
   const connectionMap = new Map<string, ConnectionWithKey>();
 
   for (const span of spans) {
-    const source: ServiceTopologyNode = {
-      'service.name': span.serviceName,
-    };
+    const source = { 'service.name': span.serviceName };
 
-    let target: ServiceTopologyNode | ExternalNode;
-
-    if (span.destinationService) {
-      // Target is another service
-      target = {
-        'service.name': span.destinationService.serviceName,
-      };
-    } else {
-      // Target is an external dependency
-      target = {
-        'span.destination.service.resource': span.spanDestinationServiceResource,
-        'span.type': span.spanType,
-        'span.subtype': span.spanSubtype,
-      };
-    }
+    const target = span.destinationService
+      ? { 'service.name': span.destinationService.serviceName }
+      : {
+          'span.destination.service.resource': span.spanDestinationServiceResource,
+          'span.type': span.spanType,
+          'span.subtype': span.spanSubtype,
+        };
 
     // Create a unique key for deduplication using source service + dependency resource
     const sourceName = source['service.name'];
