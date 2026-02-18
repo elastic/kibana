@@ -11,7 +11,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { RemovePanelActionApi } from './remove_panel_action';
 import { RemovePanelAction } from './remove_panel_action';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 
 describe('Remove panel action', () => {
   let action: RemovePanelAction;

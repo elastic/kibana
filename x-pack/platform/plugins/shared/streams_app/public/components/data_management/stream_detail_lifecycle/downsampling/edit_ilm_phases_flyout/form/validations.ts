@@ -22,6 +22,7 @@ type MinAgePhase = Exclude<PhaseName, 'hot'>;
  * `_meta.warm.minAgeValue`). We keep access centralized to reduce `any`/casts at call sites.
  */
 type StreamsIlmFlatFormData = Record<string, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IlmValidationFunc<V = unknown> = ValidationFunc<any, string, V>;
 type IlmValidationArg<V = unknown> = Parameters<IlmValidationFunc<V>>[0];
 
