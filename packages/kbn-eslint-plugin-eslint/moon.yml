@@ -27,13 +27,13 @@ tags:
 tasks:
   jest:
     args:
-      - --config
+      - '--config'
       - $projectRoot/jest.config.js
     inputs:
       - '@group(src)'
   jestCI:
     args:
-      - --config
+      - '--config'
       - $projectRoot/jest.config.js
     inputs:
       - '@group(src)'

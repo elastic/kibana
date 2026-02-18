@@ -78,7 +78,7 @@ tasks:
     command: yarn
     args:
       - build
-      - --watch
+      - '--watch'
     deps:
       - ^:build-webpack
     inputs:
