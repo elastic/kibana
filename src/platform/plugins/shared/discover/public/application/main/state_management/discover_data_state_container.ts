@@ -383,8 +383,6 @@ export function getDataStateContainer({
           };
 
           const currentTab = getCurrentTab();
-          const query = currentTab.appState.query;
-          const isEsqlQuery = isOfAggregateQueryType(query);
           const isEsqlQueryWithTransformationalCommand =
             isEsqlQuery && hasTransformationalCommand(query.esql);
 

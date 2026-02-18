@@ -208,7 +208,6 @@ export const useDiscoverHistogram = (
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const query = useAppStateSelector((state) => state.query);
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
