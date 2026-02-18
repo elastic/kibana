@@ -536,8 +536,8 @@ function DiscoverDocumentsComponent({
       viewModeToggle,
       resolveLeafData,
       cascadeGroupingChangeHandler,
-      dataCascadeUiState: latestDataCascadeUiState.current,
-      dataGridUiStateMap: latestCascadedDocumentsDataGridsUiState.current,
+      getDataCascadeUiState: () => latestDataCascadeUiState.current,
+      getDataGridUiStateMap: () => latestCascadedDocumentsDataGridsUiState.current,
       setDataCascadeUiState: (nextUiState) =>
         dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
       setDataGridUiState: (nodeId, uiState) =>

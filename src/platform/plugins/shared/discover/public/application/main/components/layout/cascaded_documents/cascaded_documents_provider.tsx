@@ -43,8 +43,8 @@ export interface CascadedDocumentsContext
   resolveLeafData: (
     args: CascadeGroupNodeUIInteraction<ESQLDataGroupNode>
   ) => DataTableRecord[] | null;
-  dataCascadeUiState: DataCascadeUiState | undefined;
-  dataGridUiStateMap: CascadedDocumentsDataGridUiStateMap | undefined;
+  getDataCascadeUiState: () => DataCascadeUiState | undefined;
+  getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
   setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
