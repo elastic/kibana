@@ -17,6 +17,7 @@
 
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
+import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -502,6 +503,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
       );
+    }
+
+    const evalsYaml = getEvalPipeline(GITHUB_PR_LABELS);
+    if (evalsYaml) {
+      pipeline.push(evalsYaml);
     }
 
     if (
