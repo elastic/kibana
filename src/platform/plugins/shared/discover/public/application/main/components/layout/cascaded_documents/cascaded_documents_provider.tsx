@@ -37,8 +37,8 @@ export interface CascadedDocumentsContext
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
   viewModeToggle: ReactElement | undefined;
-  dataCascadeUiState: DataCascadeUiState | undefined;
-  dataGridUiStateMap: CascadedDocumentsDataGridUiStateMap | undefined;
+  getDataCascadeUiState: () => DataCascadeUiState | undefined;
+  getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
   setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;

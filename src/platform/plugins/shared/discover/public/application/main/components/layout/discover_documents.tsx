@@ -527,8 +527,8 @@ function DiscoverDocumentsComponent({
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
-      dataCascadeUiState: latestDataCascadeUiState.current,
-      dataGridUiStateMap: latestCascadedDocumentsDataGridsUiState.current,
+      getDataCascadeUiState: () => latestDataCascadeUiState.current,
+      getDataGridUiStateMap: () => latestCascadedDocumentsDataGridsUiState.current,
       setDataCascadeUiState: (nextUiState) =>
         dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
       setDataGridUiState: (nodeId, uiState) =>
