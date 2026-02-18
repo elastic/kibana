@@ -112,7 +112,8 @@ describe('DocViewerTable', () => {
     });
   });
 
-  describe('search', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253440
+  describe.skip('search', () => {
     beforeEach(() => {
       storage.clear();
     });

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { and, assertEvent, assign, sendTo, setup } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
+import { and, assertEvent, assign, sendTo, setup } from 'xstate';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import type {
   DataSourceInput,
   DataSourceContext,
