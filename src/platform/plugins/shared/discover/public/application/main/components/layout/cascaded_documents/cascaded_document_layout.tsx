@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, ComponentRef } from 'react';
+import type { ComponentRef } from 'react';
 import React, { useMemo, useCallback, Fragment, useRef, useState, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
   DataCascadeRow,
   DataCascadeRowCell,
+  toRestorableState,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -128,14 +129,6 @@ const ESQLDataCascade = React.memo(
       [getDataCascadeUiState]
     );
 
-    const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialState']>(
-      () => ({
-        expanded: dataCascadeUiState?.expanded,
-        rowSelection: dataCascadeUiState?.rowSelection,
-      }),
-      [dataCascadeUiState]
-    );
-
     const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
     const [dataCascadeRef, setDataCascadeRef] = useState<ComponentRef<EsqlDataCascade> | null>(
       null
@@ -148,13 +141,18 @@ const ESQLDataCascade = React.memo(
         return;
       }
 
-      const unsubscribeSnapshot = snapshotStore.subscribe(
-        throttle(() => {
-          latestSetDataCascadeUiState.current({ ...snapshotStore.getSnapshot() });
-        }, 150)
-      );
+      const throttledHandler = throttle(() => {
+        const snapshot = toRestorableState(snapshotStore.getSnapshot());
+        latestSetDataCascadeUiState.current(snapshot);
+      }, 150);
+
+      const unsubscribeSnapshot = snapshotStore.subscribe(throttledHandler);
 
       return () => {
+        // Flush any pending throttled invocation so the last scroll
+        // position is persisted before the listener is removed.
+        throttledHandler.flush();
+        throttledHandler.cancel();
         unsubscribeSnapshot();
       };
     }, [dataCascadeRef, latestSetDataCascadeUiState]);
@@ -167,9 +165,7 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
-        initialAnchorItemIndex={dataCascadeUiState?.scrollAnchorItemIndex ?? 0}
-        initialTableState={initialTableState}
-        initialRect={dataCascadeUiState?.scrollRect}
+        initialState={dataCascadeUiState}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>

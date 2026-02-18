@@ -25,12 +25,9 @@ import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
 
-/** Captured DataCascade props we assert on in tests (includes provider props like initialTableState). */
+/** Captured DataCascade props we assert on in tests. */
 const mockDataCascadeProps: Array<
-  Pick<
-    ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>,
-    'initialAnchorItemIndex' | 'initialTableState' | 'initialRect'
-  >
+  Pick<ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>, 'initialState'>
 > = [];
 
 const mockGetUISnapshotStore = jest.fn().mockReturnValue(null);
@@ -46,11 +43,7 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
     ref: ForwardedRef<DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>>
   ) {
     mockDataCascadeProps.push({
-      initialAnchorItemIndex: props.initialAnchorItemIndex as number | undefined,
-      initialTableState: props.initialTableState as
-        | { expanded?: Record<string, boolean>; rowSelection?: Record<string, boolean> }
-        | undefined,
-      initialRect: props.initialRect as { width: number; height: number } | undefined,
+      initialState: props.initialState,
     });
     ReactLib.useImperativeHandle(ref, () => mockDataCascadeRefObject, []);
     return ReactLib.createElement(
@@ -207,21 +200,7 @@ describe('CascadedDocumentsLayout', () => {
       expect(screen.getByTestId('mock-data-cascade')).toBeInTheDocument();
     });
 
-    it('passes default initialAnchorItemIndex (0) to DataCascade when no persisted state', () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
-
-      render(
-        <Wrapper>
-          <CascadedDocumentsLayout {...defaultLayoutProps} />
-        </Wrapper>
-      );
-
-      expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
-      expect(mockDataCascadeProps[mockDataCascadeProps.length - 1].initialAnchorItemIndex).toBe(0);
-    });
-
-    it('passes initialTableState with undefined expanded and rowSelection when no persisted state', () => {
+    it('passes undefined initialState to DataCascade when no persisted state', () => {
       const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
       const { Wrapper } = createWrapper({ getDataCascadeUiState });
 
@@ -233,34 +212,18 @@ describe('CascadedDocumentsLayout', () => {
 
       expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
       const lastProps = mockDataCascadeProps[mockDataCascadeProps.length - 1];
-      expect(lastProps.initialTableState).toEqual({
-        expanded: undefined,
-        rowSelection: undefined,
-      });
-    });
-
-    it('passes undefined initialRect to DataCascade when no persisted state', () => {
-      const getDataCascadeUiState = jest.fn().mockReturnValue(undefined);
-      const { Wrapper } = createWrapper({ getDataCascadeUiState });
-
-      render(
-        <Wrapper>
-          <CascadedDocumentsLayout {...defaultLayoutProps} />
-        </Wrapper>
-      );
-
-      expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
-      expect(mockDataCascadeProps[mockDataCascadeProps.length - 1].initialRect).toBeUndefined();
+      expect(lastProps.initialState).toBeUndefined();
     });
   });
 
   describe('when persistedCascadeUiState exists', () => {
-    it('passes persisted anchor index and rect to DataCascade', () => {
+    it('passes persisted restorable state to DataCascade as initialState', () => {
       const persistedState = {
-        scrollAnchorItemIndex: 7,
         scrollRect: { width: 800, height: 600 },
+        scrollAnchorItemIndex: 5,
         expanded: { 'row-1': true },
         rowSelection: {},
+        connectedChildren: {},
       };
       const getDataCascadeUiState = jest.fn().mockReturnValue(persistedState);
       const { Wrapper } = createWrapper({ getDataCascadeUiState });
@@ -273,12 +236,12 @@ describe('CascadedDocumentsLayout', () => {
 
       expect(mockDataCascadeProps.length).toBeGreaterThanOrEqual(1);
       const lastProps = mockDataCascadeProps[mockDataCascadeProps.length - 1];
-      expect(lastProps.initialAnchorItemIndex).toBe(7);
-      expect(lastProps.initialRect).toEqual({ width: 800, height: 600 });
-      expect(lastProps.initialTableState).toEqual(
+      expect(lastProps.initialState).toEqual(
         expect.objectContaining({
-          rowSelection: {},
+          scrollRect: { width: 800, height: 600 },
+          scrollAnchorItemIndex: 5,
           expanded: { 'row-1': true },
+          rowSelection: {},
         })
       );
     });
