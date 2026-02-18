@@ -8,6 +8,7 @@
  */
 
 import { writeFile, mkdir } from 'fs/promises';
+import { fetch } from 'undici';
 import { join } from 'path';
 import {
   generateCosmosDBApiRequestHeaders,
@@ -260,7 +261,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
     method: 'POST',
     headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', ''),
     body: JSON.stringify({ id: MOCK_IDP_UIAM_COSMOS_DB_NAME }),
-    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
     dispatcher: fetchDispatcher,
   });
 
@@ -294,7 +294,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
-        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
         dispatcher: fetchDispatcher,
       }
     );

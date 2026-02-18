@@ -37,7 +37,7 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
   }, [cpsManager, updateProjectRouting]);
 
   if (access === ProjectRoutingAccess.DISABLED) {
-    return <DisabledProjectPicker />;
+    return <DisabledProjectPicker fetchProjects={fetchProjects} />;
   }
 
   return (

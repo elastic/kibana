@@ -84,4 +84,16 @@ describe('FeatureDetailsFlyout', () => {
     expect(metaSection.textContent).toContain('"host"');
     expect(metaSection.textContent).toContain('"a"');
   });
+
+  it('shows the Raw document section with the full feature as JSON', () => {
+    const feature = createMinimalFeature({ id: 'raw-doc-feature', type: 'dataset_analysis' });
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
+
+    const rawDocumentSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutRawDocument');
+    expect(rawDocumentSection).toBeInTheDocument();
+    expect(rawDocumentSection.textContent).toContain('"id"');
+    expect(rawDocumentSection.textContent).toContain('"raw-doc-feature"');
+    expect(rawDocumentSection.textContent).toContain('"type"');
+    expect(rawDocumentSection.textContent).toContain('"dataset_analysis"');
+  });
 });
