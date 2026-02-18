@@ -296,7 +296,15 @@ export class MonacoEditorActionsProvider {
 
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
-      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      services: {
+        notifications,
+        trackUiMetric,
+        http,
+        settings,
+        history,
+        autocompleteInfo,
+        esHostService,
+      },
       ...startServices
     } = context;
     const { toasts } = notifications;
@@ -357,10 +365,12 @@ export class MonacoEditorActionsProvider {
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
       const selectedHost = settings.getSelectedHost();
+      await esHostService.init();
+      const hasMultipleConfiguredHosts = esHostService.getAllHosts().length > 1;
       const results = await sendRequest({
         http,
         requests,
-        host: selectedHost || undefined,
+        host: hasMultipleConfiguredHosts ? selectedHost || undefined : undefined,
         isPackagedEnvironment: context.config.isPackagedEnvironment,
       });
 
