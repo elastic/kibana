@@ -453,7 +453,7 @@ export class TaskRunner<
     // Map auto-unmute alertInstanceIds to alert UUIDs for the batched update.
     // The snooze fields and muted flag are cleared as part of updatePersistedAlerts
     // so that all alert doc updates happen in a single ES updateByQuery call.
-    let alertUuidsToAutoUnmute: string[] = [];
+    const alertUuidsToAutoUnmute: string[] = [];
     if (alertsToAutoUnmute.length > 0) {
       for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
         this.logger.info(
