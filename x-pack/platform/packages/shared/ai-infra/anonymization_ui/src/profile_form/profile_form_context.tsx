@@ -11,6 +11,8 @@ import type { ProfileFormProps } from './profile_form_props';
 
 export interface ProfileFormContextValue extends ProfileFormProps {
   targetIdField: UseTargetIdFieldResult;
+  includeHiddenAndSystemIndices: boolean;
+  onIncludeHiddenAndSystemIndicesChange: (value: boolean) => void;
 }
 
 const ProfileFormContext = createContext<ProfileFormContextValue | undefined>(undefined);

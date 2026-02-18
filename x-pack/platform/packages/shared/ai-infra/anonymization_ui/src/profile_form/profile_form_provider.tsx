@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ProfileFormContextProvider } from './profile_form_context';
 import { useTargetIdField } from './hooks/use_target_id_field';
 import type { ProfileFormProps } from './profile_form_props';
@@ -16,10 +16,12 @@ interface ProfileFormProviderProps extends ProfileFormProps {
 
 export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderProps) => {
   const { fetch, onFieldRulesChange, onTargetIdChange, targetId, targetType } = props;
+  const [includeHiddenAndSystemIndices, setIncludeHiddenAndSystemIndices] = useState(false);
 
   const targetIdField = useTargetIdField({
     targetType,
     targetId,
+    includeHiddenAndSystemIndices,
     fetch,
     onFieldRulesChange,
     onTargetIdChange,
@@ -35,7 +37,13 @@ export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderP
 
   return (
     <ProfileFormContextProvider
-      value={{ ...props, onSubmit: onSubmitWithTargetValidation, targetIdField }}
+      value={{
+        ...props,
+        onSubmit: onSubmitWithTargetValidation,
+        targetIdField,
+        includeHiddenAndSystemIndices,
+        onIncludeHiddenAndSystemIndicesChange: setIncludeHiddenAndSystemIndices,
+      }}
     >
       {children}
     </ProfileFormContextProvider>

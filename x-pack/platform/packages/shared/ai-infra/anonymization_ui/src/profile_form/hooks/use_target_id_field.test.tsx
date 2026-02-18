@@ -69,6 +69,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange: jest.fn(),
         onTargetIdChange: jest.fn(),
@@ -105,6 +106,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange: jest.fn(),
         onTargetIdChange: jest.fn(),
@@ -137,6 +139,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange,
         onTargetIdChange,
@@ -174,6 +177,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange,
         onTargetIdChange: jest.fn(),
@@ -222,6 +226,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange,
         onTargetIdChange: jest.fn(),
@@ -257,6 +262,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'dv-1',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange: jest.fn(),
         onTargetIdChange: jest.fn(),
@@ -271,6 +277,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: 'logs-*',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange: jest.fn(),
         onTargetIdChange: jest.fn(),
@@ -295,6 +302,7 @@ describe('useTargetIdField', () => {
       useTargetIdField({
         targetType: TARGET_TYPE_INDEX_PATTERN,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         fetch: jest.fn(),
         onFieldRulesChange: jest.fn(),
         onTargetIdChange: jest.fn(),

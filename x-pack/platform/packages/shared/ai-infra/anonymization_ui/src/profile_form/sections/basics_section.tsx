@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiComboBox,
   EuiFieldText,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TARGET_TYPE_DATA_VIEW } from '../../common/target_types';
@@ -33,7 +37,10 @@ export const ProfileBasicsSection = () => {
     onDescriptionChange,
     onTargetTypeChange,
     targetIdField,
+    includeHiddenAndSystemIndices,
+    onIncludeHiddenAndSystemIndicesChange,
   } = useProfileFormContext();
+  const [isAdvancedSettingsVisible, setIsAdvancedSettingsVisible] = useState(false);
 
   const onTargetTypeSelectChange = (value: string) => {
     const selectedOption = TARGET_TYPE_OPTIONS.find((option) => option.value === value);
@@ -41,6 +48,10 @@ export const ProfileBasicsSection = () => {
       onTargetTypeChange(selectedOption.value);
     }
   };
+
+  const onAdvancedSettingsToggle = useCallback(() => {
+    setIsAdvancedSettingsVisible((isVisible) => !isVisible);
+  }, []);
 
   return (
     <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
@@ -111,7 +122,7 @@ export const ProfileBasicsSection = () => {
       <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('anonymizationUi.profiles.basics.targetIdLabel', {
-            defaultMessage: 'Index',
+            defaultMessage: 'Target',
           })}
           helpText={targetIdField.targetIdHelpText}
           isInvalid={Boolean(targetIdError || targetIdField.targetIdAsyncError)}
@@ -154,6 +165,38 @@ export const ProfileBasicsSection = () => {
             fullWidth
           />
         </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <EuiLink
+            onClick={onAdvancedSettingsToggle}
+            data-test-subj="anonymizationProfilesFormToggleAdvancedSettings"
+          >
+            {isAdvancedSettingsVisible
+              ? i18n.translate('anonymizationUi.profiles.basics.advancedSettings.hideButtonLabel', {
+                  defaultMessage: 'Hide advanced settings',
+                })
+              : i18n.translate('anonymizationUi.profiles.basics.advancedSettings.showButtonLabel', {
+                  defaultMessage: 'Show advanced settings',
+                })}
+          </EuiLink>
+        </EuiText>
+        {isAdvancedSettingsVisible ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              label={i18n.translate(
+                'anonymizationUi.profiles.basics.advancedSettings.allowHiddenLabel',
+                {
+                  defaultMessage: 'Allow hidden and system indices',
+                }
+              )}
+              checked={includeHiddenAndSystemIndices}
+              onChange={(event) => onIncludeHiddenAndSystemIndicesChange(event.target.checked)}
+              disabled={!isManageMode || isEdit || isSubmitting}
+              data-test-subj="anonymizationProfilesFormAllowHiddenAndSystemIndices"
+            />
+          </>
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGrid>
   );

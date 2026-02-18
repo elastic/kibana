@@ -6,7 +6,7 @@
  */
 
 import type { TargetType } from '../../../types/profiles';
-import type { TargetLookupClient } from '../client';
+import type { ExpandWildcardsMode, TargetLookupClient } from '../client';
 
 export interface UseTargetLookupParams {
   client: TargetLookupClient;
@@ -16,5 +16,6 @@ export interface UseTargetLookupParams {
 export interface UseResolveIndexParams extends UseTargetLookupParams {
   query: string;
   targetType: TargetType;
+  expandWildcards: ExpandWildcardsMode;
   enabled?: boolean;
 }

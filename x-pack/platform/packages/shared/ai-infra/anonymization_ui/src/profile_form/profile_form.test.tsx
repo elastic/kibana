@@ -94,4 +94,27 @@ describe('ProfileForm', () => {
 
     expect(screen.getByText('Select a target to load field rules')).toBeInTheDocument();
   });
+
+  it('shows hidden/system toggle after opening advanced settings', () => {
+    renderForm();
+
+    fireEvent.click(screen.getByText('Show advanced settings'));
+
+    expect(screen.getByRole('switch')).toBeInTheDocument();
+  });
+
+  it('passes enabled hidden/system state to target lookup hook after switch toggle', async () => {
+    renderForm();
+
+    fireEvent.click(screen.getByText('Show advanced settings'));
+    fireEvent.click(screen.getByRole('switch'));
+
+    await waitFor(() => {
+      expect(jest.mocked(useTargetIdField).mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({
+          includeHiddenAndSystemIndices: true,
+        })
+      );
+    });
+  });
 });

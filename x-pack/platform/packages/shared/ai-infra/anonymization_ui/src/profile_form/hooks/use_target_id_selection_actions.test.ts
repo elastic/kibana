@@ -31,6 +31,7 @@ describe('useTargetIdSelectionActions', () => {
       useTargetIdSelectionActions({
         targetType: TARGET_TYPE_INDEX,
         targetId: 'logs-*',
+        includeHiddenAndSystemIndices: false,
         onFieldRulesChange: jest.fn(),
         queryClient: { fetchQuery },
         targetLookupClient,
@@ -64,6 +65,7 @@ describe('useTargetIdSelectionActions', () => {
       useTargetIdSelectionActions({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'dv-1',
+        includeHiddenAndSystemIndices: false,
         onFieldRulesChange,
         queryClient: { fetchQuery },
         targetLookupClient,
@@ -106,6 +108,7 @@ describe('useTargetIdSelectionActions', () => {
       useTargetIdSelectionActions({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'dv-1',
+        includeHiddenAndSystemIndices: false,
         onFieldRulesChange,
         queryClient: { fetchQuery },
         targetLookupClient,
@@ -141,6 +144,7 @@ describe('useTargetIdSelectionActions', () => {
       useTargetIdSelectionActions({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         onFieldRulesChange,
         queryClient: { fetchQuery },
         targetLookupClient,
@@ -193,6 +197,7 @@ describe('useTargetIdSelectionActions', () => {
       useTargetIdSelectionActions({
         targetType: TARGET_TYPE_DATA_VIEW,
         targetId: '',
+        includeHiddenAndSystemIndices: false,
         onFieldRulesChange,
         queryClient: { fetchQuery },
         targetLookupClient,
@@ -253,6 +258,7 @@ describe('useTargetIdSelectionActions', () => {
         useTargetIdSelectionActions({
           targetType,
           targetId,
+          includeHiddenAndSystemIndices: false,
           onFieldRulesChange,
           queryClient: { fetchQuery },
           targetLookupClient,
@@ -312,6 +318,7 @@ describe('useTargetIdSelectionActions', () => {
         useTargetIdSelectionActions({
           targetType: TARGET_TYPE_DATA_VIEW,
           targetId,
+          includeHiddenAndSystemIndices: false,
           onFieldRulesChange,
           queryClient: { fetchQuery },
           targetLookupClient,
@@ -342,5 +349,53 @@ describe('useTargetIdSelectionActions', () => {
     expect(onFieldRulesChange).toHaveBeenCalledWith([
       { field: 'host.name', allowed: true, anonymized: false, entityClass: undefined },
     ]);
+  });
+
+  it('uses open wildcard mode for index validation when hidden/system indices are disabled', async () => {
+    fetchQuery.mockImplementation(async ({ queryFn }) => queryFn());
+    targetLookupClient.resolveIndex.mockResolvedValueOnce({ indices: [{ name: 'logs-1' }] });
+
+    const { result } = renderHook(() =>
+      useTargetIdSelectionActions({
+        targetType: TARGET_TYPE_INDEX,
+        targetId: 'logs-1',
+        includeHiddenAndSystemIndices: false,
+        onFieldRulesChange: jest.fn(),
+        queryClient: { fetchQuery },
+        targetLookupClient,
+      })
+    );
+
+    await act(async () => {
+      await result.current.applyTargetIdSelection('logs-1', { hydrate: false });
+    });
+
+    expect(targetLookupClient.resolveIndex).toHaveBeenCalledWith('logs-1', {
+      expandWildcards: 'open',
+    });
+  });
+
+  it('uses all wildcard mode for index validation when hidden/system indices are enabled', async () => {
+    fetchQuery.mockImplementation(async ({ queryFn }) => queryFn());
+    targetLookupClient.resolveIndex.mockResolvedValueOnce({ indices: [{ name: 'logs-1' }] });
+
+    const { result } = renderHook(() =>
+      useTargetIdSelectionActions({
+        targetType: TARGET_TYPE_INDEX,
+        targetId: 'logs-1',
+        includeHiddenAndSystemIndices: true,
+        onFieldRulesChange: jest.fn(),
+        queryClient: { fetchQuery },
+        targetLookupClient,
+      })
+    );
+
+    await act(async () => {
+      await result.current.applyTargetIdSelection('logs-1', { hydrate: false });
+    });
+
+    expect(targetLookupClient.resolveIndex).toHaveBeenCalledWith('logs-1', {
+      expandWildcards: 'all',
+    });
   });
 });

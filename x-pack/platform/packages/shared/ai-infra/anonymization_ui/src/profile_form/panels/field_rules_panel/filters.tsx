@@ -42,6 +42,7 @@ export const FieldRulesPanelFilters = () => {
             placeholder={i18n.translate('anonymizationUi.profiles.fieldRules.searchPlaceholder', {
               defaultMessage: 'Search fields',
             })}
+            fullWidth
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

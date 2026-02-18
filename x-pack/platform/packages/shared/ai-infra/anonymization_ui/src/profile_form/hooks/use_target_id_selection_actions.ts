@@ -10,7 +10,10 @@ import type { FieldRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../common/target_types';
 import { targetLookupQueryKeys } from '../../common/services/target_lookup/cache_keys';
-import type { TargetLookupClient } from '../../common/services/target_lookup/client';
+import type {
+  ExpandWildcardsMode,
+  TargetLookupClient,
+} from '../../common/services/target_lookup/client';
 import type { TargetType } from '../types';
 
 const THIRTY_SECONDS_MS = 30 * 1000;
@@ -28,6 +31,7 @@ interface QueryClientLike {
 interface UseTargetIdSelectionActionsParams {
   targetType: TargetType;
   targetId: string;
+  includeHiddenAndSystemIndices: boolean;
   onFieldRulesChange: (rules: FieldRule[]) => void;
   queryClient: QueryClientLike;
   targetLookupClient: TargetLookupClient;
@@ -36,10 +40,12 @@ interface UseTargetIdSelectionActionsParams {
 export const useTargetIdSelectionActions = ({
   targetType,
   targetId,
+  includeHiddenAndSystemIndices,
   onFieldRulesChange,
   queryClient,
   targetLookupClient,
 }: UseTargetIdSelectionActionsParams) => {
+  const expandWildcards: ExpandWildcardsMode = includeHiddenAndSystemIndices ? 'all' : 'open';
   const latestCommitIdRef = useRef(0);
   const hydratedTargetKeysRef = useRef(new Set<string>());
   const [targetIdAsyncError, setTargetIdAsyncError] = useState<string | undefined>();
@@ -78,8 +84,12 @@ export const useTargetIdSelectionActions = ({
 
       try {
         const response = await queryClient.fetchQuery({
-          queryKey: targetLookupQueryKeys.resolveIndex(trimmedTargetId, targetType),
-          queryFn: () => targetLookupClient.resolveIndex(trimmedTargetId),
+          queryKey: targetLookupQueryKeys.resolveIndex(
+            trimmedTargetId,
+            targetType,
+            expandWildcards
+          ),
+          queryFn: () => targetLookupClient.resolveIndex(trimmedTargetId, { expandWildcards }),
           staleTime: THIRTY_SECONDS_MS,
         });
 
@@ -111,7 +121,7 @@ export const useTargetIdSelectionActions = ({
         return false;
       }
     },
-    [isLatestCommit, queryClient, targetLookupClient, targetType]
+    [expandWildcards, isLatestCommit, queryClient, targetLookupClient, targetType]
   );
 
   const hydrateFieldRulesFromTarget = useCallback(

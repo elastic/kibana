@@ -10,7 +10,10 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../common/target_types';
 import { useDataViewsList } from '../../common/services/target_lookup/hooks/use_data_views_list';
 import { useResolveIndex } from '../../common/services/target_lookup/hooks/use_resolve_index';
-import type { TargetLookupClient } from '../../common/services/target_lookup/client';
+import type {
+  ExpandWildcardsMode,
+  TargetLookupClient,
+} from '../../common/services/target_lookup/client';
 import type { TargetType } from '../types';
 import { TARGET_ID_OPTIONS_LIMIT } from '../constants';
 
@@ -20,6 +23,7 @@ interface UseTargetIdOptionsParams {
   debouncedTargetSearchValue: string;
   targetLookupClient: TargetLookupClient;
   shouldLoadTargetOptions: boolean;
+  includeHiddenAndSystemIndices: boolean;
 }
 
 export const useTargetIdOptions = ({
@@ -28,8 +32,10 @@ export const useTargetIdOptions = ({
   debouncedTargetSearchValue,
   targetLookupClient,
   shouldLoadTargetOptions,
+  includeHiddenAndSystemIndices,
 }: UseTargetIdOptionsParams) => {
   const isDataViewTarget = targetType === TARGET_TYPE_DATA_VIEW;
+  const expandWildcards: ExpandWildcardsMode = includeHiddenAndSystemIndices ? 'all' : 'open';
   const trimmedDebouncedSearchValue = debouncedTargetSearchValue.trim();
   const resolveIndexLookupQuery = (() => {
     if (isDataViewTarget) {
@@ -58,6 +64,7 @@ export const useTargetIdOptions = ({
     client: targetLookupClient,
     query: resolveIndexLookupQuery,
     targetType,
+    expandWildcards,
     enabled: shouldResolveIndexSuggestions,
   });
 

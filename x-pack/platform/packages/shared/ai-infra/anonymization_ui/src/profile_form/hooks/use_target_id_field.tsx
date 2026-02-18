@@ -13,7 +13,10 @@ import { useQueryClient } from '@kbn/react-query';
 import type { AnonymizationUiServices } from '../../contracts';
 import { TARGET_TYPE_DATA_VIEW } from '../../common/target_types';
 import { targetLookupQueryKeys } from '../../common/services/target_lookup/cache_keys';
-import { createTargetLookupClient } from '../../common/services/target_lookup/client';
+import {
+  createTargetLookupClient,
+  type ExpandWildcardsMode,
+} from '../../common/services/target_lookup/client';
 import type { TargetType } from '../types';
 import { useTargetIdSelectionActions } from './use_target_id_selection_actions';
 import { useTargetIdHelpText } from './use_target_id_help_text';
@@ -25,6 +28,7 @@ const THIRTY_SECONDS_MS = 30 * 1000;
 interface UseTargetIdFieldParams {
   targetType: TargetType;
   targetId: string;
+  includeHiddenAndSystemIndices: boolean;
   fetch: AnonymizationUiServices['http']['fetch'];
   onFieldRulesChange: (rules: FieldRule[]) => void;
   onTargetIdChange: (targetId: string) => void;
@@ -48,12 +52,14 @@ export interface UseTargetIdFieldResult {
 export const useTargetIdField = ({
   targetType,
   targetId,
+  includeHiddenAndSystemIndices,
   fetch,
   onFieldRulesChange,
   onTargetIdChange,
 }: UseTargetIdFieldParams): UseTargetIdFieldResult => {
   const queryClient = useQueryClient();
   const targetLookupClient = useMemo(() => createTargetLookupClient({ fetch }), [fetch]);
+  const expandWildcards: ExpandWildcardsMode = includeHiddenAndSystemIndices ? 'all' : 'open';
   const [shouldLoadTargetOptions, setShouldLoadTargetOptions] = useState(false);
   const { targetIdSearchValue, debouncedTargetSearchValue, setTargetIdSearchValue } =
     useTargetIdSearchState({ targetId });
@@ -63,11 +69,13 @@ export const useTargetIdField = ({
     debouncedTargetSearchValue,
     targetLookupClient,
     shouldLoadTargetOptions,
+    includeHiddenAndSystemIndices,
   });
   const { targetIdAsyncError, isValidatingTargetId, applyTargetIdSelection } =
     useTargetIdSelectionActions({
       targetType,
       targetId,
+      includeHiddenAndSystemIndices,
       onFieldRulesChange,
       queryClient,
       targetLookupClient,
@@ -90,11 +98,11 @@ export const useTargetIdField = ({
     }
     setShouldLoadTargetOptions(true);
     void queryClient.fetchQuery({
-      queryKey: targetLookupQueryKeys.resolveIndex('*', targetType),
-      queryFn: () => targetLookupClient.resolveIndex('*'),
+      queryKey: targetLookupQueryKeys.resolveIndex('*', targetType, expandWildcards),
+      queryFn: () => targetLookupClient.resolveIndex('*', { expandWildcards }),
       staleTime: THIRTY_SECONDS_MS,
     });
-  }, [shouldLoadTargetOptions, targetType, queryClient, targetLookupClient]);
+  }, [expandWildcards, shouldLoadTargetOptions, targetType, queryClient, targetLookupClient]);
 
   const handleTargetIdSelectChange = useCallback(
     (options: EuiComboBoxOptionOption<string>[]) => {

@@ -28,10 +28,16 @@ export interface ResolveIndexResponse {
   indices?: Array<{ name: string }>;
 }
 
+export type ExpandWildcardsMode = 'open' | 'all';
+
+interface ResolveIndexOptions {
+  expandWildcards?: ExpandWildcardsMode;
+}
+
 export interface TargetLookupClient {
   getDataViews: () => Promise<DataViewsListResponse>;
   getDataViewById: (dataViewId: string) => Promise<DataViewByIdResponse>;
-  resolveIndex: (query: string) => Promise<ResolveIndexResponse>;
+  resolveIndex: (query: string, options?: ResolveIndexOptions) => Promise<ResolveIndexResponse>;
   getFieldsForWildcard: (pattern: string) => Promise<FieldsForWildcardResponse>;
 }
 
@@ -56,12 +62,12 @@ export const createTargetLookupClient = ({
   getDataViewById: (dataViewId: string) =>
     fetch<DataViewByIdResponse>(`/api/data_views/data_view/${encodeURIComponent(dataViewId)}`),
 
-  resolveIndex: async (query: string) => {
+  resolveIndex: async (query: string, options?: ResolveIndexOptions) => {
     try {
       return await fetch<ResolveIndexResponse>(
         `/internal/index-pattern-management/resolve_index/${encodeURIComponent(query)}`,
         {
-          query: { expand_wildcards: 'all' },
+          query: { expand_wildcards: options?.expandWildcards ?? 'open' },
         }
       );
     } catch (error) {

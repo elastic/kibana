@@ -15,11 +15,12 @@ export const useResolveIndex = ({
   client,
   query,
   targetType,
+  expandWildcards,
   enabled = true,
 }: UseResolveIndexParams) =>
   useQuery({
-    queryKey: targetLookupQueryKeys.resolveIndex(query, targetType),
-    queryFn: () => client.resolveIndex(query),
+    queryKey: targetLookupQueryKeys.resolveIndex(query, targetType, expandWildcards),
+    queryFn: () => client.resolveIndex(query, { expandWildcards }),
     enabled: enabled && query.trim().length > 0,
     staleTime: THIRTY_SECONDS,
     refetchOnWindowFocus: false,

@@ -55,6 +55,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'lo',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -75,6 +76,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: '',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -94,6 +96,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'logs',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -123,6 +126,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'logs',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -148,6 +152,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'logs',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -173,6 +178,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: '',
         targetLookupClient,
         shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -187,6 +193,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'kibana',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -206,6 +213,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: 'kibana',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -225,6 +233,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: '',
         targetLookupClient,
         shouldLoadTargetOptions: false,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -244,6 +253,7 @@ describe('useTargetIdOptions', () => {
         debouncedTargetSearchValue: '',
         targetLookupClient,
         shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: false,
       })
     );
 
@@ -251,6 +261,44 @@ describe('useTargetIdOptions', () => {
       expect.objectContaining({
         query: '*',
         enabled: true,
+      })
+    );
+  });
+
+  it('passes open expand wildcards when hidden/system indices are disabled', () => {
+    renderHook(() =>
+      useTargetIdOptions({
+        targetType: TARGET_TYPE_INDEX_PATTERN,
+        targetIdSearchValue: '',
+        debouncedTargetSearchValue: '',
+        targetLookupClient,
+        shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: false,
+      })
+    );
+
+    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expandWildcards: 'open',
+      })
+    );
+  });
+
+  it('passes all expand wildcards when hidden/system indices are enabled', () => {
+    renderHook(() =>
+      useTargetIdOptions({
+        targetType: TARGET_TYPE_INDEX_PATTERN,
+        targetIdSearchValue: '',
+        debouncedTargetSearchValue: '',
+        targetLookupClient,
+        shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: true,
+      })
+    );
+
+    expect(jest.mocked(useResolveIndex)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expandWildcards: 'all',
       })
     );
   });

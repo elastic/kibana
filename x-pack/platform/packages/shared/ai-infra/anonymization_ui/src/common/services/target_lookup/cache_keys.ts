@@ -6,6 +6,7 @@
  */
 
 import type { TargetType } from '../../types/profiles';
+import type { ExpandWildcardsMode } from './client';
 
 const normalizeQueryValue = (value: string) => value.trim().toLowerCase();
 const normalizePatternValue = (value: string) => value.trim();
@@ -18,11 +19,12 @@ export const targetLookupQueryKeys = {
   dataViewById: (dataViewId: string) =>
     [...targetLookupQueryKeys.root, 'dataViewById', dataViewId] as const,
 
-  resolveIndex: (query: string, targetType: TargetType) =>
+  resolveIndex: (query: string, targetType: TargetType, expandWildcards: ExpandWildcardsMode) =>
     [
       ...targetLookupQueryKeys.root,
       'resolveIndex',
       targetType,
+      expandWildcards,
       normalizeQueryValue(query),
     ] as const,
 
