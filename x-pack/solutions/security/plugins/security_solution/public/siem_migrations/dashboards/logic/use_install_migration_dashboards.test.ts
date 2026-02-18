@@ -50,18 +50,7 @@ const defaultMigrationStats = {
   created_at: '2025-01-01T00:00:00Z',
   last_updated_at: '2025-01-01T01:00:00Z',
 };
-const defaultTranslationStats: DashboardMigrationTranslationStats = {
-  id: '1',
-  dashboards: {
-    total: 2,
-    failed: 0,
-    success: {
-      total: 2,
-      result: { full: 2, partial: 0, untranslatable: 0 },
-      installable: 2,
-    },
-  },
-};
+
 
 describe('useInstallMigrationDashboards', () => {
   beforeEach(() => {
