@@ -35,6 +35,14 @@ paths:
                 managed:
                   type: boolean
                   description: Indicates if the watchlist is managed by the system
+            examples:
+              CreateWatchlistRequest:
+                summary: Create watchlist request
+                value:
+                  name: High Risk Vendors
+                  description: High risk vendor watchlist
+                  riskModifier: 1.5
+                  managed: false
       responses:
         "200":
           description: Watchlist created successfully
