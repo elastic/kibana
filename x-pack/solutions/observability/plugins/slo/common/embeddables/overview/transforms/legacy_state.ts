@@ -74,7 +74,6 @@ export const legacyStoredStateToOverviewState = (
             groups?: string[];
             filters?: unknown[];
             kqlQuery?: string;
-            kql_query?: string;
           }
         | undefined;
 

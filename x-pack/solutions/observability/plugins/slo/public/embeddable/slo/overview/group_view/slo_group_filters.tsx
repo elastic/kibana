@@ -245,11 +245,11 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           }}
           onQuerySubmit={({ query: value }) => {
             setkqlQuery(String(value?.query));
-            onSelected('kqlQuery', String(value?.query));
+            onSelected('kql_query', String(value?.query));
           }}
           onQueryChange={({ query: value }) => {
             setkqlQuery(String(value?.query));
-            onSelected('kqlQuery', String(value?.query));
+            onSelected('kql_query', String(value?.query));
           }}
           query={{ query: String(kqlQuery), language: 'kuery' }}
           showDatePicker={false}
