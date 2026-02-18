@@ -66,7 +66,6 @@ export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
-  private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -137,17 +136,11 @@ export class ProjectNavigationService {
       setCloudUrls: (cloudUrls: CloudURLs) => {
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
-      setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
-        this.feedbackUrlParams$.next(feedbackUrlParams);
-      },
       setKibanaName: (kibanaName: string) => {
         this.kibanaName$.next(kibanaName);
       },
       getKibanaName$: () => {
         return this.kibanaName$.asObservable();
-      },
-      getFeedbackUrlParams$: () => {
-        return this.feedbackUrlParams$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,

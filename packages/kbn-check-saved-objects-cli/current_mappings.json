@@ -1327,6 +1327,9 @@
           "additionalIndexPattern": {
             "type": "keyword"
           },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
           "delay": {
             "type": "keyword"
           },
@@ -1346,6 +1349,9 @@
             "type": "date"
           },
           "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationId": {
             "type": "keyword"
           },
           "paginationTimestamp": {
