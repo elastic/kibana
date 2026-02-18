@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const ConditionalLabelWrapper = ({
@@ -35,7 +35,12 @@ export const ConditionalLabelWrapper = ({
 };
 
 const styles = {
-  flexGroup: css({ gap: '1px', padding: '4px 8px 1px 8px', overflow: 'hidden' }),
+  flexGroup: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      gap: '1px',
+      padding: `${euiTheme.size.xs} ${euiTheme.size.s} 1px ${euiTheme.size.s}`,
+      overflow: 'hidden',
+    }),
   disableGrow: css({ flexGrow: 0 }),
   truncatedText: css({
     lineHeight: '1.2rem',
