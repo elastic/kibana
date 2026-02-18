@@ -34,13 +34,17 @@ import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
 import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
-import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
+import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
   () => import('../templates_v2/pages/create_template/page')
+);
+
+const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
+  () => import('../templates_v2/pages/edit_template/page')
 );
 
 const AllCasesTemplatesLazy: React.FC = lazy(
@@ -117,7 +121,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesEditTemplatePath(basePath)}>
-            <TemplateFormPage />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <EditTemplateLazy />
+            </Suspense>
           </Route>
         )}
 

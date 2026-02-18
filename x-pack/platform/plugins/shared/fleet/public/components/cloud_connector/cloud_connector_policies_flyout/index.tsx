@@ -10,10 +10,12 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiTitle,
   EuiText,
   EuiSpacer,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBasicTable,
@@ -21,6 +23,9 @@ import {
   EuiEmptyPrompt,
   EuiCopy,
   EuiButtonIcon,
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiToolTip,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
   EuiHorizontalRule,
@@ -35,6 +40,7 @@ import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../commo
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
+import { useDeleteCloudConnector } from '../hooks/use_delete_cloud_connector';
 import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
@@ -62,11 +68,13 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 }) => {
   const { application } = useKibana().services;
   const flyoutTitleId = useGeneratedHtmlId();
+  const deleteModalTitleId = useGeneratedHtmlId();
   const [cloudConnectorName, setCloudConnectorName] = useState(initialName);
   const [editedName, setEditedName] = useState(initialName);
   const [isNameValid, setIsNameValid] = useState(() => isCloudConnectorNameValid(initialName));
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const {
     data: usageData,
@@ -89,6 +97,26 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       setIsNameValid(true);
     }
   );
+
+  const { mutate: deleteConnector, isLoading: isDeleting } = useDeleteCloudConnector(
+    cloudConnectorId,
+    () => {
+      onClose();
+    }
+  );
+
+  const handleDeleteConnector = useCallback(() => {
+    setIsDeleteModalVisible(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    deleteConnector({});
+    setIsDeleteModalVisible(false);
+  }, [deleteConnector]);
+
+  const handleCancelDelete = useCallback(() => {
+    setIsDeleteModalVisible(false);
+  }, []);
 
   // Extract ARN or Subscription ID based on provider
   const identifier = useMemo(() => {
@@ -272,22 +300,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           onChange={handleNameChange}
           data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT}
         />
-
-        <EuiSpacer size="m" />
-
-        <EuiButton
-          onClick={handleSaveName}
-          isDisabled={isSaveDisabled}
-          isLoading={isUpdating}
-          iconType="save"
-          fill
-          data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON}
-        >
-          <FormattedMessage
-            id="xpack.fleet.cloudConnector.policiesFlyout.saveButton"
-            defaultMessage="Save"
-          />
-        </EuiButton>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -371,6 +383,120 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           />
         )}
       </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.CLOSE_BUTTON}
+            >
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.cloudConnectorPoliciesFlyout.closeButton"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    totalItemCount > 0
+                      ? i18n.translate(
+                          'xpack.fleet.cloudConnector.policiesFlyout.deleteDisabledTooltip',
+                          {
+                            defaultMessage:
+                              "This action isn't available because this connector is used by other integrations. To delete the connector, replace it in all other integrations",
+                          }
+                        )
+                      : undefined
+                  }
+                >
+                  <EuiButtonEmpty
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={totalItemCount > 0}
+                    isLoading={isDeleting}
+                    onClick={handleDeleteConnector}
+                    data-test-subj={
+                      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONNECTOR_BUTTON
+                    }
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.cloudConnector.policiesFlyout.deleteConnectorButton"
+                      defaultMessage="Delete Connector"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={handleSaveName}
+                  isDisabled={isSaveDisabled}
+                  iconType="save"
+                  isLoading={isUpdating}
+                  fill
+                  data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FOOTER_SAVE_BUTTON}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.policiesFlyout.footerSaveButton"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+
+      {isDeleteModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.deleteModalTitle', {
+            defaultMessage: "You're about to delete a connector",
+          })}
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
+          onCancel={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          cancelButtonText={i18n.translate(
+            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalCancel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.fleet.cloudConnector.policiesFlyout.deleteModalConfirm',
+            {
+              defaultMessage: 'Delete connector',
+            }
+          )}
+          buttonColor="danger"
+          isLoading={isDeleting}
+          data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONFIRM_MODAL}
+        >
+          <EuiCallOut
+            color="danger"
+            announceOnMount={false}
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_MODAL_CALLOUT}
+          >
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalCallout"
+              defaultMessage="Deleting {connectorName} will stop data ingestion and it cannot be re-used in other integrations."
+              values={{
+                connectorName: <strong>{cloudConnectorName}</strong>,
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalBody"
+              defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+            />
+          </EuiText>
+        </EuiConfirmModal>
+      )}
     </EuiFlyout>
   );
 };
