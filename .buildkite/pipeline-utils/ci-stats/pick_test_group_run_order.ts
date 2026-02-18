@@ -26,7 +26,7 @@ import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
 import {
   getAffectedPackagesForFiltering,
-  filterConfigsByAffectedPackages,
+  filterFilesByAffectedPackages,
 } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
@@ -218,14 +218,11 @@ export async function pickTestGroupRunOrder() {
 
   // Apply affected package filtering
   const affectedPackages = await getAffectedPackagesForFiltering(process.env.GITHUB_PR_MERGE_BASE);
-  const filteredJestUnitConfigs = filterConfigsByAffectedPackages(
-    jestUnitConfigs,
-    affectedPackages
-  );
+  const filteredJestUnitConfigs = filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages);
   console.warn(
     `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
   );
-  const filteredJestIntegrationConfigs = filterConfigsByAffectedPackages(
+  const filteredJestIntegrationConfigs = filterFilesByAffectedPackages(
     jestIntegrationConfigs,
     affectedPackages
   );

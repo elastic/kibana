@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as yaml from 'js-yaml';
 import { doAnyChangesMatch } from '../github';
-import { getKibanaDir } from '../utils';
-
-const REPO_ROOT = getKibanaDir();
+import { findPackageForPath } from './package_lookup';
+import { getAffectedPackagesGit } from './strategy_git';
+import { getAffectedPackagesMoon } from './strategy_moon';
 
 /**
  * Configuration for affected package detection
@@ -37,103 +33,22 @@ export interface AffectedPackagesConfig {
 }
 
 /**
- * Filter Jest configs to only those in affected packages
- *
- * @param configs - Array of Jest config paths
- * @param affectedPackages - Set of affected package IDs (from getAffectedPackagesForFiltering)
- *                           Pass null to skip filtering and return all configs
- * @returns Filtered array of config paths
- */
-export function filterConfigsByAffectedPackages(
-  configs: string[],
-  affectedPackages: Set<string> | null
-): string[] {
-  // If null, return all configs (filtering disabled/skipped)
-  if (affectedPackages === null) {
-    return configs;
-  }
-
-  // If empty set, no packages affected - return empty array
-  if (affectedPackages.size === 0) {
-    return [];
-  }
-
-  const filtered: string[] = [];
-
-  for (const configPath of configs) {
-    const pkgId = findPackageForPath(configPath);
-
-    if (pkgId && affectedPackages.has(pkgId)) {
-      filtered.push(configPath);
-    } else if (!pkgId) {
-      // Config is not in a package (e.g., root-level test) - include it to be safe
-      filtered.push(configPath);
-    }
-  }
-
-  return filtered;
-}
-
-/**
- * Get affected packages for filtering Jest configs
- * Returns null if filtering should be skipped (disabled, no merge base, critical files, etc.)
- * Returns empty Set if no affected packages found (will skip all tests)
- *
- * @param mergeBase - Git commit to compare against (from GITHUB_PR_MERGE_BASE)
- * @returns Set of affected package IDs, or null to skip filtering
- */
-export async function getAffectedPackagesForFiltering(
-  mergeBase: string | undefined
-): Promise<Set<string> | null> {
-  const config = getConfigFromEnv();
-  const log = config.logging ? console.warn : () => {}; // only use warn if logging is enabled, the output is parsed as buildkite step def.
-
-  // Check if filtering is disabled
-  if (config.strategy === 'disabled') {
-    log('Affected package filtering is disabled');
-    return null;
-  }
-
-  // Check if we have a merge base
-  if (!mergeBase) {
-    log('No GITHUB_PR_MERGE_BASE found - running all tests');
-    return null;
-  }
-
-  log('--- Detecting Affected Packages for Jest Filtering');
-
-  // Check if we should run all tests due to critical changes
-  const runAll = (await shouldRunAllTests()) && false;
-  if (runAll) {
-    log('Critical infrastructure files changed - running all tests (no affected filtering)');
-    return null;
-  }
-
-  // Get affected packages
-  try {
-    const affectedPackages =
-      config.strategy === 'git'
-        ? getAffectedPackagesGit(mergeBase, config.includeDownstream)
-        : getAffectedPackagesMoon(mergeBase, config.includeDownstream);
-    if (affectedPackages.size === 0) {
-      log('Warning: No affected packages found');
-    }
-
-    return affectedPackages;
-  } catch (error) {
-    console.error('Error during affected package detection:', error);
-    log('Error during affected package detection:', error);
-    return null;
-  }
-}
-
-/**
  * Get configuration from environment variables
+ *
+ * Environment variables:
+ * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'git')
+ * - AFFECTED_DOWNSTREAM: 'true' | 'false' (default: 'true')
+ * - AFFECTED_LOGGING: 'true' | 'false' (default: 'true')
+ *
+ * Note: Also supports legacy JEST_AFFECTED_* prefixed variables for backwards compatibility
  */
 function getConfigFromEnv(): AffectedPackagesConfig {
-  const strategy = (process.env.JEST_AFFECTED_STRATEGY || 'git') as 'git' | 'moon' | 'disabled';
-  const includeDownstream = process.env.JEST_AFFECTED_DOWNSTREAM !== 'false'; // Default to true
-  const logging = process.env.JEST_AFFECTED_LOGGING !== 'false'; // Default to true
+  const strategy = (process.env.AFFECTED_STRATEGY ||
+    process.env.JEST_AFFECTED_STRATEGY ||
+    'git') as 'git' | 'moon' | 'disabled';
+  const includeDownstream =
+    (process.env.AFFECTED_DOWNSTREAM || process.env.JEST_AFFECTED_DOWNSTREAM) !== 'false';
+  const logging = (process.env.AFFECTED_LOGGING || process.env.JEST_AFFECTED_LOGGING) !== 'false';
 
   return {
     strategy,
@@ -142,192 +57,10 @@ function getConfigFromEnv(): AffectedPackagesConfig {
   };
 }
 
-let cachedPackageLookup: Map<string, string> | null = null;
 /**
- * Get all @kbn packages from package.json
- * Returns a map of package directory -> package name
+ * Check if changes require skipping filtering (e.g., infrastructure changes)
  */
-function getPackageLookup(): Map<string, string> {
-  if (cachedPackageLookup != null) {
-    return cachedPackageLookup;
-  }
-
-  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-  const allDependencies = {
-    ...packageJson.dependencies,
-    ...packageJson.devDependencies,
-  };
-
-  const packageLookup = new Map<string, string>();
-  for (const [packageName, packageLink] of Object.entries<string>(allDependencies)) {
-    if (packageName.startsWith('@kbn/')) {
-      const packageDir = packageLink.replace(/^link:/, '');
-      packageLookup.set(packageDir, packageName);
-    }
-  }
-
-  cachedPackageLookup = packageLookup;
-
-  return packageLookup;
-}
-
-/**
- * Build a dependency graph that maps each package to its downstream dependents
- */
-function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
-  const downstreamMap = new Map<string, Set<string>>();
-  const packageLookup = getPackageLookup();
-
-  // Initialize empty sets for all packages
-  for (const packageName of packageLookup.values()) {
-    downstreamMap.set(packageName, new Set<string>());
-  }
-
-  // For each package, add it to the downstream set of all its dependencies
-  for (const [packageDir, packageName] of packageLookup.entries()) {
-    const dependencies = getDependenciesForPackage(packageDir);
-    for (const depId of dependencies) {
-      const downstreams = downstreamMap.get(depId);
-      if (downstreams) {
-        downstreams.add(packageName);
-      }
-    }
-  }
-
-  return downstreamMap;
-}
-
-/**
- * Get dependencies for a package from its moon.yml or tsconfig.json
- */
-function getDependenciesForPackage(packageDir: string): string[] {
-  // Try to read dependencies from moon.yml first
-  const moonYmlPath = path.join(REPO_ROOT, packageDir, 'moon.yml');
-  try {
-    const moonYmlContent = fs.readFileSync(moonYmlPath, 'utf8');
-    const moonConfig = yaml.load(moonYmlContent) as any;
-    if (moonConfig?.dependsOn && Array.isArray(moonConfig.dependsOn)) {
-      return moonConfig.dependsOn;
-    }
-  } catch (error) {
-    // moon.yml doesn't exist or can't be read, try tsconfig
-  }
-
-  // Fallback to tsconfig.json kbn_references
-  const tsconfigPath = path.join(REPO_ROOT, packageDir, 'tsconfig.json');
-  try {
-    const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
-    if (tsconfig?.kbn_references && Array.isArray(tsconfig.kbn_references)) {
-      return tsconfig.kbn_references;
-    }
-  } catch (error) {
-    // tsconfig doesn't exist or can't be read
-  }
-
-  return [];
-}
-
-/**
- * Get the downstream dependents of a set of packages (deep traversal)
- */
-function getDownstreamDependents(packageIds: Set<string>): Set<string> {
-  const downstreamMap = buildDownstreamDependencyGraph();
-  const result = new Set<string>(packageIds);
-
-  // Deep traversal: keep adding dependents until no new ones are found
-  const queue = Array.from(packageIds);
-  const visited = new Set<string>(packageIds);
-
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    const dependents = downstreamMap.get(current);
-
-    if (dependents) {
-      for (const dependent of Array.from(dependents)) {
-        if (!visited.has(dependent)) {
-          visited.add(dependent);
-          queue.push(dependent);
-          result.add(dependent);
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-/**
- * Git-based strategy: Get affected packages by mapping changed files to packages
- */
-function getAffectedPackagesGit(mergeBase: string, includeDownstream: boolean): Set<string> {
-  // Get changed files from git
-  const output = execSync(`git diff --name-only ${mergeBase} HEAD`, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-  });
-
-  const changedFiles = output
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  // Map files to packages
-  const directlyAffectedPackages = new Set<string>();
-  for (const file of changedFiles) {
-    const pkgId = findPackageForPath(file);
-    if (pkgId) {
-      directlyAffectedPackages.add(pkgId);
-    }
-  }
-
-  // Get downstream dependents if requested
-  if (includeDownstream) {
-    return getDownstreamDependents(directlyAffectedPackages);
-  } else {
-    return directlyAffectedPackages;
-  }
-}
-
-/**
- * Moon-based strategy: Use moon query to get affected projects
- */
-function getAffectedPackagesMoon(mergeBase: string, includeDownstream: boolean): Set<string> {
-  // Build the moon query command
-  const downstreamFlag = includeDownstream ? '--downstream deep' : '';
-  const command = `moon query projects --affected ${downstreamFlag} --tags jest-unit-tests --json`;
-
-  const output = execSync(command, {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 50 * 1024 * 1024, // 50MB buffer
-    env: {
-      ...process.env,
-      MOON_BASE: mergeBase,
-    },
-    timeout: 30000, // 30 seconds
-  });
-
-  const result = JSON.parse(output);
-
-  // Extract project IDs from the response
-  const packageIds = new Set<string>();
-  if (result.projects && Array.isArray(result.projects)) {
-    for (const project of result.projects) {
-      if (project.id) {
-        packageIds.add(project.id);
-      }
-    }
-  }
-
-  return packageIds;
-}
-
-/**
- * Check if changes require running all tests (e.g., infrastructure changes)
- */
-async function shouldRunAllTests(): Promise<boolean> {
+async function shouldSkipFiltering(): Promise<boolean> {
   const criticalPaths = [
     '.buildkite/',
     'scripts/jest.js',
@@ -344,18 +77,143 @@ async function shouldRunAllTests(): Promise<boolean> {
   return doAnyChangesMatch(criticalPaths.map((p) => new RegExp(p)));
 }
 
-function findPackageForPath(filePath: string): string | undefined {
-  const packageLookup = getPackageLookup();
+/**
+ * Filter file paths to only those in affected packages
+ *
+ * @param files - Array of file paths (relative to repo root)
+ * @param affectedPackages - Set of affected package IDs
+ *                           Pass null to skip filtering and return all files
+ * @returns Filtered array of file paths
+ */
+export function filterFilesByAffectedPackages(
+  files: string[],
+  affectedPackages: Set<string> | null
+): string[] {
+  // If null, return all files (filtering disabled/skipped)
+  if (affectedPackages === null) {
+    return files;
+  }
 
-  // find the longest prefix of the path that is a key in the packageLookup
-  let longestPrefix = '';
-  for (const packageDir of packageLookup.keys()) {
-    if (filePath.startsWith(packageDir)) {
-      if (packageDir.length > longestPrefix.length) {
-        longestPrefix = packageDir;
-      }
+  // If empty set, no packages affected - return empty array
+  if (affectedPackages.size === 0) {
+    return [];
+  }
+
+  const filtered: string[] = [];
+
+  for (const filePath of files) {
+    const pkgId = findPackageForPath(filePath);
+
+    if (pkgId && affectedPackages.has(pkgId)) {
+      filtered.push(filePath);
+    } else if (!pkgId) {
+      // File is not in a package (e.g., root-level) - include it to be safe
+      filtered.push(filePath);
     }
   }
 
-  return packageLookup.get(longestPrefix);
+  return filtered;
+}
+
+/**
+ * Get affected packages for filtering files
+ * Returns null if filtering should be skipped (disabled, no merge base, critical files, etc.)
+ * Returns empty Set if no affected packages found
+ *
+ * @param mergeBase - Git commit to compare against (e.g., GITHUB_PR_MERGE_BASE)
+ * @returns Set of affected package IDs, or null to skip filtering
+ */
+export async function getAffectedPackagesForFiltering(
+  mergeBase: string | undefined
+): Promise<Set<string> | null> {
+  const config = getConfigFromEnv();
+  const log = config.logging ? console.warn : () => {};
+
+  // Check if filtering is disabled
+  if (config.strategy === 'disabled') {
+    log('Affected package filtering is disabled');
+    return null;
+  }
+
+  // Check if we have a merge base
+  if (!mergeBase) {
+    log('No merge base found - skipping filtering');
+    return null;
+  }
+
+  log('--- Detecting Affected Packages');
+
+  // Check if we should skip filtering due to critical changes
+  if (await shouldSkipFiltering()) {
+    log('Critical infrastructure files changed - skipping filtering');
+    return null;
+  }
+
+  // Get affected packages
+  try {
+    const affectedPackages =
+      config.strategy === 'git'
+        ? getAffectedPackagesGit(mergeBase, config.includeDownstream)
+        : getAffectedPackagesMoon(mergeBase, config.includeDownstream);
+
+    if (affectedPackages.size === 0) {
+      log('Warning: No affected packages found');
+    }
+
+    return affectedPackages;
+  } catch (error) {
+    console.error('Error during affected package detection:', error);
+    return null;
+  }
+}
+
+/**
+ * Get affected packages using the configured strategy
+ *
+ * @param mergeBase - Git commit to compare against
+ * @param config - Optional configuration override
+ * @returns Set of affected package IDs
+ */
+export async function getAffectedPackages(
+  mergeBase: string,
+  config?: Partial<AffectedPackagesConfig>
+): Promise<Set<string>> {
+  const fullConfig = { ...getConfigFromEnv(), ...config };
+
+  if (fullConfig.logging) {
+    console.error(`Using ${fullConfig.strategy} strategy to detect affected packages`);
+    console.error(`Merge base: ${mergeBase}`);
+    console.error(`Include downstream: ${fullConfig.includeDownstream}`);
+  }
+
+  const startTime = Date.now();
+
+  try {
+    let packages: Set<string>;
+
+    if (fullConfig.strategy === 'git') {
+      packages = getAffectedPackagesGit(mergeBase, fullConfig.includeDownstream);
+    } else if (fullConfig.strategy === 'moon') {
+      packages = getAffectedPackagesMoon(mergeBase, fullConfig.includeDownstream);
+    } else {
+      return new Set<string>();
+    }
+
+    const durationMs = Date.now() - startTime;
+
+    if (fullConfig.logging) {
+      console.error(`Found ${packages.size} affected packages in ${durationMs}ms`);
+      if (packages.size > 0 && packages.size <= 20) {
+        console.error('Affected packages:', Array.from(packages).sort().join(', '));
+      }
+    }
+
+    return packages;
+  } catch (error) {
+    console.error(
+      `Failed to get affected packages using ${fullConfig.strategy} strategy:`,
+      error
+    );
+    throw error;
+  }
 }
