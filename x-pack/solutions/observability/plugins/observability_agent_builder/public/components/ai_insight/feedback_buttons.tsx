@@ -17,7 +17,7 @@ interface FeedbackButtonsProps {
 }
 
 const THANK_YOU_MESSAGE = i18n.translate(
-  'xpack.observabilityAgentBuilder.feedbackButtons.thanksForYourFeedbackLabel',
+  'xpack.observabilityAgentBuilder.feedbackButtons.notificationLabel',
   { defaultMessage: 'Thanks for your feedback' }
 );
 
