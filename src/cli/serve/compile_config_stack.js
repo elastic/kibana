@@ -8,14 +8,10 @@
  */
 
 import _ from 'lodash';
-
 import { statSync } from 'fs';
 import { resolve } from 'path';
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
-
-const isNotEmpty = _.negate(_.isEmpty);
-const isNotNull = _.negate(_.isNull);
 
 /**
  * BOOKMARK - List of Kibana project types
@@ -24,114 +20,110 @@ const isNotNull = _.negate(_.isNull);
 const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'workplaceai'];
 
 /**
- * Collects paths to configurations to be included in the final configuration stack.
- * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true, securityProductTier?: ServerlessSecurityTier}} options Options impacting the outgoing config list
- * @returns List of paths to configurations to be merged, from left to right.
+ * Builds the ordered list of config file paths to merge (left to right, last wins).
+ *
+ * Stack order:
+ *   1. serverless.yml + serverless.{mode}.yml          (serverless base)
+ *   2. kibana.yml (or env configs)                     (when no --config overrides)
+ *   3. kibana.dev.yml                                  (when dev, no --config overrides)
+ *   4. serverless.dev.yml + serverless.{mode}.dev.yml  (when serverless + dev)
+ *   5. Security / pricing tier configs + dev variants
+ *   6. --config overrides                              (always last, highest priority)
  */
-export function compileConfigStack({
-  configOverrides,
-  devConfig,
-  dev,
-  serverless,
-  unknownOptions,
-}) {
-  const cliConfigs = configOverrides || [];
-  const envConfigs = getEnvConfigs();
-  const defaultConfig = getConfigPath();
+export function compileConfigStack({ configOverrides, devConfig, dev, serverless, unknownOptions }) {
+  const isDev = dev && devConfig !== false;
+  const hasCliConfig = configOverrides?.length > 0;
+  const defaultConfigs = getDefaultConfigs();
+  const baseConfigs = hasCliConfig ? configOverrides : defaultConfigs;
+  const serverlessMode = validateServerlessMode(serverless) || getServerlessModeFromCfg(baseConfigs);
 
-  let configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
+  const configs = [];
 
-  if (dev && devConfig !== false) {
-    configs.push(resolveConfig('kibana.dev.yml'));
+  if (serverlessMode) {
+    configs.push(resolveConfig('serverless.yml'));
+    configs.push(resolveConfig(`serverless.${serverlessMode}.yml`));
   }
 
-  // Filter out all config paths that didn't exist
-  configs = configs.filter(isNotNull);
-
-  const serverlessMode = validateServerlessMode(serverless) || getServerlessModeFromCfg(configs);
-  if (serverlessMode) {
-    configs.unshift(resolveConfig(`serverless.${serverlessMode}.yml`));
-    configs.unshift(resolveConfig('serverless.yml'));
-
-    if (dev && devConfig !== false) {
-      configs.push(resolveConfig('serverless.dev.yml'));
-      configs.push(resolveConfig(`serverless.${serverlessMode}.dev.yml`));
+  if (!hasCliConfig) {
+    configs.push(...defaultConfigs);
+    if (isDev) {
+      configs.push(resolveConfig('kibana.dev.yml'));
     }
   }
 
-  // Security specific configs
+  if (serverlessMode && isDev) {
+    configs.push(resolveConfig('serverless.dev.yml'));
+    configs.push(resolveConfig(`serverless.${serverlessMode}.dev.yml`));
+  }
+
   if (serverlessMode === 'security') {
-    // Security specific tier configs
-    const serverlessSecurityTier = getServerlessSecurityTier(configs, unknownOptions);
-    if (serverlessSecurityTier) {
-      configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
-      if (dev && devConfig !== false) {
-        configs.push(
-          resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.dev.yml`)
-        );
+    const tier = getSecurityTier(configs, unknownOptions);
+    if (tier) {
+      configs.push(resolveConfig(`serverless.security.${tier}.yml`));
+      if (isDev) {
+        configs.push(resolveConfig(`serverless.security.${tier}.dev.yml`));
       }
     }
   }
 
-  // Pricing specific tier configs
-  const config = getConfigFromFiles(configs.filter(isNotNull));
+  const mergedConfig = getConfigFromFiles(configs.filter((c) => c !== null));
   const isPricingTiersEnabled =
-    _.get(unknownOptions, 'pricing.tiers.enabled') ?? _.get(config, 'pricing.tiers.enabled', false);
+    _.get(unknownOptions, 'pricing.tiers.enabled') ??
+    _.get(mergedConfig, 'pricing.tiers.enabled', false);
 
   if (isPricingTiersEnabled) {
-    const tier = getServerlessProjectTierFromConfig(config, unknownOptions);
+    const tier = getPricingTier(mergedConfig, unknownOptions);
     if (tier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
-      if (dev && devConfig !== false) {
+      if (isDev) {
         configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
       }
     }
   }
 
-  return configs.filter(isNotNull);
+  if (hasCliConfig) {
+    configs.push(...configOverrides);
+  }
+
+  return configs.filter((c) => c !== null);
 }
 
-/**
- * @param {string[]} configs List of configuration file paths
- * @returns {ServerlessProjectMode|undefined} The serverless mode in the summed configs
- */
+/** @returns {string} The serverless mode found in the merged config files, if any */
 function getServerlessModeFromCfg(configs) {
   const config = getConfigFromFiles(configs);
-
   return config.serverless;
 }
 
 /** @typedef {'search_ai_lake' | 'essentials' | 'complete'} ServerlessSecurityTier */
 /**
- * @param {string[]} configs List of configuration file paths
- * @param {Record<string, unknown>} unknownOptions
- * @returns {ServerlessSecurityTier|undefined} The serverless security tier in the summed configs
+ * Resolves the security tier from CLI options or config files.
+ * @param {(string|null)[]} configs Current config stack
+ * @param {Record<string, unknown>} unknownOptions CLI-provided options
+ * @returns {ServerlessSecurityTier|undefined}
  */
-function getServerlessSecurityTier(configs, unknownOptions) {
-  const productTypeOverride = _.get(
+function getSecurityTier(configs, unknownOptions) {
+  const cliTier = _.get(
     unknownOptions,
     'xpack.securitySolutionServerless.productTypes[0].product_tier'
   );
-  if (productTypeOverride) return productTypeOverride;
+  if (cliTier) return cliTier;
 
-  const config = getConfigFromFiles(configs.filter(isNotNull));
-
-  // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
-  // and is the only element in the array, which is why we can access the first element for product type/tier
+  const config = getConfigFromFiles(configs.filter((c) => c !== null));
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
 }
 
 /** @typedef {'essentials' | 'complete' | 'search_ai_lake' | 'ai_soc'} ServerlessProjectTier */
 /**
- * @param {string[]} config Configuration object from merged configs
- * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
+ * Resolves the pricing tier from CLI options or a pre-merged config object.
+ * @param {Record<string, unknown>} config Merged config object
+ * @param {Record<string, unknown>} unknownOptions CLI-provided options
+ * @returns {ServerlessProjectTier|undefined}
  */
-function getServerlessProjectTierFromConfig(config, unknownOptions) {
+function getPricingTier(config, unknownOptions) {
   const products =
     _.get(unknownOptions, 'pricing.tiers.products') ?? _.get(config, 'pricing.tiers.products', []);
 
-  // Constraint tier to be the same for
   const uniqueTiers = _.uniqBy(products, 'tier');
   if (uniqueTiers.length > 1) {
     throw new Error(
@@ -144,36 +136,30 @@ function getServerlessProjectTierFromConfig(config, unknownOptions) {
 
 /**
  * @param {string} fileName Name of the config within the config directory
- * @returns {string | null} The resolved path to the config, if it exists, null otherwise
+ * @returns {string | null} The resolved path, or null if the file doesn't exist
  */
 function resolveConfig(fileName) {
   const filePath = resolve(getConfigDirectory(), fileName);
-  if (fileExists(filePath)) {
-    return filePath;
-  } else {
-    return null;
-  }
+  return fileExists(filePath) ? filePath : null;
 }
 
-/**
- * @param {string} filePath Path to the config file
- * @returns {boolean} Whether the file exists
- */
 function fileExists(filePath) {
   try {
     return statSync(filePath).isFile();
   } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false;
-    }
-
+    if (err.code === 'ENOENT') return false;
     throw err;
   }
 }
 
-/**
- * @returns {string[]}
- */
+/** @returns {string[]} Config paths from env, or the default kibana.yml path */
+function getDefaultConfigs() {
+  const envConfigs = getEnvConfigs();
+  if (envConfigs.length > 0) return envConfigs;
+  return [getConfigPath()];
+}
+
+/** @returns {string[]} Config paths from the KBN_CONFIG_PATHS env variable */
 function getEnvConfigs() {
   const val = process.env.KBN_CONFIG_PATHS;
   if (typeof val === 'string') {
@@ -187,20 +173,12 @@ function getEnvConfigs() {
 
 /**
  * @param {string | true} serverlessMode
- * @returns {ServerlessProjectMode | null}
+ * @returns {string | null} The validated mode, or null if not applicable
  */
 function validateServerlessMode(serverlessMode) {
-  if (!serverlessMode) {
-    return null;
-  }
+  if (!serverlessMode || serverlessMode === true) return null;
 
-  if (serverlessMode === true) {
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(serverlessMode)) {
-    return serverlessMode;
-  }
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(serverlessMode)) return serverlessMode;
 
   throw new Error(
     `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`

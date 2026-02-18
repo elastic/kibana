@@ -58,6 +58,31 @@ describe('compileConfigStack', () => {
     expect(configList).toEqual(['serverless.yml', 'serverless.oblt.yml', 'my-config.yml']);
   });
 
+  it('prefers --config options over product tiers', async () => {
+    const configList = compileConfigStack({
+      configOverrides: ['my-config.yml'],
+      serverless: 'security',
+      unknownOptions: {
+        xpack: {
+          securitySolutionServerless: {
+            productTypes: [
+              {
+                product_tier: 'complete',
+              },
+            ],
+          },
+        },
+      },
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.security.yml',
+      'serverless.security.complete.yml',
+      'my-config.yml',
+    ]);
+  });
+
   it('adds dev configs to the stack', async () => {
     const configList = compileConfigStack({
       serverless: 'security',
