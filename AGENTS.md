@@ -18,6 +18,7 @@
 - Unsure: read more code; if still stuck, ask w/ short options.
 - Conflicts: call out; pick safer path.
 - Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
+- If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
 
@@ -42,7 +43,7 @@
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
-`node scripts/scout.js run-tests --stateful --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+`node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
