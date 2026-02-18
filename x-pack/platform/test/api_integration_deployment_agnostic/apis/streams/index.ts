@@ -9,31 +9,32 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Streams Endpoints', () => {
-    loadTestFile(require.resolve('./basic'));
-    loadTestFile(require.resolve('./enrichment'));
-    loadTestFile(require.resolve('./classic'));
-    loadTestFile(require.resolve('./flush_config'));
-    loadTestFile(require.resolve('./attachments/attachments'));
-    loadTestFile(require.resolve('./schema'));
-    loadTestFile(require.resolve('./processing_date_suggestions'));
-    loadTestFile(require.resolve('./processing_simulate'));
-    loadTestFile(require.resolve('./processing_validation'));
-    loadTestFile(require.resolve('./root_stream'));
-    loadTestFile(require.resolve('./lifecycle'));
-    loadTestFile(require.resolve('./failure_store'));
-    loadTestFile(require.resolve('./significant_events'));
-    loadTestFile(require.resolve('./queries'));
-    loadTestFile(require.resolve('./discover'));
-    loadTestFile(require.resolve('./content'));
-    loadTestFile(require.resolve('./migration_on_read'));
-    loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./conflicts'));
-    loadTestFile(require.resolve('./field_mappings'));
-    loadTestFile(require.resolve('./permissions'));
-    loadTestFile(require.resolve('./global_search'));
-    loadTestFile(require.resolve('./systems'));
-    loadTestFile(require.resolve('./settings'));
-    loadTestFile(require.resolve('./doc_counts'));
-    loadTestFile(require.resolve('./snapshot_restore'));
+    loadTestFile(require.resolve('./stream_management/basic'));
+    loadTestFile(require.resolve('./stream_management/enrichment'));
+    loadTestFile(require.resolve('./stream_management/classic'));
+    loadTestFile(require.resolve('./stream_management/flush_config'));
+    loadTestFile(require.resolve('./stream_management/attachments'));
+    loadTestFile(require.resolve('./stream_management/schema'));
+    loadTestFile(require.resolve('./stream_management/processing_date_suggestions'));
+    loadTestFile(require.resolve('./stream_management/processing_simulate'));
+    loadTestFile(require.resolve('./stream_management/processing_validation'));
+    loadTestFile(require.resolve('./stream_management/root_stream'));
+    loadTestFile(require.resolve('./stream_management/lifecycle'));
+    loadTestFile(require.resolve('./stream_management/failure_store'));
+    loadTestFile(require.resolve('./stream_management/discover'));
+    loadTestFile(require.resolve('./stream_management/content'));
+    loadTestFile(require.resolve('./stream_management/migration_on_read'));
+    loadTestFile(require.resolve('./stream_management/metadata'));
+    loadTestFile(require.resolve('./stream_management/conflicts'));
+    loadTestFile(require.resolve('./stream_management/field_mappings'));
+    loadTestFile(require.resolve('./stream_management/permissions'));
+    loadTestFile(require.resolve('./stream_management/global_search'));
+    loadTestFile(require.resolve('./stream_management/settings'));
+    loadTestFile(require.resolve('./stream_management/doc_counts'));
+    loadTestFile(require.resolve('./stream_management/snapshot_restore'));
+
+    loadTestFile(require.resolve('./sig_events/systems'));
+    loadTestFile(require.resolve('./sig_events/significant_events'));
+    loadTestFile(require.resolve('./sig_events/queries'));
   });
 }

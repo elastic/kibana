@@ -1870,11 +1870,16 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/obs-onboarding-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/stream_management/ @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/ @elastic/obs-sig-events-team @elastic/obs-onboarding-team
-
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/sig_events/ @elastic/obs-sig-events-team
 
 ### END Observability Plugins
 
