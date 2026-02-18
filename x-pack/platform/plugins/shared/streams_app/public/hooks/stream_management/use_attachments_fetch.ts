@@ -62,7 +62,7 @@ export const useAttachmentsFetch = ({
 
       // Count attachments by type for telemetry
       const attachmentCounts = response.attachments.reduce<Partial<Record<AttachmentType, number>>>(
-        (acc: Partial<Record<AttachmentType, number>>, attachment: Attachment) => {
+        (acc, attachment) => {
           acc[attachment.type] = (acc[attachment.type] || 0) + 1;
           return acc;
         },

@@ -120,7 +120,7 @@ export const getStreamsApiService = ({
         const definition = await service.getStreamDefinition(streamName);
         if (WiredStream.Definition.is(definition.stream)) {
           await Promise.all(
-            definition.stream.ingest.wired.routing.map((child: RoutingDefinition) =>
+            definition.stream.ingest.wired.routing.map((child) =>
               service.deleteStream(child.destination)
             )
           );

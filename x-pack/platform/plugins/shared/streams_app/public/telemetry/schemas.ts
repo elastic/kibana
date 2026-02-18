@@ -51,15 +51,15 @@ const attachmentTypeCountFields: Record<
   },
 };
 
-const streamsAttachmentCountSchema = {
+const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
   name: {
-    type: 'keyword' as const,
+    type: 'keyword',
     _meta: {
       description: 'The name of the Stream',
     },
   },
   ...attachmentTypeCountFields,
-} as RootSchema<StreamsAttachmentCountProps>;
+};
 
 const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
   name: {

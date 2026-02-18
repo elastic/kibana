@@ -85,7 +85,7 @@ export function useGenAIConnectors({
 
       // If connector selection is restricted, only return the default connector
       if (isConnectorSelectionRestricted) {
-        const defaultC = results.find((con: Connector) => con.id === defaultConnector);
+        const defaultC = results.find((con) => con.id === defaultConnector);
         results = defaultC ? [defaultC] : [];
       }
 
@@ -93,10 +93,7 @@ export function useGenAIConnectors({
 
       // Clear lastUsedConnector if it's no longer in the list
       setLastUsedConnector((connectorId) => {
-        if (
-          connectorId &&
-          results.findIndex((result: Connector) => result.id === connectorId) === -1
-        ) {
+        if (connectorId && results.findIndex((result) => result.id === connectorId) === -1) {
           return undefined;
         }
         return connectorId;
