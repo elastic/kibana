@@ -15,6 +15,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
@@ -37,7 +38,7 @@ import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
-import { SearchAndFiltersBar } from './components/search_and_filters_bar';
+import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
 import { NoDataPrompt } from './components/no_data_prompt';
@@ -220,9 +221,28 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <SearchAndFiltersBar
-            actions={isManageIntegrationsView ? <CreateNewIntegrationButton /> : undefined}
-          />
+          {isManageIntegrationsView ? (
+            <StickyFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  <EuiFieldSearch
+                    compressed
+                    placeholder={i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.searchPlaceholder',
+                      { defaultMessage: 'Search integrations' }
+                    )}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CreateNewIntegrationButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </StickyFlexItem>
+          ) : (
+            <SearchAndFiltersBar />
+          )}
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
