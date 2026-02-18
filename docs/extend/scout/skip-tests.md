@@ -12,7 +12,7 @@ Best practices when skipping tests:
 - Skipping is usually temporary—re-enable as soon as possible.
 - Create a tracking issue in the Kibana repo (label: `skipped-test`) and link it in a comment next to the skip.
 - Internal (Elasticians): AppEx QA maintains guidance on tracking skipped tests.
-:::::
+  :::::
 
 ## Skip tests in all test runs [skip-tests-everywhere]
 
@@ -82,4 +82,3 @@ test.describe('Stateful classic feature', { tag: tags.stateful.classic }, () => 
 ```
 
 See [Deployment tags](./deployment-tags.md) for shortcuts and patterns.
-

@@ -12,3 +12,4 @@ These pages explain Scout’s building blocks and how they fit together:
 - [Parallelism](./parallelism.md)
 - [Global setup hook](./global-setup-hook.md)
 - [Deployment tags](./deployment-tags.md)
+- [Skip tests](./skip-tests.md)

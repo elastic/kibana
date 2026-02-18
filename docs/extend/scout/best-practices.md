@@ -8,7 +8,7 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 
 **New to Scout?** Start with [Scout](../scout.md)
 
-## Quick reference [scout-best-practices-quick-ref]
+## Quick reference [quick-reference]
 
 **UI and API tests**
 
@@ -35,7 +35,7 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 | What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                                   |
 | Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                                  |
 | How do I write good **page objects**?                                | [Page object tips](#page-object-tips)                                                                         |
-| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                            |
+| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops--fix-the-source-code)       |
 | Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                       |
 
 **API tests**
@@ -47,7 +47,7 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 
 ---
 
-## UI and API tests [scout-best-practices-both]
+## UI & API tests [ui-and-api-tests]
 
 Best practices that apply to both UI and API tests.
 
@@ -116,7 +116,7 @@ test('can edit dashboard', async ({ page }) => {
 
 Each file focuses on a single role. Login and navigation happen once per test in `beforeEach`, making the code intuitive and parallel-ready.
 
-### Move repeated one-time setup operations to a global setup hook [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
+### Use a global setup hook for one-time setup [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
 
 Move one-time repeated setup steps (e.g. data ingestion, API calls) across both sequential and parallel test files to a [global setup hook](./global-setup-hook.md). This is a great way to reduce test execution time and avoid redundant code.
 
@@ -147,7 +147,7 @@ globalSetupHook('Ingest archive into Elasticsearch', async ({ esArchiver, log })
 
 The same logic applies to **API calls**, updating **settings**, or any other one-time setup step.
 
-### Put cleanup code in hooks, not in the test body [put-cleanup-code-in-hooks-not-in-the-test-body]
+### Keep cleanup in hooks [put-cleanup-code-in-hooks-not-in-the-test-body]
 
 Cleanup code in the test body **won't run if the test fails** because the execution stops after the first failure. Always put cleanup logic in `afterEach` or `afterAll` hooks to ensure resources are cleaned up regardless of test outcome.
 
@@ -183,7 +183,7 @@ test('creates an index', async ({ esClient }) => {
 });
 ```
 
-### Test with minimal permissions (avoid `admin` when possible) [test-with-minimal-permissions-avoid-admin-when-possible]
+### Test with minimal permissions [test-with-minimal-permissions-avoid-admin-when-possible]
 
 Generally, **avoid** using `admin` privileges unless absolutely necessary as that can mask permission-related bugs and lead to less realistic test scenarios. See our [API](./write-api-tests.md) and [UI](./write-ui-tests.md) authentication guides for more details.
 
@@ -219,7 +219,7 @@ await browserAuth.loginWithCustomRole('logs_analyst', {
 
 **Note**: `browserAuth` is a core Scout fixture. See [browser authentication](./browser-auth.md) and [API authentication](./api-auth.md) for more details.
 
-### Use the Flaky Test Runner to catch flaky tests early [use-the-flaky-test-runner-to-catch-flaky-tests-early]
+### Use the Flaky Test Runner [use-the-flaky-test-runner-to-catch-flaky-tests-early]
 
 We recommend manually invoking the Flaky Test Runner when adding **new tests**, fixing **flaky tests**, or making **significant changes** to existing tests. It helps identify and mitigate flakiness by running tests multiple times (we recommend between **20 and 50 test runs**).
 
@@ -241,11 +241,11 @@ Scout is designed to be **deployment-agnostic**. Write your Scout test and Playw
 
 ---
 
-## UI tests [scout-best-practices-ui]
+## UI tests [ui-tests]
 
 Best practices specific to UI tests.
 
-### Run tests in parallel whenever possible [run-tests-in-parallel-whenever-possible]
+### Prefer parallel runs [run-tests-in-parallel-whenever-possible]
 
 Whenever possible, default to [running tests in parallel](./parallelism.md). This leads to **faster test execution** and best simulates real-world usage where multiple users interact with the application simultaneously. Parallel workers **share the same ES and Kibana instance** but each operates in its own **Kibana Space** for isolation.
 
@@ -291,7 +291,7 @@ test('navigates through pages', async ({ page, pageObjects }) => {
 });
 ```
 
-### Focus UI tests on behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
+### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
 
 UI tests should verify that the **UI renders correctly** — not that the data inside is correct. When UI tests validate specific data values or complex conditional logic, they become expensive to run and hard to debug when they fail.
 
@@ -333,7 +333,7 @@ await expect(activityCells.first()).toBeVisible();
 
 Validate the actual data values with Scout API tests, and test conditional rendering (e.g., "show 'No activity' when X is null") with RTL/Jest unit tests.
 
-### Prefer Kibana APIs over UI for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
+### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
 
 For setup and teardown operations, **use Kibana APIs instead of UI interactions**. UI-based setup is slow, fragile, and introduces unnecessary points of failure. If the UI layout changes, your setup code breaks — even if the feature you're actually testing is fine.
 
@@ -369,7 +369,7 @@ test.beforeEach(async ({ kbnClient }) => {
 
 API calls are faster, more reliable, and won't break when the UI changes.
 
-### Skip onboarding flows with `addInitScript` [skip-onboarding-flows-with-addinitscript]
+### Skip onboarding with `addInitScript` [skip-onboarding-flows-with-addinitscript]
 
 Some pages show "getting started" or onboarding screens for first-time users. Instead of hacky workarounds (like navigating twice), use `page.addInitScript()` to set localStorage **before** the page loads.
 
@@ -398,7 +398,7 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
 
 The script runs before the page loads, so the onboarding flow is skipped cleanly.
 
-### Leverage Playwright auto-waiting [leverage-playwright-auto-waiting]
+### Use Playwright auto-waiting [leverage-playwright-auto-waiting]
 
 Playwright **actions** (like `click()`, `fill()`, `type()`) automatically wait for elements to be attached, visible, stable, enabled, and not covered before performing the action. This means you do **not** explicitly have to perform these checks yourself. See [Playwright auto-waiting docs](https://playwright.dev/docs/actionability).
 
@@ -446,7 +446,7 @@ await expect(this.button).toBeDisabled();
 
 **Rule of thumb:** only use `waitFor()` if the element might actually be in a different state (e.g., hidden or detached). If the element is always visible, skip the wait — it's unnecessary overhead.
 
-### Don't use manual retry loops — fix the source code [dont-use-manual-retry-loops]
+### Don't use manual retry loops [dont-use-manual-retry-loops--fix-the-source-code]
 
 If an action fails, **don't wrap it in a retry loop**. Playwright already handles standard checks (is the element attached? visible? enabled?). A failing action usually indicates a bug in the application, not a test problem.
 
@@ -637,7 +637,7 @@ If you need a longer timeout, keep it **well under 60 seconds** and **add a comm
 
 **Local vs CI performance:** your machine may be faster or slower than CI depending on specs. Don't tune timeouts locally. Instead, use the [Flaky Test Runner](#use-the-flaky-test-runner-to-catch-flaky-tests-early) to validate under realistic CI conditions.
 
-### Wait for UI updates when the next action requires it [wait-for-ui-updates-when-the-next-action-requires-it]
+### Wait when the next step depends on it [wait-for-ui-updates-when-the-next-action-requires-it]
 
 Never assume the UI is ready immediately after an action. When an action triggers a UI change that the **next action depends on**, wait for a **specific** element that confirms the UI is **ready** before proceeding.
 
@@ -711,7 +711,7 @@ await this.page.testSubj.waitForSelector('saveModal', { state: 'hidden' });
 await this.page.testSubj.click('nextStepButton');
 ```
 
-### Wait for complex components to fully render [wait-for-complex-components-to-fully-render]
+### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
 
 Some components like **tables**, **maps**, and **visualizations** require extra care. They may appear in the DOM before their data is fully loaded. Use a **two-step waiting pattern**: wait for the container, then wait for the render-complete state.
 
@@ -982,11 +982,11 @@ The test reads cleanly and the EUI interaction details are encapsulated in the p
 
 ---
 
-## API tests [scout-best-practices-api]
+## API tests [api-tests]
 
 Best practices specific to API tests.
 
-### Validate endpoints with `apiClient` for readable and scoped tests [validate-endpoints-with-apiclient-for-readable-and-scoped-tests]
+### Validate endpoints with `apiClient` [validate-endpoints-with-apiclient-for-readable-and-scoped-tests]
 
 Use the right fixture for the right purpose:
 
@@ -1034,7 +1034,7 @@ apiTest('should return data', async ({ apiClient }) => {
 
 This pattern ensures your test validates both the endpoint behavior **and** the [permission model](#test-with-minimal-permissions-avoid-admin-when-possible).
 
-### Don't just verify the status code, validate the response body [dont-just-verify-the-status-code-validate-the-response-body]
+### Validate the response body (not just status) [dont-just-verify-the-status-code-validate-the-response-body]
 
 API tests should assert both the status code and the response body.
 

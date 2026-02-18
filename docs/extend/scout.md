@@ -4,7 +4,7 @@ navigation_title: Scout
 
 # Scout [scout]
 
-Scout is Kibana’s UI and API test orchestration framework built on [Playwright](https://playwright.dev). It focuses on **fast test execution**, a good **developer experience**, and **reusable** test building blocks (e.g., [fixtures](./scout/fixtures.md), [page objects](./scout/page-objects.md) and [API services](./scout/api-services.md)).
+Scout is Kibana’s **modern UI and API test framework** built on [Playwright](https://playwright.dev). It focuses on **fast test execution**, a good **developer experience**, and **reusable** test building blocks (e.g., [fixtures](./scout/fixtures.md), [page objects](./scout/page-objects.md) and [API services](./scout/api-services.md)).
 
 ## Start here [scout-start-here]
 

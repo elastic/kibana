@@ -76,6 +76,7 @@ toc:
           - file: scout/parallelism.md
           - file: scout/global-setup-hook.md
           - file: scout/deployment-tags.md
+          - file: scout/skip-tests.md
       - file: scout/ui-testing.md
         children:
           - file: scout/write-ui-tests.md
@@ -85,7 +86,6 @@ toc:
         children:
           - file: scout/write-api-tests.md
           - file: scout/api-auth.md
-      - file: scout/skip-tests.md
   - file: advanced.md
     children:
       - file: running-elasticsearch.md
