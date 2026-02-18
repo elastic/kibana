@@ -133,6 +133,10 @@ export const useSourcesBadge = ({
         suppressSuggestionsRef.current = true;
 
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
+
+        // Remove focus from the editor immediately so there is no visible
+        // focus state while the popover mounts and takes over.
+        (editor.getDomNode()?.ownerDocument.activeElement as HTMLElement)?.blur();
       }
     },
     [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
