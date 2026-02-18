@@ -20,6 +20,7 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allMetricFields: MetricField[];
   dimensions: Dimension[];
+  onDimensionsChange?: (dimensions: Dimension[]) => void;
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
@@ -29,12 +30,14 @@ export const useToolbarActions = ({
   allMetricFields,
   dimensions,
   renderToggleActions,
+  onDimensionsChange: onDimensionsChangeProp,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
   const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
     useMetricsExperienceState();
+  const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
   const { euiTheme } = useEuiTheme();
 
@@ -51,7 +54,7 @@ export const useToolbarActions = ({
         <DimensionsSelector
           fields={allMetricFields}
           dimensions={dimensions}
-          onChange={onDimensionsChange}
+          onChange={onDimensionsSelectionChange}
           selectedDimensions={selectedDimensions}
           singleSelection={MAX_DIMENSIONS_SELECTIONS <= 1}
           fullWidth={isSmallScreen}
@@ -64,7 +67,7 @@ export const useToolbarActions = ({
       selectedDimensions,
       allMetricFields,
       dimensions,
-      onDimensionsChange,
+      onDimensionsSelectionChange,
       hideDimensionsSelector,
       isLoading,
     ]

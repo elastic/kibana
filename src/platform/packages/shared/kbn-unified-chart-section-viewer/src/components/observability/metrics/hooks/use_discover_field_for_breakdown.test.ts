@@ -426,12 +426,62 @@ describe('useDiscoverFieldForBreakdown', () => {
 
       mockOnDimensionsChange.mockClear();
 
-      // External change to selectedDimensions
+      // External change to selectedDimensions (simulates toolbar clear/replace)
       rerender({ selectedDimensions: [serviceDimension] });
 
-      // Should sync again since breakdownField is still 'host.name'
+      await waitFor(
+        () => {
+          expect(mockOnDimensionsChange).not.toHaveBeenCalled();
+        },
+        { timeout: 100 }
+      );
+    });
+  });
+
+  describe('edge-triggered behavior', () => {
+    it('does not re-sync after toolbar clear until breakdownField changes again', async () => {
+      const { rerender } = renderHook(
+        ({ breakdownField, selectedDimensions }) =>
+          useDiscoverFieldForBreakdown(
+            breakdownField,
+            [hostDimension, serviceDimension],
+            selectedDimensions,
+            mockOnDimensionsChange
+          ),
+        {
+          initialProps: {
+            breakdownField: 'host.name' as string | undefined,
+            selectedDimensions: [] as Dimension[],
+          },
+        }
+      );
+
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
+      });
+
+      mockOnDimensionsChange.mockClear();
+
+      // Simulate user clearing via toolbar dropdown.
+      rerender({
+        breakdownField: 'host.name',
+        selectedDimensions: [],
+      });
+
+      await waitFor(
+        () => {
+          expect(mockOnDimensionsChange).not.toHaveBeenCalled();
+        },
+        { timeout: 100 }
+      );
+
+      rerender({
+        breakdownField: 'service.name',
+        selectedDimensions: [],
+      });
+
+      await waitFor(() => {
+        expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension]);
       });
     });
   });

@@ -29,22 +29,40 @@ export function useDiscoverFieldForBreakdown(
     }
   }, [breakdownField, dimensions, selectedDimensions, onDimensionsChange]);
 
-  // Track previous breakdownField to detect changes
+  // Track previous breakdownField to detect transitions.
   const prevBreakdownFieldRef = useRef<string | undefined>(breakdownField);
+  const prevHasMatchingDimensionRef = useRef(
+    hasMatchingDimensionForBreakdown(breakdownField, dimensions)
+  );
+  const isFirstRenderRef = useRef(true);
 
-  // Sync breakdownField to selectedDimensions when it changes or dimensions become available
+  // Sync only on edges:
+  // 1) breakdownField changes, or
+  // 2) same breakdownField becomes selectable after dimensions update.
   useEffect(() => {
     const hasBreakdownFieldChanged = prevBreakdownFieldRef.current !== breakdownField;
+    const hasMatchingDimension = hasMatchingDimensionForBreakdown(breakdownField, dimensions);
+    const hasDimensionBecomeAvailable =
+      !hasBreakdownFieldChanged && !prevHasMatchingDimensionRef.current && hasMatchingDimension;
 
-    if (hasBreakdownFieldChanged) {
-      prevBreakdownFieldRef.current = breakdownField;
-    }
+    const shouldSync =
+      isFirstRenderRef.current || hasBreakdownFieldChanged || hasDimensionBecomeAvailable;
 
-    // Only sync if breakdownField is set and dimensions are available
-    if (breakdownField && dimensions.length > 0) {
+    if (shouldSync && breakdownField) {
       syncBreakdownFieldToDimensions();
     }
+
+    isFirstRenderRef.current = false;
+    prevBreakdownFieldRef.current = breakdownField;
+    prevHasMatchingDimensionRef.current = hasMatchingDimension;
   }, [breakdownField, dimensions, syncBreakdownFieldToDimensions]);
+}
+
+function hasMatchingDimensionForBreakdown(
+  breakdownField: string | undefined,
+  dimensions: Dimension[]
+): boolean {
+  return Boolean(breakdownField && dimensions.some((dimension) => dimension.name === breakdownField));
 }
 
 function getMatchingDimension(

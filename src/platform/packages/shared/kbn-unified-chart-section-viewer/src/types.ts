@@ -26,6 +26,10 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Breakdown field from Discover's app state, synced from sidebar "Add Breakdown" action
    */
   breakdownField?: string;
+  /**
+   * Optional callback used to push toolbar breakdown selections back to Discover app state.
+   */
+  onBreakdownFieldChange?: (fieldName?: string) => void;
 }
 
 export interface Dimension {

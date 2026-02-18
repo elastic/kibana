@@ -24,11 +24,16 @@ import type {
   ChartSectionConfigurationExtensionParams,
 } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
-import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
+import {
+  useAppStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../../../../application/main/state_management/redux';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
+  onBreakdownFieldChange?: (fieldName?: string) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -41,8 +46,16 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
 }));
 
 jest.mock('../../../../../application/main/state_management/redux', () => ({
+  internalStateActions: {
+    updateAppState: jest.fn(),
+  },
   useAppStateSelector: jest.fn(),
+  useCurrentTabAction: jest.fn(),
+  useInternalStateDispatch: jest.fn(),
 }));
+
+const mockDispatch = jest.fn();
+const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
 
 const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): ChartSectionProps => {
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;
@@ -88,6 +101,10 @@ describe('MetricsExperienceGridWrapper', () => {
     (useAppStateSelector as jest.Mock).mockImplementation((selector) =>
       selector({ breakdownField: 'host.name' })
     );
+    (useInternalStateDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
+    mockDispatch.mockClear();
+    mockUpdateAppStateAction.mockClear();
   });
 
   it('wraps onFilter to prevent default and forward the event', () => {
@@ -118,5 +135,19 @@ describe('MetricsExperienceGridWrapper', () => {
     gridOnFilter?.(event);
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('dispatches breakdown updates from metrics grid callback', () => {
+    renderChartSection();
+
+    unifiedGridProps?.onBreakdownFieldChange?.('service.name');
+
+    expect(mockUpdateAppStateAction).toHaveBeenCalledWith({
+      appState: { breakdownField: 'service.name' },
+    });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'updateAppState',
+      payload: { appState: { breakdownField: 'service.name' } },
+    });
   });
 });

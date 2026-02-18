@@ -11,7 +11,12 @@ import React, { useCallback } from 'react';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
-import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
+import {
+  internalStateActions,
+  useAppStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../../../../application/main/state_management/redux';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -24,6 +29,8 @@ const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
 ) => {
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const { onFilter } = props;
 
   // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
@@ -37,12 +44,20 @@ const MetricsExperienceGridWrapper = (
     [onFilter]
   );
 
+  const onBreakdownFieldChange = useCallback(
+    (nextBreakdownField?: string) => {
+      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   return (
     <UnifiedMetricsExperienceGrid
       {...props}
       onFilter={handleFilter}
       actions={props.actions}
       breakdownField={breakdownField}
+      onBreakdownFieldChange={onBreakdownFieldChange}
     />
   );
 };
