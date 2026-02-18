@@ -220,7 +220,7 @@ async function runConfigs(
   // launching the remaining processes. This avoids redundant cold compilations
   // when multiple processes start simultaneously with an empty cache.
   // Set JEST_WARMUP_DELAY_MS=0 to disable.
-  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '90000', 10);
+  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '120000', 10);
   const useWarmup = maxParallel > 1 && configs.length > 1 && warmupDelayMs > 0;
   let warmupComplete = !useWarmup;
 
