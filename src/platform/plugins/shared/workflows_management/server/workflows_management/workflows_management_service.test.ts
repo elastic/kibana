@@ -113,6 +113,9 @@ describe('WorkflowsService', () => {
         getUnsecuredActionsClient: mockGetActionsClient,
         getActionsClientWithRequest: mockGetActionsClientWithRequest,
       },
+      workflowsExtensions: {
+        getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      },
     });
 
     service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
@@ -2308,6 +2311,9 @@ steps:
         actions: {
           getUnsecuredActionsClient: mockGetActionsClient,
           getActionsClientWithRequest: mockGetActionsClientWithRequest,
+        },
+        workflowsExtensions: {
+          getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
         },
       });
 
