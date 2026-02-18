@@ -7,15 +7,22 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { useAttachmentPanel } from '../../../context/attachment_panel/attachment_panel_context';
 
 interface AttachmentPanelContentProps {
   attachmentId?: string;
 }
 
 export const AttachmentPanelContent: React.FC<AttachmentPanelContentProps> = ({ attachmentId }) => {
+  const { tempTitles } = useAttachmentPanel();
+  const tempTitle = attachmentId ? tempTitles[attachmentId] : undefined;
+
   return (
     <EuiText>
-      <p>Attachment ID: {attachmentId || 'No attachment selected'}</p>
+      <p>
+        Attachment ID: 
+        {tempTitle && ` ${tempTitle}`}
+      </p>
     </EuiText>
   );
 };

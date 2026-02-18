@@ -25,6 +25,49 @@ export interface RoundResponseProps {
   isLastRound: boolean;
 }
 
+/**
+ * Derives a human-readable attachment title by combining:
+ * 1. The action the assistant performed (e.g. "Retrieved documents")
+ * 2. The data source it acted on (e.g. "e-commerce", "kibana_sample_data")
+ */
+const deriveTitleFromMessage = (message: string): string => {
+  const cleaned = message.replace(/[#*_`>\[\]"]/g, '').trim().toLowerCase();
+
+  // Try to detect the action
+  const actionPatterns: Array<{ pattern: RegExp; label: string }> = [
+    { pattern: /retrieved|fetched|pulled/, label: 'Retrieved documents' },
+    { pattern: /query|queried|searched/, label: 'Query results' },
+    { pattern: /created|generated|built/, label: 'Generated output' },
+    { pattern: /filtered|narrowed/, label: 'Filtered results' },
+    { pattern: /aggregat|summar|analyz/, label: 'Analysis results' },
+    { pattern: /visuali|chart|graph|plot/, label: 'Visualization' },
+  ];
+  const action = actionPatterns.find(({ pattern }) => pattern.test(cleaned))?.label ?? 'Results';
+
+  // Try to extract the data source (index name, table name, or quoted identifier)
+  const sourcePatterns = [
+    /from\s+(?:the\s+)?(\S+?)(?:\s+index|\s+table|\s+dataset)?(?:[.,\s]|$)/,
+    /(?:index|table|dataset)\s+(?:called\s+|named\s+)?(\S+)/,
+  ];
+  let source: string | undefined;
+  for (const pattern of sourcePatterns) {
+    const match = cleaned.match(pattern);
+    if (match?.[1]) {
+      source = match[1]
+        .replace(/^["']|["']$/g, '')
+        .replace(/^kibana_sample_data_/, '')
+        .replace(/_/g, ' ');
+      break;
+    }
+  }
+
+  if (source) {
+    return `${action} from ${source}`;
+  }
+
+  return action;
+};
+
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   hasError,
   response: { message },
@@ -33,6 +76,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   isLastRound,
 }) => {
   const fakeId = useMemo(() => uuidv4(), []);
+  const fakeTitle = useMemo(() => deriveTitleFromMessage(message), [message]);
 
   return (
     <EuiFlexGroup
@@ -52,7 +96,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         ) : (
           <>
             <ChatMessageText content={message} steps={steps} />
-            <FakeAttachment attachmentId={fakeId} />
+            <FakeAttachment attachmentId={fakeId} title={fakeTitle} />
           </>
         )}
       </EuiFlexItem>

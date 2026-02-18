@@ -1338,6 +1338,7 @@
     "file-saver": "2.0.5",
     "formik": "2.4.6",
     "fp-ts": "2.16.11",
+    "framer-motion": "^12.34.1",
     "fuse.js": "7.1.0",
     "get-port": "5.1.1",
     "getopts": "2.2.5",

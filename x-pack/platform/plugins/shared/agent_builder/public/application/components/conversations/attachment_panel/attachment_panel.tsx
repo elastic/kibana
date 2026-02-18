@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AttachmentPanelContent } from './attachment_panel_content';
+import { AttachmentNavigator } from './attachment_navigator';
 
 interface AttachmentPanelProps {
   onClose: () => void;
@@ -17,16 +18,26 @@ interface AttachmentPanelProps {
 
 export const AttachmentPanel: React.FC<AttachmentPanelProps> = ({ onClose, attachmentId }) => {
   const { euiTheme } = useEuiTheme();
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
+
+  const handlePanelMouseEnter = useCallback(() => setIsPanelHovered(true), []);
+  const handlePanelMouseLeave = useCallback(() => setIsPanelHovered(false), []);
 
   const headerStyles = css`
     padding: ${euiTheme.size.m};
     border-bottom: ${euiTheme.border.thin};
   `;
 
+  const contentContainerStyles = css`
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  `;
+
   const contentStyles = css`
     padding: ${euiTheme.size.m};
     overflow-y: auto;
-    flex: 1;
+    height: 100%;
   `;
 
   return (
@@ -44,8 +55,16 @@ export const AttachmentPanel: React.FC<AttachmentPanelProps> = ({ onClose, attac
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow css={contentStyles}>
-        <AttachmentPanelContent attachmentId={attachmentId} />
+      <EuiFlexItem
+        grow
+        css={contentContainerStyles}
+        onMouseEnter={handlePanelMouseEnter}
+        onMouseLeave={handlePanelMouseLeave}
+      >
+        <div css={contentStyles}>
+          <AttachmentPanelContent attachmentId={attachmentId} />
+        </div>
+        <AttachmentNavigator isPanelHovered={isPanelHovered} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
