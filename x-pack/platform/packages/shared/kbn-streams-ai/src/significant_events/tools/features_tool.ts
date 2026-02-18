@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { COMPUTED_FEATURE_TYPES, type Feature } from '@kbn/streams-schema';
+import { type Feature } from '@kbn/streams-schema';
+import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
 import { pick } from 'lodash';
 
 export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
@@ -22,6 +23,14 @@ export type SignificantEventsFeatureToolType =
 
 export interface GetStreamFeaturesInput {
   feature_types?: unknown;
+  min_confidence?: unknown;
+  limit?: unknown;
+}
+
+export interface GetStreamFeaturesQuery {
+  featureTypes?: SignificantEventsFeatureToolType[];
+  minConfidence?: number;
+  limit?: number;
 }
 
 export type LlmFeature = Pick<
@@ -52,6 +61,41 @@ export function getFeatureTypesFromToolArgs(
   );
 
   return validTypes.length > 0 ? validTypes : undefined;
+}
+
+function getMinConfidenceFromToolArgs(toolArguments: unknown): number | undefined {
+  const args = (toolArguments ?? {}) as GetStreamFeaturesInput;
+  if (typeof args.min_confidence !== 'number' || Number.isNaN(args.min_confidence)) {
+    return undefined;
+  }
+
+  if (args.min_confidence < 0 || args.min_confidence > 100) {
+    return undefined;
+  }
+
+  return args.min_confidence;
+}
+
+function getLimitFromToolArgs(toolArguments: unknown): number | undefined {
+  const args = (toolArguments ?? {}) as GetStreamFeaturesInput;
+  if (typeof args.limit !== 'number' || Number.isNaN(args.limit)) {
+    return undefined;
+  }
+
+  const normalizedLimit = Math.floor(args.limit);
+  if (normalizedLimit <= 0) {
+    return undefined;
+  }
+
+  return normalizedLimit;
+}
+
+export function getFeatureQueryFromToolArgs(toolArguments: unknown): GetStreamFeaturesQuery {
+  return {
+    featureTypes: getFeatureTypesFromToolArgs(toolArguments),
+    minConfidence: getMinConfidenceFromToolArgs(toolArguments),
+    limit: getLimitFromToolArgs(toolArguments),
+  };
 }
 
 export function toFeatureForLlmContext(feature: Feature): LlmFeature {

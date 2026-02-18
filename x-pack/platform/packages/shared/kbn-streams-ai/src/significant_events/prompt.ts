@@ -45,7 +45,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
       tools: {
         get_stream_features: {
           description:
-            'Fetches extracted stream features for this stream. Optionally filter by feature types.',
+            'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
           schema: {
             type: 'object',
             properties: {
@@ -55,6 +55,15 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                   type: 'string',
                   enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
                 },
+              },
+              min_confidence: {
+                type: 'number',
+                minimum: 0,
+                maximum: 100,
+              },
+              limit: {
+                type: 'number',
+                minimum: 1,
               },
             },
           },

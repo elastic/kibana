@@ -21,7 +21,7 @@ import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
-  getFeatureTypesFromToolArgs,
+  getFeatureQueryFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
 } from './tools/features_tool';
@@ -82,7 +82,11 @@ export async function generateSignificantEvents({
   esClient: ElasticsearchClient;
   start: number;
   end: number;
-  getFeatures(params?: { type?: string[] }): Promise<Feature[]>;
+  getFeatures(params?: {
+    type?: string[];
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
@@ -151,10 +155,16 @@ export async function generateSignificantEvents({
           const startTime = Date.now();
           try {
             // Keep this intentionally permissive: ignore unknown tool args instead of failing generation.
-            const featureTypes = getFeatureTypesFromToolArgs(toolCall.function.arguments);
+            const { featureTypes, minConfidence, limit } = getFeatureQueryFromToolArgs(
+              toolCall.function.arguments
+            );
             const typeFilters = resolveFeatureTypeFilters(featureTypes);
             const features = await withSpan('get_stream_features_for_significant_events', () =>
-              getFeatures(typeFilters ? { type: typeFilters } : undefined)
+              getFeatures({
+                type: typeFilters,
+                minConfidence,
+                limit,
+              })
             );
             const llmFeatures = features.map(toFeatureForLlmContext);
 
