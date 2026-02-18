@@ -111,7 +111,7 @@ const buildTreeItems = (
   });
 };
 
-export const AgentDetailsComponentHealth: React.FunctionComponent<{
+export const OpAMPComponentHealth: React.FunctionComponent<{
   health?: ComponentHealth;
 }> = memo(({ health }) => {
   const componentEntries = useMemo(

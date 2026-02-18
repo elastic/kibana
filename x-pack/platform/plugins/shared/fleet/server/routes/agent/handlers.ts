@@ -93,13 +93,32 @@ export const getAgentEffectiveConfigHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
   TypeOf<typeof GetOneAgentRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = appContextService.getInternalUserESClient();
-  const agentDoc = await esClient.get({
-    index: AGENTS_INDEX,
-    id: request.params.agentId,
-    _source: ['effective_config'],
-  });
-  return response.ok({ body: { effective_config: (agentDoc._source as any).effective_config } });
+  try {
+    const [coreContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = appContextService.getInternalUserESClient();
+    const agentDoc = await esClient.get({
+      index: AGENTS_INDEX,
+      id: request.params.agentId,
+      _source: ['effective_config', 'namespaces'],
+    });
+    const agentSource = agentDoc._source as any;
+    await verifyNamespace(
+      {
+        id: request.params.agentId,
+        namespaces: agentSource.namespaces,
+      } as Agent,
+      getCurrentNamespace(coreContext.savedObjects.client)
+    );
+    return response.ok({ body: { effective_config: agentSource.effective_config } });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    throw error;
+  }
 };
 
 export const deleteAgentHandler: FleetRequestHandler<

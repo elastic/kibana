@@ -16,7 +16,7 @@ import type { Agent, AgentPolicy } from '../../../../../types';
 
 import { AgentDetailsOverviewSection } from './agent_details_overview';
 import { AgentDetailsIntegrations } from './agent_details_integrations';
-import { AgentDetailsComponentHealth } from './agent_details_component_health';
+import { OpAMPComponentHealth } from './opamp_component_health';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -70,7 +70,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <AgentDetailsComponentHealth health={agentHealth} />
+            <OpAMPComponentHealth health={agentHealth} />
           </FlexItemWithMinWidth>
         )}
       </EuiFlexGroup>

@@ -369,7 +369,7 @@ export const GetAgentEffectiveConfigRequestSchema = {
 };
 
 export const GetAgentEffectiveConfigResponseSchema = schema.object({
-  effective_config: schema.any(),
+  effective_config: schema.maybe(schema.any()),
 });
 
 export const PostNewAgentActionRequestSchema = {

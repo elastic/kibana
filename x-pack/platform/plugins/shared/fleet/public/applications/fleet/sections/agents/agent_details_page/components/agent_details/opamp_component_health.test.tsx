@@ -12,12 +12,12 @@ import userEvent from '@testing-library/user-event';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { ComponentHealth } from '../../../../../types';
 
-import { AgentDetailsComponentHealth } from './agent_details_component_health';
+import { OpAMPComponentHealth } from './opamp_component_health';
 
-describe('AgentDetailsComponentHealth', () => {
+describe('OpAMPComponentHealth', () => {
   const renderComponent = (health?: ComponentHealth) => {
     const renderer = createFleetTestRendererMock();
-    return renderer.render(<AgentDetailsComponentHealth health={health} />);
+    return renderer.render(<OpAMPComponentHealth health={health} />);
   };
 
   it('renders overall status when health is healthy', () => {
