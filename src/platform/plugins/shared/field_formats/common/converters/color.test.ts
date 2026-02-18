@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE, REACT_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
   const checkResult = (text: string | number, color: string, backgroundColor: string) =>
@@ -164,6 +166,49 @@ describe('Color Format', () => {
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('<', HTML_CONTEXT_TYPE)).toBe('&lt;');
+    });
+  });
+
+  describe('react content type', () => {
+    test('should return colored span for matching string', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'string',
+          colors: [
+            {
+              regex: 'CN',
+              text: '#ffffff',
+              background: '#ff0000',
+            },
+          ],
+        },
+        jest.fn()
+      );
+      const result = colorer.convert('CN', REACT_CONTEXT_TYPE);
+      const { container } = render(React.createElement('div', null, result));
+      const span = container.querySelector('span');
+      expect(span).not.toBeNull();
+      expect(span!.style.backgroundColor).toBe('rgb(255, 0, 0)');
+      expect(span!.style.color).toBe('rgb(255, 255, 255)');
+      expect(span!.textContent).toBe('CN');
+    });
+
+    test('should return plain text for non-matching string', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'string',
+          colors: [
+            {
+              regex: 'CN',
+              text: '#ffffff',
+              background: '#ff0000',
+            },
+          ],
+        },
+        jest.fn()
+      );
+      const result = colorer.convert('US', REACT_CONTEXT_TYPE);
+      expect(result).toBe('US');
     });
   });
 });

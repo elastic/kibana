@@ -150,7 +150,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'terms';
       static hidden = true;
 
-      convert = (val: string, type?: FieldFormatsContentType): string => {
+      private convertTerms(val: string, type?: FieldFormatsContentType) {
         const params = this._params;
         const format = this.getCachedFormat(
           params as SerializedFieldFormat<{}, SerializableRecord>
@@ -163,18 +163,22 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return `${params.missingBucketLabel}`;
         }
 
-        const stringType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
-        return format.convert(val, stringType);
-      };
+        if (type === 'react') {
+          return format.convert(val, 'react');
+        }
+        return format.convert(val, type);
+      }
+
+      convert = (val: string, type?: FieldFormatsContentType) =>
+        this.convertTerms(val, type) as any;
       getConverterFor = (type?: FieldFormatsContentType) => (val: string) =>
-        this.convert(val, type);
+        this.convertTerms(val, type) as any;
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';
       static hidden = true;
 
-      convert = (val: unknown, type?: FieldFormatsContentType): string => {
-        const stringType: 'html' | 'text' = type === 'react' ? 'text' : type ?? 'text';
+      convert = (val: unknown, type?: FieldFormatsContentType) => {
         const params = this._params;
         const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
           return this.getCachedFormat(fieldParams);
@@ -185,6 +189,8 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         }
 
         const joinTemplate = `${params.separator ?? ' › '}`;
+        // join() requires strings, so map 'react' to 'text' for multi-terms
+        const stringType: FieldFormatsContentType = type === 'react' ? 'text' : type ?? 'text';
 
         return (
           (val as MultiFieldKey)?.keys
