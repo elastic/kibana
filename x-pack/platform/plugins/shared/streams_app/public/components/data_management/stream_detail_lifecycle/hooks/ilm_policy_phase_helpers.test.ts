@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { IlmPolicy, IlmPolicyPhases } from '@kbn/streams-schema';
+import type {
+  IlmPolicy,
+  IlmPolicyDeletePhase,
+  IlmPolicyHotPhase,
+  IlmPolicyPhases,
+} from '@kbn/streams-schema';
 
 import { buildModifiedPhasesFromEdit } from './ilm_policy_phase_helpers';
 
@@ -18,9 +23,13 @@ describe('buildModifiedPhasesFromEdit', () => {
           name: 'hot',
           size_in_bytes: 0,
           rollover: { max_age: '1d' },
-        } as any,
-      } as any,
-    } as any;
+        },
+      },
+    };
+
+    const rolloverWithUndefined = {
+      max_age: undefined,
+    } as unknown as IlmPolicyHotPhase['rollover'];
 
     const nextPhases: IlmPolicyPhases = {
       hot: {
@@ -28,9 +37,9 @@ describe('buildModifiedPhasesFromEdit', () => {
         size_in_bytes: 0,
         // Simulate a user clearing all rollover fields: serializer can produce an object
         // with only undefined values, which sanitizes to {}.
-        rollover: { max_age: undefined } as any,
-      } as any,
-    } as any;
+        rollover: rolloverWithUndefined,
+      },
+    };
 
     const out = buildModifiedPhasesFromEdit(policy, nextPhases);
     expect(out.hot?.actions?.rollover).toBeUndefined();
@@ -44,23 +53,27 @@ describe('buildModifiedPhasesFromEdit', () => {
           name: 'delete',
           min_age: '1d',
           delete_searchable_snapshot: true,
-        } as any,
-      } as any,
-    } as any;
+        },
+      },
+    };
+
+    const deletePhaseWithUndefined = {
+      name: 'delete',
+      min_age: '1d',
+      // Explicitly present but undefined should clear any prior state.
+      delete_searchable_snapshot: undefined,
+    } as unknown as IlmPolicyDeletePhase;
 
     const nextPhases: IlmPolicyPhases = {
-      delete: {
-        name: 'delete',
-        min_age: '1d',
-        // Explicitly present but undefined should clear any prior state.
-        delete_searchable_snapshot: undefined,
-      } as any,
-    } as any;
+      delete: deletePhaseWithUndefined,
+    };
 
     const out = buildModifiedPhasesFromEdit(policy, nextPhases);
     // ES ILM requires `actions` in all phases; we keep a `delete` action but clear the flag.
     expect(out.delete?.actions).toBeDefined();
     expect(out.delete?.actions?.delete).toBeDefined();
-    expect((out.delete?.actions?.delete as any)?.delete_searchable_snapshot).toBeUndefined();
+    const deleteAction = out.delete?.actions?.delete;
+    expect(deleteAction).toEqual(expect.any(Object));
+    expect((deleteAction as Record<string, unknown>).delete_searchable_snapshot).toBeUndefined();
   });
 });

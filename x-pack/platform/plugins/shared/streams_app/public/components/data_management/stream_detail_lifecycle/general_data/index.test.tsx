@@ -10,6 +10,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import { StreamDetailGeneralData } from '.';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Streams } from '@kbn/streams-schema';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 
 let mockFlyoutOpen = false;
 let mockFlyoutHasUnsavedChanges = false;
@@ -54,7 +55,15 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 jest.mock('../common/section_panel', () => ({
-  SectionPanel: ({ children, topCard, bottomCard }: any) => (
+  SectionPanel: ({
+    children,
+    topCard,
+    bottomCard,
+  }: {
+    children: React.ReactNode;
+    topCard?: React.ReactNode;
+    bottomCard?: React.ReactNode;
+  }) => (
     <div>
       {topCard}
       {children}
@@ -114,7 +123,12 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     effective_lifecycle: { ilm: { policy: 'test-policy' } },
   } as unknown as Streams.ingest.all.GetResponse;
 
-  const data = { stats: undefined, error: undefined, isLoading: false } as any;
+  const data: ReturnType<typeof useDataStreamStats> = {
+    stats: undefined,
+    error: undefined,
+    isLoading: false,
+    refresh: jest.fn(),
+  };
 
   it('does not mark unsaved changes just because flyout is open', async () => {
     mockFlyoutOpen = true;

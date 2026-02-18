@@ -11,10 +11,10 @@ import { buildLifecycleSummaryPhases, getSelectedIlmPhases } from './ilm_lifecyc
 describe('ilm_lifecycle_summary_helpers', () => {
   describe('getSelectedIlmPhases', () => {
     const ilmStatsPhases: IlmPolicyPhases = {
-      hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} } as any,
-      warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 } as any,
-      delete: { name: 'delete', min_age: '60d' } as any,
-    } as any;
+      hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} },
+      warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+      delete: { name: 'delete', min_age: '60d' },
+    };
 
     it('uses ilmStatsPhases when flyout is closed', () => {
       expect(
@@ -29,9 +29,9 @@ describe('ilm_lifecycle_summary_helpers', () => {
 
     it('uses previewPhases when flyout is open', () => {
       const previewPhases: IlmPolicyPhases = {
-        hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} } as any,
-        delete: { name: 'delete', min_age: '60d' } as any,
-      } as any;
+        hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} },
+        delete: { name: 'delete', min_age: '60d' },
+      };
 
       expect(
         getSelectedIlmPhases({
@@ -45,10 +45,10 @@ describe('ilm_lifecycle_summary_helpers', () => {
 
     it('falls back to editFlyoutInitialPhases when flyout is open and previewPhases is null', () => {
       const initialPhases: IlmPolicyPhases = {
-        hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} } as any,
-        cold: { name: 'cold', min_age: '30d', size_in_bytes: 1000 } as any,
-        delete: { name: 'delete', min_age: '60d' } as any,
-      } as any;
+        hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {} },
+        cold: { name: 'cold', min_age: '30d', size_in_bytes: 1000 },
+        delete: { name: 'delete', min_age: '60d' },
+      };
 
       expect(
         getSelectedIlmPhases({
@@ -78,16 +78,15 @@ describe('ilm_lifecycle_summary_helpers', () => {
           size_in_bytes: 1000,
           rollover: {},
           readonly: true,
-        } as any,
-        delete: { name: 'delete', min_age: '30d' } as any,
-      } as any;
+        },
+        delete: { name: 'delete', min_age: '30d' },
+      };
 
       const phases = buildLifecycleSummaryPhases({
         isEditLifecycleFlyoutOpen: false,
         previewPhases: null,
         ilmStatsPhases,
-        stats: { totalDocs: 100 } as any,
-        ilmPhases: ilmPhasesMeta as any,
+        ilmPhases: ilmPhasesMeta,
       });
 
       const hot = phases.find((p) => p.name === 'hot')!;
