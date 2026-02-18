@@ -11,6 +11,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { upsertDataStream } from '../../../lib/streams/data_streams/manage_data_streams';
@@ -58,8 +59,10 @@ export const createClassicStreamRoute = createServerRoute({
         name,
       });
     } catch (error) {
-      logger.error(`Failed to create data stream for classic stream ${name}: ${error.message}`);
-      throw badData(`Failed to create data stream: ${error.message}`);
+      logger.error(
+        `Failed to create data stream for classic stream ${name}: ${getErrorMessage(error)}`
+      );
+      throw badData(`Failed to create data stream: ${getErrorMessage(error)}`);
     }
 
     // Step 2: Register the classic stream in Kibana
@@ -79,8 +82,8 @@ export const createClassicStreamRoute = createServerRoute({
         name,
       });
     } catch (error) {
-      logger.error(`Failed to register classic stream ${name}: ${error.message}`);
-      throw badData(`Failed to register classic stream: ${error.message}`);
+      logger.error(`Failed to register classic stream ${name}: ${getErrorMessage(error)}`);
+      throw badData(`Failed to register classic stream: ${getErrorMessage(error)}`);
     }
   },
 });

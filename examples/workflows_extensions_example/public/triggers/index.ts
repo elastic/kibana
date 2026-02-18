@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '../../..';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { customTriggerPublicDefinition } from './custom_trigger';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export const registerTriggerDefinitions = (
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+) => {
+  workflowsExtensions.registerTriggerDefinition(customTriggerPublicDefinition);
+};
