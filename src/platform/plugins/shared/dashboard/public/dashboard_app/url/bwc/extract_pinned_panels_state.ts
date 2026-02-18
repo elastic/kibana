@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { get } from 'lodash';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_IGNORE_VALIDATIONS,
   DEFAULT_USE_GLOBAL_FILTERS,
 } from '@kbn/controls-constants';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { get } from 'lodash';
 import type { DashboardState } from '../../../../common';
 
-export function extractControlGroupState(state: { [key: string]: unknown }): {
+export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
   pinned_panels?: DashboardState['pinned_panels'];
   autoApplyFilters?: boolean;
 } {
-  let pathToState; // >9.3 controls do not have any other state
-  let pathToControls = 'pinned_panels'; // >9.3 controls exported directly under pinned_panels
+  /**
+   * <=9.3, pinned panels **only ever** referred to controls; however, >9.3, we made it more generic
+   * and stored them under `pinned_panels` to one day allow for other panel types
+   */
+  let pathToState; // >9.3 pinned_panels do not have any other state
+  let pathToControls = 'pinned_panels'; // >9.3 pinned panels exported directly under pinned_panels
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
     pathToState = 'controlGroupState';
@@ -39,10 +43,10 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   }
 
   const controls = pathToControls ? get(state, pathToControls) : undefined;
-  let standardizedControls: ControlsGroupState = [];
+  let standardizedPinnedPanels: DashboardState['pinned_panels'] = [];
   if (Array.isArray(controls)) {
     // >8.18 controls are exported as an array without order
-    standardizedControls = controls.map((control) => {
+    standardizedPinnedPanels = controls.map((control) => {
       if ('controlConfig' in control) {
         // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
@@ -52,7 +56,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
     });
   } else if (controls !== null && typeof controls === 'object') {
     // <=8.18 controls were exported as an object with order
-    standardizedControls = Object.entries(controls)
+    standardizedPinnedPanels = Object.entries(controls)
       .sort(([, controlA], [, controlB]) => {
         return controlA.order - controlB.order;
       })
@@ -76,7 +80,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
             config,
           };
         }
-      }) as ControlsGroupState;
+      }) as Required<DashboardState>['pinned_panels'];
   }
 
   const controlState = pathToState ? get(state, pathToState) : null;
@@ -113,7 +117,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       useGlobalFilters !== DEFAULT_USE_GLOBAL_FILTERS ||
       ignoreValidations !== DEFAULT_IGNORE_VALIDATIONS
     ) {
-      standardizedControls = standardizedControls.map((control) => {
+      standardizedPinnedPanels = standardizedPinnedPanels.map((control) => {
         if (control.type === 'timeSlider' || control.type === 'esqlControl') return control;
         // these settings are only relevant for data controls
         return {
@@ -142,9 +146,14 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
     }
   }
 
+  // <9.4 convert camel cased control state to snake case
+  standardizedPinnedPanels = standardizedPinnedPanels.map((panel) =>
+    convertCamelCasedKeysToSnakeCase<Required<DashboardState>['pinned_panels'][number]>(panel)
+  );
+
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    pinned_panels: standardizedControls.length ? standardizedControls : undefined,
+    pinned_panels: standardizedPinnedPanels.length ? standardizedPinnedPanels : undefined,
   };
 }

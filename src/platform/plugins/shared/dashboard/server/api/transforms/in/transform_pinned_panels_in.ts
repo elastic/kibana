@@ -9,24 +9,32 @@
 
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { Writable } from 'utility-types';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
-import { prefixReferencesFromPanel } from '../../../../common';
-import type { StoredControlState } from '../../../dashboard_saved_object';
+import { type DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object/schema';
 
-export function transformControlGroupIn(controls?: ControlsGroupState) {
-  if (!controls) return { references: [] };
+type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
+
+export function transformPinnedPanelsIn(pinnedPanels?: PinnedPanelsState): {
+  pinnedPanels?: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+  references: Reference[];
+} {
+  if (!pinnedPanels) return { references: [] };
 
   let references: Reference[] = [];
-  const updatedControls = Object.fromEntries(
-    controls.map((controlState, index) => {
+  const updatedPinnedPanels = Object.fromEntries(
+    pinnedPanels.map((controlState, index) => {
       const { uid = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      const transformedControlState = { ...controlState } as Partial<StoredControlState>;
+      let transformedControlState = { ...controlState } as Partial<
+        Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
+      >;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
@@ -36,11 +44,21 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
             ...prefixReferencesFromPanel(uid, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
-          const transformedState = transformed.state as StoredControlState['explicitInput'];
-          transformedControlState.explicitInput = transformedState;
-          transformedControlState.explicitInput.dataViewRefName = `${uid}:${transformedState.dataViewRefName}`;
+          const transformedState = transformed.state as Writable<LegacyStoredPinnedControlState>;
+          if ('dataViewRefName' in transformedState) {
+            transformedControlState = {
+              ...transformedControlState,
+              config: {
+                ...transformedState,
+                dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
+              },
+            };
+          }
         } else {
-          transformedControlState.explicitInput = controlState.config;
+          transformedControlState = {
+            ...transformedControlState,
+            config: controlState.config,
+          };
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws
@@ -49,7 +67,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
         );
       }
 
-      const { width, grow, explicitInput } = transformedControlState;
+      const { width, grow, config } = transformedControlState;
       return [
         uid,
         {
@@ -57,14 +75,14 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
           type,
           width,
           grow,
-          explicitInput: { ...omit(explicitInput, ['type']) },
+          config: { ...omit(config, ['type']) },
         },
       ];
     })
   );
 
   return {
-    controlsJSON: JSON.stringify(updatedControls),
+    pinnedPanels: updatedPinnedPanels,
     references,
   };
 }
