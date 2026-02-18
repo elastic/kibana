@@ -26,6 +26,23 @@ import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 const { emptyField, startsWithField, containsCharsField } = fieldValidators;
 
+const getFirstAvailableCopyName = ({
+  originalPolicyName,
+  policyNames,
+}: {
+  originalPolicyName: string;
+  policyNames: string[];
+}) => {
+  const existing = new Set(policyNames);
+
+  for (let i = 2; i <= 9; i++) {
+    const candidate = `${originalPolicyName}-${i}`;
+    if (!existing.has(candidate)) return candidate;
+  }
+
+  return '';
+};
+
 const i18nTexts = {
   errors: {
     policyNameRequiredMessage: i18n.translate('xpack.streams.createPolicyModal.emptyNameError', {
@@ -108,6 +125,7 @@ export interface CreatePolicyModalProps {
   onBack: () => void;
   onSave: (policyName: string) => void;
   isLoading?: boolean;
+  originalPolicyName: string;
 }
 
 export function CreatePolicyModal({
@@ -115,6 +133,7 @@ export function CreatePolicyModal({
   onBack,
   onSave,
   isLoading = false,
+  originalPolicyName,
 }: CreatePolicyModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const { form } = useForm({
@@ -122,6 +141,8 @@ export function CreatePolicyModal({
       policyName: '',
     },
   });
+
+  const suggestedPolicyName = getFirstAvailableCopyName({ originalPolicyName, policyNames });
 
   const policyNameValidations = useMemo(
     () => createPolicyNameValidations({ policies: policyNames }),
@@ -168,6 +189,7 @@ export function CreatePolicyModal({
                 disabled: isLoading,
               },
             }}
+            defaultValue={suggestedPolicyName}
           />
         </Form>
       </EuiModalBody>

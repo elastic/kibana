@@ -15,7 +15,12 @@ describe('CreatePolicyModal', () => {
 
   it('renders title and policy name input', () => {
     renderWithI18n(
-      <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+      <CreatePolicyModal
+        policyNames={policyNames}
+        onBack={() => {}}
+        onSave={() => {}}
+        originalPolicyName="my-policy"
+      />
     );
 
     expect(screen.getByTestId('createPolicyModalTitle')).toHaveTextContent(
@@ -27,7 +32,12 @@ describe('CreatePolicyModal', () => {
   it('calls onBack when back button is clicked', () => {
     const onBack = jest.fn();
     renderWithI18n(
-      <CreatePolicyModal policyNames={policyNames} onBack={onBack} onSave={() => {}} />
+      <CreatePolicyModal
+        policyNames={policyNames}
+        onBack={onBack}
+        onSave={() => {}}
+        originalPolicyName="my-policy"
+      />
     );
 
     fireEvent.click(screen.getByTestId('createPolicyModal-backButton'));
@@ -37,7 +47,12 @@ describe('CreatePolicyModal', () => {
   it('submits a valid policy name', async () => {
     const onSave = jest.fn();
     renderWithI18n(
-      <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={onSave} />
+      <CreatePolicyModal
+        policyNames={policyNames}
+        onBack={() => {}}
+        onSave={onSave}
+        originalPolicyName="my-policy"
+      />
     );
 
     fireEvent.change(screen.getByTestId('createPolicyModal-policyNameInput'), {
@@ -49,6 +64,54 @@ describe('CreatePolicyModal', () => {
     fireEvent.click(saveButton);
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith('new-policy'));
+  });
+
+  it('pre-populates the policy name field with the original policy name', () => {
+    renderWithI18n(
+      <CreatePolicyModal
+        policyNames={policyNames}
+        onBack={() => {}}
+        onSave={() => {}}
+        originalPolicyName="my-policy"
+      />
+    );
+    expect(screen.getByTestId('createPolicyModal-policyNameInput')).toHaveValue('my-policy-2');
+  });
+
+  it('pre-populates with the first available copy name when the default already exists', () => {
+    renderWithI18n(
+      <CreatePolicyModal
+        policyNames={[...policyNames, 'my-policy-2']}
+        onBack={() => {}}
+        onSave={() => {}}
+        originalPolicyName="my-policy"
+      />
+    );
+
+    expect(screen.getByTestId('createPolicyModal-policyNameInput')).toHaveValue('my-policy-3');
+  });
+
+  it('does not suggest a copy name after 9 attempts', () => {
+    renderWithI18n(
+      <CreatePolicyModal
+        policyNames={[
+          ...policyNames,
+          'my-policy-2',
+          'my-policy-3',
+          'my-policy-4',
+          'my-policy-5',
+          'my-policy-6',
+          'my-policy-7',
+          'my-policy-8',
+          'my-policy-9',
+        ]}
+        onBack={() => {}}
+        onSave={() => {}}
+        originalPolicyName="my-policy"
+      />
+    );
+
+    expect(screen.getByTestId('createPolicyModal-policyNameInput')).toHaveValue('');
   });
 
   describe('policy name validation', () => {
@@ -70,7 +133,12 @@ describe('CreatePolicyModal', () => {
 
     it('shows an error for duplicate policy names', async () => {
       renderWithI18n(
-        <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+        <CreatePolicyModal
+          policyNames={policyNames}
+          onBack={() => {}}
+          onSave={() => {}}
+          originalPolicyName="my-policy"
+        />
       );
 
       const input = screen.getByTestId('createPolicyModal-policyNameInput');
@@ -85,7 +153,12 @@ describe('CreatePolicyModal', () => {
 
     it('shows an error for empty policy name', async () => {
       renderWithI18n(
-        <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+        <CreatePolicyModal
+          policyNames={policyNames}
+          onBack={() => {}}
+          onSave={() => {}}
+          originalPolicyName="my-policy"
+        />
       );
 
       const input = screen.getByTestId('createPolicyModal-policyNameInput');
@@ -99,7 +172,12 @@ describe('CreatePolicyModal', () => {
 
     it('shows an error for policy names that start with an underscore', async () => {
       renderWithI18n(
-        <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+        <CreatePolicyModal
+          policyNames={policyNames}
+          onBack={() => {}}
+          onSave={() => {}}
+          originalPolicyName="my-policy"
+        />
       );
 
       const input = screen.getByTestId('createPolicyModal-policyNameInput');
@@ -114,7 +192,12 @@ describe('CreatePolicyModal', () => {
 
     it('shows an error for policy names that contain spaces or commas', async () => {
       renderWithI18n(
-        <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+        <CreatePolicyModal
+          policyNames={policyNames}
+          onBack={() => {}}
+          onSave={() => {}}
+          originalPolicyName="my-policy"
+        />
       );
 
       const input = screen.getByTestId('createPolicyModal-policyNameInput');
@@ -137,7 +220,12 @@ describe('CreatePolicyModal', () => {
 
     it('shows an error for policy names that are too long', async () => {
       renderWithI18n(
-        <CreatePolicyModal policyNames={policyNames} onBack={() => {}} onSave={() => {}} />
+        <CreatePolicyModal
+          policyNames={policyNames}
+          onBack={() => {}}
+          onSave={() => {}}
+          originalPolicyName="my-policy"
+        />
       );
 
       const input = screen.getByTestId('createPolicyModal-policyNameInput');
