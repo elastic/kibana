@@ -14,11 +14,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 export const buildFilter = (
   dataView: DataView,
   controlId: string,
-  filterState: Pick<RangeSliderControlState, 'fieldName' | 'value'> & { sectionId?: string }
+  filterState: Pick<RangeSliderControlState, 'field_name' | 'value'> & { sectionId?: string }
 ) => {
   let rangeFilter: Filter | undefined;
   const fieldName =
-    dataView && filterState.fieldName ? dataView.getFieldByName(filterState.fieldName) : undefined;
+    dataView && filterState.field_name
+      ? dataView.getFieldByName(filterState.field_name)
+      : undefined;
   const gte = parseFloat(filterState.value?.[0] ?? '');
   const lte = parseFloat(filterState.value?.[1] ?? '');
 
@@ -30,7 +32,7 @@ export const buildFilter = (
 
     rangeFilter = buildRangeFilter(fieldName, params, dataView);
     if (rangeFilter) {
-      rangeFilter.meta.key = filterState.fieldName;
+      rangeFilter.meta.key = filterState.field_name;
       rangeFilter.meta.type = 'range';
       rangeFilter.meta.params = params;
       rangeFilter.meta.controlledBy = controlId;
