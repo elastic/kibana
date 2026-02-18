@@ -8,13 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { of } from 'rxjs';
+import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
 import { StreamsAppSearchBar } from '.';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
 jest.mock('./uncontrolled_streams_app_bar', () => ({
-  UncontrolledStreamsAppSearchBar: (props: Record<string, any>) => {
+  UncontrolledStreamsAppSearchBar: (props: UncontrolledStreamsAppSearchBarProps) => {
     // Store onQuerySubmit on the DOM so tests can invoke it
     return <div data-testid="mockSearchBar" ref={() => (capturedProps = props)} />;
   },
@@ -28,13 +29,24 @@ const mockUseTimeRange = useTimeRange as jest.MockedFunction<typeof useTimeRange
 const mockUseTimeRangeUpdate = useTimeRangeUpdate as jest.MockedFunction<typeof useTimeRangeUpdate>;
 const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
 
-let capturedProps: Record<string, any>;
+let capturedProps: UncontrolledStreamsAppSearchBarProps;
 
 const mockUpdateTimeRange = jest.fn();
 const mockRefresh = jest.fn();
 
 const dateRange = { from: 'now-15m', to: 'now' };
 const query = { query: '', language: 'kuery' };
+
+const mockTimeState = {
+  start: 1704067200000,
+  end: 1704068100000,
+  timeRange: { from: 'now-15m', to: 'now' },
+  asAbsoluteTimeRange: {
+    from: '2024-01-01T00:00:00.000Z',
+    to: '2024-01-01T00:15:00.000Z',
+    mode: 'absolute' as const,
+  },
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -54,13 +66,10 @@ beforeEach(() => {
 
   mockUseTimefilter.mockReturnValue({
     refresh: mockRefresh,
-    timeState: {
-      start: '2024-01-01T00:00:00.000Z',
-      end: '2024-01-01T00:15:00.000Z',
-      timeRange: { from: 'now-15m', to: 'now' },
-    },
-    timeState$: of({ kind: 'initial' as const }),
-  } as any);
+    setTime: jest.fn(),
+    timeState: mockTimeState,
+    timeState$: of({ kind: 'initial' as const, timeState: mockTimeState }),
+  });
 });
 
 describe('StreamsAppSearchBar', () => {
@@ -68,7 +77,7 @@ describe('StreamsAppSearchBar', () => {
     it('should call refresh()', () => {
       render(<StreamsAppSearchBar />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, false);
+      capturedProps.onQuerySubmit!({ dateRange, query }, false);
 
       expect(mockRefresh).toHaveBeenCalledTimes(1);
     });
@@ -76,7 +85,7 @@ describe('StreamsAppSearchBar', () => {
     it('should call updateTimeRange()', () => {
       render(<StreamsAppSearchBar />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, false);
+      capturedProps.onQuerySubmit!({ dateRange, query }, false);
 
       expect(mockUpdateTimeRange).toHaveBeenCalledWith(dateRange);
     });
@@ -86,7 +95,7 @@ describe('StreamsAppSearchBar', () => {
     it('should not call refresh()', () => {
       render(<StreamsAppSearchBar />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, true);
+      capturedProps.onQuerySubmit!({ dateRange, query }, true);
 
       expect(mockRefresh).not.toHaveBeenCalled();
     });
@@ -94,7 +103,7 @@ describe('StreamsAppSearchBar', () => {
     it('should call updateTimeRange()', () => {
       render(<StreamsAppSearchBar />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, true);
+      capturedProps.onQuerySubmit!({ dateRange, query }, true);
 
       expect(mockUpdateTimeRange).toHaveBeenCalledWith(dateRange);
     });
@@ -105,7 +114,7 @@ describe('StreamsAppSearchBar', () => {
       const parentOnQuerySubmit = jest.fn();
       render(<StreamsAppSearchBar onQuerySubmit={parentOnQuerySubmit} />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, false);
+      capturedProps.onQuerySubmit!({ dateRange, query }, false);
 
       expect(parentOnQuerySubmit).toHaveBeenCalledWith({ dateRange, query }, false);
     });
@@ -114,7 +123,7 @@ describe('StreamsAppSearchBar', () => {
       const parentOnQuerySubmit = jest.fn();
       render(<StreamsAppSearchBar onQuerySubmit={parentOnQuerySubmit} />);
 
-      capturedProps.onQuerySubmit({ dateRange, query }, true);
+      capturedProps.onQuerySubmit!({ dateRange, query }, true);
 
       expect(parentOnQuerySubmit).toHaveBeenCalledWith({ dateRange, query }, true);
     });
