@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecurityDocumentProfileProviders } from './security/security_profile_providers';
 import type { DiscoverServices } from '../../build_services';
 import type {
   DataSourceProfileService,
@@ -31,7 +32,6 @@ import type {
   ProfileProviderServices,
   ProfileProviderSharedServices,
 } from './profile_provider_services';
-import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
 
@@ -133,6 +133,6 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
-  createSecurityDocumentProfileProvider(providerServices),
+  ...createSecurityDocumentProfileProviders(providerServices),
   ...createObservabilityDocumentProfileProviders(providerServices),
 ];

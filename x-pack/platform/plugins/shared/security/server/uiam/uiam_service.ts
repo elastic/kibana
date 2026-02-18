@@ -10,12 +10,12 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
-import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -69,12 +69,6 @@ export interface UiamServicePublic {
    * `client_authentication` option in Elasticsearch client.
    */
   getClientAuthentication(): ClientAuthentication;
-
-  /**
-   * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
-   * This header is used to authenticate requests from Kibana to Elasticsearch when using UIAM credentials.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string>;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -154,13 +148,6 @@ export class UiamService implements UiamServicePublic {
    */
   getClientAuthentication(): ClientAuthentication {
     return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
-  }
-
-  /**
-   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string> {
-    return { [ES_CLIENT_AUTHENTICATION_HEADER]: this.getClientAuthentication().value };
   }
 
   /**
