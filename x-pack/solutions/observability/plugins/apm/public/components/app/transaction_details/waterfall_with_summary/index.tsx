@@ -26,7 +26,6 @@ import type { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
-import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -46,7 +45,7 @@ interface Props<TSample extends {}> {
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
   rangeFrom: string;
   rangeTo: string;
-  queryParams?: ESQLQueryParams;
+  traceId?: string;
 }
 
 export function WaterfallWithSummary<TSample extends {}>({
@@ -67,7 +66,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   onLogsTableConfigChange,
   rangeFrom,
   rangeTo,
-  queryParams,
+  traceId,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -166,10 +165,13 @@ export function WaterfallWithSummary<TSample extends {}>({
                   indexType="traces"
                   rangeFrom={rangeFrom}
                   rangeTo={rangeTo}
+                  label={i18n.translate(
+                    'xpack.apm.transactionDetails.openFullTraceInDiscover.label',
+                    { defaultMessage: 'Open full trace in Discover' }
+                  )}
                   queryParams={{
-                    ...queryParams,
-                    serviceName,
-                    environment,
+                    traceId,
+                    sortDirection: 'ASC',
                   }}
                 />
               </EuiFlexItem>
