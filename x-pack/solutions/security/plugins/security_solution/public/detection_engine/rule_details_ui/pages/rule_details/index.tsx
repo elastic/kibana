@@ -495,7 +495,6 @@ export const RuleDetailsPage = connector(
             date={lastExecutionDate}
             message={lastExecutionMessage}
           />
-          <EuiSpacer size="m" />
         </>
       );
     }, [
