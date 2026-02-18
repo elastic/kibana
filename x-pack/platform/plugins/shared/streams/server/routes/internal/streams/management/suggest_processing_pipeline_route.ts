@@ -33,9 +33,11 @@ import {
   extractDissectPattern,
   groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
+import type { Logger } from '@kbn/logging';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import type { StreamsClient } from '../../../../lib/streams/client';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
@@ -332,10 +334,10 @@ async function processGrokPatterns({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
@@ -355,6 +357,7 @@ async function processGrokPatterns({
           body: {
             connector_id: connectorId,
             sample_messages: group.messages,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             review_fields: getGrokReviewFields(group.nodes as any, 10),
           },
         },
@@ -397,6 +400,19 @@ async function processGrokPatterns({
   // Merge all grok processors into one
   const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
 
+  // Filter out empty patterns that may come from the heuristics library
+  const filteredPatterns = combinedGrokProcessor.patterns.filter(
+    (pattern) => pattern.trim().length > 0
+  );
+
+  // If all patterns were empty, return null
+  if (filteredPatterns.length === 0) {
+    logger.debug(
+      '[suggest_pipeline][grok] All patterns were empty after filtering out empty string patterns'
+    );
+    return null;
+  }
+
   // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
     params: {
@@ -409,7 +425,7 @@ async function processGrokPatterns({
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
               from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
+              patterns: filteredPatterns,
             },
           ],
         },
@@ -428,7 +444,7 @@ async function processGrokPatterns({
     processor: {
       action: 'grok',
       from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
+      patterns: filteredPatterns as [string, ...string[]],
     },
     parsedRate,
   };
@@ -461,10 +477,10 @@ async function processDissectPattern({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 
