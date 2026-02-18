@@ -81,8 +81,8 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object`           | `object`           | The tracked object.                                                                               |
 | `object.id`        | `keyword`          | Unique id of the target object in Kibana.                                                         |
 | `object.type`      | `keyword`          | Type of the target object in Kibana.                                                              |
-| `object.hash`      | `keyword`          | Hash of the `object.snapshot` to identify the payload.                                 |
-| `object.sequence`  | `keyword`          | Sequence identifier for ordering. (Optional)                                                     |
+| `object.hash`      | `keyword`          | Hash of the `object.snapshot` to identify the payload.                                            |
+| `object.sequence`  | `keyword`          | Sequence identifier for ordering. (Optional)                                                      |
 | `object.changes`   | `keyword`          | List of field names that changed. (Optional)                                                      |
 | `object.oldvalues` | `object` (dynamic) | Previous values for changed fields. (Optional)                                                    |
 | `object.snapshot`  | `object` (dynamic) | Full snapshot after the change. (Optional)                                                        |
@@ -126,11 +126,10 @@ const change: ObjectChange = {
   after: ruleSnapshot, // <-- Version after changes, the raw object we use for reverting
 };
 await client.log(change, {
-    action: 'rule-create',
-    userId,
-    spaceId,
-  }
-);
+  action: 'rule-create',
+  userId,
+  spaceId,
+});
 
 // When reading history for an object
 const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
@@ -214,17 +213,16 @@ await client.log(change, {
   action: 'rule-update',
   userId,
   spaceId,
-  // Fields that should not participate in the diff (e.g. volatile or system fields) and that can be excluded
+  // Keys with truthy values are excluded from the diff (and their nested descendants)
   excludeFields: {
     updatedAt: true,
     monitoringData: true,
     'params.isUpdated': true,
   },
   // Fields containing sensitive data that should be masked
-  sensitiveFields: ['user.email', 'params.apiKey']
+  sensitiveFields: ['user.email', 'params.apiKey'],
 });
 ```
-
 
 ### Logging a deletion
 
@@ -232,12 +230,11 @@ Store the last known state as the snapshot and mark the event as a deletion:
 
 ```ts
 await client.log(changes, {
-    action: 'rule-delete',
-    userId,
-    spaceId,
-    data: { event: { type: 'deletion', reason: 'User requested deletion' } },
-  }
-);
+  action: 'rule-delete',
+  userId,
+  spaceId,
+  data: { event: { type: 'deletion', reason: 'User requested deletion' } },
+});
 ```
 
 ### Querying with filters and pagination

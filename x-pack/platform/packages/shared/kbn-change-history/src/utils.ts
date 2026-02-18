@@ -59,12 +59,11 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
       case 'bigint': default: throw new TypeError('Please use JSON-compatible types');
     }
   };
-  // We exclude keys when:
-  // - the filter is missing OR
-  // - the key (or its parent/ancestor) is explicitly excluded
+  // We exclude keys when the key (or an ancestor) is in excludeFields with a truthy value.
+  // So excludeFields = { type: true, description: true } excludes type and description from the diff.
   const exclude = (key: string) =>
-    // TODO: Review this. If excluding parent property we should also exclude its children
-    flatFilter && Object.entries(flatFilter).some(([k, v]) => key === k && !v);
+    flatFilter &&
+    Object.entries(flatFilter).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
   for (const key of allKeys) {
     if (!exclude(key)) {
       const valA = check(flatA[key]);

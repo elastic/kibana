@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies -- `ulid` dependency is in root `package.json`
 import { monotonicFactory } from 'ulid';
 import type {
   QueryDslQueryContainer,
@@ -199,7 +200,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
             b: change.after,
             excludeFields: opts.excludeFields,
           });
-          document.object = { ...document.object, changes: fieldChanges, oldvalues };
+          document.object = { changes: fieldChanges, oldvalues, ...document.object };
         } catch (err) {
           // Uncalculated diff should not be fatal, just log and continue
           this.logger.error(new Error('Unable to calculate change history diff', { cause: err }));
