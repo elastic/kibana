@@ -100,9 +100,10 @@ describe('Cases Ui Plugin', () => {
           "attachmentFramework": Object {
             "registerExternalReference": [Function],
             "registerPersistableState": [Function],
+            "registerUnified": [Function],
           },
         }
-    `);
+      `);
     });
 
     it('registers cases page view event type', async () => {
