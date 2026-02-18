@@ -95,18 +95,14 @@ async function main() {
   const body = await res.json();
   const endpoints = body.endpoints || [];
 
-  const chatElastic = endpoints.filter(
-    (ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic'
-  );
-
-  if (chatElastic.length === 0) {
-    console.error('No chat_completion endpoints with service "elastic" found.');
+  if (endpoints.length === 0) {
+    console.error('No chat_completion endpoints found.');
     process.exit(1);
   }
 
   const lines = [
     '# Paste these blocks under xpack.actions.preconfigured: in config/kibana.dev.yml',
-    ...chatElastic.map(endpointToYaml),
+    ...endpoints.map(endpointToYaml),
   ];
   console.log(lines.join('\n'));
 }
