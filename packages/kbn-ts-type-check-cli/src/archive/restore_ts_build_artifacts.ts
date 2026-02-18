@@ -137,9 +137,7 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
         // Therefore we search:
         //   1. HEAD history — includes commits CI built for the current branch
         //   2. upstream/main history — in case CI also archives main builds
-        const mainShas = upstreamRemote
-          ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK)
-          : [];
+        const mainShas = upstreamRemote ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK) : [];
         const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
 
         const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
@@ -148,7 +146,9 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
           const bestMatch = matchedShas[0];
 
           log.info(
-            `Found ${matchedShas.length} matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
+            `Found ${
+              matchedShas.length
+            } matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
           );
 
           if (currentSha) {
@@ -189,9 +189,7 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     try {
       await Fs.promises.access(LOCAL_CACHE_ROOT);
     } catch {
-      log.info(
-        'No local cache exists yet. It will be populated after this type check completes.'
-      );
+      log.info('No local cache exists yet. It will be populated after this type check completes.');
       return;
     }
 
@@ -202,4 +200,3 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
   }
 }
-

@@ -151,11 +151,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     try {
       // -- Step 1: Download ------------------------------------------------
       const dlStart = Date.now();
-      await execa(
-        'curl',
-        ['-sSLf', '-o', tmpFile, '-H', `Authorization: Bearer ${token}`, url],
-        { stderr: 'pipe' }
-      );
+      await execa('curl', ['-sSLf', '-o', tmpFile, '-H', `Authorization: Bearer ${token}`, url], {
+        stderr: 'pipe',
+      });
       const dlElapsed = Date.now() - dlStart;
 
       let sizeBytes: number | undefined;
@@ -172,7 +170,9 @@ export class GcsFileSystem extends AbstractFileSystem {
           ? ` at ${formatBytes(Math.round(sizeBytes / (dlElapsed / 1000)))}/s`
           : '';
       this.log.info(
-        `Downloaded TypeScript build artifacts${sizeLabel} in ${(dlElapsed / 1000).toFixed(1)}s${speedLabel}`
+        `Downloaded TypeScript build artifacts${sizeLabel} in ${(dlElapsed / 1000).toFixed(
+          1
+        )}s${speedLabel}`
       );
 
       // -- Step 2: Extract -------------------------------------------------
@@ -197,9 +197,7 @@ export class GcsFileSystem extends AbstractFileSystem {
       });
 
       const exElapsed = Date.now() - exStart;
-      this.log.info(
-        `Extracted TypeScript build artifacts in ${(exElapsed / 1000).toFixed(1)}s`
-      );
+      this.log.info(`Extracted TypeScript build artifacts in ${(exElapsed / 1000).toFixed(1)}s`);
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
       throw new Error(
@@ -255,9 +253,7 @@ export class GcsFileSystem extends AbstractFileSystem {
   }
 
   /** Original implementation: tries `gcloud storage cat`, falls back to `gsutil cat`. */
-  private async readMetadataWithGcloud(
-    metadataPath: string
-  ): Promise<ArchiveMetadata | undefined> {
+  private async readMetadataWithGcloud(metadataPath: string): Promise<ArchiveMetadata | undefined> {
     const commands: Array<[cmd: string, args: string[]]> = [
       ['gcloud', ['storage', 'cat', metadataPath]],
       ['gsutil', ['cat', metadataPath]],
@@ -430,7 +426,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
       this.log.verbose(
-        `Failed to list GCS archives via API: ${details.replace(token, '<redacted>')} (${Date.now() - start}ms)`
+        `Failed to list GCS archives via API: ${details.replace(token, '<redacted>')} (${
+          Date.now() - start
+        }ms)`
       );
       return new Set();
     }

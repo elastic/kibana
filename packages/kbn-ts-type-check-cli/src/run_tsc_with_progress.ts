@@ -57,9 +57,7 @@ export async function runTscWithProgress(options: {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
     const mins = Math.floor(elapsed / 60);
     const secs = elapsed % 60;
-    return mins > 0
-      ? `${mins}m ${secs.toString().padStart(2, '0')}s`
-      : `${secs}s`;
+    return mins > 0 ? `${mins}m ${secs.toString().padStart(2, '0')}s` : `${secs}s`;
   };
 
   const bar = new SingleBar({
@@ -170,11 +168,15 @@ export async function runTscWithProgress(options: {
   const elapsed = formatElapsed();
 
   if (result.killed || result.signal) {
-    log.warning(`Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`);
+    log.warning(
+      `Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`
+    );
   } else if (result.exitCode === 0) {
     log.info(`Type checked ${totalProjects} projects successfully in ${elapsed}.`);
   } else {
-    log.error(`Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`);
+    log.error(
+      `Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
+    );
   }
 
   return result.exitCode === 0;
