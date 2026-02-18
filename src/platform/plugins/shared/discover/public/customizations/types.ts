@@ -44,10 +44,9 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
   };
 
   /**
-   * Builds a SavedSearch object from the current tab's state.
-   * Returns undefined if the data view is not available.
+   * Builds a SavedSearch object from the current tab's state
    */
-  getSavedSearchFromCurrentTab: () => Promise<SavedSearch | undefined>;
+  getSavedSearchFromCurrentTab: () => Promise<SavedSearch>;
 }
 
 export interface CustomizationCallbackContext {
