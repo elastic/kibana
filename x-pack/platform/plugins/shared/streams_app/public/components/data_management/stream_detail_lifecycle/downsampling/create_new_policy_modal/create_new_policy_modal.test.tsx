@@ -114,6 +114,19 @@ describe('CreatePolicyModal', () => {
     expect(screen.getByTestId('createPolicyModal-policyNameInput')).toHaveValue('');
   });
 
+  it('does not suggest a copy name when the shortest suffix is too long', () => {
+    renderWithI18n(
+      <CreatePolicyModal
+        policyNames={[]}
+        onBack={() => {}}
+        onSave={() => {}}
+        originalPolicyName={'a'.repeat(255)}
+      />
+    );
+
+    expect(screen.getByTestId('createPolicyModal-policyNameInput')).toHaveValue('');
+  });
+
   describe('policy name validation', () => {
     const validationDebounceMs = 500;
     const advanceValidation = async () => {
