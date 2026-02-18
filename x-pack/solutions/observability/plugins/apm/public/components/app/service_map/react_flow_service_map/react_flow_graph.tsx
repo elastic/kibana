@@ -25,6 +25,11 @@ import {
   EuiScreenReaderOnly,
   EuiScreenReaderLive,
   useGeneratedHtmlId,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiBadge,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
@@ -65,6 +70,16 @@ interface ReactFlowGraphProps {
   kuery: string;
   start: string;
   end: string;
+  /** Whether path selection mode is active */
+  pathMode?: boolean;
+  /** Origin service selected in path mode */
+  pathOrigin?: string;
+  /** Target service selected in path mode */
+  pathTarget?: string;
+  /** Callback when a service node is clicked in path mode */
+  onPathNodeClick?: (serviceNodeId: string) => void;
+  /** Callback to toggle path mode on/off */
+  onPathModeToggle?: () => void;
 }
 
 function ReactFlowGraphInner({
@@ -76,6 +91,11 @@ function ReactFlowGraphInner({
   kuery,
   start,
   end,
+  pathMode,
+  pathOrigin,
+  pathTarget,
+  onPathNodeClick,
+  onPathModeToggle,
 }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -109,6 +129,7 @@ function ReactFlowGraphInner({
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
+  // Effect 1: Apply layout and edge highlighting when graph data changes
   useEffect(() => {
     setNodes(layoutedNodes);
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
@@ -126,15 +147,68 @@ function ReactFlowGraphInner({
     getFitViewOptions,
   ]);
 
+  // Effect 2: Apply path filtering (BFS + hidden + pathRole) when path selections change.
+  // Uses functional updates so it works on current node/edge state without rebuilding.
+  // BFS runs against the full (unfiltered) initialEdges to ensure correct path finding.
+  useEffect(() => {
+    const pathNodeIds =
+      pathMode && pathOrigin && pathTarget
+        ? findPathNodes(initialEdges, pathOrigin, pathTarget)
+        : null;
+
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => ({
+        ...n,
+        hidden: pathNodeIds ? !pathNodeIds.has(n.id) : false,
+        data: {
+          ...n.data,
+          pathRole:
+            pathMode && n.id === pathOrigin
+              ? ('origin' as const)
+              : pathMode && n.id === pathTarget
+              ? ('target' as const)
+              : undefined,
+        },
+      }))
+    );
+
+    setEdges((currentEdges) =>
+      currentEdges.map((e) => ({
+        ...e,
+        hidden: pathNodeIds ? !pathNodeIds.has(e.source) || !pathNodeIds.has(e.target) : false,
+      }))
+    );
+
+    // Only re-fit when a path is actively being shown or cleared
+    if (pathNodeIds || (!pathMode && (pathOrigin || pathTarget))) {
+      setTimeout(() => fitView(getFitViewOptions()), 50);
+    }
+  }, [
+    pathMode,
+    pathOrigin,
+    pathTarget,
+    initialEdges,
+    setNodes,
+    setEdges,
+    fitView,
+    getFitViewOptions,
+  ]);
+
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
+      // In path mode, clicking a service node selects it as origin/destination
+      if (pathMode && node.data.isService && onPathNodeClick) {
+        onPathNodeClick(node.id);
+        return;
+      }
+
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
       setSelectedEdgeForPopover(null);
     },
-    [selectedNodeId, setEdges, applyEdgeHighlighting]
+    [selectedNodeId, setEdges, applyEdgeHighlighting, pathMode, onPathNodeClick]
   );
   const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
     (_, edge) => {
@@ -231,6 +305,7 @@ function ReactFlowGraphInner({
       height,
       width: '100%',
       overflow: 'auto',
+      position: 'relative' as const,
       background: `linear-gradient(
         90deg,
         ${euiTheme.colors.backgroundBasePlain}
@@ -355,6 +430,98 @@ function ReactFlowGraphInner({
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
+      {/* Path mode toggle and status */}
+      <div
+        css={css`
+          position: absolute;
+          top: ${euiTheme.size.s};
+          right: ${euiTheme.size.s};
+          z-index: ${euiTheme.levels.content};
+          display: flex;
+          align-items: center;
+          gap: ${euiTheme.size.s};
+        `}
+      >
+        {pathMode && (pathOrigin || pathTarget) && (
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${euiTheme.size.xs};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+              box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
+            `}
+          >
+            {pathOrigin && <EuiBadge color="primary">{pathOrigin}</EuiBadge>}
+            {pathOrigin && !pathTarget && (
+              <EuiText size="xs" color="subdued">
+                <EuiIcon type="sortRight" size="s" aria-hidden={true} />{' '}
+                {i18n.translate('xpack.apm.serviceMap.pathMode.selectDestination', {
+                  defaultMessage: 'Click destination',
+                })}
+              </EuiText>
+            )}
+            {pathTarget && (
+              <>
+                <EuiIcon type="sortRight" size="s" aria-hidden={true} />
+                <EuiBadge color="success">{pathTarget}</EuiBadge>
+              </>
+            )}
+          </div>
+        )}
+        {pathMode && !pathOrigin && (
+          <div
+            css={css`
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+              box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
+            `}
+          >
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.apm.serviceMap.pathMode.selectOrigin', {
+                defaultMessage: 'Click a service to set origin',
+              })}
+            </EuiText>
+          </div>
+        )}
+        <EuiToolTip
+          content={
+            pathMode
+              ? i18n.translate('xpack.apm.serviceMap.pathMode.disable', {
+                  defaultMessage: 'Exit path mode',
+                })
+              : i18n.translate('xpack.apm.serviceMap.pathMode.enable', {
+                  defaultMessage: 'Find path between services',
+                })
+          }
+        >
+          <EuiButtonIcon
+            iconType="link"
+            aria-label={i18n.translate('xpack.apm.serviceMap.pathMode.toggle', {
+              defaultMessage: 'Toggle path mode',
+            })}
+            display={pathMode ? 'fill' : 'empty'}
+            size="m"
+            color={pathMode ? 'primary' : 'text'}
+            onClick={onPathModeToggle}
+            data-test-subj="serviceMapPathModeToggle"
+            css={css`
+              background-color: ${pathMode
+                ? euiTheme.colors.primary
+                : euiTheme.colors.backgroundBasePlain};
+              border: ${euiTheme.border.width.thin} solid
+                ${pathMode ? euiTheme.colors.primary : euiTheme.colors.lightShade};
+              border-radius: ${euiTheme.border.radius.medium};
+              box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
+            `}
+          />
+        </EuiToolTip>
+      </div>
       <ReactFlowPopover
         selectedNode={selectedNodeForPopover}
         selectedEdge={selectedEdgeForPopover}
@@ -367,6 +534,78 @@ function ReactFlowGraphInner({
       />
     </div>
   );
+}
+
+/**
+ * Finds all node IDs that lie on ANY directed path from origin to target.
+ *
+ * Uses two BFS passes:
+ *   1. Forward BFS from origin following edge direction (source -> target)
+ *   2. Backward BFS from target following reversed edges (target -> source)
+ *
+ * A node is on a path if it appears in both sets (reachable from origin AND
+ * can reach target). This captures all parallel routes, not just one shortest path.
+ *
+ * Returns null if no directed path exists (caller should treat as "show all").
+ */
+function findPathNodes(
+  edgeList: ServiceMapEdgeType[],
+  origin: string,
+  target: string
+): Set<string> | null {
+  // Build directed adjacency (forward) and reverse adjacency (backward)
+  const forward = new Map<string, Set<string>>();
+  const reverse = new Map<string, Set<string>>();
+
+  for (const edge of edgeList) {
+    if (!forward.has(edge.source)) forward.set(edge.source, new Set());
+    forward.get(edge.source)!.add(edge.target);
+
+    if (!reverse.has(edge.target)) reverse.set(edge.target, new Set());
+    reverse.get(edge.target)!.add(edge.source);
+  }
+
+  // Forward BFS from origin
+  const reachableFromOrigin = bfs(origin, forward);
+
+  // If target is not reachable from origin, no path exists
+  if (!reachableFromOrigin.has(target)) {
+    return null;
+  }
+
+  // Backward BFS from target (using reversed edges)
+  const canReachTarget = bfs(target, reverse);
+
+  // Intersection: nodes on any directed path from origin to target
+  const pathNodes = new Set<string>();
+  for (const node of reachableFromOrigin) {
+    if (canReachTarget.has(node)) {
+      pathNodes.add(node);
+    }
+  }
+
+  return pathNodes;
+}
+
+/** Simple BFS returning all reachable nodes from a start node. */
+function bfs(start: string, adjacency: Map<string, Set<string>>): Set<string> {
+  const visited = new Set<string>();
+  const queue = [start];
+  visited.add(start);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const neighbors = adjacency.get(current);
+    if (!neighbors) continue;
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return visited;
 }
 
 export function ReactFlowServiceMap(props: ReactFlowGraphProps) {

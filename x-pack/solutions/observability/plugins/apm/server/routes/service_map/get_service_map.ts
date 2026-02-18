@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
@@ -16,12 +16,19 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
+import {
+  isPrecomputedServiceMapAvailable,
+  getPrecomputedServiceMap,
+  convertEdgesToServiceMapSpans,
+} from './workflow/graph';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
   config: APMConfig;
   apmEventClient: APMEventClient;
+  esClient: ElasticsearchClient;
   serviceName?: string;
+  targetServiceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -29,20 +36,50 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  usePrecomputedServiceMap?: boolean;
 }
 
 async function getConnectionData({
   config,
   apmEventClient,
+  esClient,
   serviceName,
+  targetServiceName,
   environment,
   start,
   end,
   serviceGroupKuery,
   kuery,
   logger,
-}: IEnvOptions): Promise<{ tracesCount: number; spans: ServiceMapSpan[] }> {
+  usePrecomputedServiceMap,
+}: IEnvOptions): Promise<{
+  tracesCount: number;
+  spans: ServiceMapSpan[];
+  staleServices?: string[];
+}> {
   return withApmSpan('get_service_map_connections', async () => {
+    // Try materialized dependency graph if enabled
+    if (usePrecomputedServiceMap) {
+      const available = await isPrecomputedServiceMapAvailable(esClient);
+      if (available) {
+        logger.debug('Using materialized dependency graph');
+        const { edges, services } = await getPrecomputedServiceMap({
+          esClient,
+          environment,
+          serviceName,
+          targetServiceName,
+          logger,
+        });
+        const spans = convertEdgesToServiceMapSpans(edges);
+        const staleServices = Array.from(services.entries())
+          .filter(([, info]) => info.stale)
+          .map(([name]) => name);
+        return { spans, tracesCount: 0, staleServices };
+      }
+      logger.debug('Materialized dependency graph not available, falling back to sampling');
+    }
+
+    // Fall back to trace sampling approach
     logger.debug('Getting trace sample IDs');
     const { traceIds } = await getTraceSampleIds({
       config,
@@ -104,6 +141,9 @@ export function getServiceMap(
       tracesCount: connectionData.tracesCount,
       servicesData,
       anomalies,
+      ...(connectionData.staleServices?.length
+        ? { staleServices: connectionData.staleServices }
+        : {}),
     };
   });
 }

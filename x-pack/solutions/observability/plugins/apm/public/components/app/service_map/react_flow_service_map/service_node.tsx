@@ -27,7 +27,19 @@ export const ServiceNode = memo(
     const { euiTheme, colorMode } = useEuiTheme();
     const isDarkMode = colorMode === 'DARK';
 
+    const { pathRole } = data;
+    const isStale = data.stale ?? false;
+
     const borderColor = useMemo(() => {
+      if (pathRole === 'origin') {
+        return euiTheme.colors.primary;
+      }
+      if (pathRole === 'target') {
+        return euiTheme.colors.success;
+      }
+      if (isStale) {
+        return euiTheme.colors.warning;
+      }
       if (data.serviceAnomalyStats?.healthStatus) {
         return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
       }
@@ -35,19 +47,21 @@ export const ServiceNode = memo(
         return euiTheme.colors.primary;
       }
       return euiTheme.colors.mediumShade;
-    }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
+    }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme, pathRole, isStale]);
 
     const borderWidth = useMemo(() => {
+      if (pathRole) return euiTheme.size.xs;
       const status = data.serviceAnomalyStats?.healthStatus;
       if (status === ServiceHealthStatus.critical) return euiTheme.size.xs;
       return euiTheme.size.xxs;
-    }, [data.serviceAnomalyStats?.healthStatus, euiTheme.size.xxs, euiTheme.size.xs]);
+    }, [data.serviceAnomalyStats?.healthStatus, euiTheme.size.xxs, euiTheme.size.xs, pathRole]);
 
     const borderStyle = useMemo(() => {
+      if (isStale) return 'dashed';
       const status = data.serviceAnomalyStats?.healthStatus;
       if (status === ServiceHealthStatus.critical) return 'double';
       return 'solid';
-    }, [data.serviceAnomalyStats?.healthStatus]);
+    }, [data.serviceAnomalyStats?.healthStatus, isStale]);
 
     const iconUrl = useMemo(() => {
       if (data.agentName) {
@@ -74,6 +88,14 @@ export const ServiceNode = memo(
         );
       }
 
+      if (isStale) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.serviceNode.staleInfo', {
+            defaultMessage: 'Status: stale (not seen recently)',
+          })
+        );
+      }
+
       if (data.serviceAnomalyStats?.healthStatus) {
         parts.push(
           i18n.translate('xpack.apm.serviceMap.serviceNode.healthInfo', {
@@ -88,7 +110,7 @@ export const ServiceNode = memo(
       }
 
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, isStale]);
 
     const containerStyles = css`
       position: relative;
@@ -112,6 +134,7 @@ export const ServiceNode = memo(
       box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
       cursor: pointer;
       pointer-events: all;
+      ${isStale ? 'opacity: 0.5;' : ''}
 
       &:focus-visible {
         outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};

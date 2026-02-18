@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { SERVICE_NAME } from '@kbn/apm-types';
 import type {
   ServiceMapRawResponse,
   ServiceMapTelemetry,
@@ -63,6 +64,7 @@ export function isCytoscapeServiceMapState(
 
 export interface UseServiceMapResult {
   data: ServiceMapState;
+  serviceNames: string[];
   error?: Error | IHttpFetchError<ResponseErrorBody>;
   status: FETCH_STATUS;
 }
@@ -94,8 +96,11 @@ export const useServiceMap = ({
 
   const initialState = useReactFlow ? INITIAL_REACT_FLOW_STATE : INITIAL_CYTOSCAPE_STATE;
 
+  const serviceNamesRef = useRef<string[]>([]);
+
   const [serviceMapNodes, setServiceMapNodes] = useState<UseServiceMapResult>({
     data: initialState,
+    serviceNames: [],
     status: FETCH_STATUS.LOADING,
   });
 
@@ -141,6 +146,7 @@ export const useServiceMap = ({
     if (status === FETCH_STATUS.FAILURE || error) {
       setServiceMapNodes({
         data: initialState,
+        serviceNames: serviceNamesRef.current,
         status: FETCH_STATUS.FAILURE,
         error,
       });
@@ -149,12 +155,25 @@ export const useServiceMap = ({
 
     if (data) {
       if ('spans' in data) {
+        // Cache service names only from the full (unfiltered) graph
+        if (!serviceName) {
+          const names = data.servicesData
+            .map((s) => s[SERVICE_NAME])
+            .filter(Boolean)
+            .sort();
+
+          if (names.length > 0) {
+            serviceNamesRef.current = names;
+          }
+        }
+
         try {
           if (useReactFlow) {
             // Transform directly from raw API response to React Flow format
             const reactFlowData = transformToReactFlow(data);
             setServiceMapNodes({
               data: reactFlowData,
+              serviceNames: serviceNamesRef.current,
               status: FETCH_STATUS.SUCCESS,
             });
           } else {
@@ -166,18 +185,21 @@ export const useServiceMap = ({
                 nodesCount: cytoscapeData.nodesCount,
                 tracesCount: data.tracesCount,
               },
+              serviceNames: serviceNamesRef.current,
               status: FETCH_STATUS.SUCCESS,
             });
           }
         } catch (err) {
           setServiceMapNodes({
             data: initialState,
+            serviceNames: serviceNamesRef.current,
             status: FETCH_STATUS.FAILURE,
             error: err,
           });
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, status, error, useReactFlow, initialState]);
 
   return serviceMapNodes;

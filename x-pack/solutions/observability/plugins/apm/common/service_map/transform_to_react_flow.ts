@@ -43,16 +43,19 @@ import {
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
-function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
+function toServiceNodeData(node: ConnectionNode, staleServicesSet?: Set<string>): ServiceNodeData {
   // Reuse ServiceAnomalyStats directly from the connection node
   const serviceAnomalyStats = 'serviceAnomalyStats' in node ? node.serviceAnomalyStats : undefined;
+  const serviceName = node[SERVICE_NAME] || node.label || node.id;
+  const stale = staleServicesSet?.has(serviceName) || false;
 
   return {
     id: node.id,
-    label: node[SERVICE_NAME] || node.label || node.id,
+    label: serviceName,
     agentName: node[AGENT_NAME],
     isService: true,
     serviceAnomalyStats,
+    ...(stale ? { stale } : {}),
   };
 }
 
@@ -70,16 +73,18 @@ function isServiceNode(node: ConnectionNode): boolean {
   return node[SERVICE_NAME] !== undefined;
 }
 
-function toNodeData(node: ConnectionNode): ServiceMapNodeData {
-  return isServiceNode(node) ? toServiceNodeData(node) : toDependencyNodeData(node);
+function toNodeData(node: ConnectionNode, staleServicesSet?: Set<string>): ServiceMapNodeData {
+  return isServiceNode(node)
+    ? toServiceNodeData(node, staleServicesSet)
+    : toDependencyNodeData(node);
 }
 
-function toReactFlowNode(node: ConnectionNode): ServiceMapNode {
+function toReactFlowNode(node: ConnectionNode, staleServicesSet?: Set<string>): ServiceMapNode {
   return {
     id: node.id,
     type: isServiceNode(node) ? 'service' : 'dependency',
     position: { x: 0, y: 0 },
-    data: toNodeData(node),
+    data: toNodeData(node, staleServicesSet),
   };
 }
 
@@ -107,6 +112,8 @@ export function transformToReactFlow(
   data: ServiceMapResponse | ServiceMapRawResponse
 ): ReactFlowServiceMapResponse {
   const tracesCount = 'tracesCount' in data ? data.tracesCount : 0;
+
+  const staleServicesSet = data.staleServices?.length ? new Set(data.staleServices) : undefined;
 
   const paths = getPaths({ spans: data.spans });
 
@@ -141,7 +148,7 @@ export function transformToReactFlow(
 
   const reactFlowNodes = [...uniqueNodes.values()]
     .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
-    .map(toReactFlowNode);
+    .map((node) => toReactFlowNode(node, staleServicesSet));
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {

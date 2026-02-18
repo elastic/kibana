@@ -288,6 +288,9 @@ export class APMPlugin
     createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
       logger.debug(`Failed to create apm-source-map index template: ${e.message}`);
     });
+
+    // Service map pre-computation is handled by OneWorkflow
+    // See: routes/service_map/transforms/ONE_WORKFLOW_SERVICE_MAP.md
   }
 
   public stop() {}
