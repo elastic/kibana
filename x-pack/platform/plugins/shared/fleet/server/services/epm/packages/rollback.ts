@@ -10,6 +10,7 @@ import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import pMap from 'p-map';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import semverGt from 'semver/functions/gt';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../common';
 
@@ -128,7 +129,8 @@ export async function rollbackAvailableCheck(
       .filter((so) => {
         if (!so.id.endsWith(':prev')) {
           return (
-            so.attributes.package?.version !== previousVersion &&
+            so.attributes.package?.version &&
+            semverGt(so.attributes.package.version, previousVersion) &&
             !policyIds.includes(`${so.id}:prev`)
           );
         }

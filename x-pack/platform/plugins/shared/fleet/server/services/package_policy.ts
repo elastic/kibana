@@ -3028,7 +3028,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev') && policy.attributes.package?.version !== previousVersion) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {

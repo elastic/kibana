@@ -756,6 +756,16 @@ describe('rollbackAvailableCheck', () => {
             latest_revision: true,
           },
         },
+        {
+          id: 'test-package-policy3',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: `${pkgName}-3`,
+            package: { name: pkgName, title: 'Test Package', version: '0.9.0' },
+            revision: 3,
+            latest_revision: true,
+          },
+        },
       ],
     } as any);
 
@@ -763,6 +773,7 @@ describe('rollbackAvailableCheck', () => {
       'test-package-policy',
       'test-package-policy:prev',
       'test-package-policy2',
+      'test-package-policy3',
     ]);
 
     expect(response).toEqual({
