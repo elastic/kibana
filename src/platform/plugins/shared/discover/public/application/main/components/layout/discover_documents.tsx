@@ -481,12 +481,16 @@ function DiscoverDocumentsComponent({
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
+  const latestDataCascadeUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.dataCascade)
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
+  const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const resolveLeafData = useCallback<NonNullable<CascadedDocumentsContext['resolveLeafData']>>(
@@ -526,21 +530,27 @@ function DiscoverDocumentsComponent({
       viewModeToggle,
       resolveLeafData,
       cascadeGroupingChangeHandler,
+      dataCascadeUiState: latestDataCascadeUiState.current,
+      setDataCascadeUiState: (nextUiState) =>
+        dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
       onUpdateESQLQuery,
       openInNewTab,
     };
   }, [
     availableCascadeGroups,
+    query,
     cascadedDocumentsFetcher,
-    cascadeGroupingChangeHandler,
+    selectedCascadeGroups,
     esqlVariables,
+    requestParams.timeRangeAbsolute,
+    viewModeToggle,
+    resolveLeafData,
+    cascadeGroupingChangeHandler,
+    latestDataCascadeUiState,
     onUpdateESQLQuery,
     openInNewTab,
-    query,
-    requestParams.timeRangeAbsolute,
-    resolveLeafData,
-    selectedCascadeGroups,
-    viewModeToggle,
+    dispatch,
+    setDataCascadeUiState,
   ]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

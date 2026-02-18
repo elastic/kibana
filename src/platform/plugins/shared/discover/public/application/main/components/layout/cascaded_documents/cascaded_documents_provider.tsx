@@ -12,7 +12,10 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { CascadeGroupNodeUIInteraction } from '@kbn/shared-ux-document-data-cascade';
+import type {
+  CascadeGroupNodeUIInteraction,
+  DataCascadeUISnapshot,
+} from '@kbn/shared-ux-document-data-cascade';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
@@ -20,7 +23,9 @@ import type {
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
-import type { ESQLDataGroupNode } from './blocks/types';
+import type { ESQLDataGroupNode } from './blocks';
+
+export type DataCascadeUiState = DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
 
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
@@ -32,6 +37,8 @@ export interface CascadedDocumentsContext
   resolveLeafData: (
     args: CascadeGroupNodeUIInteraction<ESQLDataGroupNode>
   ) => DataTableRecord[] | null;
+  dataCascadeUiState: DataCascadeUiState | undefined;
+  setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
