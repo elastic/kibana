@@ -78,7 +78,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         img: ['go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv'],
         audio: ['hello.mp3'],
       },
-      sampleConverterType: 'html',
+      sampleConverterType: 'react',
       showUrlTemplateHelp: false,
       showLabelTemplateHelp: false,
     };
@@ -266,7 +266,11 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 
         {urlType === 'img' && this.renderWidthHeightParameters()}
 
-        <FormatEditorSamples samples={samples} sampleType={sampleConverterType} />
+        <FormatEditorSamples
+          samples={samples}
+          sampleType={sampleConverterType}
+          fieldFormat={format}
+        />
       </Fragment>
     );
   }

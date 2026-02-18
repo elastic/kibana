@@ -46,9 +46,11 @@ interface SampleInputs {
   [key: string]: Array<ReactText[] | ReactText>;
 }
 
+export type SampleConverterType = FieldFormatsContentType | 'react';
+
 export interface FormatEditorState {
   sampleInputs: SampleInput[];
-  sampleConverterType: FieldFormatsContentType;
+  sampleConverterType: SampleConverterType;
   error?: string;
   samples: Sample[];
   sampleInputsByType: SampleInputs;
@@ -56,7 +58,7 @@ export interface FormatEditorState {
 
 export const defaultState = {
   sampleInputs: [] as SampleInput[],
-  sampleConverterType: 'text' as FieldFormatsContentType,
+  sampleConverterType: 'text' as SampleConverterType,
   error: undefined,
   samples: [] as Sample[],
   sampleInputsByType: {},
@@ -73,7 +75,8 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
     const { format, formatParams, onError } = nextProps;
     const { sampleInputsByType, sampleInputs, sampleConverterType } = state;
 
-    const converter = format.getConverterFor(sampleConverterType);
+    const converterType = sampleConverterType === 'react' ? 'text' : sampleConverterType;
+    const converter = format.getConverterFor(converterType);
     const type = typeof sampleInputsByType === 'object' && formatParams.type;
     const inputs = type ? sampleInputsByType[formatParams.type as string] || [] : sampleInputs;
     const output = convertSampleInput(converter, inputs);

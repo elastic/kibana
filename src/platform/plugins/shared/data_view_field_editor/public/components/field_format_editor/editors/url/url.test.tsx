@@ -23,6 +23,8 @@ const format = {
   getConverterFor: jest
     .fn()
     .mockImplementation(() => (input: string) => `converted url for ${input}`),
+  convertToReact: jest.fn().mockImplementation((input: string) => `converted url for ${input}`),
+  hasReactSupport: jest.fn().mockReturnValue(true),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },

@@ -14,11 +14,14 @@ import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Sample } from '../types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FormattedValue } from '@kbn/field-formats-plugin/common';
+import type { Sample, SampleInput } from '../types';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];
   sampleType: string;
+  fieldFormat?: FieldFormat;
 }
 
 export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps> {
@@ -27,7 +30,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
   };
 
   render() {
-    const { samples, sampleType } = this.props;
+    const { samples, sampleType, fieldFormat } = this.props;
 
     const columns = [
       {
@@ -44,18 +47,15 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         name: i18n.translate('indexPatternFieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
-        render: (output: string) => {
-          return sampleType === 'html' ? (
-            <div
-              /*
-               * Justification for dangerouslySetInnerHTML:
-               * Sample output may contain HTML tags, like URL image/audio format.
-               */
-              dangerouslySetInnerHTML={{ __html: output }} // eslint-disable-line react/no-danger
-            />
-          ) : (
-            <div>{output}</div>
-          );
+        render: (output: string, sample: Sample) => {
+          if (sampleType === 'react' && fieldFormat) {
+            return (
+              <div>
+                <FormattedValue fieldFormat={fieldFormat} value={sample.input as SampleInput} />
+              </div>
+            );
+          }
+          return <div>{output}</div>;
         },
       },
     ];
