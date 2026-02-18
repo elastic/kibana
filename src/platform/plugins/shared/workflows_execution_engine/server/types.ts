@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -18,7 +19,11 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -33,14 +38,33 @@ export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
 }
 
+export interface SearchWorkflowExecutionsParams {
+  query: QueryDslQueryContainer;
+  sort?: Sort;
+  size?: number;
+  from?: number;
+  page?: number;
+}
+
+export interface SearchResult<T> {
+  results: T[];
+  page: number;
+  size: number;
+  total: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
+
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
+  getWorkflowExecution: GetWorkflowExecution;
+  searchWorkflowExecutions: SearchWorkflowExecutions;
+  getStepExecutions: GetStepExecutions;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -80,3 +104,17 @@ export type ScheduleWorkflow = (
   context: Record<string, any>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type GetWorkflowExecution = (
+  executionId: string,
+  spaceId: string
+) => Promise<EsWorkflowExecution | null>;
+
+export type SearchWorkflowExecutions = (
+  params: SearchWorkflowExecutionsParams
+) => Promise<SearchResult<EsWorkflowExecution>>;
+
+export type GetStepExecutions = (
+  executionId: string,
+  spaceId: string
+) => Promise<Record<string, EsWorkflowStepExecution> | null>;

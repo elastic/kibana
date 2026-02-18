@@ -119,7 +119,7 @@ export interface EsWorkflowExecution extends EsBaseExecution {
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
-  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  /** IDs of all step executions in chronological order, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
 }
 
