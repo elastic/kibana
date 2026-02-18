@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const list = await discover.getHistogramLegendList();
       // With top 9 values and only 5 extension types, no Other bucket
       expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
-      expect(await discover.getBreakdownFieldValue()).to.be('extension.raw');
+      expect(await discover.getBreakdownFieldValue()).to.be('Breakdown by extension.raw');
     });
 
     it('should clear breakdown field in persisted discover session', async () => {
