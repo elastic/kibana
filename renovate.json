@@ -1263,7 +1263,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:all-open",
+        "backport:skip",
         "Team:obs-onboarding"
       ],
       "enabled": true,
@@ -4371,27 +4371,6 @@
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
-      "enabled": true
-    },
-    {
-      "groupName": "XState5",
-      "matchDepNames": [
-        "xstate5",
-        "@xstate5/react"
-      ],
-      "reviewers": [
-        "team:obs-onboarding-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:obs-onboarding",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "separateMajorMinor": true,
       "enabled": true
     },
     {

@@ -23,6 +23,7 @@ import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
@@ -75,6 +76,7 @@ export function createCoreSetupMock({
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createSetup(),
     userProfile: userProfileServiceMock.createSetup(),
