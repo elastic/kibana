@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
@@ -42,12 +43,22 @@ const tabs = [
 
 export const Tabs = () => {
   const [selectedTabId, setSelectedTabId] = useTabId(tabs[0].id);
+  // This map allow to keep track of which tabs content have been rendered the first time.
+  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
+  const renderedTabsSet = useLazyRef(() => new Set([selectedTabId]));
 
   const tabEntries = tabs.map((tab, index) => (
     <EuiTab
       {...tab}
       key={index}
       onClick={() => {
+        if (tab.id === selectedTabId) return;
+
+        // On a tab click, mark the tab content as allowed to be rendered except for the logs tab.
+        if (tab.id !== TabIds.LOGS) {
+          renderedTabsSet.current.add(tab.id);
+        }
+
         setSelectedTabId(tab.id);
       }}
       isSelected={tab.id === selectedTabId}
@@ -61,9 +72,17 @@ export const Tabs = () => {
     <>
       <EuiTabs>{tabEntries}</EuiTabs>
       <EuiSpacer />
-      {selectedTabId === TabIds.METRICS && <MetricsGrid />}
+      {renderedTabsSet.current.has(TabIds.METRICS) && (
+        <div hidden={selectedTabId !== TabIds.METRICS}>
+          <MetricsGrid />
+        </div>
+      )}
       {selectedTabId === TabIds.LOGS && <LogsTabContent />}
-      {selectedTabId === TabIds.ALERTS && <AlertsTabContent />}
+      {renderedTabsSet.current.has(TabIds.ALERTS) && (
+        <div hidden={selectedTabId !== TabIds.ALERTS}>
+          <AlertsTabContent />
+        </div>
+      )}
     </>
   );
 };
