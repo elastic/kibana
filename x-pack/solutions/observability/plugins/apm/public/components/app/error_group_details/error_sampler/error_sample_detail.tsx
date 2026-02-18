@@ -53,7 +53,7 @@ import { ErrorSampleContextualInsight } from './error_sample_contextual_insight'
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
-import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -95,7 +95,10 @@ export function ErrorSampleDetails({
 
   const router = useApmRouter();
 
-  const { query } = useAnyOfApmParams(
+  const {
+    query,
+    path: { groupId },
+  } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
@@ -204,7 +207,18 @@ export function ErrorSampleDetails({
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
-          <OpenErrorInDiscoverButton dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton" />
+          <OpenInDiscover
+            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+            variant="button"
+            indexType="error"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName: error?.service.name,
+              errorGroupId: groupId,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
