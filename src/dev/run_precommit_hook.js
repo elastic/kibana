@@ -22,6 +22,7 @@ import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
+import { getExpectedCasing } from './precommit_hook/casing_check_config';
 
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
@@ -87,7 +88,8 @@ class FileCasingCheck extends PrecommitCheck {
     const exceptions = Object.values(rawExceptions).flatMap((teamObject) =>
       Object.keys(teamObject)
     );
-    await checkFileCasing(log, files, {
+
+    await checkFileCasing(log, files, getExpectedCasing, {
       packageRootDirs,
       exceptions,
     });
