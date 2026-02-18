@@ -8,4 +8,10 @@
  */
 
 export { DateRangePicker } from './date_range_picker';
-export type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
+export type {
+  DateRangePickerProps,
+  DateRangePickerOnChangeProps,
+  TimeWindowButtonsConfig,
+} from './date_range_picker';
+export { useDateRangePickerContext } from './date_range_picker_context';
+export type { DateRangePickerContextValue } from './date_range_picker_context';
