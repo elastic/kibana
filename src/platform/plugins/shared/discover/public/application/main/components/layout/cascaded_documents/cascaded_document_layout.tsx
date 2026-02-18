@@ -33,7 +33,10 @@ import {
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
-import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import {
+  type DataCascadeUiState,
+  useCascadedDocumentsContext,
+} from './cascaded_documents_provider';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -62,9 +65,7 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
       viewModeToggle,
       getDataCascadeUiState,
-      getDataGridUiStateMap,
       setDataCascadeUiState,
-      setDataGridUiState,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
@@ -106,10 +107,6 @@ const ESQLDataCascade = React.memo(
       }) => (
         <ESQLDataCascadeLeafCell
           {...props}
-          initialState={getDataGridUiStateMap()?.[cellId]}
-          onInitialStateChange={(initialState) => {
-            setDataGridUiState(cellId, initialState);
-          }}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
@@ -119,15 +116,59 @@ const ESQLDataCascade = React.memo(
           preventSizeChangePropagation={preventSizeChangePropagation}
         />
       ),
-      [getDataGridUiStateMap, dataView, props, setDataGridUiState]
+      [dataView, props]
     );
+
+    const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(() => {
+      const persistedCascadeUiState = getDataCascadeUiState();
+
+      if (!persistedCascadeUiState) {
+        return undefined;
+      }
+
+      // we need to verify that the rows persisted as "expanded" if any, are currently viable for rendering
+      // for instance a user might have applied a filter that removed a row from the data set,
+      // which the cascade component would not know about so in this scenario the current cascade ui state would be considered to be stale
+      // till there's actual interaction with the table after the fact.
+      // Here we leverage the visible rows for this check so we don't need to iterate over all rows in the data set.
+      const visibleRowData = cascadeGroupData.slice(
+        persistedCascadeUiState.range && Boolean(persistedCascadeUiState.range.endIndex)
+          ? // in the event that the expanded row is the only visible group within the viewport
+            // the start and end range index would have the same value,
+            // so we subtract 1 from the end index to use as the start index,
+            // in this scenario at most we run the check against 2 records
+            Math.min(
+              persistedCascadeUiState.range.startIndex,
+              persistedCascadeUiState.range.endIndex - 1
+            )
+          : 0,
+        persistedCascadeUiState.range?.endIndex
+          ? persistedCascadeUiState.range.endIndex + 1
+          : cascadeGroupData.length
+      );
+
+      const viableExpandedRows = Object.entries(persistedCascadeUiState.expanded ?? {}).reduce(
+        (acc, [rowId, isExpanded]) => {
+          if (visibleRowData.find((row) => row.id === rowId)) {
+            acc[rowId] = isExpanded;
+          }
+          return acc;
+        },
+        {} as Exclude<DataCascadeUiState['expanded'], true>
+      );
+
+      return {
+        ...persistedCascadeUiState,
+        expanded: viableExpandedRows,
+      };
+    }, [getDataCascadeUiState, cascadeGroupData]);
 
     const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialTableState']>(
       () => ({
-        expanded: getDataCascadeUiState()?.expanded,
-        rowSelection: getDataCascadeUiState()?.rowSelection,
+        expanded: dataCascadeUiState?.expanded,
+        rowSelection: dataCascadeUiState?.rowSelection,
       }),
-      [getDataCascadeUiState]
+      [dataCascadeUiState]
     );
 
     const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
@@ -161,9 +202,9 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
-        initialScrollOffset={getDataCascadeUiState()?.scrollOffset}
+        initialScrollOffset={dataCascadeUiState?.scrollOffset}
         initialTableState={initialTableState}
-        initialRect={getDataCascadeUiState()?.scrollRect}
+        initialRect={dataCascadeUiState?.scrollRect}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
