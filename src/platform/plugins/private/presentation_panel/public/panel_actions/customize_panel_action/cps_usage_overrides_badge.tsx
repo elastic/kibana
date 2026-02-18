@@ -30,6 +30,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
 import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
@@ -88,7 +89,7 @@ export class CpsUsageOverridesBadge
                     if (action) {
                       await action.execute({
                         ...context,
-                        trigger: { id: ON_OPEN_PANEL_MENU },
+                        trigger: triggers[ON_OPEN_PANEL_MENU],
                       });
                     }
                   } catch (error) {
