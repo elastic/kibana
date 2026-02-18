@@ -20,7 +20,6 @@ import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
 import { EngineDescriptorType } from './domain/definitions/saved_objects';
-import { EntityMaintainersTasksType } from './infra/saved_objects/entity_maintainers_client/types';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
@@ -69,9 +68,8 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
-    core.savedObjects.registerType(EntityMaintainersTasksType);
 
-    return {
+    return {  
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
         registerEntityMaintainerTask({
           taskManager: plugins.taskManager,

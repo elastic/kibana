@@ -417,11 +417,6 @@
     "timestampField",
     "type"
   ],
-  "entity-maintainers-tasks": [
-    "entity-maintainers-tasks",
-    "entity-maintainers-tasks.id",
-    "entity-maintainers-tasks.interval"
-  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",

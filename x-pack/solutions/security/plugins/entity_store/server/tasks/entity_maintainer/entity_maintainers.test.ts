@@ -9,19 +9,18 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { scheduleEntityMaintainerTasks, registerEntityMaintainerTask } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
+import { entityMaintainersTasksClient } from './entity_maintainers_tasks_client';
 
-const mockGetAll = jest.fn();
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
 const mockCreateInternalRepository = jest.fn();
 const mockGetStartServices = jest.fn();
 
-jest.mock('../../infra/saved_objects/entity_maintainers_client', () => ({
-  EntityMaintainersTasksClient: jest.fn().mockImplementation(() => ({
-    getAll: mockGetAll,
-    addOrUpdate: jest.fn().mockResolvedValue(undefined),
-  })),
-  EntityMaintainersTasksTypeName: 'entity-maintainers-tasks',
+jest.mock('./entity_maintainers_tasks_client', () => ({
+  entityMaintainersTasksClient: {
+    getAll: jest.fn(),
+    update: jest.fn(),
+  },
 }));
 
 function createMockDeps() {
@@ -33,10 +32,6 @@ function createMockDeps() {
   };
   const taskManagerSetup = {
     registerTaskDefinitions: mockRegisterTaskDefinitions.mockImplementation((defs) => defs),
-  };
-  const entityMaintainersTasksClient = {
-    getAll: mockGetAll,
-    addOrUpdate: jest.fn().mockResolvedValue(undefined),
   };
   const mockEsClient = {};
   const start = {
@@ -57,7 +52,6 @@ function createMockDeps() {
     request,
     taskManagerStart,
     taskManagerSetup,
-    entityMaintainersTasksClient,
     core,
   };
 }
@@ -84,8 +78,8 @@ describe('entity_maintainer task', () => {
 
   describe('scheduleEntityMaintainerTasks', () => {
     it('should call getAll and ensureScheduled for each task with correct id, taskType, and schedule', async () => {
-      const { logger, request, taskManagerStart, entityMaintainersTasksClient } = createMockDeps();
-      mockGetAll.mockResolvedValue([
+      const { logger, request, taskManagerStart } = createMockDeps();
+      jest.mocked(entityMaintainersTasksClient.getAll).mockReturnValue([
         { id: 'maintainer-a', interval: '1m' },
         { id: 'maintainer-b', interval: '5m' },
       ]);
@@ -95,10 +89,9 @@ describe('entity_maintainer task', () => {
         taskManager: taskManagerStart as any,
         namespace: 'default',
         request,
-        entityMaintainersTasksClient: entityMaintainersTasksClient as any,
       });
 
-      expect(mockGetAll).toHaveBeenCalledTimes(1);
+      expect(entityMaintainersTasksClient.getAll).toHaveBeenCalledTimes(1);
       expect(mockEnsureScheduled).toHaveBeenCalledTimes(2);
       expect(mockEnsureScheduled).toHaveBeenNthCalledWith(
         1,
@@ -125,9 +118,11 @@ describe('entity_maintainer task', () => {
     });
 
     it('should propagate and log error when getAll throws', async () => {
-      const { logger, request, taskManagerStart, entityMaintainersTasksClient } = createMockDeps();
+      const { logger, request, taskManagerStart } = createMockDeps();
       const err = new Error('getAll failed');
-      mockGetAll.mockRejectedValue(err);
+      jest.mocked(entityMaintainersTasksClient.getAll).mockImplementation(() => {
+        throw err;
+      });
 
       await expect(
         scheduleEntityMaintainerTasks({
@@ -135,7 +130,6 @@ describe('entity_maintainer task', () => {
           taskManager: taskManagerStart as any,
           namespace: 'default',
           request,
-          entityMaintainersTasksClient: entityMaintainersTasksClient as any,
         })
       ).rejects.toThrow('getAll failed');
 

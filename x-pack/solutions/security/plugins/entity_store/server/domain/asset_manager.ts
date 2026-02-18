@@ -25,7 +25,6 @@ import {
   type EngineDescriptorClient,
   type LogExtractionState,
 } from './definitions/saved_objects';
-import type { EntityMaintainersTasksClient } from '../infra/saved_objects/entity_maintainers_client';
 import type { LogExtractionBodyParams } from '../routes/constants';
 import {
   ENGINE_STATUS,
@@ -59,7 +58,6 @@ interface AssetManagerDependencies {
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
-  entityMaintainersTasksClient: EntityMaintainersTasksClient;
   security: SecurityPluginStart;
 }
 
@@ -71,7 +69,6 @@ export class AssetManager {
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
-  private readonly entityMaintainersTasksClient: EntityMaintainersTasksClient;
   private readonly security: SecurityPluginStart;
 
   constructor(deps: AssetManagerDependencies) {
@@ -82,7 +79,6 @@ export class AssetManager {
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
-    this.entityMaintainersTasksClient = deps.entityMaintainersTasksClient;
     this.security = deps.security;
   }
 
@@ -101,7 +97,6 @@ export class AssetManager {
         taskManager: this.taskManager,
         namespace: this.namespace,
         request,
-        entityMaintainersTasksClient: this.entityMaintainersTasksClient,
       });
     } catch (error) {
       this.logger.error('Error during entity store init:', error);

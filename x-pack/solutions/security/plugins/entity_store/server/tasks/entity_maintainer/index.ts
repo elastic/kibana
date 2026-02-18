@@ -17,8 +17,7 @@ import type {
 import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
-import { EntityMaintainersTasksClient } from '../../infra/saved_objects/entity_maintainers_client';
-import { EntityMaintainersTasksTypeName } from '../../infra/saved_objects/entity_maintainers_client/types';
+import { entityMaintainersTasksClient } from './entity_maintainers_tasks_client';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
@@ -33,17 +32,15 @@ export async function scheduleEntityMaintainerTasks({
   taskManager,
   namespace,
   request,
-  entityMaintainersTasksClient,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   namespace: string;
   request: KibanaRequest;
-  entityMaintainersTasksClient: EntityMaintainersTasksClient;
 }): Promise<void> {
   try {
     logger.debug(`Scheduling entity maintainer tasks`);
-    const tasks = await entityMaintainersTasksClient.getAll();
+    const tasks = entityMaintainersTasksClient.getAll();
     for (const { id, interval } of tasks) {
       await taskManager.ensureScheduled(
         {
@@ -78,17 +75,11 @@ export function registerEntityMaintainerTask({
   const { run, interval, initialState, description, id, setup } = config;
   const type = getTaskType(id);
 
+  entityMaintainersTasksClient.update({ id, interval });
+
   void core
     .getStartServices()
     .then(([start]) => {
-      const internalRepo = start.savedObjects.createInternalRepository([
-        EntityMaintainersTasksTypeName,
-      ]);
-      const maintainerTasksClient = new EntityMaintainersTasksClient(internalRepo, logger);
-      maintainerTasksClient.addOrUpdate({ id, interval }).catch((err) => {
-        logger.error(`Failed to register entity maintainer task in saved object: ${err?.message}`);
-      });
-
       taskManager.registerTaskDefinitions({
         [type]: {
           title,

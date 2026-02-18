@@ -8,6 +8,15 @@
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+export interface EntityMaintainerConfig {
+  interval: string;
+}
+
+export interface EntityMaintainerTaskEntry {
+  id: string;
+  interval: string;
+}
+
 export interface EntityMaintainerStatusMetadata {
   namespace: string;
   runs: number;
