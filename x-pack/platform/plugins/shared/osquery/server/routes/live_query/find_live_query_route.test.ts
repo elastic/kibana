@@ -53,9 +53,9 @@ describe('findLiveQueryRoute', () => {
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
-      getStartServices: jest.fn().mockResolvedValue([
-        { elasticsearch: { client: { asInternalUser: mockEsClient } } },
-      ]),
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: mockEsClient } } }]),
     } as unknown as OsqueryAppContext;
   });
 
@@ -133,10 +133,7 @@ describe('findLiveQueryRoute', () => {
 
     (getResultCountsForActions as jest.Mock).mockResolvedValue(
       new Map([
-        [
-          'query-1',
-          { totalRows: 42, respondedAgents: 3, successfulAgents: 2, errorAgents: 1 },
-        ],
+        ['query-1', { totalRows: 42, respondedAgents: 3, successfulAgents: 2, errorAgents: 1 }],
       ])
     );
 
