@@ -732,124 +732,106 @@ describe('run_all.ts', () => {
           });
         });
 
-        it(
-          'should only launch 1 process during warmup phase',
-          async () => {
-            process.env.JEST_WARMUP_DELAY_MS = '300';
+        it('should only launch 1 process during warmup phase', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '300';
 
-            const processes: any[] = [];
-            mockSpawn.mockImplementation(() => {
-              const proc = new EventEmitter() as any;
-              proc.stdout = new EventEmitter();
-              proc.stderr = new EventEmitter();
-              processes.push(proc);
-              return proc;
-            });
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
 
-            const runPromise = runJestAll().catch(() => {});
-            await waitMs(50);
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
 
-            expect(mockSpawn).toHaveBeenCalledTimes(1);
+          expect(mockSpawn).toHaveBeenCalledTimes(1);
 
-            await waitMs(350);
-            expect(mockSpawn).toHaveBeenCalledTimes(3);
+          await waitMs(350);
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
 
-            for (const proc of processes) completeProcess(proc);
-            await runPromise;
-          },
-          10_000
-        );
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
 
-        it(
-          'should log warmup messages when delay elapses',
-          async () => {
-            process.env.JEST_WARMUP_DELAY_MS = '300';
+        it('should log warmup messages when delay elapses', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '300';
 
-            const processes: any[] = [];
-            mockSpawn.mockImplementation(() => {
-              const proc = new EventEmitter() as any;
-              proc.stdout = new EventEmitter();
-              proc.stderr = new EventEmitter();
-              processes.push(proc);
-              return proc;
-            });
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
 
-            const runPromise = runJestAll().catch(() => {});
-            await waitMs(400);
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(400);
 
-            expect(mockLog.info).toHaveBeenCalledWith(
-              expect.stringContaining('[jest-warmup] Starting 1 process to warm transform cache')
-            );
-            expect(mockLog.info).toHaveBeenCalledWith(
-              expect.stringContaining('[jest-warmup] Warmup delay elapsed')
-            );
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] Starting 1 process to warm transform cache')
+          );
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] Warmup delay elapsed')
+          );
 
-            for (const proc of processes) completeProcess(proc);
-            await runPromise;
-          },
-          10_000
-        );
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
 
-        it(
-          'should ramp immediately when first config completes before delay',
-          async () => {
-            process.env.JEST_WARMUP_DELAY_MS = '60000';
+        it('should ramp immediately when first config completes before delay', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '60000';
 
-            const processes: any[] = [];
-            mockSpawn.mockImplementation(() => {
-              const proc = new EventEmitter() as any;
-              proc.stdout = new EventEmitter();
-              proc.stderr = new EventEmitter();
-              processes.push(proc);
-              return proc;
-            });
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
 
-            const runPromise = runJestAll().catch(() => {});
-            await waitMs(50);
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
 
-            expect(mockSpawn).toHaveBeenCalledTimes(1);
+          expect(mockSpawn).toHaveBeenCalledTimes(1);
 
-            completeProcess(processes[0]);
-            await waitMs(50);
+          completeProcess(processes[0]);
+          await waitMs(50);
 
-            expect(mockSpawn).toHaveBeenCalledTimes(3);
-            expect(mockLog.info).toHaveBeenCalledWith(
-              expect.stringContaining('[jest-warmup] First config completed')
-            );
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] First config completed')
+          );
 
-            for (let i = 1; i < processes.length; i++) completeProcess(processes[i]);
-            await runPromise;
-          },
-          10_000
-        );
+          for (let i = 1; i < processes.length; i++) completeProcess(processes[i]);
+          await runPromise;
+        }, 10_000);
 
-        it(
-          'should skip warmup when JEST_WARMUP_DELAY_MS=0',
-          async () => {
-            process.env.JEST_WARMUP_DELAY_MS = '0';
+        it('should skip warmup when JEST_WARMUP_DELAY_MS=0', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '0';
 
-            const processes: any[] = [];
-            mockSpawn.mockImplementation(() => {
-              const proc = new EventEmitter() as any;
-              proc.stdout = new EventEmitter();
-              proc.stderr = new EventEmitter();
-              processes.push(proc);
-              return proc;
-            });
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
 
-            const runPromise = runJestAll().catch(() => {});
-            await waitMs(50);
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
 
-            expect(mockSpawn).toHaveBeenCalledTimes(3);
-            expect(mockLog.info).not.toHaveBeenCalledWith(
-              expect.stringContaining('[jest-warmup]')
-            );
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
+          expect(mockLog.info).not.toHaveBeenCalledWith(expect.stringContaining('[jest-warmup]'));
 
-            for (const proc of processes) completeProcess(proc);
-            await runPromise;
-          },
-          10_000
-        );
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
       });
     });
 
