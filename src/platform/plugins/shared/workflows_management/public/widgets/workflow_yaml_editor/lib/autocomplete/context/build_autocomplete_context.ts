@@ -19,6 +19,8 @@ import {
   isInScheduledTriggerWithBlock,
   isInStepsContext,
   isInTriggersContext,
+  isInWorkflowInputsByPosition,
+  isInWorkflowInputsPath,
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
@@ -144,6 +146,8 @@ export function buildAutocompleteContext({
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     isInTriggersContext: isInTriggersContext(path),
     isInStepsContext: isInStepsContext(path),
+    isInWorkflowInputsContext:
+      isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,

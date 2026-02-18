@@ -16,28 +16,6 @@ import {
 } from '../../../../../../common/lib/regex';
 import { parsePath } from '../../../../../../common/lib/zod';
 
-/**
- * Keys that are not workflow inputs. Used to avoid emitting 'workflow-inputs' for
- * step-level or other parsers' keys. getWorkflowInputsSuggestions returns null when
- * not in a workflow.execute step, so other suggestion providers still run.
- */
-const WORKFLOW_STEP_KNOWN_KEYS = [
-  'foreach',
-  'type',
-  'connector-id',
-  'workflow-id',
-  'inputs',
-  'name',
-  'with',
-  'on-failure',
-  'condition',
-  'url',
-  'method',
-  'duration',
-  'sources',
-  'branches',
-] as const;
-
 interface BaseLineParseResult {
   fullKey: string;
   matchType: string;
@@ -294,32 +272,6 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: null,
     };
-  }
-
-  // Check for input key-value pairs in inputs section
-  // This must come AFTER other checks like @, foreach-variable, type, etc.
-  // to avoid false matches
-  const workflowInputKeyMatch = lineUpToCursor.match(
-    /^(?<prefix>\s+)(?<key>[a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(?<value>.*)$/
-  );
-  if (workflowInputKeyMatch && workflowInputKeyMatch.groups) {
-    const key = workflowInputKeyMatch.groups.key;
-    // Don't match known keywords that should be handled by other parsers
-    const isKnownKey = WORKFLOW_STEP_KNOWN_KEYS.some(
-      (known) => key.toLowerCase() === known.toLowerCase()
-    );
-    if (!isKnownKey) {
-      const inputValue = workflowInputKeyMatch.groups?.value.trim() ?? '';
-      return {
-        matchType: 'workflow-inputs',
-        fullKey: inputValue || key,
-        match: workflowInputKeyMatch,
-        valueStartIndex:
-          (workflowInputKeyMatch.groups.prefix?.length || 0) +
-          (workflowInputKeyMatch.groups.key?.length || 0) +
-          2, // +2 for ": "
-      };
-    }
   }
 
   // Check for Liquid syntax completion (e.g., "{% ")

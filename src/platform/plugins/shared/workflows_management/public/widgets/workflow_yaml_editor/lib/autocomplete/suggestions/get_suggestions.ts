@@ -138,6 +138,16 @@ export async function getSuggestions(
     return matchTypeSuggestions;
   }
 
+  // Path-based workflow inputs detection: when the YAML AST path indicates
+  // we're inside `with.inputs` of a workflow step, try input suggestions
+  // even if the line parser didn't produce a 'workflow-inputs' matchType.
+  if (autocompleteContext.isInWorkflowInputsContext) {
+    const inputsSuggestions = await getWorkflowInputsSuggestions(autocompleteContext);
+    if (inputsSuggestions !== null) {
+      return inputsSuggestions;
+    }
+  }
+
   // JSON Schema autocompletion for inputs.properties
   // e.g.
   // inputs:

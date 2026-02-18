@@ -281,6 +281,7 @@ function shouldProvidePropertyKeySuggestions(
 /**
  * Get JSON Schema autocompletion suggestions
  */
+// eslint-disable-next-line complexity
 export function getJsonSchemaSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): monaco.languages.CompletionItem[] {
@@ -300,7 +301,21 @@ export function getJsonSchemaSuggestions(
           }
           const propertyMatch = prevLine.match(/^\s{4}([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/);
           if (propertyMatch && indentLevel >= 6) {
-            inferredPath = ['inputs', 'properties', propertyMatch[1]];
+            // Verify this 4-space key is actually under `properties:` by walking up further
+            let isUnderProperties = false;
+            for (let parentNum = prevLineNum - 1; parentNum >= 1; parentNum--) {
+              const parentLine = autocompleteContext.model.getLineContent(parentNum);
+              if (parentLine.trim() !== '') {
+                const parentIndent = parentLine.match(/^(\s*)/)?.[1]?.length ?? 0;
+                if (parentIndent <= 2) {
+                  isUnderProperties = !!parentLine.match(/^\s{2}properties\s*:/);
+                  break;
+                }
+              }
+            }
+            if (isUnderProperties) {
+              inferredPath = ['inputs', 'properties', propertyMatch[1]];
+            }
             break;
           }
           if (prevLine.match(/^\s{0,2}[a-zA-Z]/)) {

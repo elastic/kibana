@@ -96,28 +96,47 @@ function createInputSuggestion(
 }
 
 /**
- * Gets workflow inputs suggestions for autocomplete
- * Used when typing in the inputs: section of a workflow.execute or workflow.executeAsync step
- * Returns null when not in a workflow step context so other suggestion providers (e.g. JSON Schema) can run.
+ * Extracts the input key prefix from a line inside a `with.inputs` block.
+ * For `  myIn` returns `'myIn'`, for `  myInput: value` returns `'myInput'`.
+ */
+function extractInputKeyPrefix(lineUpToCursor: string): string {
+  const keyMatch = lineUpToCursor.match(/^\s*([a-zA-Z_][a-zA-Z0-9_-]*)/);
+  return keyMatch?.[1] ?? '';
+}
+
+/**
+ * Gets workflow inputs suggestions for autocomplete.
+ * Used when typing in the inputs: section of a workflow.execute or workflow.executeAsync step.
+ *
+ * Detection uses two complementary signals:
+ * - `matchType === 'workflow-inputs'`: line parser matched the `inputs:` key directly
+ * - `isInWorkflowInputsContext`: YAML AST path indicates cursor is inside `with.inputs`
+ *
+ * Returns null when not in a workflow step context so other suggestion providers
+ * (e.g. JSON Schema) can run.
  */
 export async function getWorkflowInputsSuggestions(
   autocompleteContext: AutocompleteContext
 ): Promise<monaco.languages.CompletionItem[] | null> {
-  const { focusedStepInfo, lineParseResult, range, workflows } = autocompleteContext;
+  const { focusedStepInfo, lineParseResult, lineUpToCursor, range, workflows } =
+    autocompleteContext;
 
-  if (
-    !focusedStepInfo ||
-    (focusedStepInfo.stepType !== 'workflow.execute' &&
-      focusedStepInfo.stepType !== 'workflow.executeAsync')
-  ) {
+  const isWorkflowStep =
+    focusedStepInfo?.stepType === 'workflow.execute' ||
+    focusedStepInfo?.stepType === 'workflow.executeAsync';
+
+  if (!focusedStepInfo || !isWorkflowStep) {
     return null;
   }
 
-  if (lineParseResult?.matchType !== 'workflow-inputs') {
+  const isInputsMatchType = lineParseResult?.matchType === 'workflow-inputs';
+  const isInputsPath = autocompleteContext.isInWorkflowInputsContext;
+
+  if (!isInputsMatchType && !isInputsPath) {
     return null;
   }
 
-  const workflowIdProp = focusedStepInfo.propInfos['workflow-id'];
+  const workflowIdProp = focusedStepInfo.propInfos['with.workflow-id'];
   if (!workflowIdProp || !isScalar(workflowIdProp.valueNode)) {
     return [];
   }
@@ -132,7 +151,9 @@ export async function getWorkflowInputsSuggestions(
     return [];
   }
 
-  const searchPrefix = lineParseResult?.fullKey || '';
+  const searchPrefix = isInputsMatchType
+    ? lineParseResult?.fullKey || ''
+    : extractInputKeyPrefix(lineUpToCursor);
   const lowerSearchPrefix = searchPrefix.toLowerCase();
 
   const suggestions: monaco.languages.CompletionItem[] = [];

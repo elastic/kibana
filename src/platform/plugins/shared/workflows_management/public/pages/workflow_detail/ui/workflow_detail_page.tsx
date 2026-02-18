@@ -40,7 +40,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
   const [loadConnectors, { isLoading: isLoadingConnectors }] =
     useAsyncThunkState(loadConnectorsThunk);
-  const [loadWorkflows, { isLoading: isLoadingWorkflows }] = useAsyncThunkState(loadWorkflowsThunk);
+  const [loadWorkflows] = useAsyncThunkState(loadWorkflowsThunk);
   const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();

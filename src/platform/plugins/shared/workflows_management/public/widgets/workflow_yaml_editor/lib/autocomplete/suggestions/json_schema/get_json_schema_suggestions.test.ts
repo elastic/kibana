@@ -42,6 +42,7 @@ describe('getJsonSchemaSuggestions', () => {
       isInTriggersContext: false,
       isInScheduledTriggerWithBlock: false,
       isInStepsContext: false,
+      isInWorkflowInputsContext: false,
       dynamicConnectorTypes: null,
       workflows: {
         workflows: {},
@@ -140,15 +141,16 @@ describe('getJsonSchemaSuggestions', () => {
     it('should infer path from indentation when path is empty on empty line after property', () => {
       const mockModel = {
         getLineContent: (lineNum: number) => {
-          if (lineNum === 1) return '    x:';
-          if (lineNum === 2) return '      ';
+          if (lineNum === 1) return '  properties:';
+          if (lineNum === 2) return '    x:';
+          if (lineNum === 3) return '      ';
           return '';
         },
       } as any;
 
       const context = createMockContext([], '      ', '      ');
       context.model = mockModel;
-      context.position = { lineNumber: 2, column: 7 } as any;
+      context.position = { lineNumber: 3, column: 7 } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
 

@@ -47,6 +47,7 @@ export interface AutocompleteContext {
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
+  isInWorkflowInputsContext: boolean;
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;

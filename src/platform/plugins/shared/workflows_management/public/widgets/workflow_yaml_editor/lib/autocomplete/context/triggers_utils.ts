@@ -9,6 +9,7 @@
 
 import type { Document, Node, Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, visit } from 'yaml';
+import type { StepInfo } from '../../../../../entities/workflows/store';
 
 /**
  * Detect if the current cursor position is inside a triggers block
@@ -21,6 +22,36 @@ export function isInTriggersContext(path: (string | number)[]): boolean {
 
 export function isInStepsContext(path: (string | number)[]): boolean {
   return path.length > 0 && path[0] === 'steps';
+}
+
+/**
+ * Detect if the cursor is inside a `with.inputs` block in the YAML path.
+ * Used to structurally identify workflow input key-value pairs instead of
+ * relying on text-based deny-lists in the line parser.
+ */
+export function isInWorkflowInputsPath(path: (string | number)[]): boolean {
+  for (let i = 0; i < path.length - 1; i++) {
+    if (path[i] === 'with' && path[i + 1] === 'inputs') {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Position-based fallback for detecting `with.inputs` context.
+ * Used when `getPathAtOffset` returns an empty path (e.g. cursor is on a blank
+ * line right after `inputs:` with no value). Checks whether the focused step
+ * has a `with.inputs` prop and the cursor is positioned after that key.
+ */
+export function isInWorkflowInputsByPosition(
+  focusedStepInfo: StepInfo | null,
+  absoluteOffset: number
+): boolean {
+  if (!focusedStepInfo) return false;
+  const inputsProp = focusedStepInfo.propInfos['with.inputs'];
+  if (!inputsProp?.keyNode?.range) return false;
+  return absoluteOffset > inputsProp.keyNode.range[2];
 }
 
 /**
