@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamsTimeUnit } from '../../helpers/format_size_units';
+import type { StreamsTimeUnit } from '../../../../stream_management/data_management/stream_detail_lifecycle/helpers/format_size_units';
 
 /**
  * Time units offered by the UI selectors by default.

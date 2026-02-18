@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { getRegularEcsField } from '@kbn/streams-schema';
-import { getFormattedError } from '../../../util/errors';
+import { getFormattedError } from '../../../../util/errors';
 import { useControls } from './hooks/use_controls';
 import { useKibana } from '../../../../hooks/common/use_kibana';
 import type { SchemaEditorProps, SchemaField } from './types';

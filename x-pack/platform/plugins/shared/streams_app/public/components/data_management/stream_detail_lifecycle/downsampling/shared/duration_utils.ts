@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { splitSizeAndUnits, toMillis } from '../../helpers/format_size_units';
+import {
+  splitSizeAndUnits,
+  toMillis,
+} from '../../../../stream_management/data_management/stream_detail_lifecycle/helpers/format_size_units';
 import type { PreservedTimeUnit } from './time_unit_types';
 
 export const toMilliseconds = (value: string, unit: PreservedTimeUnit): number => {

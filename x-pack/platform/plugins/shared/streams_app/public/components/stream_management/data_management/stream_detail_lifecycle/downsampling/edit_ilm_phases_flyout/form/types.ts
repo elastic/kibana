@@ -6,7 +6,10 @@
  */
 
 import type { IlmPolicyHotPhase, IlmPolicyPhases } from '@kbn/streams-schema';
-import type { PreservedTimeUnit, TimeUnit } from '../../shared';
+import type {
+  PreservedTimeUnit,
+  TimeUnit,
+} from '../../../../../../data_management/stream_detail_lifecycle/downsampling/shared';
 
 export type { PreservedTimeUnit, TimeUnit };
 

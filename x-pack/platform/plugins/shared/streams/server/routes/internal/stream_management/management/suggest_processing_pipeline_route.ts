@@ -43,6 +43,7 @@ import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
 import { handleProcessingDissectSuggestions } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
+import type { StreamsClient } from '../../../../lib/stream_management/client';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };

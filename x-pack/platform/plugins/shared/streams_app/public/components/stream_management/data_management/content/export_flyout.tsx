@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../hooks/common/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/common/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../../../hooks/common/use_streams_privileges';
-import { getFormattedError } from '../../../../../util/errors';
+import { getFormattedError } from '../../../../util/errors';
 import { ContentPackObjectsList } from './objects_list';
 import { previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getErrorMessage } from '../errors/parse_error';
+import { getErrorMessage } from '../../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DeletePipelineOptions {

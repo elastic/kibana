@@ -18,7 +18,10 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from
 
 import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import {
+  getBoundsHelpTextValues,
+  getUnitSelectOptions,
+} from '../../../../../../../data_management/stream_detail_lifecycle/downsampling/shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';

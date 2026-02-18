@@ -16,7 +16,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import {
+  getBoundsHelpTextValues,
+  getUnitSelectOptions,
+} from '../../../../../../../data_management/stream_detail_lifecycle/downsampling/shared';
 import { getRelativeBoundsInMs, toMilliseconds } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
