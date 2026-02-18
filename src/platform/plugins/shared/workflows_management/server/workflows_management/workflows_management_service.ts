@@ -51,7 +51,10 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
 
-import { getWorkflowExecution } from './lib/get_workflow_execution';
+import {
+  getWorkflowExecution,
+  transformToWorkflowExecutionDetailDto,
+} from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
@@ -100,6 +103,7 @@ export class WorkflowsService {
   private getActionsClientWithRequest: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private getWrorkflowExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>;
 
   constructor(
     logger: Logger,
@@ -111,6 +115,8 @@ export class WorkflowsService {
       getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
       getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
+    this.getWrorkflowExecutionEngine = () =>
+      getPluginsStart().then((plugins) => plugins.workflowsExecutionEngine);
 
     void this.initialize(getCoreStart, getPluginsStart);
   }
@@ -994,6 +1000,27 @@ export class WorkflowsService {
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
+    const workflowExecutionEngine = await this.getWrorkflowExecutionEngine();
+    const workflowExecution = await workflowExecutionEngine.getWorkflowExecution(
+      executionId,
+      spaceId
+    );
+
+    if (!workflowExecution) {
+      return null;
+    }
+
+    const stepExecutionsResult = await workflowExecutionEngine.getStepExecutions(
+      executionId,
+      spaceId
+    );
+    const stepExecutions = stepExecutionsResult ? Object.values(stepExecutionsResult) : [];
+    return transformToWorkflowExecutionDetailDto(
+      executionId,
+      workflowExecution,
+      stepExecutions,
+      this.logger
+    );
     return getWorkflowExecution({
       esClient: this.esClient,
       logger: this.logger,
@@ -1063,6 +1090,19 @@ export class WorkflowsService {
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
+
+    return this.getWrorkflowExecutionEngine().then((workflowExecutionEngine) =>
+      workflowExecutionEngine.searchWorkflowExecutions({
+        query: {
+          bool: {
+            must,
+          },
+        },
+        size,
+        from,
+        page,
+      })
+    );
 
     return searchWorkflowExecutions({
       esClient: this.esClient,
