@@ -16,7 +16,7 @@ Maintained by the Security Solution team
 To (interactively) run unit tests with code coverage, run the following command:
 
 ```sh
-cd $KIBANA_HOME && node scripts/jest --watch x-pack/platform/packages/shared/kbn-elastic-assistant-common --coverage
+cd $KIBANA_HOME && node scripts/jest.ts --watch x-pack/platform/packages/shared/kbn-elastic-assistant-common --coverage
 ```
 
 ## OpenAPI Codegen

@@ -247,13 +247,13 @@ Note: Docker needs to be running to run these tests.
 Run the tests from the Kibana root folder with:
 
 ```sh
-node scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node scripts/jest_integration.ts --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-started/debugging) allows inspecting Elasticsearch indices. To do this, add a `debugger;` statement in the test (cf. [Jest documentation](https://jestjs.io/docs/troubleshooting)) and run `node` with `--inspect` or `--inspect-brk`:
 
 ```sh
-node --inspect scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node --inspect scripts/jest_integration.ts --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 #### Observability onboarding nightly tests

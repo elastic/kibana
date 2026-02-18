@@ -269,7 +269,7 @@ Control verbosity with log levels: `verbose`, `debug`, `info`, `error`.
 Run the Jest tests:
 
 ```sh
-node scripts/jest --config ./src/platform/packages/shared/kbn-synthtrace/jest.config.js
+node scripts/jest.ts --config ./src/platform/packages/shared/kbn-synthtrace/jest.config.js
 ```
 
 ## TypeScript

@@ -7,5 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/test').runJest();
+process.argv.push('--runInBand');
+
+const { runJest } = require('./jest.ts');
+
+runJest('jest.integration.config.js').catch((error: unknown) => {
+  if (error instanceof Error) {
+    console.error(error.stack || error.message);
+    process.exit((error as Error & { exitCode?: number }).exitCode ?? 1);
+  }
+
+  console.error(error);
+  process.exit(1);
+});

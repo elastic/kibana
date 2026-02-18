@@ -111,7 +111,7 @@ info, refer to [Set up transforms](https://www.elastic.co/guide/en/elasticsearch
 ### Jest tests
 
 ```
-node scripts/jest --config=x-pack/platform/plugins/private/transform/jest.config.js
+node scripts/jest.ts --config=x-pack/platform/plugins/private/transform/jest.config.js
 ```
 
 ### Functional tests
@@ -127,8 +127,8 @@ Functional tests are broken up into independent groups with their own configurat
 Test server and runner need to be pointed to the configuration to run. The basic
 commands are
 
-    node scripts/functional_tests_server.js --config PATH_TO_CONFIG
-    node scripts/functional_test_runner.js --config PATH_TO_CONFIG
+    node scripts/functional_tests_server --config PATH_TO_CONFIG
+    node scripts/functional_test_runner --config PATH_TO_CONFIG
 
 With PATH_TO_CONFIG and other options as follows.
 
@@ -168,6 +168,6 @@ With PATH_TO_CONFIG and other options as follows.
     We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of Transforms (for example, users relying on screen readers).
 
          node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts
-         node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=transform
+         node scripts/functional_test_runner --config src/platform/test/accessibility/config.ts --grep=transform
 
     Transform accessibility tests are located in `x-pack/platform/test/accessibility/apps/group2`.

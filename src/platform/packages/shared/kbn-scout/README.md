@@ -429,7 +429,7 @@ We welcome contributions to improve and extend `kbn-scout`. This guide will help
 Make sure to run unit tests before opening the PR:
 
 ```bash
-node scripts/jest --config src/platform/packages/shared/kbn-scout/jest.config.js
+node scripts/jest.ts --config src/platform/packages/shared/kbn-scout/jest.config.js
 ```
 
 #### Setting Up the Environment

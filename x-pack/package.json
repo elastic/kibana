@@ -8,7 +8,7 @@
     "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
     "start": "node ../scripts/kibana --dev",
-    "test:jest": "node ../scripts/jest"
+    "test:jest": "node ../scripts/jest.ts"
   },
   "kibana": {
     "build": {

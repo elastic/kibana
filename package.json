@@ -64,8 +64,8 @@
     "test:ftr": "node --no-experimental-require-module scripts/functional_tests",
     "test:ftr:runner": "node --no-experimental-require-module scripts/functional_test_runner",
     "test:ftr:server": "node --no-experimental-require-module scripts/functional_tests_server",
-    "test:jest": "node --no-experimental-require-module scripts/jest",
-    "test:jest_integration": "node --no-experimental-require-module scripts/jest_integration",
+    "test:jest": "node scripts/jest.ts",
+    "test:jest_integration": "node scripts/jest_integration.ts",
     "test:type_check": "node --no-experimental-require-module scripts/type_check"
   },
   "repository": {

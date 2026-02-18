@@ -68,7 +68,7 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 The tests for `@kbn/handlebars` are integrated into the regular test suite of Kibana and are all jest tests. To run them all, simply do:
 
 ```sh
-node scripts/jest src/platform/packages/private/kbn-handlebars
+node scripts/jest.ts src/platform/packages/private/kbn-handlebars
 ```
 
 By default, each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. To isolate a test run to just one or the other, you can use the following environment variables:

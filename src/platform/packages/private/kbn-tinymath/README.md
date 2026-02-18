@@ -69,7 +69,7 @@ using `yarn build` from the `src/platform/packages/private/kbn-tinymath` directo
 
 ### Running tests
 
-To test `@kbn/tinymath` from Kibana, run `node scripts/jest --config src/platform/packages/private/kbn-tinymath/jest.config.js` from
+To test `@kbn/tinymath` from Kibana, run `node scripts/jest.ts --config src/platform/packages/private/kbn-tinymath/jest.config.js` from
 the top level of Kibana.
 
 To test grammar changes it is required to run a build task before the test suite.
