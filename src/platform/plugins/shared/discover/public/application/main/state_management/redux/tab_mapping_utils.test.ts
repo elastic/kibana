@@ -103,6 +103,7 @@ describe('tab mapping utils', () => {
           },
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
+            "cascadedDocumentsMap": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -195,6 +196,7 @@ describe('tab mapping utils', () => {
           },
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
+            "cascadedDocumentsMap": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
