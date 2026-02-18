@@ -33,12 +33,3 @@ responses:
                 serverInfo:
                   name: "elastic-mcp-server"
                   version: "0.0.1"
-x-codeSamples:
-- lang: curl
-  source: |
-    curl \
-      -X GET "${KIBANA_URL}/api/agent_builder/mcp" \
-      -H "Authorization: ApiKey ${API_KEY}"
-- lang: Console
-  source: |
-    GET kbn://api/agent_builder/mcp
