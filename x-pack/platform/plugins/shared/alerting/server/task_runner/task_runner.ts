@@ -456,12 +456,19 @@ export class TaskRunner<
     const alertUuidsToAutoUnmute: string[] = [];
     if (alertsToAutoUnmute.length > 0) {
       for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
-        this.logger.info(
-          `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
-        );
         const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
         if (uuid) {
           alertUuidsToAutoUnmute.push(uuid);
+          this.logger.info(
+            `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+          );
+          this.alertingEventLogger.logAlert({
+            action: 'auto-unsnooze',
+            id: alertInstanceId,
+            uuid,
+            message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
+            flapping: false,
+          });
         } else {
           this.logger.warn(
             `Could not resolve UUID for auto-unmute alert '${alertInstanceId}' in rule '${rule.id}'`

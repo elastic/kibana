@@ -118,7 +118,7 @@ describe('unmuteInstance()', () => {
     );
   });
 
-  test('skips unmuting when alert instance not muted', async () => {
+  test('cancels conditional snooze when alert instance not in mutedInstanceIds', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -135,8 +135,13 @@ describe('unmuteInstance()', () => {
     });
 
     await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(alertsService.clearSnoozeAndUnmuteAlertInstances).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(alertsService.clearSnoozeAndUnmuteAlertInstances).toHaveBeenCalledWith({
+      ruleId: '1',
+      alertInstanceIds: ['2'],
+      indices: ['.alerts-default'],
+      logger: rulesClientParams.logger,
+    });
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
   test('skips unmuting when alert is muted', async () => {
@@ -236,7 +241,74 @@ describe('unmuteInstance()', () => {
   });
 
   describe('auditLogger', () => {
-    test('logs audit event when unmuting an alert', async () => {
+    test('logs UNMUTE_ALERT audit event when unmuting a simple-muted alert', async () => {
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fake_rule_name',
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: ['2'],
+        },
+        version: '123',
+        references: [],
+      });
+      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_alert_unmute',
+            outcome: 'unknown',
+          }),
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fake_rule_name' },
+          },
+        })
+      );
+    });
+
+    test('logs UNMUTE_ALERT audit event when muteAll short-circuits unmute', async () => {
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fake_rule_name',
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: [],
+          muteAll: true,
+        },
+        version: '123',
+        references: [],
+      });
+
+      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_alert_unmute',
+            outcome: 'unknown',
+          }),
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fake_rule_name' },
+          },
+        })
+      );
+      expect(alertsService.clearSnoozeAndUnmuteAlertInstances).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    test('logs UNSNOOZE_ALERT audit event when cancelling a conditional snooze', async () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -257,7 +329,7 @@ describe('unmuteInstance()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_alert_unmute',
+            action: 'rule_alert_unsnooze',
             outcome: 'unknown',
           }),
           kibana: {
@@ -267,7 +339,50 @@ describe('unmuteInstance()', () => {
       );
     });
 
-    test('logs audit event when not authorised to unmute an alert', async () => {
+    test('logs UNMUTE_ALERT failure audit event when not authorised for simple unmute', async () => {
+      const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fake_rule_name',
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: ['2'],
+        },
+        version: '123',
+        references: [],
+      });
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_alert_unmute',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: RULE_SAVED_OBJECT_TYPE,
+              name: 'fake_rule_name',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
+
+    test('logs UNSNOOZE_ALERT failure audit event when not authorised for snooze cancel', async () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -292,7 +407,7 @@ describe('unmuteInstance()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'rule_alert_unmute',
+            action: 'rule_alert_unsnooze',
             outcome: 'failure',
           }),
           kibana: {
