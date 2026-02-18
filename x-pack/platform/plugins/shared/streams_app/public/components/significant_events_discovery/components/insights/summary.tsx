@@ -102,14 +102,8 @@ export function Summary({ count }: { count: number }) {
     setInsights(null);
   };
 
-  const onCancelClick = async () => {
-    await cancelTask();
-  };
-
   const isGenerateButtonPending =
-    task?.status === TaskStatus.InProgress ||
-    isCancellingTask ||
-    isSchedulingTask;
+    task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
 
   if (insights && insights.length > 0) {
     return (
@@ -163,7 +157,7 @@ export function Summary({ count }: { count: number }) {
             style={{ minHeight: '30vh', minWidth: '40vh' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="createAdvancedJob" size="xxl" />
+              <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
@@ -216,7 +210,7 @@ export function Summary({ count }: { count: number }) {
 
                 {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
-                    onClick={onCancelClick}
+                    onClick={cancelTask}
                     isDisabled={isCancellingTask}
                     data-test-subj="significant_events_cancel_insights_generation_button"
                   >
