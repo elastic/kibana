@@ -123,25 +123,18 @@ export async function rollbackAvailableCheck(
     };
   }
 
-  const packageVersion = packageSO?.attributes.version;
-  if (
-    packagePolicySOs
-      .filter((so) => !so.id.endsWith(':prev'))
-      .some((so) => so.attributes.package?.version !== packageVersion)
-  ) {
-    return {
-      isAvailable: false,
-      reason: `Rollback not available because some integration policies are not upgraded to version ${packageVersion}`,
-    };
-  }
-
   if (packagePolicySOs.length > 0) {
-    const policyIdsWithNoPreviousVersion = policyIds.filter((soId) => {
-      if (!soId.endsWith(':prev')) {
-        return !policyIds.includes(`${soId}:prev`);
-      }
-      return false;
-    });
+    const policyIdsWithNoPreviousVersion = packagePolicySOs
+      .filter((so) => {
+        if (!so.id.endsWith(':prev')) {
+          return (
+            so.attributes.package?.version !== previousVersion &&
+            !policyIds.includes(`${so.id}:prev`)
+          );
+        }
+        return false;
+      })
+      .map((so) => so.id);
     if (policyIdsWithNoPreviousVersion.length > 0) {
       return {
         isAvailable: false,
@@ -261,7 +254,8 @@ export async function rollbackInstallation(options: {
     // Roll back package policies.
     const rollbackResult = await packagePolicyService.rollback(
       savedObjectsClient,
-      packagePolicySOs
+      packagePolicySOs,
+      previousVersion
     );
 
     // Roll back package.
