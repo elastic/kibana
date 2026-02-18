@@ -4,96 +4,52 @@ navigation_title: Browser auth
 
 # Browser authentication in Scout [scout-browser-auth]
 
-Scout uses SAML as a unified authentication protocol across deployment types. This guide explains how to authenticate Playwright UI tests using the `browserAuth` fixture.
+Use the `browserAuth` fixture to authenticate UI tests. Scout uses SAML so the same approach works across deployment types.
 
-## Log in with the `browserAuth` fixture [scout-browser-auth-login]
+## Log in with `browserAuth` [scout-browser-auth-login]
 
-The `browserAuth` fixture provides convenience methods to authenticate with different user roles:
+Common helpers:
 
-| Method | Description |
-| --- | --- |
-| `loginAsAdmin()` | Logs in with `admin` (full access) |
-| `loginAsPrivilegedUser()` | Logs in with a privileged non-admin role (resolved by environment) |
-| `loginAsViewer()` | Logs in with `viewer` (read-only) |
-| `loginAs(role)` | Logs in with a specific built-in role name |
-| `loginWithCustomRole(roleDescriptor)` | Creates a custom role and logs in with that role |
-
-Basic usage:
+- `loginAsViewer()`
+- `loginAsPrivilegedUser()`
+- `loginAsAdmin()` (avoid unless required)
+- `loginAs(role)`
+- `loginWithCustomRole(roleDescriptor)`
 
 ```ts
-import { tags } from '@kbn/scout';
-import { test } from '../fixtures';
-
-test.describe('My sample test suite', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    // ... navigate, setup, etc.
-  });
-
-  test('my sample test', async ({ pageObjects }) => {
-    // browser is already authenticated
-  });
+test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  await browserAuth.loginAsViewer();
+  await pageObjects.dashboard.goto();
 });
 ```
 
-:::::{note}
-Local vs Elastic Cloud:
+::::::{note}
+Local runs can create on-demand identities via a trusted mock IdP. Cloud runs authenticate using pre-provisioned users (internal provisioning details live in internal AppEx QA documentation).
+::::::
 
-- Local (stateful/serverless): Scout can create on-demand SAML identities using a trusted mock IdP.
-- Elastic Cloud: Scout authenticates with real Elastic Cloud accounts using credentials from `<KIBANA_ROOT>/.ftr/role_users.json` (or `<KIBANA_ROOT>/.scout/role_users.json`), via the real IdP.
+## Custom roles [scout-browser-auth-custom-role]
 
-Internal (Elasticians): provisioning Cloud users/roles is documented in internal AppEx QA documentation.
-:::::
-
-## Predefined roles vs custom roles [scout-browser-auth-roles]
-
-- Predefined roles: built-in roles like `admin`, `editor`, `viewer`
-- Custom roles: dynamically created roles with specific Kibana/Elasticsearch privileges
-
-## Log in with a custom role [scout-browser-auth-custom-role]
-
-Use `loginWithCustomRole()` to test specific permission sets:
+Use `loginWithCustomRole()` to test permission boundaries with least privilege:
 
 ```ts
-import { test, tags } from '@kbn/scout';
-
-test.describe('Discover app with a restricted read-only role', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole({
-      kibana: [
-        {
-          base: [],
-          feature: { discover: ['read'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: {
-        cluster: [],
-        indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-      },
-    });
-  });
-
-  test('should display a disabled save button', async ({ page }) => {
-    // ...
-  });
+await browserAuth.loginWithCustomRole({
+  kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],
+  elasticsearch: { indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }] },
 });
 ```
 
-## Extending the `browserAuth` fixture [scout-browser-auth-extend]
+## Reuse role helpers [scout-browser-auth-extend]
 
-If you need the same custom role across many tests, extend `browserAuth` with plugin/solution-specific helpers (rather than repeating `loginWithCustomRole()` everywhere).
+If the same login/role is needed across many tests, extend `browserAuth` in your solution/package/plugin fixtures instead of repeating role descriptors.
 
-Examples in the repository:
+Examples in the repo:
 
-- Solution-scoped extension (Security): `https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/browser_auth/index.ts`
-- Plugin-scoped extension (APM): `https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/index.ts`
+- Security: `https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/browser_auth/index.ts`
+- APM: `https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/index.ts`
 
 ## Best practices [scout-browser-auth-best-practices]
 
-- Avoid `admin` unless absolutely necessary.
-- Prefer deployment-agnostic helpers like `loginAsPrivilegedUser()` when writing suites that should run everywhere.
-- Keep custom roles minimal (least privilege).
-- Reuse custom roles by extending fixtures.
-- Explicitly test permission boundaries (what users can and cannot do).
+- Avoid `admin` unless you’re explicitly testing admin-only behavior.
+- Prefer `loginAsPrivilegedUser()` for suites that run across multiple environments.
+- Keep custom roles minimal and document why they exist.
 

@@ -29,7 +29,10 @@ Avoid running a11y checks on every interaction. Pick a few high-value checkpoint
 Run `page.checkA11y()` once the page is fully loaded and the UI has settled:
 
 ```ts
-test('Dashboard listing page has no basic accessibility violations', async ({ pageObjects, page }) => {
+test('Dashboard listing page has no basic accessibility violations', async ({
+  pageObjects,
+  page,
+}) => {
   await pageObjects.dashboard.gotoApp();
 
   // Wait for the page to be ready (example helper)
@@ -103,7 +106,7 @@ When `page.checkA11y` detects violations, the returned `violations` array includ
 - `nodes` (elements that violate the rule)
 - `helpUrl`
 
-Violations appear in the Scout HTML report. See [Reporting](./reporting.md).
+Violations appear in the Scout HTML report.
 
 ## Best practices [scout-a11y-best-practices]
 
@@ -112,4 +115,3 @@ Violations appear in the Scout HTML report. See [Reporting](./reporting.md).
 - Focus on critical paths and key interaction states
 - Assert `violations.length === 0`
 - Combine with manual testing
-

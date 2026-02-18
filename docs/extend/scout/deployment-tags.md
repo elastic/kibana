@@ -4,100 +4,55 @@ navigation_title: Deployment tags
 
 # Deployment tags [scout-deployment-tags]
 
-Deployment tags are **mandatory** for every `test.describe()` block. They control which environments your Scout tests run in. Instead of skipping tests, you explicitly declare which deployment types each test suite targets.
+Deployment tags declare **where a test suite is expected to run**. Add them to every `test.describe()` (or `apiTest.describe()` / `spaceTest.describe()`), then use `--grep` when running tests to target a specific environment.
 
-Each tag follows the format `@{location}-{arch}-{domain}`, where:
+Tags follow this shape:
 
-- **location**: `local` (self-managed / mock-serverless) or `cloud` (Elastic Cloud hosted / MKI)
+- `@<location>-<arch>-<domain>`
+
+Where:
+
+- **location**: `local` or `cloud`
 - **arch**: `stateful` or `serverless`
-- **domain**: product area (for example: `classic`, `search`, `observability_complete`, `security_complete`, `workplaceai`)
+- **domain**: `classic`, `search`, `observability_complete`, `security_complete`, …
 
-Rather than using raw tag strings, prefer the `tags` helper exported by `@kbn/scout`. Each shortcut returns an array of Playwright tags.
+## Use the `tags` helper [scout-deployment-tags-using]
 
-## Tag shortcuts [scout-deployment-tags-shortcuts]
-
-### Stateful [scout-deployment-tags-stateful]
-
-| `tags` shortcut | Underlying Playwright tags |
-| --- | --- |
-| `tags.stateful.classic` | `@local-stateful-classic`, `@cloud-stateful-classic` |
-| `tags.stateful.search` | `@local-stateful-search`, `@cloud-stateful-search` |
-| `tags.stateful.observability` | `@local-stateful-observability_complete`, `@cloud-stateful-observability_complete` |
-| `tags.stateful.security` | `@local-stateful-security_complete`, `@cloud-stateful-security_complete` |
-
-### Serverless [scout-deployment-tags-serverless]
-
-| `tags` shortcut | Underlying Playwright tags |
-| --- | --- |
-| `tags.serverless.search` | `@local-serverless-search`, `@cloud-serverless-search` |
-| `tags.serverless.observability.complete` | `@local-serverless-observability_complete`, `@cloud-serverless-observability_complete` |
-| `tags.serverless.observability.logs_essentials` | `@local-serverless-observability_logs_essentials`, `@cloud-serverless-observability_logs_essentials` |
-| `tags.serverless.security.complete` | `@local-serverless-security_complete`, `@cloud-serverless-security_complete` |
-| `tags.serverless.security.essentials` | `@local-serverless-security_essentials`, `@cloud-serverless-security_essentials` |
-| `tags.serverless.security.ease` | `@local-serverless-security_ease`, `@cloud-serverless-security_ease` |
-| `tags.serverless.workplaceai` | `@local-serverless-workplaceai`, `@cloud-serverless-workplaceai` |
-
-## Aggregate shortcuts [scout-deployment-tags-aggregate]
-
-Use these to target broader groups of environments:
-
-| Shortcut | Description |
-| --- | --- |
-| `tags.stateful.all` | All stateful domain types (classic, search, observability, security) |
-| `tags.serverless.observability.all` | All serverless observability project types |
-| `tags.serverless.security.all` | All serverless security project types |
-| `tags.serverless.all` | All serverless project types |
-| `tags.deploymentAgnostic` | All stateful types + serverless types that have a stateful counterpart |
-| `tags.performance` | Performance tests (`@perf`) |
-
-## Using deployment tags [scout-deployment-tags-using]
-
-Import `tags` and pass a shortcut to the `tag` property in `test.describe()` (or `apiTest.describe()` / `spaceTest.describe()`).
-
-Since each shortcut is an array, you can use it directly or spread multiple shortcuts together:
+Prefer the `tags` helper exported by Scout instead of writing raw strings. It returns arrays of Playwright tags you can use directly or combine.
 
 ```ts
 import { test, tags } from '@kbn/scout';
 
-// Runs on stateful classic + serverless observability (complete) environments
-test.describe(
-  'My test suite',
-  {
-    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
-  },
-  () => {
-    test('my test', async ({ page }) => {
-      // test code
-    });
-  }
-);
-```
-
-For deployment-agnostic tests that should run across all stateful and most serverless environments, use `tags.deploymentAgnostic`:
-
-```ts
-import { apiTest, tags } from '@kbn/scout';
-
-apiTest.describe('GET /api/endpoint', { tag: tags.deploymentAgnostic }, () => {
-  apiTest('should return 200', async ({ apiClient }) => {
-    // test code
+test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
+  test('works', async () => {
+    // ...
   });
 });
 ```
 
-For tests that should only run on stateful deployments:
+Combine multiple targets by spreading:
 
 ```ts
-import { test, tags } from '@kbn/scout';
-
-test.describe('Stateful-only feature', { tag: tags.stateful.all }, () => {
-  test('my test', async ({ page }) => {
-    // test code
-  });
+test.describe('My suite', { tag: [...tags.stateful.classic, ...tags.serverless.search] }, () => {
+  // ...
 });
 ```
 
-:::::{note}
-Use deployment tags to **include** tests for specific environments rather than skipping them. This makes it explicit where each suite is expected to run and prevents accidental runs in unsupported environments.
-:::::
+## Common shortcuts [scout-deployment-tags-shortcuts]
 
+| Shortcut                                                          | What it targets                                                                                                                    |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `tags.deploymentAgnostic`                                         | Broad **“runs almost everywhere”** set (stateful + "complete" serverless counterparts). Excludes workplace AI serverless projects. |
+| `tags.stateful.classic` / `search` / `observability` / `security` | Stateful environments (local + cloud) for that domain                                                                              |
+| `tags.serverless.search`                                          | Serverless search (local + cloud)                                                                                                  |
+| `tags.serverless.observability.complete` / `logs_essentials`      | Serverless observability projects (local + cloud)                                                                                  |
+| `tags.serverless.security.complete` / `essentials` / `ease`       | Serverless security projects (local + cloud)                                                                                       |
+| `tags.serverless.workplaceai`                                     | Serverless Workplace AI (local + cloud)                                                                                            |
+| `tags.stateful.all` / `tags.serverless.all`                       | All targets for that architecture                                                                                                  |
+| `tags.performance`                                                | Performance tests (`@perf`)                                                                                                        |
+
+For the authoritative list (and the exact tag strings), see `src/platform/packages/shared/kbn-scout/src/playwright/tags.ts` or just rely on editor autocomplete.
+
+::::::{note}
+Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
+::::::

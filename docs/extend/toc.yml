@@ -78,13 +78,13 @@ toc:
           - file: scout/deployment-tags.md
       - file: scout/ui-testing.md
         children:
-          - file: scout/browser-auth.md
           - file: scout/write-ui-tests.md
+          - file: scout/browser-auth.md
           - file: scout/a11y-checks.md
       - file: scout/api-testing.md
         children:
-          - file: scout/api-auth.md
           - file: scout/write-api-tests.md
+          - file: scout/api-auth.md
       - file: scout/skip-tests.md
   - file: advanced.md
     children:

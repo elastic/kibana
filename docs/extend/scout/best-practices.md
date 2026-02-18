@@ -12,38 +12,38 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 
 **UI and API tests**
 
-| Question | Section |
-|----------|---------|
-| How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow) |
-| Where should **shared setup** go? | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
-| Where should **cleanup code** go? | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body) |
-| What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible) |
-| How do I know if my test is **flaky**? | [Use the Flaky Test Runner to catch flaky tests early](#use-the-flaky-test-runner-to-catch-flaky-tests-early) |
+| Question                                 | Section                                                                                                                |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
+| Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
+| Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
+| What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
+| How do I know if my test is **flaky**?   | [Use the Flaky Test Runner to catch flaky tests early](#use-the-flaky-test-runner-to-catch-flaky-tests-early)          |
 
 **UI tests**
 
-| Question | Section |
-|----------|---------|
-| What should I test in **UI tests** vs **API tests**? | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness) |
-| Should my tests run in **parallel** or **sequentially**? | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible) |
-| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows) |
-| How should I set up **test data**? | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown) |
-| How do I skip **onboarding screens**? | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript) |
-| Do I need to add explicit **waits** everywhere? | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting) |
-| How do I **wait for the UI** to be ready? | [Wait for UI updates when the next action requires it](#wait-for-ui-updates-when-the-next-action-requires-it) |
-| How do I test **tables** and **complex components**? | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render) |
-| What **locators** should I use? | [Locate UI elements reliably](#locate-ui-elements-reliably) |
-| Should I change Scout's default **timeouts**? | [Use Scout's default timeouts](#use-scouts-default-timeouts) |
-| How do I write good **page objects**? | [Page object tips](#page-object-tips) |
-| My test keeps failing — should I add **retries**? | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops--fix-the-source-code) |
-| Should I **contribute** my page object to Scout? | [Contribute to Scout when possible](#contribute-to-scout-when-possible) |
+| Question                                                             | Section                                                                                                       |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| What should I test in **UI tests** vs **API tests**?                 | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness)          |
+| Should my tests run in **parallel** or **sequentially**?             | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible)                           |
+| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows)                                    |
+| How should I set up **test data**?                                   | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown)       |
+| How do I skip **onboarding screens**?                                | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript)                       |
+| Do I need to add explicit **waits** everywhere?                      | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting)                                         |
+| How do I **wait for the UI** to be ready?                            | [Wait for UI updates when the next action requires it](#wait-for-ui-updates-when-the-next-action-requires-it) |
+| How do I test **tables** and **complex components**?                 | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render)                   |
+| What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                                   |
+| Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                                  |
+| How do I write good **page objects**?                                | [Page object tips](#page-object-tips)                                                                         |
+| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                            |
+| Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                       |
 
 **API tests**
 
-| Question | Section |
-|----------|---------|
-| Which **fixture** should I use? | [Validate endpoints with `apiClient`](#validate-endpoints-with-apiclient-for-readable-and-scoped-tests) |
-| What should I **assert**? | [Don't just verify the status code, validate the response body](#dont-just-verify-the-status-code-validate-the-response-body) |
+| Question                        | Section                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Which **fixture** should I use? | [Validate endpoints with `apiClient`](#validate-endpoints-with-apiclient-for-readable-and-scoped-tests)                       |
+| What should I **assert**?       | [Don't just verify the status code, validate the response body](#dont-just-verify-the-status-code-validate-the-response-body) |
 
 ---
 
@@ -211,11 +211,9 @@ await browserAuth.loginAsViewer();
 // role with custom privileges
 await browserAuth.loginWithCustomRole('logs_analyst', {
   elasticsearch: {
-    indices: [{ names: ['logs-*'], privileges: ['read'] }]
+    indices: [{ names: ['logs-*'], privileges: ['read'] }],
   },
-  kibana: [
-    { spaces: ['*'], base: [], feature: { discover: ['read'] } }
-  ]
+  kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],
 });
 ```
 
@@ -251,12 +249,12 @@ Best practices specific to UI tests.
 
 Whenever possible, default to [running tests in parallel](./parallelism.md). This leads to **faster test execution** and best simulates real-world usage where multiple users interact with the application simultaneously. Parallel workers **share the same ES and Kibana instance** but each operates in its own **Kibana Space** for isolation.
 
-| Run in **parallel** | Run **sequentially** |
-|---------------------|----------------------|
-| UI tests (most test suites) | API tests |
+| Run in **parallel**                                                                                     | Run **sequentially**                          |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| UI tests (most test suites)                                                                             | API tests                                     |
 | Tests that can share pre-ingested ES data (usually via the [global setup hook](./global-setup-hook.md)) | Tests requiring a "clean" Elasticsearch state |
 
-**Why sequential for clean state?** The global setup hook ingests data *before* parallel workers start. Tests verifying "no data" UI states must run in a sequential test suite with no pre-ingested data.
+**Why sequential for clean state?** The global setup hook ingests data _before_ parallel workers start. Tests verifying "no data" UI states must run in a sequential test suite with no pre-ingested data.
 
 ### Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
 
@@ -313,11 +311,7 @@ const activityCells = await lastActivityCol.getCellTexts();
 
 // validating specific text content of every cell — business logic
 expect(activityCells[activityCells.length - 1]).not.toEqual('No activity');
-expect(activityCells.slice(0, -1)).toEqual([
-  'No activity',
-  'No activity',
-  'No activity',
-]);
+expect(activityCells.slice(0, -1)).toEqual(['No activity', 'No activity', 'No activity']);
 ```
 
 When this fails, is it the API, the UI, or the test expectation? Complex parsing logic is slow, hard to maintain, and obscures the root cause.
@@ -327,7 +321,10 @@ When this fails, is it the API, the UI, or the test expectation? Complex parsing
 ```ts
 // confirm the column exists and is visible
 await expect(page.testSubj.locator('datasetQualityTable-loaded')).toBeVisible();
-await expect(page.testSubj.locator('datasetQualityTable').locator('th')).toContainText(['Dataset', 'Last Activity']);
+await expect(page.testSubj.locator('datasetQualityTable').locator('th')).toContainText([
+  'Dataset',
+  'Last Activity',
+]);
 
 // basic render check — at least one cell rendered
 const activityCells = page.testSubj.locator('lastActivityColumn').locator('td');
@@ -439,7 +436,7 @@ await this.button.waitFor({ state: 'attached' });
 await expect(this.button).toBeDisabled();
 ```
 
-The `waitFor()` call is redundant because the `toBeDisabled()` assertion already auto-retries, waiting for the element to exist in the DOM (be *attached*) and checking if it's disabled until the condition passes or times out.
+The `waitFor()` call is redundant because the `toBeDisabled()` assertion already auto-retries, waiting for the element to exist in the DOM (be _attached_) and checking if it's disabled until the condition passes or times out.
 
 **✅ Do let auto-retrying assertions do their magic**
 
@@ -449,7 +446,7 @@ await expect(this.button).toBeDisabled();
 
 **Rule of thumb:** only use `waitFor()` if the element might actually be in a different state (e.g., hidden or detached). If the element is always visible, skip the wait — it's unnecessary overhead.
 
-### Don't use manual retry loops — fix the source code [dont-use-manual-retry-loops--fix-the-source-code]
+### Don't use manual retry loops — fix the source code [dont-use-manual-retry-loops]
 
 If an action fails, **don't wrap it in a retry loop**. Playwright already handles standard checks (is the element attached? visible? enabled?). A failing action usually indicates a bug in the application, not a test problem.
 
@@ -564,10 +561,7 @@ await page.testSubj.click('createConfigurationButton');
 
 ```ts
 // fragile - relies on EUI internal structure
-await this.page.testSubj
-  .locator('indexPatternsField')
-  .locator('input')
-  .fill('test-index-pattern');
+await this.page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
 ```
 
 Chaining locators to find nested elements inside EUI components is fragile. Use [EUI wrappers](#use-eui-wrappers-as-class-fields-in-page-objects) instead.
@@ -947,7 +941,8 @@ EUI wrappers abstract away the complexity of interacting with EUI components. Us
 ```ts
 // fragile — relies on EUI internal structure
 await page.testSubj.click('environmentFilter > comboBoxSearchInput');
-await page.testSubj.click('comboBoxOptionsList environmentFilter-optionsList')
+await page.testSubj
+  .click('comboBoxOptionsList environmentFilter-optionsList')
   .locator('button:has-text("production")')
   .click();
 await expect(page.testSubj.locator('comboBoxSearchInput')).toHaveValue('production');
@@ -995,10 +990,10 @@ Best practices specific to API tests.
 
 Use the right fixture for the right purpose:
 
-| Fixture | Use for |
-|---------|---------|
-| `apiClient` | Testing the endpoint under test (with [scoped credentials](./api-auth.md)) |
-| `apiServices` | Setup, teardown, verifying side effects |
+| Fixture                       | Use for                                                                                                                                                                                                                                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apiClient`                   | Testing the endpoint under test (with [scoped credentials](./api-auth.md))                                                                                                                                                                                                                |
+| `apiServices`                 | Setup, teardown, verifying side effects                                                                                                                                                                                                                                                   |
 | `kbnClient`, `esClient`, etc. | Lower-level setup when `apiServices` doesn't have a suitable helper. Use one of the existing fixtures (e.g., `kbnClient`, `esClient`, etc.) directly or [contribute a new API helper](#contribute-to-scout-when-possible) (recommended if you think it will be useful for other plugins). |
 
 See [Write Scout API tests](./write-api-tests.md) for a complete walkthrough and [API authentication](./api-auth.md) for credential options.
@@ -1079,16 +1074,3 @@ apiTest('should return autocomplete definitions', async ({ apiClient }) => {
 ```
 
 This catches issues like missing fields, wrong types, or empty collections that a status code check would miss.
-
----
-
-## Contribute to Scout when possible [contribute-to-scout-when-possible]
-
-We welcome contributions to one of the [Scout packages](../scout.md#scout-modular-and-extensible). This includes page objects, EUI wrappers, API helpers, and more.
-
-| If your code... | Then... |
-|-----------------|---------|
-| Could be useful to **reuse in other plugins** | **Platform-wide** functionality should be contributed to `@kbn/scout`. **Solution-specific** functionality should go to a solution-specific Scout package (e.g. `@kbn/scout-security`, `@kbn/scout-oblt`). |
-| Is **specific to your plugin** | Keep it in your plugin's test directory |
-
-Internal (Elasticians): reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.

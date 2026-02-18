@@ -81,5 +81,5 @@ test.describe('Stateful classic feature', { tag: tags.stateful.classic }, () => 
 });
 ```
 
-See [Deployment tags](./deployment-tags.md) for the full set of shortcuts and patterns.
+See [Deployment tags](./deployment-tags.md) for shortcuts and patterns.
 

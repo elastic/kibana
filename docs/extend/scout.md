@@ -27,7 +27,7 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 
 ## Scout packages [scout-packages]
 
-**Pick your import:**
+**Import the right Scout package in your Scout tests:**
 
 - **Platform-owned tests** → `@kbn/scout`
 
@@ -46,6 +46,22 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 ::::::{note}
 Fixtures, page objects, and API helpers defined in `@kbn/scout` can be imported by solution-specific Scout packages. When they are defined in a solution package or a plugin they will only be available to that solution or plugin.
 ::::::
+
+## Contribute to Scout when possible [contribute-to-scout-when-possible]
+
+We welcome contributions to one of the Scout packages.
+
+| If your helper/code…                  | Put it…                                                                                                   | Examples                                        |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Is reusable across many plugins/teams | In `@kbn/scout`                                                                                           | Generic fixtures, page objects, and API helpers |
+| Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers  |
+| Is specific to one plugin             | In your plugin’s `test/scout` directory                                                                   | Plugin-only locators and setup helpers          |
+
+## Need help?
+
+- **Internal (Elasticians)**: reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.
+
+- **External contributors**: open an issue in the Kibana repository and label it with `Team:QA`.
 
 ## FAQ [scout-faq]
 

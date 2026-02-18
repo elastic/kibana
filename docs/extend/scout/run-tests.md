@@ -4,102 +4,77 @@ navigation_title: Run tests
 
 # Run Scout tests [scout-run-tests]
 
-This guide explains how to run Scout tests locally and on Elastic Cloud.
+:::::::{tip}
+The commands below work the same way for both UI and API tests.
+:::::::
 
-For additional details, see the public-facing `@kbn/scout` README:
-
-- `https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/README.md#how-to-use`
-
-:::::{note}
-The same Playwright commands apply to **UI** and **API** tests. To run API tests, point the command to the Playwright config that contains your API tests.
-:::::
-
-## Run Scout tests against a local deployment [scout-run-tests-local]
+## Local runs [scout-run-tests-local]
 
 Scout requires Kibana and Elasticsearch to be running before running tests against a local deployment.
 
 ### Start servers [scout-start-servers]
 
-Start servers with the Scout CLI:
-
 ```bash
 node scripts/scout.js start-server \
-  --arch [stateful|serverless] \
-  --domain [search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai] <1>
+  --arch <stateful|serverless> \
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai>
 ```
 
-1. `start-server` is a Scout CLI command.
-
-### Run tests [scout-run-tests-playwright]
-
-In a separate terminal, run the tests with Playwright:
+### Run tests with Playwright [scout-run-tests-playwright]
 
 ```bash
 npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
-  --project local <1> \
-  --grep @<location>-<arch>-<domain> <2>
-```
-
-1. Use `--project local` to run against your local Kibana/Elasticsearch processes.
-2. Use `--grep` to filter suites by deployment tag (for example `@local-stateful-classic`, `@cloud-serverless-search`, `@local-serverless-security_complete`). If you omit `--grep`, Playwright will run all suites defined by the config—even ones that may not be compatible with your target.
-
-### One command: start servers + run tests [scout-run-tests-cli]
-
-Alternatively, start servers and run tests in one command:
-
-```bash
-node scripts/scout.js run-tests \
-  --arch [stateful|serverless] \
-  --domain [search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai] \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
-```
-
-When Scout starts Kibana and Elasticsearch locally, it saves server configuration to `.scout/servers/local.json` and later reads it when running tests.
-
-### Run specific tests with `--testFiles` [scout-run-tests-testFiles]
-
-You can pass a directory:
-
-```bash
-node scripts/scout.js run-tests \
-  --arch [stateful|serverless] \
-  --domain [search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai] \
-  --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
-```
-
-Or a comma-separated list of spec files:
-
-```bash
-node scripts/scout.js run-tests \
-  --arch [stateful|serverless] \
-  --domain [search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai] \
-  --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts,<plugin-path>/test/scout/ui/tests/another_test_spec.ts
-```
-
-:::::{warning}
-All paths provided to `--testFiles` must fall under the same Scout root (for example, `scout/ui/tests`, `scout/ui/parallel_tests`, or `scout/api/tests`) and must belong to the same Playwright config file (Scout will discover it).
-:::::
-
-### Run multiple files directly with Playwright [scout-run-tests-multiple-files]
-
-```bash
-npx playwright test \
-  <plugin-path>/test/scout/ui/tests/test_one.spec.ts \
-  <plugin-path>/test/scout/ui/tests/test_two.spec.ts \
-  --config <path/to/your/config>/playwright.config.ts \
   --project local \
   --grep @<location>-<arch>-<domain>
 ```
 
-## Run Scout tests on Elastic Cloud [scout-run-tests-cloud]
+- Use `--project local` to target your locally running Kibana/Elasticsearch processes.
+- Use `--grep` to filter by tag (for example `@local-stateful-classic`, `@cloud-serverless-search`). If you omit `--grep`, Playwright will run all suites in the config, including ones that may not be compatible with your target.
 
-Scout can run tests on Elastic Cloud, but you must provide a server configuration file under `.scout/servers/`.
+### One command: start servers + run tests [scout-run-tests-cli]
 
-::::{tab-set}
+```bash
+node scripts/scout.js run-tests \
+  --arch <stateful|serverless> \
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai> \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
 
-:::{tab-item} "ECH (stateful)"
+When Scout starts Kibana and Elasticsearch locally, it saves the server configuration to `.scout/servers/local.json` and later reads it when running tests.
 
-Open `.scout/servers/cloud_ech.json`:
+### Run a subset with `--testFiles` [scout-run-tests-testFiles]
+
+Directory:
+
+```bash
+node scripts/scout.js run-tests \
+  --arch <stateful|serverless> \
+  --domain <domain> \
+  --testFiles <plugin-path>/test/scout/ui/tests/some_dir
+```
+
+Comma-separated file list:
+
+```bash
+node scripts/scout.js run-tests \
+  --arch <stateful|serverless> \
+  --domain <domain> \
+  --testFiles <path/to/one.spec.ts>,<path/to/two.spec.ts>
+```
+
+:::::::{warning}
+All `--testFiles` paths must fall under the same Scout root (for example, `scout/ui/tests` vs `scout/ui/parallel_tests`) so Scout can discover the right config.
+:::::::
+
+## Elastic Cloud runs [scout-run-tests-cloud]
+
+To run on ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on Elastic Cloud Hosted') Elastic Cloud you must provide a server config under `.scout/servers/`.
+
+:::::{tab-set}
+
+::::{tab-item} ECH (stateful)
+
+Open `<KIBANA_ROOT>/.scout/servers/cloud_ech.json`:
 
 ```json
 {
@@ -118,6 +93,9 @@ Open `.scout/servers/cloud_ech.json`:
 }
 ```
 
+- `cloudHostName`: the Cloud environment hostname (for example `console.qa.cld.elstc.co` or `cloud.elastic.co`)
+- `cloudUsersFilePath`: credentials for Cloud role users (often `<KIBANA_ROOT>/.ftr/role_users.json`)
+
 Run tests with `--project ech`:
 
 ```bash
@@ -126,11 +104,13 @@ npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
   --grep @cloud-stateful-<domain>
 ```
 
-:::
+Example `--grep` values: `@cloud-stateful-classic`, `@cloud-stateful-search`.
 
-:::{tab-item} "MKI (serverless)"
+::::
 
-Open `.scout/servers/cloud_mki.json`:
+::::{tab-item} MKI (serverless)
+
+Open `<KIBANA_ROOT>/.scout/servers/cloud_mki.json`:
 
 ```json
 {
@@ -150,6 +130,9 @@ Open `.scout/servers/cloud_mki.json`:
 }
 ```
 
+- `projectType` values: `es`, `security`, `oblt`
+- `cloudHostName`: the Cloud environment hostname (for example `console.qa.cld.elstc.co` or `cloud.elastic.co`)
+
 Run tests with `--project mki`:
 
 ```bash
@@ -158,15 +141,35 @@ npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
   --grep @cloud-serverless-<domain>
 ```
 
-:::::{note}
-Internal (Elasticians): `testing-internal` is an operator user. Retrieving/resetting its credentials and provisioning Cloud role users is internal-only; see internal AppEx QA documentation.
+Example `--grep` values: `@cloud-serverless-search`, `@cloud-serverless-observability_complete`, `@cloud-serverless-security_ease`.
+
+:::::::{note}
+Internal (Elasticians): `testing-internal` is an operator user with `superuser` privileges plus additional [operator privileges](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/operator-privileges).
+
+To retrieve its password, call the `_reset-internal-credentials` Elastic Cloud API endpoint (this resets the credential and returns a new password):
+
+```bash
+curl -XPOST \
+  -H "Authorization: ApiKey $API_KEY" \
+  "${CLOUD_ENV_URL}/api/v1/serverless/projects/elasticsearch/${PROJECT_ID}/_reset-internal-credentials"
+```
+
+- `API_KEY`: create in the Elastic Cloud UI (Organization → API keys)
+- `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://cloud.elastic.co`)
+- `PROJECT_ID`: serverless project ID from the Cloud UI
+  :::::::
+
+::::
+
 :::::
 
-:::
+:::::::{note}
+Internal (Elasticians): provisioning Cloud users/roles and populating `cloudUsersFilePath` is internal-only; see internal AppEx QA documentation.
+:::::::
 
-:::: 
+### Run on Cloud with the Scout CLI [scout-run-tests-cloud-cli]
 
-You can also run tests on Elastic Cloud using the Scout CLI:
+ECH:
 
 ```bash
 node scripts/scout.js run-tests \
@@ -176,15 +179,16 @@ node scripts/scout.js run-tests \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
+MKI:
+
 ```bash
 node scripts/scout.js run-tests \
   --arch serverless \
-  --domain [search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai] \
+  --domain <search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai> \
   --location cloud \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ## Run Scout tests with QAF (internal) [scout-run-tests-qaf]
 
-Internal (Elasticians): QAF is an internal tool. For how to run Scout tests with QAF and associated workflows, refer to internal AppEx QA documentation.
-
+Internal (Elasticians): QAF is an internal tool. For QAF workflows, refer to internal AppEx QA documentation.

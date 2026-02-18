@@ -4,134 +4,62 @@ navigation_title: Global setup hook
 
 # Global setup hook [scout-global-setup-hook]
 
-The global setup hook lets you run code **exactly once** before any Scout tests execute, regardless of how many workers are configured. This is useful for one-time setup tasks, including:
+Use a global setup hook to run code **once** before any tests start (even with multiple workers). This is most useful for [parallel suites](./parallelism.md), where you want shared data/setup to exist before workers begin.
 
-- Importing Elasticsearch archives with the `esArchiver` fixture
-- Updating Kibana settings via the `kbnClient` fixture
-- Enabling an experimental plugin's API
+**Common uses**:
 
-:::::{note}
-There is currently no global teardown hook in Scout. In most cases, teardown is redundant because the test environment is shut down after tests complete.
-:::::
+- Load Elasticsearch archives with `esArchiver`
+- Run one-time API setup with `apiServices`
+- Apply shared Kibana settings via `kbnClient`
 
-The global setup hook is especially useful for [parallel test suites](./parallelism.md): when multiple workers are configured, the first worker executes the setup once and all other workers wait for it to complete.
+::::::{note}
+Scout doesn’t currently have a global teardown hook. Most environments are ephemeral and are shut down after the run.
+::::::
 
-:::::{warning}
-We assume you have [set up your plugin or package](./setup-plugin.md) to work with Scout.
-:::::
+## Enable it [enable-global-setup-hook]
 
-:::::{note}
-Global setup hook vs `beforeAll`:
+### 1. Turn it on in your config [global-setup-config]
 
-- Global setup hook runs **once in total** (executed by the first worker if multiple workers are configured).
-- `beforeAll` runs **once per test file per worker**.
-:::::
-
-## Enable the global setup hook [enable-global-setup-hook]
-
-### 1. Update your Playwright config [global-setup-config]
-
-Set `runGlobalSetup: true` in your Playwright config file:
+Set `runGlobalSetup: true` in your Playwright config:
 
 ```ts
-import { createPlaywrightConfig } from '@kbn/scout'; <1>
+import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './parallel_tests/', <2>
-  workers: 2, // optional
-  runGlobalSetup: true, <3>
+  testDir: './parallel_tests',
+  workers: 2,
+  runGlobalSetup: true,
 });
 ```
 
-1. Import from `@kbn/scout-oblt` or `@kbn/scout-security` if your plugin belongs to a specific solution.
-2. The directory containing your test files.
-3. Enables the global setup hook.
+### 2. Create `global.setup.ts` [global-setup-file]
 
-### 2. Create the global setup hook file [global-setup-file]
-
-Create a `global.setup.ts` file in the same directory specified by `testDir` (for example, `./parallel_tests/`):
+Add `global.setup.ts` inside the `testDir` folder. Scout will discover and run it automatically.
 
 ```text
-your-plugin/
-└── test/
-    └── scout/
-        └── ui/
-            ├── parallel_tests/
-            │   ├── global.setup.ts
-            │   ├── feature_a.spec.ts
-            │   └── feature_b.spec.ts
-            └── parallel.playwright.config.ts
+test/scout/ui/
+└── parallel_tests/
+    ├── global.setup.ts
+    └── some_suite.spec.ts
 ```
 
-Scout will automatically find and execute this file before running any tests.
+### 3. Write setup code [global-setup-code]
 
-### 3. Write your setup code in `global.setup.ts` [global-setup-code]
-
-Example 1: loading Elasticsearch archives:
+Example: load an ES archive once:
 
 ```ts
-import { globalSetupHook } from '@kbn/scout'; <1>
+import { globalSetupHook } from '@kbn/scout';
 
-globalSetupHook('Setup environment for Discovery tests', async ({ esArchiver, log }) => {
-  log.info('[setup] Loading ES archive with test data...');
+globalSetupHook('Load test data', async ({ esArchiver, log }) => {
+  log.info('[setup] loading ES archive (only if needed)...');
   await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 });
 ```
 
-1. Import from `@kbn/scout-oblt` or `@kbn/scout-security` if your plugin belongs to a specific solution.
+::::::{warning}
+The global setup hook only has access to **worker-scoped** fixtures. It cannot use test-scoped fixtures like `page`, `browserAuth`, or `pageObjects`.
+::::::
 
-Example 2: enabling a plugin's API:
-
-```ts
-import { globalSetupHook } from '@kbn/scout'; <1>
-
-globalSetupHook('Setup environment for Streams tests', async ({ apiServices, log }) => {
-  log.info('[setup] Enabling Streams plugin API...');
-  await apiServices.streams.enable();
-});
-```
-
-1. Import from `@kbn/scout-oblt` or `@kbn/scout-security` if your plugin belongs to a specific solution.
-
-Example 3: setting up Fleet infrastructure:
-
-```ts
-import { globalSetupHook } from '@kbn/scout'; <1>
-
-globalSetupHook('Setup Fleet infrastructure for Profiling tests', async ({ apiServices, log }) => {
-  log.info('[setup] Initializing Fleet...');
-
-  // Initialize Fleet's internal services and agent infrastructure
-  await apiServices.fleet.internal.setup();
-  await apiServices.fleet.agent.setup();
-
-  log.info('[setup] Checking if APM agent policy exists...');
-  const getPolicyResponse = await apiServices.fleet.agent_policies.get({
-    page: 1,
-    perPage: 10,
-  });
-
-  const apmPolicyData = getPolicyResponse.data.items.find(
-    (policy: { id: string }) => policy.id === 'policy-elastic-agent-on-cloud'
-  );
-
-  if (!apmPolicyData) {
-    // create new agent policy...
-  } else {
-    log.info('[setup] APM agent policy already exists, skipping creation');
-  }
-
-  log.info('[setup] Fleet infrastructure ready');
-});
-```
-
-1. Import from `@kbn/scout-oblt` or `@kbn/scout-security` if your plugin belongs to a specific solution.
-
-:::::{warning}
-The global setup hook does **not** have access to test-scoped fixtures like `page`, `browserAuth`, or `pageObjects`. Only worker-scoped fixtures are available.
-:::::
-
-### 4. Run your tests [global-setup-run-tests]
+## Run tests [global-setup-run-tests]
 
 Run tests as usual via [Run Scout tests](./run-tests.md). The global setup hook will execute first—check console logs to verify it ran successfully.
-
