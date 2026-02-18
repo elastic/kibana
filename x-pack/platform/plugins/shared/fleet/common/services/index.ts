@@ -109,3 +109,5 @@ export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_conn
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
+
+export { createYamlKeysSorter, toYaml } from './yaml_utils';

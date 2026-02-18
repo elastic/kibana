@@ -100,6 +100,7 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+import { toYaml } from '../../common/services';
 
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
@@ -1925,7 +1926,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, toYaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');

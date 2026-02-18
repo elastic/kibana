@@ -19,7 +19,7 @@ import {
 } from '../../../common/constants';
 import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
-import { fullAgentPolicyToYaml } from '../../../common/services';
+import { fullAgentPolicyToYaml, toYaml } from '../../../common/services';
 import {
   appContextService,
   agentPolicyService,
@@ -809,7 +809,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       standalone: request.query.standalone === true,
     });
     if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy);
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, toYaml);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,

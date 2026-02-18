@@ -27,7 +27,7 @@ import {
 import { MAX_FLYOUT_WIDTH } from '../../../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { fullAgentPolicyToYaml, toYaml, agentPolicyRouteService } from '../../../services';
 import { API_VERSIONS } from '../../../../../../common/constants';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
@@ -65,7 +65,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
     ) : (
       <>
         <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-          {fullAgentPolicyToYaml(yamlData!.item)}
+          {fullAgentPolicyToYaml(yamlData!.item, toYaml)}
         </EuiCodeBlock>
       </>
     );

@@ -29,6 +29,7 @@ export {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
   fullAgentPolicyToYaml,
+  toYaml,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   isValidNamespace,
