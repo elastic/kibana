@@ -40,7 +40,7 @@ const renderFlyout = (
       dsl: {
         data_retention: '30d',
       },
-    } as any);
+    } as IngestStreamLifecycleDSL);
 
   const setSelectedStepIndexRef: { current: ((index: number | undefined) => void) | null } = {
     current: null,
@@ -204,7 +204,7 @@ describe('EditDslStepsFlyout', () => {
         initialSteps: {
           dsl: {
             data_retention: '30d',
-          } as any,
+          },
         },
       });
 
@@ -223,18 +223,24 @@ describe('EditDslStepsFlyout', () => {
 
   describe('save and cancel', () => {
     it('calls onSave with the current serialized lifecycle when valid', async () => {
+      type LifecycleWithPreservedFields = IngestStreamLifecycleDSL & {
+        dsl: IngestStreamLifecycleDSL['dsl'] & {
+          enabled?: boolean;
+          downsampling_method?: string;
+        };
+      };
       const { onSave, initialSteps } = renderFlyout({
         initialSteps: {
           dsl: {
             data_retention: '30d',
             enabled: true,
-            downsampling_method: 'something' as any,
+            downsampling_method: 'something',
             downsample: [
               { after: '30d', fixed_interval: '1h' },
               { after: '40d', fixed_interval: '5d' },
             ],
-          } as any,
-        },
+          },
+        } as LifecycleWithPreservedFields,
       });
 
       await tick();

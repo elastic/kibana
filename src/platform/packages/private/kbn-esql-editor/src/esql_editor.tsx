@@ -759,6 +759,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     esqlCallbacks,
+    telemetryService,
   });
 
   const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler } = useSourcesBadge({
@@ -785,6 +786,7 @@ const ESQLEditorInternal = function ESQLEditor({
     getTimeRange: () => data.query.timefilter.timefilter.getTime(),
     signal: abortControllerRef.current.signal,
     activeSolutionId: activeSolutionId ?? undefined,
+    telemetryService,
   });
 
   const queryRunButtonProperties = useMemo(() => {
