@@ -162,14 +162,13 @@ export const useAddConnectorFlyout = ({
         initialConnector: {
           actionTypeId: selectedConnectorType,
           ...(suggestedName && { name: suggestedName }),
-          ...(preloadUrl &&
-            selectedConnectorType && {
-              config: {
-                serverUrl: preloadUrl,
-                hasAuth: true,
-                authType: MCPAuthType.ApiKeyInUrl,
-              },
-            }),
+          ...(preloadUrl && {
+            config: {
+              serverUrl: preloadUrl,
+              hasAuth: true,
+              authType: MCPAuthType.ApiKeyInUrl,
+            },
+          }),
         },
       }),
     });

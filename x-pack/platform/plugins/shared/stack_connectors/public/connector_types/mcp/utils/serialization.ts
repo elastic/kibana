@@ -12,6 +12,25 @@ import { isEmpty } from 'lodash';
 import { type HeaderField, HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 import { toHeaderFields, toHeadersRecord } from './transform';
 
+function buildSerializedResult(
+  formData: MCPInternalConnectorForm,
+  configHeaders: Record<string, string> | undefined,
+  secretHeaders: Record<string, string> | undefined,
+  configOverrides?: Partial<{ serverUrl: string; hasAuth: boolean }>
+): ConnectorFormSchema {
+  return {
+    ...formData,
+    config: {
+      ...formData.config,
+      headers: isEmpty(configHeaders) ? undefined : configHeaders,
+      ...configOverrides,
+    },
+    secrets: {
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+    },
+  };
+}
+
 export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFormSchema => {
   const headers = (formData.__internal__?.headers ?? []) as HeaderField[];
   const configHeaders = toHeadersRecord(headers, HeaderFieldType.CONFIG);
@@ -27,30 +46,13 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
     serverUrl.includes(API_KEY_URL_PLACEHOLDER) &&
     credential
   ) {
-    return {
-      ...formData,
-      config: {
-        ...formData.config,
-        serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential),
-        hasAuth: false,
-        headers: isEmpty(configHeaders) ? undefined : configHeaders,
-      },
-      secrets: {
-        secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
-      },
-    };
+    return buildSerializedResult(formData, configHeaders, secretHeaders, {
+      serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential),
+      hasAuth: false,
+    });
   }
 
-  return {
-    ...formData,
-    config: {
-      ...formData.config,
-      headers: isEmpty(configHeaders) ? undefined : configHeaders,
-    },
-    secrets: {
-      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
-    },
-  };
+  return buildSerializedResult(formData, configHeaders, secretHeaders);
 };
 
 export const formDeserializer = (data: ConnectorFormSchema): MCPInternalConnectorForm => {
