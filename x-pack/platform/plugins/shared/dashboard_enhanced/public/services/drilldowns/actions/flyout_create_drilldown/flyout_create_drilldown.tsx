@@ -9,10 +9,9 @@ import {
   apiHasDynamicActions,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
@@ -26,6 +25,7 @@ import {
   type HasParentApi,
   type HasSupportedTriggers,
   type HasType,
+  type PresentationContainer,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
