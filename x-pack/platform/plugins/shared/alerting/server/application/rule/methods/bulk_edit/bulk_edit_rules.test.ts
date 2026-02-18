@@ -2682,7 +2682,10 @@ describe('bulkEdit()', () => {
 
   describe('apiKeys', () => {
     beforeEach(() => {
-      createAPIKeyMock.mockResolvedValueOnce({ apiKeysEnabled: true, result: { api_key: '111' } });
+      createAPIKeyMock.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '111', api_key: 'abc' },
+      });
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
           {
@@ -2769,7 +2772,7 @@ describe('bulkEdit()', () => {
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
+        { apiKeys: ['MTExOmFiYw=='] },
         expect.any(Object),
         expect.any(Object)
       );
@@ -2820,7 +2823,7 @@ describe('bulkEdit()', () => {
       });
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
+        { apiKeys: ['MTExOmFiYw=='] },
         expect.any(Object),
         expect.any(Object)
       );
