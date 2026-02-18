@@ -263,17 +263,6 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
-
-    /**
-     * Get an observable of the visibility state of the feedback button in the side nav.
-     */
-    getIsFeedbackBtnVisible$: () => Observable<boolean>;
-
-    /**
-     * Set the visibility state of the feedback button in the side nav.
-     * @param isVisible The visibility state of the feedback button in the side nav.
-     */
-    setIsFeedbackBtnVisible: (isVisible: boolean) => void;
   };
 
   /**

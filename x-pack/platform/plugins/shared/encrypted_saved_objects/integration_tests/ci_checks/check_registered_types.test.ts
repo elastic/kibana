@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 20 as const;
+export const ESO_TYPES_COUNT = 21 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -84,6 +84,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
         "task": "2d8e9bf532f469805b82051f545b915785d99eabfa050cb1aefbc715c6096b97",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
+        "user_connector_token": "b443b022b46b79c0ff9fa674aecc64176a5fcbd09c2db2d9f050a6a88435732e",
       }
     `);
     expect(Object.keys(hashMap).length).toEqual(ESO_TYPES_COUNT);
@@ -151,6 +152,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|3",
         "task|2",
         "task|1",
+        "user_connector_token|1",
       ]
     `);
   });

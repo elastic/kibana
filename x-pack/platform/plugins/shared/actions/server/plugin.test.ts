@@ -33,6 +33,7 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
+import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 function getConfig(overrides = {}) {
   return {
@@ -146,6 +147,16 @@ describe('Actions Plugin', () => {
       expect(pluginsSetup.encryptedSavedObjects.canEncrypt).toEqual(false);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    });
+
+    it('should register user_connector_token saved object type and encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
     });
 

@@ -505,10 +505,10 @@ export const oauthCallbackRoute = (
 
           const connectorTokenClient = new ConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
             }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
             }),
             logger: routeLogger,
           });
