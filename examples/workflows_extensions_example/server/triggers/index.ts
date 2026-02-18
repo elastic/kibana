@@ -12,6 +12,6 @@ import { commonCustomTriggerDefinition } from '../../common/triggers/custom_trig
 import { commonEntityUpdatedTriggerDefinition } from '../../common/triggers/entity_updated_trigger';
 
 export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
-  workflowsExtensions.registerTrigger(commonCustomTriggerDefinition);
-  workflowsExtensions.registerTrigger(commonEntityUpdatedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(commonCustomTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(commonEntityUpdatedTriggerDefinition);
 };

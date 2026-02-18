@@ -52,6 +52,25 @@ describe('PublicTriggerRegistry', () => {
         registry.register(definition2);
       }).toThrow('Trigger definition for "example.test_trigger" is already registered');
     });
+
+    it('should accept valid conditionExamples', () => {
+      const definition: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        conditionExamples: [
+          { title: 'Message contains error', condition: 'event.message: *error*' },
+        ],
+      };
+      expect(() => registry.register(definition)).not.toThrow();
+      expect(registry.get(triggerId)?.conditionExamples).toHaveLength(1);
+    });
+
+    it('should throw when conditionExamples reference a field not in event schema', () => {
+      const definition: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        conditionExamples: [{ title: 'Bad', condition: 'event.unknown: "x"' }],
+      };
+      expect(() => registry.register(definition)).toThrow();
+    });
   });
 
   describe('get', () => {

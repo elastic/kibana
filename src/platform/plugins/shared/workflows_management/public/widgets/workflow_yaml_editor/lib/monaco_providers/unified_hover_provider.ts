@@ -20,9 +20,9 @@ import type {
 } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset, getTriggerNodes } from '../../../../../common/lib/yaml';
-import { triggerSchemas } from '../../../../../common/trigger_schemas';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import { triggerSchemas } from '../../../../trigger_schemas';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 import { getInterceptedHover } from '../hover/get_intercepted_hover';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
@@ -229,27 +229,29 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       const currentValue = yamlDocument.getIn(yamlPath, true);
       const yamlPathStr = yamlPath.map((segment) => String(segment));
 
+      const triggerNodes = getTriggerNodes(yamlDocument);
+      const triggerAtPosition = triggerNodes.find(({ node }) => {
+        const r = node.range;
+        return r && absolutePosition >= r[0] && absolutePosition <= r[2];
+      });
       let triggerType = getTriggerTypeAtPath(yamlPath, (path) => yamlDocument.getIn(path, true));
-      if (!triggerType) {
-        const triggerNodes = getTriggerNodes(yamlDocument);
-        const triggerAtPosition = triggerNodes.find(({ node }) => {
-          const r = node.range;
-          return r && absolutePosition >= r[0] && absolutePosition <= r[2];
-        });
-        if (triggerAtPosition) {
-          triggerType = triggerAtPosition.triggerType;
-        }
+      if (!triggerType && triggerAtPosition) {
+        triggerType = triggerAtPosition.triggerType;
       }
-      if (triggerType) {
-        return {
-          kind: 'trigger',
-          triggerType,
-          yamlPath: yamlPathStr,
-          currentValue,
-          position,
-          model,
-          yamlDocument,
-        };
+      const typeValueNode = triggerAtPosition?.typePair?.value as import('yaml').Node | undefined;
+      if (triggerType && typeValueNode?.range) {
+        const [start, , end] = typeValueNode.range;
+        if (absolutePosition >= start && absolutePosition <= end) {
+          return {
+            kind: 'trigger',
+            triggerType,
+            yamlPath: yamlPathStr,
+            currentValue,
+            position,
+            model,
+            yamlDocument,
+          };
+        }
       }
 
       const stepContext = this.detectStepContext(model.getValue(), position);

@@ -86,11 +86,6 @@ function getEventSchemaProperties(eventSchema: z.ZodType): Array<{
   }
 }
 
-/**
- * Build usage section for any trigger (built-in or custom) from a unified definition.
- * Handles Configuration (if conditionExamples), Usage in steps, and Event properties.
- * For custom triggers the template hint is always event.<property> when schema has properties, else {{ event }}.
- */
 function generateTriggerUsage(
   definition: PublicTriggerDefinition,
   triggerType: string,
@@ -98,6 +93,20 @@ function generateTriggerUsage(
 ): string {
   const templateHint = eventProperties.length > 0 ? '`{{ event.<property> }}`' : '`{{ event }}`';
   const lines: string[] = [];
+
+  if (eventProperties.length > 0) {
+    lines.push('**Event properties:**\n');
+    lines.push(`Access the event properties with ${templateHint}.`);
+    lines.push('');
+    for (const prop of eventProperties) {
+      const typeInfo = prop.type ? ` _(${prop.type})_` : '';
+      lines.push(`- \`${prop.name}\`${typeInfo}`);
+      if (prop.description) {
+        lines.push(`  ${prop.description}`);
+      }
+    }
+    lines.push('');
+  }
 
   const conditionExamples = definition.conditionExamples;
   const hasConditionExamples = conditionExamples && conditionExamples.length > 0;
@@ -121,22 +130,6 @@ function generateTriggerUsage(
     }
   }
 
-  lines.push(
-    '',
-    '**Usage in steps:**',
-    `- Access the event payload with ${templateHint} in steps.`
-  );
-
-  if (eventProperties.length > 0) {
-    lines.push('', '**Event properties:**');
-    for (const prop of eventProperties) {
-      const typeInfo = prop.type ? ` _(${prop.type})_` : '';
-      lines.push(`- \`${prop.name}\`${typeInfo}`);
-      if (prop.description) {
-        lines.push(`  ${prop.description}`);
-      }
-    }
-  }
   return lines.join('\n');
 }
 

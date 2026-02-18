@@ -16,7 +16,6 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
-import { triggerSchemas } from '../../../../common/trigger_schemas';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';

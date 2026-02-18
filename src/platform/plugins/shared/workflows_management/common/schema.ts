@@ -31,7 +31,6 @@ import {
 } from './connector_action_schema';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
-import { triggerSchemas } from './trigger_schemas';
 
 /**
  * Get parameter schema for a specific sub-action
