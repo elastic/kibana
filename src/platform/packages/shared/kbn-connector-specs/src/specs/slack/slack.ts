@@ -29,6 +29,7 @@ const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
 const SLACK_RETRY_JITTER_MAX_MS = 250;
 const SLACK_RETRY_MAX_DELAY_MS = 60_000;
 const SLACK_RETRY_EXPONENT_CAP = 6;
+const SLACK_MAX_RETRIES = 5;
 
 // Tiny async sleep helper
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -555,7 +556,7 @@ export const Slack: ConnectorSpec = {
             await slackRequestWithRateLimitRetry<SlackAssistantSearchContextResponse>({
               ctx,
               action: 'searchMessages',
-              maxRetries: 5,
+              maxRetries: SLACK_MAX_RETRIES,
               request: () =>
                 ctx.client.post(`${SLACK_API_BASE}/assistant.search.context`, requestBody, {
                   headers: {
@@ -658,7 +659,7 @@ export const Slack: ConnectorSpec = {
           }>({
             ctx,
             action: 'resolveChannelId',
-            maxRetries: 5,
+            maxRetries: SLACK_MAX_RETRIES,
             request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.list`, { params }),
           });
 
@@ -745,7 +746,7 @@ export const Slack: ConnectorSpec = {
           const response = await slackRequestWithRateLimitRetry({
             ctx,
             action: 'sendMessage',
-            maxRetries: 5,
+            maxRetries: SLACK_MAX_RETRIES,
             request: () =>
               ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
                 headers: {
