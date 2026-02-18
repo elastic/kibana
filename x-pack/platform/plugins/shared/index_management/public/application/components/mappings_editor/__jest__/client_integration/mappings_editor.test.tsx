@@ -528,7 +528,8 @@ describe('Mappings editor: core', () => {
       };
     });
 
-    describe('props.value and props.onChange', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/253428
+    describe.skip('props.value and props.onChange', () => {
       beforeEach(async () => {
         setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
         await screen.findByTestId('mappingsEditor');
