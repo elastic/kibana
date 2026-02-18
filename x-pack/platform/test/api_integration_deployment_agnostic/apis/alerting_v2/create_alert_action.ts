@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     async function getLatestAction(ruleIds: string[]) {
+      await esClient.indices.refresh({ index: ALERTS_ACTIONS_INDEX });
       const result = await esClient.search({
         index: ALERTS_ACTIONS_INDEX,
         query: {
