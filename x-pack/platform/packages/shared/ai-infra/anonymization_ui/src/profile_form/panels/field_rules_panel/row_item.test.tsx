@@ -32,7 +32,7 @@ const renderRow = (rule: FieldRule) => {
 };
 
 describe('FieldRulesPanelRowItem', () => {
-  it('renders mask input when anonymize is selected', () => {
+  it('renders entity class dropdown when anonymize is selected', () => {
     const { onRuleEntityClassChange } = renderRow({
       field: 'host.name',
       allowed: true,
@@ -40,10 +40,10 @@ describe('FieldRulesPanelRowItem', () => {
       entityClass: 'HOST_NAME',
     });
 
-    const input = screen.getByPlaceholderText('Entity class');
-    expect(input).toBeTruthy();
-    fireEvent.change(input, { target: { value: 'NEW_MASK' } });
-    expect(onRuleEntityClassChange).toHaveBeenCalledWith('host.name', 'NEW_MASK');
+    const select = screen.getByRole('combobox', { name: 'Entity class for field host.name' });
+    expect(select).toBeTruthy();
+    fireEvent.change(select, { target: { value: 'RESOURCE_NAME' } });
+    expect(onRuleEntityClassChange).toHaveBeenCalledWith('host.name', 'RESOURCE_NAME');
   });
 
   it('renders reserved mask placeholder when anonymize is not selected', () => {
@@ -54,7 +54,7 @@ describe('FieldRulesPanelRowItem', () => {
       entityClass: undefined,
     });
 
-    expect(screen.queryByPlaceholderText('Entity class')).toBeNull();
+    expect(screen.queryByRole('combobox', { name: 'Entity class for field host.name' })).toBeNull();
     expect(screen.getByText('Mask not used')).toBeTruthy();
   });
 

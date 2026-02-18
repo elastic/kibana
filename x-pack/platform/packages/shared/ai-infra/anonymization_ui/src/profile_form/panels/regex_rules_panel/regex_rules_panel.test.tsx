@@ -21,7 +21,7 @@ const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>>
       {
         id: 'regex-1',
         type: 'regex',
-        entityClass: 'CUSTOM',
+        entityClass: 'REDACTED',
         pattern: '/geoip\\..*/',
         enabled: true,
       },
@@ -89,7 +89,7 @@ describe('RegexRulesPanel', () => {
     setContext();
     render(<RegexRulesPanel />);
 
-    fireEvent.change(screen.getByLabelText('New mask entity class'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('New entity class'), { target: { value: '' } });
     expect(screen.getByRole('button', { name: 'Add regex' })).toBeDisabled();
   });
 
@@ -115,7 +115,7 @@ describe('RegexRulesPanel', () => {
       'aria-invalid',
       'true'
     );
-    expect(screen.getByLabelText('Mask entity class for regex rule regex-1')).toHaveAttribute(
+    expect(screen.getByLabelText('Entity class for regex rule regex-1')).toHaveAttribute(
       'aria-invalid',
       'true'
     );

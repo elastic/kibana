@@ -65,12 +65,12 @@ describe('FieldRulesPanelBulkActions', () => {
       target: { value: FIELD_RULE_ACTION_ANONYMIZE },
     });
     fireEvent.change(screen.getByLabelText('Bulk entity class'), {
-      target: { value: 'EMAIL' },
+      target: { value: 'HOST_NAME' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Apply to selected' }));
 
     expect(setBulkAction).toHaveBeenCalledWith(FIELD_RULE_ACTION_ANONYMIZE);
-    expect(setBulkEntityClass).toHaveBeenCalledWith('EMAIL');
+    expect(setBulkEntityClass).toHaveBeenCalledWith('HOST_NAME');
     expect(applyBulkAction).toHaveBeenCalledTimes(1);
   });
 
@@ -97,7 +97,7 @@ describe('FieldRulesPanelBulkActions', () => {
     render(<FieldRulesPanelBulkActions />);
 
     expect((screen.getByLabelText('Bulk policy action') as HTMLSelectElement).disabled).toBe(true);
-    expect((screen.getByLabelText('Bulk entity class') as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByLabelText('Bulk entity class') as HTMLSelectElement).disabled).toBe(true);
     expect(
       (screen.getByRole('button', { name: 'Apply to selected' }) as HTMLButtonElement).disabled
     ).toBe(true);

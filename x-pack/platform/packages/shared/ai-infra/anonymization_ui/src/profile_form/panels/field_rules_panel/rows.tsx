@@ -86,7 +86,7 @@ export const FieldRulesPanelRows = () => {
           <EuiText size="xs">
             <EuiTextColor color="subdued">
               {i18n.translate('anonymizationUi.profiles.fieldRules.header.mask', {
-                defaultMessage: 'Mask (entity class)',
+                defaultMessage: 'Entity class',
               })}
             </EuiTextColor>
           </EuiText>

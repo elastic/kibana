@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FIELD_RULE_ACTION_ANONYMIZE } from '../../hooks/field_rule_actions';
-import { POLICY_ACTION_OPTIONS } from '../../constants';
+import { ENTITY_CLASS_VALUES, POLICY_ACTION_OPTIONS } from '../../constants';
 import { useFieldRulesPanelContext } from './context';
 
 export const FieldRulesPanelBulkActions = () => {
@@ -38,6 +31,18 @@ export const FieldRulesPanelBulkActions = () => {
       values: { count: selectedCount },
     }
   );
+  const entityClassOptions = [
+    {
+      value: '',
+      text: i18n.translate(
+        'anonymizationUi.profiles.fieldRules.bulk.entityClassSelectPlaceholder',
+        {
+          defaultMessage: 'Select entity class',
+        }
+      ),
+    },
+    ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+  ];
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -66,7 +71,7 @@ export const FieldRulesPanelBulkActions = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFieldText
+        <EuiSelect
           value={bulkEntityClass}
           aria-label={i18n.translate(
             'anonymizationUi.profiles.fieldRules.bulk.entityClassAriaLabel',
@@ -74,13 +79,8 @@ export const FieldRulesPanelBulkActions = () => {
               defaultMessage: 'Bulk entity class',
             }
           )}
+          options={entityClassOptions}
           onChange={(event) => setBulkEntityClass(event.target.value)}
-          placeholder={i18n.translate(
-            'anonymizationUi.profiles.fieldRules.bulk.entityClassPlaceholder',
-            {
-              defaultMessage: 'Entity class',
-            }
-          )}
           disabled={bulkAction !== FIELD_RULE_ACTION_ANONYMIZE || !isManageMode || isSubmitting}
           compressed
         />

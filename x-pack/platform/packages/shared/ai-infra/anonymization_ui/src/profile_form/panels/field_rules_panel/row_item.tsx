@@ -9,16 +9,16 @@ import React, { useState } from 'react';
 import {
   EuiButtonGroup,
   EuiCheckbox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import type { FieldRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { FIELD_RULE_ACTION_ANONYMIZE, type FieldRuleAction } from '../../hooks/field_rule_actions';
-import { POLICY_ACTION_OPTIONS, toFieldAction } from '../../constants';
+import { ENTITY_CLASS_VALUES, POLICY_ACTION_OPTIONS, toFieldAction } from '../../constants';
 import { toActionOption } from './hooks/policy_helpers';
 
 interface FieldRulesPanelRowItemProps {
@@ -34,6 +34,15 @@ interface FieldRulesPanelRowItemProps {
 
 export const FIELD_RULE_POLICY_COLUMN_WIDTH = 220;
 export const FIELD_RULE_MASK_COLUMN_WIDTH = 180;
+const ENTITY_CLASS_OPTIONS = [
+  {
+    value: '',
+    text: i18n.translate('anonymizationUi.profiles.fieldRules.rowEntityClassSelectPlaceholder', {
+      defaultMessage: 'Select entity class',
+    }),
+  },
+  ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+];
 
 export const FieldRulesPanelRowItem = ({
   rule,
@@ -87,22 +96,17 @@ export const FieldRulesPanelRowItem = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: FIELD_RULE_MASK_COLUMN_WIDTH }}>
         {action === FIELD_RULE_ACTION_ANONYMIZE ? (
-          <EuiFieldText
+          <EuiSelect
             compressed
             value={rule.entityClass ?? ''}
             aria-label={i18n.translate(
               'anonymizationUi.profiles.fieldRules.rowEntityClassAriaLabel',
               {
-                defaultMessage: 'Mask entity class for field {field}',
+                defaultMessage: 'Entity class for field {field}',
                 values: { field: rule.field },
               }
             )}
-            placeholder={i18n.translate(
-              'anonymizationUi.profiles.fieldRules.rowEntityClassPlaceholder',
-              {
-                defaultMessage: 'Entity class',
-              }
-            )}
+            options={ENTITY_CLASS_OPTIONS}
             onChange={(event) => onRuleEntityClassChange(rule.field, event.target.value)}
             onBlur={() => setIsEntityClassTouched(true)}
             isInvalid={isEntityClassInvalid}

@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -23,6 +24,7 @@ import {
 } from '@elastic/eui';
 import type { RegexRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
+import { ENTITY_CLASS_VALUES } from '../../constants';
 import { useProfileFormContext } from '../../profile_form_context';
 
 const REGEX_RULE_STATE_ENABLED = 'enabled';
@@ -31,8 +33,17 @@ const REGEX_RULE_STATE_DISABLED = 'disabled';
 export const RegexRulesPanel = () => {
   const { regexRules, onRegexRulesChange, isManageMode, isSubmitting, regexRulesError } =
     useProfileFormContext();
-  const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'CUSTOM' });
+  const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'REDACTED' });
   const showValidationErrors = Boolean(regexRulesError);
+  const entityClassOptions = [
+    {
+      value: '',
+      text: i18n.translate('anonymizationUi.profiles.regexRules.entityClassSelectPlaceholder', {
+        defaultMessage: 'Select entity class',
+      }),
+    },
+    ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+  ];
 
   const updateRegexRule = useCallback(
     (index: number, next: RegexRule) => {
@@ -59,7 +70,7 @@ export const RegexRulesPanel = () => {
         enabled: true,
       },
     ]);
-    setRegexDraft({ pattern: '', entityClass: 'CUSTOM' });
+    setRegexDraft({ pattern: '', entityClass: 'REDACTED' });
   }, [onRegexRulesChange, regexDraft.entityClass, regexDraft.pattern, regexRules]);
 
   const removeRegexRule = useCallback(
@@ -111,7 +122,7 @@ export const RegexRulesPanel = () => {
         <EuiText size="xs">
           <EuiTextColor color="subdued">
             {i18n.translate('anonymizationUi.profiles.regexRules.header.entityClass', {
-              defaultMessage: 'Mask (entity class)',
+              defaultMessage: 'Entity class',
             })}
           </EuiTextColor>
         </EuiText>
@@ -120,17 +131,18 @@ export const RegexRulesPanel = () => {
       render: (_value: string, rule: RegexRule) => {
         const isInvalid = showValidationErrors && !rule.entityClass.trim();
         return (
-          <EuiFieldText
+          <EuiSelect
             compressed
             value={rule.entityClass}
             isInvalid={isInvalid}
             aria-label={i18n.translate(
               'anonymizationUi.profiles.regexRules.row.entityClassAriaLabel',
               {
-                defaultMessage: 'Mask entity class for regex rule {id}',
+                defaultMessage: 'Entity class for regex rule {id}',
                 values: { id: rule.id },
               }
             )}
+            options={entityClassOptions}
             onChange={(event) =>
               updateRegexRule(
                 regexRules.findIndex((item) => item.id === rule.id),
@@ -138,12 +150,6 @@ export const RegexRulesPanel = () => {
               )
             }
             disabled={!isManageMode || isSubmitting}
-            placeholder={i18n.translate(
-              'anonymizationUi.profiles.regexRules.entityClassPlaceholder',
-              {
-                defaultMessage: 'Entity class',
-              }
-            )}
             fullWidth
           />
         );
@@ -290,28 +296,23 @@ export const RegexRulesPanel = () => {
         <EuiFlexItem grow={false} style={{ width: 220 }}>
           <EuiFormRow
             label={i18n.translate('anonymizationUi.profiles.regexRules.create.entityClassLabel', {
-              defaultMessage: 'Mask (entity class)',
+              defaultMessage: 'Entity class',
             })}
             fullWidth
           >
-            <EuiFieldText
+            <EuiSelect
               compressed
               value={regexDraft.entityClass}
               aria-label={i18n.translate(
                 'anonymizationUi.profiles.regexRules.create.entityClassAriaLabel',
                 {
-                  defaultMessage: 'New mask entity class',
+                  defaultMessage: 'New entity class',
                 }
               )}
+              options={entityClassOptions}
               onChange={(event) =>
                 setRegexDraft((draft) => ({ ...draft, entityClass: event.target.value }))
               }
-              placeholder={i18n.translate(
-                'anonymizationUi.profiles.regexRules.entityClassPlaceholder',
-                {
-                  defaultMessage: 'Entity class',
-                }
-              )}
               disabled={!isManageMode || isSubmitting}
               fullWidth
             />
