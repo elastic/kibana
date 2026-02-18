@@ -139,7 +139,7 @@ jest.mock('./actions_menu_button', () => ({
 jest.mock('./decorations', () => ({
   useAlertTriggerDecorations: jest.fn(),
   useConnectorTypeDecorations: jest.fn(),
-  useFocusedStepOutline: jest.fn(() => ({ styles: {} })),
+  useFocusedStepDecoration: jest.fn(),
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),

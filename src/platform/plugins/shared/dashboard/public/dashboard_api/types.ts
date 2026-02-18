@@ -23,8 +23,6 @@ import type {
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-} from '@kbn/presentation-containers';
-import type {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -42,9 +40,9 @@ import type {
   PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
+  PublishesSearchSession,
+  PublishesReload,
 } from '@kbn/presentation-publishing';
-import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
