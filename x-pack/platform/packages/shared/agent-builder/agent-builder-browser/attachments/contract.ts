@@ -34,6 +34,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isSidebar: boolean;
   /** Function to update the attachment's origin reference */
   updateOrigin: (originId: string) => Promise<void>;
+  /** Callback to open the attachment in canvas mode (expanded flyout view) */
+  openCanvas: () => void;
 }
 
 /**
@@ -72,7 +74,12 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.
    */
-  renderContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  /**
+   * Optional custom content renderer for canvas mode (expanded flyout view).
+   * When provided, attachments can be opened in an expanded view via action buttons.
+   */
+  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
   /**
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.
