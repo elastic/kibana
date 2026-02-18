@@ -193,9 +193,10 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
 
-    const initialGridState = useMemo(() => {
-      return getDataGridUiStateMap()?.[cellId];
-    }, [cellId, getDataGridUiStateMap]);
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
 
     const onInitialStateChange = useCallback<
       NonNullable<UnifiedDataTableProps['onInitialStateChange']>
