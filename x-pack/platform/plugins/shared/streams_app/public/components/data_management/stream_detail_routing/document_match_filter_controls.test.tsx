@@ -27,6 +27,7 @@ describe('DocumentMatchFilterControls', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
   });
 
@@ -83,6 +84,7 @@ describe('DocumentMatchFilterControls', () => {
 
   it('should call onFilterChange when filter button is clicked', async () => {
     const user = userEvent.setup();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
 
     renderWithProviders(
