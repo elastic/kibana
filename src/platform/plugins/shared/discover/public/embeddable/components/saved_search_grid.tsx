@@ -264,7 +264,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
             defaultMessage="{editPanelLink} to fix it."
             values={{
               editPanelLink: (
-                <EuiLink onClick={viewModeDeletedTabAction.onClick}>
+                <EuiLink
+                  data-test-subj="discoverEmbeddableDeletedTabEditPanelLink"
+                  onClick={viewModeDeletedTabAction.onClick}
+                >
                   {i18n.translate('discover.embeddable.deletedTab.editPanelLinkLabel', {
                     defaultMessage: 'Edit the panel',
                   })}
