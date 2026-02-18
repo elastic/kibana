@@ -12,7 +12,7 @@ import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
 
-interface ServiceAggregate {
+export interface ServiceAggregate {
   serviceName: string;
   count: number;
   errorCount: number;
