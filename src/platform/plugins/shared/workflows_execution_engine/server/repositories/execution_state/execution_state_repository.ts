@@ -8,8 +8,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsExecution } from '@kbn/workflows';
+import { NonTerminalExecutionStatuses, type EsExecution } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common';
+
+export interface FindExecutionsOptions {
+  executionIds?: Set<string>;
+  type?: 'workflow' | 'step';
+}
 
 export class ExecutionStateRepository {
   private indexName = WORKFLOWS_EXECUTION_STATE_INDEX;
@@ -51,6 +56,7 @@ export class ExecutionStateRepository {
     return executions;
   }
 
+  // TODO REMOVE THIS
   public async getExecutionById(executionId: string): Promise<EsExecution | null> {
     const response = await this.esClient.get<EsExecution>({
       index: this.indexName,
@@ -96,6 +102,20 @@ export class ExecutionStateRepository {
     }
   }
 
+  public async bulkUpdate(executions: Array<Partial<EsExecution>>): Promise<void> {
+    if (executions.length === 0) {
+      return;
+    }
+
+    await this.esClient.bulk({
+      index: this.indexName,
+      body: executions.flatMap((execution) => [
+        { update: { _id: execution.id } },
+        { doc: execution },
+      ]),
+    });
+  }
+
   public async bulkDelete(executionIds: Set<string>): Promise<void> {
     if (executionIds.size === 0) {
       return;
@@ -105,5 +125,113 @@ export class ExecutionStateRepository {
       index: this.indexName,
       body: Array.from(executionIds).map((id) => ({ delete: { _id: id } })),
     });
+  }
+
+  /**
+   * Retrieves non-terminal workflow execution IDs by concurrency group key.
+   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
+   * to make room for new executions.
+   *
+   * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
+   * Results are sorted by createdAt ascending (oldest first).
+   *
+   * @param concurrencyGroupKey - The concurrency group key to filter by.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
+   * @param size - Optional limit on the number of results to return. Defaults to 5000.
+   * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
+   */
+  public async getRunningExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    excludeExecutionId?: string,
+    type?: 'workflow' | 'step',
+    size: number = 5000
+  ): Promise<string[]> {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { concurrencyGroupKey } },
+      { term: { spaceId } },
+      { term: { type } },
+      // Direct match on in-progress statuses is faster than must_not on terminal statuses
+      {
+        terms: {
+          status: NonTerminalExecutionStatuses,
+        },
+      },
+    ];
+
+    // Add exclusion as a nested bool query in filter context.
+    // We nest must_not inside a bool query within the filter array (rather than using
+    // a top-level must_not) to keep all clauses in the same filter context for consistency
+    // and optimal performance. The nested must_not is still in filter context (no scoring).
+    if (excludeExecutionId) {
+      filterClauses.push({
+        bool: {
+          must_not: [{ term: { id: excludeExecutionId } }],
+        },
+      });
+    }
+
+    const response = await this.esClient.search<Pick<EsExecution, 'id'>>({
+      index: this.indexName,
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+      _source: ['id'], // Only fetch ID field for efficiency
+      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
+      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * Retrieves running (non-terminal) workflow executions by workflow ID.
+   *
+   * Uses the same optimized query structure as hasRunningExecution() but returns the actual hits.
+   *
+   * @param workflowId - The ID of the workflow.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
+   * @returns A promise that resolves to the list of search hits for running executions.
+   */
+  public async getRunningExecutionsByWorkflowId(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string,
+    type?: 'workflow' | 'step'
+  ) {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { workflowId } },
+      { term: { spaceId } },
+      { term: { type } },
+      // Direct match on in-progress statuses is faster than must_not on terminal statuses
+      {
+        terms: {
+          status: NonTerminalExecutionStatuses,
+        },
+      },
+    ];
+
+    if (triggeredBy) {
+      filterClauses.push({ term: { triggeredBy } });
+    }
+
+    const response = await this.esClient.search<EsExecution>({
+      index: this.indexName,
+      size: 1,
+      terminate_after: 1, // Stop after finding 1 match
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
+
+    return response.hits.hits;
   }
 }

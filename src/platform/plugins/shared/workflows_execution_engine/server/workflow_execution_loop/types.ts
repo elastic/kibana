@@ -16,6 +16,7 @@ import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manage
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
@@ -24,6 +25,7 @@ export interface WorkflowExecutionLoopParams {
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: IWorkflowEventLogger;
   workflowExecutionRepository: WorkflowExecutionRepository;
+  executionStateRepository: ExecutionStateRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

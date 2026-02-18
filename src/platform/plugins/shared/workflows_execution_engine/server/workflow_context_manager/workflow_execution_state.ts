@@ -14,11 +14,8 @@ import {
   type EsExecution,
   type EsWorkflowExecution,
   type EsWorkflowStepExecution,
-  isTerminalStatus,
 } from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
@@ -35,9 +32,7 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private executionStateRepository: ExecutionStateRepository,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
-    private stepExecutionRepository: StepExecutionRepository
+    private executionStateRepository: ExecutionStateRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -132,43 +127,7 @@ export class WorkflowExecutionState {
     const changes = Array.from(this.changes.values());
     this.changes.clear();
 
-    const tasks: Promise<void>[] = [];
-
-    tasks.push(this.executionStateRepository.bulkUpsert(changes));
-
-    if (isTerminalStatus(this.workflowExecution.status)) {
-      tasks.push(
-        this.workflowExecutionRepository.createWorkflowExecution(
-          this.workflowExecution as EsWorkflowExecution,
-          {
-            refresh: false,
-          }
-        )
-      );
-    }
-
-    const stepChanges = Array.from(changes).filter(
-      (change) => change.type === 'step' && change.status && isTerminalStatus(change.status)
-    ) as EsWorkflowStepExecution[];
-
-    if (stepChanges.length) {
-      tasks.push(
-        this.stepExecutionRepository.bulkCreate(
-          stepChanges.map(
-            (stepChange) => this.stepExecutions.get(stepChange.id) as EsWorkflowStepExecution
-          )
-        )
-      );
-    }
-
-    await Promise.all(tasks);
-
-    // if (isTerminalStatus(this.workflowExecution.status)) {
-    //   await new Promise((resolve) => setTimeout(resolve, 4000));
-    //   await this.executionStateRepository.bulkDelete(
-    //     new Set([this.workflowExecution.id, ...(this.workflowExecution.stepExecutionIds ?? [])])
-    //   );
-    // }
+    await this.executionStateRepository.bulkUpsert(changes);
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {

@@ -15,6 +15,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { UrlValidator } from '../lib/url_validator';
+import { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -25,7 +26,6 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 
 const defaultWorkflowSettings: WorkflowSettings = {
   timeout: '6h',
@@ -93,9 +93,7 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
-    executionStateRepository,
-    workflowExecutionRepository,
-    stepExecutionRepository
+    executionStateRepository
   );
 
   // Create telemetry client
@@ -151,5 +149,6 @@ export async function setupDependencies(
     nodesFactory,
     workflowExecutionRepository,
     esClient,
+    executionStateRepository,
   };
 }

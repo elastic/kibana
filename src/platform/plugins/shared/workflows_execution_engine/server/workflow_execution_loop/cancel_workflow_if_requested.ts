@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
@@ -25,7 +26,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * issues from causing step execution failures.
  */
 export async function cancelWorkflowIfRequested(
-  workflowExecutionRepository: WorkflowExecutionRepository,
+  executionStateRepository: ExecutionStateRepository,
   workflowExecutionState: WorkflowExecutionState,
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger,
@@ -33,10 +34,14 @@ export async function cancelWorkflowIfRequested(
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
     try {
-      const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowExecutionState.getWorkflowExecution().id,
+      const result = await executionStateRepository.getExecutions(
+        new Set([workflowExecutionState.getWorkflowExecution().id]),
         workflowExecutionState.getWorkflowExecution().spaceId
       );
+
+      const currentExecution = result[
+        workflowExecutionState.getWorkflowExecution().id
+      ] as EsWorkflowExecution;
 
       if (!currentExecution?.cancelRequested) {
         return;

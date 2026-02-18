@@ -9,7 +9,7 @@
 
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -24,15 +24,12 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
   private readonly workflowTaskManager: WorkflowTaskManager;
-  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
+  private readonly executionStateRepository: ExecutionStateRepository;
 
-  constructor(
-    workflowTaskManager: WorkflowTaskManager,
-    workflowExecutionRepository: WorkflowExecutionRepository
-  ) {
+  constructor(workflowTaskManager: WorkflowTaskManager, executionState: ExecutionStateRepository) {
     this.templatingEngine = new WorkflowTemplatingEngine();
     this.workflowTaskManager = workflowTaskManager;
-    this.workflowExecutionRepository = workflowExecutionRepository;
+    this.executionStateRepository = executionState;
   }
 
   /**
@@ -117,10 +114,11 @@ export class ConcurrencyManager {
 
     // Query for non-terminal execution IDs in the same concurrency group
     const runningExecutionIds =
-      await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+      await this.executionStateRepository.getRunningExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
         spaceId,
-        currentExecutionId
+        currentExecutionId,
+        'workflow'
       );
 
     const activeCount = runningExecutionIds.length;
@@ -133,14 +131,16 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
-      await this.workflowExecutionRepository.updateWorkflowExecution({
-        id: currentExecutionId,
-        status: ExecutionStatus.SKIPPED,
-        cancelRequested: true,
-        cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
-        cancelledAt: skipTimestamp,
-        cancelledBy: 'system',
-      });
+      await this.executionStateRepository.bulkUpdate([
+        {
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+          cancelledAt: skipTimestamp,
+          cancelledBy: 'system',
+        },
+      ]);
       return false; // Drop the new execution
     }
 
@@ -154,7 +154,7 @@ export class ConcurrencyManager {
 
       // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
-      await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
+      await this.executionStateRepository.bulkUpdate(
         executionIdsToCancel.map((id) => ({
           id,
           status: ExecutionStatus.CANCELLED,

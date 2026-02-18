@@ -56,7 +56,7 @@ export async function processNodeStackMonitoring(
   }
 
   await cancelWorkflowIfRequested(
-    params.workflowExecutionRepository,
+    params.executionStateRepository,
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,
     params.workflowLogger,
