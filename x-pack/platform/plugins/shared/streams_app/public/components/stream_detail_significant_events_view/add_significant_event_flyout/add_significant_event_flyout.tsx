@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
 import { TaskStatus, type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -111,13 +111,15 @@ export function AddSignificantEventFlyout({
     doScheduleGenerationTask(connectorId, effectiveSystems).then(setTask);
   };
 
-  const getTaskStatus = () => {
+  const getTaskStatus = useCallback(() => {
     gettingTaskStatus();
-    getGenerationTask()
-      .then(setTask)
-      .then(stoppedGettingTaskStatus)
-      .finally(stoppedGettingTaskStatus);
-  };
+    getGenerationTask().then(setTask).finally(stoppedGettingTaskStatus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stoppedGettingTaskStatus, gettingTaskStatus]);
+
+  useEffect(() => {
+    getTaskStatus();
+  }, [getTaskStatus]);
 
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
@@ -128,26 +130,20 @@ export function AddSignificantEventFlyout({
 
   const isGenerating =
     task?.status === 'in_progress' ||
-    isCancellingTask ||
+    task?.status === 'being_canceled' ||
     isGettingTaskStatus ||
     isSchedulingGenerationTask;
 
-  const prevTaskStatusRef = useRef<string | undefined>(undefined);
+  const prevTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
 
   useEffect(() => {
     const prevStatus = prevTaskStatusRef.current;
-    prevTaskStatusRef.current = task?.status;
 
     // Process completed when:
-    // - First time getting the task (prevStatus is undefined)
-    // - Transitioning from in_progress to completed
-    const isFirstLoad = prevStatus === undefined;
-    const isTransitionFromInProgress = prevStatus === 'in_progress';
-    if (
-      task?.status === 'completed' &&
-      (isFirstLoad || isTransitionFromInProgress) &&
-      !isGenerating
-    ) {
+    // - Transitioning from any non-completed state to completed
+    const isNewlyCompleted =
+      task?.status === TaskStatus.Completed && prevStatus !== TaskStatus.Completed;
+    if (isNewlyCompleted) {
       setGeneratedQueries(
         task.queries
           .filter((nextQuery) => {
@@ -167,7 +163,9 @@ export function AddSignificantEventFlyout({
           }))
       );
     }
-  }, [isGenerating, task]);
+
+    prevTaskStatusRef.current = task?.status;
+  }, [task]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
