@@ -18,10 +18,11 @@ import {
 import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import {
-  SetAlertsStatusByIds,
-  type SetAlertsStatusRequestBody,
+import type {
+  Reason,
+  SetAlertsStatusRequestBody,
 } from '../../../../../common/api/detection_engine/signals';
+import { SetAlertsStatusByIds } from '../../../../../common/api/detection_engine/signals';
 import { buildSiemResponse } from '../utils';
 import { DefaultClosingReasonSchema } from '../../../../../common/types';
 import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from '../signals/translations';
@@ -50,7 +51,8 @@ export const setWorkflowStatusHandler = async ({
   const esClient = core.elasticsearch.client.asCurrentUser;
 
   if (status === AlertStatusEnum.closed) {
-    const customReasons = await core.uiSettings.client.get(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+    const customReasons =
+      (await core.uiSettings.client.get<Reason[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY)) ?? [];
     const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
     if (body.reason === undefined || validReasons.has(body.reason)) {
       reason = body.reason;

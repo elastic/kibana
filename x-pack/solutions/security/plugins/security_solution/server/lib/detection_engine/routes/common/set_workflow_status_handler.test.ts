@@ -114,12 +114,15 @@ describe('set workflow status handler', () => {
         DEFAULT_ALERT_CLOSE_REASONS_KEY
       );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("'false_positive'");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: 'false_positive',
+            }),
+          }),
+        })
+      );
     });
 
     test('handles closed status without reason', async () => {
@@ -142,12 +145,15 @@ describe('set workflow status handler', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("ctx._source.remove('kibana.alert.workflow_reason')");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: null,
+            }),
+          }),
+        })
+      );
     });
 
     test('handles different status values', async () => {
@@ -195,12 +201,15 @@ describe('set workflow status handler', () => {
         getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
       });
 
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("'test-uid-123'");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              workflowUser: 'test-uid-123',
+            }),
+          }),
+        })
+      );
     });
 
     test('handles null user in script', async () => {
@@ -220,12 +229,15 @@ describe('set workflow status handler', () => {
         getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
       });
 
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain('null');
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              workflowUser: null,
+            }),
+          }),
+        })
+      );
     });
 
     test('catches error if updateByQuery throws error', async () => {
@@ -297,12 +309,15 @@ describe('set workflow status handler', () => {
       const response = responseAdapter(mockedResponse);
 
       expect(response.status).toEqual(200);
-      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
-      expect(
-        call.script && typeof call.script === 'object' && 'source' in call.script
-          ? call.script.source
-          : ''
-      ).toContain("'custom_close_reason'");
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            params: expect.objectContaining({
+              reason: 'custom_close_reason',
+            }),
+          }),
+        })
+      );
     });
 
     test('returns 400 when closing reason is invalid', async () => {
