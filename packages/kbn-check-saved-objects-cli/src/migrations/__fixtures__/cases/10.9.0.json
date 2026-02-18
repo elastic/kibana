@@ -1,58 +1,89 @@
 {
   "10.8.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.8.0 and 10.9.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "assignees": [
+        {
+          "uid": "user-profile-1"
+        }
+      ],
+      "category": null,
+      "closed_at": null,
+      "closed_by": null,
+      "created_at": "2026-02-18T00:00:00.000Z",
+      "created_by": {
+        "email": "test@elastic.co",
+        "full_name": "Elastic",
+        "username": "elastic",
+        "profile_uid": null
+      },
+      "connector": {
+        "name": "none",
+        "type": ".none",
+        "fields": []
+      },
+      "customFields": [],
+      "description": "Fixture case document for model version checks",
+      "duration": null,
+      "external_service": null,
+      "owner": "securitySolution",
+      "severity": 0,
+      "status": 0,
+      "tags": ["fixture"],
+      "title": "Cases SO fixture",
+      "total_alerts": 0,
+      "total_comments": 0,
+      "total_events": 0,
+      "total_observables": 0,
+      "updated_at": null,
+      "updated_by": null,
+      "observables": [],
+      "settings": {
+        "syncAlerts": true,
+        "extractObservables": false
+      }
     }
   ],
   "10.9.0": [
     {
-      "assignees": "array",
-      "category": "string?|null",
-      "closed_at": "string?|null",
-      "closed_by": "object?|null",
-      "created_at": "string",
-      "customFields": "array?|null",
-      "description": "string",
-      "duration": "number?|null",
-      "external_service": "object?|null",
-      "owner": "string",
-      "severity": "0|10|20|30",
-      "status": "0|10|20",
-      "tags": "array",
-      "title": "string",
-      "total_alerts": "number",
-      "total_comments": "number",
-      "updated_at": "string?|null",
-      "updated_by": "object?|null",
-      "observables": "array?|null",
-      "incremental_id": "number?|null",
-      "in_progress_at": "string?|null",
-      "time_to_acknowledge": "number?|null",
-      "time_to_investigate": "number?|null",
-      "time_to_resolve": "number?|null",
-      "total_events": "number",
-      "total_observables": "number",
-      "template": "object?|null",
-      "extended_fields": "object?|null",
+      "assignees": [
+        {
+          "uid": "user-profile-1"
+        }
+      ],
+      "category": null,
+      "closed_at": null,
+      "closed_by": null,
+      "created_at": "2026-02-18T00:00:00.000Z",
       "created_by": {
-        "email": "string?|null",
-        "full_name": "string?|null",
-        "username": "string?|null",
-        "profile_uid": "string?|null"
+        "email": "test@elastic.co",
+        "full_name": "Elastic",
+        "username": "elastic",
+        "profile_uid": null
       },
       "connector": {
-        "name": "string",
-        "type": "string",
-        "fields": "array"
+        "name": "none",
+        "type": ".none",
+        "fields": []
       },
+      "customFields": [],
+      "description": "Fixture case document for model version checks",
+      "duration": null,
+      "external_service": null,
+      "owner": "securitySolution",
+      "severity": 0,
+      "status": 0,
+      "tags": ["fixture"],
+      "title": "Cases SO fixture",
+      "total_alerts": 0,
+      "total_comments": 0,
+      "total_events": 0,
+      "total_observables": 0,
+      "updated_at": null,
+      "updated_by": null,
+      "observables": [],
       "settings": {
-        "extractObservables": "boolean?"
+        "syncAlerts": true,
+        "extractObservables": false
       }
     }
   ]
