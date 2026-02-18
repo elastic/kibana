@@ -96,10 +96,54 @@ export const panelBodySectionStyles = ({ euiTheme }: UseEuiTheme) => {
 
 export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = css`
-    /* TODO */
+    display: flex;
+    align-items: center;
+    min-block-size: ${euiTheme.size.xl};
+
+    &:hover,
+    &:focus-within {
+      background-color: ${euiTheme.focus.backgroundColor};
+    }
+  `;
+  const button = css`
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+    flex-grow: 1;
+    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+    font-size: ${euiFontSizeFromScale('s', euiTheme)};
+    line-height: ${euiLineHeightFromBaseline('s', euiTheme)};
+    font-weight: ${euiTheme.font.weight.regular};
+    color: ${euiTheme.colors.textParagraph};
+    cursor: pointer;
+    outline-offset: -${euiTheme.focus.width};
+
+    .css-${root.name}:has(:nth-child(2)):hover > &,
+    .css-${root.name}:has(:nth-child(2)):focus-within > & {
+      padding-inline-end: ${euiTheme.size.s};
+    }
+  `;
+  const suffix = css`
+    font-family: ${euiTheme.font.familyCode};
+    font-size: ${euiFontSizeFromScale('xs', euiTheme)};
+    line-height: 1;
+    font-weight: ${euiTheme.font.weight.regular};
+    color: ${euiTheme.colors.textSubdued};
+  `;
+  const extraActions = css`
+    display: none;
+    flex-shrink: 0;
+    padding-inline-end: ${euiTheme.size.base};
+
+    .css-${root.name}:hover > &,
+    .css-${root.name}:focus-within > & {
+      display: flex;
+    }
   `;
 
-  return { root };
+  return { root, button, suffix, extraActions };
 };
 
 export const panelNavItemStyles = ({ euiTheme }: UseEuiTheme) => {

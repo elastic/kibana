@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ReactNode, PropsWithChildren } from 'react';
+import type { ReactNode, PropsWithChildren, ButtonHTMLAttributes, MouseEventHandler } from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import { useDateRangePickerPanelNavigation } from './date_range_picker_panel_navigation';
@@ -91,11 +91,37 @@ export const PanelBodySection = ({
   return <div css={[styles.root, spacing[spacingSide]]}>{children}</div>;
 };
 
-/** A single selectable item within the panel body. */
-export const PanelListItem = ({ children }: PropsWithChildren) => {
-  const euiThemeContext = useEuiTheme();
+interface PanelListItemProps {
+  /** Main action handler, merged with buttonProps when present */
+  onClick: MouseEventHandler<HTMLButtonElement>;
+  /** Additional props for the main button */
+  buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>;
+  /** Meta text on the right hand side */
+  suffix?: string;
+  /** Extra actions shown only on container hover */
+  extraActions?: ReactNode;
+}
 
-  return <div css={panelListItemStyles(euiThemeContext).root}>{children}</div>;
+/** A single selectable item within the panel body. */
+export const PanelListItem = ({
+  onClick,
+  buttonProps,
+  suffix,
+  extraActions,
+  children,
+}: PanelListItemProps & PropsWithChildren) => {
+  const euiThemeContext = useEuiTheme();
+  const styles = panelListItemStyles(euiThemeContext);
+
+  return (
+    <li css={styles.root}>
+      <button css={styles.button} {...buttonProps} onClick={onClick}>
+        {children}
+        {suffix && <span css={styles.suffix}>{suffix}</span>}
+      </button>
+      {extraActions && <div css={styles.extraActions}>{extraActions}</div>}
+    </li>
+  );
 };
 
 /** A navigation item within the panel body that links to another panel. */
