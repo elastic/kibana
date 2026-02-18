@@ -457,7 +457,7 @@ async function simulateIngest(
   };
   const isWiredStream = Streams.WiredStream.Definition.is(streamDefinition);
 
-  let pipelineSubstitutions: Record<string, { processors: any[] }>;
+  let pipelineSubstitutions: Record<string, { processors: Array<Record<string, unknown>> }>;
   let simulatePath: string;
 
   if (isWiredStream) {
