@@ -141,7 +141,7 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Interactions (with data)', () => {
-    it('should show an error message when there is an error with fetching scripts', async () => {
+    it('should show an error message when there is an error with fetching scripts', () => {
       (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
         isFetching: false,
@@ -320,7 +320,7 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Delete modal workflow', () => {
-    it('should open delete modal when delete action is clicked', async () => {
+    it('should open delete modal when delete action is clicked', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId, name: 'Test Script' });
       getScriptsListMock([script]);
@@ -338,7 +338,7 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should refetch scripts list after successful delete', async () => {
+    it('should refetch scripts list after successful delete', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
       const mockRefetch = jest.fn();
@@ -377,7 +377,7 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should close modal without refetch when cancel is clicked', async () => {
+    it('should close modal without refetch when cancel is clicked', () => {
       const scriptId = 'script-1';
       const script = scriptsGenerator.generate({ id: scriptId });
       const mockRefetch = jest.fn();
@@ -418,7 +418,7 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Pagination and sorting URL updates', () => {
-    it('should update URL params when changing `page`', async () => {
+    it('should update URL params when changing `page`', () => {
       const scripts = scriptsGenerator.generateListOfScripts(Array.from({ length: 30 }));
       getScriptsListMock(scripts);
 
@@ -427,12 +427,12 @@ describe('ScriptsLibrary', () => {
       const nextPageButton = renderResult.getByTestId('pagination-button-next');
       userEvent.click(nextPageButton);
 
-      await waitFor(() => {
+      waitFor(() => {
         expect(history.location.search).toContain('page=2');
       });
     });
 
-    it('should update URL params when changing `pageSize`', async () => {
+    it('should update URL params when changing `pageSize`', () => {
       const scripts = scriptsGenerator.generateListOfScripts(Array.from({ length: 30 }));
       getScriptsListMock(scripts);
 
@@ -451,17 +451,16 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should update URL params when changing sort', async () => {
+    it('should update URL params when changing sort', () => {
       const scripts = scriptsGenerator.generateListOfScripts(Array.from({ length: 5 }));
       getScriptsListMock(scripts);
 
       render();
 
       const { getByText } = renderResult;
-      const nameHeader = getByText('Name');
-      userEvent.click(nameHeader);
-
-      await waitFor(() => {
+      waitFor(() => {
+        const nameHeader = getByText('Name');
+        userEvent.click(nameHeader);
         expect(history.location.search).toContain('sortField=name');
         expect(history.location.search).toContain('sortDirection=desc');
       });
