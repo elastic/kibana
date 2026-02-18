@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import type { TimeUnit } from './form';
-import { getTimeUnitLabel } from '../../helpers/format_size_units';
+export { TIME_UNIT_OPTIONS } from '../shared';
 
 export const ILM_PHASE_ORDER: PhaseName[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 
@@ -31,25 +31,6 @@ export const PHASE_LABELS: Record<PhaseName, string> = {
     defaultMessage: 'Delete',
   }),
 };
-
-export const TIME_UNIT_OPTIONS: ReadonlyArray<{ value: TimeUnit; text: string }> = [
-  {
-    value: 'd',
-    text: getTimeUnitLabel('d'),
-  },
-  {
-    value: 'h',
-    text: getTimeUnitLabel('h'),
-  },
-  {
-    value: 'm',
-    text: getTimeUnitLabel('m'),
-  },
-  {
-    value: 's',
-    text: getTimeUnitLabel('s'),
-  },
-];
 
 export const DEFAULT_NEW_PHASE_MIN_AGE: { value: string; unit: TimeUnit } = {
   value: '30',
