@@ -179,7 +179,11 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+        await bulkMigrateLegacyActions({
+          context,
+          rules: response.saved_objects,
+          skipActionsValidation: true,
+        });
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
