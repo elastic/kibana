@@ -167,9 +167,7 @@ export type ChartSectionConfiguration<T extends object = object> =
        * Renders the title displayed in the collapsed chart bar when the chart is hidden.
        * If not provided, no title is shown.
        */
-      renderCollapsedTitle?: (
-        fetchParams: ChartSectionProps['fetchParams']
-      ) => React.ReactNode;
+      renderCollapsedTitle?: (fetchParams: ChartSectionProps['fetchParams']) => React.ReactNode;
     }
   | {
       replaceDefaultChart: false;

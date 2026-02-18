@@ -8,34 +8,12 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import {
+  UnifiedMetricsExperienceGrid,
+  categorizeFields,
+  MetricsCountLabel,
+} from '@kbn/unified-chart-section-viewer';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-
-const getMetricFieldsCount = (fetchParams: ChartSectionProps['fetchParams']): number => {
-  const { dataView, table } = fetchParams;
-  if (!dataView) {
-    return 0;
-  }
-
-  const dataViewFieldMap = dataView.fields.toSpec();
-  const columns = table?.columns ?? [];
-  let count = 0;
-
-  for (const column of columns) {
-    if (column.isNull) {
-      continue;
-    }
-    const field = dataViewFieldMap[column.name];
-    if (field?.timeSeriesMetric) {
-      count++;
-    }
-  }
-
-  return count;
-};
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
@@ -50,20 +28,16 @@ export const createChartSection =
       localStorageKeyPrefix: 'discover:metricsExperience',
       defaultTopPanelHeight: 'max-content',
       renderCollapsedTitle: (fetchParams) => {
-        const count = getMetricFieldsCount(fetchParams);
-        if (count === 0) {
+        const { dataView, table } = fetchParams;
+        const { metricFields } = categorizeFields({
+          index: dataView.getIndexPattern(),
+          dataViewFieldMap: dataView.fields.toSpec(),
+          columns: table?.columns,
+        });
+        if (metricFields.length === 0) {
           return null;
         }
-        return (
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('discover.metricsDataSource.collapsedChartTitle', {
-                defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                values: { count },
-              })}
-            </strong>
-          </EuiText>
-        );
+        return <MetricsCountLabel count={metricFields.length} />;
       },
     };
   };
