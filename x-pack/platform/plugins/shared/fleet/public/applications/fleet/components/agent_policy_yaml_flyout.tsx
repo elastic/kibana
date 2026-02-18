@@ -111,7 +111,7 @@ export const AgentPolicyYamlFlyout = memo<{
                       content={
                         <FormattedMessage
                           id="xpack.fleet.agentPolicyYamlFlyout.versionSpecificPolicyTooltip"
-                          defaultMessage="This agent uses a version-specific policy because it doesn't meet the agent version requirements of some integrations."
+                          defaultMessage="This agent uses a version-specific policy because some integrations have agent version requirements."
                         />
                       }
                     />
