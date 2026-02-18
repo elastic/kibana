@@ -103,23 +103,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
-        // console.log('UnifiedHoverProvider: No YAML document available');
         return null;
       }
 
       // Detect context at current position
       const context = await this.buildHoverContext(model, position, yamlDocument);
       if (!context) {
-        // console.log('UnifiedHoverProvider: Could not build hover context');
         return null;
       }
-
-      // console.log('✅ UnifiedHoverProvider: Context detected', {
-      //    connectorType: context.connectorType,
-      //   yamlPath: context.yamlPath,
-      //   stepContext: context.stepContext,
-      //   parameterContext: context.parameterContext,
-      // });
 
       // Only show connector hover for specific fields (type, or connector parameters)
       // Don't show hover for arbitrary string values in the YAML
@@ -130,37 +121,21 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        /*
-        console.log(
-          'UnifiedHoverProvider: No Monaco handler found for connector type:',
-          context.connectorType
-        );
-        */
         return null;
       }
-
-      /*
-      console.log(
-        'UnifiedHoverProvider: Found Monaco handler for connector type:',
-        context.connectorType
-      );
-      */
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
       if (!hoverContent) {
-        // console.log('UnifiedHoverProvider: Handler returned no hover content');
         return null;
       }
 
-      // console.log('UnifiedHoverProvider: Returning hover content');
       // Don't return a range for connector hovers - this prevents Monaco from highlighting
       // Only template expression hovers should have ranges to show the blue highlight
       return {
         contents: [hoverContent],
       };
     } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error providing hover', error);
       return null;
     }
   }
@@ -181,13 +156,11 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
         yamlPath = this.getPathFromCurrentLine(model, position, yamlDocument);
-        // console.log('🔍 buildHoverContext: Found path from current line:', yamlPath);
       }
 
       // Detect connector type and step context
       const stepContext = this.detectStepContext(model.getValue(), position);
       if (!stepContext?.stepType) {
-        // console.log('🔍 buildHoverContext: No stepContext found for path:', yamlPath);
         return null;
       }
 
@@ -208,7 +181,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         parameterContext,
       };
     } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error building context', error);
       return null;
     }
   }
@@ -225,17 +197,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       const lineContent = model.getLineContent(position.lineNumber);
       const beforeCursor = lineContent.substring(0, position.column - 1);
 
-      // console.log('🔍 getPathFromCurrentLine (hover):', {
-      //   lineContent: JSON.stringify(lineContent),
-      //   beforeCursor: JSON.stringify(beforeCursor),
-      //   position: { line: position.lineNumber, column: position.column },
-      // });
-
       // Check if we're after a colon (common case: "with:|")
       const colonMatch = beforeCursor.match(/(\w+)\s*:\s*$/);
       if (colonMatch) {
         const keyName = colonMatch[1];
-        // console.log('🔍 Found key after colon:', keyName);
 
         // Try to find this key in the document by looking at nearby positions
         // Look at the start of the key on this line
@@ -266,14 +231,12 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         const testPosition = lineStartPosition + offset;
         const testPath = getPathAtOffset(yamlDocument, testPosition);
         if (testPath.length > 0) {
-          // console.log('🔍 Found fallback path at offset', offset, ':', testPath);
           return testPath;
         }
       }
 
       return [];
     } catch (error) {
-      // console.warn('UnifiedHoverProvider: Error getting path from current line', error);
       return [];
     }
   }
@@ -290,7 +253,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     if (!stepInfo) {
       return null;
     }
-    // console.log('🔍 detectStepContext: Step info:', stepInfo);
     return {
       stepName: stepInfo.stepId,
       stepType: stepInfo.stepType,
