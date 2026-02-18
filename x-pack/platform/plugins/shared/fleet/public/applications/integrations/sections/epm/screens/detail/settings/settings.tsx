@@ -48,7 +48,7 @@ import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
-import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/overview';
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
 import { wrapTitleWithDeprecated } from '../../../components/utils';
 

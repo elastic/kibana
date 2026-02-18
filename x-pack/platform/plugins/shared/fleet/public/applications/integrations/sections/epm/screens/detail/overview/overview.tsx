@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  getNormalizedInputs,
   isIntegrationPolicyTemplate,
   isRootPrivilegesRequired,
 } from '../../../../../../../../common/services';
@@ -32,7 +31,6 @@ import {
   useStartServices,
   sendGetFileByPath,
   useConfig,
-  useLink,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -48,6 +46,7 @@ import { Readme } from './readme';
 import { Details } from './details';
 import { Requirements } from './requirements';
 import { PrereleaseCallout } from './prerelease_callout';
+import { DeprecatedFeaturesCallout, DeprecationCallout } from './deprecation_callout';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -128,158 +127,6 @@ const LogsEssentialsCallout: React.FC = () => {
         color="primary"
       />
       <EuiSpacer size="l" />
-    </>
-  );
-};
-
-export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
-  const { getHref } = useLink();
-  const deprecated = packageInfo?.conditions?.deprecated || packageInfo?.deprecated;
-  return (
-    <>
-      {' '}
-      {deprecated ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            data-test-subj="deprecationCallout"
-            title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
-              defaultMessage: 'This integration is deprecated',
-            })}
-            color="warning"
-            iconType="warning"
-          >
-            <p>{deprecated?.description}</p>
-            {deprecated?.since && (
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.epm.deprecatedSinceVersion"
-                  defaultMessage="Deprecated since version {version}"
-                  values={{ version: deprecated?.since }}
-                />
-              </p>
-            )}
-            {deprecated?.replaced_by?.package && (
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.epm.replacedByPackage"
-                  defaultMessage="Please use {link} instead."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={getHref('integration_details_overview', {
-                          pkgkey: deprecated.replaced_by.package,
-                        })}
-                      >
-                        {deprecated.replaced_by.package}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            )}
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-    </>
-  );
-};
-
-export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
-  packageInfo,
-}) => {
-  const deprecatedFeatures: Array<{
-    type: 'input' | 'variable' | 'data stream';
-    name: string;
-    description: string;
-  }> = [];
-
-  (packageInfo.policy_templates || []).forEach((policyTemplate) => {
-    const inputs = getNormalizedInputs(policyTemplate);
-    inputs.forEach((input) => {
-      if (input.deprecated) {
-        deprecatedFeatures.push({
-          type: 'input',
-          name: input.title || input.type,
-          description: input.deprecated.description,
-        });
-      }
-      (input.vars || []).forEach((varDef) => {
-        if (varDef.deprecated) {
-          deprecatedFeatures.push({
-            type: 'variable',
-            name: varDef.title || varDef.name,
-            description: varDef.deprecated.description,
-          });
-        }
-      });
-    });
-  });
-
-  // Check deprecated streams in data_streams
-  (packageInfo.data_streams || []).forEach((dataStream) => {
-    (dataStream.streams || []).forEach((stream) => {
-      if (stream.deprecated) {
-        deprecatedFeatures.push({
-          type: 'data stream',
-          name: stream.title || dataStream.title,
-          description: stream.deprecated.description,
-        });
-      }
-      // Also check vars within deprecated streams
-      (stream.vars || []).forEach((varDef) => {
-        if (varDef.deprecated) {
-          deprecatedFeatures.push({
-            type: 'variable',
-            name: varDef.title || varDef.name,
-            description: varDef.deprecated.description,
-          });
-        }
-      });
-    });
-  });
-
-  // Also check package-level vars
-  (packageInfo.vars || []).forEach((varDef) => {
-    if (varDef.deprecated) {
-      deprecatedFeatures.push({
-        type: 'variable',
-        name: varDef.title || varDef.name,
-        description: varDef.deprecated.description,
-      });
-    }
-  });
-
-  if (deprecatedFeatures.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiCallOut
-        data-test-subj="deprecatedFeaturesCallout"
-        title={i18n.translate('xpack.fleet.epm.deprecatedFeaturesTitle', {
-          defaultMessage: 'This integration has deprecated features',
-        })}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.fleet.epm.deprecatedFeaturesDescription"
-            defaultMessage="The following features in this integration are deprecated:"
-          />
-        </p>
-        <ul>
-          {deprecatedFeatures.map(({ type, name, description }) => (
-            <li key={`${type}-${name}`}>
-              <strong>{name}</strong> ({type}): {description}
-            </li>
-          ))}
-        </ul>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
     </>
   );
 };
@@ -447,9 +294,11 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiBadge color="default">{packageInfo.name}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           <DeprecationCallout packageInfo={packageInfo} />
+          <DeprecatedFeaturesCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
 
           {packageInfo.readme ? (

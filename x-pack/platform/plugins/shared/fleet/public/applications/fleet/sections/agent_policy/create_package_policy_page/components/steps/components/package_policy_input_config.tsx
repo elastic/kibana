@@ -50,7 +50,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
       const _advancedVars: RegistryVarsEntry[] = [];
       const _requiredVars: RegistryVarsEntry[] = [];
       (packageInputVars || []).forEach((varDef) => {
-        if (!isEditPage && varDef.deprecated) {
+        if (!isEditPage && !!varDef.deprecated) {
           return;
         }
         if (isAdvancedVar(varDef)) {

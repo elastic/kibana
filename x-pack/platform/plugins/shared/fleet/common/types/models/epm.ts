@@ -244,7 +244,9 @@ export interface ConfigurationLink {
 export interface DeprecationInfo {
   description: string;
   since?: string;
-  replaced_by?: Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>;
+  replaced_by?: Partial<
+    Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>
+  >;
 }
 
 export enum RegistryPolicyTemplateKeys {

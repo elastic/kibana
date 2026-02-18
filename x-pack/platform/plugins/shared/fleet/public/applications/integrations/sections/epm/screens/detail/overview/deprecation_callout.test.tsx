@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
 
-import { DeprecationCallout, DeprecatedFeaturesCallout } from './overview';
+import { DeprecationCallout, DeprecatedFeaturesCallout } from './deprecation_callout';
 
 const mockUseLink = jest.fn();
 
@@ -210,10 +210,10 @@ describe('DeprecationCallout', () => {
 });
 
 describe('DeprecatedFeaturesCallout', () => {
-  function renderCallout(packageInfo: Partial<PackageInfo>) {
+  function renderCallout(packageInfo: Record<string, unknown>) {
     return render(
       <I18nProvider>
-        <DeprecatedFeaturesCallout packageInfo={packageInfo as PackageInfo} />
+        <DeprecatedFeaturesCallout packageInfo={packageInfo as unknown as PackageInfo} />
       </I18nProvider>
     );
   }
