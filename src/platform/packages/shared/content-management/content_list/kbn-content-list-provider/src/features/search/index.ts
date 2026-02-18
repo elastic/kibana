@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '../../..';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export type { SearchConfig } from './types';
+export { useContentListSearch } from './use_content_list_search';
+export type { UseContentListSearchReturn } from './use_content_list_search';
