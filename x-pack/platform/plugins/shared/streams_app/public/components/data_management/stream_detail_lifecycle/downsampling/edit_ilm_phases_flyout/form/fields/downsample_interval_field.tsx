@@ -130,6 +130,12 @@ export const DownsampleIntervalField = ({
                       compressed
                       min={0}
                       fullWidth
+                      aria-label={i18n.translate(
+                        'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel',
+                        {
+                          defaultMessage: 'Downsample interval value',
+                        }
+                      )}
                       value={currentValue}
                       disabled={!isEnabled}
                       isInvalid={showInvalid}

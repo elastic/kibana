@@ -184,6 +184,12 @@ export const AfterField = ({ item, dataTestSubj, timeUnitOptions }: AfterFieldPr
                           compressed
                           fullWidth
                           min={0}
+                          aria-label={i18n.translate(
+                            'xpack.streams.editDslStepsFlyout.afterAriaLabel',
+                            {
+                              defaultMessage: 'Downsample after value',
+                            }
+                          )}
                           value={currentValue}
                           isInvalid={isInvalid}
                           data-test-subj={`${dataTestSubj}AfterValue`}
