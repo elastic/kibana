@@ -11,10 +11,13 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Placeholder feature flag for testing experimental features infrastructure.
-   * This should be removed once the first real experimental feature is added.
+   * This feature flag hides all 9.4 UI changes:
+   *   - Enables the copy/duplicate functionality for packs and saved queries,
+   *     and the kebab row-action menus in list tables.
+   *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
+   *   - Introduces /history and /new routes, redirects legacy /live_queries paths
    */
-  _placeholder: false,
+  queryHistoryRework: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
