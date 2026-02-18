@@ -689,7 +689,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const spans = await renderedValueContainer.findAllByTagName('span');
               const styledSpan = spans[spans.length - 1];
               expect(await styledSpan.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
-              expect(await styledSpan.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+              expect(await styledSpan.getComputedStyle('background-color')).to.be(
+                'rgba(255, 0, 0, 1)'
+              );
             },
           },
           {
@@ -735,7 +737,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const spans = await renderedValueContainer.findAllByTagName('span');
               const styledSpan = spans[spans.length - 1];
               expect(await styledSpan.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
-              expect(await styledSpan.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+              expect(await styledSpan.getComputedStyle('background-color')).to.be(
+                'rgba(255, 0, 0, 1)'
+              );
             },
           },
           {
