@@ -72,8 +72,6 @@ const createStartContractMock = () => {
     sideNav: lazyObject({
       getIsCollapsed$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
       setIsCollapsed: jest.fn(),
-      getIsFeedbackBtnVisible$: jest.fn(),
-      setIsFeedbackBtnVisible: jest.fn(),
     }),
     getBreadcrumbsAppendExtensions$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setBreadcrumbsAppendExtension: jest.fn(),
@@ -95,7 +93,6 @@ const createStartContractMock = () => {
       setHome: jest.fn(),
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),
-      setFeedbackUrlParams: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn(),

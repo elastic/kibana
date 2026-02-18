@@ -161,7 +161,7 @@ describe('useAlertSearchBarStateContainer', () => {
       wrapper: MemoryRouter,
     });
 
-    const newControlConfigs = [{ dataViewId: 'test-view', fieldName: 'host.name' }];
+    const newControlConfigs = [{ data_view_id: 'test-view', field_name: 'host.name' }];
     act(() => {
       result.current.onControlConfigsChange(newControlConfigs);
     });
