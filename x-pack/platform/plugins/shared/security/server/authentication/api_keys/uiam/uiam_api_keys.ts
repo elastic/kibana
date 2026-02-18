@@ -8,6 +8,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
+  ConvertUiamAPIKeyParams,
+  ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
@@ -144,6 +146,36 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           },
         ],
       };
+    }
+  }
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys.
+   *
+   * @param params The parameters containing the keys to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
+   */
+  async convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);
+
+    try {
+      const mappedKeys = params.keys.map(({ key, endpoint }) => ({
+        type: 'elasticsearch' as const,
+        key,
+        endpoint,
+      }));
+
+      const response = await this.uiam.convertApiKeys(mappedKeys);
+
+      this.logger.debug('API key(s) converted successfully');
+      return response;
+    } catch (e) {
+      this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
+      throw e;
     }
   }
 

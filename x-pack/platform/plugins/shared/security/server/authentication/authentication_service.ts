@@ -420,6 +420,7 @@ export class AuthenticationService {
           ? {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
+              convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
             }
           : null,
       },

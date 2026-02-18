@@ -8,7 +8,12 @@
  */
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
-import type { GrantUiamAPIKeyParams, InvalidateUiamAPIKeyParams } from './uiam_api_keys';
+import type {
+  ConvertUiamAPIKeyParams,
+  ConvertUiamAPIKeysResponse,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+} from './uiam_api_keys';
 
 /**
  * Public UIAM API Keys service exposed through core context to manage
@@ -33,4 +38,12 @@ export interface UiamAPIKeysWithContextType {
    * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   invalidate(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys.
+   *
+   * @param params The parameters containing the keys to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
+   */
+  convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null>;
 }

@@ -38,6 +38,14 @@ export interface UiamAPIKeysType {
     request: KibanaRequest,
     params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys.
+   *
+   * @param params The parameters containing the keys to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
+   */
+  convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 /**
@@ -63,4 +71,59 @@ export interface InvalidateUiamAPIKeyParams {
    * ID of the API key to invalidate
    */
   id: string;
+}
+
+/**
+ * Parameters for converting Elasticsearch API keys into UIAM API keys.
+ */
+export interface ConvertUiamAPIKeyParams {
+  /**
+   * The Elasticsearch API keys to convert.
+   */
+  keys: Array<{
+    /** The base64-encoded Elasticsearch API key value. */
+    key: string;
+    /** The Elasticsearch endpoint URI used to validate the key. */
+    endpoint: string;
+  }>;
+}
+
+/**
+ * A successful result from converting an Elasticsearch API key into a UIAM API key.
+ */
+export interface ConvertUiamAPIKeyResultSuccess {
+  status: 'success';
+  id: string;
+  key: string;
+  description: string;
+  organization_id: string;
+  internal: boolean;
+  role_assignments: Record<string, unknown>;
+  creation_date: string;
+  expiration_date: string | null;
+}
+
+/**
+ * A failed result from converting an Elasticsearch API key into a UIAM API key.
+ */
+export interface ConvertUiamAPIKeyResultFailed {
+  status: 'failed';
+  code: string;
+  message: string;
+  resource: string | null;
+  type: string;
+}
+
+/**
+ * A single result entry from the convert API keys operation; either success or failure.
+ */
+export type ConvertUiamAPIKeyResult =
+  | ConvertUiamAPIKeyResultSuccess
+  | ConvertUiamAPIKeyResultFailed;
+
+/**
+ * Response from the UIAM convert API keys operation.
+ */
+export interface ConvertUiamAPIKeysResponse {
+  results: ConvertUiamAPIKeyResult[];
 }

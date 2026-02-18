@@ -23,6 +23,11 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
   UiamAPIKeysType,
   ClientAuthentication,
 } from './src/authentication';

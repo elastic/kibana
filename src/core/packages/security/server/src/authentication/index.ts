@@ -30,6 +30,11 @@ export type {
   UiamAPIKeysWithContextType,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
 } from './api_keys';
 
 export { HTTPAuthorizationHeader } from './http_authentication';

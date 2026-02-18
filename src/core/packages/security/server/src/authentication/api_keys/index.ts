@@ -36,6 +36,11 @@ export type {
   UiamAPIKeysWithContextType,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
 } from './uiam';
 
 export interface APIKeysType extends NativeAPIKeysType {
