@@ -67,7 +67,7 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
-        connectedChildren: new Map(),
+        connectedChildren: {},
         scrollAnchorItemIndex: null,
       });
     });
@@ -173,7 +173,7 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
-        connectedChildren: new Map(),
+        connectedChildren: {},
         scrollAnchorItemIndex: null,
       });
 
@@ -199,7 +199,7 @@ describe('useExposePublicApi', () => {
           expanded: {},
           rowSelection: {},
           scrollRect: { width: 0, height: 0 },
-          connectedChildren: new Map(),
+          connectedChildren: {},
           scrollAnchorItemIndex: 10,
         });
       });

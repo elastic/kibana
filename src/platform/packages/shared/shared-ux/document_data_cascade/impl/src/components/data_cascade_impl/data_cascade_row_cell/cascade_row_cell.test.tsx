@@ -189,7 +189,7 @@ describe('CascadeRowCellPrimitive', () => {
         subscribe: jest.fn(() => () => {}),
         shouldActivate: jest.fn(() => true),
         enqueue: jest.fn(() => jest.fn()),
-        isRowReturning: jest.fn(() => false),
+        isReturningCell: jest.fn(() => false),
       };
 
       const customMockVirtualizerGetter = jest.fn(

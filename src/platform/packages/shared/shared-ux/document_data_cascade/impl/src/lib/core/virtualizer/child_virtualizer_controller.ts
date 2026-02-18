@@ -41,17 +41,11 @@ export interface ChildVirtualizerController {
    */
   enqueue(cellId: string, rowIndex: number): () => void;
   /**
-   * Marks a row as "returning expanded" — it was previously expanded, scrolled
-   * out of view, and is now remounting. When {@link enqueue} is called for a
-   * returning row it bypasses the stagger queue and activates immediately.
+   * Returns true if the cell has a persisted anchor, meaning it was previously
+   * connected and is now remounting. Allows the cell to bypass the skeleton on
+   * its very first render, before effects fire.
    */
-  markRowAsReturning(rowIndex: number): void;
-  /**
-   * Returns true if the row has been marked as returning via {@link markRowAsReturning}
-   * but has not yet been consumed by {@link enqueue}. Allows the cell to bypass
-   * the skeleton on its very first render, before effects fire.
-   */
-  isRowReturning(rowIndex: number): boolean;
+  isReturningCell(cellId: string): boolean;
   getChildConfig(rowIndex: number): ChildVirtualizerConfig;
   /**
    * Returns the current start position of a root row from the root
@@ -67,12 +61,24 @@ export interface ChildVirtualizerController {
   markRootStable(): void;
   subscribe(listener: () => void): () => void;
   getPersistedAnchor(cellId: string): number | null;
+  /**
+   * Removes a persisted anchor for a cell. Called when a row collapses so that
+   * re-expanding goes through the normal stagger/skeleton path.
+   */
+  clearPersistedAnchor(cellId: string): void;
+  /**
+   * Returns true when at least one connected (non-detached) child has a
+   * persisted scroll anchor. Used by the root virtualizer to decide whether
+   * to yield post-measurement corrections to a child.
+   */
+  hasConnectedChildWithPersistedAnchor(): boolean;
   destroy(): void;
 }
 
 export interface CreateChildVirtualizerControllerOptions {
   getRootVirtualizer: () => CascadeVirtualizerReturnValue | undefined;
   activationBudget?: number;
+  initialPersistedAnchors?: Record<string, number | null>;
 }
 
 const DEFAULT_ACTIVATION_BUDGET = 5;
@@ -91,9 +97,19 @@ const createDefaultChildState = (cellId: string, rowIndex: number): ConnectedChi
 export const createChildVirtualizerController = ({
   getRootVirtualizer,
   activationBudget = DEFAULT_ACTIVATION_BUDGET,
+  initialPersistedAnchors,
 }: CreateChildVirtualizerControllerOptions): ChildVirtualizerController => {
   const connectedChildren = new Map<string, ConnectedChildState>();
   const persistedAnchors = new Map<string, number>();
+
+  if (initialPersistedAnchors) {
+    for (const [cellId, anchor] of Object.entries(initialPersistedAnchors)) {
+      if (anchor != null) {
+        persistedAnchors.set(cellId, anchor);
+      }
+    }
+  }
+
   const activatedRows = new Set<number>();
   const enqueuedCells = new Set<string>();
   const listeners = new Set<() => void>();
@@ -162,14 +178,8 @@ export const createChildVirtualizerController = ({
     staggerRafId = requestAnimationFrame(activateNext);
   };
 
-  const returningRows = new Set<number>();
-
-  const markRowAsReturning: ChildVirtualizerController['markRowAsReturning'] = (rowIndex) => {
-    returningRows.add(rowIndex);
-  };
-
-  const isRowReturning: ChildVirtualizerController['isRowReturning'] = (rowIndex) => {
-    return returningRows.has(rowIndex);
+  const isReturningCell: ChildVirtualizerController['isReturningCell'] = (cellId) => {
+    return persistedAnchors.has(cellId);
   };
 
   const enqueue: ChildVirtualizerController['enqueue'] = (cellId, rowIndex) => {
@@ -177,9 +187,8 @@ export const createChildVirtualizerController = ({
       enqueuedCells.add(cellId);
       connectedChildren.set(cellId, createDefaultChildState(cellId, rowIndex));
 
-      if (returningRows.has(rowIndex) && rootStable) {
+      if (persistedAnchors.has(cellId) && rootStable) {
         activatedRows.add(rowIndex);
-        returningRows.delete(rowIndex);
       }
 
       notifyListeners();
@@ -232,7 +241,7 @@ export const createChildVirtualizerController = ({
       scheduleStaggeredActivation();
     } else if (persisted != null) {
       const current = connectedChildren.get(cellId)!;
-      if (current.scrollAnchorItemIndex == null) {
+      if (current.scrollAnchorItemIndex === null) {
         connectedChildren.set(cellId, { ...current, scrollAnchorItemIndex: persisted });
       }
     }
@@ -302,6 +311,20 @@ export const createChildVirtualizerController = ({
     return persistedAnchors.get(cellId) ?? null;
   };
 
+  const clearPersistedAnchor: ChildVirtualizerController['clearPersistedAnchor'] = (cellId) => {
+    persistedAnchors.delete(cellId);
+  };
+
+  const hasConnectedChildWithPersistedAnchor: ChildVirtualizerController['hasConnectedChildWithPersistedAnchor'] =
+    () => {
+      for (const [cellId, child] of connectedChildren) {
+        if (!child.isDetached && persistedAnchors.has(cellId)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
   const markRootStable: ChildVirtualizerController['markRootStable'] = () => {
     rootStable = true;
     notifyListeners();
@@ -321,8 +344,7 @@ export const createChildVirtualizerController = ({
 
   return {
     enqueue,
-    markRowAsReturning,
-    isRowReturning,
+    isReturningCell,
     getChildConfig,
     getScrollMarginForRow,
     connect,
@@ -334,6 +356,8 @@ export const createChildVirtualizerController = ({
     markRootStable,
     subscribe,
     getPersistedAnchor,
+    clearPersistedAnchor,
+    hasConnectedChildWithPersistedAnchor,
     destroy,
   };
 };

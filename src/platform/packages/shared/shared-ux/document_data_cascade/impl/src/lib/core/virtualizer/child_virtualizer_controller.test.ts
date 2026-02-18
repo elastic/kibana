@@ -547,40 +547,53 @@ describe('ChildVirtualizerController', () => {
     });
   });
 
-  describe('returning rows (markRowAsReturning / isRowReturning)', () => {
-    it('isRowReturning returns false by default', () => {
-      expect(controller.isRowReturning(2)).toBe(false);
+  describe('returning cells (isReturningCell / persisted anchors)', () => {
+    it('isReturningCell returns false for unknown cells', () => {
+      expect(controller.isReturningCell('cell-unknown')).toBe(false);
     });
 
-    it('isRowReturning returns true after markRowAsReturning', () => {
-      controller.markRowAsReturning(2);
-      expect(controller.isRowReturning(2)).toBe(true);
+    it('isReturningCell returns true for cells with persisted anchors', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      expect(returningController.isReturningCell('cell-a')).toBe(true);
+      returningController.destroy();
     });
 
-    it('enqueue immediately activates a returning row when root is stable', () => {
-      controller.markRootStable();
-      controller.markRowAsReturning(2);
-      controller.enqueue('cell-a', 2);
-
-      expect(controller.shouldActivate(2)).toBe(true);
+    it('isReturningCell returns false when persisted anchor is null', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': null },
+      });
+      expect(returningController.isReturningCell('cell-a')).toBe(false);
+      returningController.destroy();
     });
 
-    it('enqueue does not immediately activate a returning row when root is not stable', () => {
-      controller.markRowAsReturning(2);
-      controller.enqueue('cell-a', 2);
+    it('enqueue immediately activates a returning cell when root is stable', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      returningController.markRootStable();
+      returningController.enqueue('cell-a', 2);
 
-      expect(controller.shouldActivate(2)).toBe(false);
+      expect(returningController.shouldActivate(2)).toBe(true);
+      returningController.destroy();
     });
 
-    it('returning flag is consumed after enqueue processes it', () => {
-      controller.markRootStable();
-      controller.markRowAsReturning(2);
-      controller.enqueue('cell-a', 2);
+    it('enqueue does not immediately activate a returning cell when root is not stable', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      returningController.enqueue('cell-a', 2);
 
-      expect(controller.isRowReturning(2)).toBe(false);
+      expect(returningController.shouldActivate(2)).toBe(false);
+      returningController.destroy();
     });
 
-    it('non-returning rows still go through staggered activation', () => {
+    it('non-returning cells still go through staggered activation', () => {
       controller.markRootStable();
       controller.enqueue('cell-a', 2);
 
@@ -590,15 +603,15 @@ describe('ChildVirtualizerController', () => {
       expect(controller.shouldActivate(2)).toBe(true);
     });
 
-    it('returning rows do not consume stagger budget from non-returning rows', () => {
+    it('returning cells do not consume stagger budget from non-returning cells', () => {
       const limitedController = createChildVirtualizerController({
         getRootVirtualizer: () => mockRoot,
         activationBudget: 2,
+        initialPersistedAnchors: { 'cell-returning': 5 },
       });
 
       limitedController.markRootStable();
 
-      limitedController.markRowAsReturning(2);
       limitedController.enqueue('cell-returning', 2);
       expect(limitedController.shouldActivate(2)).toBe(true);
 
@@ -615,15 +628,53 @@ describe('ChildVirtualizerController', () => {
       limitedController.destroy();
     });
 
-    it('notifies listeners when a returning row is immediately activated via enqueue', () => {
-      controller.markRootStable();
+    it('notifies listeners when a returning cell is immediately activated via enqueue', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      returningController.markRootStable();
       const listener = jest.fn();
-      controller.subscribe(listener);
+      returningController.subscribe(listener);
 
-      controller.markRowAsReturning(2);
-      controller.enqueue('cell-a', 2);
+      returningController.enqueue('cell-a', 2);
 
       expect(listener).toHaveBeenCalled();
+      returningController.destroy();
+    });
+
+    it('isReturningCell returns true for cells that disconnect and persist their anchor', () => {
+      controller.markRootStable();
+      const handle = controller.connect('cell-a', 2);
+      handle.reportState({ scrollAnchorItemIndex: 10 });
+      handle.disconnect();
+
+      expect(controller.isReturningCell('cell-a')).toBe(true);
+    });
+
+    it('clearPersistedAnchor removes the returning status for a cell', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      expect(returningController.isReturningCell('cell-a')).toBe(true);
+
+      returningController.clearPersistedAnchor('cell-a');
+      expect(returningController.isReturningCell('cell-a')).toBe(false);
+      returningController.destroy();
+    });
+
+    it('enqueue does not immediately activate after clearPersistedAnchor', () => {
+      const returningController = createChildVirtualizerController({
+        getRootVirtualizer: () => mockRoot,
+        initialPersistedAnchors: { 'cell-a': 5 },
+      });
+      returningController.markRootStable();
+      returningController.clearPersistedAnchor('cell-a');
+      returningController.enqueue('cell-a', 2);
+
+      expect(returningController.shouldActivate(2)).toBe(false);
+      returningController.destroy();
     });
   });
 

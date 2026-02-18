@@ -149,7 +149,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
 
-  const isRowReturning = childController?.isRowReturning(row.index) ?? false;
+  const isRowReturning = childController?.isReturningCell(leafCacheKey) ?? false;
   const isReady =
     Boolean(leafData) && !isPendingRowLeafDataFetch && (isActivated || isRowReturning);
 

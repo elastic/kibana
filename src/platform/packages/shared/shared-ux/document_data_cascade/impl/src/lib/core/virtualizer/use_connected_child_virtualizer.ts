@@ -100,15 +100,16 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   const onStateChange = useCallback<
     NonNullable<Parameters<typeof useCascadeVirtualizer>[0]['onStateChange']>
   >(
-    (instance) => {
-      if (!isActive) return;
+    (instance, didRestoreScrollPosition) => {
+      if (!isActive || !didRestoreScrollPosition) return;
       const range = instance.range;
       innerHandle.reportState({
         scrollOffset: instance.scrollOffset ?? 0,
         range: range ? { startIndex: range.startIndex, endIndex: range.endIndex } : null,
         totalSize: instance.getTotalSize(),
         totalItemCount: instance.options.count,
-        scrollAnchorItemIndex: range?.startIndex ?? null,
+        scrollAnchorItemIndex:
+          instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
       });
     },
     [innerHandle, isActive]

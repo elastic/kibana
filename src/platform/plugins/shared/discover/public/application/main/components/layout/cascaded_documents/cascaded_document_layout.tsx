@@ -152,12 +152,19 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(parsedQuery);
     }, [esqlQuery]);
 
+    const updateESQLQuery = useCallback(
+      (...args: Parameters<typeof onUpdateESQLQuery>) => {
+        onUpdateESQLQuery(...args);
+      },
+      [onUpdateESQLQuery]
+    );
+
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
       editorQuery: esqlQuery,
       statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
-      updateESQLQuery: onUpdateESQLQuery,
+      updateESQLQuery,
       openInNewTab,
     });
 

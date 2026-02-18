@@ -91,7 +91,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     controller: virtualizerController,
     cellId,
     rowIndex,
-    // @ts-expect-error - fff
+    // @ts-expect-error - required to allow the use of the visibleRows array
     rows: visibleRows,
     estimatedRowHeight: 65,
     overscan: 10,
@@ -221,24 +221,23 @@ export const ESQLDataCascadeLeafCell = React.memo(
         gridWidth,
         headerRow,
         footerRow,
-      }) =>
-        virtualizerController ? (
-          <CustomCascadeGridBodyMemoized
-            key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
-            Cell={Cell}
-            data={cellData}
-            visibleColumns={visibleColumns}
-            visibleRowData={visibleRowData}
-            headerRow={headerRow}
-            footerRow={footerRow}
-            gridWidth={gridWidth}
-            setCustomGridBodyProps={setCustomGridBodyProps}
-            virtualizerController={virtualizerController}
-            cellId={cellId}
-            rowIndex={rowIndex}
-            isFullScreenMode={isCellInFullScreenMode}
-          />
-        ) : null,
+      }) => (
+        <CustomCascadeGridBodyMemoized
+          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          Cell={Cell}
+          data={cellData}
+          visibleColumns={visibleColumns}
+          visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
+          gridWidth={gridWidth}
+          setCustomGridBodyProps={setCustomGridBodyProps}
+          virtualizerController={virtualizerController}
+          cellId={cellId}
+          rowIndex={rowIndex}
+          isFullScreenMode={isCellInFullScreenMode}
+        />
+      ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
 
