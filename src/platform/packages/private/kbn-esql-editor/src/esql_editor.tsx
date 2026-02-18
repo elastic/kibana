@@ -1274,7 +1274,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
                     if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
-                      triggerSuggestions();
+                      // triggerSuggestions();
                     }
 
                     isFirstFocusRef.current = false;

@@ -127,7 +127,6 @@ export const useSourcesBadge = ({
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
-        editor.revealPosition(positionAfterCommand);
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
       }
     },
