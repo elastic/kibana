@@ -45,6 +45,7 @@ Use this skill when:
 ### 1. Find the risky entities
 - Use the 'security.entity_analysis.risk_score' tool to find the riskiest entities based on their normalized risk scores (0-100)
 - These entities will be sorted by their normalized risk score (calculated_score_norm) in descending order
+- When entity ID is provided and no results are found, you must call the tool again with another entity type to find the entity (e.g. if "john" is not found as a user entity, try finding "john" as a host or service entity type)
 
 ### 2. Analyze risk score changes over time
 - Use the 'security.entity_analysis.risk_score' tool to analyze how an entity's risk score has changed over a specified time interval (e.g., last 30, 60, 90 days)
@@ -82,6 +83,18 @@ Steps:
 2. Use the 'security.entity_analysis.asset_criticality' tool to get the asset criticality levels for these hosts
 3. Filter the results to only show hosts that have a criticality level of "high_impact" or "extreme_impact"
 3. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
+
+
+### Example 4: Risk Score History
+
+User query: Has Cielo39's risk score changed significantly?
+
+Steps:
+1. Use the 'security.entity_analysis.risk_score' tool with a time interval of '30d' to analyze Cielo39's risk score changes with host entityType
+2. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with user entityType
+3. When no results are returned, use the 'security.entity_analysis.risk_score' tool again to analyze Cielo39's risk score changes with service entityType
+2. When results are returned, determine if the change in risk score is significant (e.g., greater than 20 points).
+3. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
 
 ## Important dependencies
 - Risk score questions require the **Risk Engine** to be enabled and risk indices to exist.
