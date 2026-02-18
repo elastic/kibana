@@ -93,33 +93,33 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
             },
           },
         ];
-      } else {
-        return [
-          {
-            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-            name: 'switchToClassic',
-            label: i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
-            }),
-            onClick: () => {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-
-              // Determine if we should show the ES|QL to Data View transition modal
-              const shouldShowESQLToDataViewTransitionModal =
-                !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
-
-              if (
-                shouldShowESQLToDataViewTransitionModal &&
-                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-              ) {
-                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-              } else {
-                dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
-              }
-            },
-          },
-        ];
       }
+
+      return [
+        {
+          'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+          name: 'switchToClassic',
+          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+            defaultMessage: 'Switch to classic',
+          }),
+          onClick: () => {
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+
+            // Determine if we should show the ES|QL to Data View transition modal
+            const shouldShowESQLToDataViewTransitionModal =
+              !persistedDiscoverSession || unsavedTabIds.includes(tab.id);
+
+            if (
+              shouldShowESQLToDataViewTransitionModal &&
+              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+            ) {
+              dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
+            } else {
+              dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
+            }
+          },
+        },
+      ];
     },
     [
       allTabs,
