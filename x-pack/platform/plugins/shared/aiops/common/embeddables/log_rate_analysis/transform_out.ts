@@ -8,8 +8,8 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-rate-analysis/constants';
-import type { LogRateAnalysisEmbeddableState, StoredLogRateAnalysisEmbeddableState } from './types';
 import { flow } from 'lodash';
+import type { LogRateAnalysisEmbeddableState, StoredLogRateAnalysisEmbeddableState } from './types';
 
 export function transformOut(
   storedState: StoredLogRateAnalysisEmbeddableState,
@@ -17,7 +17,7 @@ export function transformOut(
 ): LogRateAnalysisEmbeddableState {
   const transformsFlow = flow(
     transformTitlesOut<StoredLogRateAnalysisEmbeddableState>,
-    transformTimeRangeOut<StoredLogRateAnalysisEmbeddableState>,
+    transformTimeRangeOut<StoredLogRateAnalysisEmbeddableState>
   );
   const state = transformsFlow(storedState);
   const dataViewIdRef = references?.find(

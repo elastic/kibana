@@ -9,12 +9,12 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
-import { flow } from 'lodash';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -51,10 +51,7 @@ export function transformPanelsOut(
 const defaultTransform = (
   config: SavedDashboardPanel['embeddableConfig']
 ): SavedDashboardPanel['embeddableConfig'] => {
-  const transformsFlow = flow(
-    transformTitlesOut,
-    transformTimeRangeOut,
-  );
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
   return transformsFlow(config);
 };
 

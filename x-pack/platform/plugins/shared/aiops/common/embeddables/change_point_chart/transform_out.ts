@@ -8,8 +8,8 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 import { flow } from 'lodash';
+import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 
 export function transformOut(
   storedState: StoredChangePointEmbeddableState,
@@ -17,7 +17,7 @@ export function transformOut(
 ): ChangePointEmbeddableState {
   const transformsFlow = flow(
     transformTitlesOut<StoredChangePointEmbeddableState>,
-    transformTimeRangeOut<StoredChangePointEmbeddableState>,
+    transformTimeRangeOut<StoredChangePointEmbeddableState>
   );
   const state = transformsFlow(storedState);
   const dataViewIdRef = references?.find(
