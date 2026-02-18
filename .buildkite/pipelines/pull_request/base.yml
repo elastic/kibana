@@ -9,7 +9,7 @@ steps:
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -165,7 +165,7 @@ steps:
       - linting
       - linting_with_types
       - check_types
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'

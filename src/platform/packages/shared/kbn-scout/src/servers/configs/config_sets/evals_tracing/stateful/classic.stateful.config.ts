@@ -7,11 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
+const gcsCredentials = process.env.GCS_CREDENTIALS;
+let gcsSecureFile: string | undefined;
+
+if (gcsCredentials) {
+  const gcsCredentialsFilePath = join(
+    tmpdir(),
+    `gcs-credentials-${Date.now()}-${process.pid}.json`
+  );
+  writeFileSync(gcsCredentialsFilePath, gcsCredentials);
+  gcsSecureFile = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+  process.on('exit', () => {
+    try {
+      unlinkSync(gcsCredentialsFilePath);
+    } catch {
+      // Ignore errors if file was already deleted
+    }
+  });
+}
 const defaultExporters = JSON.stringify([
   {
     http: {
@@ -45,6 +66,7 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
+    secureFiles: [...(gcsSecureFile ? [gcsSecureFile] : [])],
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
       `xpack.inference.elastic.url=${EIS_QA_URL}`,
