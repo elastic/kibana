@@ -167,7 +167,7 @@ export const App = (props: {
                   props.plugins.lens.navigateToPrefilledEditor(
                     {
                       id: '',
-                      timeRange: time,
+                      time_range: time,
                       attributes,
                     },
                     {
@@ -191,7 +191,7 @@ export const App = (props: {
                   props.plugins.lens.navigateToPrefilledEditor(
                     {
                       id: '',
-                      timeRange: time,
+                      time_range: time,
                       attributes,
                     },
                     {
