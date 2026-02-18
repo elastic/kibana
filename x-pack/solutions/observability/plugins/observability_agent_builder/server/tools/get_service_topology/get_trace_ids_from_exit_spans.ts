@@ -8,7 +8,7 @@
 import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, TRACE_ID } from '@kbn/apm-types';
 
 /**
  * Get trace IDs from exit spans that target a specific external dependency.
@@ -59,7 +59,7 @@ export async function getTraceIdsFromExitSpansTargetingDependency({
           aggs: {
             traceIds: {
               terms: {
-                field: 'trace.id',
+                field: TRACE_ID,
                 size: maxTraces,
               },
             },
@@ -69,9 +69,6 @@ export async function getTraceIdsFromExitSpansTargetingDependency({
     }
   );
 
-  const buckets =
-    (response.aggregations as { sample?: { traceIds?: { buckets?: Array<{ key: string }> } } })
-      ?.sample?.traceIds?.buckets ?? [];
-
-  return buckets.map((bucket) => bucket.key);
+  const buckets = response.aggregations?.sample?.traceIds?.buckets ?? [];
+  return buckets.map((bucket) => String(bucket.key));
 }

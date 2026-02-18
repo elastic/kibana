@@ -23,8 +23,6 @@ export const OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID = 'observability.get_ser
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-export type TopologyDirection = 'downstream' | 'upstream' | 'both';
-
 const getServiceTopologyToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z.string().min(1).describe('The name of the service to get the topology for'),
