@@ -29,14 +29,18 @@ Scout is Kibana’s UI and API test orchestration framework built on [Playwright
 **Pick your import:**
 
 - **Platform-owned tests** → `@kbn/scout`
+
+| Package      | Use in tests               |
+| ------------ | -------------------------- |
+| `@kbn/scout` | Platform (shared baseline) |
+
 - **Solution-owned tests** → your solution Scout package (it builds on `@kbn/scout`)
 
-| Package               | Use in tests               |
-| --------------------- | -------------------------- |
-| `@kbn/scout`          | Platform (shared baseline) |
-| `@kbn/scout-oblt`     | Observability solution     |
-| `@kbn/scout-security` | Security solution          |
-| `@kbn/scout-search`   | Search solution            |
+| Package               | Use in tests           |
+| --------------------- | ---------------------- |
+| `@kbn/scout-oblt`     | Observability solution |
+| `@kbn/scout-security` | Security solution      |
+| `@kbn/scout-search`   | Search solution        |
 
 ::::::{note}
 Fixtures, page objects, and API helpers defined in `@kbn/scout` can be imported by solution-specific Scout packages. When they are defined in a solution package or a plugin they will only be available to that solution or plugin.
@@ -50,7 +54,7 @@ No—good test design still matters.
 
 #### Q: Is Scout designed to be _just_ a Playwright UI test runner? [scout-faq-ui-only]
 
-No. Scout supports UI and API testing with Playwright.
+No. Scout supports both UI and API testing with Playwright.
 
 #### Q: Are test runs going to be faster? [scout-faq-faster]
 
