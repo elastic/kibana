@@ -89,7 +89,7 @@ describe('archiveTSBuildArtifacts', () => {
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
-  it('uses the LocalFileSystem to archive matching artifacts', async () => {
+  it('skips local archiving outside CI (target/types dirs serve as the cache)', async () => {
     const log = createLog();
     const files = ['target/types/foo.d.ts', 'tsconfig.type_check.json'];
 
@@ -99,12 +99,6 @@ describe('archiveTSBuildArtifacts', () => {
 
     await archiveTSBuildArtifacts(log);
 
-    expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({
-      files,
-      cacheInvalidationFiles: ['yarn.lock', '.nvmrc', '.node-version'],
-      prNumber: '789',
-      sha: 'abc123',
-    });
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 });

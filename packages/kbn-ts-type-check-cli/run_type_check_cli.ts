@@ -190,8 +190,6 @@ run(
         if (isCiEnvironment()) {
           throw new Error(`Canceling TypeScript cache archive because ${message}`);
         }
-
-        log.info(`Skipping TypeScript cache archive because ${message}`);
       } else {
         await archiveTSBuildArtifacts(log);
       }

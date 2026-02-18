@@ -11,7 +11,6 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
 import { CACHE_IGNORE_GLOBS, CACHE_MATCH_GLOBS, CACHE_INVALIDATION_FILES } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
-import { LocalFileSystem } from './file_system/local_file_system';
 import {
   getPullRequestNumber,
   isCiEnvironment,
@@ -55,8 +54,6 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
 
     if (isCiEnvironment()) {
       await withGcsAuth(log, () => new GcsFileSystem(log).updateArchive(options));
-    } else {
-      await new LocalFileSystem(log).updateArchive(options);
     }
   } catch (error) {
     const archiveErrorDetails = error instanceof Error ? error.message : String(error);
