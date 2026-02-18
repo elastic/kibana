@@ -87,7 +87,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
     const hasContent = Boolean(summary && summary.trim());
     const hasGeneratedInsight = !isLoading && hasContent && !error;
 
-    if (hasGeneratedInsight && connectorInfo) {
+    if (hasGeneratedInsight) {
       reportTelemetryEvent(analytics, {
         type: ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated,
         payload: { insightType, connector: connectorInfo },
@@ -109,14 +109,14 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
     (feedback: Feedback) => {
       reportTelemetryEvent(analytics, {
         type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback,
-        payload: { feedback, insightType, connector: connectorInfo! },
+        payload: { feedback, insightType, connector: connectorInfo },
       });
     },
     [analytics, connectorInfo, insightType]
   );
 
   useEffect(() => {
-    if (error && connectorInfo) {
+    if (error) {
       reportTelemetryEvent(analytics, {
         type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed,
         payload: { insightType, errorMessage: error, connector: connectorInfo },

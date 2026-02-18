@@ -12,3 +12,5 @@ export {
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
 } from './constants';
+
+export type { ConnectorInfo } from './types';

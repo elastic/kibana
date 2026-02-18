@@ -6,19 +6,13 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
+import type { ConnectorInfo } from '../../../common';
 import type { Feedback } from '../../components/ai_insight/feedback_buttons';
 import { ObservabilityAgentBuilderTelemetryEventType } from '../telemetry_event_type';
 
 export type InsightType = 'log' | 'alert' | 'error';
 
-export interface ConnectorInfo {
-  connectorId: string;
-  name: string;
-  type: string;
-  modelFamily: string;
-  modelProvider: string;
-  modelId: string;
-}
+export type { ConnectorInfo };
 
 export interface InsightResponseGeneratedEvent {
   insightType: InsightType;
@@ -34,7 +28,7 @@ export interface InsightFeedbackEvent {
 export interface InsightFailedEvent {
   insightType: InsightType;
   errorMessage: string;
-  connector: ConnectorInfo;
+  connector?: ConnectorInfo;
 }
 
 const insightTypeSchema = {
@@ -106,7 +100,13 @@ export const insightFailedEventSchema: EventTypeOpts<InsightFailedEvent> = {
         description: 'The error message from the failed insight generation',
       },
     },
-    connector: connectorSchema,
+    connector: {
+      ...connectorSchema,
+      _meta: {
+        ...connectorSchema._meta,
+        optional: true,
+      },
+    },
   },
 };
 
@@ -115,7 +115,7 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedbackEvent> = {
   schema: {
     insightType: insightTypeSchema,
     feedback: {
-      type: 'text',
+      type: 'keyword',
       _meta: {
         description: 'Whether the user found the insight helpful: positive or negative',
       },

@@ -8,15 +8,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { scan, takeUntil, finalize, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { ConnectorInfo } from '../../common';
 
-export interface ConnectorInfo {
-  connectorId: string;
-  name: string;
-  type: string;
-  modelFamily: string;
-  modelProvider: string;
-  modelId: string;
-}
+export type { ConnectorInfo };
 
 interface ContextEvent {
   type: 'context';

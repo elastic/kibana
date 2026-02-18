@@ -9,15 +9,9 @@ import type { Observable } from 'rxjs';
 import { concat, of } from 'rxjs';
 import type { ChatCompletionEvent, InferenceConnector } from '@kbn/inference-common';
 import { getConnectorFamily, getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
+import type { ConnectorInfo } from '../../../common';
 
-export interface ConnectorInfo {
-  connectorId: string;
-  name: string;
-  type: string;
-  modelFamily: string;
-  modelProvider: string;
-  modelId: string;
-}
+export type { ConnectorInfo };
 
 export interface ContextEvent {
   type: 'context';
