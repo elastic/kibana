@@ -30,10 +30,15 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { getStepExecutionsFn } from './execution_functions/get_step_executions';
+import { getWorkflowExecutionFn } from './execution_functions/get_workflow_executions';
+import { searchWorkflowExecutionsFn } from './execution_functions/search_workflow_executions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
+import { ExecutionStateRepository } from './repositories/execution_state/execution_state_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -458,7 +463,13 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+    const executionStateRepository = new ExecutionStateRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    const stepExecutionRepository = new StepExecutionRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
     this.concurrencyManager = new ConcurrencyManager(
@@ -482,7 +493,7 @@ export class WorkflowsExecutionEnginePlugin
       request: KibanaRequest
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
-      repository: WorkflowExecutionRepository;
+      repository: ExecutionStateRepository;
     }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
@@ -493,11 +504,13 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
+        type: 'workflow',
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
         context,
@@ -517,9 +530,9 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await executionStateRepository.bulkUpsert([workflowExecution]);
 
-      return { workflowExecution, repository: workflowExecutionRepository };
+      return { workflowExecution, repository: executionStateRepository };
     };
 
     // Helper function to create a task instance
@@ -750,6 +763,18 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      getWorkflowExecution: getWorkflowExecutionFn(
+        executionStateRepository,
+        workflowExecutionRepository
+      ),
+      searchWorkflowExecutions: searchWorkflowExecutionsFn(
+        coreStart.elasticsearch.client.asInternalUser
+      ),
+      getStepExecutions: getStepExecutionsFn(
+        executionStateRepository,
+        workflowExecutionRepository,
+        stepExecutionRepository
+      ),
     };
   }
 
