@@ -596,6 +596,14 @@ The helper will spin up one `local` project per available connector so results a
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts --project azure-gpt4o
 ```
 
+### Skipping connector setup/teardown
+
+By default, the eval runner creates and tears down connectors for each worker. If you are evaluating with pre-defined connectors (e.g. preconfigured in `kibana.yml`), you can skip this step:
+
+```bash
+KBN_EVALS_SKIP_CONNECTOR_SETUP=true node scripts/playwright test --config ...
+```
+
 ### Selecting specific evaluators
 
 To enable selective evaluator execution, wrap your evaluators with the `selectEvaluators` function:
