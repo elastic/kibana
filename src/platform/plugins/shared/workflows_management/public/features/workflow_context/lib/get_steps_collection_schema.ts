@@ -47,24 +47,26 @@ export function getStepsCollectionSchema(
 
   let stepsSchema = z.object({});
   for (const node of predecessors) {
+    // Excluding triggers from the context for now. Maybe they should be included under 'triggers' key?
     if (node.type === 'trigger') {
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    if (isEnterForeach(node)) {
-      stepsSchema = stepsSchema.extend({
-        [node.stepId]: getForeachStateSchema(
-          stepContextSchema.merge(z.object({ steps: stepsSchema })),
-          node.configuration
-        ),
-      });
-    } else {
+    if (!isEnterForeach(node)) {
       stepsSchema = stepsSchema.extend({
         [node.stepId]: z.object({
           output: getOutputSchemaForStepType(node).optional(),
           error: z.any().optional(),
         }),
+      });
+    } else {
+      // if the step is a foreach, add the foreach schema to the step state schema
+      stepsSchema = stepsSchema.extend({
+        [node.stepId]: getForeachStateSchema(
+          stepContextSchema.merge(z.object({ steps: stepsSchema })),
+          node.configuration
+        ),
       });
     }
   }
