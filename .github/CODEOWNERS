@@ -617,6 +617,7 @@ src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-security-hardening @elastic/kibana-security
 src/platform/packages/shared/kbn-security-solution-common @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-security-solution-flyout @elastic/security-threat-hunting-investigations
+src/platform/packages/shared/kbn-securitysolution-api @elastic/security-solution
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
