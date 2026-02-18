@@ -123,7 +123,7 @@ export const DownsamplingBar = ({
           responsive={false}
           css={{
             gridTemplateColumns,
-            paddingRight: euiTheme.size.xs,
+            paddingInline: euiTheme.size.xxs,
             boxSizing: 'border-box',
           }}
         >
