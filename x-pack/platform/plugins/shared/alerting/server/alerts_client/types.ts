@@ -101,9 +101,11 @@ export interface IAlertsClient<
   updatePersistedAlerts({
     alertsToUpdateWithMaintenanceWindows,
     alertsToUpdateWithLastScheduledActions,
+    alertUuidsToAutoUnmute,
   }: {
     alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
     alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+    alertUuidsToAutoUnmute?: string[];
   }): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;

@@ -620,25 +620,6 @@ export class AlertsService implements IAlertsService {
     });
   }
 
-  public async unmuteAlertInstance({
-    ruleId,
-    alertInstanceId,
-    indices,
-    logger,
-  }: {
-    ruleId: string;
-    alertInstanceId: string;
-    indices: string[];
-    logger: Logger;
-  }) {
-    return this._updateMuteState({
-      muted: false,
-      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
-      indices,
-      logger,
-    });
-  }
-
   public async muteAllAlerts({
     ruleId,
     indices,
@@ -805,23 +786,31 @@ export class AlertsService implements IAlertsService {
   }
 
   /**
-   * Clears snooze configuration fields from the alert ES document.
+   * Clears all per-alert snooze fields and sets kibana.alert.muted = false
+   * in a single updateByQuery call. Accepts one or more alert instance IDs
+   * so that all matching documents are updated in a single ES round-trip.
+   * Used during auto-unmute when conditional snooze conditions are met,
+   * and by the explicit unmute API.
    */
-  public async clearSnoozeAlertInstance({
+  public async clearSnoozeAndUnmuteAlertInstances({
     ruleId,
-    alertInstanceId,
+    alertInstanceIds,
     indices,
     logger,
   }: {
     ruleId: string;
-    alertInstanceId: string;
+    alertInstanceIds: string[];
     indices: string[];
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
       throw new Error(
-        `Unable to clear snooze for alert instance for rule '${ruleId}' - no alert indices available`
+        `Unable to clear snooze and unmute alert instances for rule '${ruleId}' - no alert indices available`
       );
+    }
+
+    if (alertInstanceIds.length === 0) {
+      return;
     }
 
     const esClient = await this.options.elasticsearchClientPromise;
@@ -830,7 +819,7 @@ export class AlertsService implements IAlertsService {
       bool: {
         must: [
           { term: { [ALERT_RULE_UUID]: ruleId } },
-          { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+          { terms: { [ALERT_INSTANCE_ID]: alertInstanceIds } },
         ],
       },
     };
@@ -845,6 +834,7 @@ export class AlertsService implements IAlertsService {
         query,
         script: {
           source: [
+            `ctx._source['${ALERT_MUTED}'] = false;`,
             `ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');`,
             `ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');`,
             `ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');`,
@@ -855,7 +845,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (error) {
       logger.error(
-        `Error clearing snooze for alert instance '${alertInstanceId}' for rule '${ruleId}' - ${error.message}`
+        `Error clearing snooze and unmuting alert instances for rule '${ruleId}' - ${error.message}`
       );
       throw error;
     }

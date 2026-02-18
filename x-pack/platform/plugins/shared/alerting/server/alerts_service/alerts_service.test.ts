@@ -2696,101 +2696,6 @@ describe('Alerts Service', () => {
         });
       });
 
-      describe('unmuteAlertInstance', () => {
-        test('should throw an error if no indices are provided', async () => {
-          const alertsService = new AlertsService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-            elasticsearchAndSOAvailability$,
-            isServerless: false,
-          });
-
-          await expect(
-            alertsService.unmuteAlertInstance({
-              ruleId: 'rule-1',
-              alertInstanceId: 'alert-1',
-              indices: [],
-              logger,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to update mute state for rules (example: {\\"ruleId\\":\\"rule-1\\",\\"alertInstanceIds\\":[\\"alert-1\\"]}) - no alert indices available"`
-          );
-        });
-
-        test('should call updateByQuery with the correct parameters', async () => {
-          const alertsService = new AlertsService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-            elasticsearchAndSOAvailability$,
-            isServerless: false,
-          });
-
-          await alertsService.unmuteAlertInstance({
-            ruleId: 'rule-1',
-            alertInstanceId: 'alert-1',
-            indices: ['.alerts-default'],
-            logger,
-          });
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
-            index: ['.alerts-default'],
-            conflicts: 'proceed',
-            wait_for_completion: false,
-            refresh: true,
-            ignore_unavailable: true,
-            query: {
-              bool: {
-                minimum_should_match: 1,
-                must: [{ term: { 'kibana.alert.status': 'active' } }],
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                        { terms: { 'kibana.alert.instance.id': ['alert-1'] } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            script: {
-              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
-              lang: 'painless',
-              params: { muted: false },
-            },
-          });
-        });
-
-        test('should re-throw an error if updateByQuery fails', async () => {
-          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
-          const alertsService = new AlertsService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-            elasticsearchAndSOAvailability$,
-            isServerless: false,
-          });
-
-          await expect(
-            alertsService.unmuteAlertInstance({
-              ruleId: 'rule-1',
-              alertInstanceId: 'alert-1',
-              indices: ['.alerts-default'],
-              logger,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
-        });
-      });
-
       describe('muteAllAlerts', () => {
         test('should throw an error if no indices are provided', async () => {
           const alertsService = new AlertsService({
@@ -3280,9 +3185,9 @@ describe('Alerts Service', () => {
         });
       });
 
-      describe('clearSnoozeAlertInstance', () => {
-        it('calls updateByQuery to remove snooze fields', async () => {
-          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+      describe('clearSnoozeAndUnmuteAlertInstances', () => {
+        it('calls updateByQuery to remove snooze fields and set muted to false in a single call', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 2 });
 
           const alertsService = new AlertsService({
             logger,
@@ -3294,21 +3199,50 @@ describe('Alerts Service', () => {
             isServerless: false,
           });
 
-          await alertsService.clearSnoozeAlertInstance({
+          await alertsService.clearSnoozeAndUnmuteAlertInstances({
             ruleId: 'rule-1',
-            alertInstanceId: 'alert-1',
+            alertInstanceIds: ['alert-1', 'alert-2'],
             indices: ['.alerts-default'],
             logger,
           });
 
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
             expect.objectContaining({
               index: ['.alerts-default'],
+              query: expect.objectContaining({
+                bool: expect.objectContaining({
+                  must: expect.arrayContaining([
+                    { terms: { 'kibana.alert.instance.id': ['alert-1', 'alert-2'] } },
+                  ]),
+                }),
+              }),
               script: expect.objectContaining({
                 lang: 'painless',
               }),
             })
           );
+        });
+
+        it('returns early when no alert instance IDs are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.clearSnoozeAndUnmuteAlertInstances({
+            ruleId: 'rule-1',
+            alertInstanceIds: [],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
         });
 
         it('throws when no indices are provided', async () => {
@@ -3323,13 +3257,13 @@ describe('Alerts Service', () => {
           });
 
           await expect(
-            alertsService.clearSnoozeAlertInstance({
+            alertsService.clearSnoozeAndUnmuteAlertInstances({
               ruleId: 'rule-1',
-              alertInstanceId: 'alert-1',
+              alertInstanceIds: ['alert-1'],
               indices: [],
               logger,
             })
-          ).rejects.toThrow('Unable to clear snooze');
+          ).rejects.toThrow('Unable to clear snooze and unmute');
         });
       });
     });

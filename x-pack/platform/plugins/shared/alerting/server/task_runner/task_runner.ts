@@ -13,7 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
-import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
+
 import type {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
@@ -414,6 +414,7 @@ export class TaskRunner<
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
+    let alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -430,39 +431,7 @@ export class TaskRunner<
             recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
 
-          // Auto-unmute alerts whose snooze conditions were met during this run.
-          // Clear snooze fields and set kibana.alert.muted = false on alert docs.
-          // The rule SO's mutedInstanceIds is NOT touched because conditional snoozes
-          // are stored exclusively on the alert document.
-          const alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
-          if (alertsToAutoUnmute.length > 0 && this.context.alertsService) {
-            const { alias: alertAlias } = getIndexTemplateAndPattern({
-              context: this.ruleType.alerts?.context ?? 'default',
-              namespace: ruleTypeRunnerContext.namespace,
-            });
-            const indices = [alertAlias];
-            for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
-              this.logger.info(
-                `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
-              );
-              try {
-                await this.context.alertsService.clearSnoozeAlertInstance({
-                  ruleId: rule.id,
-                  alertInstanceId,
-                  indices,
-                  logger: this.logger,
-                });
-                await this.context.alertsService.unmuteAlertInstance({
-                  ruleId: rule.id,
-                  alertInstanceId,
-                  indices,
-                  logger: this.logger,
-                });
-              } catch (e) {
-                this.logger.warn(`Failed to auto-unmute alert '${alertInstanceId}': ${e.message}`);
-              }
-            }
-          }
+          alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
         }
       })
     );
@@ -481,12 +450,33 @@ export class TaskRunner<
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
 
+    // Map auto-unmute alertInstanceIds to alert UUIDs for the batched update.
+    // The snooze fields and muted flag are cleared as part of updatePersistedAlerts
+    // so that all alert doc updates happen in a single ES updateByQuery call.
+    let alertUuidsToAutoUnmute: string[] = [];
+    if (alertsToAutoUnmute.length > 0) {
+      for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+        this.logger.info(
+          `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+        );
+        const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
+        if (uuid) {
+          alertUuidsToAutoUnmute.push(uuid);
+        } else {
+          this.logger.warn(
+            `Could not resolve UUID for auto-unmute alert '${alertInstanceId}' in rule '${rule.id}'`
+          );
+        }
+      }
+    }
+
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
           await alertsClient.updatePersistedAlerts({
             alertsToUpdateWithLastScheduledActions,
             alertsToUpdateWithMaintenanceWindows,
+            alertUuidsToAutoUnmute,
           });
         })
       );
