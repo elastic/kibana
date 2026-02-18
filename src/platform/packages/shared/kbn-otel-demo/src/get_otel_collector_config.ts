@@ -9,7 +9,8 @@
 
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
- * Collects both OTLP telemetry and container logs from Kubernetes nodes.
+ * Collects container logs from Kubernetes nodes and forwards them to Elasticsearch.
+ * OTLP traces and metrics are accepted but only exported to debug (not Elasticsearch).
  * Uses k8sattributes processor for proper pod/container metadata enrichment.
  */
 export function getFullOtelCollectorConfig({
@@ -17,11 +18,13 @@ export function getFullOtelCollectorConfig({
   username,
   password,
   logsIndex = 'logs',
+  namespace = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   logsIndex?: string;
+  namespace?: string;
 }): string {
   const configYaml = `
 receivers:
@@ -35,7 +38,7 @@ receivers:
   # Filelog receiver for Kubernetes container logs
   filelog/k8s:
     include:
-      - /var/log/pods/otel-demo_*/*/*.log
+      - /var/log/pods/${namespace}_*/*/*.log
     exclude:
       - /var/log/pods/*/otel-collector/*.log
     start_at: end
@@ -110,6 +113,47 @@ receivers:
         id: move_log_to_body
         from: attributes.log
         to: body
+
+      # Try to parse body as JSON (for structured logs from services)
+      # Only attempt if body looks like JSON (starts with { and ends with }, allowing trailing whitespace)
+      - type: json_parser
+        id: parse_application_json
+        parse_from: body
+        parse_to: attributes
+        if: 'body matches "^{.*}[[:space:]]*$"'
+        on_error: send
+
+      # Extract common JSON log fields to standardized attributes
+      # Only move fields that exist to avoid errors
+      - type: move
+        id: extract_json_message
+        from: attributes.message
+        to: body
+        if: 'attributes.message != nil'
+
+      - type: move
+        id: extract_severity
+        from: attributes.severity
+        to: attributes["log.level"]
+        if: 'attributes.severity != nil'
+
+      - type: move
+        id: extract_level
+        from: attributes.level
+        to: attributes["log.level"]
+        if: 'attributes.level != nil'
+
+      - type: move
+        id: extract_timestamp
+        from: attributes.timestamp
+        to: attributes["log.timestamp"]
+        if: 'attributes.timestamp != nil'
+
+      - type: move
+        id: extract_time
+        from: attributes.time
+        to: attributes["log.timestamp"]
+        if: 'attributes.time != nil'
 
 processors:
   batch:
@@ -186,9 +230,6 @@ processors:
       log_record:
         - 'true'
 
-connectors:
-  spanmetrics: {}
-
 exporters:
   debug:
     verbosity: basic
@@ -228,14 +269,16 @@ service:
       receivers: [filelog/k8s]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
+    # Accept traces but only export to debug (not Elasticsearch)
     traces:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [elasticsearch, spanmetrics, debug]
+      exporters: [debug]
+    # Accept metrics but only export to debug (not Elasticsearch)
     metrics:
-      receivers: [otlp, spanmetrics]
+      receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [elasticsearch, debug]
+      exporters: [debug]
 `;
 
   return configYaml

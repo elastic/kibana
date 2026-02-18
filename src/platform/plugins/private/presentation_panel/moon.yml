@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/i18n'
   - '@kbn/kibana-react-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
   - '@kbn/unified-search-plugin'

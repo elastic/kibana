@@ -83,3 +83,6 @@ if (!Object.hasOwn(global, 'Worker')) {
 if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};
 }
+
+// Required from ts decorators support in tests
+import 'reflect-metadata/lite';

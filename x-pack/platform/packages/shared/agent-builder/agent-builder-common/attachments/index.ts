@@ -12,28 +12,39 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
+  VisualizationAttachment,
 } from './attachments';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
+  visualizationAttachmentDataSchema,
+  visualizationOriginDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
+  type VisualizationAttachmentData,
+  type VisualizationOriginData,
 } from './attachment_types';
 
 export type {
   VersionedAttachment,
   AttachmentVersion,
   AttachmentVersionRef,
+  AttachmentRefOperation,
+  AttachmentRefActor,
   AttachmentDiff,
   VersionedAttachmentInput,
 } from './versioned_attachment';
 export {
+  ATTACHMENT_REF_OPERATION,
+  ATTACHMENT_REF_ACTOR,
   attachmentVersionSchema,
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
+  attachmentRefOperationSchema,
+  attachmentRefActorSchema,
   versionedAttachmentInputSchema,
   attachmentDiffSchema,
   getLatestVersion,

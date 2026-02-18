@@ -8,11 +8,12 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
-  validateRuleResponseActionsPermissions,
-  validateRuleResponseActionsPayload,
-} from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
+  EXCEPTIONS_API_ALL,
+  RULES_API_ALL,
+  RULES_API_READ,
+} from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -33,7 +34,11 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: [RULES_API_ALL],
+          requiredPrivileges: [
+            {
+              anyRequired: [RULES_API_ALL, { allOf: [RULES_API_READ, EXCEPTIONS_API_ALL] }],
+            },
+          ],
         },
       },
     })
@@ -76,17 +81,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateRuleResponseActionsPermissions({
+          await validateRuleResponseActions({
             endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
             endpointService: securitySolutionCtx.getEndpointService(),
-            ruleUpdate: params,
-            existingRule,
-          });
-
-          await validateRuleResponseActionsPayload({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
             spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
           });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });

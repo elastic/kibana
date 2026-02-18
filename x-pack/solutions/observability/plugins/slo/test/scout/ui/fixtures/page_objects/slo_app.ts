@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ScoutPage, ScoutTestConfig } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 
 export class SLOApp {
   constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {}

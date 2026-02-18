@@ -74,9 +74,9 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
         'QuickStatsDocumentCount'
       );
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0.00 B');
       await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0.00 B');
     },
 
     async expectQuickStatsToHaveIndexStatus() {
@@ -363,13 +363,6 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(true);
-    },
-
-    async dismissIngestTourIfShown() {
-      if (await testSubjects.isDisplayed('searchIngestTourCloseButton')) {
-        await testSubjects.click('searchIngestTourCloseButton');
-        await testSubjects.missingOrFail('searchIngestTourCloseButton', { timeout: 2000 });
-      }
     },
   };
 }

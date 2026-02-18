@@ -113,13 +113,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Clicks a visualize list item's title (in the visualize app).
+     * Clicks a visualize list item's title (visualize app or dashboard Visualizations tab).
      *
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
       return retry.try(async () => {
-        await testSubjects.click(`visListingTitleLink-${title}`);
+        const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
+          ? `visualizationListingListingTitleLink-${title}`
+          : (await testSubjects.exists(`visListingTitleLink-${title}`))
+          ? `visListingTitleLink-${title}`
+          : `visualizationListingTitleLink-${title}`;
+        await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
     },
@@ -1712,8 +1717,52 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return;
         }
 
-        // Click to make it active
-        await tabs[index].click();
+        // Scroll tabs into view by clicking scroll buttons if needed.
+        // The tab may be hidden behind the scroll navigation buttons.
+        // Note: scroll buttons only exist when there are enough tabs to overflow.
+        // We try scrolling right first for higher indices, left for lower indices.
+        let scrollAttempts = 0;
+        const maxScrollAttempts = 10;
+
+        await retry.try(async () => {
+          // Try clicking the tab - if it fails due to scroll button overlap, scroll and retry
+          try {
+            await tabs[index].click();
+          } catch (e) {
+            if (e instanceof Error && e.message.includes('element click intercepted')) {
+              scrollAttempts++;
+              if (scrollAttempts > maxScrollAttempts) {
+                throw e; // Give up after max attempts
+              }
+
+              // Determine scroll direction based on tab index
+              // Lower indices are on the left, higher indices are on the right
+              const scrollRightBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollRightBtn',
+                { timeout: 500 }
+              );
+              const scrollLeftBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollLeftBtn',
+                { timeout: 500 }
+              );
+
+              // Try scrolling in the appropriate direction
+              if (index >= tabs.length / 2 && scrollRightBtnExists) {
+                // Tab is in the right half, try scrolling right
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              } else if (scrollLeftBtnExists) {
+                // Tab is in the left half, try scrolling left
+                await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
+              } else if (scrollRightBtnExists) {
+                // Fallback to scrolling right if left isn't available
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              }
+
+              throw e; // Rethrow to retry
+            }
+            throw e;
+          }
+        });
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
@@ -1886,7 +1935,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
-        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+        await retry.waitFor('dashboard visualizations list to load', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('#/list/visualizations');
+        });
       });
     },
 

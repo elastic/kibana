@@ -38,7 +38,7 @@ export const executeEsqlRequest = async ({
     ];
 
     if (sourceIndex === -1 || idIndex === -1) {
-      throw new Error('Invalid ES|QL response format: missing _source or _id column');
+      return [];
     }
 
     const results = values.map((row) => ({
@@ -48,7 +48,9 @@ export const executeEsqlRequest = async ({
 
     return results;
   } catch (error) {
-    const message = `Error executing ES|QL request: ${error.message}`;
+    const message = `Error executing ES|QL request: ${
+      error instanceof Error ? error.message : String(error)
+    }`;
     logger.debug(message);
     throw new Error(message);
   }
