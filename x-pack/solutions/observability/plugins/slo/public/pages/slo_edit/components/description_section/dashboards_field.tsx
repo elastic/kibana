@@ -12,7 +12,6 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
 import type { CreateSLOForm } from '../../types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useIsHorizontalLayout } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 const DASHBOARDS_COMBOBOX_PLACEHOLDER = i18n.translate('xpack.slo.sloEdit.dashboards.placeholder', {
@@ -20,14 +19,13 @@ const DASHBOARDS_COMBOBOX_PLACEHOLDER = i18n.translate('xpack.slo.sloEdit.dashbo
 });
 
 export function DashboardsField() {
-  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
   const { services } = useKibana();
   const { uiActions } = services;
 
   return (
     <EuiFormRow
-      fullWidth={isHorizontalLayout}
+      fullWidth
       label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {
         defaultMessage: 'Linked dashboards',
       })}

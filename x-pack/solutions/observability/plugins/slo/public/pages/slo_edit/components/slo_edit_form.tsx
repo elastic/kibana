@@ -47,7 +47,7 @@ export function SloEditForm({
     values: initialValues,
     mode: 'all',
   });
-  const { watch, getFieldState, getValues, formState, trigger } = form;
+  const { watch, getFieldState, getValues, formState } = form;
 
   const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
     useSectionFormValidation({
@@ -131,35 +131,13 @@ export function SloEditForm({
     [activeStep, canAccessDescriptionStep, canAccessObjectiveStep]
   );
 
-  const handleNext = useCallback(async () => {
-    if (activeStep === STEP_DEFINITION) {
-      const isValid = await trigger([
-        'indicator.type',
-        'indicator.params.service',
-        'indicator.params.environment',
-        'indicator.params.transactionType',
-        'indicator.params.transactionName',
-        'indicator.params.index',
-        'indicator.params.timestampField',
-        'indicator.params.filter',
-        'indicator.params.good',
-        'indicator.params.total',
-      ]);
-      if (isValid || isIndicatorSectionValid) {
-        setActiveStep(STEP_OBJECTIVES);
-      }
-    } else if (activeStep === STEP_OBJECTIVES) {
-      const isValid = await trigger([
-        'budgetingMethod',
-        'timeWindow.duration',
-        'timeWindow.type',
-        'objective.target',
-      ]);
-      if (isValid || isObjectiveSectionValid) {
-        setActiveStep(STEP_DESCRIPTION);
-      }
+  const handleNext = useCallback(() => {
+    if (activeStep === STEP_DEFINITION && isIndicatorSectionValid) {
+      setActiveStep(STEP_OBJECTIVES);
+    } else if (activeStep === STEP_OBJECTIVES && isObjectiveSectionValid) {
+      setActiveStep(STEP_DESCRIPTION);
     }
-  }, [activeStep, isIndicatorSectionValid, isObjectiveSectionValid, trigger]);
+  }, [activeStep, isIndicatorSectionValid, isObjectiveSectionValid]);
 
   const handleBack = useCallback(() => {
     if (activeStep === STEP_OBJECTIVES) {

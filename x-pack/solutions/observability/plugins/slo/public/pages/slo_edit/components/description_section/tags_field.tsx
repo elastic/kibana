@@ -12,18 +12,16 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
 import { useFetchSLOSuggestions } from '../../hooks/use_fetch_suggestions';
-import { useIsHorizontalLayout } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 export function TagsField() {
-  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
   const { suggestions } = useFetchSLOSuggestions();
 
   return (
     <EuiFormRow
-      fullWidth={isHorizontalLayout}
+      fullWidth
       label={i18n.translate('xpack.slo.sloEdit.tags.label', {
         defaultMessage: 'Tags',
       })}
@@ -37,7 +35,7 @@ export function TagsField() {
           <EuiComboBox
             {...field}
             id={tagsId}
-            fullWidth={isHorizontalLayout}
+            fullWidth
             aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
               defaultMessage: 'Add tags',
             })}

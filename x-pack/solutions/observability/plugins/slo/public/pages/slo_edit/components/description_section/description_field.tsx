@@ -10,17 +10,15 @@ import { EuiFormRow, EuiTextArea, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useIsHorizontalLayout } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 export function DescriptionField() {
-  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
 
   return (
     <EuiFormRow
-      fullWidth={isHorizontalLayout}
+      fullWidth
       label={i18n.translate('xpack.slo.sloEdit.description.sloDescription', {
         defaultMessage: 'Description',
       })}
@@ -33,7 +31,7 @@ export function DescriptionField() {
         render={({ field: { ref, ...field } }) => (
           <EuiTextArea
             {...field}
-            fullWidth={isHorizontalLayout}
+            fullWidth
             id={descriptionId}
             data-test-subj="sloFormDescriptionTextArea"
             placeholder={i18n.translate('xpack.slo.sloEdit.description.sloDescriptionPlaceholder', {

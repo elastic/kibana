@@ -147,7 +147,6 @@ export function MetricInput({
               min: 0.001,
               max: 99.999,
             }}
-            shouldUnregister={true}
             control={control}
             render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFormRow
@@ -187,7 +186,6 @@ export function MetricInput({
             name={`indicator.params.metric.metrics.${index}.field`}
             defaultValue=""
             rules={{ required: true }}
-            shouldUnregister={true}
             control={control}
             render={({ field: { ref, ...field }, fieldState }) => (
               <EuiFormRow

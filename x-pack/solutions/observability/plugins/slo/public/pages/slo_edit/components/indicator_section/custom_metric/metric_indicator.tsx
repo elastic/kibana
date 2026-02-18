@@ -226,7 +226,6 @@ export function MetricIndicator({
                         name={`indicator.params.${type}.metrics.${index}.field`}
                         defaultValue=""
                         rules={{ required: true }}
-                        shouldUnregister
                         control={control}
                         render={({ field: { ref, ...field }, fieldState }) => (
                           <EuiComboBox

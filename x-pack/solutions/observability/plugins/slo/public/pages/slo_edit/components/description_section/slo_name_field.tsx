@@ -10,16 +10,14 @@ import { EuiFieldText, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useIsHorizontalLayout } from '../slo_form_context';
 
 export function SloNameField() {
-  const isHorizontalLayout = useIsHorizontalLayout();
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
 
   return (
     <EuiFormRow
-      fullWidth={isHorizontalLayout}
+      fullWidth
       isInvalid={getFieldState('name').invalid}
       label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
         defaultMessage: 'SLO Name',
@@ -32,7 +30,7 @@ export function SloNameField() {
         render={({ field: { ref, ...field }, fieldState }) => (
           <EuiFieldText
             {...field}
-            fullWidth={isHorizontalLayout}
+            fullWidth
             isInvalid={fieldState.invalid}
             id={sloNameId}
             data-test-subj="sloFormNameInput"

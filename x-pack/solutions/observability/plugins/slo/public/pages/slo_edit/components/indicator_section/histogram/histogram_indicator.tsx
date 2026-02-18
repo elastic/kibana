@@ -233,7 +233,6 @@ export function HistogramIndicator({
                     defaultValue={NaN}
                     control={control}
                     rules={{ required: true }}
-                    shouldUnregister
                     render={({ field: { ref, ...field }, fieldState }) => (
                       <EuiFieldNumber
                         {...field}
@@ -262,7 +261,6 @@ export function HistogramIndicator({
                     name={`indicator.params.${type}.to`}
                     defaultValue={NaN}
                     rules={{ required: true }}
-                    shouldUnregister
                     control={control}
                     render={({ field: { ref, ...field }, fieldState }) => (
                       <EuiFieldNumber
