@@ -194,6 +194,7 @@ export async function generateSignificantEvents({
               const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
 
               if (unmappedFields.length > 0) {
+                hasFailures = true;
                 return {
                   query,
                   valid: false,
