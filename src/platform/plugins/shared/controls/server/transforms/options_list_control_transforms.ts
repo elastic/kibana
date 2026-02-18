@@ -17,6 +17,7 @@ import {
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
+import { logger } from '../kibana_services';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
 const OPTIONS_LIST_LEGACY_REF_NAMES = [
@@ -94,6 +95,14 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
             },
             {} as OptionsListDSLControlState
           );
+          try {
+            controlsGroupSchema.validate([deNulledConfig]);
+          } catch (e2) {
+            // If the de-nulled config still fails to validate, do not prevent read, but log a warning
+            logger.warn(
+              `Unable to transform options list "${id}" embeddable state on read. Error: ${e2.message}`
+            );
+          }
           return deNulledConfig;
         }
 
