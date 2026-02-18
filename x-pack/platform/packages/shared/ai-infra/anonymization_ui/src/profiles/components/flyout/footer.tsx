@@ -17,6 +17,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useProfileFlyoutContext } from './context';
 
 export const ProfileFlyoutFooter = () => {
+  return (
+    <EuiFlyoutFooter>
+      <ProfileFormFooter />
+    </EuiFlyoutFooter>
+  );
+};
+
+export const ProfileFormFooter = () => {
   const { isManageMode, isSubmitting, onCancel, onSubmit, targetIdField } =
     useProfileFlyoutContext();
   const isSubmitDisabled =
@@ -26,26 +34,24 @@ export const ProfileFlyoutFooter = () => {
     targetIdField.isTargetIdValidating;
 
   return (
-    <EuiFlyoutFooter>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel}>
-            <FormattedMessage id="anonymizationUi.form.cancel" defaultMessage="Cancel" />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={() => void onSubmit()}
-            isLoading={isSubmitting || targetIdField.isTargetIdValidating}
-            isDisabled={isSubmitDisabled}
-            data-test-subj="anonymizationProfilesSubmitProfile"
-          >
-            <FormattedMessage id="anonymizationUi.form.save" defaultMessage="Save profile" />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={onCancel}>
+          <FormattedMessage id="anonymizationUi.form.cancel" defaultMessage="Cancel" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          onClick={() => void onSubmit()}
+          isLoading={isSubmitting || targetIdField.isTargetIdValidating}
+          isDisabled={isSubmitDisabled}
+          data-test-subj="anonymizationProfilesSubmitProfile"
+        >
+          <FormattedMessage id="anonymizationUi.form.save" defaultMessage="Save profile" />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

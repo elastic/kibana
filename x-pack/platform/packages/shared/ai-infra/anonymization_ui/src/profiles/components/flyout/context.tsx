@@ -6,41 +6,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { FieldRule, NerRule, RegexRule } from '@kbn/anonymization-common';
-import type { FetchPreviewDocument, TrustedNerModelOption } from '../../../contracts';
-import type { ProfilesApiError } from '../../services/profiles/errors';
-import type { TargetType } from '../../types';
 import type { UseTargetIdFieldResult } from './hooks/use_target_id_field';
+import type { ProfileFormProps } from './profile_form_props';
 
-export interface ProfileFlyoutContextValue {
-  isEdit: boolean;
-  isManageMode: boolean;
-  isSubmitting: boolean;
-  name: string;
-  description: string;
-  targetType: TargetType;
-  targetId: string;
-  fieldRules: FieldRule[];
-  regexRules: RegexRule[];
-  nerRules: NerRule[];
-  nameError?: string;
-  targetIdError?: string;
-  fieldRulesError?: string;
-  regexRulesError?: string;
-  nerRulesError?: string;
-  submitError?: ProfilesApiError;
-  hasConflict?: boolean;
-  onNameChange: (name: string) => void;
-  onDescriptionChange: (description: string) => void;
-  onTargetTypeChange: (targetType: TargetType) => void;
-  onTargetIdChange: (targetId: string) => void;
-  onFieldRulesChange: (rules: FieldRule[]) => void;
-  onRegexRulesChange: (rules: RegexRule[]) => void;
-  onNerRulesChange: (rules: NerRule[]) => void;
-  listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
-  fetchPreviewDocument?: FetchPreviewDocument;
-  onCancel: () => void;
-  onSubmit: () => Promise<void>;
+export interface ProfileFlyoutContextValue extends ProfileFormProps {
   targetIdField: UseTargetIdFieldResult;
 }
 
