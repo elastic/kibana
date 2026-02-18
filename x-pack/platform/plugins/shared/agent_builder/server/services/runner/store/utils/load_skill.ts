@@ -33,23 +33,22 @@ export async function loadSkillTools({
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
 
-    const allowedTools = skill.getAllowedTools?.() ?? [];
-    const registryExecutableTools = await pickTools({
-      toolProvider,
-      selection: [{ tool_ids: allowedTools }],
-      request,
-    });
-
-    const dynamicToolIds = (await skill.getDynamicToolIds?.()) ?? [];
-    const dynamicExecutableTools =
-      dynamicToolIds.length > 0
-        ? await pickTools({ toolProvider, selection: [{ tool_ids: dynamicToolIds }], request })
+    const registryToolIds = (await skill.getRegistryTools?.()) ?? [];
+    if (registryToolIds.length > 25) {
+      logger.warn(
+        `Skill '${skill.id}' returned ${registryToolIds.length} registry tools, exceeding the 25-tool limit. Truncating.`
+      );
+      registryToolIds.length = 25;
+    }
+    const registryExecutableTools =
+      registryToolIds.length > 0
+        ? await pickTools({ toolProvider, selection: [{ tool_ids: registryToolIds }], request })
         : [];
 
     await toolManager.addTools(
       {
         type: ToolManagerToolType.executable,
-        tools: [...inlineExecutableTools, ...registryExecutableTools, ...dynamicExecutableTools],
+        tools: [...inlineExecutableTools, ...registryExecutableTools],
         logger,
       },
       {

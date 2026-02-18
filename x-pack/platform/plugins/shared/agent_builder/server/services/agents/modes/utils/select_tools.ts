@@ -99,15 +99,9 @@ export const selectTools = async ({
 
   // Dynamic tools
 
-  // Re-resolve dynamic tool IDs from loaded skills (these may have changed since the skill was first loaded)
-  const skillDynamicToolIds = (
-    await Promise.all(skills.list().map((skill) => skill.getDynamicToolIds?.() ?? []))
-  ).flat();
-  const allDynamicToolIds = [...new Set([...previousDynamicToolIds, ...skillDynamicToolIds])];
-
   const dynamicRegistryTools = await pickTools({
     toolProvider,
-    selection: [{ tool_ids: allDynamicToolIds }],
+    selection: [{ tool_ids: previousDynamicToolIds }],
     request,
   });
 
@@ -120,7 +114,7 @@ export const selectTools = async ({
     )
   )
     .flat()
-    .filter((tool) => allDynamicToolIds.includes(tool.id))
+    .filter((tool) => previousDynamicToolIds.includes(tool.id))
     .map((tool) => skills.convertSkillTool(tool));
 
   return {

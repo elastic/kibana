@@ -11,7 +11,7 @@ export interface SkillServiceSetup {
   /**
    * Register a built-in skill to be exposed to built-in agents.
    */
-  registerSkill(skill: SkillDefinition): void;
+  registerSkill(skill: SkillDefinition): Promise<void>;
 }
 
 export interface SkillServiceStart {
