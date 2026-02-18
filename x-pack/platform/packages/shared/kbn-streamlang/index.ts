@@ -34,3 +34,11 @@ export {
   getMathParameterNames,
 } from './src/transpilers/shared/math';
 export type { MathFunctionDefinition } from './src/transpilers/shared/math';
+export {
+  getAvailableGrokPatterns,
+  compileGrokPatternToRegex,
+  compileGrokPatternsToRegex,
+  isKnownGrokPattern,
+  BASE_GROK_PATTERNS,
+} from './types/utils/grok_to_regex';
+export type { CompiledRedactPattern } from './types/utils/grok_to_regex';

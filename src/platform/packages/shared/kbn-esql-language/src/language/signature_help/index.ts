@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Parser } from '../../parser';
 import { within, Walker } from '../../ast';
@@ -18,7 +19,12 @@ import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
-import { getArgumentToHighlightIndex, getParameterList } from './helpers';
+import {
+  buildSignatureHelpItem,
+  getArgumentToHighlightIndex,
+  getParameterList,
+  getPromqlSignatureHelp,
+} from './helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
@@ -46,6 +52,12 @@ export async function getSignatureHelp(
   // Corrects the query to be able to work with incomplete syntax
   const correctedQuery = correctQuerySyntax(fullText, offset);
   const { root } = Parser.parse(correctedQuery);
+
+  const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
+
+  if (commandAtOffset?.name === 'promql') {
+    return getPromqlSignatureHelp(root, fullText, offset);
+  }
 
   // Find the function node that contains the cursor
   let fnNode: ESQLFunction | undefined;
@@ -101,24 +113,5 @@ export async function getSignatureHelp(
   );
   const parameters: string[] = getParameterList(formattedSignature);
 
-  const signature = {
-    label: formattedSignature,
-    parameters:
-      parameters.map((param) => {
-        const paramDefinition = fnDefinition.signatures
-          ?.flatMap((sig) => sig.params)
-          .find((p) => param.startsWith(p.name));
-        return {
-          label: param,
-          documentation: paramDefinition?.description ? paramDefinition?.description : '',
-        };
-      }) || [],
-  };
-
-  return {
-    signatures: [signature],
-    activeSignature: 0,
-    // Math.min for the variadic functions, that can have more arguments than the defined parameters
-    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
-  };
+  return buildSignatureHelpItem(formattedSignature, fnDefinition, parameters, currentArgIndex);
 }
