@@ -87,21 +87,20 @@ const expectPromqlSuggestions = async (
 };
 
 describe('after PROMQL keyword', () => {
-  test('suggests params but not column when required params missing', async () => {
+  test('suggests all after PROMQL keyword without params', async () => {
     (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
       'PROMQL ',
       {
-        textsContain: promqlParamTexts,
-        textsNotContain: ['col0 = '],
-        labelsNotContain: promqlFunctionLabels,
+        textsContain: [...promqlParamTexts, 'col0 = '],
+        labelsContain: promqlFunctionLabels,
       },
       mockCallbacks
     );
   });
 
-  test('suggests column when all required params are present', async () => {
+  test('suggests column when params are present', async () => {
     (mockCallbacks.getSuggestedUserDefinedColumnName as jest.Mock).mockReturnValue('col0');
 
     await expectPromqlSuggestions(
