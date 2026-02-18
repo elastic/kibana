@@ -39,7 +39,7 @@ export const DetailsPage: FunctionComponent<
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
 
-  const isNewDesignEnabled = settings?.client.get<boolean>(PLATFORM_INDEX_MGMT_V2, false);
+  const isNewDesignEnabled = settings.client.get<boolean>(PLATFORM_INDEX_MGMT_V2, false);
 
   const navigateToIndicesList = useCallback(() => {
     const paramsString = resetIndexUrlParams(search);

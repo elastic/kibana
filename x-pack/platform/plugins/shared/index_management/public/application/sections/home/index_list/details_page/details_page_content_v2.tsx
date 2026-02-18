@@ -92,7 +92,7 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
     },
     config: { enableIndexStats },
     plugins: { console: consolePlugin, ml },
-    services: { extensionsService },
+    services: { extensionsService, notificationService },
   } = useAppContext();
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
 
@@ -153,11 +153,13 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
             navigateToIndicesList={navigateToIndicesList}
             fill={true}
           />,
-          <DiscoverLink indexName={index.name} asButton={true} />,
+          <DiscoverLink indexName={index.name} asButton={true} fill={false} />,
           <EuiButtonEmpty
             onClick={() =>
               openWiredConnectionDetails({
                 props: { options: { defaultTabId: 'apiKeys' } },
+              }).catch((error) => {
+                notificationService.showDangerToast(error.body.message);
               })
             }
             iconType="plugs"
