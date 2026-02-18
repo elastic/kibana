@@ -41,8 +41,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
   private readonly fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
-  private fetchedStepIds: Set<string> = new Set();
-  private lastExecutionContext: ExecutionContext | null = null;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
@@ -367,6 +365,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
    * Fetch step I/O data on demand if not already available.
    * Returns the enriched step data (merged with fetched I/O), or the existing
    * data if already present. Returns null if the step doesn't exist.
+   * Deduplication is handled by the React Query cache inside fetchStepExecutionData.
    */
   private async fetchStepDataIfNeeded(
     stepData: StepExecutionData | undefined,
@@ -380,11 +379,10 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       return stepData;
     }
 
-    if (this.fetchedStepIds.has(stepId) || stepData.output !== undefined) {
+    if (stepData.output !== undefined) {
       return stepData;
     }
 
-    this.fetchedStepIds.add(stepId);
     const fullStepData = await this.fetchStepExecutionData(stepId);
     if (fullStepData) {
       return { ...stepData, ...fullStepData };
@@ -407,12 +405,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     const executionContext = this.getExecutionContext();
     if (!executionContext) {
       return null;
-    }
-
-    // Clear fetched step cache when execution context changes (new execution selected)
-    if (executionContext !== this.lastExecutionContext) {
-      this.fetchedStepIds = new Set();
-      this.lastExecutionContext = executionContext;
     }
 
     try {

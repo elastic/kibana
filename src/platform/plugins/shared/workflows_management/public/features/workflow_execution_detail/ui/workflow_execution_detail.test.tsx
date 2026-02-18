@@ -78,11 +78,8 @@ describe('WorkflowExecutionDetail - cache invalidation', () => {
   let mockRemoveQueries: jest.Mock;
 
   beforeEach(() => {
-    mockRemoveQueries = jest.fn();
-    mockUseQueryClient.mockReturnValue({
-      removeQueries: mockRemoveQueries,
-    } as any);
     jest.clearAllMocks();
+    mockRemoveQueries = jest.fn();
     mockUseQueryClient.mockReturnValue({
       removeQueries: mockRemoveQueries,
     } as any);

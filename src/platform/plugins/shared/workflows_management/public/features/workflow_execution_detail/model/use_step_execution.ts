@@ -35,7 +35,7 @@ export function useStepExecution(
       return response;
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: isStepFinished ? Infinity : 0, // will be cleared when switching to a different execution
+    staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
     refetchInterval: isStepFinished ? false : REFETCH_INTERVAL_MS,
   });
 }
