@@ -46,6 +46,7 @@ export interface SchemaEditorFlyoutProps {
    * chose to edit description only.
    */
   isDescriptionOnlyMode?: boolean;
+  onGoToField?: (fieldName: string) => void;
 }
 
 export const SchemaEditorFlyout = ({
@@ -59,6 +60,7 @@ export const SchemaEditorFlyout = ({
   fields,
   enableGeoPointSuggestions = true,
   isDescriptionOnlyMode = false,
+  onGoToField,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
@@ -214,8 +216,9 @@ export const SchemaEditorFlyout = ({
             onChange={setNextField}
             stream={stream}
             enableGeoPointSuggestions={enableGeoPointSuggestions}
+            onGoToField={onGoToField}
           />
-          {nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && (
+          {nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && !nextField.alias_for && (
             <AdvancedFieldMappingOptions
               value={nextField.additionalParameters}
               onChange={(additionalParameters) => setNextField({ additionalParameters })}
@@ -223,11 +226,14 @@ export const SchemaEditorFlyout = ({
               isEditing={isEditing}
             />
           )}
-          {withFieldSimulation && nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && (
-            <EuiFlexItem grow={false}>
-              <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
-            </EuiFlexItem>
-          )}
+          {withFieldSimulation &&
+            nextField.type !== 'unmapped' &&
+            !isDescriptionOnlyEditing &&
+            !nextField.alias_for && (
+              <EuiFlexItem grow={false}>
+                <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
+              </EuiFlexItem>
+            )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
       {isEditing && (
