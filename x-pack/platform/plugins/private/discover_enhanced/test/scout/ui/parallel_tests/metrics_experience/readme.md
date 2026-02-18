@@ -32,16 +32,17 @@ discover_enhanced/test/scout/ui/
 ├── parallel_tests/
 │   ├── global.setup.ts              # Loads archives + creates test index
 │   └── metrics_experience/          # Feature subfolder (you are here)
-│       ├── grid.spec.ts             # Grid activation/command compatibility
-│       └── grid.navigation.spec.ts  # Pagination and search
+│       ├── grid.spec.ts             # Grid activation, command compatibility, chart actions
+│       ├── grid.navigation.spec.ts  # Pagination and search
+│       └── insights_flyout.spec.ts  # Flyout tabs, content, dimensions pagination
 ```
 
 ## Data strategy
 
 Two approaches are used:
 
-- **Static data** (`TSDB_LOGS` archive): For `grid.spec.ts`. Enough for grid activation tests. No dynamic data generation needed, uses the shared archive loaded in global setup.
-- **Dynamic data** (`test-metrics-experience` index): For `grid.navigation.spec.ts`. Contains enough metrics to fill multiple pages. Created via `metrics_tsdb_index.ts` generator. Handles parallel creation races with `resource_already_exists_exception`.
+- **Static data** (`TSDB_LOGS` archive): For `grid.spec.ts`. Enough for grid activation and chart actions tests. No dynamic data generation needed, uses the shared archive loaded in global setup.
+- **Dynamic data** (`test-metrics-experience` index): For `grid.navigation.spec.ts` and `insights_flyout.spec.ts`. Contains enough metrics to fill multiple pages and 30 dimensions to trigger flyout pagination. Created via `metrics_tsdb_index.ts` generator. Handles parallel creation races with `resource_already_exists_exception`.
 
 ## How to add a new test
 

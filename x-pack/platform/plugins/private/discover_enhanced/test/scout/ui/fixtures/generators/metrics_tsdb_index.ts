@@ -68,6 +68,15 @@ export const PAGINATION = {
   LAST_PAGE_CARDS: TOTAL_METRIC_FIELDS % PAGE_SIZE || PAGE_SIZE,
 } as const;
 
+const DIMENSIONS_PAGE_SIZE = 10;
+const TOTAL_DIMENSIONS = DEFAULT_CONFIG.dimensions.length;
+
+export const DIMENSIONS_PAGINATION = {
+  PAGE_SIZE: DIMENSIONS_PAGE_SIZE,
+  TOTAL_PAGES: Math.ceil(TOTAL_DIMENSIONS / DIMENSIONS_PAGE_SIZE),
+  LAST_PAGE_ITEMS: TOTAL_DIMENSIONS % DIMENSIONS_PAGE_SIZE || DIMENSIONS_PAGE_SIZE,
+} as const;
+
 function getEsMapping({ type }: MetricDefinition): EsMappingProperty {
   switch (type) {
     case 'gauge':

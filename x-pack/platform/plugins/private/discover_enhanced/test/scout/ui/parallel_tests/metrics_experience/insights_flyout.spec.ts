@@ -1,0 +1,97 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Insights flyout tests.
+ *
+ * These tests use the dynamically created TSDB index (test-metrics-experience)
+ * to exercise the insights flyout tabs and the dimensions pagination.
+ */
+
+import { expect } from '@kbn/scout/ui';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DIMENSIONS_PAGINATION } from '../../fixtures';
+
+const { TOTAL_PAGES } = DIMENSIONS_PAGINATION;
+
+spaceTest.describe(
+  'Metrics in Discover - Insights Flyout',
+  { tag: testData.METRICS_EXPERIENCE_TAGS },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);
+      await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.discover.goto();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest('should open insights flyout and verify tab content', async ({ pageObjects }) => {
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
+      await expect(metricsExperience.grid).toBeVisible();
+
+      await spaceTest.step('open flyout via View details', async () => {
+        await metricsExperience.openInsightsFlyout(0);
+        await expect(metricsExperience.flyout.container).toBeVisible();
+      });
+
+      await spaceTest.step('Overview tab shows description list', async () => {
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+      });
+
+      await spaceTest.step('switch to ES|QL Query tab and verify content', async () => {
+        await metricsExperience.flyout.esqlQuery.tab.click();
+        await expect(metricsExperience.flyout.esqlQuery.codeBlock).toBeVisible();
+      });
+
+      await spaceTest.step('switch back to Overview tab', async () => {
+        await metricsExperience.flyout.overview.tab.click();
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+      });
+    });
+
+    spaceTest('should paginate through dimensions in flyout', async ({ pageObjects }) => {
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_METRICS_TEST);
+      await expect(metricsExperience.grid).toBeVisible();
+
+      await spaceTest.step('open flyout and verify pagination is visible', async () => {
+        await metricsExperience.openInsightsFlyout(0);
+        await expect(metricsExperience.flyout.container).toBeVisible();
+        await expect(
+          metricsExperience.flyout.overview.dimensionsPagination.container
+        ).toBeVisible();
+      });
+
+      await spaceTest.step('navigate to last page', async () => {
+        const { dimensionsPagination } = metricsExperience.flyout.overview;
+        await dimensionsPagination.getPageButton(TOTAL_PAGES - 1).click();
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+      });
+
+      await spaceTest.step('navigate using next and prev arrows', async () => {
+        const { dimensionsPagination } = metricsExperience.flyout.overview;
+        await dimensionsPagination.getPageButton(0).click();
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+
+        await dimensionsPagination.nextButton.click();
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+
+        await dimensionsPagination.prevButton.click();
+        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+      });
+    });
+  }
+);

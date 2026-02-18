@@ -91,5 +91,27 @@ spaceTest.describe(
 
       await expect(metricsExperience.grid).toBeVisible();
     });
+
+    spaceTest('should show chart actions menu on metric card', async ({ pageObjects }) => {
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
+      await expect(metricsExperience.grid).toBeVisible();
+
+      await spaceTest.step('open context menu from first metric card', async () => {
+        await metricsExperience.openCardContextMenu(0);
+      });
+
+      await spaceTest.step('View details action is present', async () => {
+        await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
+      });
+
+      await spaceTest.step('Copy to dashboard action is present', async () => {
+        await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
+      });
+
+      await spaceTest.step('Explore action is present', async () => {
+        await expect(metricsExperience.chartActions.explore).toBeVisible();
+      });
+    });
   }
 );
