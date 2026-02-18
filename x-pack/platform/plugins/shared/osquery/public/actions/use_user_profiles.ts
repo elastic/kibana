@@ -27,7 +27,7 @@ export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
     return uidSet;
   }, [actionItems]);
 
-  const { data: userProfiles } = useQuery<UserProfileWithAvatar[]>(
+  const { data: userProfiles, isLoading } = useQuery<UserProfileWithAvatar[]>(
     ['useBulkGetUserProfiles', ...uids],
     () => userProfile.bulkGet({ uids, dataPath: 'avatar' }),
     {
@@ -37,9 +37,11 @@ export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
     }
   );
 
-  return useMemo(() => {
+  const profilesMap = useMemo(() => {
     if (!userProfiles) return new Map<string, UserProfileWithAvatar>();
 
     return new Map(userProfiles.map((profile) => [profile.uid, profile]));
   }, [userProfiles]);
+
+  return { profilesMap, isLoading: isLoading && uids.size > 0 };
 };

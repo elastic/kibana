@@ -19,6 +19,7 @@ import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { createActionHandler } from '../../handlers';
 import { parser as OsqueryParser } from './osquery_parser';
 import { getUserInfo } from '../../lib/get_user_info';
@@ -113,9 +114,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         try {
+          const [, startPlugins] = await osqueryContext.getStartServices();
+          const securityStart = (startPlugins as StartPlugins).security;
           const currentUser = await getUserInfo({
             request,
-            security: osqueryContext.security,
+            security: securityStart,
             logger: osqueryContext.logFactory.get('liveQuery'),
           });
           const username = currentUser?.username ?? undefined;

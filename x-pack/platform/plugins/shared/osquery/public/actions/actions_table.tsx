@@ -18,8 +18,6 @@ import {
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
-import { UserAvatar } from '@kbn/user-profile-components';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -30,6 +28,7 @@ import { useBulkGetUserProfiles } from './use_user_profiles';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
+import { RunByColumn } from './components/run_by_column';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 const EMPTY_ARRAY: SearchHit[] = [];
@@ -63,31 +62,6 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
-interface RunByColumnProps {
-  userId: string | undefined;
-  userProfileUid: string | undefined;
-  profilesMap: Map<string, UserProfileWithAvatar>;
-}
-
-const RunByColumn: React.FC<RunByColumnProps> = ({ userId, userProfileUid, profilesMap }) => {
-  const profile = userProfileUid ? profilesMap.get(userProfileUid) : undefined;
-
-  if (profile) {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{profile.user.full_name || profile.user.username}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  return <>{userId ?? '-'}</>;
-};
-
-RunByColumn.displayName = 'RunByColumn';
-
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
@@ -112,7 +86,9 @@ const ActionsTableComponent = () => {
     [actionsData?.data?.items]
   );
 
-  const profilesMap = useBulkGetUserProfiles(isHistoryEnabled ? actionItems : EMPTY_ARRAY);
+  const { profilesMap, isLoading: isLoadingProfiles } = useBulkGetUserProfiles(
+    isHistoryEnabled ? actionItems : EMPTY_ARRAY
+  );
 
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
@@ -164,10 +140,11 @@ const ActionsTableComponent = () => {
           userId={userId}
           userProfileUid={userProfileUid}
           profilesMap={profilesMap}
+          isLoadingProfiles={isLoadingProfiles}
         />
       );
     },
-    [profilesMap]
+    [profilesMap, isLoadingProfiles]
   );
 
   const renderTimestampColumn = useCallback(
