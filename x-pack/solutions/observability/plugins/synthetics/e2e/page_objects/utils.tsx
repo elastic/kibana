@@ -5,7 +5,39 @@
  * 2.0.
  */
 import type { Page } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+
+export const byTestId = (testId: string) => {
+  return `[data-test-subj="${testId}"]`;
+};
+
+export async function waitForLoadingToFinish({ page }: { page: Page }) {
+  let retries = 50;
+  while (retries) {
+    retries--;
+    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
+    await page.waitForTimeout(2 * 1000);
+  }
+  retries = 50;
+  while (retries) {
+    if ((await page.$(byTestId('globalLoadingIndicator'))) === null) break;
+    await page.waitForTimeout(2 * 1000);
+  }
+}
+
+export async function loginToKibana({
+  page,
+  user,
+}: {
+  page: Page;
+  user?: { username: string; password: string };
+}) {
+  await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
+    timeout: 60 * 1000,
+  });
+  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme');
+  await page.click('[data-test-subj=loginSubmit]');
+  await waitForLoadingToFinish({ page });
+}
 
 export function utilsPageProvider({ page }: { page: Page }) {
   return {
