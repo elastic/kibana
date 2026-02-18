@@ -21,8 +21,9 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { debounce } from 'lodash';
+import { FormattedValue } from '@kbn/field-formats-plugin/common';
 import type { PreviewState, FetchDocError } from './types';
 import type { BehaviorObservable } from '../../state_utils';
 import type { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
@@ -510,6 +511,34 @@ export class PreviewController {
     return defaultValueFormatter(value);
   };
 
+  valueFormatterReact = ({
+    value,
+    format,
+    type,
+  }: {
+    value: unknown;
+    format: Params['format'];
+    type: Params['type'];
+  }): ReactNode => {
+    if (format?.id) {
+      const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
+      if (formatter) {
+        return <FormattedValue fieldFormat={formatter} value={value} options={{}} />;
+      }
+    }
+
+    if (type) {
+      const fieldType = castEsToKbnFieldTypeName(type);
+      const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
+      if (defaultFormatterForType) {
+        return <FormattedValue fieldFormat={defaultFormatterForType} value={value} options={{}} />;
+      }
+    }
+
+    const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+    return <>{content}</>;
+  };
+
   fetchSampleDocuments = async (limit: number = 50) => {
     if (typeof limit !== 'number') {
       // We guard ourself from passing an <input /> event accidentally
@@ -670,10 +699,10 @@ export class PreviewController {
     format: Params['format']
   ) => {
     const [value] = values;
-    const formattedValue = this.valueFormatter({ value, type, format });
+    const formattedValueReact = this.valueFormatterReact({ value, type, format });
 
     this.setPreviewResponse({
-      fields: [{ key: fieldName, value, formattedValue }],
+      fields: [{ key: fieldName, value, formattedValueReact }],
       error: null,
     });
   };
@@ -699,14 +728,14 @@ export class PreviewController {
         updatedFieldsInScript.push(fieldName);
 
         const [value] = values;
-        const formattedValue = this.valueFormatter({ value, type, format });
+        const formattedValueReact = this.valueFormatterReact({ value, type, format });
 
         return {
           key: parentName
             ? `${parentName ?? ''}.${fieldName}`
             : `${fieldName$Value ?? ''}.${fieldName}`,
           value,
-          formattedValue,
+          formattedValueReact,
           type: valueTypeToSelectedType(value),
         };
       })

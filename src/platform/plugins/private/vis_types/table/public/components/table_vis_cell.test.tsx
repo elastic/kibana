@@ -14,13 +14,16 @@ import { createTableVisCell } from './table_vis_cell';
 import type { FormattedColumns } from '../types';
 
 describe('table vis cell', () => {
-  it('should return a cell component with data in scope', () => {
+  it('should return a cell component with FormattedValue', () => {
     const rows = [{ first: 1, second: 2 }];
+    const mockFormatter = {
+      convert: jest.fn(),
+      convertToReact: jest.fn(),
+      hasReactSupport: jest.fn().mockReturnValue(true),
+    };
     const formattedColumns = {
       second: {
-        formatter: {
-          convert: jest.fn(),
-        },
+        formatter: mockFormatter,
       },
     } as unknown as FormattedColumns;
     const Cell = createTableVisCell(rows, formattedColumns);
@@ -32,6 +35,22 @@ describe('table vis cell', () => {
     const comp = shallow(<Cell {...cellProps} />);
 
     expect(comp).toMatchSnapshot();
-    expect(formattedColumns.second.formatter.convert).toHaveBeenLastCalledWith(2, 'html');
+    expect(comp.find('FormattedValue').exists()).toBe(true);
+    expect(comp.find('FormattedValue').prop('fieldFormat')).toBe(mockFormatter);
+    expect(comp.find('FormattedValue').prop('value')).toBe(2);
+  });
+
+  it('should handle missing column gracefully', () => {
+    const rows = [{ first: 1 }];
+    const formattedColumns = {} as unknown as FormattedColumns;
+    const Cell = createTableVisCell(rows, formattedColumns);
+    const cellProps = {
+      rowIndex: 0,
+      columnId: 'second',
+    } as EuiDataGridCellValueElementProps;
+
+    const comp = shallow(<Cell {...cellProps} />);
+
+    expect(comp.find('FormattedValue').exists()).toBe(false);
   });
 });

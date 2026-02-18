@@ -17,7 +17,6 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -40,11 +39,6 @@ const defaultParams: Params = {
   type: null,
   format: null,
   parentName: null,
-};
-
-export const defaultValueFormatter = (value: unknown) => {
-  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
-  return renderToString(<>{content}</>);
 };
 
 export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes => {
@@ -169,7 +163,6 @@ export const FieldPreviewProvider: FC<
             {
               key: name ?? '',
               value: '',
-              formattedValue: defaultValueFormatter(''),
             },
           ],
           error: { code: 'PAINLESS_SCRIPT_ERROR', error: parseEsError(error) },
@@ -269,7 +262,7 @@ export const FieldPreviewProvider: FC<
     // If the user has entered a name but not yet any script we will display
     // the field in the preview with just the name
     if (updatedFields.length === 0 && name !== null) {
-      updatedFields = [{ key: name, value: undefined, formattedValue: undefined, type: undefined }];
+      updatedFields = [{ key: name, value: undefined, type: undefined }];
     }
 
     controller.setPreviewResponse({
@@ -297,12 +290,16 @@ export const FieldPreviewProvider: FC<
             ? get(document?._source, name ?? '')
             : field?.value;
 
-        const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
+        const formattedValueReact = controller.valueFormatterReact({
+          value: nextValue,
+          type,
+          format,
+        });
 
         return {
           ...field,
           value: nextValue,
-          formattedValue,
+          formattedValueReact,
         };
       }),
     });

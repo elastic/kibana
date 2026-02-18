@@ -37,7 +37,7 @@ const setup = (props: Partial<ComponentProps>) => {
   } as any);
 
   const finalProps: ComponentProps = {
-    field: { key: 'test', value: 'test', formattedValue: 'test', isPinned: false },
+    field: { key: 'test', value: 'test', formattedValueReact: <>test</>, isPinned: false },
     toggleIsPinned: jest.fn(),
     hasScriptError: false,
     isFromScript: false,

@@ -1,13 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`table vis cell should return a cell component with data in scope 1`] = `
+exports[`table vis cell should return a cell component with FormattedValue 1`] = `
 <div
   className="tbvChartCellContent eui-textTruncate"
-  dangerouslySetInnerHTML={
-    Object {
-      "__html": undefined,
-    }
-  }
   data-test-subj="tbvChartCellContent"
-/>
+>
+  <FormattedValue
+    fieldFormat={
+      Object {
+        "convert": [MockFunction],
+        "convertToReact": [MockFunction],
+        "hasReactSupport": [MockFunction],
+      }
+    }
+    options={Object {}}
+    value={2}
+  />
+</div>
 `;
