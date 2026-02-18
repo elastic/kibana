@@ -6,8 +6,8 @@
  */
 
 import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
-import { getEntityDefinition } from '../definitions/registry';
-import { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
   Object.values(EntityType.Values).forEach((type) => {

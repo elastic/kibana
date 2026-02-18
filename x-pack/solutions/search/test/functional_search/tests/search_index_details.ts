@@ -71,7 +71,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await searchSpace.navigateTo(spaceCreated.id);
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
           await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
-          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -193,7 +192,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
-        describe('has index actions enabled', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/248780
+        describe.skip('has index actions enabled', () => {
           beforeEach(async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });

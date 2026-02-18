@@ -56,3 +56,34 @@ export const CENTER_ANIMATION_DURATION_MS = 200;
 
 /** Minimum distance threshold for directional keyboard navigation (in pixels) */
 export const DIRECTION_THRESHOLD = 50;
+
+/**
+ * Mock EUI theme colors for testing purposes.
+ * These match the light theme values and are used to mock useEuiTheme in tests.
+ */
+export const MOCK_EUI_THEME = {
+  colors: {
+    primary: '#0077CC',
+    mediumShade: '#98A2B3',
+    primaryText: '#0077CC',
+    textPrimary: '#1a1c21',
+    emptyShade: '#fff',
+    backgroundBasePlain: '#fff',
+    textParagraph: '#343741',
+    text: '#343741',
+    lightShade: '#D3DAE6',
+    success: '#00BFB3',
+    warning: '#FEC514',
+    danger: '#BD271E',
+  },
+} as const;
+
+/**
+ * Mock primary color for testing (matches EUI light theme primary color)
+ */
+export const MOCK_PRIMARY_COLOR = MOCK_EUI_THEME.colors.primary;
+
+/**
+ * Mock default/medium shade color for testing (matches EUI light theme mediumShade)
+ */
+export const MOCK_DEFAULT_COLOR = MOCK_EUI_THEME.colors.mediumShade;

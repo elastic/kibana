@@ -752,6 +752,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
     stack: {
@@ -773,6 +774,9 @@ export const mockCasesContract = (): CasesServerStart => ({
       taskStartDelayMinutes: 10,
     },
     templates: {
+      enabled: true,
+    },
+    attachments: {
       enabled: true,
     },
   },

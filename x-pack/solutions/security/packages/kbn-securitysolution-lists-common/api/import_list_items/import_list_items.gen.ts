@@ -21,18 +21,18 @@ import { List } from '../model/list_schemas.gen';
 
 export type ImportListItemsRequestQuery = z.infer<typeof ImportListItemsRequestQuery>;
 export const ImportListItemsRequestQuery = z.object({
-  /** 
+  /**
       * List's id.
 
 Required when importing to an existing list.
- 
+
       */
   list_id: ListId.optional(),
-  /** 
+  /**
       * Type of the importing list.
 
 Required when importing a new list whose list `id` is not specified.
- 
+
       */
   type: ListType.optional(),
   /**

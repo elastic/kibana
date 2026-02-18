@@ -20,6 +20,7 @@ import { GrokLang, GROK_LANG_ID } from './grok';
 import { HandlebarsLang, HANDLEBARS_LANG_ID } from './handlebars';
 import { CssLang, CSS_LANG_ID } from './css';
 import { HJsonLang, HJSON_LANG_ID } from './hjson';
+import { PromQLLang, PROMQL_LANG_ID } from './promql';
 
 // export all language ids
 export {
@@ -35,6 +36,7 @@ export {
   CSS_LANG_ID,
   HJSON_LANG_ID,
   PAINLESS_LANG_ID,
+  PROMQL_LANG_ID,
 };
 
 // export all language definitions
@@ -51,6 +53,7 @@ export {
   HandlebarsLang,
   CssLang,
   HJsonLang,
+  PromQLLang,
 };
 
 export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
@@ -70,6 +73,7 @@ export const initializeSupportedLanguages = () => {
     XJsonLang,
     PainlessLang,
     SQLLang,
+    PromQLLang,
     ESQLLang,
     YamlLang,
     ConsoleLang,

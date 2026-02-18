@@ -14,6 +14,13 @@ import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
+const SEARCHABLE_TEXT_FIELD_TYPES = new Set([
+  'match_only_text',
+  'pattern_text',
+  'semantic_text',
+  'text',
+]);
+
 export const relevanceSearch = async ({
   term,
   target,
@@ -31,12 +38,10 @@ export const relevanceSearch = async ({
 }): Promise<RelevanceSearchResponse> => {
   const { fields } = await resolveResource({ resourceName: target, esClient });
 
-  const selectedFields = fields.filter(
-    (field) => field.type === 'text' || field.type === 'semantic_text'
-  );
+  const selectedFields = fields.filter((field) => SEARCHABLE_TEXT_FIELD_TYPES.has(field.type));
 
   if (selectedFields.length === 0) {
-    throw new Error('No text or semantic_text fields found, aborting search.');
+    throw new Error('No searchable text fields found, aborting search.');
   }
 
   return performMatchSearch({

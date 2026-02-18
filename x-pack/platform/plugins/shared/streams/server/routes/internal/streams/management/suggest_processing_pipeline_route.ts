@@ -6,12 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import { suggestProcessingPipeline } from '@kbn/streams-ai';
+import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
+import {
+  Streams,
+  type FlattenRecord,
+  flattenRecord,
+  getStreamTypeFromDefinition,
+} from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -31,6 +36,7 @@ import {
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
@@ -97,7 +103,7 @@ export const suggestIngestPipelineSchema = z.object({
 type SuggestProcessingPipelineResponse = Observable<
   ServerSentEventBase<
     'suggested_processing_pipeline',
-    { pipeline: Awaited<ReturnType<typeof suggestProcessingPipeline>> }
+    { pipeline: SuggestProcessingPipelineResult['pipeline'] }
   >
 >;
 
@@ -118,6 +124,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     logger.debug('[suggest_pipeline] Request received');
     logger.debug(
@@ -140,6 +147,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
+        if (!Streams.ingest.all.Definition.is(stream)) {
+          throw new StatusError(
+            'Processing suggestions are only available for ingest streams',
+            400
+          );
+        }
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -229,11 +242,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           }
         }
 
-        return await suggestProcessingPipeline({
+        const maxSteps = 6; // Limit reasoning steps for latency and token cost
+        const startTime = Date.now();
+
+        const result = await suggestProcessingPipeline({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 6, // Limit reasoning steps for latency and token cost
+          maxSteps,
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
@@ -249,11 +265,24 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               fieldsMetadataClient,
             }),
         });
+
+        const durationMs = Date.now() - startTime;
+
+        // Report telemetry for pipeline suggestion
+        telemetry.trackProcessingPipelineSuggested({
+          duration_ms: durationMs,
+          steps_used: result.metadata.stepsUsed,
+          success: result.pipeline !== null,
+          stream_name: stream.name,
+          stream_type: getStreamTypeFromDefinition(stream),
+        });
+
+        return result;
       })()
     ).pipe(
-      map((pipeline) => ({
+      map((result) => ({
         type: 'suggested_processing_pipeline' as const,
-        pipeline,
+        pipeline: result.pipeline,
       })),
       catchError((error) => {
         if (isNoLLMSuggestionsError(error)) {
@@ -368,6 +397,19 @@ async function processGrokPatterns({
   // Merge all grok processors into one
   const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
 
+  // Filter out empty patterns that may come from the heuristics library
+  const filteredPatterns = combinedGrokProcessor.patterns.filter(
+    (pattern) => pattern.trim().length > 0
+  );
+
+  // If all patterns were empty, return null
+  if (filteredPatterns.length === 0) {
+    logger.debug(
+      '[suggest_pipeline][grok] All patterns were empty after filtering out empty string patterns'
+    );
+    return null;
+  }
+
   // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
     params: {
@@ -380,7 +422,7 @@ async function processGrokPatterns({
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
               from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
+              patterns: filteredPatterns,
             },
           ],
         },
@@ -399,7 +441,7 @@ async function processGrokPatterns({
     processor: {
       action: 'grok',
       from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
+      patterns: filteredPatterns as [string, ...string[]],
     },
     parsedRate,
   };
