@@ -349,7 +349,6 @@ const NO_META_AVAILABLE = i18n.translate('xpack.streams.featureDetailsFlyout.noM
   defaultMessage: 'No meta information',
 });
 
-const RAW_DOCUMENT_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.rawDocumentLabel',
-  { defaultMessage: 'Raw document' }
-);
+const RAW_DOCUMENT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.rawDocumentLabel', {
+  defaultMessage: 'Raw document',
+});

@@ -92,9 +92,7 @@ export function FeaturesTable() {
         defaultMessage: 'Type',
       }),
       width: '15%',
-      render: (type: string) => (
-        <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>
-      ),
+      render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
     },
     {
       field: 'confidence',
@@ -106,9 +104,7 @@ export function FeaturesTable() {
       ),
       width: '12%',
       render: (confidence: number) => (
-        <EuiHealth color={getConfidenceColor(confidence ?? 0)}>
-          {confidence ?? '–'}
-        </EuiHealth>
+        <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
       ),
     },
     {
