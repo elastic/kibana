@@ -1,0 +1,237 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import {
+  SecurityAgentBuilderAttachments,
+  THREAT_HUNTING_AGENT_ID,
+} from '../../../plugins/security_solution/common/constants';
+import { extractCategory } from './helpers';
+import type { ReferenceRule } from '../datasets/sample_rules';
+
+const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
+const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
+const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
+
+export type EvalFetch = (path: string, options?: Record<string, unknown>) => Promise<unknown>;
+
+interface ToolResult {
+  type?: string;
+  data?: Record<string, unknown>;
+}
+
+interface RuleToolStep {
+  type: string;
+  tool_id?: string;
+  results?: ToolResult[];
+}
+
+interface ConverseResponse {
+  steps?: RuleToolStep[];
+}
+
+interface ParsedSseEvent {
+  event?: string;
+  data?: Record<string, unknown>;
+}
+
+interface SecurityRuleGenerationLog {
+  warning: (msg: string) => void;
+}
+
+export class SecurityRuleGenerationClient {
+  constructor(
+    private readonly fetch: EvalFetch,
+    private readonly log: SecurityRuleGenerationLog,
+    private readonly connectorId: string
+  ) {}
+
+  public async generateRule(prompt: string): Promise<{
+    generatedRule?: Partial<ReferenceRule>;
+    error?: string;
+  }> {
+    const payload = {
+      agent_id: THREAT_HUNTING_AGENT_ID,
+      input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
+      connector_id: this.connectorId,
+      capabilities: getKibanaDefaultAgentCapabilities(),
+      attachments: [
+        {
+          type: SecurityAgentBuilderAttachments.rule,
+          data: {
+            text: '',
+            attachmentLabel: 'AI Rule Creation',
+          },
+        },
+      ],
+      browser_api_tools: [],
+    };
+
+    try {
+      const asyncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_ASYNC_API_PATH, {
+        method: 'POST',
+        version: '2023-10-31',
+        asResponse: true,
+        rawResponse: true,
+        body: JSON.stringify(payload),
+      })) as { response?: { text: () => Promise<string> } };
+
+      const ssePayload = await asyncResponse.response?.text();
+      if (ssePayload) {
+        const events = parseSseEvents(ssePayload);
+        const toolResultEvents = events.filter(
+          (event) =>
+            event.event === 'tool_result' &&
+            (event.data?.data as { tool_id?: string } | undefined)?.tool_id ===
+              SECURITY_CREATE_DETECTION_RULE_TOOL_ID
+        );
+        const latestToolResultEvent = toolResultEvents.at(-1)?.data?.data as
+          | { results?: ToolResult[] }
+          | undefined;
+        const extracted = extractRuleDataFromToolResults(latestToolResultEvent?.results);
+
+        if (extracted.ruleData) {
+          return { generatedRule: mapGeneratedRule(extracted.ruleData) };
+        }
+        if (extracted.error) {
+          return { error: extracted.error };
+        }
+
+        this.log.warning(
+          `Agent returned no rule from async converse. Diagnostics: ${JSON.stringify({
+            totalEvents: events.length,
+            toolResultEvents: toolResultEvents.length,
+          })}`
+        );
+      }
+    } catch (error) {
+      this.log.warning(
+        `Async converse failed, falling back to sync endpoint: ${stringifyError(error)}`
+      );
+    }
+
+    const syncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
+      method: 'POST',
+      version: '2023-10-31',
+      body: JSON.stringify(payload),
+    })) as ConverseResponse;
+    const extractedFromSync = extractRuleFromSyncResponse(syncResponse);
+
+    if (extractedFromSync.ruleData) {
+      return {
+        generatedRule: mapGeneratedRule(extractedFromSync.ruleData),
+      };
+    }
+
+    this.log.warning(`Agent returned no rule. Sync diagnostics: ${extractedFromSync.diagnostics}`);
+    return {
+      error: extractedFromSync.error || 'No rule returned from agent',
+    };
+  }
+}
+
+const stringifyError = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const parseSseEvents = (ssePayload: string): ParsedSseEvent[] => {
+  const blocks = ssePayload.split(/\r?\n\r?\n/);
+  const parsedEvents: ParsedSseEvent[] = [];
+
+  for (const block of blocks) {
+    const lines = block.split(/\r?\n/);
+    let eventName: string | undefined;
+    const dataLines: string[] = [];
+
+    for (const line of lines) {
+      if (line.startsWith('event:')) {
+        eventName = line.substring('event:'.length).trim();
+      } else if (line.startsWith('data:')) {
+        dataLines.push(line.substring('data:'.length).trim());
+      }
+    }
+
+    if (dataLines.length === 0) {
+      continue;
+    }
+
+    try {
+      parsedEvents.push({
+        event: eventName,
+        data: JSON.parse(dataLines.join('\n')) as Record<string, unknown>,
+      });
+    } catch {
+      // Keep parsing resilient when events include malformed chunks.
+    }
+  }
+
+  return parsedEvents;
+};
+
+const extractRuleDataFromToolResults = (results?: ToolResult[]): {
+  ruleData?: Record<string, unknown>;
+  error?: string;
+} => {
+  if (!results?.length) {
+    return {};
+  }
+
+  for (const result of results) {
+    if (result.type === 'error') {
+      return {
+        error: (result.data?.message as string) || 'Rule generation tool returned an error',
+      };
+    }
+
+    if (result.type === 'other') {
+      const success = result.data?.success;
+      const rule = result.data?.rule as Record<string, unknown> | undefined;
+      if (success === true && rule) {
+        return { ruleData: rule };
+      }
+      if (success === false) {
+        return {
+          error: (result.data?.message as string) || 'Rule generation tool reported failure',
+        };
+      }
+    }
+  }
+
+  return {};
+};
+
+const mapGeneratedRule = (ruleData: Record<string, unknown>): Partial<ReferenceRule> => ({
+  name: ruleData.name as string,
+  description: ruleData.description as string,
+  query: ruleData.query as string,
+  threat: (ruleData.threat as ReferenceRule['threat']) || [],
+  severity: ruleData.severity as string,
+  tags: (ruleData.tags as string[]) || [],
+  riskScore: (ruleData.risk_score ?? ruleData.riskScore) as number,
+  from: ruleData.from as string,
+  category: extractCategory((ruleData.name as string) || ''),
+});
+
+const extractRuleFromSyncResponse = (response: ConverseResponse) => {
+  const toolSteps =
+    response.steps?.filter(
+      (step) => step.type === 'tool_call' && step.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID
+    ) ?? [];
+  const lastToolStep = toolSteps.at(-1);
+  const extracted = extractRuleDataFromToolResults(lastToolStep?.results);
+
+  return {
+    ...extracted,
+    diagnostics: JSON.stringify({
+      totalSteps: response.steps?.length ?? 0,
+      toolCallSteps: toolSteps.length,
+      stepToolIds:
+        response.steps?.filter((step) => step.type === 'tool_call').map((step) => step.tool_id) ??
+        [],
+      lastToolResultTypes: lastToolStep?.results?.map((result) => result.type) ?? [],
+    }),
+  };
+};

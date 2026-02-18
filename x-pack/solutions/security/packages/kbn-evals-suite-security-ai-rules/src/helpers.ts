@@ -61,25 +61,6 @@ export function extractMitreTechniques(
 }
 
 /**
- * Extract MITRE ATT&CK tactics from a rule
- */
-export function extractMitreTactics(
-  rule: Partial<ReferenceRule>
-): Set<string> {
-  const tactics = new Set<string>();
-  
-  if (rule.threat) {
-    for (const threat of rule.threat) {
-      if (threat.tactic) {
-        tactics.add(threat.tactic);
-      }
-    }
-  }
-  
-  return tactics;
-}
-
-/**
  * Basic ESQL syntax validation
  * Checks for common syntax patterns and keywords
  */
@@ -134,20 +115,6 @@ export function validateEsqlSyntax(query: string): { valid: boolean; error?: str
   }
 
   return { valid: true };
-}
-
-/**
- * Calculate Jaccard similarity between two sets
- */
-export function jaccardSimilarity<T>(set1: Set<T>, set2: Set<T>): number {
-  if (set1.size === 0 && set2.size === 0) {
-    return 1.0;
-  }
-  
-  const intersection = new Set([...set1].filter((x) => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-  
-  return intersection.size / union.size;
 }
 
 /**

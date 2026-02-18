@@ -26,13 +26,18 @@ The eval suite intentionally follows the same rule-generation API flow as the Se
 kbn-evals-suite-security-ai-rules/
 ├── playwright.config.ts          # Playwright evals configuration
 ├── evals/
-│   └── rule_generation.spec.ts   # Evaluation tests
+│   ├── rule_generation.spec.ts          # Evaluation scenarios (baseline + edge cases)
+│   └── datasets/rule_generation_datasets.ts # Scenario dataset assembly
 ├── datasets/
-│   └── sample_rules.ts           # Reference detection rules
+│   └── sample_rules.ts                 # Canonical reference detection rules
 └── src/
-    ├── evaluators.ts             # Custom evaluators
-    ├── helpers.ts                # Utility functions
-    └── helpers.test.ts           # Unit tests
+    ├── evaluate.ts                       # Suite-specific eval fixture extensions
+    ├── evaluate_dataset.ts               # Experiment runner wiring
+    ├── rule_generation_client.ts         # Agent Builder API client + parsing
+    ├── evaluators.ts                     # Custom evaluators
+    ├── helpers.ts                        # Utility functions
+    ├── helpers.test.ts                   # Unit tests
+    └── types.ts                          # Shared suite types
 ```
 
 ## Prerequisites
@@ -277,7 +282,7 @@ The evaluation dataset includes 8 Windows detection rules covering:
 
 ### Adding More Rules
 
-To expand the dataset, edit `datasets/sample_rules.ts`:
+To expand the dataset, edit `datasets/sample_rules.ts`, then wire any new scenario composition in `evals/datasets/rule_generation_datasets.ts` when needed:
 
 ```typescript
 export const sampleRules: ReferenceRule[] = [

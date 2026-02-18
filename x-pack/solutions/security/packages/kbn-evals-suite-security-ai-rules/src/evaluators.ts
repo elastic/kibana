@@ -21,6 +21,19 @@ export interface RuleGenerationTaskOutput {
   error?: string;
 }
 
+type RuleExample = Example<{ prompt: string }, ReferenceRule, Record<string, unknown> | null>;
+
+const parsePercentageScore = (content?: string) => {
+  const scoreMatch = content?.match(/\b(\d{1,3}(?:\.\d+)?)\b/);
+  const parsed = scoreMatch ? parseFloat(scoreMatch[0]) : 0;
+  const percentageScore = Math.max(0, Math.min(100, parsed));
+
+  return {
+    percentageScore,
+    normalizedScore: percentageScore / 100,
+  };
+};
+
 /**
  * Create all evaluators for rule generation
  */
@@ -28,7 +41,7 @@ export function createRuleEvaluators({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Array<Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput>> {
+}): Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> {
   return [
     createQuerySyntaxValidityEvaluator(),
     createFieldCoverageEvaluator(),
@@ -39,13 +52,10 @@ export function createRuleEvaluators({
 }
 
 /**
- * Evaluator 4: Query Syntax Validity
+ * Evaluator: Query Syntax Validity
  * Validates that generated query is syntactically valid ESQL
  */
-function createQuerySyntaxValidityEvaluator(): Evaluator<
-  Example<{ prompt: string }, ReferenceRule>,
-  RuleGenerationTaskOutput
-> {
+function createQuerySyntaxValidityEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'Query Syntax Validity',
     kind: 'CODE',
@@ -53,9 +63,7 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<
       if (!output?.generatedRule?.query) {
         return {
           score: 0,
-          metadata: {
-            error: 'No query generated',
-          },
+          metadata: { error: 'No query generated' },
         };
       }
 
@@ -66,7 +74,7 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<
         metadata: {
           valid: validation.valid,
           error: validation.error,
-          query: output.generatedRule.query.substring(0, 200), // Truncate for logging
+          query: output.generatedRule.query.substring(0, 200),
         },
       };
     },
@@ -74,13 +82,10 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<
 }
 
 /**
- * Evaluator 2: Field Coverage
+ * Evaluator: Field Coverage
  * Checks if generated rule includes key required fields
  */
-function createFieldCoverageEvaluator(): Evaluator<
-  Example<{ prompt: string }, ReferenceRule>,
-  RuleGenerationTaskOutput
-> {
+function createFieldCoverageEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'Field Coverage',
     kind: 'CODE',
@@ -109,13 +114,10 @@ function createFieldCoverageEvaluator(): Evaluator<
 }
 
 /**
- * Evaluator 3: MITRE Mapping Accuracy
+ * Evaluator: MITRE Mapping Accuracy
  * Compares MITRE ATT&CK techniques between generated and reference
  */
-function createMitreAccuracyEvaluator(): Evaluator<
-  Example<{ prompt: string }, ReferenceRule>,
-  RuleGenerationTaskOutput
-> {
+function createMitreAccuracyEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'MITRE Accuracy',
     kind: 'CODE',
@@ -123,15 +125,12 @@ function createMitreAccuracyEvaluator(): Evaluator<
       if (!output?.generatedRule) {
         return {
           score: 0,
-          metadata: {
-            error: 'No rule generated',
-          },
+          metadata: { error: 'No rule generated' },
         };
       }
 
       const generatedTechniques = extractMitreTechniques(output.generatedRule);
-      const expectedTechniques = extractMitreTechniques(expected);
-
+      const expectedTechniques = extractMitreTechniques(expected ?? {});
       const metrics = calculateSetMetrics(generatedTechniques, expectedTechniques);
 
       return {
@@ -149,14 +148,14 @@ function createMitreAccuracyEvaluator(): Evaluator<
 }
 
 /**
- * Evaluator 1: Query Similarity (LLM-as-judge)
+ * Evaluator: Query Similarity (LLM-as-judge)
  * Compares generated query to reference query for semantic equivalence
  */
 function createQuerySimilarityEvaluator({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput> {
+}): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'Query Similarity',
     kind: 'LLM',
@@ -164,14 +163,12 @@ function createQuerySimilarityEvaluator({
       if (!output?.generatedRule?.query) {
         return {
           score: 0,
-          metadata: {
-            error: 'No query generated',
-          },
+          metadata: { error: 'No query generated' },
         };
       }
 
       const generatedQuery = normalizeQuery(output.generatedRule.query);
-      const expectedQuery = normalizeQuery(expected.query);
+      const expectedQuery = normalizeQuery(expected?.query ?? '');
 
       const prompt = `You are evaluating the semantic similarity between two ESQL detection queries.
 
@@ -204,18 +201,13 @@ Respond ONLY with a number between 0 and 100.`;
           input: prompt,
         });
 
-        // Extract percentage score (0-100)
-        const scoreMatch = response.content?.match(/\b(\d{1,3}(?:\.\d+)?)\b/);
-        const percentageScore = scoreMatch ? parseFloat(scoreMatch[0]) : 0;
-        
-        // Clamp to [0, 100] and convert to [0, 1] for @kbn/evals
-        const clampedPercentage = Math.max(0, Math.min(100, percentageScore));
-        const normalizedScore = clampedPercentage / 100;
+        const { percentageScore, normalizedScore } = parsePercentageScore(response.content);
 
         return {
           score: normalizedScore,
           metadata: {
-            percentageScore: `${clampedPercentage}%`,
+            percentageScore,
+            percentageLabel: `${percentageScore}%`,
             llmResponse: response.content?.substring(0, 200),
             generatedQueryPreview: generatedQuery.substring(0, 100),
             expectedQueryPreview: expectedQuery.substring(0, 100),
@@ -224,9 +216,7 @@ Respond ONLY with a number between 0 and 100.`;
       } catch (error) {
         return {
           score: 0,
-          metadata: {
-            error: error instanceof Error ? error.message : 'Unknown error',
-          },
+          metadata: { error: error instanceof Error ? error.message : 'Unknown error' },
         };
       }
     },
@@ -234,14 +224,14 @@ Respond ONLY with a number between 0 and 100.`;
 }
 
 /**
- * Evaluator 5: Semantic Correctness (LLM-as-judge)
+ * Evaluator: Semantic Correctness (LLM-as-judge)
  * Evaluates if the rule would detect the threat described in the prompt
  */
 function createSemanticCorrectnessEvaluator({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput> {
+}): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
     name: 'Semantic Correctness',
     kind: 'LLM',
@@ -249,9 +239,7 @@ function createSemanticCorrectnessEvaluator({
       if (!output?.generatedRule) {
         return {
           score: 0,
-          metadata: {
-            error: 'No rule generated',
-          },
+          metadata: { error: 'No rule generated' },
         };
       }
 
@@ -261,7 +249,7 @@ User Request:
 ${input.prompt}
 
 Expected Threat Description:
-${expected.description}
+${expected?.description ?? 'N/A'}
 
 Generated Rule:
 Name: ${output.generatedRule.name || 'N/A'}
@@ -291,29 +279,22 @@ Respond ONLY with a number between 0 and 100.`;
           input: prompt,
         });
 
-        // Extract percentage score (0-100)
-        const scoreMatch = response.content?.match(/\b(\d{1,3}(?:\.\d+)?)\b/);
-        const percentageScore = scoreMatch ? parseFloat(scoreMatch[0]) : 0;
-        
-        // Clamp to [0, 100] and convert to [0, 1] for @kbn/evals
-        const clampedPercentage = Math.max(0, Math.min(100, percentageScore));
-        const normalizedScore = clampedPercentage / 100;
+        const { percentageScore, normalizedScore } = parsePercentageScore(response.content);
 
         return {
           score: normalizedScore,
           metadata: {
-            percentageScore: `${clampedPercentage}%`,
+            percentageScore,
+            percentageLabel: `${percentageScore}%`,
             llmResponse: response.content?.substring(0, 200),
             generatedName: output.generatedRule.name,
-            expectedName: expected.name,
+            expectedName: expected?.name,
           },
         };
       } catch (error) {
         return {
           score: 0,
-          metadata: {
-            error: error instanceof Error ? error.message : 'Unknown error',
-          },
+          metadata: { error: error instanceof Error ? error.message : 'Unknown error' },
         };
       }
     },

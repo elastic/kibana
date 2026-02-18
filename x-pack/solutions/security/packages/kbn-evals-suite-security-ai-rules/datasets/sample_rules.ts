@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+export interface RuleThreat {
+  technique: string;
+  tactic: string;
+  subtechnique?: string;
+}
+
 export interface ReferenceRule {
   name: string;
   description: string;
   query: string;
-  threat: Array<{ technique: string; tactic: string; subtechnique?: string }>;
+  threat: RuleThreat[];
   severity: string;
   tags: string[];
   riskScore: number;
