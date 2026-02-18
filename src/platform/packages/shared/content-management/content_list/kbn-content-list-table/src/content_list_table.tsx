@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { useContentListItems, type ContentListItem } from '@kbn/content-list-provider';
-import { Column as BaseColumn, NameColumn } from './column';
+import { Column as BaseColumn, NameColumn, UpdatedAtColumn } from './column';
 import { useColumns, useSorting } from './hooks';
 import { EmptyState } from './empty_state';
 
@@ -133,6 +133,7 @@ const ContentListTableComponent = ({
 // Create Column namespace with sub-components.
 export const Column = Object.assign(BaseColumn, {
   Name: NameColumn,
+  UpdatedAt: UpdatedAtColumn,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {

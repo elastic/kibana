@@ -13,11 +13,18 @@ import type { ActiveFilters } from '../datasource';
 
 /**
  * Action type constants for state reducer.
- *
- * @internal
  */
 export const CONTENT_LIST_ACTIONS = {
+  /** Atomically update the search query text and parsed filters. */
+  SET_SEARCH: 'SET_SEARCH',
+  /** Clear all filters and reset query text. */
+  CLEAR_FILTERS: 'CLEAR_FILTERS',
+  /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
+  /** Set page index. */
+  SET_PAGE_INDEX: 'SET_PAGE_INDEX',
+  /** Set page size. */
+  SET_PAGE_SIZE: 'SET_PAGE_SIZE',
 } as const;
 
 /**
@@ -30,11 +37,26 @@ export const DEFAULT_FILTERS: ActiveFilters = {
 /**
  * Client-controlled state managed by the reducer.
  *
- * This includes user-driven state like filters and sort configuration.
+ * This includes user-driven state like search, filters, and sort configuration.
  * Query data (items, loading, error) comes directly from React Query.
  */
 export interface ContentListClientState {
-  /** Filter state - currently applied filters. */
+  /**
+   * Search state — the serialized `EuiSearchBar` query text is the source of truth
+   * for the search input value. This may contain filter syntax (e.g. `tag:foo`).
+   */
+  search: {
+    /** Full query text including filter syntax (e.g. `tag:foo search text`). */
+    queryText: string;
+  };
+  /**
+   * Parsed filter state used to drive data fetching.
+   *
+   * Updated atomically with `search.queryText` via `SET_SEARCH`.
+   * When no tag service is configured, `filters.search` equals `search.queryText`.
+   * When tag parsing is available, `filters.search` contains only the free-text
+   * portion and `filters.tags` holds the structured tag filters.
+   */
   filters: ActiveFilters;
   /** Sort state. */
   sort: {
@@ -42,6 +64,13 @@ export interface ContentListClientState {
     field: string;
     /** Sort direction. */
     direction: 'asc' | 'desc';
+  };
+  /** Pagination state. */
+  page: {
+    /** Current page index (0-based). */
+    index: number;
+    /** Current number of items per page. */
+    size: number;
   };
 }
 
@@ -55,8 +84,25 @@ export interface ContentListQueryData {
   items: ContentListItem[];
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
-  /** Whether data is currently being fetched. */
+  /**
+   * Whether the initial data load is in progress (no data available yet).
+   *
+   * This is `true` only on the first fetch before any data has been received.
+   * Use this for hard loading states (e.g., skeletons, spinners) when there is
+   * nothing to show. Once data has been loaded, subsequent fetches triggered by
+   * filter or search changes keep `isLoading` as `false` while the previous
+   * data remains visible.
+   */
   isLoading: boolean;
+  /**
+   * Whether a fetch is currently in progress (including background refetches).
+   *
+   * Unlike `isLoading`, this is `true` during any fetch, including background
+   * refetches triggered by search, sort, or filter changes. Use this for subtle
+   * loading indicators (e.g., progress bar, reduced opacity) that should not
+   * hide existing content.
+   */
+  isFetching: boolean;
   /** Error from the most recent fetch attempt. */
   error?: Error;
 }
@@ -68,15 +114,34 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
+/** Atomically update both the query text and the parsed filters. */
+interface SetSearchAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH;
+  payload: { queryText: string; filters: ActiveFilters };
+}
+
+/** Clear all filters and search text. */
+interface ClearFiltersAction {
+  type: typeof CONTENT_LIST_ACTIONS.CLEAR_FILTERS;
+}
+
+/** Set sort field and direction. */
+interface SetSortAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+  payload: { field: string; direction: 'asc' | 'desc' };
+}
+
 /**
  * Union type of all possible state actions.
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | SetSearchAction
+  | ClearFiltersAction
+  | SetSortAction
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } };
 
 /**
  * Context value provided by `ContentListStateProvider`.
@@ -84,7 +149,7 @@ export interface ContentListAction {
 export interface ContentListStateContextValue {
   /** Current state of the content list (client state + query data). */
   state: ContentListState;
-  /** Dispatch function for client state updates (filters, sort). */
+  /** Dispatch function for client state updates (search, filters, sort). */
   dispatch: Dispatch<ContentListAction>;
   /** Function to manually refetch items from the data source. */
   refetch: () => void;

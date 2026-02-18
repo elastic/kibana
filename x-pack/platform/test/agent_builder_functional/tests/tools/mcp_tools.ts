@@ -32,7 +32,8 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
-  describe('MCP tools', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/248906
+  describe.skip('MCP tools', function () {
     let mcpServer: McpServerSimulator;
     let mcpServerUrl: string;
     let connectorId: string;

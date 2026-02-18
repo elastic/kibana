@@ -43,7 +43,12 @@ export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
 
 // Other worker types
-export type { SamlAuth, SynthtraceFixture, RequestAuthFixture } from './fixtures/scope/worker';
+export type {
+  SamlAuth,
+  SynthtraceFixture,
+  RequestAuthFixture,
+  SpaceSolutionView,
+} from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';
