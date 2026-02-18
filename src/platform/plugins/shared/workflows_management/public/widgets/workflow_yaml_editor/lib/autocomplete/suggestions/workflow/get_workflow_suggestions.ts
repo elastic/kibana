@@ -46,7 +46,10 @@ function getWorkflowsFromStore(
 }
 
 /**
- * Builds documentation for workflow suggestion
+ * Builds hover documentation for a workflow completion item.
+ * Scenarios: (1) Workflow has no inputs → "Workflow: {name}".
+ * (2) Workflow has inputs, step has none/empty → "Workflow: {name}", "Inputs: ...", and note about scaffold/empty replacement.
+ * (3) Workflow has inputs, step already has inputs → same plus note that we will not modify existing inputs.
  */
 function buildDocumentation(
   workflow: { id: string; name: string; inputs?: LegacyWorkflowInput[] },

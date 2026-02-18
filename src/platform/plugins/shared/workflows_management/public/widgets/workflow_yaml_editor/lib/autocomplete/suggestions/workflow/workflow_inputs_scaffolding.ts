@@ -130,8 +130,10 @@ export function checkInputsInYamlNode(
 }
 
 /**
- * Checks if inputs already exist in the step and if they're empty
- * Returns: 'none' if inputs don't exist, 'empty' if they exist but are empty, 'has-content' if they have content
+ * Checks whether the workflow.execute step's YAML already has a with.inputs block.
+ * - 'none': step has no inputs key (we can insert "inputs:\n  key: value" in the snippet).
+ * - 'empty': step has "inputs: {}" (we can replace the {} with scaffolded key-value pairs).
+ * - 'has-content': step has "inputs: { someKey: ... }" (we do not modify, only suggest workflow-id).
  */
 export function checkExistingInputs(
   focusedStepInfo: StepInfo | null

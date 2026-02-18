@@ -94,6 +94,15 @@ function jsonSchemaInputsToLegacy(inputs: {
         default: typeof defaultVal === 'boolean' ? defaultVal : undefined,
         required: isRequired,
       });
+    } else if (prop?.type === 'object') {
+      // Legacy format has no 'object' type; map to string so autocomplete still suggests the key (placeholder "{}")
+      result.push({
+        name,
+        type: 'string',
+        description,
+        default: typeof defaultVal === 'string' ? defaultVal : undefined,
+        required: isRequired,
+      });
     } else {
       result.push({
         name,
