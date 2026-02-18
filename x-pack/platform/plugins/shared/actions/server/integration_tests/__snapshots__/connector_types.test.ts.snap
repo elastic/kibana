@@ -10706,6 +10706,27 @@ Object {
             ],
             "type": "number",
           },
+          "defaultModel": Object {
+            "flags": Object {
+              "default": [Function],
+              "error": [Function],
+              "presence": "optional",
+            },
+            "metas": Array [
+              Object {
+                "x-oas-optional": true,
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
           "headers": Object {
             "flags": Object {
               "default": [Function],
