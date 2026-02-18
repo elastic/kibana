@@ -43,6 +43,7 @@ import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createUnifiedAttachmentTypeRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -241,6 +242,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -277,6 +279,7 @@ export const createCasesClientFactoryMockArgs = () => {
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
   };
 };
 
