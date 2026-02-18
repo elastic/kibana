@@ -90,7 +90,7 @@ export interface SkillsStart {
    * Unregister a previously registered skill by ID.
    * Returns true if the skill was found and removed.
    */
-  unregister: (skillId: string) => boolean;
+  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**

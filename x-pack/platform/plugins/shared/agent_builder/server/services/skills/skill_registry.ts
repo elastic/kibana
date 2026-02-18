@@ -11,7 +11,7 @@ import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 
 export interface SkillRegistry {
   register(skill: SkillDefinition): Promise<void>;
-  unregister(skillId: string): boolean;
+  unregister(skillId: string): Promise<boolean>;
   has(skillId: string): boolean;
   get(skillId: string): SkillDefinition | undefined;
   list(): SkillDefinition[];
@@ -46,7 +46,7 @@ class SkillRegistryImpl implements SkillRegistry {
     this.skills.set(skill.id, skill);
   }
 
-  unregister(skillId: string): boolean {
+  async unregister(skillId: string): Promise<boolean> {
     const skill = this.skills.get(skillId);
     if (!skill) {
       return false;

@@ -125,14 +125,14 @@ describe('SkillRegistry', () => {
       await registry.register(skill);
       expect(registry.has('skill-to-remove')).toBe(true);
 
-      const result = registry.unregister('skill-to-remove');
+      const result = await registry.unregister('skill-to-remove');
       expect(result).toBe(true);
       expect(registry.has('skill-to-remove')).toBe(false);
       expect(registry.get('skill-to-remove')).toBeUndefined();
     });
 
-    it('returns false for non-existent skill', () => {
-      expect(registry.unregister('non-existent')).toBe(false);
+    it('returns false for non-existent skill', async () => {
+      expect(await registry.unregister('non-existent')).toBe(false);
     });
 
     it('removes the skill from list()', async () => {
@@ -141,7 +141,7 @@ describe('SkillRegistry', () => {
       await registry.register(skill1);
       await registry.register(skill2);
 
-      registry.unregister('skill-1');
+      await registry.unregister('skill-1');
 
       const list = registry.list();
       expect(list).toHaveLength(1);
@@ -151,7 +151,7 @@ describe('SkillRegistry', () => {
     it('frees the path so the same path+name can be re-registered', async () => {
       const skill = createMockSkill({ id: 'skill-1', name: 'my-skill', basePath: 'skills/platform' });
       await registry.register(skill);
-      registry.unregister('skill-1');
+      await registry.unregister('skill-1');
 
       const newSkill = createMockSkill({ id: 'skill-2', name: 'my-skill', basePath: 'skills/platform' });
       await expect(registry.register(newSkill)).resolves.not.toThrow();
@@ -174,7 +174,7 @@ describe('SkillRegistry', () => {
       const skill = createMockSkill({ id: 'temp-skill' });
       await registry.register(skill);
       expect(registry.has('temp-skill')).toBe(true);
-      registry.unregister('temp-skill');
+      await registry.unregister('temp-skill');
       expect(registry.has('temp-skill')).toBe(false);
     });
   });
