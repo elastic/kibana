@@ -14,8 +14,8 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 Generate the `bundled` files by running the following commands:
 
 ```bash
-npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
-npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.yaml --ext yaml
+yarn redocly bundle entrypoint.yaml --output bundled.yaml --ext yaml
+yarn redocly bundle entrypoint_serverless.yaml --output bundled_serverless.yaml --ext yaml
 ```
 
 These files are joined with the rest of the Kibana APIs per `oas_docs/README.md`

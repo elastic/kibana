@@ -6,13 +6,13 @@ validate: ## validate tree
 
 .PHONY: bundle
 bundle: validate ## generate bundled.yaml and bundled.json
-	@npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
-	@npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
+	@yarn redocly bundle entrypoint.yaml --output bundled.yaml --ext yaml
+	@yarn redocly bundle entrypoint.yaml --output bundled.json --ext json
 	@$(MAKE) lint
 
 .PHONY: lint
 lint: ## lint bundled.json
-	@npx @redocly/cli lint bundled.json
+	@yarn redocly lint bundled.json
 
 .PHONY: help
 help: ## you're looking at it
