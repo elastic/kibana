@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
@@ -24,18 +24,23 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
   const services = useObservable(sidebarServices$);
   const runtimeContext = useObservable(sidebarRuntimeContext$);
 
-  if (!services || !runtimeContext) {
+  const ConversationComponent = useMemo(
+    () =>
+      services
+        ? createEmbeddableConversation({
+            services: services.services,
+            coreStart: services.coreStart,
+          })
+        : null,
+    [services]
+  );
+
+  if (!services || !runtimeContext || !ConversationComponent) {
     return null;
   }
 
-  const { coreStart, services: internalServices } = services;
   const { options, onRegisterCallbacks, onClose: contextOnClose } = runtimeContext;
   const { onClose: externalOnClose, ...restOptions } = options;
-
-  const ConversationComponent = createEmbeddableConversation({
-    services: internalServices,
-    coreStart,
-  });
 
   const handleOnClose = () => {
     onClose(); // closes the sidebar panel
