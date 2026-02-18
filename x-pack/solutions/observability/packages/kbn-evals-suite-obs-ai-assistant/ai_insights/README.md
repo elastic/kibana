@@ -9,31 +9,15 @@ For general information about writing evaluation tests, configuration, and usage
 
 ### Snapshot Data
 
-Before running AI Insights evaluations, you need to set up snapshot data from Google Cloud Storage.
+AI Insights replay now uses a GCS snapshot repository directly (`obs-ai-datasets/otel-demo/payment-service-failures`), so local `gcloud rsync` to `/tmp/repo` is no longer required.
 
-#### Step 1: Install gcloud CLI
-
-Install the Google Cloud CLI by following the [official installation guide](https://cloud.google.com/sdk/docs/install-sdk).
-
-#### Step 2: Sync Snapshot Data to Local Repository
-
-The Scout server uses `/tmp/repo` as the default `path.repo` value for Elasticsearch snapshot repositories. Sync snapshot data from Google Cloud Storage to this local directory:
+Set `GCS_CREDENTIALS` before starting Scout. This environment variable must contain the full JSON service account credential string (not a file path):
 
 ```bash
-gcloud storage rsync --recursive gs://YOUR-BUCKET-NAME/snapshot-name /tmp/repo
+export GCS_CREDENTIALS='{"type":"service_account",...}'
 ```
 
-Replace `YOUR-BUCKET-NAME` with the actual GCS bucket name (shared internally to avoid bucket-squatting). This command downloads the snapshot data locally, making it accessible to Elasticsearch.
-
-#### Step 3: Verify Setup
-
-Confirm that the snapshot data was synced successfully:
-
-```bash
-ls -la /tmp/repo
-```
-
-You should see snapshot metadata files (e.g., `index-*`, `meta-*`, `snap-*`) in the directory.
+When `GCS_CREDENTIALS` is set, the `evals_tracing` Scout config writes it to a temporary file and injects `gcs.client.default.credentials_file` so Elasticsearch can access GCS snapshots through the keystore flow.
 
 ### Tracing Setup
 
@@ -84,7 +68,7 @@ You can optionally use non-default ports with `--http-port <port>` or `--grpc-po
 Start the Scout server with the built-in tracing config:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 ```
 
 ### Run Evaluations

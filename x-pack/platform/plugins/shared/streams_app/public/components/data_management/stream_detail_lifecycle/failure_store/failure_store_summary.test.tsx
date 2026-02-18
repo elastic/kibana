@@ -50,6 +50,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Failure Store - Serverless', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
     });
 
@@ -123,6 +124,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Failure Store - Non-Serverless', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
     });
 
@@ -176,6 +178,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Infinite Retention', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
     });
 
