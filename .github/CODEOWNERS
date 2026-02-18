@@ -44,9 +44,11 @@ examples/state_containers_examples @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
+examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
+packages/kbn-api-contracts @elastic/kibana-core
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -325,6 +327,9 @@ src/core/packages/usage-data/base-server-internal @elastic/kibana-core
 src/core/packages/usage-data/server @elastic/kibana-core
 src/core/packages/usage-data/server-internal @elastic/kibana-core
 src/core/packages/usage-data/server-mocks @elastic/kibana-core
+src/core/packages/user-activity/server @elastic/kibana-core
+src/core/packages/user-activity/server-internal @elastic/kibana-core
+src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
@@ -420,6 +425,7 @@ src/platform/packages/shared/content-management/content_editor @elastic/appex-sh
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-footer @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
@@ -671,7 +677,6 @@ src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
-src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-presentation
@@ -953,6 +958,7 @@ x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-i
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
+x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1784,8 +1790,6 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
-/src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
@@ -1811,6 +1815,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
 # obs-exploration-team 
+/x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -1968,8 +1973,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
+/.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/kibana-cases
 /.buildkite/scripts/steps/security @elastic/kibana-security
 /.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
+/.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -1989,6 +1996,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/fixtures/page_objects/metrics_experience.ts @elastic/appex-qa @elastic/obs-exploration-team
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/ @elastic/appex-qa @elastic/obs-exploration-team
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
@@ -2659,13 +2668,14 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
+/x-pack/solutions/security/.cursor/bug_validator.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
+/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - Cloud Security Posture
@@ -3019,6 +3029,7 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/automatic_troubleshooting @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -3183,6 +3194,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 /src/platform/test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
+/src/platform/plugins/private/advanced_settings/test/scout/ui @elastic/appex-sharedux
 /src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
@@ -3192,7 +3204,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/platform/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/platform/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/fixtures/kbn_archives/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
@@ -3210,13 +3221,13 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
-/x-pack/platform/test/serverless/functional/test_suites/spaces/spaces_selection.ts @elastic/appex-sharedux
+/x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
+/x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/test_suites/spaces/index.ts @elastic/appex-sharedux
 packages/react @elastic/appex-sharedux
 src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
-/x-pack/solutions/security/test/serverless/functional/test_suites/ftr/navigation.ts @elastic/appex-sharedux
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
@@ -3276,10 +3287,11 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
 /.agent/skills/ftr-testing/** @elastic/appex-qa
+/.agent/skills/scout-api-testing/** @elastic/appex-qa
 /.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
 /.agent/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
-/.agent/skills/scout-testing/** @elastic/appex-qa
+/.agent/skills/scout-ui-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
