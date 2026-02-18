@@ -1,5 +1,5 @@
 ---
-name: Scout Create Scaffold
+name: scout-create-scaffold
 description: Generate or repair a Scout test scaffold for a Kibana plugin/package (test/scout*/{api,ui} Playwright configs, fixtures, example specs). Use when you need the initial Scout directory structure; prefer `node scripts/scout.js generate` with flags for non-interactive/LLM execution.
 ---
 
@@ -63,8 +63,6 @@ Notes:
 
 - Update `.meta` manifests when adding/moving configs or tests:
   - `node scripts/scout.js update-test-config-manifests`
-- CI plumbing:
-  - Add the plugin/package to `.buildkite/scout_ci_config.yml` (the generator warns about this).
 - Custom server config sets:
   - If you create/use `test/scout_<configSet>`, you typically also need a matching server config under `src/platform/packages/shared/kbn-scout/src/servers/configs/custom/<configSet>`.
   - `start-server` requires `--config-dir <configSet>` when using a custom server config set.
