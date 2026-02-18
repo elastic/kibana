@@ -298,3 +298,7 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
 };
 
 export const HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS = 30;
+
+// TODO: Update this version once the elastic-agent release that handles
+// the browser timeout overhead internally is known.
+export const BROWSER_TIMEOUT_AGENT_VERSION_THRESHOLD = '9.1.0';

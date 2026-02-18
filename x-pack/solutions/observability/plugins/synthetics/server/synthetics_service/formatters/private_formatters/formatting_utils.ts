@@ -7,8 +7,7 @@
 
 import { inlineSourceFormatter, secondsToCronFormatter } from '../formatting_utils';
 import type { MonitorFields } from '../../../../common/runtime_types';
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
-import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 
@@ -75,25 +74,5 @@ export const stringifyString = (value?: string) => {
 };
 
 export const privateTimeoutFormatter: FormatterFn = (fields) => {
-  const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
-  if (!value) return null;
-
-  // Heartbeat adds a 30s overhead to browser monitor timeouts internally,
-  // so we subtract it to match the user's expected total timeout.
-  // Clamp to 0 to guard against negative values if validation is bypassed.
-  if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
-    const timeoutSeconds = parseInt(value, 10);
-
-    if (isNaN(timeoutSeconds)) {
-      return null;
-    }
-
-    const adjustedTimeout = Math.max(
-      0,
-      timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS
-    );
-    return secondsToCronFormatter({ [ConfigKey.TIMEOUT]: adjustedTimeout }, ConfigKey.TIMEOUT);
-  }
-
   return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);
 };

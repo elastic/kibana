@@ -22,7 +22,10 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
+import {
+  getBrowserTimeoutWarningForMonitor,
+  getBrowserTimeoutAgentVersionWarningForMonitor,
+} from './monitor_warnings';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -144,9 +147,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
-      const warning = getBrowserTimeoutWarningForMonitor(normalizedMonitor, newMonitor.id);
+      const warnings = [
+        getBrowserTimeoutWarningForMonitor(normalizedMonitor, newMonitor.id),
+        getBrowserTimeoutAgentVersionWarningForMonitor(normalizedMonitor, newMonitor.id),
+      ].filter((w): w is NonNullable<typeof w> => w !== null);
       const monitorResponse = mapSavedObjectToMonitor({ monitor: newMonitor, internal });
-      return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
+      return warnings.length > 0 ? { ...monitorResponse, warnings } : monitorResponse;
     } catch (error) {
       if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
         return response.badRequest({ body: { message: error.message } });

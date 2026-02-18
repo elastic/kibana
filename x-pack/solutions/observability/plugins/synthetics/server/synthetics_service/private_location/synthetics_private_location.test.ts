@@ -288,7 +288,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     expect(test.formattedPolicy.inputs[3].streams[1].vars?.timeout).toStrictEqual({
       type: 'text',
-      value: '30s',
+      value: '60s',
     });
   });
 });

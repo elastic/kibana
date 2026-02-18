@@ -7,10 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import type { ProjectMonitor, SyntheticsMonitor } from '../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
+import {
+  BROWSER_TIMEOUT_AGENT_VERSION_THRESHOLD,
+  HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
+} from '../../../common/constants/monitor_defaults';
 
-interface MonitorWarning {
+export interface MonitorWarning {
   monitorId: string;
-  publicLocationIds: string[];
+  publicLocationIds?: string[];
   message: string;
 }
 
@@ -59,6 +63,55 @@ export const getBrowserTimeoutWarningsForProjectMonitors = (
       (monitor.locations ?? []).length > 0
     ) {
       acc.push(buildBrowserTimeoutWarning(monitor.id, monitor.locations as string[]));
+    }
+
+    return acc;
+  }, []);
+};
+
+const buildBrowserTimeoutAgentVersionWarning = (monitorId: string): MonitorWarning => ({
+  monitorId,
+  message: i18n.translate(
+    'xpack.synthetics.server.monitors.browserTimeoutAgentVersionWarning',
+    {
+      defaultMessage:
+        'Browser monitor {monitorId} has a custom timeout. Elastic Agents older than version {agentVersion} will add {overhead} seconds to the configured timeout. Please ensure your agents are up to date to avoid unexpected timeout behavior.',
+      values: {
+        monitorId,
+        agentVersion: BROWSER_TIMEOUT_AGENT_VERSION_THRESHOLD,
+        overhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
+      },
+    }
+  ),
+});
+
+export const getBrowserTimeoutAgentVersionWarningForMonitor = (
+  monitor: SyntheticsMonitor,
+  monitorId: string
+): MonitorWarning | null => {
+  if (monitor[ConfigKey.MONITOR_TYPE] !== MonitorTypeEnum.BROWSER) {
+    return null;
+  }
+  if (!monitor[ConfigKey.TIMEOUT]) {
+    return null;
+  }
+  const hasPrivateLocations = monitor.locations?.some((location) => !location.isServiceManaged);
+  if (!hasPrivateLocations) {
+    return null;
+  }
+  return buildBrowserTimeoutAgentVersionWarning(monitorId);
+};
+
+export const getBrowserTimeoutAgentVersionWarningsForProjectMonitors = (
+  monitors: ProjectMonitor[]
+): MonitorWarning[] => {
+  return monitors.reduce<MonitorWarning[]>((acc, monitor) => {
+    if (
+      monitor.type === MonitorTypeEnum.BROWSER &&
+      Boolean(monitor.timeout) &&
+      (monitor.privateLocations ?? []).length > 0
+    ) {
+      acc.push(buildBrowserTimeoutAgentVersionWarning(monitor.id));
     }
 
     return acc;

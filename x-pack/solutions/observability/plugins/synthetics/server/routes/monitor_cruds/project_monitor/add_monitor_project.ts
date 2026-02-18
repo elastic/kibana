@@ -19,7 +19,10 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
-import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
+import {
+  getBrowserTimeoutWarningsForProjectMonitors,
+  getBrowserTimeoutAgentVersionWarningsForProjectMonitors,
+} from '../monitor_warnings';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 
@@ -231,7 +234,10 @@ const getBrowserTimeoutWarningsForSucceededProjectMonitors = (
 ) => {
   const failedIdsSet = new Set(failedMonitorsIds);
   const succeededMonitors = monitors.filter((m) => !failedIdsSet.has(m.id));
-  return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
+  return [
+    ...getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors),
+    ...getBrowserTimeoutAgentVersionWarningsForProjectMonitors(succeededMonitors),
+  ];
 };
 
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(

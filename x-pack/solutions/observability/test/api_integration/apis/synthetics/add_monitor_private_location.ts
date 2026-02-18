@@ -110,6 +110,33 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
+    it('returns agent version warning for browser timeout on private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout agent warning ${uuidv4()}`,
+        timeout: '60',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      expect(apiResponse.body.warnings).to.have.length(1);
+      const [warning] = apiResponse.body.warnings;
+      expect(warning.monitorId).eql(apiResponse.body.id);
+      expect(warning.message).to.contain('Elastic Agents older than version');
+      expect(warning.message).to.contain('30 seconds');
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
+    });
+
     it('handles spaces', async () => {
       const { username, password, SPACE_ID, roleName } = await monitorTestService.addsNewSpace();
 
