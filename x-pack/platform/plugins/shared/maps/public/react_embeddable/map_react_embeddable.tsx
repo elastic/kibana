@@ -212,6 +212,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
             drilldownsManager.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
+            projectRoutingManager.cleanup();
           };
         }, []);
 
