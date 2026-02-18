@@ -153,7 +153,6 @@ export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
       <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
         deepLinkId={SecurityPageName.rules}
-        // TODO(rylnd) this conflicted with Alanna's rule details tab work; revisit to ensure proper behavior
         path={getRuleDetailsTabUrl(id, RuleDetailTabs.overview)}
       >
         {name}
