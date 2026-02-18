@@ -29,6 +29,7 @@ describe('EbtTelemetryClient', () => {
       registerContextProvider: jest.fn(),
       removeContextProvider: jest.fn(),
       optIn: jest.fn(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       telemetryCounter$: {} as any,
     };
     client = new EbtTelemetryClient(analyticsService);
