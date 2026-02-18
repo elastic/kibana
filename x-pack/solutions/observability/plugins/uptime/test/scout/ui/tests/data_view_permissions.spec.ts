@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { test } from '../fixtures';
+
+const queryParams = new URLSearchParams({
+  dateRangeStart: '2021-11-21T22:06:06.502Z',
+  dateRangeEnd: '2021-11-21T22:10:08.203Z',
+}).toString();
+
+test.describe('DataViewPermissions', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    try {
+      await kbnClient.savedObjects.delete({
+        type: 'index-pattern',
+        id: 'synthetics_static_index_pattern_id_heartbeat_',
+      });
+    } catch (e) {
+      // Ignore - may not exist
+    }
+  });
+
+  test('renders exploratory view for viewer user', async ({
+    pageObjects,
+    browserAuth,
+    page,
+  }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.uptimeOverview.goto(queryParams);
+
+    await pageObjects.uptimeOverview.clickExploreDataButton();
+    await pageObjects.uptimeOverview.waitForLoadingToFinish();
+
+    await expect(page.locator('text=browser')).toBeVisible({ timeout: 60 * 1000 });
+    await expect(page.locator('text=Monitor duration')).toBeVisible();
+  });
+});
