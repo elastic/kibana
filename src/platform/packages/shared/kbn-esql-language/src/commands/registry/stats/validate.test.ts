@@ -103,6 +103,10 @@ describe('STATS Validation', () => {
         ]);
       });
 
+      test('allows bare fields in STATS when source command is TS', () => {
+        statsExpectErrors('TS a_index | stats doubleField', []);
+      });
+
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField', [
           'Unknown column "wrongField"',
