@@ -52,6 +52,7 @@ import {
   useAuthz,
   useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
+import { useHasIncompatibleAgentVersion } from '../../../../hooks/use_has_incompatible_agent_version';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
@@ -317,6 +318,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
+
+  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+    packageInfo,
+    agentPolicyData?.items
+  );
 
   useEffect(() => {
     if (
@@ -673,6 +679,36 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
+
+      {(hasIncompatibleAgentVersion === 'SOME' || hasIncompatibleAgentVersion === 'ALL') && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.incompatibleAgentVersionTitle"
+                defaultMessage="Incompatible agent version"
+              />
+            }
+            color="warning"
+          >
+            {hasIncompatibleAgentVersion === 'SOME' ? (
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
+                defaultMessage="The selected agent policies have some agent in a version non compatible with the integration."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
+                defaultMessage="The selected agent policies have no agents in a version compatible with the integration."
+              />
+            )}
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
