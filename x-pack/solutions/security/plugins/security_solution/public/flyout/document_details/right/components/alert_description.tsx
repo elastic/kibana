@@ -37,7 +37,7 @@ export const AlertDescription: FC = () => {
   const { rulesPrivileges } = useUserPrivileges();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const ruleSummaryDisabled =
-    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.read;
+    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.rules.read;
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({

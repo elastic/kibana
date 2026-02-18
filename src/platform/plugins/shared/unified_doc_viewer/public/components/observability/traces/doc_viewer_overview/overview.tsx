@@ -24,6 +24,7 @@ import {
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
@@ -39,11 +40,13 @@ import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { TraceWaterfall } from '../components/trace_waterfall';
 import { isTransaction } from '../helpers';
 import { TraceRootSpanProvider } from './hooks/use_fetch_trace_root_span';
+import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_viewer_extension_actions';
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
+  docViewActions?: DocViewActions;
 };
 
 export type TraceOverviewSections = 'errors-table';
@@ -63,6 +66,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       showWaterfall = true,
       dataView,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
+      docViewActions,
     },
     ref
   ) => {
@@ -104,52 +108,54 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
 
     return (
       <DataSourcesProvider indexes={indexes}>
-        <TraceRootSpanProvider traceId={traceId}>
-          <div
-            ref={setContainerRef}
-            css={
-              containerHeight
-                ? css`
-                    max-height: ${containerHeight}px;
-                    overflow: auto;
-                  `
-                : undefined
-            }
-          >
-            <EuiSpacer size="m" />
-            <About
-              hit={hit}
-              dataView={dataView}
-              filter={filter}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-            />
-            <EuiSpacer size="m" />
-            <SimilarSpans
-              spanName={flattenedHit[SPAN_NAME]}
-              serviceName={serviceName}
-              transactionName={flattenedHit[TRANSACTION_NAME]}
-              transactionType={flattenedHit[TRANSACTION_TYPE]}
-              isOtelSpan={isOtelSpan}
-              duration={duration || 0}
-            />
-            {showWaterfall ? (
-              <TraceWaterfall
+        <DocViewerExtensionActionsProvider actions={docViewActions}>
+          <TraceRootSpanProvider traceId={traceId}>
+            <div
+              ref={setContainerRef}
+              css={
+                containerHeight
+                  ? css`
+                      max-height: ${containerHeight}px;
+                      overflow: auto;
+                    `
+                  : undefined
+              }
+            >
+              <EuiSpacer size="m" />
+              <About
+                hit={hit}
                 dataView={dataView}
-                traceId={traceId}
-                serviceName={serviceName}
-                docId={docId}
+                filter={filter}
+                onAddColumn={onAddColumn}
+                onRemoveColumn={onRemoveColumn}
               />
-            ) : null}
-            <ErrorsTable ref={setErrorsTableSectionRef} traceId={traceId} docId={docId} />
-            <TraceContextLogEvents
-              traceId={traceId}
-              spanId={spanId}
-              transactionId={transactionId}
-            />
-            {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
-          </div>
-        </TraceRootSpanProvider>
+              <EuiSpacer size="m" />
+              <SimilarSpans
+                spanName={flattenedHit[SPAN_NAME]}
+                serviceName={serviceName}
+                transactionName={flattenedHit[TRANSACTION_NAME]}
+                transactionType={flattenedHit[TRANSACTION_TYPE]}
+                isOtelSpan={isOtelSpan}
+                duration={duration || 0}
+              />
+              {showWaterfall ? (
+                <TraceWaterfall
+                  dataView={dataView}
+                  traceId={traceId}
+                  serviceName={serviceName}
+                  docId={docId}
+                />
+              ) : null}
+              <ErrorsTable ref={setErrorsTableSectionRef} traceId={traceId} docId={docId} />
+              <TraceContextLogEvents
+                traceId={traceId}
+                spanId={spanId}
+                transactionId={transactionId}
+              />
+              {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
+            </div>
+          </TraceRootSpanProvider>
+        </DocViewerExtensionActionsProvider>
       </DataSourcesProvider>
     );
   }

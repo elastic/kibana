@@ -279,6 +279,9 @@ export const TableTab = memo(() => {
         search={search}
         sorting={false}
         data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
+          defaultMessage: 'Document fields',
+        })}
         css={css`
           .euiTableRow {
             font-size: ${smallFontSize};

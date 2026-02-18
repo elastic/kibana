@@ -96,7 +96,6 @@ dependsOn:
   - '@kbn/aiops-plugin'
   - '@kbn/data-visualizer-plugin'
   - '@kbn/search-types'
-  - '@kbn/presentation-containers'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/discover-contextual-components'
@@ -128,11 +127,12 @@ dependsOn:
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
   - '@kbn/cps'
-  - '@kbn/controls-renderer'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/es-query-constants'
+  - '@kbn/esql'
+  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod

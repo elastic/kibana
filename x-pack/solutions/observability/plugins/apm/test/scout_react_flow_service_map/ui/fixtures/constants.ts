@@ -14,3 +14,6 @@ export const SERVICE_OPBEANS_NODE = 'opbeans-node';
 export const SERVICE_OPBEANS_JAVA = 'opbeans-java';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
 export const PRODUCTION_ENVIRONMENT = 'production';
+
+// Dependency nodes
+export const DEPENDENCY_POSTGRESQL = 'postgresql';

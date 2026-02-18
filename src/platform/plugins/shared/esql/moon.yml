@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/discover-utils'
   - '@kbn/kql'
+  - '@kbn/inspector-plugin'
 tags:
   - plugin
   - prod

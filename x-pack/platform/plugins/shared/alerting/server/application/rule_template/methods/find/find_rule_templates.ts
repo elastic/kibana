@@ -82,7 +82,7 @@ export async function findRuleTemplates(
   // aside from rule type, these are the only mapped fields.
   // it doesn't make much sense to expose a param to customize this yet.
   // we should add 'description' here when it's available.
-  const searchFields = ['name', 'tags'];
+  const searchFields = ['name', 'tags', 'description'];
 
   const {
     page: resultPage,

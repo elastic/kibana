@@ -116,3 +116,11 @@ export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_re
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+
+// Cloud Connector Setup - lazy loaded component for external plugins
+export const LazyCloudConnectorSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.CloudConnectorSetup,
+  }))
+);
+export type { CloudConnectorSetupProps } from './components/cloud_connector';

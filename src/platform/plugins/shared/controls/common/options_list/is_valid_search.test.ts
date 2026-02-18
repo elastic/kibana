@@ -100,6 +100,56 @@ describe('test validity of search strings', () => {
         })
       ).toBe(false);
     });
+
+    it('valid search - CIDR notation IPv4 with exact technique', () => {
+      expect(
+        isValidSearch({
+          searchString: '192.168.1.0/24',
+          fieldType: 'ip',
+          searchTechnique: 'exact',
+        })
+      ).toBe(true);
+    });
+
+    it('valid search - CIDR notation IPv6 with exact technique', () => {
+      expect(
+        isValidSearch({
+          searchString: '2001:db8::/32',
+          fieldType: 'ip',
+          searchTechnique: 'exact',
+        })
+      ).toBe(true);
+    });
+
+    it('valid search - CIDR notation with prefix technique', () => {
+      expect(
+        isValidSearch({
+          searchString: '10.0.0.0/8',
+          fieldType: 'ip',
+          searchTechnique: 'prefix',
+        })
+      ).toBe(true);
+    });
+
+    it('invalid search - CIDR with invalid prefix length', () => {
+      expect(
+        isValidSearch({
+          searchString: '192.168.1.0/33',
+          fieldType: 'ip',
+          searchTechnique: 'exact',
+        })
+      ).toBe(false);
+    });
+
+    it('invalid search - malformed CIDR', () => {
+      expect(
+        isValidSearch({
+          searchString: '192.168.1/24',
+          fieldType: 'ip',
+          searchTechnique: 'exact',
+        })
+      ).toBe(false);
+    });
   });
 
   // string field searches can never be invalid

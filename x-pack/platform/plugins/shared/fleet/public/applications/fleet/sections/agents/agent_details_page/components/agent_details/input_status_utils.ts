@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { PackagePolicy } from '../../../../../types';
 import type {
   FleetServerAgentComponent,
   FleetServerAgentComponentStatus,
@@ -46,9 +45,9 @@ export class InputStatusFormatter {
 
 export const getInputUnitsByPackage = (
   agentComponents: FleetServerAgentComponent[],
-  packagePolicy: PackagePolicy
+  inputOrPackagePolicyId: string
 ): FleetServerAgentComponentUnit[] => {
-  const re = new RegExp(packagePolicy.id);
+  const re = new RegExp(inputOrPackagePolicyId);
 
   return agentComponents
     .map((c) => c?.units || [])
@@ -58,9 +57,9 @@ export const getInputUnitsByPackage = (
 
 export const getOutputUnitsByPackage = (
   agentComponents: FleetServerAgentComponent[],
-  packagePolicy: PackagePolicy
+  inputOrPackagePolicyId: string
 ): FleetServerAgentComponentUnit[] => {
-  const reId = new RegExp(packagePolicy.id);
+  const reId = new RegExp(inputOrPackagePolicyId);
 
   return agentComponents
     .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId)))
@@ -71,10 +70,10 @@ export const getOutputUnitsByPackage = (
 
 export const getOutputUnitsByPackageAndInputType = (
   agentComponents: FleetServerAgentComponent[],
-  packagePolicy: PackagePolicy,
+  inputOrPackagePolicyId: string,
   unitType: string
 ): FleetServerAgentComponentUnit | undefined => {
-  const reId = new RegExp(packagePolicy.id);
+  const reId = new RegExp(inputOrPackagePolicyId);
   const reUnitType = new RegExp(unitType);
 
   return agentComponents

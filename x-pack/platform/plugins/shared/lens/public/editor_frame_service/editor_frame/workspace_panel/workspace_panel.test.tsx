@@ -27,8 +27,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable/events';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import {
   applyChanges,
   setState,
@@ -62,7 +62,7 @@ let mockVisualization2: ReturnType<typeof createMockVisualization>;
 let mockDatasource: ReturnType<typeof createMockDatasource>;
 
 let expressionRendererMock: ReturnType<typeof createExpressionRendererMock>;
-const trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
+const trigger = { exec: jest.fn() } as unknown as jest.Mocked<Trigger>;
 const uiActionsMock = uiActionsPluginMock.createStartContract();
 uiActionsMock.getTrigger.mockReturnValue(trigger);
 
@@ -185,7 +185,7 @@ describe('workspace_panel', () => {
     renderWithReduxStore(
       <EditorFrameServiceProvider
         datasourceMap={{
-          testDatasource: mockDatasource,
+          formBased: mockDatasource,
         }}
         visualizationMap={{
           testVis: {
@@ -216,7 +216,7 @@ describe('workspace_panel', () => {
     const { rerender, store } = renderWithReduxStore(
       <EditorFrameServiceProvider
         datasourceMap={{
-          testDatasource: mockDatasource,
+          formBased: mockDatasource,
         }}
         visualizationMap={{
           testVis: {
@@ -246,7 +246,7 @@ describe('workspace_panel', () => {
     rerender(
       <EditorFrameServiceProvider
         datasourceMap={{
-          testDatasource: mockDatasource,
+          formBased: mockDatasource,
         }}
         visualizationMap={{
           testVis: {
@@ -278,7 +278,7 @@ describe('workspace_panel', () => {
       rerender(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: {
@@ -314,7 +314,7 @@ describe('workspace_panel', () => {
     const { store } = renderWithReduxStore(
       <EditorFrameServiceProvider
         datasourceMap={{
-          testDatasource: mockDatasource,
+          formBased: mockDatasource,
         }}
         visualizationMap={{
           testVis: {
@@ -408,7 +408,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => null },
@@ -475,7 +475,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -496,8 +496,7 @@ describe('workspace_panel', () => {
       const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
       onEvent({ name: 'brush', data: eventData });
 
-      expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
-      expect(trigger.exec).toHaveBeenCalledWith({
+      expect(uiActionsMock.executeTriggerActions).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush, {
         data: { ...eventData, timeFieldName: undefined },
       });
     });
@@ -514,7 +513,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -537,10 +536,12 @@ describe('workspace_panel', () => {
       };
       onEvent({ name: 'multiFilter', data: eventData });
 
-      expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.multiFilter);
-      expect(trigger.exec).toHaveBeenCalledWith({
-        data: { ...eventData, timeFieldName: undefined },
-      });
+      expect(uiActionsMock.executeTriggerActions).toHaveBeenCalledWith(
+        VIS_EVENT_TO_TRIGGER.multiFilter,
+        {
+          data: { ...eventData, timeFieldName: undefined },
+        }
+      );
     });
 
     it('should call getTriggerCompatibleActions on hasCompatibleActions call from within renderer', async () => {
@@ -555,7 +556,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -593,7 +594,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -641,7 +642,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -688,7 +689,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -749,7 +750,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={defaultVisualizationMap}
         >
@@ -780,7 +781,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: mockVisualization,
@@ -818,7 +819,7 @@ describe('workspace_panel', () => {
       act(() => {
         lensStore.dispatch(
           updateDatasourceState({
-            datasourceId: 'testDatasource',
+            datasourceId: 'formBased',
             newDatasourceState: 'newState',
           })
         );
@@ -849,7 +850,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -880,7 +881,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -913,7 +914,7 @@ describe('workspace_panel', () => {
       const mounted = mountWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
-            testDatasource: mockDatasource,
+            formBased: mockDatasource,
           }}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
@@ -960,7 +961,7 @@ describe('workspace_panel', () => {
     function renderWithDndAndRedux(propsOverrides = {}, draggingContext = draggedField) {
       return renderWithReduxStore(
         <EditorFrameServiceProvider
-          datasourceMap={{ testDatasource: mockDatasource }}
+          datasourceMap={{ formBased: mockDatasource }}
           visualizationMap={{
             testVis: mockVisualization,
             vis2: mockVisualization2,
@@ -983,7 +984,7 @@ describe('workspace_panel', () => {
         getSuggestionForField: jest.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
-          datasourceId: 'testDatasource',
+          datasourceId: 'formBased',
           datasourceState: {},
         }),
       });
@@ -994,7 +995,7 @@ describe('workspace_panel', () => {
           suggestion: {
             newVisualizationId: 'testVis',
             visualizationState: {},
-            datasourceId: 'testDatasource',
+            datasourceId: 'formBased',
             datasourceState: {},
           },
           clearStagedPreview: true,
@@ -1007,7 +1008,7 @@ describe('workspace_panel', () => {
         getSuggestionForField: jest.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
-          datasourceId: 'testDatasource',
+          datasourceId: 'formBased',
           datasourceState: {},
         }),
       });
