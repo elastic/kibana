@@ -90,7 +90,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
               <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading}>
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.effectiveConfigFlyoutDownloadButtonLabel"
-                  defaultMessage="Download Config"
+                  defaultMessage="Download Configuration"
                 />
               </EuiButton>
             </EuiFlexItem>
