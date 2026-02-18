@@ -26,13 +26,12 @@ import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/t
 
 export class EntityStorePlugin
   implements
-    Plugin<
-      EntityStoreSetupContract,
-      EntityStoreStartContract,
-      EntityStoreSetupPlugins,
-      EntityStoreStartPlugins
-    >
-{
+  Plugin<
+    EntityStoreSetupContract,
+    EntityStoreStartContract,
+    EntityStoreSetupPlugins,
+    EntityStoreStartPlugins
+  > {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
