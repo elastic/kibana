@@ -25,7 +25,6 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SetRuleQuery } from '../../../../detections/hooks/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/hooks/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -68,7 +67,6 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAllEsqlRuleFields } from '../../hooks';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
@@ -163,7 +161,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   shouldLoadQueryDynamically,
   threatIndex,
 }) => {
-  const kibanaServices = useKibana().services;
   const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
     watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold.field'],
@@ -581,17 +578,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   onValidityChange={setIsQueryBarValid}
                 />
               ) : isEsqlRule(ruleType) ? (
-                <KibanaContextProvider services={{ core: kibanaServices }}>
-                  <EsqlQueryEdit
-                    path="queryBar"
-                    fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
-                    required
-                    dataView={indexPattern}
-                    disabled={isLoading}
-                    loading={isLoading}
-                    onValidityChange={setIsQueryBarValid}
-                  />
-                </KibanaContextProvider>
+                <EsqlQueryEdit
+                  path="queryBar"
+                  fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
+                  required
+                  dataView={indexPattern}
+                  disabled={isLoading}
+                  loading={isLoading}
+                  onValidityChange={setIsQueryBarValid}
+                />
               ) : (
                 QueryBarMemo
               )}
