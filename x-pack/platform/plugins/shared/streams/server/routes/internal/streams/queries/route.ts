@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type {
-  DiscoveryQueriesGetResponse,
-  DiscoveryQueriesOccurrencesGetResponse,
-} from '@kbn/streams-schema';
+import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import { sortForQueriesTable } from '../../../../lib/significant_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -132,12 +129,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<DiscoveryQueriesGetResponse> => {
+  handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
     const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
@@ -188,7 +180,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<DiscoveryQueriesOccurrencesGetResponse> => {
+  }): Promise<QueriesOccurrencesGetResponse> => {
     const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,

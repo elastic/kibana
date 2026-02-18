@@ -7,7 +7,7 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { DiscoveryQueriesOccurrencesGetResponse } from '@kbn/streams-schema';
+import type { QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
@@ -59,7 +59,7 @@ export const useFetchDiscoveryQueriesOccurrences = (
 
     const intervalString = `${bucketSize.asSeconds()}s`;
 
-    const response: DiscoveryQueriesOccurrencesGetResponse = await streamsRepositoryClient.fetch(
+    const response: QueriesOccurrencesGetResponse = await streamsRepositoryClient.fetch(
       'GET /internal/streams/_queries/_occurrences',
       {
         params: {

@@ -8,7 +8,7 @@
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
-  DiscoveryQueriesGetResponse,
+  QueriesGetResponse,
   SignificantEventsResponse,
   StreamQuery,
 } from '@kbn/streams-schema';
@@ -73,7 +73,7 @@ export const useFetchDiscoveryQueries = (
 
     const intervalString = `${bucketSize.asSeconds()}s`;
 
-    const response: DiscoveryQueriesGetResponse = await streamsRepositoryClient.fetch(
+    const response: QueriesGetResponse = await streamsRepositoryClient.fetch(
       'GET /internal/streams/_queries',
       {
         params: {
