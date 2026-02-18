@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
 import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty } from 'lodash';
@@ -91,41 +90,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        const { name, description, queries: rawQueries, enabled, policy_ids, shards = {} } = request.body;
+        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
-        const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean; queries?: Array<{ id: string; action_id?: string; start_date?: string }> }>(
+        const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(
           packSavedObjectType,
           request.params.id
         );
-
-        // Build a map of existing action_ids from the current pack SO queries
-        const existingActionIdMap: Record<string, { action_id: string; start_date?: string }> = {};
-        if (currentPackSO.attributes.queries) {
-          for (const q of currentPackSO.attributes.queries) {
-            if (q.action_id) {
-              existingActionIdMap[q.id] = { action_id: q.action_id, start_date: q.start_date };
-            }
-          }
-        }
-
-        // Backfill action_id and start_date for queries
-        const now = moment().toISOString();
-        const queries = rawQueries
-          ? Object.fromEntries(
-              Object.entries(rawQueries).map(([key, value]) => {
-                const existing = existingActionIdMap[key];
-
-                return [
-                  key,
-                  {
-                    ...value,
-                    action_id: existing?.action_id ?? uuidv4(),
-                    start_date: existing?.start_date ?? now,
-                  },
-                ];
-              })
-            )
-          : rawQueries;
 
         if (name) {
           const conflictingEntries = await spaceScopedClient.find<PackSavedObject>({
@@ -252,9 +222,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         draft,
                         `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                         {
-                          schedule_id: updatedPackSO.id,
-                          start_date: updatedPackSO.attributes.created_at,
-                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, {
+                            scheduleId: updatedPackSO.id,
+                            startDate: updatedPackSO.attributes.created_at,
+                          }),
                         }
                       );
 
@@ -345,9 +316,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        schedule_id: updatedPackSO.id,
-                        start_date: updatedPackSO.attributes.created_at,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, {
+                          scheduleId: updatedPackSO.id,
+                          startDate: updatedPackSO.attributes.created_at,
+                        }),
                       }
                     );
 
@@ -380,9 +352,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
-                        schedule_id: updatedPackSO.id,
-                        start_date: updatedPackSO.attributes.created_at,
-                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
+                        queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries, {
+                          scheduleId: updatedPackSO.id,
+                          startDate: updatedPackSO.attributes.created_at,
+                        }),
                       }
                     );
 
@@ -408,8 +381,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const scheduledQueries = convertPackQueriesToSO(effectiveQueries).map((q: { id: string; action_id?: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
-            action_id: q.action_id ?? '',
+          const scheduledQueries = convertPackQueriesToSO(effectiveQueries).map((q: { id: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
+            action_id: updatedPackSO.id,
             id: q.id,
             query: q.query,
             interval: q.interval,

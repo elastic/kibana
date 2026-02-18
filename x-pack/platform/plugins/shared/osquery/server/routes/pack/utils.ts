@@ -42,8 +42,6 @@ export const convertPackQueriesToSO = (queries) =>
           'snapshot',
           'removed',
           'timeout',
-          'action_id',
-          'start_date',
         ]),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
@@ -58,8 +56,6 @@ export const convertPackQueriesToSO = (queries) =>
       timeout?: number;
       snapshot?: boolean;
       removed?: boolean;
-      action_id?: string;
-      start_date?: string;
       ecs_mapping?: Record<string, unknown>;
     }>
   );
@@ -90,13 +86,14 @@ export const convertSOQueriesToPack = (
 
 export const convertSOQueriesToPackConfig = (
   // @ts-expect-error update types
-  queries
+  queries,
+  scheduleInfo?: { scheduleId: string; startDate: string }
 ) =>
   reduce(
     queries,
     (
       acc,
-      { id: queryId, ecs_mapping, query, platform, removed, snapshot, action_id, start_date, ...rest },
+      { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest },
       key
     ) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
@@ -111,8 +108,7 @@ export const convertSOQueriesToPackConfig = (
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
-        ...(action_id ? { action_id } : {}),
-        ...(start_date ? { start_date } : {}),
+        ...(scheduleInfo ? { schedule_id: scheduleInfo.scheduleId, start_date: scheduleInfo.startDate } : {}),
       };
 
       return acc;

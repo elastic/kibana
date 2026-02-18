@@ -104,40 +104,45 @@ describe('Pack utils', () => {
       expect(convertedQueries).toStrictEqual(getOneLiner({ removed: false, snapshot: false }));
     });
 
-    test('includes action_id and start_date when present', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
-        getTestQueries({ action_id: 'test-uuid-123', start_date: '2025-01-01T00:00:00.000Z' })
-      );
+    test('includes schedule_id and start_date from scheduleInfo when provided', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries(), {
+        scheduleId: 'pack-so-id-123',
+        startDate: '2025-01-01T00:00:00.000Z',
+      });
       expect(convertedQueries).toStrictEqual(
-        getOneLiner({ action_id: 'test-uuid-123', start_date: '2025-01-01T00:00:00.000Z' })
+        getOneLiner({ schedule_id: 'pack-so-id-123', start_date: '2025-01-01T00:00:00.000Z' })
       );
     });
 
-    test('omits action_id and start_date when absent', () => {
+    test('omits schedule_id and start_date when scheduleInfo not provided', () => {
       const convertedQueries = convertSOQueriesToPackConfig(getTestQueries());
       const result = convertedQueries['default'];
-      expect(result).not.toHaveProperty('action_id');
+      expect(result).not.toHaveProperty('schedule_id');
       expect(result).not.toHaveProperty('start_date');
     });
 
-    test('includes action_id but omits start_date when only action_id is present', () => {
-      const convertedQueries = convertSOQueriesToPackConfig(
-        getTestQueries({ action_id: 'test-uuid-456' })
-      );
-      const result = convertedQueries['default'];
-      expect(result.action_id).toBe('test-uuid-456');
-      expect(result).not.toHaveProperty('start_date');
+    test('applies same schedule_id to all queries in a pack', () => {
+      const queries = {
+        query1: { query: 'SELECT 1;', interval: 60 },
+        query2: { query: 'SELECT 2;', interval: 120 },
+      };
+      const convertedQueries = convertSOQueriesToPackConfig(queries, {
+        scheduleId: 'shared-pack-id',
+        startDate: '2025-06-01T00:00:00.000Z',
+      });
+      expect(convertedQueries.query1.schedule_id).toBe('shared-pack-id');
+      expect(convertedQueries.query2.schedule_id).toBe('shared-pack-id');
+      expect(convertedQueries.query1.start_date).toBe('2025-06-01T00:00:00.000Z');
+      expect(convertedQueries.query2.start_date).toBe('2025-06-01T00:00:00.000Z');
     });
   });
 
   describe('convertPackQueriesToSO', () => {
-    test('preserves action_id and start_date when present', () => {
+    test('converts queries to SO format', () => {
       const queries = {
         myQuery: {
           query: 'SELECT 1;',
           interval: 60,
-          action_id: 'uuid-abc',
-          start_date: '2025-06-01T00:00:00.000Z',
         },
       };
       const result = convertPackQueriesToSO(queries);
@@ -146,27 +151,22 @@ describe('Pack utils', () => {
           id: 'myQuery',
           query: 'SELECT 1;',
           interval: 60,
-          action_id: 'uuid-abc',
-          start_date: '2025-06-01T00:00:00.000Z',
         },
       ]);
     });
 
-    test('omits action_id and start_date when absent', () => {
+    test('does not include action_id or start_date', () => {
       const queries = {
         myQuery: {
           query: 'SELECT 1;',
           interval: 60,
+          action_id: 'should-be-ignored',
+          start_date: 'should-be-ignored',
         },
       };
       const result = convertPackQueriesToSO(queries);
-      expect(result).toEqual([
-        {
-          id: 'myQuery',
-          query: 'SELECT 1;',
-          interval: 60,
-        },
-      ]);
+      expect(result[0]).not.toHaveProperty('action_id');
+      expect(result[0]).not.toHaveProperty('start_date');
     });
   });
 });

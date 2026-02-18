@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
 import { has, unset, some, mapKeys } from 'lodash';
@@ -85,22 +84,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        const { name, description, queries: rawQueries, enabled, policy_ids, shards = {} } = request.body;
-
-        // Generate per-query action_ids
-        const now = moment().toISOString();
-        const queries = rawQueries
-          ? Object.fromEntries(
-              Object.entries(rawQueries).map(([key, value]) => [
-                key,
-                {
-                  ...value,
-                  action_id: uuidv4(),
-                  start_date: now,
-                },
-              ])
-            )
-          : rawQueries;
+        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
         const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
@@ -181,9 +165,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
-                      schedule_id: packSO.id,
-                      start_date: packSO.attributes.created_at,
-                      queries: convertSOQueriesToPackConfig(queries),
+                      queries: convertSOQueriesToPackConfig(queries, {
+                        scheduleId: packSO.id,
+                        startDate: packSO.attributes.created_at,
+                      }),
                     });
 
                     return draft;
@@ -200,8 +185,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const scheduledQueries = convertPackQueriesToSO(queries).map((q: { id: string; action_id?: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
-            action_id: q.action_id ?? '',
+          const scheduledQueries = convertPackQueriesToSO(queries).map((q: { id: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
+            action_id: packSO.id,
             id: q.id,
             query: q.query,
             interval: q.interval,
