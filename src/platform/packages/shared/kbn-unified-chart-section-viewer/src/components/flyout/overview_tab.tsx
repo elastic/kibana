@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
+import { METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ } from '../../common/constants';
 import { TabTitleAndDescription } from './tab_title_and_description';
 interface OverviewTabProps {
   metric: MetricField;
@@ -73,6 +74,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
     const hasIcon = iconMap.has(dimension.type);
     return {
+      'data-test-subj': `${METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ}-${dimension.name}`,
       label: (
         <div style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
           {hasIcon && <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />}

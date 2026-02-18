@@ -7,18 +7,17 @@
 
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ } from '../constants';
 
-interface MetricsPagination {
+interface PaginationLocators {
   readonly container: Locator;
   readonly prevButton: Locator;
   readonly nextButton: Locator;
   getPageButton(pageIndex: number): Locator;
 }
 
-function createPagination(parentContainer: Locator): MetricsPagination {
-  const container = parentContainer.locator('[data-test-subj="metricsExperienceGridPagination"]');
+function createPaginationLocators(container: Locator): Omit<PaginationLocators, 'container'> {
   return {
-    container,
     prevButton: container.locator('[data-test-subj="pagination-button-previous"]'),
     nextButton: container.locator('[data-test-subj="pagination-button-next"]'),
     getPageButton: (pageIndex: number) =>
@@ -26,17 +25,19 @@ function createPagination(parentContainer: Locator): MetricsPagination {
   };
 }
 
-interface DimensionsPagination {
-  readonly container: Locator;
-  readonly prevButton: Locator;
-  readonly nextButton: Locator;
-  getPageButton(pageIndex: number): Locator;
+function createPagination(parentContainer: Locator): PaginationLocators {
+  const container = parentContainer.locator('[data-test-subj="metricsExperienceGridPagination"]');
+  return {
+    container,
+    ...createPaginationLocators(container),
+  };
 }
 
 interface FlyoutOverviewTab {
   readonly tab: Locator;
   readonly descriptionList: Locator;
-  readonly dimensionsPagination: DimensionsPagination;
+  readonly dimensionsPagination: PaginationLocators;
+  readonly dimensionsListItems: Locator;
 }
 
 interface FlyoutEsqlQueryTab {
@@ -92,16 +93,13 @@ function createChartActions(page: ScoutPage): ChartActions {
   };
 }
 
-function createDimensionsPagination(parentContainer: Locator): DimensionsPagination {
+function createDimensionsPagination(parentContainer: Locator): PaginationLocators {
   const container = parentContainer.locator(
     '[data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"]'
   );
   return {
     container,
-    prevButton: container.locator('[data-test-subj="pagination-button-previous"]'),
-    nextButton: container.locator('[data-test-subj="pagination-button-next"]'),
-    getPageButton: (pageIndex: number) =>
-      container.locator(`[data-test-subj="pagination-button-${pageIndex}"]`),
+    ...createPaginationLocators(container),
   };
 }
 
@@ -114,11 +112,14 @@ function createFlyout(page: ScoutPage): MetricsFlyout {
       tab: page.locator('role=tab[name="Overview"]'),
       descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
       dimensionsPagination: createDimensionsPagination(container),
+      dimensionsListItems: page.testSubj
+        .locator('metricsExperienceFlyoutOverviewTabDimensionsList')
+        .locator(`[data-test-subj^="${METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ}-"]`),
     },
     esqlQuery: {
       // TODO: Replace with page.testSubj.locator() once data-test-subj is added to tabs
       tab: page.locator('role=tab[name="ES|QL Query"]'),
-      codeBlock: container.locator('.euiCodeBlock'),
+      codeBlock: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryCodeBlock'),
     },
   };
 }
@@ -128,7 +129,7 @@ export class MetricsExperiencePage {
   public readonly container: Locator;
   public readonly grid: Locator;
   public readonly cards: Locator;
-  public readonly pagination: MetricsPagination;
+  public readonly pagination: PaginationLocators;
   public readonly flyout: MetricsFlyout;
   public readonly searchButton: Locator;
   public readonly searchInput: Locator;

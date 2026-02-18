@@ -15,7 +15,7 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE, DIMENSIONS_PAGINATION } from '../../fixtures';
 
-const { TOTAL_PAGES } = DIMENSIONS_PAGINATION;
+const { TOTAL_PAGES, PAGE_SIZE, LAST_PAGE_ITEMS } = DIMENSIONS_PAGINATION;
 
 spaceTest.describe(
   'Metrics in Discover - Insights Flyout',
@@ -77,20 +77,25 @@ spaceTest.describe(
 
       await spaceTest.step('navigate to last page', async () => {
         const { dimensionsPagination } = metricsExperience.flyout.overview;
-        await dimensionsPagination.getPageButton(TOTAL_PAGES - 1).click();
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        const lastPageButton = dimensionsPagination.getPageButton(TOTAL_PAGES - 1);
+        await lastPageButton.click();
+        await expect(metricsExperience.flyout.overview.dimensionsListItems).toHaveCount(
+          LAST_PAGE_ITEMS
+        );
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
-        const { dimensionsPagination } = metricsExperience.flyout.overview;
-        await dimensionsPagination.getPageButton(0).click();
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        const { dimensionsPagination, dimensionsListItems } = metricsExperience.flyout.overview;
+        const firstPageButton = dimensionsPagination.getPageButton(0);
+
+        await firstPageButton.click();
+        await expect(dimensionsListItems).toHaveCount(PAGE_SIZE);
 
         await dimensionsPagination.nextButton.click();
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        await expect(dimensionsListItems).toHaveCount(LAST_PAGE_ITEMS);
 
         await dimensionsPagination.prevButton.click();
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        await expect(dimensionsListItems).toHaveCount(PAGE_SIZE);
       });
     });
   }

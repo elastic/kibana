@@ -19,6 +19,8 @@ export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrict
 export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
 export const METRICS_BREAKDOWN_OPTION_DATA_TEST_SUBJ = 'metricsBreakdownOption';
 export const METRICS_GRID_PAGINATION_DATA_TEST_SUBJ = 'metricsExperienceGridPagination';
+export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
+  'metricsExperienceFlyoutOverviewTabDimensionItem';
 
 // Selection limits
 export const MAX_DIMENSIONS_SELECTIONS = 5;
