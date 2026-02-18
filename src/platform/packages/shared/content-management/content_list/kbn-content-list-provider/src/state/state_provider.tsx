@@ -13,7 +13,7 @@ import type { ContentListClientState, ContentListStateContextValue } from './typ
 import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
-import { isSortingConfig, isPaginationConfig } from '../features';
+import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
@@ -52,19 +52,19 @@ const resolveInitialPageSize = (
  * Internal provider component that manages the runtime state of the content list.
  *
  * This provider:
- * - Manages client-controlled state (filters, sort, pagination) via reducer.
+ * - Manages client-controlled state (search, filters, sort, pagination) via reducer.
  * - Uses React Query for data fetching with caching and deduplication.
  * - Combines client state with query data for a unified state interface.
  *
- * Note: Initial state is derived from `features.sorting` and `features.pagination`
- * at mount and not updated if configuration changes. See {@link ContentListProvider}
- * for details.
+ * Note: Initial state is derived from `features.sorting`, `features.pagination`, and
+ * `features.search` at mount and not updated if configuration changes.
+ * See {@link ContentListProvider} for details.
  *
  * @internal This is automatically included when using `ContentListProvider`.
  */
 export const ContentListStateProvider = ({ children }: ContentListStateProviderProps) => {
   const { features, queryKeyScope } = useContentListConfig();
-  const { sorting, pagination } = features;
+  const { sorting, pagination, search } = features;
 
   // Determine initial sort from sorting config (default: title ascending).
   const initialSort = useMemo(() => {
@@ -80,14 +80,23 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     [pagination, queryKeyScope]
   );
 
-  // Initial client state (filters, sort, page).
+  // Determine initial search from search config (default: undefined).
+  const initialSearch = useMemo(() => {
+    if (isSearchConfig(search) && search.initialSearch) {
+      return search.initialSearch;
+    }
+    return undefined;
+  }, [search]);
+
+  // Initial client state (search, filters, sort, page).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
-      filters: { ...DEFAULT_FILTERS },
+      search: { queryText: initialSearch ?? '' },
+      filters: { ...DEFAULT_FILTERS, search: initialSearch },
       sort: initialSort,
       page: { index: 0, size: initialPageSize },
     }),
-    [initialSort, initialPageSize]
+    [initialSort, initialPageSize, initialSearch]
   );
 
   const [clientState, dispatch] = useReducer(reducer, initialClientState);
@@ -97,6 +106,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     items,
     totalItems,
     isLoading,
+    isFetching,
     error,
     refetch: queryRefetch,
   } = useContentListItemsQuery(clientState);
@@ -112,12 +122,13 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         items,
         totalItems,
         isLoading,
+        isFetching,
         error,
       },
       dispatch,
       refetch,
     }),
-    [clientState, items, totalItems, isLoading, error, dispatch, refetch]
+    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch]
   );
 
   return (

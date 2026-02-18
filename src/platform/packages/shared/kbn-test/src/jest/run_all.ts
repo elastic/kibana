@@ -215,6 +215,15 @@ async function runConfigs(
   let active = 0;
   let index = 0;
 
+  // Staggered warmup: start 1 process to populate the shared Babel transform
+  // cache (data/jest-cache) with common imports (EUI, React, etc.) before
+  // launching the remaining processes. This avoids redundant cold compilations
+  // when multiple processes start simultaneously with an empty cache.
+  // Set JEST_WARMUP_DELAY_MS=0 to disable.
+  const warmupDelayMs = parseInt(process.env.JEST_WARMUP_DELAY_MS || '120000', 10);
+  const useWarmup = maxParallel > 1 && configs.length > 1 && warmupDelayMs > 0;
+  let warmupComplete = !useWarmup;
+
   const slowTestsDir = `${tmpdir()}/kibana-jest-slow-tests`;
   await fs.mkdir(slowTestsDir, { recursive: true });
 
@@ -233,8 +242,10 @@ async function runConfigs(
     }, 60_000);
     heartbeat.unref(); // don't keep the process alive just for the timer
 
+    let warmupTimer: ReturnType<typeof setTimeout> | undefined;
+
     const launchNext = () => {
-      while (active < maxParallel && index < configs.length) {
+      while (active < (warmupComplete ? maxParallel : 1) && index < configs.length) {
         const config = configs[index++];
         const start = Date.now();
         active += 1;
@@ -326,6 +337,17 @@ async function runConfigs(
               log.info(`Configs left: ${remaining}`);
 
               active -= 1;
+
+              // If warmup is still active and a config just completed, the shared
+              // transform cache is warm — ramp to full parallelism immediately.
+              if (!warmupComplete) {
+                warmupComplete = true;
+                if (warmupTimer) clearTimeout(warmupTimer);
+                log.info(
+                  `[jest-warmup] First config completed, ramping to ${maxParallel} parallel processes`
+                );
+              }
+
               if (index < configs.length) {
                 launchNext();
               } else if (active === 0) {
@@ -362,6 +384,27 @@ async function runConfigs(
         });
       }
     };
+
+    // Schedule warmup end: after the delay, ramp to full parallelism even if
+    // the first config hasn't finished yet (the cache is partially warm by then).
+    if (useWarmup) {
+      log.info(
+        `[jest-warmup] Starting 1 process to warm transform cache (${Math.round(
+          warmupDelayMs / 1000
+        )}s before full parallelism)`
+      );
+      warmupTimer = setTimeout(() => {
+        if (!warmupComplete) {
+          warmupComplete = true;
+          log.info(
+            `[jest-warmup] Warmup delay elapsed, ramping to ${maxParallel} parallel processes`
+          );
+          launchNext();
+        }
+      }, warmupDelayMs);
+      warmupTimer.unref();
+    }
+
     launchNext();
   });
 
