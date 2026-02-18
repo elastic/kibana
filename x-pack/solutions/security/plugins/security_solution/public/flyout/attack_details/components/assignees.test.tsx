@@ -177,14 +177,14 @@ describe('Assignees', () => {
     expect(screen.queryByTestId('attack-details-flyout-header-assignees')).not.toBeInTheDocument();
   });
 
-  it('renders assignees block with add button and context menu when has permission', () => {
+  it('renders assignees block with add button and popover when has permission', () => {
     renderAssignees();
 
     expect(screen.getByTestId('attack-details-flyout-header-assignees')).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
     expect(
-      screen.getByTestId('attack-details-flyout-header-assignees-context-menu')
+      screen.getByTestId('attack-details-flyout-header-assignees-popover')
     ).toBeInTheDocument();
   });
 
