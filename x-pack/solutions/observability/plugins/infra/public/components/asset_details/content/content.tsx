@@ -100,7 +100,7 @@ const TabPanel = ({
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();
 
   // The logs tab is a special case because it is not rendered in the DOM until it is clicked due to performance reasons.
-  if (activeWhen === ContentTabIds.LOGS) {
+  if (activeWhen === ContentTabIds.LOGS && activeTabId === activeWhen) {
     return <div data-test-subj={makeTabPanelDataTestSubj({ tabId: activeWhen })}>{children}</div>;
   }
 
