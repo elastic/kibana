@@ -62,25 +62,14 @@ function buildSummaryTable(scores: EvaluationScoreDocument[]): string {
   // Group docs by model
   const byModel = new Map<string, EvaluationScoreDocument[]>();
   for (const doc of scores) {
-    const modelId = doc.task.model.id;
+    const modelId = doc.task.model.id ?? doc.task.model.family;
     if (!byModel.has(modelId)) byModel.set(modelId, []);
     byModel.get(modelId)!.push(doc);
   }
 
   const modelIds = [...byModel.keys()].sort();
 
-  // Header row: Model + one column per evaluator (abbreviated)
-  const ABBREV: Record<string, string> = {
-    'Query Syntax Validity': 'Syntax',
-    'Field Coverage': 'Fields',
-    'Rule Type & Language': 'Type/Lang',
-    'MITRE Accuracy': 'MITRE',
-    'ESQL Functional Equivalence': 'ESQL Equiv',
-    'Rule Name': 'Name',
-    'Rule Description': 'Desc',
-  };
-
-  const headers = ['Model', ...evalNames.map((e) => ABBREV[e] ?? e)];
+  const headers = ['Model', ...evalNames];
 
   const dataRows = modelIds.map((modelId) => {
     const modelDocs = byModel.get(modelId)!;

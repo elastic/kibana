@@ -8,28 +8,6 @@
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 /**
- * Extract the category from a rule name
- * e.g., "credential_access_lsass_handle" -> "credential_access"
- */
-export function extractCategory(ruleName: string): string {
-  const parts = ruleName.toLowerCase().split('_');
-  if (parts.length >= 2) {
-    // Common patterns: category_subcategory_details
-    const potentialCategory = parts[0];
-    const potentialSubcategory = parts[1];
-    
-    // Handle two-word categories
-    const twoWordCategories = ['credential', 'defense', 'command', 'privilege'];
-    if (twoWordCategories.includes(potentialCategory)) {
-      return `${potentialCategory}_${potentialSubcategory}`;
-    }
-    
-    return potentialCategory;
-  }
-  return 'unknown';
-}
-
-/**
  * Extract MITRE ATT&CK techniques from a rule
  */
 export function extractMitreTechniques(

@@ -12,6 +12,8 @@
   "kbn_references": [
     "@kbn/evals",
     "@kbn/scout",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/tooling-log",
+    "@kbn/agent-builder-common"
   ]
 }

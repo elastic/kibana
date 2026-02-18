@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
-import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../plugins/security_solution/common/constants';
-import { extractCategory } from './helpers';
+import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ReferenceRule } from '../datasets/sample_rules';
+
+// These string literals mirror the constants defined in security_solution/common/constants.
+// They are inlined here to avoid a package→plugin import boundary violation.
+const THREAT_HUNTING_AGENT_ID = 'security.agent';
+const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
 const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
@@ -61,7 +61,7 @@ export class SecurityRuleGenerationClient {
       capabilities: getKibanaDefaultAgentCapabilities(),
       attachments: [
         {
-          type: SecurityAgentBuilderAttachments.rule,
+          type: SECURITY_RULE_ATTACHMENT_TYPE,
           data: {
             text: '',
             attachmentLabel: 'AI Rule Creation',
@@ -201,6 +201,18 @@ const extractRuleDataFromToolResults = (results?: ToolResult[]): {
   }
 
   return {};
+};
+
+const extractCategory = (ruleName: string): string => {
+  const parts = ruleName.toLowerCase().split('_');
+  if (parts.length >= 2) {
+    const twoWordCategories = ['credential', 'defense', 'command', 'privilege'];
+    if (twoWordCategories.includes(parts[0])) {
+      return `${parts[0]}_${parts[1]}`;
+    }
+    return parts[0];
+  }
+  return 'unknown';
 };
 
 /**

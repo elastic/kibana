@@ -12,6 +12,7 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
 import type { SecurityRuleGenerationClient } from './chat_client';
 import {
@@ -28,7 +29,6 @@ export interface RuleGenerationTaskOutput {
 
 type RuleExample = Example<{ prompt: string }, ReferenceRule, Record<string, unknown> | null>;
 
-type Log = { info: (msg: string) => void; debug: (msg: string) => void; error: (msg: string) => void };
 
 // ---------------------------------------------------------------------------
 // CODE evaluators — deterministic, no LLM required
@@ -149,7 +149,7 @@ function createEsqlFunctionalEquivalenceEvaluator(
  * Checks that the generated rule name semantically matches the expected rule name —
  * they should convey the same threat detection intent even if worded differently.
  */
-function createRuleNameEvaluator(
+export function createRuleNameEvaluator(
   evaluators: DefaultEvaluators
 ): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
@@ -176,7 +176,7 @@ function createRuleNameEvaluator(
  * Checks that the generated rule description functionally describes the same threat scenario
  * as the expected description, even if worded differently.
  */
-function createRuleDescriptionEvaluator(
+export function createRuleDescriptionEvaluator(
   evaluators: DefaultEvaluators
 ): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   return {
@@ -212,7 +212,7 @@ export function createEvaluateDataset({
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityRuleGenerationClient;
-  log: Log;
+  log: ToolingLog;
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
@@ -222,6 +222,8 @@ export function createEvaluateDataset({
     createMitreAccuracyEvaluator(),
     // LLM — functional/semantic equivalence via built-in @kbn/evals criteria evaluator
     createEsqlFunctionalEquivalenceEvaluator(evaluators),
+    // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
+    // Re-enable when running thorough multi-model comparisons.
     // createRuleNameEvaluator(evaluators),
     // createRuleDescriptionEvaluator(evaluators),
   ];
