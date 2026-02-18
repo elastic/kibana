@@ -6,15 +6,20 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';
+import { flow } from 'lodash';
 
 export function transformOut(
   storedState: StoredPatternAnalysisEmbeddableState,
   references?: Reference[]
 ): PatternAnalysisEmbeddableState {
-  const state = transformTitlesOut(storedState);
+  const transformsFlow = flow(
+    transformTitlesOut<StoredPatternAnalysisEmbeddableState>,
+    transformTimeRangeOut<StoredPatternAnalysisEmbeddableState>,
+  );
+  const state = transformsFlow(storedState);
   const dataViewIdRef = references?.find((ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME);
   return {
     ...state,

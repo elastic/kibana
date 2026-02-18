@@ -11,11 +11,18 @@ import type {
   StoredFieldStatisticsTableEmbeddableState,
 } from './types';
 import { FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
+import { flow } from 'lodash';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 
 export function transformOut(
-  state: StoredFieldStatisticsTableEmbeddableState,
+  storedState: StoredFieldStatisticsTableEmbeddableState,
   references?: Reference[]
 ): FieldStatisticsTableEmbeddableState {
+  const transformsFlow = flow(
+    transformTitlesOut<StoredFieldStatisticsTableEmbeddableState>,
+    transformTimeRangeOut<StoredFieldStatisticsTableEmbeddableState>,
+  );
+  const state = transformsFlow(storedState);
   const dataViewIdRef = references?.find((ref) => ref.name === FIELD_STATS_DATA_VIEW_REF_NAME);
   return {
     ...state,

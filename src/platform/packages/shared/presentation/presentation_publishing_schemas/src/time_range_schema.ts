@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SerializedTimeRange, SerializedTitles } from './src/types';
-export { serializedTimeRangeSchema } from './src/time_range_schema';
-export { serializedTitlesSchema } from './src/titles_schema';
+import { schema } from '@kbn/config-schema';
+import { timeRangeSchema } from '@kbn/es-query-server';
+
+export const serializedTimeRangeSchema = schema.object({
+  time_range: schema.maybe(timeRangeSchema),
+});
