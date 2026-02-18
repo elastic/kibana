@@ -104,6 +104,17 @@ const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
+  private getDocumentId(doc: EvaluationScoreDocument): string {
+    return [
+      doc.run_id,
+      encodeURIComponent(doc.task.model.id),
+      doc.example.dataset.id,
+      doc.example.id,
+      doc.evaluator.name,
+      doc.task.repetition_index,
+    ].join('-');
+  }
+
   private async ensureIndexTemplate(): Promise<void> {
     const templateBody = {
       index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
@@ -243,23 +254,34 @@ export class EvaluationScoreRepository {
 
       // Bulk index documents
       if (documents.length > 0) {
+        const droppedItems: Array<{
+          status?: number;
+          errorType?: string;
+          reason?: string;
+          docId?: string;
+        }> = [];
+
         const stats = await this.esClient.helpers.bulk({
           datasource: documents,
           onDocument: (doc) => {
-            const docId = [
-              doc.run_id,
-              doc.example.dataset.id,
-              doc.example.id,
-              doc.evaluator.name,
-              doc.task.repetition_index,
-            ].join('-');
-
             return {
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: docId,
+                _id: this.getDocumentId(doc),
               },
             };
+          },
+          onDrop: (droppedItem) => {
+            const droppedDoc = droppedItem.document as EvaluationScoreDocument | undefined;
+            const error = droppedItem.error as
+              | { type?: string; reason?: string; caused_by?: { reason?: string } }
+              | undefined;
+            droppedItems.push({
+              status: droppedItem.status,
+              errorType: error?.type,
+              reason: error?.reason ?? error?.caused_by?.reason,
+              docId: droppedDoc ? this.getDocumentId(droppedDoc) : undefined,
+            });
           },
           refresh: 'wait_for',
         });
@@ -269,6 +291,17 @@ export class EvaluationScoreRepository {
           this.log.error(
             `Bulk indexing had ${stats.failed} failed operations out of ${stats.total}`
           );
+          if (droppedItems.length > 0) {
+            const failedSummary = droppedItems.slice(0, 5).map((item) => ({
+              status: item.status,
+              errorType: item.errorType,
+              reason: item.reason,
+              docId: item.docId,
+            }));
+            this.log.error(
+              `Sample bulk indexing failures: ${JSON.stringify(failedSummary, null, 2)}`
+            );
+          }
           throw new Error(
             `Bulk indexing failed: ${stats.failed} of ${stats.total} operations failed`
           );
