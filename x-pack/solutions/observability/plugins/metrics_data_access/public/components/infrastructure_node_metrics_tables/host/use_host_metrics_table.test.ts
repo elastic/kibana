@@ -81,7 +81,7 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `(${kuery})`,
+          kuery: `event.dataset: "hostmetricsreceiver.otel" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
             expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),

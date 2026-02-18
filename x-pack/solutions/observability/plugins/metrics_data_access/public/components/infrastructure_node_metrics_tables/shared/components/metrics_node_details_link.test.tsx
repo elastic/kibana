@@ -201,7 +201,7 @@ describe('MetricsNodeDetailsLink', () => {
         expect.objectContaining({
           entityType: 'host',
           entityId: 'host-01',
-          isOtel: true,
+          preferredSchema: 'semconv',
         })
       );
       expect(discoverLocator.getRedirectUrl).not.toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe('MetricsNodeDetailsLink', () => {
         expect.objectContaining({
           entityType: 'container',
           entityId: 'abc-123',
-          isOtel: false,
+          preferredSchema: 'ecs',
           search: expect.objectContaining({ name: 'my-container' }),
         })
       );

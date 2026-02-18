@@ -76,7 +76,7 @@ describe('usePodMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery: `(${kuery})`,
+          kuery: `event.dataset: "kubeletstatsreceiver.otel" AND (${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
             expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
