@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import type { ComponentProps, ComponentRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useState, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
@@ -21,6 +22,8 @@ import { EsqlQuery } from '@kbn/esql-language';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { throttle } from 'lodash';
+import useLatest from 'react-use/lib/useLatest';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -49,6 +52,8 @@ export interface ESQLDataCascadeProps
   queryMeta: ESQLStatsQueryMeta;
 }
 
+type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;
+
 const ESQLDataCascade = React.memo(
   ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
     const {
@@ -56,6 +61,8 @@ const ESQLDataCascade = React.memo(
       selectedCascadeGroups,
       esqlVariables,
       viewModeToggle,
+      dataCascadeUiState,
+      setDataCascadeUiState,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
@@ -109,13 +116,48 @@ const ESQLDataCascade = React.memo(
       [dataView, props]
     );
 
+    const initialTableState = useMemo<ComponentProps<EsqlDataCascade>['initialTableState']>(
+      () => ({
+        expanded: dataCascadeUiState?.expanded,
+        rowSelection: dataCascadeUiState?.rowSelection,
+      }),
+      [dataCascadeUiState]
+    );
+
+    const latestSetDataCascadeUiState = useLatest(setDataCascadeUiState);
+    const [dataCascadeRef, setDataCascadeRef] = useState<ComponentRef<EsqlDataCascade> | null>(
+      null
+    );
+
+    useEffect(() => {
+      const snapshotStore = dataCascadeRef?.getUISnapshotStore();
+
+      if (!snapshotStore) {
+        return;
+      }
+
+      const unsubscribeSnapshot = snapshotStore.subscribe(
+        throttle(() => {
+          latestSetDataCascadeUiState.current({ ...snapshotStore.getSnapshot() });
+        }, 150)
+      );
+
+      return () => {
+        unsubscribeSnapshot();
+      };
+    }, [dataCascadeRef, latestSetDataCascadeUiState]);
+
     return (
       <DataCascade<ESQLDataGroupNode>
+        ref={setDataCascadeRef}
         size="s"
         overscan={25}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
+        initialScrollOffset={dataCascadeUiState?.scrollOffset}
+        initialTableState={initialTableState}
+        initialRect={dataCascadeUiState?.scrollRect}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>

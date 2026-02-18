@@ -31,8 +31,10 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataCascadeUISnapshot } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ESQLDataGroupNode } from '../../components/layout/cascaded_documents/blocks';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -176,6 +178,7 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;

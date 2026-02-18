@@ -494,12 +494,16 @@ function DiscoverDocumentsComponent({
     stateContainer.runtimeStateManager,
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
+  const latestDataCascadeUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.dataCascade)
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
+  const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
@@ -517,6 +521,9 @@ function DiscoverDocumentsComponent({
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
+      dataCascadeUiState: latestDataCascadeUiState.current,
+      setDataCascadeUiState: (nextUiState) =>
+        dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -528,10 +535,12 @@ function DiscoverDocumentsComponent({
     cascadedDocumentsFetcher,
     dispatch,
     esqlVariables,
+    latestDataCascadeUiState,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
+    setDataCascadeUiState,
     setSelectedCascadeGroups,
     viewModeToggle,
   ]);
