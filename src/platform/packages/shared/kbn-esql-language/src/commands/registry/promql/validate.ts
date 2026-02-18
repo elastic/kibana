@@ -21,6 +21,7 @@ import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
   getPromqlFunctionDefinition,
+  getPromqlOperatorDefinition,
   isPromqlAcrossSeriesFunction,
 } from '../../definitions/utils/promql';
 import { getPromqlExpressionType } from '../../definitions/utils/expressions';
@@ -34,6 +35,7 @@ import {
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
 import type {
+  PromQLBinaryExpression,
   PromQLFunction,
   PromQLLabelName,
   PromQLSelector,
@@ -43,7 +45,7 @@ import {
   IDENTIFIER_PATTERN,
   isPromqlParamName,
   looksLikePromqlParamAssignment,
-  PROMQL_REQUIRED_PARAMS,
+  PromqlParamName,
 } from './utils';
 
 // ISO 8601 with Z, optional milliseconds (e.g. 2024-01-15T10:00:00Z or ...00.000Z).
@@ -70,7 +72,7 @@ export const validate = (
     usedParams.add(param);
   }
 
-  if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has('step')) {
+  if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has(PromqlParamName.Step)) {
     messages.push(
       getMessageFromId({
         messageId: 'promqlInvalidStepParam',
@@ -80,28 +82,27 @@ export const validate = (
     );
   }
 
-  for (const param of PROMQL_REQUIRED_PARAMS) {
-    if (usedParams.has(param)) {
-      continue;
-    }
+  const hasStep = usedParams.has(PromqlParamName.Step);
+  const hasBuckets = usedParams.has(PromqlParamName.Buckets);
 
+  if (hasStep && hasBuckets) {
     messages.push({
       ...getMessageFromId({
-        messageId: 'promqlMissingParam',
-        values: { param },
+        messageId: 'promqlMutuallyExclusiveParams',
+        values: { param1: PromqlParamName.Step, param2: PromqlParamName.Buckets },
         locations: command.location,
       }),
     });
   }
 
-  const hasStart = usedParams.has('start');
-  const hasEnd = usedParams.has('end');
+  const hasStart = usedParams.has(PromqlParamName.Start);
+  const hasEnd = usedParams.has(PromqlParamName.End);
 
   if (hasStart !== hasEnd) {
     messages.push({
       ...getMessageFromId({
         messageId: 'promqlMissingParam',
-        values: { param: hasStart ? 'end' : 'start' },
+        values: { param: hasStart ? PromqlParamName.End : PromqlParamName.Start },
         locations: command.location,
       }),
     });
@@ -125,7 +126,7 @@ export const validate = (
       continue;
     }
 
-    if (param === 'start' || param === 'end') {
+    if (param === PromqlParamName.Start || param === PromqlParamName.End) {
       const normalized = stripQuotes(value);
       const isPlaceholder = normalized === '?_tstart' || normalized === '?_tend';
 
@@ -140,13 +141,26 @@ export const validate = (
       }
     }
 
-    if (param === 'step') {
+    if (param === PromqlParamName.Step) {
       const normalized = stripQuotes(value);
 
       if (!FORMAT_STEP_DURATION_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
             messageId: 'promqlInvalidStepParam',
+            values: {},
+            locations: keyLocation ?? location,
+          }),
+        });
+      }
+    }
+
+    if (param === PromqlParamName.Buckets) {
+      const num = Number(value);
+      if (!Number.isInteger(num) || num <= 0) {
+        messages.push({
+          ...getMessageFromId({
+            messageId: 'promqlInvalidBucketsParam',
             values: {},
             locations: keyLocation ?? location,
           }),
@@ -238,7 +252,7 @@ function validateIndexSources(
 ): void {
   const params = command.params;
   const indexEntry = params?.entries.find(
-    (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
+    (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === PromqlParamName.Index
   );
 
   if (indexEntry) {
@@ -265,7 +279,7 @@ function validateIndexSources(
   }
 
   // Fallback: handles case when index is mis-parsed into query field
-  const indexParam = paramValues.get('index');
+  const indexParam = paramValues.get(PromqlParamName.Index);
   if (indexParam && indexParam.value) {
     const indexName = stripQuotes(indexParam.value);
 
@@ -435,6 +449,11 @@ function validatePromqlQuery(
       visitPromqlSelector: (selector) => {
         selectors.push(selector);
       },
+
+      visitPromqlBinaryExpression: (binary) => {
+        const definition = getPromqlOperatorDefinition(binary.name);
+        messages.push(...getBinaryOperatorTypeErrors(binary, definition));
+      },
     },
   });
 
@@ -521,6 +540,33 @@ function getMatchingSignatureErrors(
       messageId: 'promqlNoMatchingSignature',
       values: { fn: fn.name, required: mismatch.required },
       locations: getPromqlNodeLocation(fn.args[mismatch.mismatchIdx], fn.location),
+    }),
+  ];
+}
+
+/* Returns an error when binary operator operand types don't match any signature. */
+function getBinaryOperatorTypeErrors(
+  binary: PromQLBinaryExpression,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || binary.incomplete) return [];
+
+  const argTypes = [binary.left, binary.right].map(getPromqlExpressionType);
+  if (argTypes.some((argType) => !argType)) return [];
+
+  const matching = getPromqlMatchingSignatures(definition.signatures, argTypes);
+  if (matching.length > 0) return [];
+
+  const mismatch = getPromqlSignatureMismatch(definition.signatures, argTypes, 2);
+  if (!mismatch) return [];
+
+  const mismatchedNode = mismatch.mismatchIdx === 0 ? binary.left : binary.right;
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlNoMatchingSignature',
+      values: { fn: binary.name, required: mismatch.required },
+      locations: getPromqlNodeLocation(mismatchedNode, binary.location),
     }),
   ];
 }
