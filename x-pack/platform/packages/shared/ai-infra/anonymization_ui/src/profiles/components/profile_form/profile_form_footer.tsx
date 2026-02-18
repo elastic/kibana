@@ -6,27 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useProfileFlyoutContext } from './context';
-
-export const ProfileFlyoutFooter = () => {
-  return (
-    <EuiFlyoutFooter>
-      <ProfileFormFooter />
-    </EuiFlyoutFooter>
-  );
-};
+import { useProfileFormContext } from './profile_form_context';
 
 export const ProfileFormFooter = () => {
-  const { isManageMode, isSubmitting, onCancel, onSubmit, targetIdField } =
-    useProfileFlyoutContext();
+  const { isManageMode, isSubmitting, onCancel, onSubmit, targetIdField } = useProfileFormContext();
   const isSubmitDisabled =
     !isManageMode ||
     isSubmitting ||

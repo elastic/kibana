@@ -8,15 +8,15 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RegexRulesPanel } from './regex_rules_panel';
-import { useProfileFlyoutContext } from './context';
+import { useProfileFormContext } from '../profile_form_context';
 
-jest.mock('./context', () => ({
-  useProfileFlyoutContext: jest.fn(),
+jest.mock('../profile_form_context', () => ({
+  useProfileFormContext: jest.fn(),
 }));
 
-const setContext = (overrides: Partial<ReturnType<typeof useProfileFlyoutContext>> = {}) => {
+const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
   const onRegexRulesChange = jest.fn();
-  jest.mocked(useProfileFlyoutContext).mockReturnValue({
+  jest.mocked(useProfileFormContext).mockReturnValue({
     regexRules: [
       {
         id: 'regex-1',
@@ -30,7 +30,7 @@ const setContext = (overrides: Partial<ReturnType<typeof useProfileFlyoutContext
     isManageMode: true,
     isSubmitting: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useProfileFlyoutContext>);
+  } as unknown as ReturnType<typeof useProfileFormContext>);
 
   return { onRegexRulesChange };
 };

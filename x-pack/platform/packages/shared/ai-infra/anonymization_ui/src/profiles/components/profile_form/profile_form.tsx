@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { ProfileFormFooter } from './footer';
+import { ProfileFormFooter } from './profile_form_footer';
 import { ProfileFormContent } from './profile_form_content';
 import type { ProfileFormProps } from './profile_form_props';
 import { ProfileFormProvider } from './profile_form_provider';

@@ -9,24 +9,24 @@ import React, { createContext, useContext } from 'react';
 import type { UseTargetIdFieldResult } from './hooks/use_target_id_field';
 import type { ProfileFormProps } from './profile_form_props';
 
-export interface ProfileFlyoutContextValue extends ProfileFormProps {
+export interface ProfileFormContextValue extends ProfileFormProps {
   targetIdField: UseTargetIdFieldResult;
 }
 
-const ProfileFlyoutContext = createContext<ProfileFlyoutContextValue | undefined>(undefined);
+const ProfileFormContext = createContext<ProfileFormContextValue | undefined>(undefined);
 
-export const ProfileFlyoutContextProvider = ({
+export const ProfileFormContextProvider = ({
   value,
   children,
 }: {
-  value: ProfileFlyoutContextValue;
+  value: ProfileFormContextValue;
   children: React.ReactNode;
-}) => <ProfileFlyoutContext.Provider value={value}>{children}</ProfileFlyoutContext.Provider>;
+}) => <ProfileFormContext.Provider value={value}>{children}</ProfileFormContext.Provider>;
 
-export const useProfileFlyoutContext = (): ProfileFlyoutContextValue => {
-  const context = useContext(ProfileFlyoutContext);
+export const useProfileFormContext = (): ProfileFormContextValue => {
+  const context = useContext(ProfileFormContext);
   if (context === undefined) {
-    throw new Error('useProfileFlyoutContext must be used within ProfileFlyoutContextProvider');
+    throw new Error('useProfileFormContext must be used within ProfileFormContextProvider');
   }
   return context;
 };

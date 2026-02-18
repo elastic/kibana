@@ -23,14 +23,14 @@ import {
 } from '@elastic/eui';
 import type { RegexRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
-import { useProfileFlyoutContext } from './context';
+import { useProfileFormContext } from '../profile_form_context';
 
 const REGEX_RULE_STATE_ENABLED = 'enabled';
 const REGEX_RULE_STATE_DISABLED = 'disabled';
 
 export const RegexRulesPanel = () => {
   const { regexRules, onRegexRulesChange, isManageMode, isSubmitting, regexRulesError } =
-    useProfileFlyoutContext();
+    useProfileFormContext();
   const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'CUSTOM' });
   const showValidationErrors = Boolean(regexRulesError);
 

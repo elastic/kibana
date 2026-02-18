@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ProfileFlyoutContextProvider } from './context';
+import { ProfileFormContextProvider } from './profile_form_context';
 import { useTargetIdField } from './hooks/use_target_id_field';
 import type { ProfileFormProps } from './profile_form_props';
 
@@ -34,10 +34,10 @@ export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderP
   };
 
   return (
-    <ProfileFlyoutContextProvider
+    <ProfileFormContextProvider
       value={{ ...props, onSubmit: onSubmitWithTargetValidation, targetIdField }}
     >
       {children}
-    </ProfileFlyoutContextProvider>
+    </ProfileFormContextProvider>
   );
 };

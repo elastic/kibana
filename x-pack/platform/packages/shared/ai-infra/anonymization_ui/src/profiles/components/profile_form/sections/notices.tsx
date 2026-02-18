@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useProfileFlyoutContext } from './context';
+import { useProfileFormContext } from '../profile_form_context';
 
-export const ProfileFlyoutNotices = () => {
-  const { submitError, hasConflict } = useProfileFlyoutContext();
+export const ProfileFormNotices = () => {
+  const { submitError, hasConflict } = useProfileFormContext();
 
   return (
     <>

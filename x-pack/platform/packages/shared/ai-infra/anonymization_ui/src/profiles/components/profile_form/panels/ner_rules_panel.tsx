@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 import type { NerRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
-import { useProfileFlyoutContext } from './context';
-import { useNerRulesPanelState } from './hooks/use_ner_rules_panel_state';
+import { useProfileFormContext } from '../profile_form_context';
+import { useNerRulesPanelState } from '../hooks/use_ner_rules_panel_state';
 
 const NER_RULE_STATE_ENABLED = 'enabled';
 const NER_RULE_STATE_DISABLED = 'disabled';
@@ -40,7 +40,7 @@ export const NerRulesPanel = () => {
     listTrustedNerModels,
     onNerRulesChange,
     nerRulesError,
-  } = useProfileFlyoutContext();
+  } = useProfileFormContext();
 
   const {
     nerDraft,

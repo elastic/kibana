@@ -9,12 +9,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiIcon, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldRulesPanel } from '../field_rules/field_rules_panel';
-import { NerRulesPanel } from './ner_rules_panel';
-import { PreviewPanel } from './preview_panel';
-import { ProfileBasicsSection } from './basics_section';
-import { useProfileFlyoutContext } from './context';
-import { ProfileFlyoutNotices } from './notices';
-import { RegexRulesPanel } from './regex_rules_panel';
+import { NerRulesPanel } from './panels/ner_rules_panel';
+import { PreviewPanel } from './panels/preview_panel';
+import { RegexRulesPanel } from './panels/regex_rules_panel';
+import { ProfileBasicsSection } from './sections/basics_section';
+import { ProfileFormNotices } from './sections/notices';
+import { useProfileFormContext } from './profile_form_context';
 
 export const ProfileFormContent = () => {
   const {
@@ -28,7 +28,7 @@ export const ProfileFormContent = () => {
     regexRulesError,
     targetId,
     targetIdField,
-  } = useProfileFlyoutContext();
+  } = useProfileFormContext();
 
   const hasLoadedDataSource = isEdit || targetId.trim().length > 0 || fieldRules.length > 0;
   const [selectedTabId, setSelectedTabId] = useState('fieldRules');
@@ -171,7 +171,7 @@ export const ProfileFormContent = () => {
 
   return (
     <>
-      <ProfileFlyoutNotices />
+      <ProfileFormNotices />
       <ProfileBasicsSection />
       {hasLoadedDataSource ? (
         <>

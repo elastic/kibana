@@ -15,9 +15,9 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TARGET_TYPE_DATA_VIEW } from '../../../target_types';
-import { TARGET_TYPE_OPTIONS } from '../constants';
-import { useProfileFlyoutContext } from './context';
+import { TARGET_TYPE_DATA_VIEW } from '../../../../target_types';
+import { TARGET_TYPE_OPTIONS } from '../../constants';
+import { useProfileFormContext } from '../profile_form_context';
 
 export const ProfileBasicsSection = () => {
   const {
@@ -33,7 +33,7 @@ export const ProfileBasicsSection = () => {
     onDescriptionChange,
     onTargetTypeChange,
     targetIdField,
-  } = useProfileFlyoutContext();
+  } = useProfileFormContext();
 
   const onTargetTypeSelectChange = (value: string) => {
     const selectedOption = TARGET_TYPE_OPTIONS.find((option) => option.value === value);

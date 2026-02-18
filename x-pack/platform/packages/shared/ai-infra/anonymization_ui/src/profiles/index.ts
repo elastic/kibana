@@ -8,13 +8,13 @@
 export { createAnonymizationProfilesClient } from './services/profiles/client';
 export { AnonymizationProfilesSection } from './anonymization_profiles_section';
 export type { AnonymizationProfilesSectionProps } from './anonymization_profiles_section';
-export { ProfileForm } from './components/flyout/profile_form';
-export { ProfileFormContent } from './components/flyout/profile_form_content';
-export type { ProfileFormProps } from './components/flyout/profile_form_props';
-export { ProfileFormProvider } from './components/flyout/profile_form_provider';
+export { ProfileForm } from './components/profile_form/profile_form';
+export { ProfileFormContent } from './components/profile_form/profile_form_content';
+export type { ProfileFormProps } from './components/profile_form/profile_form_props';
+export { ProfileFormProvider } from './components/profile_form/profile_form_provider';
 export { ProfileFlyout } from './components/flyout/profile_flyout';
 export type { ProfileFlyoutProps } from './components/flyout/profile_flyout';
-export { ProfileFormFooter } from './components/flyout/footer';
+export { ProfileFormFooter } from './components/profile_form/profile_form_footer';
 export { ProfilesToolbar } from './components/toolbar/profiles_toolbar';
 export { ProfilesTable } from './components/table/profiles_table';
 export { DeleteProfileModal } from './components/delete_modal/delete_profile_modal';

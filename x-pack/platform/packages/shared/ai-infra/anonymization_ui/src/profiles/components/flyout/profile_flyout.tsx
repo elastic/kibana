@@ -6,12 +6,19 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProfileFlyoutFooter } from './footer';
-import { ProfileFormContent } from './profile_form_content';
-import type { ProfileFormProps } from './profile_form_props';
-import { ProfileFormProvider } from './profile_form_provider';
+import { ProfileFormContent } from '../profile_form/profile_form_content';
+import { ProfileFormFooter } from '../profile_form/profile_form_footer';
+import type { ProfileFormProps } from '../profile_form/profile_form_props';
+import { ProfileFormProvider } from '../profile_form/profile_form_provider';
 
 export type ProfileFlyoutProps = ProfileFormProps;
 
@@ -60,7 +67,9 @@ export const ProfileFlyout = (props: ProfileFlyoutProps) => {
         <EuiFlyoutBody>
           <ProfileFormContent />
         </EuiFlyoutBody>
-        <ProfileFlyoutFooter />
+        <EuiFlyoutFooter>
+          <ProfileFormFooter />
+        </EuiFlyoutFooter>
       </ProfileFormProvider>
     </EuiFlyout>
   );

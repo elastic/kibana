@@ -21,13 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type PreviewRow, getPreviewDisplayValue } from '../../hooks/preview';
+import { type PreviewRow, getPreviewDisplayValue } from '../../../hooks/preview';
 import {
   FIELD_RULE_ACTION_ANONYMIZE,
   FIELD_RULE_ACTION_DENY,
-} from '../../hooks/field_rule_actions';
-import { useProfileFlyoutContext } from './context';
-import { usePreviewPanelState } from './hooks/use_preview_panel_state';
+} from '../../../hooks/field_rule_actions';
+import { useProfileFormContext } from '../profile_form_context';
+import { usePreviewPanelState } from '../hooks/use_preview_panel_state';
 
 const MASK_TOKEN_PATTERN = /^<[^>]+>$/;
 
@@ -133,7 +133,7 @@ const renderDeniedIndicator = (action: PreviewRow['action']) => {
 
 export const PreviewPanel = () => {
   const { fieldRules, regexRules, isSubmitting, targetType, targetId, fetchPreviewDocument } =
-    useProfileFlyoutContext();
+    useProfileFormContext();
   const {
     previewViewMode,
     setPreviewViewMode,
