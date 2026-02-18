@@ -10,7 +10,6 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
-  controlsGroupSchema,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
@@ -71,33 +70,20 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
           state as LegacyStoredOptionsListExplicitInput
         );
 
-        const transformedConfig = {
+        // Optional legacy props may have been stored as `null` instead of `undefined`, so convert
+        // all nulls to `undefined`
+        return {
           ...dataControlState,
-          exclude,
-          ...{ sort: sort as OptionsListDSLControlState['sort'] },
-          exists_selected,
-          display_settings,
-          run_past_timeout,
-          search_technique: search_technique as OptionsListDSLControlState['search_technique'],
-          selected_options,
-          single_select,
+          exclude: exclude ?? undefined,
+          ...{ sort: (sort as OptionsListDSLControlState['sort']) ?? undefined },
+          exists_selected: exists_selected ?? undefined,
+          display_settings: display_settings ?? undefined,
+          run_past_timeout: run_past_timeout ?? undefined,
+          search_technique:
+            (search_technique as OptionsListDSLControlState['search_technique']) ?? undefined,
+          selected_options: selected_options ?? undefined,
+          single_select: single_select ?? undefined,
         };
-
-        try {
-          controlsGroupSchema.validate([transformedConfig]);
-        } catch (e) {
-          // If the control config fails to validate because of unexpected `null` values, try omitting the `null` values
-          const deNulledConfig = Object.entries(transformedConfig).reduce(
-            (result, [key, value]) => {
-              if (value === null) return result;
-              return { ...result, [key]: value };
-            },
-            {} as OptionsListDSLControlState
-          );
-          return deNulledConfig;
-        }
-
-        return transformedConfig;
       },
     }),
   });
