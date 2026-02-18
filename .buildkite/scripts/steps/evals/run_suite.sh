@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+# NOTE: Keep this Buildkite *step* script mostly bash + orchestration.
+# - If you need non-trivial logic (parsing/transforming JSON, label/model selection, connector merging, etc),
+#   put it in a standalone script under `x-pack/platform/packages/shared/kbn-evals/scripts/ci/`
+#   and call it from here (see `get_connector_ids.js`, `merge_ai_connectors.js`, `generate_eis_connectors.js`).
+# - Avoid inline `node - <<'NODE'` heredocs in this file; ops/reviewers will ask to extract them anyway.
+
 EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
 if [[ -z "$EVAL_SUITE_ID" ]]; then
   echo "EVAL_SUITE_ID is required"
