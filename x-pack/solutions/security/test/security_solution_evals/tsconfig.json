@@ -18,6 +18,7 @@
     "@kbn/security-solution-plugin",
     "@kbn/detections-response-ftr-services",
     "@kbn/es-archiver",
+    "@kbn/scout-security",
   ]
 }
 
