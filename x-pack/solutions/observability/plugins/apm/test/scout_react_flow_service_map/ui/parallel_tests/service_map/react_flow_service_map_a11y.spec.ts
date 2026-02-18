@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { SERVICE_OPBEANS_JAVA, SERVICE_OPBEANS_NODE } from '../../fixtures/constants';
@@ -20,162 +21,166 @@ import { SERVICE_OPBEANS_JAVA, SERVICE_OPBEANS_NODE } from '../../fixtures/const
  *
  * Tests run with the serviceMapUseReactFlow feature flag enabled.
  */
-test.describe('React Flow Service Map Accessibility', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { reactFlowServiceMapPage } }) => {
-    await browserAuth.loginAsViewer();
-    await reactFlowServiceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
-    await reactFlowServiceMapPage.waitForReactFlowServiceMapToLoad();
-  });
+test.describe(
+  'React Flow Service Map Accessibility',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { reactFlowServiceMapPage } }) => {
+      await browserAuth.loginAsViewer();
+      await reactFlowServiceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await reactFlowServiceMapPage.waitForReactFlowServiceMapToLoad();
+    });
 
-  test('axe-core automated accessibility checks pass', async ({
-    page,
-    pageObjects: { reactFlowServiceMapPage },
-  }) => {
-    await test.step('service map container has no accessibility violations', async () => {
-      await page.testSubj.locator('reactFlowServiceMap').waitFor({ state: 'visible' });
+    test('axe-core automated accessibility checks pass', async ({
+      page,
+      pageObjects: { reactFlowServiceMapPage },
+    }) => {
+      await test.step('service map container has no accessibility violations', async () => {
+        await page.testSubj.locator('reactFlowServiceMap').waitFor({ state: 'visible' });
 
-      const { violations } = await page.checkA11y({
-        include: ['[data-test-subj="reactFlowServiceMap"]'],
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="reactFlowServiceMap"]'],
+        });
+
+        expect(violations).toHaveLength(0);
       });
 
-      expect(violations).toHaveLength(0);
-    });
+      await test.step('service map controls have no accessibility violations', async () => {
+        const { violations } = await page.checkA11y({
+          include: ['[data-testid="rf__controls"]'],
+        });
 
-    await test.step('service map controls have no accessibility violations', async () => {
-      const { violations } = await page.checkA11y({
-        include: ['[data-testid="rf__controls"]'],
+        expect(violations).toHaveLength(0);
       });
 
-      expect(violations).toHaveLength(0);
+      await test.step('service node popover has no accessibility violations', async () => {
+        await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+        await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="serviceMapPopoverContent"]'],
+        });
+
+        expect(violations).toHaveLength(0);
+      });
     });
 
-    await test.step('service node popover has no accessibility violations', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
-      await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+    test('keyboard navigation works correctly', async ({
+      page,
+      pageObjects: { reactFlowServiceMapPage },
+    }) => {
+      await test.step('service map nodes are focusable with Tab key', async () => {
+        await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
 
-      const { violations } = await page.checkA11y({
-        include: ['[data-test-subj="serviceMapPopoverContent"]'],
+        const serviceMap = page.testSubj.locator('reactFlowServiceMap');
+        await serviceMap.focus();
+        await page.keyboard.press('Tab');
+
+        const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+        expect(focusedElement).toBeTruthy();
       });
 
-      expect(violations).toHaveLength(0);
-    });
-  });
-
-  test('keyboard navigation works correctly', async ({
-    page,
-    pageObjects: { reactFlowServiceMapPage },
-  }) => {
-    await test.step('service map nodes are focusable with Tab key', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-
-      const serviceMap = page.testSubj.locator('reactFlowServiceMap');
-      await serviceMap.focus();
-      await page.keyboard.press('Tab');
-
-      const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
-      expect(focusedElement).toBeTruthy();
-    });
-
-    await test.step('pressing Enter on a focused node opens the popover', async () => {
-      await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, 'Enter');
-    });
-
-    await test.step('pressing Escape closes the popover', async () => {
-      await page.keyboard.press('Escape');
-
-      await reactFlowServiceMapPage.waitForPopoverToBeHidden();
-      await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeHidden();
-    });
-
-    await test.step('pressing Space on a focused node opens the popover', async () => {
-      await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, ' ');
-
-      await page.keyboard.press('Escape');
-      await reactFlowServiceMapPage.waitForPopoverToBeHidden();
-    });
-
-    await test.step('arrow keys navigate between nodes', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_NODE);
-
-      const javaNode = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      await javaNode.focus();
-
-      const originalFocusedId = await page.evaluate(() => {
-        const el = document.activeElement?.closest('[data-id]');
-        return el?.getAttribute('data-id');
+      await test.step('pressing Enter on a focused node opens the popover', async () => {
+        await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, 'Enter');
       });
 
-      await page.keyboard.press('ArrowRight');
+      await test.step('pressing Escape closes the popover', async () => {
+        await page.keyboard.press('Escape');
 
-      const newFocusedId = await page.evaluate(() => {
-        const el = document.activeElement?.closest('[data-id]');
-        return el?.getAttribute('data-id');
+        await reactFlowServiceMapPage.waitForPopoverToBeHidden();
+        await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeHidden();
       });
 
-      expect(newFocusedId || originalFocusedId).toBeTruthy();
-    });
-  });
+      await test.step('pressing Space on a focused node opens the popover', async () => {
+        await reactFlowServiceMapPage.openPopoverWithKeyboard(SERVICE_OPBEANS_JAVA, ' ');
 
-  test('focus management and visible indicators work correctly', async ({
-    page,
-    pageObjects: { reactFlowServiceMapPage },
-  }) => {
-    await test.step('nodes have visible focus indicators when focused', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+        await page.keyboard.press('Escape');
+        await reactFlowServiceMapPage.waitForPopoverToBeHidden();
+      });
 
-      const node = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      await node.focus();
+      await test.step('arrow keys navigate between nodes', async () => {
+        await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_NODE);
 
-      const isFocused = await page.evaluate((nodeId) => {
-        const nodeEl = document.querySelector(`[data-id="${nodeId}"]`);
-        return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement);
-      }, SERVICE_OPBEANS_JAVA);
+        const javaNode = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        await javaNode.focus();
 
-      expect(isFocused).toBe(true);
-    });
+        const originalFocusedId = await page.evaluate(() => {
+          const el = document.activeElement?.closest('[data-id]');
+          return el?.getAttribute('data-id');
+        });
 
-    await test.step('zoom controls are keyboard accessible', async () => {
-      await expect(reactFlowServiceMapPage.reactFlowZoomInBtn).toBeVisible();
-      await expect(reactFlowServiceMapPage.reactFlowZoomOutBtn).toBeVisible();
-      await expect(reactFlowServiceMapPage.reactFlowFitViewBtn).toBeVisible();
+        await page.keyboard.press('ArrowRight');
 
-      await reactFlowServiceMapPage.reactFlowZoomInBtn.focus();
-      await page.keyboard.press('Enter');
+        const newFocusedId = await page.evaluate(() => {
+          const el = document.activeElement?.closest('[data-id]');
+          return el?.getAttribute('data-id');
+        });
 
-      await expect(reactFlowServiceMapPage.reactFlowControls).toBeVisible();
-    });
-  });
-
-  test('ARIA attributes are properly set for screen readers', async ({
-    page,
-    pageObjects: { reactFlowServiceMapPage },
-  }) => {
-    await test.step('service map container has aria-label describing the content', async () => {
-      const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
-      await expect(serviceMapContainer).toBeVisible();
-
-      await expect(serviceMapContainer).toHaveAttribute('aria-label', /Service map/);
+        expect(newFocusedId || originalFocusedId).toBeTruthy();
+      });
     });
 
-    await test.step('service nodes have proper role and aria-label', async () => {
-      await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+    test('focus management and visible indicators work correctly', async ({
+      page,
+      pageObjects: { reactFlowServiceMapPage },
+    }) => {
+      await test.step('nodes have visible focus indicators when focused', async () => {
+        await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
 
-      const nodeContainer = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      const interactiveElement = nodeContainer.locator('[role="button"]');
+        const node = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        await node.focus();
 
-      await expect(interactiveElement).toHaveAttribute('role', 'button');
-      await expect(interactiveElement).toHaveAttribute('aria-label', /service/i);
-      await expect(interactiveElement).toHaveAttribute(
-        'aria-label',
-        new RegExp(SERVICE_OPBEANS_JAVA, 'i')
-      );
+        const isFocused = await page.evaluate((nodeId) => {
+          const nodeEl = document.querySelector(`[data-id="${nodeId}"]`);
+          return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement);
+        }, SERVICE_OPBEANS_JAVA);
+
+        expect(isFocused).toBe(true);
+      });
+
+      await test.step('zoom controls are keyboard accessible', async () => {
+        await expect(reactFlowServiceMapPage.reactFlowZoomInBtn).toBeVisible();
+        await expect(reactFlowServiceMapPage.reactFlowZoomOutBtn).toBeVisible();
+        await expect(reactFlowServiceMapPage.reactFlowFitViewBtn).toBeVisible();
+
+        await reactFlowServiceMapPage.reactFlowZoomInBtn.focus();
+        await page.keyboard.press('Enter');
+
+        await expect(reactFlowServiceMapPage.reactFlowControls).toBeVisible();
+      });
     });
 
-    await test.step('screen reader announcement region exists within service map', async () => {
-      const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
-      const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
-      await expect(liveRegion).toHaveCount(1);
+    test('ARIA attributes are properly set for screen readers', async ({
+      page,
+      pageObjects: { reactFlowServiceMapPage },
+    }) => {
+      await test.step('service map container has aria-label describing the content', async () => {
+        const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
+        await expect(serviceMapContainer).toBeVisible();
+
+        await expect(serviceMapContainer).toHaveAttribute('aria-label', /Service map/);
+      });
+
+      await test.step('service nodes have proper role and aria-label', async () => {
+        await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+
+        const nodeContainer = reactFlowServiceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        const interactiveElement = nodeContainer.locator('[role="button"]');
+
+        await expect(interactiveElement).toHaveAttribute('role', 'button');
+        await expect(interactiveElement).toHaveAttribute('aria-label', /service/i);
+        await expect(interactiveElement).toHaveAttribute(
+          'aria-label',
+          new RegExp(SERVICE_OPBEANS_JAVA, 'i')
+        );
+      });
+
+      await test.step('screen reader announcement region exists within service map', async () => {
+        const serviceMapContainer = page.testSubj.locator('reactFlowServiceMap');
+        const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
+        await expect(liveRegion).toHaveCount(1);
+      });
     });
-  });
-});
+  }
+);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -32,6 +32,7 @@ export function TraceExplorerWaterfall() {
       environment,
       showCriticalPath,
       detailTab,
+      kuery,
     },
   } = useApmParams('/traces/explorer/waterfall');
 
@@ -106,6 +107,8 @@ export function TraceExplorerWaterfall() {
     [history]
   );
 
+  const queryParams = useMemo(() => ({ kuery }), [kuery]);
+
   const isWaterfallLoading =
     waterfallFetchResult.status === FETCH_STATUS.LOADING &&
     !waterfallFetchResult.waterfall.entryWaterfallTransaction;
@@ -125,6 +128,9 @@ export function TraceExplorerWaterfall() {
         serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        queryParams={queryParams}
       />
     </ResettingHeightRetainer>
   );
