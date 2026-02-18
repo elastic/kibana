@@ -13,8 +13,8 @@ import {
   generateHostsData,
   indexAll,
 } from '@kbn/synthtrace';
-import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/tool';
+import { OBSERVABILITY_GET_HOST_METRICS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
+import type { GetHostMetricsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_host_metrics/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
@@ -22,7 +22,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
 
-  describe(`tool: ${OBSERVABILITY_GET_HOSTS_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_HOST_METRICS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let infraSynthtraceEsClient: InfraSynthtraceEsClient;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -76,11 +76,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('when fetching hosts', () => {
-      let resultData: GetHostsToolResult['data'];
+      let resultData: GetHostMetricsToolResult['data'];
 
       before(async () => {
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetHostMetricsToolResult>({
+          id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
             end: 'now',
@@ -159,8 +159,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using limit parameter', () => {
       it('respects the limit and returns fewer hosts', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetHostMetricsToolResult>({
+          id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
             end: 'now',
@@ -176,8 +176,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using kqlFilter parameter', () => {
       it('filters hosts by KQL query', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetHostMetricsToolResult>({
+          id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
             end: 'now',
@@ -224,8 +224,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('filters hosts by service.name using APM data correlation', async () => {
         // Filter by payment-service which runs on test-host-01
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetHostMetricsToolResult>({
+          id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
             end: 'now',
@@ -239,8 +239,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters hosts by order-service which runs on test-host-02', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+        const results = await agentBuilderApiClient.executeTool<GetHostMetricsToolResult>({
+          id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
             end: 'now',

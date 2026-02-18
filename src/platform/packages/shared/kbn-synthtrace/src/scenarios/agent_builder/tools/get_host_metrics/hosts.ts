@@ -32,7 +32,7 @@
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
- *   "tool_id": "observability.get_hosts",
+ *   "tool_id": "observability.get_host_metrics",
  *   "tool_params": {
  *     "start": "now-1h",
  *     "end": "now"

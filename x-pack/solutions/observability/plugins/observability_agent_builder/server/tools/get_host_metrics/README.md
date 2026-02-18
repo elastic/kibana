@@ -1,4 +1,4 @@
-# get_hosts
+# get_host_metrics
 
 Retrieves a list of hosts with their infrastructure metrics (CPU, memory, disk, network). Use this tool to get an overview of host health and resource utilization.
 
@@ -16,7 +16,7 @@ Retrieves a list of hosts with their infrastructure metrics (CPU, memory, disk, 
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_hosts",
+  "tool_id": "observability.get_host_metrics",
   "tool_params": {
     "start": "now-4h",
     "end": "now"
@@ -29,7 +29,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_hosts",
+  "tool_id": "observability.get_host_metrics",
   "tool_params": {
     "hostNames": ["web-server-01", "web-server-02"]
   }
@@ -41,7 +41,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_hosts",
+  "tool_id": "observability.get_host_metrics",
   "tool_params": {
     "kqlFilter": "service.name: frontend"
   }
@@ -53,7 +53,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_hosts",
+  "tool_id": "observability.get_host_metrics",
   "tool_params": {
     "kqlFilter": "cloud.provider: aws",
     "limit": 50

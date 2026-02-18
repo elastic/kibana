@@ -17,7 +17,7 @@ import type {
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
-import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } from '..';
+import { OBSERVABILITY_GET_HOST_METRICS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } from '..';
 
 export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_metrics';
 
@@ -76,7 +76,7 @@ When to use this tool:
 
 When NOT to use this tool:
 - For a high-level overview of all services, use the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool instead
-- For infrastructure metrics (CPU, memory, disk), use the ${OBSERVABILITY_GET_HOSTS_TOOL_ID} tool instead
+- For infrastructure metrics (CPU, memory, disk), use the ${OBSERVABILITY_GET_HOST_METRICS_TOOL_ID} tool instead
 
 Example workflow:
 1. Call the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool to identify a service with high latency
