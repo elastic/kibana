@@ -159,6 +159,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
+  const suppressSuggestionsRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -479,6 +480,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
+      if (suppressSuggestionsRef.current) {
+        suppressSuggestionsRef.current = false;
+        return;
+      }
       editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
     }, 0);
   }, []);
@@ -760,6 +765,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     openIndicesBrowser,
+    suppressSuggestionsRef,
   });
 
   const {

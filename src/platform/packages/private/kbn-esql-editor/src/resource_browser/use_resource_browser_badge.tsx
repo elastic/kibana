@@ -20,12 +20,14 @@ interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
+  suppressSuggestionsRef: MutableRefObject<boolean>;
 }
 
 export const useSourcesBadge = ({
   editorRef,
   editorModel,
   openIndicesBrowser,
+  suppressSuggestionsRef,
 }: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -127,10 +129,13 @@ export const useSourcesBadge = ({
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
+
+        suppressSuggestionsRef.current = true;
+
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
       }
     },
-    [editorModel, editorRef, openIndicesBrowser]
+    [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
   );
 
   return {
