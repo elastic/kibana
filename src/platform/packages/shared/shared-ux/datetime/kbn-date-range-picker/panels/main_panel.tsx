@@ -9,10 +9,31 @@
 
 import React from 'react';
 
-// import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
+import { EuiButton } from '@elastic/eui';
+
+import {
+  PanelContainer,
+  PanelHeader,
+  PanelBody,
+  PanelBodySection,
+} from '../date_range_picker_panel_ui';
+import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 
 export function MainPanel() {
-  // const { navigateTo } = useDateRangePickerPanelNavigation();
+  const { navigateTo } = useDateRangePickerPanelNavigation();
 
-  return <div style={{ padding: 16 }}>Main panel</div>;
+  return (
+    <PanelContainer>
+      <PanelHeader spacingSide="both">
+        <h1>Main panel</h1>
+      </PanelHeader>
+      <PanelBody>
+        <PanelBodySection>
+          <EuiButton size="s" fullWidth onClick={() => navigateTo('example-panel')}>
+            Example panel
+          </EuiButton>
+        </PanelBodySection>
+      </PanelBody>
+    </PanelContainer>
+  );
 }

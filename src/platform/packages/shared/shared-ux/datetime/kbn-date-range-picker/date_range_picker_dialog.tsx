@@ -82,7 +82,10 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
     >
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
-        css={css({ minWidth: maxWidth })}
+        css={css({
+          inlineSize: maxWidth,
+          maxInlineSize: '100%',
+        })}
         ref={panelRef}
         id={panelId}
         role="dialog"

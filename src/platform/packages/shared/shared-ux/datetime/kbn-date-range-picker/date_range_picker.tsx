@@ -21,6 +21,7 @@ import {
   type DateRangePickerPanelDescriptor,
 } from './date_range_picker_panel_navigation';
 import { MainPanel } from './panels/main_panel';
+import { ExamplePanel } from './panels/example_panel';
 
 export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 
@@ -103,6 +104,9 @@ export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps)
         >
           <DateRangePickerPanel id="main">
             <MainPanel />
+          </DateRangePickerPanel>
+          <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
+            <ExamplePanel />
           </DateRangePickerPanel>
           {/* TODO Calendar and Custom time range panels go here */}
           {panels.map(({ id, component: Component }) => (
