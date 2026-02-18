@@ -117,7 +117,7 @@ describe('EndpointScriptDetailsFlyout', () => {
         .join(', ');
 
       expect(detailLabels).toBe(
-        'Requires user input, Types, Description, Instructions, Examples, File name, Path to executable file, File size, SHA256, Updated by'
+        'Requires user input, Types, Description, Instructions, Examples, File name, Path to executable file (only for archive files), File size, SHA256, Updated by'
       );
     });
 
