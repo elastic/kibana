@@ -1,0 +1,38 @@
+{
+  "healthy": [
+    "{timestamp} LOG:  {db_type} [{node_name}] checkpoint starting: time pid={pid} duration={duration_ms}ms",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"index {index_name} refreshed\",\"shard\":\"{shard_id}\",\"docs_count\":48231,\"duration_ms\":{duration_ms}}",
+    "{timestamp} [INFO] {db_type} {node_name}: replication lag={duration_ms}ms user={db_user} db=claims_prod connections={pool_active}/{pool_max}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"vacuum completed on {table}\",\"duration_ms\":{duration_ms},\"rows_reclaimed\":15234,\"db_user\":\"{db_user}\"}",
+    "{timestamp} [INFO] {db_type} {node_name}: WAL archiving finished — segment={bytes} bytes written to archive pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"stats collector cycle complete\",\"duration_ms\":{duration_ms},\"tables_scanned\":12,\"pid\":\"{pid}\"}",
+    "{timestamp} LOG:  {db_type} [{node_name}] connection accepted from {client_ip}:{port} user={db_user} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"autovacuum launcher started\",\"table\":\"{table}\",\"duration_ms\":{duration_ms},\"pid\":\"{pid}\"}",
+    "{timestamp} [INFO] {db_type} {node_name}: replica sync complete — index={index_name} shard={shard_id} lag={duration_ms}ms",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"buffer pool stats\",\"memory_used\":\"{memory_used}\",\"memory_max\":\"{memory_max}\",\"duration_ms\":{duration_ms}}"
+  ],
+  "error": [
+    "{timestamp} ERROR: {db_type} [{node_name}] FATAL: too many connections for role \"{db_user}\" (max={pool_max}, active={pool_active}) client={client_ip}:{port}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"shard {shard_id} on index {index_name} failed\",\"error\":\"CorruptIndexException: codec footer mismatch\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} [ERROR] {db_type} {node_name}: disk space critical — {disk_used_gb}GB/{disk_total_gb}GB used, refusing writes on {index_name} pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"deadlock detected\",\"conn_id\":\"{conn_id}\",\"table\":\"{table}\",\"query_hash\":\"{query_hash}\"}",
+    "{timestamp} ERROR: {db_type} [{node_name}] replication failure — replica {node_name} diverged from primary pid={pid} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"authentication failed\",\"db_user\":\"{db_user}\",\"client_ip\":\"{client_ip}\",\"port\":\"{port}\"}",
+    "{timestamp} [ERROR] {db_type} {node_name}: out of shared memory — requested {bytes} bytes pid={pid} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"WAL corruption detected\",\"shard_id\":\"{shard_id}\",\"duration_ms\":{duration_ms},\"pid\":\"{pid}\"}",
+    "{timestamp} ERROR: {db_type} [{node_name}] cluster split-brain\n  node={node_name} cannot reach quorum pid={pid} port={port} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"recovery target not reached\",\"index_name\":\"{index_name}\",\"shard_id\":\"{shard_id}\",\"duration_ms\":{duration_ms}}"
+  ],
+  "slow": [
+    "{timestamp} LOG:  {db_type} [{node_name}] duration: {duration_ms}ms statement: SELECT * FROM {table} WHERE id IN (SELECT claim_id FROM {table}) — user={db_user} client={client_ip}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"slow query on {index_name}\",\"took_ms\":{duration_ms},\"shard\":\"{shard_id}\",\"query_hash\":\"{query_hash}\"}",
+    "{timestamp} [WARN] {db_type} {node_name}: query exceeded {duration_ms}ms threshold on {table} — scan_rows=1482901 user={db_user} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"sequential scan on {table}\",\"duration_ms\":{duration_ms},\"rows_scanned\":892341,\"db_user\":\"{db_user}\"}",
+    "{timestamp} [WARN] {db_type} {node_name}: index rebuild on {index_name} took {duration_ms}ms — shard={shard_id} pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"lock wait exceeded threshold\",\"table\":\"{table}\",\"conn_id\":\"{conn_id}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} LOG:  {db_type} [{node_name}] transaction held too long — conn_id={conn_id} duration={duration_ms}ms user={db_user} client={client_ip}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"full table scan on {table}\",\"duration_ms\":{duration_ms},\"bytes\":\"{bytes}\",\"query_hash\":\"{query_hash}\"}",
+    "{timestamp} [WARN] {db_type} {node_name}: merge join spill to disk\n  bytes={bytes} duration={duration_ms}ms conn_id={conn_id} table={table}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{db_type}\",\"node\":\"{node_name}\",\"message\":\"aggregation pipeline slow\",\"index_name\":\"{index_name}\",\"duration_ms\":{duration_ms},\"db_user\":\"{db_user}\"}"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "go": [
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"client/payment.go:{line_no}\",\"msg\":\"upstream request timeout\",\"upstream\":\"{upstream_host}\",\"duration_ms\":{duration_ms},\"retry\":{retry_count},\"max_retries\":{max_retries},\"request_id\":\"{request_id}\"}",
+    "level=error ts={timestamp} caller=circuit.go:{line_no} msg=\"circuit breaker OPEN\" service={upstream_host} failures=10 threshold=5 half_open_after=30s",
+    "{\"level\":\"warn\",\"msg\":\"connection reset by peer\",\"upstream\":\"{upstream_host}:{port}\",\"retry\":{retry_count},\"duration_ms\":{duration_ms},\"conn_id\":\"{conn_id}\"}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"client/gateway.go:{line_no}\",\"msg\":\"upstream DNS resolution failed\",\"host\":\"{upstream_host}\",\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\",\"pid\":{pid}}",
+    "level=error ts={timestamp} caller=proxy.go:{line_no} msg=\"TLS handshake timeout to upstream\" host={upstream_host}:{port} duration_ms={duration_ms} request_id={request_id}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"client/retry.go:{line_no}\",\"msg\":\"all retries exhausted for upstream call\",\"upstream\":\"{upstream_host}\",\"retries\":{retry_count},\"max_retries\":{max_retries},\"total_elapsed_ms\":{duration_ms},\"request_id\":\"{request_id}\"}",
+    "level=warn ts={timestamp} caller=lb.go:{line_no} msg=\"upstream health check failed\" host={upstream_host}:{port} latency_ms={duration_ms} consecutive_failures={retry_count} pid={pid}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"grpc/client.go:{line_no}\",\"msg\":\"gRPC deadline exceeded\",\"target\":\"{upstream_host}:{port}\",\"duration_ms\":{duration_ms},\"grpc_code\":\"DEADLINE_EXCEEDED\",\"request_id\":\"{request_id}\"}",
+    "[ERROR] [{timestamp}] Upstream {upstream_host}:{port} unresponsive — {duration_ms}ms elapsed, retry {retry_count}/{max_retries}, request_id={request_id}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"client/payment.go:{line_no}\",\"msg\":\"gateway timeout cascade\",\"upstream\":\"{upstream_host}\",\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\",\"conn_id\":\"{conn_id}\",\"detail\":\"upstream failed to respond within deadline\"}"
+  ],
+  "python": [
+    "{timestamp} ERROR [{module}:{line_no}] requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='{upstream_host}', port={port}): Read timed out. (read timeout={duration_ms}ms) retry={retry_count}/{max_retries}",
+    "{timestamp} ERROR [{module}:{line_no}] httpx.ReadTimeout: Timed out while receiving data from {upstream_host}:{port} after {duration_ms}ms request_id={request_id}",
+    "Traceback (most recent call last):\n  File \"/app/{module}.py\", line {line_no}, in call_upstream\n    resp = await session.post(url, json=payload, timeout={duration_ms}/1000)\naiohttp.ClientError: Connection to {upstream_host}:{port} reset by peer",
+    "{\"event\": \"upstream_timeout\", \"level\": \"error\", \"timestamp\": \"{timestamp}\", \"upstream\": \"{upstream_host}\", \"port\": {port}, \"duration_ms\": {duration_ms}, \"retry\": {retry_count}, \"max_retries\": {max_retries}, \"request_id\": \"{request_id}\"}",
+    "{timestamp} ERROR [{module}:{line_no}] urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='{upstream_host}', port={port}): Max retries exceeded — {retry_count}/{max_retries} attempts, last_duration={duration_ms}ms",
+    "{timestamp} ERROR [{module}:{line_no}] event=circuit_breaker_open service={upstream_host} failures={retry_count} half_open_after=30s pid={pid} request_id={request_id}",
+    "{\"event\": \"dns_resolution_failed\", \"level\": \"error\", \"timestamp\": \"{timestamp}\", \"host\": \"{upstream_host}\", \"duration_ms\": {duration_ms}, \"module\": \"{module}\", \"pid\": {pid}}",
+    "Traceback (most recent call last):\n  File \"/app/{module}.py\", line {line_no}, in forward_request\n    async with session.get(url, timeout=aiohttp.ClientTimeout(total={duration_ms}/1000)) as resp:\naiohttp.ServerTimeoutError: Timeout on reading response from {upstream_host}:{port} request_id={request_id}",
+    "{timestamp} ERROR [{module}:{line_no}] grpc.RpcError: StatusCode.DEADLINE_EXCEEDED — upstream {upstream_host}:{port} did not respond within {duration_ms}ms request_id={request_id}",
+    "{timestamp} WARN [{module}:{line_no}] Upstream health degraded:\n  host: {upstream_host}:{port}\n  last_latency: {duration_ms}ms\n  retries: {retry_count}/{max_retries}\n  request_id: {request_id}\n  pid: {pid}\n  action: marking unhealthy"
+  ],
+  "java": [
+    "{timestamp} [{thread}] ERROR c.s.payment.GatewayClient - RestClientException: I/O error on POST request for \"{upstream_host}:{port}/api/authorize\": Read timed out after {duration_ms}ms; retry {retry_count}/{max_retries}",
+    "{timestamp} [{thread}] ERROR c.s.resilience.CircuitBreaker - Circuit OPEN for {upstream_host} after {retry_count} consecutive failures — requests will fail-fast for 30s",
+    "{timestamp} [{thread}] WARN  c.s.payment.RetryHandler - Retry {retry_count}/{max_retries} for {upstream_host}:{port} — {duration_ms}ms elapsed, connection reset",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"thread\":\"{thread}\",\"logger\":\"c.s.client.UpstreamClient\",\"message\":\"upstream request deadline exceeded\",\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\"}",
+    "{timestamp} [{thread}] ERROR c.s.payment.GatewayClient - ConnectTimeoutException: connection to {upstream_host}:{port} timed out after {duration_ms}ms request_id={request_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"thread\":\"{thread}\",\"logger\":\"c.s.client.DnsResolver\",\"message\":\"DNS lookup failed for upstream host\",\"host\":\"{upstream_host}\",\"duration_ms\":{duration_ms},\"pid\":{pid},\"request_id\":\"{request_id}\"}",
+    "{timestamp} [{thread}] ERROR c.s.grpc.GrpcClient - StatusRuntimeException: DEADLINE_EXCEEDED: deadline exceeded after {duration_ms}ms target={upstream_host}:{port} request_id={request_id}",
+    "{timestamp} [{thread}] WARN  c.s.resilience.RetryTemplate - Exhausted {max_retries} retries for {upstream_host}:{port}, total wait={duration_ms}ms — returning 504 request_id={request_id}",
+    "{timestamp} [{thread}] ERROR c.s.health.UpstreamProbe - Upstream health check failed: {upstream_host}:{port} latency={duration_ms}ms threshold=3000ms pid={pid}",
+    "{timestamp} [{thread}] ERROR c.s.payment.GatewayClient - Gateway timeout breakdown:\n  Upstream: {upstream_host}:{port}\n  Thread: {thread}\n  Duration: {duration_ms}ms\n  Retries: {retry_count}/{max_retries}\n  RequestId: {request_id}\n  Action: responding with 504"
+  ],
+  "node": [
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"upstream timeout\",\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"retry\":{retry_count},\"maxRetries\":{max_retries},\"requestId\":\"{request_id}\"}",
+    "{timestamp} error: axios timeout after {duration_ms}ms to {upstream_host}:{port} — retry {retry_count}/{max_retries} request_id={request_id}",
+    "Error: connect ECONNRESET {upstream_host}:{port}\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:{line_no}:16)\n    at GatewayClient.authorize (/app/clients/gateway.js:{line_no}:11)",
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"all retries exhausted\",\"host\":\"{upstream_host}\",\"port\":{port},\"retries\":{retry_count},\"maxRetries\":{max_retries},\"totalElapsedMs\":{duration_ms},\"requestId\":\"{request_id}\"}",
+    "{timestamp} error: got-scrappy DNS timeout resolving {upstream_host} after {duration_ms}ms — request_id={request_id} pid={pid}",
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"circuit breaker opened\",\"service\":\"{upstream_host}\",\"failures\":{retry_count},\"halfOpenAfterMs\":30000,\"requestId\":\"{request_id}\"}",
+    "{timestamp} error: node-fetch AbortError: network timeout at {upstream_host}:{port} — {duration_ms}ms elapsed request_id={request_id} pid={pid}",
+    "Error: connect ETIMEDOUT {upstream_host}:{port}\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:{line_no}:16)\n    at PaymentClient.charge (/app/clients/payment.js:{line_no}:9)\n    pid={pid} request_id={request_id}",
+    "{timestamp} error: grpc deadline exceeded calling {upstream_host}:{port} after {duration_ms}ms — request_id={request_id} retry={retry_count}/{max_retries}",
+    "[ERROR] [{timestamp}] Upstream failure summary:\n  host: {upstream_host}:{port}\n  elapsed: {duration_ms}ms\n  retries: {retry_count}/{max_retries}\n  request_id: {request_id}\n  pid: {pid}\n  action: returning 504 to caller"
+  ],
+  "dotnet": [
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Upstream request to {Host} timed out\",\"@l\":\"Error\",\"Host\":\"{upstream_host}\",\"Port\":{port},\"DurationMs\":{duration_ms},\"Retry\":{retry_count},\"MaxRetries\":{max_retries},\"RequestId\":\"{request_id}\",\"SourceContext\":\"ClaimsApi.Clients.PaymentGateway\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Circuit breaker opened for {Service}\",\"@l\":\"Error\",\"Service\":\"{upstream_host}\",\"Failures\":{retry_count},\"HalfOpenAfterMs\":30000,\"RequestId\":\"{request_id}\",\"SourceContext\":\"ClaimsApi.Resilience.CircuitBreaker\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"HttpRequestException: connection to upstream refused\",\"@l\":\"Error\",\"Host\":\"{upstream_host}\",\"Port\":{port},\"DurationMs\":{duration_ms},\"Pid\":{pid},\"SourceContext\":\"ClaimsApi.Clients.UpstreamClient\"}",
+    "[{timestamp} ERR] ClaimsApi.Clients.PaymentGateway TaskCanceledException: upstream {upstream_host}:{port} did not respond within {duration_ms}ms [RequestId={request_id}]",
+    "[{timestamp} ERR] ClaimsApi.Resilience.RetryPolicy All {max_retries} retries exhausted for {upstream_host}:{port} — total elapsed={duration_ms}ms RequestId={request_id}",
+    "[{timestamp} WRN] ClaimsApi.Health.UpstreamHealthCheck Upstream {upstream_host}:{port} health check failed: latency={duration_ms}ms threshold=3000ms Pid={pid}",
+    "fail: ClaimsApi.Clients.GrpcGateway[0] Grpc.Core.RpcException: Status(StatusCode=\"DeadlineExceeded\") target={upstream_host}:{port} elapsed={duration_ms}ms request_id={request_id}",
+    "{timestamp} ERR ClaimsApi.Clients.PaymentGateway upstream_dns_failure host={upstream_host} duration_ms={duration_ms} request_id={request_id} pid={pid}",
+    "{timestamp} ERR ClaimsApi.Resilience.RetryPolicy upstream_timeout host={upstream_host}:{port} retry={retry_count}/{max_retries} elapsed_ms={duration_ms} request_id={request_id}",
+    "[{timestamp} ERR] ClaimsApi.Clients.PaymentGateway Gateway timeout cascade:\n  Upstream: {upstream_host}:{port}\n  Duration: {duration_ms}ms\n  Retries: {retry_count}/{max_retries}\n  RequestId: {request_id}\n  PID: {pid}\n  Action: returning 504 to client"
+  ],
+  "ruby": [
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"error\",\"name\":\"ClaimsApi::PaymentGateway\",\"message\":\"upstream request timeout\",\"payload\":{\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"retry\":{retry_count},\"max_retries\":{max_retries},\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"error\",\"name\":\"ClaimsApi::CircuitBreaker\",\"message\":\"circuit opened for upstream service\",\"payload\":{\"service\":\"{upstream_host}\",\"failures\":{retry_count},\"half_open_after\":30,\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"error\",\"name\":\"ClaimsApi::UpstreamClient\",\"message\":\"connection reset by upstream\",\"payload\":{\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"conn_id\":\"{conn_id}\"}}",
+    "E, [{timestamp} #{pid}] ERROR -- Faraday: ConnectionFailed: execution expired connecting to {upstream_host}:{port} — {duration_ms}ms elapsed request_id={request_id}",
+    "E, [{timestamp} #{pid}] ERROR -- Net::HTTP: ReadTimeout reading from {upstream_host}:{port} after {duration_ms}ms retry={retry_count}/{max_retries}",
+    "status=504 method={method} path={path} error=Net::ReadTimeout upstream={upstream_host}:{port} duration={duration_ms} request_id={request_id}",
+    "{timestamp} ERROR [Faraday] event=upstream_retries_exhausted host={upstream_host}:{port} retries={retry_count}/{max_retries} total_ms={duration_ms} request_id={request_id} pid={pid}",
+    "{timestamp} ERROR -- HealthCheck: Upstream {upstream_host}:{port} probe failed: latency={duration_ms}ms threshold=3000ms consecutive_failures={retry_count} pid={pid}",
+    "{timestamp} WARN [req:{request_id}] DNS resolution timeout for {upstream_host}: {duration_ms}ms elapsed pid={pid} method={method}",
+    "E, [{timestamp} #{pid}] ERROR -- Gateway: Upstream timeout report:\n  Host: {upstream_host}:{port}\n  Duration: {duration_ms}ms\n  Retries: {retry_count}/{max_retries}\n  RequestId: {request_id}\n  PID: {pid}\n  Action: returning 504"
+  ],
+  "rust": [
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::client::payment\",\"fields\":{\"message\":\"upstream request deadline exceeded\",\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"retry\":{retry_count},\"max_retries\":{max_retries},\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::resilience\",\"fields\":{\"message\":\"circuit breaker tripped\",\"service\":\"{upstream_host}\",\"failures\":{retry_count},\"half_open_after_ms\":30000,\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::client\",\"fields\":{\"message\":\"connection reset by upstream\",\"host\":\"{upstream_host}\",\"port\":{port},\"duration_ms\":{duration_ms},\"conn_id\":\"{conn_id}\",\"pid\":{pid}}}",
+    "{timestamp} ERROR claims_api::client::payment: hyper timeout to upstream host={upstream_host}:{port} duration_ms={duration_ms} request_id={request_id}",
+    "{timestamp} ERROR claims_api::client: all retries exhausted host={upstream_host}:{port} retries={retry_count}/{max_retries} total_ms={duration_ms} request_id={request_id}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::client::grpc\",\"fields\":{\"message\":\"tonic status: deadline exceeded\",\"target\":\"{upstream_host}:{port}\",\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\",\"pid\":{pid}}}",
+    "[{timestamp} ERROR claims_api::dns] DNS resolution failed for {upstream_host} after {duration_ms}ms — request_id={request_id} pid={pid}",
+    "{timestamp} ERROR claims_api::health: upstream probe failed host={upstream_host}:{port} latency_ms={duration_ms} threshold_ms=3000 consecutive={retry_count}",
+    "[{timestamp} WARN  claims_api::client::tls] TLS handshake timeout to {upstream_host}:{port} elapsed={duration_ms}ms request_id={request_id} pid={pid}",
+    "{timestamp} ERROR claims_api::client: gateway timeout cascade:\n  upstream: {upstream_host}:{port}\n  duration: {duration_ms}ms\n  retries: {retry_count}/{max_retries}\n  request_id: {request_id}\n  pid: {pid}\n  action: responding with 504"
+  ]
+}

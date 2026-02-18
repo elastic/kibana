@@ -1,0 +1,86 @@
+{
+  "go": [
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"handler/claims.go:{line_no}\",\"msg\":\"request completed\",\"method\":\"{method}\",\"path\":\"{path}\",\"status\":{status},\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\"}",
+    "{\"level\":\"info\",\"msg\":\"connection pool healthy\",\"active\":{pool_active},\"max\":{pool_max},\"idle_timeout_ms\":{duration_ms},\"service\":\"pool-manager\"}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"server/router.go:{line_no}\",\"msg\":\"route dispatched\",\"method\":\"{method}\",\"path\":\"{path}\",\"bytes\":{bytes},\"latency_ms\":{duration_ms},\"remote_ip\":\"{ip}\"}",
+    "{\"level\":\"debug\",\"ts\":\"{timestamp}\",\"caller\":\"middleware/auth.go:{line_no}\",\"msg\":\"jwt validated\",\"request_id\":\"{request_id}\",\"method\":\"{method}\",\"path\":\"{path}\",\"subject\":\"usr-{conn_id}\",\"verify_ms\":{duration_ms}}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"db/query.go:{line_no}\",\"msg\":\"query executed\",\"table\":\"{table}\",\"rows_affected\":3,\"duration_ms\":{duration_ms},\"conn_id\":\"{conn_id}\",\"query_hash\":\"{query_hash}\"}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"cache/redis.go:{line_no}\",\"msg\":\"cache hit\",\"key\":\"claim:{request_id}\",\"ttl_remaining_ms\":{duration_ms},\"pool_active\":{pool_active}}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"msg\":\"graceful shutdown completed\",\"active_conns\":{pool_active},\"drain_time_ms\":{duration_ms},\"pid\":{pid}}",
+    "{\"level\":\"debug\",\"ts\":\"{timestamp}\",\"caller\":\"grpc/interceptor.go:{line_no}\",\"msg\":\"unary call finished\",\"grpc_method\":\"/claims.v1.ClaimService/GetClaim\",\"grpc_code\":\"OK\",\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\"}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"worker/batch.go:{line_no}\",\"msg\":\"batch processed\",\"items\":42,\"successful\":42,\"failed\":0,\"elapsed_ms\":{duration_ms},\"goroutine\":\"G{pid}\"}",
+    "{\"level\":\"info\",\"ts\":\"{timestamp}\",\"caller\":\"metrics/collector.go:{line_no}\",\"msg\":\"metrics flushed\",\"datapoints\":128,\"target\":\"{upstream_host}\",\"flush_ms\":{duration_ms},\"pid\":{pid}}"
+  ],
+  "python": [
+    "{timestamp} INFO [{module}:{line_no}] {method} {path} completed status={status} duration={duration_ms}ms request_id={request_id}",
+    "{timestamp} INFO [uvicorn.access] {ip}:{port} - \"{method} {path} HTTP/1.1\" {status} {bytes}b {duration_ms}ms",
+    "INFO:healthcheck:All checks passed db=ok redis=ok kafka=ok latency_ms={duration_ms} pid={pid}",
+    "{\"event\": \"request_handled\", \"level\": \"info\", \"timestamp\": \"{timestamp}\", \"method\": \"{method}\", \"path\": \"{path}\", \"status\": {status}, \"duration_ms\": {duration_ms}, \"request_id\": \"{request_id}\", \"pid\": {pid}}",
+    "{\"event\": \"db_query_completed\", \"level\": \"debug\", \"timestamp\": \"{timestamp}\", \"table\": \"{table}\", \"duration_ms\": {duration_ms}, \"rows\": 17, \"conn_id\": \"{conn_id}\", \"query_hash\": \"{query_hash}\"}",
+    "{\"event\": \"cache_hit\", \"level\": \"info\", \"timestamp\": \"{timestamp}\", \"key\": \"policy:{request_id}\", \"hit\": true, \"latency_ms\": {duration_ms}, \"pool_active\": {pool_active}}",
+    "{\"event\": \"connection_pool_status\", \"level\": \"debug\", \"timestamp\": \"{timestamp}\", \"active\": {pool_active}, \"max\": {pool_max}, \"host\": \"{db_host}\", \"idle_timeout_ms\": {duration_ms}}",
+    "{timestamp} INFO [gunicorn.access] {ip} \"{method} {path}\" {status} {bytes} process_time={duration_ms}ms pid={pid}",
+    "{timestamp} INFO [{module}:{line_no}] Background task claims-digest completed: {queue_depth} records processed in {duration_ms}ms pid={pid}",
+    "{timestamp} DEBUG [{module}:{line_no}] Request lifecycle for {request_id}:\n  middleware: 2ms\n  auth: 8ms\n  handler: {duration_ms}ms\n  total: {duration_ms}ms\n  status: {status}"
+  ],
+  "java": [
+    "{timestamp} [{thread}] INFO c.s.claims.ClaimController - {method} {path} -> {status} ({duration_ms}ms) requestId={request_id}",
+    "{timestamp} [{thread}] INFO c.s.pool.HikariMonitor - Pool stats: active={pool_active}/{pool_max} idle={pool_active} waiting=0",
+    "{timestamp} [{thread}] INFO c.s.health.HealthEndpoint - Health check completed in {duration_ms}ms status=UP",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"INFO\",\"thread\":\"{thread}\",\"logger\":\"c.s.claims.ClaimController\",\"message\":\"request processed\",\"method\":\"{method}\",\"path\":\"{path}\",\"status\":{status},\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\"}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"DEBUG\",\"thread\":\"{thread}\",\"logger\":\"c.s.db.QueryExecutor\",\"message\":\"query executed\",\"table\":\"{table}\",\"duration_ms\":{duration_ms},\"rows\":23,\"conn_id\":\"{conn_id}\",\"query_hash\":\"{query_hash}\"}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"INFO\",\"thread\":\"{thread}\",\"logger\":\"c.s.cache.CacheManager\",\"message\":\"cache entry stored\",\"key\":\"claim:{request_id}\",\"size\":{bytes},\"ttl_ms\":{duration_ms},\"pool_active\":{pool_active}}",
+    "{timestamp} [{thread}] DEBUG c.s.grpc.GrpcInterceptor - unary call /claims.v1.ClaimService/SubmitClaim OK in {duration_ms}ms correlationId={request_id}",
+    "{timestamp} [{thread}] INFO c.s.batch.BatchProcessor - Batch completed: 84 items, 0 failures, elapsed={duration_ms}ms pid={pid}",
+    "{timestamp} [{thread}] INFO c.s.metrics.MetricsExporter - metrics_exported count=256 target={upstream_host} flush_time={duration_ms}ms",
+    "{timestamp} [{thread}] INFO c.s.startup.ApplicationBootstrap - Application started successfully\n  Active profiles: production\n  Port: {port}\n  PID: {pid}\n  Pool: {pool_active}/{pool_max}\n  Boot time: {duration_ms}ms"
+  ],
+  "node": [
+    "{\"level\":30,\"time\":\"{timestamp}\",\"pid\":{pid},\"hostname\":\"{upstream_host}\",\"req\":{\"method\":\"{method}\",\"url\":\"{path}\"},\"res\":{\"statusCode\":{status}},\"responseTime\":{duration_ms},\"msg\":\"request completed\"}",
+    "{timestamp} info: {method} {path} {status} {duration_ms}ms - {bytes}b request_id={request_id}",
+    "health check OK | db: connected ({duration_ms}ms) | redis: connected | kafka: {pool_active} partitions assigned",
+    "{\"level\":20,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"database query executed\",\"table\":\"{table}\",\"duration_ms\":{duration_ms},\"rows\":15,\"conn_id\":\"{conn_id}\",\"query_hash\":\"{query_hash}\"}",
+    "{\"level\":30,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"cache hit\",\"key\":\"session:{request_id}\",\"ttl_remaining_ms\":{duration_ms},\"pool_active\":{pool_active},\"bytes\":{bytes}}",
+    "{\"level\":30,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"background job completed\",\"job\":\"claims-export\",\"processed\":{queue_depth},\"elapsed_ms\":{duration_ms},\"failures\":0}",
+    "{timestamp} debug: gRPC call /claims.v1.ClaimService/GetClaim completed in {duration_ms}ms requestId={request_id} status=OK",
+    "{timestamp} info: pool stats active={pool_active} max={pool_max} idle={pool_active} host={db_host} avg_query_ms={duration_ms}",
+    "[INFO] [{timestamp}] Server listening on :{port} | workers={pool_active} | pid={pid} | boot_time={duration_ms}ms",
+    "{timestamp} info: request trace {request_id}\n  {method} {path}\n  auth: 5ms\n  handler: {duration_ms}ms\n  status: {status}\n  bytes: {bytes}"
+  ],
+  "dotnet": [
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Request {Method} {Path} completed with {StatusCode}\",\"@l\":\"Information\",\"Method\":\"{method}\",\"Path\":\"{path}\",\"StatusCode\":{status},\"DurationMs\":{duration_ms},\"RequestId\":\"{request_id}\",\"SourceContext\":\"ClaimsApi.Controllers.ClaimController\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Database query executed on {Table}\",\"@l\":\"Debug\",\"Table\":\"{table}\",\"DurationMs\":{duration_ms},\"ConnId\":\"{conn_id}\",\"QueryHash\":\"{query_hash}\",\"RowsAffected\":12,\"SourceContext\":\"ClaimsApi.Data.QueryExecutor\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Connection pool status healthy\",\"@l\":\"Information\",\"Active\":{pool_active},\"Max\":{pool_max},\"Host\":\"{db_host}\",\"IdleTimeoutMs\":{duration_ms},\"SourceContext\":\"ClaimsApi.Data.ConnectionPool\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Cache hit for key {CacheKey}\",\"@l\":\"Debug\",\"CacheKey\":\"claim:{request_id}\",\"SizeBytes\":{bytes},\"TtlMs\":{duration_ms},\"PoolActive\":{pool_active},\"SourceContext\":\"ClaimsApi.Caching.DistributedCacheProvider\"}",
+    "[{timestamp} INF] ClaimsApi.Controllers.ClaimController {method} {path} responded {status} in {duration_ms}ms [RequestId={request_id}]",
+    "[{timestamp} DBG] ClaimsApi.Middleware.AuthenticationHandler JWT validated for request {request_id} subject=usr-{conn_id} elapsed={duration_ms}ms",
+    "[{timestamp} INF] ClaimsApi.HostedServices.BatchProcessor Batch completed: 64 items, 0 failures, elapsed={duration_ms}ms [PID={pid}]",
+    "info: ClaimsApi.Health.HealthCheckService[0] Health check passed db={duration_ms}ms redis=ok kafka={pool_active} partitions pid={pid}",
+    "{timestamp} INF ClaimsApi.Metrics.MetricsPublisher metrics_flushed datapoints=192 target={upstream_host} flush_ms={duration_ms} pid={pid}",
+    "[{timestamp} INF] Application started\n  ContentRootPath: /app\n  Urls: http://+:{port}\n  Environment: Production\n  PID: {pid}\n  ThreadPool: {pool_active}/{pool_max}\n  BootTime: {duration_ms}ms"
+  ],
+  "ruby": [
+    "method={method} path={path} format=json controller=ClaimsController action=show status={status} duration={duration_ms} view=4.23 db={duration_ms} request_id={request_id}",
+    "method={method} path={path} format=json controller=PoliciesController action=index status={status} duration={duration_ms} allocations=8421 pid={pid}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"info\",\"name\":\"ClaimsApi::ConnectionPool\",\"message\":\"pool check healthy\",\"payload\":{\"active\":{pool_active},\"max\":{pool_max},\"host\":\"{db_host}\",\"idle_timeout_ms\":{duration_ms}}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"debug\",\"name\":\"ClaimsApi::QueryExecutor\",\"message\":\"query completed\",\"payload\":{\"table\":\"{table}\",\"duration_ms\":{duration_ms},\"rows\":8,\"conn_id\":\"{conn_id}\",\"query_hash\":\"{query_hash}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"info\",\"name\":\"ClaimsApi::CacheClient\",\"message\":\"cache hit\",\"payload\":{\"key\":\"claim:{request_id}\",\"bytes\":{bytes},\"ttl_ms\":{duration_ms},\"pool_active\":{pool_active}}}",
+    "I, [{timestamp} #{pid}]  INFO -- Rails: {method} {path} completed {status} in {duration_ms}ms (Views: 4.2ms | ActiveRecord: {duration_ms}ms | Allocations: 9432)",
+    "I, [{timestamp} #{pid}]  INFO -- Sidekiq: class=ClaimDigestWorker jid={request_id} elapsed={duration_ms}ms args=[\"{table}\"] status=done queue_size={queue_depth}",
+    "{timestamp} [INFO] [req:{request_id}] Completed {status} {method} {path} in {duration_ms}ms (ActiveRecord: {duration_ms}ms) pid={pid}",
+    "{timestamp} INFO -- Puma: worker {pool_active} booted on :{port} pid={pid} threads={pool_active}/{pool_max} uptime={duration_ms}s",
+    "I, [{timestamp} #{pid}]  INFO -- Diagnostics:\n  Service: claims-api\n  Port: {port}\n  Workers: {pool_active}/{pool_max}\n  DB host: {db_host}\n  Boot time: {duration_ms}ms\n  Status: healthy"
+  ],
+  "rust": [
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"INFO\",\"target\":\"claims_api::handler\",\"fields\":{\"message\":\"request completed\",\"method\":\"{method}\",\"path\":\"{path}\",\"status\":{status},\"duration_ms\":{duration_ms},\"request_id\":\"{request_id}\"},\"span\":{\"name\":\"handle_request\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"DEBUG\",\"target\":\"claims_api::db::pool\",\"fields\":{\"message\":\"query executed\",\"table\":\"{table}\",\"duration_ms\":{duration_ms},\"rows\":14,\"conn_id\":\"{conn_id}\",\"query_hash\":\"{query_hash}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"INFO\",\"target\":\"claims_api::cache\",\"fields\":{\"message\":\"cache hit\",\"key\":\"claim:{request_id}\",\"bytes\":{bytes},\"ttl_ms\":{duration_ms},\"pool_active\":{pool_active}}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"INFO\",\"target\":\"claims_api::pool\",\"fields\":{\"message\":\"connection pool healthy\",\"active\":{pool_active},\"max\":{pool_max},\"host\":\"{db_host}\",\"idle_timeout_ms\":{duration_ms}}}",
+    "{timestamp}  INFO claims_api::handler: request served method={method} path={path} status={status} duration_ms={duration_ms} bytes={bytes}",
+    "{timestamp} DEBUG claims_api::db::pool: connection acquired conn_id={conn_id} pool_active={pool_active} pool_max={pool_max} wait_ms={duration_ms}",
+    "[{timestamp} INFO  claims_api::grpc] unary call /claims.v1.ClaimService/GetClaim completed in {duration_ms}ms request_id={request_id}",
+    "[{timestamp} INFO  claims_api::worker] batch job completed items=42 failures=0 elapsed_ms={duration_ms} pid={pid}",
+    "{timestamp}  INFO claims_api: listening on 0.0.0.0:{port} workers={pool_active} pid={pid} boot_ms={duration_ms}",
+    "{timestamp}  INFO claims_api::diagnostics: health check report\n  database: ok ({duration_ms}ms)\n  cache: ok pool={pool_active}/{pool_max}\n  upstream: ok host={upstream_host}\n  pid: {pid}"
+  ]
+}

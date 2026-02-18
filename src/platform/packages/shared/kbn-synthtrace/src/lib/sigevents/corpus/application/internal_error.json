@@ -1,0 +1,86 @@
+{
+  "go": [
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"handler/fraud.go:{line_no}\",\"msg\":\"panic recovered\",\"error\":\"runtime error: invalid memory address or nil pointer dereference\",\"goroutine\":\"G{pid}\",\"request_id\":\"{request_id}\"}",
+    "level=fatal ts={timestamp} caller=scoring.go:{line_no} msg=\"out of memory allocating fraud model\" requested_bytes={bytes} available_bytes=0 pid={pid}",
+    "{\"level\":\"error\",\"msg\":\"unhandled error in request pipeline\",\"error\":\"index out of range [3] with length 2\",\"path\":\"{path}\",\"method\":\"{method}\",\"request_id\":\"{request_id}\"}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"service/policy.go:{line_no}\",\"msg\":\"goroutine panic: assignment to entry in nil map\",\"goroutine\":\"G{pid}\",\"request_id\":\"{request_id}\",\"method\":\"{method}\",\"path\":\"{path}\"}",
+    "level=error ts={timestamp} caller=claims.go:{line_no} msg=\"send on closed channel\" goroutine=G{pid} request_id={request_id} method={method} path={path}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"db/tx.go:{line_no}\",\"msg\":\"deadlock detected between concurrent goroutines\",\"table\":\"{table}\",\"conn_id\":\"{conn_id}\",\"duration_ms\":{duration_ms},\"pid\":{pid}}",
+    "level=error ts={timestamp} caller=middleware.go:{line_no} msg=\"recovered panic in HTTP handler\" error=\"slice bounds out of range [:5] with capacity 3\" request_id={request_id} path={path}",
+    "{\"level\":\"fatal\",\"ts\":\"{timestamp}\",\"caller\":\"main.go:{line_no}\",\"msg\":\"assertion failed: worker pool size must be positive\",\"pool_active\":{pool_active},\"pool_max\":{pool_max},\"pid\":{pid}}",
+    "[FATAL] [{timestamp}] Unrecoverable error in goroutine G{pid}: stack overflow in recursive claim resolution — request_id={request_id} path={path}",
+    "{\"level\":\"error\",\"ts\":\"{timestamp}\",\"caller\":\"handler/intake.go:{line_no}\",\"msg\":\"internal server error\",\"error\":\"reflect: call of reflect.Value.Field on zero Value\",\"method\":\"{method}\",\"path\":\"{path}\",\"request_id\":\"{request_id}\",\"duration_ms\":{duration_ms}}"
+  ],
+  "python": [
+    "Traceback (most recent call last):\n  File \"/app/{module}.py\", line {line_no}, in process_claim\n    result = self.score_fraud(claim_data)\n  File \"/app/{module}.py\", line {line_no}, in score_fraud\n    return model.predict(features)\nValueError: Input contains NaN, infinity or a value too large for dtype('float64')",
+    "{timestamp} ERROR [{module}:{line_no}] Unhandled exception in worker pid={pid}: {exc_type}: cannot allocate memory for risk model ({bytes} bytes requested)",
+    "{timestamp} CRITICAL [{module}:{line_no}] Service fatal: {exc_type} — request_id={request_id} method={method} path={path}",
+    "{\"event\": \"unhandled_exception\", \"level\": \"error\", \"timestamp\": \"{timestamp}\", \"exc_type\": \"{exc_type}\", \"module\": \"{module}\", \"line_no\": {line_no}, \"pid\": {pid}, \"request_id\": \"{request_id}\", \"path\": \"{path}\"}",
+    "Traceback (most recent call last):\n  File \"/app/{module}.py\", line {line_no}, in handle_request\n    data = cache[claim_id]\nKeyError: 'CLM-{request_id}' (pid={pid})",
+    "{timestamp} ERROR [{module}:{line_no}] AssertionError: expected positive claim amount, got -{duration_ms} — request_id={request_id} path={path}",
+    "{timestamp} CRITICAL [{module}:{line_no}] Segmentation fault in native extension _fraud_model.so — pid={pid} request_id={request_id} bytes_allocated={bytes}",
+    "Traceback (most recent call last):\n  File \"/app/{module}.py\", line {line_no}, in serialize_response\n    return obj.to_dict()\nAttributeError: 'NoneType' object has no attribute 'to_dict' request_id={request_id} pid={pid}",
+    "{timestamp} ERROR [celery.worker:{line_no}] Worker process pid={pid} crashed: {exc_type} in task claims.process — queue_depth={queue_depth} method={method}",
+    "{\"event\": \"recursion_limit_exceeded\", \"level\": \"error\", \"timestamp\": \"{timestamp}\", \"module\": \"{module}\", \"line_no\": {line_no}, \"max_depth\": 1000, \"pid\": {pid}, \"request_id\": \"{request_id}\"}"
+  ],
+  "java": [
+    "java.lang.NullPointerException: Cannot invoke \"com.service.claims.Policy.getId()\" because \"policy\" is null\n\tat com.service.claims.FraudScorer.evaluate(FraudScorer.java:{line_no})\n\tat com.service.claims.ClaimProcessor.process(ClaimProcessor.java:{line_no})\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)",
+    "{timestamp} [{thread}] ERROR c.s.fraud.ScoringEngine - OutOfMemoryError: Java heap space — model allocation failed, requested {bytes} bytes, pid={pid}",
+    "{timestamp} [{thread}] ERROR c.s.claims.RequestHandler - Unhandled exception processing {method} {path}: {exc_type} request_id={request_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"thread\":\"{thread}\",\"logger\":\"c.s.claims.PolicyLookupService\",\"message\":\"StackOverflowError in recursive policy resolution\",\"pid\":{pid},\"request_id\":\"{request_id}\",\"path\":\"{path}\"}",
+    "{timestamp} [{thread}] ERROR c.s.claims.ClaimMapper - ClassCastException: cannot cast LinkedHashMap to ClaimDTO at line {line_no} request_id={request_id} path={path}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"thread\":\"{thread}\",\"logger\":\"c.s.batch.BatchProcessor\",\"message\":\"ConcurrentModificationException during claim iteration\",\"pid\":{pid},\"table\":\"{table}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} [{thread}] ERROR c.s.claims.StateManager - IllegalStateException: claim already in CLOSED state, cannot transition to REOPENED — request_id={request_id} pid={pid}",
+    "{timestamp} [{thread}] ERROR c.s.claims.Validator - AssertionError: invariant violated — claimTotal exceeds policy limit pid={pid} request_id={request_id} bytes={bytes}",
+    "{\"@timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"thread\":\"{thread}\",\"logger\":\"c.s.handler.IntakeHandler\",\"message\":\"ArrayIndexOutOfBoundsException: Index 7 out of bounds for length 5\",\"method\":\"{method}\",\"path\":\"{path}\",\"request_id\":\"{request_id}\",\"line\":{line_no}}",
+    "{timestamp} [{thread}] ERROR c.s.claims.ClaimService - Unhandled exception cascade:\n  Root cause: java.lang.OutOfMemoryError: GC overhead limit exceeded\n  Thread: {thread}\n  PID: {pid}\n  Active requests: {pool_active}\n  Last request: {method} {path}\n  Action: JVM heap dump initiated"
+  ],
+  "node": [
+    "Error: Cannot read properties of undefined (reading 'score')\n    at FraudService.evaluate (/app/services/fraud.js:{line_no}:22)\n    at ClaimProcessor.process (/app/processors/claim.js:{line_no}:15)\n    at processTicksAndRejections (node:internal/process/task_queues:96:5)",
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"unhandled rejection\",\"err\":{\"type\":\"{exc_type}\",\"message\":\"heap out of memory\",\"stack\":\"...\"}}",
+    "{timestamp} error: fatal error in request handler pid={pid} method={method} path={path} error=\"{exc_type}: allocation failed\" request_id={request_id}",
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"uncaught exception\",\"err\":{\"type\":\"TypeError\",\"message\":\"Cannot convert undefined to object\"},\"requestId\":\"{request_id}\",\"path\":\"{path}\"}",
+    "RangeError: Maximum call stack size exceeded\n    at ClaimResolver.resolve (/app/services/resolver.js:{line_no}:18)\n    at ClaimResolver.resolve (/app/services/resolver.js:{line_no}:22)\n    at processTicksAndRejections (node:internal/process/task_queues:96:5)\n    pid={pid} request_id={request_id}",
+    "{\"level\":50,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"assertion failed: pool_active must not exceed pool_max\",\"pool_active\":{pool_active},\"pool_max\":{pool_max},\"requestId\":\"{request_id}\"}",
+    "TypeError: Assignment to constant variable.\n    at PolicyService.update (/app/services/policy.js:{line_no}:14)\n    at ClaimHandler.process (/app/handlers/claim.js:{line_no}:28)\n    at Layer.handle (/app/node_modules/express/lib/router/layer.js:95:5)\n    request_id={request_id} pid={pid}",
+    "{timestamp} error: worker process pid={pid} crashed with SIGABRT — last request: {method} {path} request_id={request_id} active_connections={pool_active}",
+    "{\"level\":60,\"time\":\"{timestamp}\",\"pid\":{pid},\"msg\":\"process out of memory\",\"heapUsed\":{bytes},\"rss\":{bytes},\"requestId\":\"{request_id}\",\"path\":\"{path}\"}",
+    "{timestamp} fatal: unhandled rejection in async context:\n  Error: {exc_type}\n  Location: /app/lib/{module}.js:{line_no}\n  RequestId: {request_id}\n  Method: {method}\n  Path: {path}\n  PID: {pid}"
+  ],
+  "dotnet": [
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"Unhandled NullReferenceException in request pipeline\",\"@l\":\"Error\",\"@x\":\"System.NullReferenceException: Object reference not set to an instance of an object.\\n   at ClaimsApi.Services.PolicyService.GetById(String id) in /app/Services/PolicyService.cs:line {line_no}\",\"RequestId\":\"{request_id}\",\"Path\":\"{path}\",\"SourceContext\":\"ClaimsApi.Services.PolicyService\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"InvalidOperationException: Sequence contains no matching element\",\"@l\":\"Error\",\"Method\":\"{method}\",\"Path\":\"{path}\",\"RequestId\":\"{request_id}\",\"Pid\":{pid},\"SourceContext\":\"ClaimsApi.Controllers.ClaimController\"}",
+    "{\"@t\":\"{timestamp}\",\"@mt\":\"OutOfMemoryException during batch processing\",\"@l\":\"Fatal\",\"BytesRequested\":{bytes},\"Active\":{pool_active},\"Pid\":{pid},\"SourceContext\":\"ClaimsApi.Batch.ClaimProcessor\"}",
+    "[{timestamp} FTL] ClaimsApi.Services.FraudScorer StackOverflowException in recursive policy graph resolution — RequestId={request_id} Pid={pid}",
+    "[{timestamp} ERR] ClaimsApi.Controllers.ClaimController Unhandled exception processing {method} {path}: {exc_type} [RequestId={request_id}, Pid={pid}]",
+    "[{timestamp} ERR] ClaimsApi.Data.QueryExecutor ObjectDisposedException: Cannot access a disposed DbContext — ConnId={conn_id} Table={table} Pid={pid}",
+    "fail: ClaimsApi.Middleware.ExceptionHandler[0] Internal server error on {method} {path}: {exc_type} at line {line_no} request_id={request_id} pid={pid}",
+    "{timestamp} ERR ClaimsApi.Services.ClaimService assertion_failed expected=positive_amount actual=-{duration_ms} request_id={request_id} path={path}",
+    "{timestamp} FTL ClaimsApi.Host process_crash pid={pid} error=\"{exc_type}\" method={method} path={path} active_requests={pool_active}",
+    "[{timestamp} ERR] ClaimsApi.Middleware.ExceptionHandler Unhandled exception:\n  Type: {exc_type}\n  Message: Operation is not valid due to the current state of the object\n  RequestId: {request_id}\n  Method: {method}\n  Path: {path}\n  PID: {pid}\n  Stack: at ClaimsApi.Services.ClaimService.Process() in /app/Services/ClaimService.cs:line {line_no}"
+  ],
+  "ruby": [
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"error\",\"name\":\"ClaimsApi::PolicyService\",\"message\":\"NoMethodError: undefined method 'id' for nil:NilClass\",\"payload\":{\"request_id\":\"{request_id}\",\"path\":\"{path}\",\"line\":{line_no},\"pid\":{pid}}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"fatal\",\"name\":\"ClaimsApi::FraudScorer\",\"message\":\"RuntimeError: model weights file corrupted or missing\",\"payload\":{\"bytes\":{bytes},\"pid\":{pid},\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"error\",\"name\":\"ClaimsApi::ClaimProcessor\",\"message\":\"TypeError: no implicit conversion of nil into String\",\"payload\":{\"method\":\"{method}\",\"path\":\"{path}\",\"request_id\":\"{request_id}\",\"line\":{line_no}}}",
+    "E, [{timestamp} #{pid}] FATAL -- Rails: RuntimeError (worker process terminated unexpectedly): pid={pid} request_id={request_id} last_path={path}",
+    "status=500 method={method} path={path} error=NoMethodError duration={duration_ms} request_id={request_id} pid={pid}",
+    "/app/{module}.rb:{line_no}:in 'process_claim': undefined local variable or method 'policy_data' for ClaimsApi::IntakeService:Class (NameError)\n  from /app/{module}.rb:{line_no}:in 'handle'\n  from /app/vendor/rack/lib/rack/handler.rb:42:in 'call'\n  request_id={request_id} pid={pid}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"fatal\",\"name\":\"ClaimsApi::Worker\",\"message\":\"SystemStackError: stack level too deep\",\"payload\":{\"pid\":{pid},\"request_id\":\"{request_id}\",\"queue_depth\":{queue_depth}}}",
+    "E, [{timestamp} #{pid}] ERROR -- Puma: Out of memory — process {pid} exceeded {bytes} bytes, killing worker, active_requests={pool_active}",
+    "{timestamp} ERROR [req:{request_id}] Unhandled {exc_type} in {method} {path} at {module}.rb:{line_no} — returning 500 pid={pid}",
+    "E, [{timestamp} #{pid}] ERROR -- Rails: Internal error cascade:\n  Error: {exc_type}\n  Location: /app/{module}.rb:{line_no}\n  Request: {method} {path}\n  RequestId: {request_id}\n  PID: {pid}\n  Workers: {pool_active}/{pool_max}"
+  ],
+  "rust": [
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::handler\",\"fields\":{\"message\":\"thread panicked at 'called Option::unwrap() on a None value'\",\"request_id\":\"{request_id}\",\"method\":\"{method}\",\"path\":\"{path}\",\"pid\":{pid}}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::service::fraud\",\"fields\":{\"message\":\"assertion failed: model weights must be non-negative\",\"bytes\":{bytes},\"pid\":{pid},\"request_id\":\"{request_id}\"}}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::db\",\"fields\":{\"message\":\"stack overflow in recursive claim resolution\",\"table\":\"{table}\",\"conn_id\":\"{conn_id}\",\"pid\":{pid}}}",
+    "{timestamp} ERROR claims_api::handler: panic in request handler — index out of bounds: len is 3 but index is 5 request_id={request_id} path={path}",
+    "{timestamp} ERROR claims_api::service: out of memory allocating {bytes} bytes — pid={pid} pool_active={pool_active} method={method} path={path}",
+    "{\"timestamp\":\"{timestamp}\",\"level\":\"ERROR\",\"target\":\"claims_api::middleware\",\"fields\":{\"message\":\"unhandled error in request pipeline\",\"error\":\"cannot borrow value as mutable more than once\",\"request_id\":\"{request_id}\",\"method\":\"{method}\",\"path\":\"{path}\",\"pid\":{pid}}}",
+    "[{timestamp} ERROR claims_api::worker] thread 'tokio-runtime-worker' panicked at 'slice index 12 is out of range for slice of length 8' pid={pid} request_id={request_id}",
+    "{timestamp} ERROR claims_api::ffi: caught SIGSEGV in FFI boundary — pid={pid} request_id={request_id} method={method} path={path} pool_active={pool_active}",
+    "{timestamp} ERROR claims_api::db::tx: deadlock detected between async tasks table={table} conn_id={conn_id} duration_ms={duration_ms} pid={pid}",
+    "{timestamp} ERROR claims_api::handler: unrecoverable error:\n  Panic: {exc_type} — channel closed unexpectedly\n  Request: {method} {path}\n  RequestId: {request_id}\n  PID: {pid}\n  Active: {pool_active}/{pool_max}\n  Action: dropping request, returning 500"
+  ]
+}

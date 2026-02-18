@@ -1,0 +1,38 @@
+{
+  "healthy": [
+    "{timestamp} INFO [{queue_type}] [{node_name}] topic={topic} partition={partition} offset=194832 consumer_group={consumer_group} lag=0 process_ms={duration_ms}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"partition {partition} rebalanced\",\"topic\":\"{topic}\",\"consumer_group\":\"{consumer_group}\",\"members\":3,\"duration_ms\":{duration_ms}}",
+    "[INFO] {queue_type} {node_name}: message delivered to {topic}:{partition} in {duration_ms}ms — key={request_id} size={bytes}b",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"message acknowledged\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"request_id\":\"{request_id}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} [INFO] {queue_type} {node_name}: heartbeat sent — consumer_group={consumer_group} topic={topic} partition={partition} pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"consumer joined group\",\"consumer_group\":\"{consumer_group}\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} INFO [{queue_type}] [{node_name}] producer metadata refreshed for topic={topic} partition={partition} conn_id={conn_id} port={port}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"compaction completed\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"bytes\":\"{bytes}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} [INFO] {queue_type} {node_name}: group generation advanced\n  consumer_group={consumer_group} members=5 pool_active={pool_active} port={port}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"INFO\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"fetch completed\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"bytes\":\"{bytes}\",\"duration_ms\":{duration_ms}}"
+  ],
+  "error": [
+    "{timestamp} ERROR [{queue_type}] [{node_name}] topic={topic} partition={partition}: replication failed to follower — ISR shrunk to 1, leader_epoch=42 pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"consumer group {consumer_group} coordinator not available\",\"topic\":\"{topic}\",\"error\":\"GroupCoordinatorNotAvailableException\",\"retry\":{retry_count}}",
+    "[ERROR] {queue_type} {node_name}: failed to produce to {topic}:{partition} — NotLeaderOrFollowerException after {duration_ms}ms pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"broker not available\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"port\":\"{port}\",\"retry_count\":{retry_count}}",
+    "{timestamp} [ERROR] {queue_type} {node_name}: leader election failed — topic={topic} partition={partition} pid={pid} conn_id={conn_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"authorization denied\",\"consumer_group\":\"{consumer_group}\",\"topic\":\"{topic}\",\"request_id\":\"{request_id}\"}",
+    "{timestamp} ERROR [{queue_type}] [{node_name}] message too large — topic={topic} size={bytes}b max=1048576 request_id={request_id}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"disk full\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"bytes\":\"{bytes}\",\"duration_ms\":{duration_ms}}",
+    "{timestamp} [ERROR] {queue_type} {node_name}: ZooKeeper session expired\n  node={node_name} port={port} pid={pid} retry_count={retry_count} topic={topic}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"ERROR\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"network partition detected\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"conn_id\":\"{conn_id}\",\"duration_ms\":{duration_ms}}"
+  ],
+  "lag": [
+    "{timestamp} WARN [{queue_type}] [{node_name}] consumer_group={consumer_group} topic={topic} partition={partition} lag={queue_depth} commit_delay_ms={duration_ms}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"consumer lag growing\",\"consumer_group\":\"{consumer_group}\",\"topic\":\"{topic}\",\"total_lag\":{queue_depth},\"oldest_uncommitted_ms\":{duration_ms}}",
+    "[WARN] {queue_type} {node_name}: partition {partition} on {topic} behind by {queue_depth} messages — consumer_group={consumer_group} last_commit={duration_ms}ms ago",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"fetch lag exceeded\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"queue_depth\":{queue_depth},\"duration_ms\":{duration_ms}}",
+    "{timestamp} [WARN] {queue_type} {node_name}: consumer stalled — consumer_group={consumer_group} topic={topic} partition={partition} lag={queue_depth} pid={pid}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"batch processing delay\",\"consumer_group\":\"{consumer_group}\",\"topic\":\"{topic}\",\"duration_ms\":{duration_ms},\"queue_depth\":{queue_depth}}",
+    "{timestamp} WARN [{queue_type}] [{node_name}] checkpoint behind — topic={topic} partition={partition} offset_lag={queue_depth} request_id={request_id} duration_ms={duration_ms}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"unconsumed messages growing\",\"topic\":\"{topic}\",\"partition\":\"{partition}\",\"queue_depth\":{queue_depth},\"bytes\":\"{bytes}\"}",
+    "{timestamp} [WARN] {queue_type} {node_name}: replay requested\n  consumer_group={consumer_group} topic={topic} partition={partition} lag={queue_depth} retry_count={retry_count}",
+    "{\"@timestamp\":\"{timestamp}\",\"log.level\":\"WARN\",\"component\":\"{queue_type}\",\"node\":\"{node_name}\",\"message\":\"processing backpressure\",\"consumer_group\":\"{consumer_group}\",\"topic\":\"{topic}\",\"queue_depth\":{queue_depth},\"duration_ms\":{duration_ms}}"
+  ]
+}
