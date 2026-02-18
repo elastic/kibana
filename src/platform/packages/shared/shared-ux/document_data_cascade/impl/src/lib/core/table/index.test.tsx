@@ -17,10 +17,10 @@ import { useCascadeTable, useAdaptedTableRows, type TableProps } from '.';
 describe('table', () => {
   const createHookWrapper = ({
     children,
-    data = [],
+    initialData = [],
     helper: Helper = React.Fragment,
-  }: PropsWithChildren<{ data?: GroupNode[]; helper?: React.FC<PropsWithChildren> }>) => (
-    <DataCascadeProvider data={data} cascadeGroups={[]}>
+  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren>; initialData?: GroupNode[] }>) => (
+    <DataCascadeProvider data={initialData} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
   );
@@ -43,7 +43,7 @@ describe('table', () => {
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current).toHaveProperty('headerColumns');
@@ -62,13 +62,14 @@ describe('table', () => {
             children,
             data,
             helper: TestHelper,
+            initialData: data,
           }),
         initialProps: {
           allowMultipleRowToggle: false,
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current.rows.length).toBe(data.length);
@@ -87,13 +88,14 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
+              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: true,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         expect(Object.keys(cascadeState.table.expanded ?? {})).toHaveLength(0);
@@ -118,13 +120,14 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
+              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded
@@ -155,13 +158,14 @@ describe('table', () => {
               children,
               data,
               helper: TestHelper,
+              initialData: data,
             }),
           initialProps: {
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded

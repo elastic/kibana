@@ -79,6 +79,7 @@ export const SingleTabView = ({
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
+
   const initializeTab = useLatest(
     async ({
       dataViewSpec,

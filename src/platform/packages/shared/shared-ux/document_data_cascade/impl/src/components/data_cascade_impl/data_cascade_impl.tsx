@@ -42,7 +42,7 @@ import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps
  * @description Public Component for configuring the rendering of a data cascade row cell
  */
 export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowCellProps<G, L>
+  _props: DataCascadeRowCellProps<G, L>
 ) => {
   return null;
 };
@@ -51,7 +51,7 @@ export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
  * @description Public Component for configuring the rendering of a data cascade row
  */
 export const DataCascadeRow = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowProps<G, L>
+  _props: DataCascadeRowProps<G, L>
 ) => {
   return null;
 };

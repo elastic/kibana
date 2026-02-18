@@ -381,6 +381,10 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
