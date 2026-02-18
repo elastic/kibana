@@ -157,7 +157,7 @@ describe('mute alert instance', () => {
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
     expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
+    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -275,6 +275,139 @@ describe('mute alert instance', () => {
     expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
 
     // Conditional snooze should NOT update the rule SO's mutedInstanceIds
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('removes stale mutedInstanceIds when transitioning from simple mute to conditional snooze', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: ['instance1', 'instance2'],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        conditions: [
+          {
+            type: 'field_change',
+            field: 'kibana.alert.severity',
+            snapshotValue: 'critical',
+          },
+        ],
+      },
+    });
+
+    expect(alertsServiceMock.snoozeAlertInstance).toHaveBeenCalledTimes(1);
+    expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      expect.objectContaining({
+        mutedInstanceIds: ['instance2'],
+        updatedAt: expect.any(String),
+      }),
+      { version: 'v1' }
+    );
+  });
+
+  it('throws when conditional snooze is requested and no alert indices are available', async () => {
+    getAlertIndicesAliasMock.mockReturnValueOnce([]);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: ['instance1'],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      muteInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: {},
+        body: {
+          conditions: [
+            {
+              type: 'severity_equals',
+              field: 'kibana.alert.severity',
+              value: 'low',
+            },
+          ],
+        },
+      })
+    ).rejects.toThrow('Unable to apply conditional snooze');
+
+    expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
+    expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws when conditional snooze is requested and no alert indices are available (validate disabled)', async () => {
+    getAlertIndicesAliasMock.mockReturnValueOnce([]);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: ['instance1'],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      muteInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          conditions: [
+            {
+              type: 'severity_equals',
+              field: 'kibana.alert.severity',
+              value: 'low',
+            },
+          ],
+        },
+      })
+    ).rejects.toThrow('Unable to apply conditional snooze');
+
+    expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 

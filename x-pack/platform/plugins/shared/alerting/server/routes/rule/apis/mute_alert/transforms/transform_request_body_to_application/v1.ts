@@ -20,17 +20,19 @@ export const transformRequestBodyToApplication = (
   }
 
   return {
-    ...(body.expires_at ? { expiresAt: body.expires_at } : {}),
-    ...(body.conditions
+    ...(body.expires_at !== undefined ? { expiresAt: body.expires_at } : {}),
+    ...(body.conditions !== undefined
       ? {
           conditions: body.conditions.map((c) => ({
             type: c.type,
             field: c.field,
-            ...(c.value ? { value: c.value } : {}),
-            ...(c.snapshot_value ? { snapshotValue: c.snapshot_value } : {}),
+            ...(c.value !== undefined ? { value: c.value } : {}),
+            ...(c.snapshot_value !== undefined ? { snapshotValue: c.snapshot_value } : {}),
           })),
         }
       : {}),
-    ...(body.condition_operator ? { conditionOperator: body.condition_operator } : {}),
+    ...(body.condition_operator !== undefined
+      ? { conditionOperator: body.condition_operator }
+      : {}),
   };
 };

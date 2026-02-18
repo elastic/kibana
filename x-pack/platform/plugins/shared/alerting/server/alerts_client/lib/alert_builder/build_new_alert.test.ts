@@ -31,6 +31,8 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_EXPIRES_AT,
 } from '@kbn/rule-data-utils';
 import { alertRule } from '../test_fixtures';
 import type { AlertRuleData } from '../../types';
@@ -500,6 +502,56 @@ describe('buildNewAlert', () => {
       });
 
       expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+    });
+
+    test('should preserve ALERT_MUTED when existing alert has conditional snooze state', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert: {
+          [ALERT_MUTED]: true,
+          [ALERT_SNOOZE_EXPIRES_AT]: new Date(Date.now() + 3600000).toISOString(),
+          [ALERT_SNOOZE_CONDITIONS]: [
+            {
+              type: 'field_change',
+              field: 'kibana.alert.severity',
+              snapshotValue: 'critical',
+            },
+          ],
+        } as unknown as Alert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          mutedInstanceIds: ['alert-B'],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+    });
+
+    test('should not preserve ALERT_MUTED when existing alert has no conditional snooze state', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert: {
+          [ALERT_MUTED]: true,
+        } as unknown as Alert,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          mutedInstanceIds: ['alert-B'],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
     });
 
     test('should set ALERT_MUTED to false when alert instance ID is not in mutedInstanceIds', () => {

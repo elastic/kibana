@@ -52,6 +52,7 @@ interface BuildNewAlertOpts<
   RecoveryActionGroupId extends string
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
+  existingAlert?: Alert & AlertData;
   rule: AlertRule;
   ruleData?: AlertRuleData;
   payload?: DeepPartial<AlertData>;
@@ -74,6 +75,7 @@ export const buildNewAlert = <
   RecoveryActionGroupId extends string
 >({
   legacyAlert,
+  existingAlert,
   rule,
   ruleData,
   runTimestamp,
@@ -94,7 +96,7 @@ export const buildNewAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, existingAlert);
 
   return deepmerge.all(
     [

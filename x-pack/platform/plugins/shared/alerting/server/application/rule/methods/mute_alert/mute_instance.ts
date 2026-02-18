@@ -92,9 +92,15 @@ async function muteInstanceWithOCC(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+  if (isConditionalSnooze && (!indices || indices.length === 0)) {
+    throw Boom.badRequest(
+      `Unable to apply conditional snooze to alert instance "${alertInstanceId}" because no alert indices are available for rule "${ruleId}"`
+    );
+  }
 
   if (validateAlertsExistence) {
-    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
     const isExistingAlert = await context.alertsService?.isExistingAlert({
       indices,
       alertId: alertInstanceId,
@@ -110,21 +116,33 @@ async function muteInstanceWithOCC(
 
   if (!attributes.muteAll) {
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
-    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
     if (isConditionalSnooze && body) {
       // Conditional snooze: write snooze configuration to the alert ES document only.
       // The alert document is the single source of truth for conditional snooze state;
       // mutedInstanceIds on the rule SO is NOT updated.
-      if (indices && indices.length > 0) {
-        await context.alertsService?.snoozeAlertInstance({
-          ruleId,
-          alertInstanceId,
-          indices,
-          logger: context.logger,
-          expiresAt: body.expiresAt,
-          conditions: body.conditions,
-          conditionOperator: body.conditionOperator ?? 'any',
+      await context.alertsService?.snoozeAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+        expiresAt: body.expiresAt,
+        conditions: body.conditions,
+        conditionOperator: body.conditionOperator ?? 'any',
+      });
+
+      // Transitioning from simple mute -> conditional snooze requires removing
+      // stale rule SO mute state; otherwise scheduler short-circuits on simple mute.
+      if (mutedInstanceIds.includes(alertInstanceId)) {
+        await updateRuleSo({
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+          savedObjectsUpdateOptions: { version },
+          id: ruleId,
+          updateRuleAttributes: updateMeta(context, {
+            mutedInstanceIds: mutedInstanceIds.filter((id) => id !== alertInstanceId),
+            updatedBy: await context.getUserName(),
+            updatedAt: new Date().toISOString(),
+          }),
         });
       }
     } else if (!mutedInstanceIds.includes(alertInstanceId)) {

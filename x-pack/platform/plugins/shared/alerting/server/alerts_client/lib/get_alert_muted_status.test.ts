@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ALERT_MUTED,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_EXPIRES_AT,
+} from '@kbn/rule-data-utils';
 import { getAlertMutedStatus } from './get_alert_muted_status';
 import type { AlertRuleData } from '../types';
 
@@ -24,8 +29,40 @@ const createMockRuleData = (overrides: Partial<AlertRuleData> = {}): AlertRuleDa
 });
 
 describe('getAlertMutedStatus', () => {
-  test('should return false when ruleData is undefined', () => {
+  test('should return false when ruleData is undefined and no conditional snooze exists', () => {
     expect(getAlertMutedStatus('alert-1')).toBe(false);
+  });
+
+  test('should return true when alert document is conditionally snoozed with expiry', () => {
+    expect(
+      getAlertMutedStatus('alert-1', undefined, {
+        [ALERT_MUTED]: true,
+        [ALERT_SNOOZE_EXPIRES_AT]: new Date(Date.now() + 60_000).toISOString(),
+      })
+    ).toBe(true);
+  });
+
+  test('should return true when alert document is conditionally snoozed with conditions', () => {
+    expect(
+      getAlertMutedStatus('alert-1', undefined, {
+        [ALERT_MUTED]: true,
+        [ALERT_SNOOZE_CONDITIONS]: [
+          {
+            type: 'field_change',
+            field: 'kibana.alert.severity',
+            snapshotValue: 'critical',
+          },
+        ],
+      })
+    ).toBe(true);
+  });
+
+  test('should return false when alert document is muted but has no conditional snooze config', () => {
+    expect(
+      getAlertMutedStatus('alert-1', undefined, {
+        [ALERT_MUTED]: true,
+      })
+    ).toBe(false);
   });
 
   test('should return false when ruleData exists but muteAll is false and alertInstanceId is not muted', () => {
