@@ -24,6 +24,10 @@ import type {
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import type {
+  TemplatesFindRequest,
+  TemplatesFindResponse,
+} from '../../../common/types/api/template/v1';
 
 export class TemplatesService {
   constructor(
@@ -35,91 +39,193 @@ export class TemplatesService {
     }
   ) {}
 
-  async getAllTemplates(
-    filterById?: string,
-    version?: string
-  ): Promise<Array<SavedObject<Template>>> {
-    interface SearchResult {
-      aggregations: {
-        by_template: {
-          buckets: Array<{
-            latest_template: {
-              hits: {
-                hits: SavedObjectsRawDoc[];
-              };
-            };
-          }>;
-        };
-      };
-    }
+  async getAllTemplates(params: TemplatesFindRequest): Promise<TemplatesFindResponse> {
+    const {
+      page,
+      perPage,
+      sortField = 'name',
+      sortOrder = 'asc',
+      search,
+      tags,
+      author,
+      isDeleted,
+    } = params;
 
-    const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
-      namespaces: ['*'],
-      type: CASE_TEMPLATE_SAVED_OBJECT,
-      query: {
-        bool: {
-          filter: [
-            toElasticsearchQuery(
-              fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.deletedAt: *`)
-            ),
-            ...(filterById
-              ? [
-                  toElasticsearchQuery(
-                    fromKueryExpression(`${CASE_TEMPLATE_SAVED_OBJECT}.templateId: "${filterById}"`)
-                  ),
-                ]
-              : []),
-            ...(version
-              ? [
-                  toElasticsearchQuery(
-                    fromKueryExpression(
-                      `${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion: "${version}"`
-                    )
-                  ),
-                ]
-              : []),
-          ],
-        },
-      },
-      aggs: {
-        by_template: {
-          terms: {
-            field: `${CASE_TEMPLATE_SAVED_OBJECT}.templateId`,
-            size: 10000,
-          },
-          aggs: {
-            latest_template: {
-              top_hits: {
-                size: 1,
-                sort: [
-                  {
-                    [`${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion`]: {
-                      order: 'desc',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    })) as SearchResult;
+    const { templates, total } = await this.searchTemplates({
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+      isDeleted,
+      search,
+      tags,
+      author,
+      isLatest: true,
+    });
 
-    const latestTemplateVersions = findResult.aggregations.by_template.buckets.flatMap(
-      (bucket) =>
-        bucket.latest_template.hits?.hits?.map((hit) =>
-          this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit)
-        ) ?? []
-    );
+    const searchLower = search?.toLowerCase() ?? '';
 
-    return latestTemplateVersions;
+    return {
+      templates: templates.map((so) => ({
+        ...so.attributes,
+        fieldSearchMatches:
+          searchLower !== '' &&
+          (so.attributes.fieldNames ?? []).some((fieldName) =>
+            fieldName.toLowerCase().includes(searchLower)
+          ),
+      })),
+      page,
+      perPage,
+      total,
+    };
   }
 
   async getTemplate(
     templateId: string,
     version?: string
   ): Promise<SavedObject<Template> | undefined> {
-    return (await this.getAllTemplates(templateId, version))[0];
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 1,
+      sortField: 'templateVersion',
+      sortOrder: 'desc',
+      templateId,
+      version,
+      ...(version === undefined ? { isLatest: true } : {}),
+    });
+
+    return templates[0];
+  }
+
+  /**
+   * Fetches templates from ES using regular search.
+   */
+  private async searchTemplates({
+    page,
+    perPage,
+    sortField,
+    sortOrder,
+    isDeleted = false,
+    templateId,
+    version,
+    isLatest,
+    search,
+    tags,
+    author,
+  }: {
+    page: number;
+    perPage: number;
+    sortField: TemplatesFindRequest['sortField'];
+    sortOrder: TemplatesFindRequest['sortOrder'];
+    isDeleted?: boolean;
+    templateId?: string;
+    version?: string;
+    isLatest?: boolean;
+    search?: string;
+    tags?: string[];
+    author?: string[];
+  }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
+    interface SearchResult {
+      hits: {
+        hits: SavedObjectsRawDoc[];
+        total: {
+          value: number;
+        };
+      };
+    }
+
+    const SO = CASE_TEMPLATE_SAVED_OBJECT;
+
+    const filters = [
+      ...(isDeleted ? [] : [toElasticsearchQuery(fromKueryExpression(`NOT ${SO}.deletedAt: *`))]),
+      ...(templateId
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateId: "${templateId}"`))]
+        : []),
+      ...(version
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateVersion: "${version}"`))]
+        : []),
+      ...(isLatest !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: ${isLatest}`))]
+        : []),
+      ...(tags && tags.length > 0
+        ? [
+            toElasticsearchQuery(
+              fromKueryExpression(tags.map((tag) => `${SO}.tags: "${tag}"`).join(' OR '))
+            ),
+          ]
+        : []),
+      ...(author && author.length > 0
+        ? [
+            toElasticsearchQuery(
+              fromKueryExpression(author.map((a) => `${SO}.author: "${a}"`).join(' OR '))
+            ),
+          ]
+        : []),
+    ];
+
+    const must = search
+      ? [
+          {
+            bool: {
+              should: [
+                { wildcard: { [`${SO}.name`]: { value: `*${search}*`, case_insensitive: true } } },
+                {
+                  match_phrase: {
+                    [`${SO}.description`]: search,
+                  },
+                },
+                {
+                  wildcard: {
+                    [`${SO}.fieldNames`]: { value: `*${search}*`, case_insensitive: true },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
+
+    const from = (page - 1) * perPage;
+
+    const sort = [
+      {
+        [`${CASE_TEMPLATE_SAVED_OBJECT}.${sortField}`]: {
+          order: sortOrder,
+          missing: '_last',
+        },
+      },
+      ...(sortField === 'templateId'
+        ? []
+        : [
+            {
+              [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: {
+                order: 'asc' as const,
+              },
+            },
+          ]),
+    ];
+
+    const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
+      namespaces: ['*'],
+      type: CASE_TEMPLATE_SAVED_OBJECT,
+      from,
+      size: perPage,
+      sort,
+      query: {
+        bool: {
+          filter: filters,
+          ...(must.length > 0 ? { must } : {}),
+        },
+      },
+    })) as SearchResult;
+
+    return {
+      templates: findResult.hits.hits.map((hit) =>
+        this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit)
+      ),
+      total: findResult.hits.total.value,
+    };
   }
 
   private async updateMappings(definition: string) {
@@ -145,18 +251,24 @@ export class TemplatesService {
     });
   }
 
-  async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
+  async createTemplate(input: CreateTemplateInput, author: string): Promise<SavedObject<Template>> {
     const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: 1,
+        isLatest: true,
         deletedAt: null,
         definition: input.definition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: v4(),
+        description: parsedDefinition.description ?? input.description,
+        tags: parsedDefinition.tags ?? input.tags,
+        author,
+        fieldCount: parsedDefinition.fields.length,
+        fieldNames: parsedDefinition.fields.map((f) => f.name),
       } as Template,
       { refresh: true }
     );
@@ -182,20 +294,71 @@ export class TemplatesService {
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
+        isLatest: true,
         definition: input.definition,
         name: parsedDefinition.name,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
         deletedAt: null,
+        description: parsedDefinition.description ?? input.description,
+        tags: parsedDefinition.tags ?? input.tags,
+        author: currentTemplate.attributes.author,
+        fieldCount: parsedDefinition.fields.length,
+        fieldNames: parsedDefinition.fields.map((f) => f.name),
       },
       {
         refresh: true,
       }
     );
 
+    await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+      [
+        {
+          id: currentTemplate.id,
+          type: CASE_TEMPLATE_SAVED_OBJECT,
+          attributes: {
+            isLatest: false,
+          },
+        },
+      ],
+      { refresh: true }
+    );
+
     await this.updateMappings(input.definition);
 
     return templateSavedObject;
+  }
+
+  /**
+   * Returns all unique tags from the latest version of each non-deleted template.
+   */
+  async getTags(): Promise<string[]> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      isLatest: true,
+    });
+    const tags = templates.flatMap((so) => so.attributes.tags ?? []).filter(Boolean);
+    return [...new Set(tags)].sort();
+  }
+
+  /**
+   * Returns all unique authors from the latest version of each non-deleted template.
+   */
+  async getAuthors(): Promise<string[]> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      isLatest: true,
+    });
+    const authors = templates
+      .map((so) => so.attributes.author)
+      .filter((a): a is string => Boolean(a));
+    return [...new Set(authors)].sort();
   }
 
   async deleteTemplate(templateId: string): Promise<void> {
