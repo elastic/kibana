@@ -963,8 +963,10 @@ describe('AutomaticImportSavedObjectService', () => {
         integrationParams,
         authenticatedUser
       );
-      expect(createdIntegration.attributes.status).toBeUndefined();
-
+      expect(createdIntegration.attributes.created_by).toBe(authenticatedUser.username);
+      expect(createdIntegration.attributes.created_by_profile_uid).toBe(
+        authenticatedUser.profile_uid
+      );
       const dataStreamParams1: DataStreamParams = {
         ...mockDataStreamParams,
         integrationId,
@@ -1008,8 +1010,8 @@ describe('AutomaticImportSavedObjectService', () => {
       );
 
       const finalIntegration = await savedObjectService.getIntegration(integrationId);
-      // Status is no longer stored on the integration saved object
-      expect(finalIntegration.status).toBeUndefined();
+      expect(finalIntegration.created_by).toBe(authenticatedUser.username);
+      expect(finalIntegration.created_by_profile_uid).toBe(authenticatedUser.profile_uid);
       ds = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
       expect(ds.total).toBe(2);
 
