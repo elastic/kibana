@@ -94,8 +94,7 @@ export class SearchAPI {
           switchMap((params) => {
             const sanitizedRouting = sanitizeProjectRoutingForES(this.projectRouting);
             if (sanitizedRouting) {
-              // @ts-ignore it will not throw ts error once ES client supports it
-              params.body.project_routing = sanitizedRouting;
+              params.project_routing = sanitizedRouting;
             }
 
             return search

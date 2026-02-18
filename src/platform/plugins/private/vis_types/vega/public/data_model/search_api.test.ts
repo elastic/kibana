@@ -181,8 +181,8 @@ describe('SearchAPI', () => {
 
         searchAPI.search([searchRequest]).subscribe(() => {
           expect(mockSearch).toHaveBeenCalled();
-          const searchOptions = mockSearch.mock.calls[0][1];
-          expect(searchOptions?.projectRouting).toBe(expectedValue);
+          const callArgs = mockSearch.mock.calls[0][0];
+          expect(callArgs.params.project_routing).toBe(expectedValue);
           done();
         });
       };
