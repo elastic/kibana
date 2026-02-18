@@ -296,6 +296,7 @@ export function AddSignificantEventFlyout({
                   {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
                       isBeingCanceled={isCancellingTask}
+                      isSchedulingGenerationTask={isSchedulingGenerationTask}
                       isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}

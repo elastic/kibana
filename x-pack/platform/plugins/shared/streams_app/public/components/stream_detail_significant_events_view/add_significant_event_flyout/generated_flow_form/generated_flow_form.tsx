@@ -18,6 +18,7 @@ import { AiFlowWaitingForGeneration } from './waiting_for_generation';
 interface Props {
   isGenerating: boolean;
   isBeingCanceled: boolean;
+  isSchedulingGenerationTask: boolean;
   generatedQueries: StreamQueryKql[];
   onEditQuery: (query: StreamQueryKql) => void;
   stopGeneration: () => void;
@@ -34,6 +35,7 @@ interface Props {
 export function GeneratedFlowForm({
   isGenerating,
   isBeingCanceled,
+  isSchedulingGenerationTask,
   generatedQueries,
   onEditQuery,
   stopGeneration,
@@ -87,29 +89,15 @@ export function GeneratedFlowForm({
     );
   }
 
-  if (!isGenerating && generatedQueries.length === 0) {
-    return <AiFlowEmptyState />;
-  }
-
-  if (isGenerating && generatedQueries.length === 0) {
-    return (
+  if (generatedQueries.length === 0) {
+    return isGenerating ? (
       <AiFlowWaitingForGeneration
         stopGeneration={stopGeneration}
         isBeingCanceled={isBeingCanceled}
+        isSchedulingGenerationTask={isSchedulingGenerationTask}
       />
-    );
-  }
-
-  if (!isGenerating && generatedQueries.length === 0) {
-    return <AiFlowEmptyState />;
-  }
-
-  if (isGenerating && generatedQueries.length === 0) {
-    return (
-      <AiFlowWaitingForGeneration
-        stopGeneration={stopGeneration}
-        isBeingCanceled={isBeingCanceled}
-      />
+    ) : (
+      <AiFlowEmptyState />
     );
   }
 
@@ -131,6 +119,7 @@ export function GeneratedFlowForm({
           stopGeneration={stopGeneration}
           hasInitialResults={true}
           isBeingCanceled={isBeingCanceled}
+          isSchedulingGenerationTask={isSchedulingGenerationTask}
         />
       )}
     </>
