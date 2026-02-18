@@ -51,10 +51,6 @@ export function Summary({ count }: { count: number }) {
     await getTaskStatus();
   }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
-  useEffect(() => {
-    getTaskStatus();
-  }, [getTaskStatus]);
-
   const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
 
   useEffect(() => {
@@ -86,7 +82,12 @@ export function Summary({ count }: { count: number }) {
     }
   }, [task, notifications.toasts]);
 
-  useTaskPolling(task, getInsightsDiscoveryTaskStatus, getTaskStatus);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getInsightsDiscoveryTaskStatus,
+    onRefresh: getTaskStatus,
+    onCancel: cancelInsightsDiscoveryTask,
+  });
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
 
@@ -102,13 +103,12 @@ export function Summary({ count }: { count: number }) {
   };
 
   const onCancelClick = async () => {
-    await cancelInsightsDiscoveryTask();
-    getTaskStatus();
+    await cancelTask();
   };
 
   const isGenerateButtonPending =
     task?.status === TaskStatus.InProgress ||
-    task?.status === TaskStatus.BeingCanceled ||
+    isCancellingTask ||
     isSchedulingTask;
 
   if (insights && insights.length > 0) {
@@ -214,14 +214,13 @@ export function Summary({ count }: { count: number }) {
                   }}
                 />
 
-                {(task?.status === TaskStatus.InProgress ||
-                  task?.status === TaskStatus.BeingCanceled) && (
+                {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
                     onClick={onCancelClick}
-                    isDisabled={task?.status === TaskStatus.BeingCanceled}
+                    isDisabled={isCancellingTask}
                     data-test-subj="significant_events_cancel_insights_generation_button"
                   >
-                    {task?.status === TaskStatus.BeingCanceled
+                    {isCancellingTask
                       ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
                           defaultMessage: 'Cancelling',
                         })

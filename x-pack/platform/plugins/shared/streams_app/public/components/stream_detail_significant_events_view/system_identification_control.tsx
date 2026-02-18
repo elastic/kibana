@@ -6,7 +6,7 @@
  */
 
 import type { System, Streams } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,10 +42,12 @@ export function SystemIdentificationControl({
   } = useStreamSystemsApi(definition);
 
   const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationStatus);
-  useEffect(() => {
-    getTask();
-  }, [getTask]);
-  useTaskPolling(task, getSystemIdentificationStatus, getTask);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getSystemIdentificationStatus,
+    onRefresh: getTask,
+    onCancel: cancelSystemIdentificationTask,
+  });
 
   const flyout = isFlyoutVisible && (
     <StreamSystemsFlyout
@@ -119,7 +121,7 @@ export function SystemIdentificationControl({
     return triggerButton;
   }
 
-  if (task.status === 'in_progress') {
+  if (task.status === 'in_progress' && !isCancellingTask) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -140,11 +142,7 @@ export function SystemIdentificationControl({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="system_identification_cancel_system_identification_button"
-            onClick={() => {
-              cancelSystemIdentificationTask().then(() => {
-                getTask();
-              });
-            }}
+            onClick={cancelTask}
           >
             {i18n.translate(
               'xpack.streams.streamDetailView.cancelSystemIdentificationButtonLabel',
@@ -158,7 +156,7 @@ export function SystemIdentificationControl({
     );
   }
 
-  if (task.status === 'being_canceled') {
+  if (isCancellingTask) {
     return (
       <ConnectorListButtonBase
         aiFeatures={aiFeatures}

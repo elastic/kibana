@@ -97,16 +97,16 @@ export function AddSignificantEventFlyout({
   const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
     useAsyncFn(scheduleGenerationTask);
 
-  useEffect(() => {
-    getTask();
-  }, [getTask]);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getGenerationTask,
+    onRefresh: getTask,
+    onCancel: cancelGenerationTask,
+  });
 
-  useTaskPolling(task, getGenerationTask, getTask);
-
-  const isBeingCanceled = task?.status === 'being_canceled';
   const isGenerating =
     task?.status === 'in_progress' ||
-    isBeingCanceled ||
+    isCancellingTask ||
     isGettingTask ||
     isSchedulingGenerationTask;
 
@@ -146,14 +146,6 @@ export function AddSignificantEventFlyout({
       );
     }
   }, [isGenerating, task]);
-
-  const stopGeneration = useCallback(() => {
-    if (task?.status === 'in_progress') {
-      cancelGenerationTask().then(() => {
-        getTask();
-      });
-    }
-  }, [cancelGenerationTask, getTask, task?.status]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -303,7 +295,7 @@ export function AddSignificantEventFlyout({
 
                   {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
-                      isBeingCanceled={isBeingCanceled}
+                      isBeingCanceled={isCancellingTask}
                       isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}
@@ -312,7 +304,7 @@ export function AddSignificantEventFlyout({
                           prev.map((q) => (q.id === editedQuery.id ? editedQuery : q))
                         );
                       }}
-                      stopGeneration={stopGeneration}
+                      stopGeneration={cancelTask}
                       definition={definition.stream}
                       setQueries={(next: StreamQueryKql[]) => {
                         setQueries(next);

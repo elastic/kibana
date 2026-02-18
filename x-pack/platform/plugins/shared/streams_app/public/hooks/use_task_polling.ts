@@ -6,17 +6,49 @@
  */
 
 import { TaskStatus } from '@kbn/streams-schema';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface TaskWithStatus {
   status: TaskStatus;
 }
 
-export function useTaskPolling(
-  task: TaskWithStatus | undefined,
-  poll: () => Promise<TaskWithStatus>,
-  refresh: () => void
-) {
+interface UseTaskPollingParams {
+  task: TaskWithStatus | undefined;
+  onPoll: () => Promise<TaskWithStatus>;
+  onRefresh: () => void | Promise<unknown>;
+  onCancel?: () => Promise<unknown>;
+  pollIntervalMs?: number;
+}
+
+export function useTaskPolling({
+  task,
+  onPoll,
+  onRefresh,
+  onCancel,
+  pollIntervalMs = 2000,
+}: UseTaskPollingParams) {
+  const [isCancellingRequested, setIsCancellingRequested] = useState(false);
+  const isCancellingRequestInFlightRef = useRef(false);
+
+  const isCancellingTask = task?.status === TaskStatus.BeingCanceled || isCancellingRequested;
+
+  /**
+   * Start refreshing the task status on mount without waiting for the first poll wait to complete.
+   */
+  useEffect(() => {
+    onRefresh();
+  }, [onRefresh]);
+
+  /**
+   * Resets optimistic cancellation state once task reaches a terminal status.
+   */
+  useEffect(() => {
+    if (task?.status !== TaskStatus.InProgress && task?.status !== TaskStatus.BeingCanceled) {
+      setIsCancellingRequested(false);
+      isCancellingRequestInFlightRef.current = false;
+    }
+  }, [task?.status]);
+
   useEffect(() => {
     if (task?.status !== TaskStatus.InProgress && task?.status !== TaskStatus.BeingCanceled) {
       return;
@@ -27,7 +59,7 @@ export function useTaskPolling(
 
     const scheduleNextPoll = () => {
       timeoutId = setTimeout(async () => {
-        const polledTask = await poll();
+        const polledTask = await onPoll();
 
         if (!isMounted) {
           return;
@@ -39,12 +71,12 @@ export function useTaskPolling(
           polledTask.status !== TaskStatus.InProgress &&
           polledTask.status !== TaskStatus.BeingCanceled
         ) {
-          refresh();
+          onRefresh();
           return;
         }
 
         scheduleNextPoll();
-      }, 2000);
+      }, pollIntervalMs);
     };
 
     scheduleNextPoll();
@@ -55,5 +87,37 @@ export function useTaskPolling(
         clearTimeout(timeoutId);
       }
     };
-  }, [task?.status, poll, refresh]);
+  }, [onPoll, onRefresh, pollIntervalMs, task?.status]);
+
+  /**
+   * Cancels the task if it is in progress.
+   * If the task is already being canceled, does nothing.
+   * If the task is not in progress, does nothing.
+   * If the task is not in progress and is not being canceled, sets the cancellation state to true and waits for the task to be canceled.
+   */
+  const cancelTask = useCallback(async () => {
+    if (!onCancel || isCancellingRequested || isCancellingRequestInFlightRef.current) {
+      return;
+    }
+
+    if (task?.status !== TaskStatus.InProgress && task?.status !== TaskStatus.BeingCanceled) {
+      return;
+    }
+
+    setIsCancellingRequested(true);
+
+    if (task?.status === TaskStatus.BeingCanceled) {
+      return;
+    }
+
+    isCancellingRequestInFlightRef.current = true;
+    try {
+      await onCancel();
+      await onRefresh();
+    } finally {
+      isCancellingRequestInFlightRef.current = false;
+    }
+  }, [isCancellingRequested, onCancel, onRefresh, task?.status]);
+
+  return { cancelTask, isCancellingTask };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -39,10 +39,12 @@ export function DescriptionGenerationControl({
 }: DescriptionGenerationControlProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    refreshTask();
-  }, [refreshTask]);
-  useTaskPolling(task, getDescriptionGenerationStatus, refreshTask);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getDescriptionGenerationStatus,
+    onRefresh: refreshTask,
+    onCancel: cancelDescriptionGenerationTask,
+  });
 
   if (taskError) {
     return (
@@ -99,7 +101,7 @@ export function DescriptionGenerationControl({
     return triggerButton;
   }
 
-  if (task.status === 'in_progress') {
+  if (task.status === 'in_progress' && !isCancellingTask) {
     return (
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -120,11 +122,7 @@ export function DescriptionGenerationControl({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="cancel_description_generation_button"
-            onClick={() => {
-              cancelDescriptionGenerationTask().then(() => {
-                refreshTask();
-              });
-            }}
+            onClick={cancelTask}
           >
             {i18n.translate(
               'xpack.streams.streamDetailView.streamDescription.cancelDescriptionGenerationButtonLabel',
@@ -138,7 +136,7 @@ export function DescriptionGenerationControl({
     );
   }
 
-  if (task.status === 'being_canceled') {
+  if (isCancellingTask) {
     return (
       <ConnectorListButton
         buttonProps={{
