@@ -484,33 +484,6 @@ export class PreviewController {
     this.lastExecutePainlessRequestParams = updated;
   };
 
-  valueFormatter = ({
-    value,
-    format,
-    type,
-  }: {
-    value: unknown;
-    format: Params['format'];
-    type: Params['type'];
-  }) => {
-    if (format?.id) {
-      const formatter = this.deps.fieldFormats.getInstance(format.id, format.params);
-      if (formatter) {
-        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
-      }
-    }
-
-    if (type) {
-      const fieldType = castEsToKbnFieldTypeName(type);
-      const defaultFormatterForType = this.deps.fieldFormats.getDefaultInstance(fieldType);
-      if (defaultFormatterForType) {
-        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
-      }
-    }
-
-    return defaultValueFormatter(value);
-  };
-
   valueFormatterReact = ({
     value,
     format,
