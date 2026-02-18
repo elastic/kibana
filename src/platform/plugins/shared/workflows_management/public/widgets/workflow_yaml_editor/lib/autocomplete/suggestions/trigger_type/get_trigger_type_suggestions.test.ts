@@ -13,6 +13,10 @@ import {
   getTriggerTypeSuggestions,
 } from './get_trigger_type_suggestions';
 
+jest.mock('../../../../../../trigger_schemas', () => ({
+  triggerSchemas: { getTriggerDefinitions: () => [] },
+}));
+
 // Mock the generate_trigger_snippet module
 jest.mock('../../../snippets/generate_trigger_snippet', () => ({
   generateTriggerSnippet: jest.fn(),

@@ -46,6 +46,10 @@ jest.mock('./configs/get_jest_configs', () => ({
   getJestConfigs: jest.fn(),
 }));
 
+jest.mock('./shard_config', () => {
+  return jest.requireActual('./shard_config');
+});
+
 // Mock process.exit to prevent tests from actually exiting
 const mockProcessExit = jest
   .spyOn(process, 'exit')
@@ -76,6 +80,7 @@ describe('run_all.ts', () => {
     delete process.env.BUILDKITE;
     delete process.env.BUILDKITE_STEP_ID;
     delete process.env.BUILDKITE_PARALLEL_JOB;
+    process.env.JEST_WARMUP_DELAY_MS = '0';
 
     // Set up mocks
     mockGetopts = jest.mocked(jest.requireMock('getopts'));
@@ -342,8 +347,10 @@ describe('run_all.ts', () => {
 
       await runPromise;
 
-      // Verify that output was captured and logged
-      expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('Test output from stdout'));
+      // Verify that output was captured and written (via log.write in Buildkite section)
+      expect(mockLog.write).toHaveBeenCalledWith(
+        expect.stringContaining('Test output from stdout')
+      );
     });
 
     describe('logging and reporting', () => {
@@ -368,7 +375,7 @@ describe('run_all.ts', () => {
         );
       });
 
-      it('should log output for each config with timing', async () => {
+      it('should log output for each config with Buildkite section headers', async () => {
         const mockProcess = new EventEmitter() as any;
         mockProcess.stdout = new EventEmitter();
         mockProcess.stderr = new EventEmitter();
@@ -386,8 +393,9 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/Output for .*config.*\.js \(exit 0 - success, \d+s\)/)
+        // Passing configs get collapsed Buildkite sections (---)
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*config.*\.js \(\d+s\)\n/)
         );
       });
 
@@ -407,7 +415,7 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
+        expect(mockLog.write).toHaveBeenCalledWith('+++ Combined Jest run summary\n');
         expect(mockLog.info).toHaveBeenCalledWith(
           expect.stringMatching(/Total duration \(wall to wall\): \d+s/)
         );
@@ -449,17 +457,13 @@ describe('run_all.ts', () => {
           emptyConfigs: [],
         });
 
-        // Mock multiple process instances for retry logic
-        let processCount = 0;
         mockSpawn.mockImplementation(() => {
           const mockProcess = new EventEmitter() as any;
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          // Always fail both initial and retry attempts
           process.nextTick(() => {
             mockProcess.emit('exit', 1);
-            processCount++;
           });
 
           return mockProcess;
@@ -472,8 +476,8 @@ describe('run_all.ts', () => {
           expect((err as Error).message).toContain('process.exit called with code 10');
         }
 
-        // Should have spawned processes for both initial run and retry
-        expect(mockSpawn).toHaveBeenCalledTimes(2); // 1 initial + 1 retry
+        // No retry — only 1 spawn for the failing config
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
 
         expect(mockReporter).toHaveBeenCalledWith(
           expect.any(Number),
@@ -553,74 +557,281 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        // Should log duration in seconds
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/exit 0 - success, \d+s\)/)
+        // Should log duration in Buildkite section header
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*\.js \(\d+s\)\n/)
         );
       });
     });
 
-    describe('parallel execution and retry logic', () => {
-      it('should handle retry mechanism for failed configs', async () => {
+    describe('shard annotation handling', () => {
+      it('should strip shard annotations before passing to getJestConfigs (CI path)', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: undefined,
+        });
+
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
           emptyConfigs: [],
         });
 
-        let callCount = 0;
-        mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
 
-          process.nextTick(() => {
-            // Fail first time, succeed on retry
-            mockProcess.emit('exit', callCount === 0 ? 1 : 0);
-            callCount++;
-          });
+        const runPromise = runJestAll().catch(() => {});
 
-          return mockProcess;
-        });
-
-        const runPromise = runJestAll().catch(() => {
-          // Expected due to process.exit mock
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+          if (mockSpawn.mock.calls.length > 1) {
+            mockProcess.emit('exit', 0);
+          }
         });
 
         await runPromise;
 
-        expect(mockLog.info).toHaveBeenCalledWith(
-          '--- Detected failing configs, starting retry pass (maxParallel=1)'
-        );
-        expect(mockLog.info).toHaveBeenCalledWith('Configs fixed after retry:');
+        // Should pass clean config path (without shard annotation) to getJestConfigs
+        expect(mockGetJestConfigs).toHaveBeenCalledWith(['config1.js']);
       });
 
-      it('should handle configs that still fail after retry', async () => {
+      it('should pass --shard flag to spawned processes for annotated configs', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: '2',
+        });
+
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
           emptyConfigs: [],
         });
 
-        // Always fail
+        const processes: any[] = [];
         mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
-
-          process.nextTick(() => {
-            mockProcess.emit('exit', 1);
-          });
-
-          return mockProcess;
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
         });
 
         try {
           await runJestAll();
-        } catch (err) {
-          expect((err as Error).message).toContain('process.exit called with code 10');
+        } catch {
+          // Expected
         }
 
-        expect(mockLog.info).toHaveBeenCalledWith('Configs still failing after retry:');
-        expect(mockLog.info).toHaveBeenCalledWith('  - /path/to/config1.js');
+        // Should spawn 2 processes (one per shard)
+        expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+        // First process should get --shard=1/2
+        expect(mockSpawn.mock.calls[0][1]).toEqual(expect.arrayContaining(['--shard=1/2']));
+        // Config should be clean (without annotation)
+        expect(mockSpawn.mock.calls[0][1]).toEqual(
+          expect.arrayContaining(['--config', 'config1.js'])
+        );
+
+        // Second process should get --shard=2/2
+        expect(mockSpawn.mock.calls[1][1]).toEqual(expect.arrayContaining(['--shard=2/2']));
+      });
+
+      it('should NOT pass --shard flag for non-annotated configs', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {});
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        const spawnArgs = mockSpawn.mock.calls[0][1] as string[];
+        expect(spawnArgs).not.toEqual(expect.arrayContaining([expect.stringMatching(/--shard/)]));
+      });
+
+      it('should NOT auto-expand sharded configs locally (only CI annotations)', async () => {
+        // A config is in the shard map but no CI annotation — locally it should NOT expand
+        mockGetopts.mockReturnValue({
+          configs: 'fleet/jest.integration.config.js',
+          maxParallel: '2',
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            {
+              config: '/path/to/fleet/jest.integration.config.js',
+              testFiles: ['test1.js'],
+            },
+          ],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn only 1 process — no auto-expansion locally
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+
+        const args = mockSpawn.mock.calls[0][1] as string[];
+        expect(args).not.toEqual(expect.arrayContaining([expect.stringMatching(/--shard/)]));
+      });
+    });
+
+    describe('parallel execution', () => {
+      describe('staggered warmup', () => {
+        const completeProcess = (proc: any) => {
+          proc.stdout.emit('end');
+          proc.stderr.emit('end');
+          proc.emit('exit', 0);
+        };
+
+        const waitMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+        beforeEach(() => {
+          mockGetopts.mockReturnValue({
+            configs: 'config1.js,config2.js,config3.js',
+            maxParallel: '3',
+          });
+
+          mockGetJestConfigs.mockResolvedValue({
+            configsWithTests: [
+              { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+              { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+              { config: '/path/to/config3.js', testFiles: ['test3.js'] },
+            ],
+            emptyConfigs: [],
+          });
+        });
+
+        it('should only launch 1 process during warmup phase', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '300';
+
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
+
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
+
+          expect(mockSpawn).toHaveBeenCalledTimes(1);
+
+          await waitMs(350);
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
+
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
+
+        it('should log warmup messages when delay elapses', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '300';
+
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
+
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(400);
+
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] Starting 1 process to warm transform cache')
+          );
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] Warmup delay elapsed')
+          );
+
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
+
+        it('should ramp immediately when first config completes before delay', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '60000';
+
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
+
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
+
+          expect(mockSpawn).toHaveBeenCalledTimes(1);
+
+          completeProcess(processes[0]);
+          await waitMs(50);
+
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
+          expect(mockLog.info).toHaveBeenCalledWith(
+            expect.stringContaining('[jest-warmup] First config completed')
+          );
+
+          for (let i = 1; i < processes.length; i++) completeProcess(processes[i]);
+          await runPromise;
+        }, 10_000);
+
+        it('should skip warmup when JEST_WARMUP_DELAY_MS=0', async () => {
+          process.env.JEST_WARMUP_DELAY_MS = '0';
+
+          const processes: any[] = [];
+          mockSpawn.mockImplementation(() => {
+            const proc = new EventEmitter() as any;
+            proc.stdout = new EventEmitter();
+            proc.stderr = new EventEmitter();
+            processes.push(proc);
+            return proc;
+          });
+
+          const runPromise = runJestAll().catch(() => {});
+          await waitMs(50);
+
+          expect(mockSpawn).toHaveBeenCalledTimes(3);
+          expect(mockLog.info).not.toHaveBeenCalledWith(expect.stringContaining('[jest-warmup]'));
+
+          for (const proc of processes) completeProcess(proc);
+          await runPromise;
+        }, 10_000);
       });
     });
 
@@ -676,12 +887,12 @@ describe('run_all.ts', () => {
 
         // config1 should be skipped
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config1.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
         );
 
         // Should log the resume summary
         expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringContaining('Resumed from checkpoint: skipped 1 already-completed configs')
+          expect.stringContaining('[jest-checkpoint] Resumed: skipped 1 already-completed')
         );
 
         // Only one process should be spawned (for config2)
@@ -838,10 +1049,10 @@ describe('run_all.ts', () => {
 
         // Both configs should be reported as skipped
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config1.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
         );
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config2.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config2.js')
         );
       });
 
