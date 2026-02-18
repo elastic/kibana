@@ -134,11 +134,15 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                 });
               };
 
+              const allStreamsDeprecated =
+                packageInputStreams.length > 0 && packageInputStreams.every((s) => !!s.deprecated);
+              const isDeprecatedInput = !!packagePolicyInput?.deprecated || allStreamsDeprecated;
               const isInputAvailable =
                 packagePolicyInput &&
                 isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo) &&
-                isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections);
-
+                isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections) &&
+                // Hide deprecated inputs on new installations
+                (!isDeprecatedInput || isEditPage);
               return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>
                   <PackagePolicyInputPanel

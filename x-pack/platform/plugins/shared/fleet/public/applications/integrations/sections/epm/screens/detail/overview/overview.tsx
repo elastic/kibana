@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  getNormalizedInputs,
   isIntegrationPolicyTemplate,
   isRootPrivilegesRequired,
 } from '../../../../../../../../common/services';
@@ -181,6 +182,104 @@ export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ pac
           <EuiSpacer size="m" />
         </>
       ) : null}
+    </>
+  );
+};
+
+export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
+  packageInfo,
+}) => {
+  const deprecatedFeatures: Array<{
+    type: 'input' | 'variable' | 'data stream';
+    name: string;
+    description: string;
+  }> = [];
+
+  (packageInfo.policy_templates || []).forEach((policyTemplate) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
+      if (input.deprecated) {
+        deprecatedFeatures.push({
+          type: 'input',
+          name: input.title || input.type,
+          description: input.deprecated.description,
+        });
+      }
+      (input.vars || []).forEach((varDef) => {
+        if (varDef.deprecated) {
+          deprecatedFeatures.push({
+            type: 'variable',
+            name: varDef.title || varDef.name,
+            description: varDef.deprecated.description,
+          });
+        }
+      });
+    });
+  });
+
+  // Check deprecated streams in data_streams
+  (packageInfo.data_streams || []).forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.deprecated) {
+        deprecatedFeatures.push({
+          type: 'data stream',
+          name: stream.title || dataStream.title,
+          description: stream.deprecated.description,
+        });
+      }
+      // Also check vars within deprecated streams
+      (stream.vars || []).forEach((varDef) => {
+        if (varDef.deprecated) {
+          deprecatedFeatures.push({
+            type: 'variable',
+            name: varDef.title || varDef.name,
+            description: varDef.deprecated.description,
+          });
+        }
+      });
+    });
+  });
+
+  // Also check package-level vars
+  (packageInfo.vars || []).forEach((varDef) => {
+    if (varDef.deprecated) {
+      deprecatedFeatures.push({
+        type: 'variable',
+        name: varDef.title || varDef.name,
+        description: varDef.deprecated.description,
+      });
+    }
+  });
+
+  if (deprecatedFeatures.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut
+        data-test-subj="deprecatedFeaturesCallout"
+        title={i18n.translate('xpack.fleet.epm.deprecatedFeaturesTitle', {
+          defaultMessage: 'This integration has deprecated features',
+        })}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.epm.deprecatedFeaturesDescription"
+            defaultMessage="The following features in this integration are deprecated:"
+          />
+        </p>
+        <ul>
+          {deprecatedFeatures.map(({ type, name, description }) => (
+            <li key={`${type}-${name}`}>
+              <strong>{name}</strong> ({type}): {description}
+            </li>
+          ))}
+        </ul>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   );
 };

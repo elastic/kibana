@@ -107,6 +107,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
     const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
+    // Hide deprecated variables on new installations
+    if (!isEditPage && !!varDef.deprecated) {
+      return null;
+    }
+
     if (name === DATASET_VAR_NAME && packageType === 'input') {
       return (
         <DatasetComponent
@@ -157,6 +162,27 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       });
     }
 
+    const isDeprecated = !!varDef.deprecated;
+    const deprecationTooltip = varDef.deprecated
+      ? varDef.deprecated.replaced_by
+        ? `${varDef.deprecated.description} Replaced by: ${Object.values(
+            varDef.deprecated.replaced_by
+          ).join(', ')}`
+        : varDef.deprecated.description
+      : undefined;
+
+    const deprecatedIcon = isDeprecated ? (
+      <EuiIconTip type="warning" color="warning" position="top" content={deprecationTooltip} />
+    ) : undefined;
+    const labelAppend = isOptional ? (
+      <EuiText size="xs" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+          defaultMessage="Optional"
+        />
+      </EuiText>
+    ) : undefined;
+
     const formRow = (
       <FormRow
         isInvalid={isInvalid}
@@ -164,14 +190,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         hasChildLabel={!varDef.multi}
         label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
-          isOptional ? (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-                defaultMessage="Optional"
-              />
-            </EuiText>
-          ) : undefined
+          <>
+            {deprecatedIcon}&nbsp;
+            {labelAppend}
+          </>
         }
         helpText={description && <ReactMarkdown children={description} />}
         fullWidth
@@ -348,6 +370,39 @@ const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
         </EuiLink>
       </EuiText>
     </EuiPanel>
+  );
+};
+
+const DeprecatedFieldLabel = ({
+  fieldLabel,
+  tooltipContent,
+}: {
+  fieldLabel: string;
+  tooltipContent?: string;
+}) => {
+  return (
+    <EuiFlexGroup alignItems="flexEnd" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued" aria-label={fieldLabel}>
+          {fieldLabel}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          type="warning"
+          color="warning"
+          position="top"
+          content={
+            tooltipContent || (
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.deprecatedVarTooltip"
+                defaultMessage="This variable is deprecated."
+              />
+            )
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

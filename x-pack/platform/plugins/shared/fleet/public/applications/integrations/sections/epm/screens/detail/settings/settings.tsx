@@ -48,7 +48,7 @@ import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
-import { DeprecationCallout } from '../overview/overview';
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/overview';
 
 import { wrapTitleWithDeprecated } from '../../../components/utils';
 
@@ -254,6 +254,7 @@ export const SettingsPage: React.FC<Props> = memo(
               </EuiTitle>
               <EuiSpacer size="s" />
               <DeprecationCallout packageInfo={packageInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>

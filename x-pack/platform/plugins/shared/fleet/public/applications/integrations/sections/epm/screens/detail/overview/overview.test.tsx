@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
 
-import { DeprecationCallout } from './overview';
+import { DeprecationCallout, DeprecatedFeaturesCallout } from './overview';
 
 const mockUseLink = jest.fn();
 
@@ -206,5 +206,194 @@ describe('DeprecationCallout', () => {
 
     const warningIcon = container.querySelector('[data-euiicon-type="warning"]');
     expect(warningIcon).toBeInTheDocument();
+  });
+});
+
+describe('DeprecatedFeaturesCallout', () => {
+  function renderCallout(packageInfo: Partial<PackageInfo>) {
+    return render(
+      <I18nProvider>
+        <DeprecatedFeaturesCallout packageInfo={packageInfo as PackageInfo} />
+      </I18nProvider>
+    );
+  }
+
+  it('should not render when no deprecated features exist', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'default',
+          title: 'Default',
+          description: 'Default template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Log input',
+              description: 'Collect logs',
+            },
+          ],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.queryByTestId('deprecatedFeaturesCallout')).not.toBeInTheDocument();
+  });
+
+  it('should render when an input is deprecated', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'default',
+          title: 'Default',
+          description: 'Default template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Deprecated Log Input',
+              description: 'Collect logs',
+              deprecated: {
+                description: 'This input is deprecated. Use CEL instead.',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText('This integration has deprecated features')).toBeInTheDocument();
+    expect(screen.getByText(/Deprecated Log Input/)).toBeInTheDocument();
+    expect(screen.getByText(/This input is deprecated. Use CEL instead./)).toBeInTheDocument();
+  });
+
+  it('should render when a variable is deprecated', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'default',
+          title: 'Default',
+          description: 'Default template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Log Input',
+              description: 'Collect logs',
+              vars: [
+                {
+                  name: 'old_var',
+                  type: 'text',
+                  title: 'Old Variable',
+                  deprecated: {
+                    description: 'Use new_var instead.',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText(/Old Variable/)).toBeInTheDocument();
+    expect(screen.getByText(/Use new_var instead./)).toBeInTheDocument();
+  });
+
+  it('should render when a package-level var is deprecated', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [],
+      vars: [
+        {
+          name: 'legacy_setting',
+          type: 'text',
+          title: 'Legacy Setting',
+          deprecated: {
+            description: 'This setting is deprecated.',
+          },
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText(/Legacy Setting/)).toBeInTheDocument();
+  });
+
+  it('should render when a data stream has a deprecated stream', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'test.access',
+          title: 'Test access logs',
+          streams: [
+            {
+              input: 'logfile',
+              title: 'Access logs',
+              template_path: 'stream.yml.hbs',
+              deprecated: {
+                description: 'This data stream is deprecated. Use the new CEL stream instead.',
+              },
+            },
+          ],
+          package: 'test-package',
+          path: 'access',
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText(/Access logs/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This data stream is deprecated. Use the new CEL stream instead./)
+    ).toBeInTheDocument();
+  });
+
+  it('should render multiple deprecated features', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'default',
+          title: 'Default',
+          description: 'Default template',
+          inputs: [
+            {
+              type: 'old-input',
+              title: 'Old Input',
+              description: 'Old input type',
+              deprecated: {
+                description: 'Input is deprecated.',
+              },
+              vars: [
+                {
+                  name: 'old_var',
+                  type: 'text',
+                  title: 'Old Var',
+                  deprecated: {
+                    description: 'Variable is deprecated.',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText(/Old Input/)).toBeInTheDocument();
+    expect(screen.getByText(/Old Var/)).toBeInTheDocument();
   });
 });
