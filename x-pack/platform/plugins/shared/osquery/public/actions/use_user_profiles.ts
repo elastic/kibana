@@ -14,7 +14,7 @@ import type { SearchHit } from '../../common/search_strategy';
 export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
   const { userProfile } = useKibana().services;
 
-  const uids = useMemo(() => {
+  const uidList = useMemo(() => {
     const uidSet = new Set<string>();
 
     for (const item of actionItems) {
@@ -24,16 +24,17 @@ export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
       }
     }
 
-    return uidSet;
+    return Array.from(uidSet).sort();
   }, [actionItems]);
 
   const { data: userProfiles, isLoading } = useQuery<UserProfileWithAvatar[]>(
-    ['useBulkGetUserProfiles', ...uids],
-    () => userProfile.bulkGet({ uids, dataPath: 'avatar' }),
+    ['useBulkGetUserProfiles', ...uidList],
+    () => userProfile.bulkGet({ uids: new Set(uidList), dataPath: 'avatar' }),
     {
-      enabled: uids.size > 0,
+      enabled: uidList.length > 0,
       staleTime: Infinity,
       retry: false,
+      keepPreviousData: true,
     }
   );
 
@@ -43,5 +44,5 @@ export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
     return new Map(userProfiles.map((profile) => [profile.uid, profile]));
   }, [userProfiles]);
 
-  return { profilesMap, isLoading: isLoading && uids.size > 0 };
+  return { profilesMap, isLoading: isLoading && uidList.length > 0 };
 };

@@ -24,12 +24,12 @@ const RunByColumnComponent: React.FC<RunByColumnProps> = ({
 }) => {
   const profile = userProfileUid ? profilesMap.get(userProfileUid) : undefined;
 
-  if (userProfileUid && isLoadingProfiles) {
-    return null;
-  }
-
   if (profile) {
     return <UserAvatarCell user={profile.user} avatar={profile.data?.avatar} />;
+  }
+
+  if (userProfileUid && isLoadingProfiles && !profilesMap.has(userProfileUid)) {
+    return null;
   }
 
   if (userId) {
