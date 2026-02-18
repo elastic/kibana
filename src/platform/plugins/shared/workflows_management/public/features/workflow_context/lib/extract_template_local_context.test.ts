@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTemplateLocalContext } from './extract_template_local_context';
-import { forLoopScopesContainingOffset } from '../../../shared/lib/template_local_context_shared';
+import {
+  forLoopScopesContainingOffset,
+  getTemplateLocalContext,
+} from './extract_template_local_context';
 
 describe('getTemplateLocalContext', () => {
   describe('assign and capture', () => {
