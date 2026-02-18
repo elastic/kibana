@@ -6,16 +6,14 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useInstallMigrationDashboards } from './use_install_migration_dashboards';
+import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
+import { useInstallMigrationDashboard } from './use_install_migration_dashboard';
 import { installMigrationDashboards } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useInvalidateGetMigrationDashboards } from './use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
-import { MigrationSource } from '../../common/types';
-import type { DashboardMigrationTranslationStats } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -34,36 +32,40 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 
-const mockResponse = { installed: 2 };
+const mockResponse = { installed: 1 };
 const mockError = new Error('API error');
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const invalidateDashboards = jest.fn();
 const invalidateStats = jest.fn();
-const mockReportTranslatedItemBulkInstall = jest.fn();
-const defaultMigrationStats = {
-  id: '1',
-  status: SiemMigrationTaskStatus.READY,
-  vendor: MigrationSource.SPLUNK,
-  name: 'Test Migration',
-  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
-  created_at: '2025-01-01T00:00:00Z',
-  last_updated_at: '2025-01-01T01:00:00Z',
-};
-const defaultTranslationStats: DashboardMigrationTranslationStats = {
-  id: '1',
-  dashboards: {
-    total: 2,
-    failed: 0,
-    success: {
-      total: 2,
-      result: { full: 2, partial: 0, untranslatable: 0 },
-      installable: 2,
-    },
+const mockReportTranslatedItemInstall = jest.fn();
+
+const mockDashboard: DashboardMigrationDashboard = {
+  id: 'dash-1',
+  migration_id: 'mig-1',
+  original_dashboard: {
+    id: 'orig-1',
+    vendor: 'splunk',
+    title: 'Original Dashboard',
+    description: 'desc',
+    data: '{}',
+    format: 'json',
   },
+  elastic_dashboard: {
+    title: 'Elastic Dashboard',
+    description: 'Elastic desc',
+    data: '{}',
+  },
+  comments: [],
+  created_by: 'user1',
+  '@timestamp': '2024-06-01T12:00:00Z',
+  status: 'completed',
+  translation_result: 'full',
 };
 
-describe('useInstallMigrationDashboards', () => {
+describe('useInstallMigrationDashboard', () => {
+  const migrationId = 'mig-1';
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useAppToasts as jest.Mock).mockReturnValue({
@@ -77,7 +79,7 @@ describe('useInstallMigrationDashboards', () => {
         siemMigrations: {
           dashboards: {
             telemetry: {
-              reportTranslatedItemBulkInstall: mockReportTranslatedItemBulkInstall,
+              reportTranslatedItemInstall: mockReportTranslatedItemInstall,
             },
           },
         },
@@ -88,22 +90,32 @@ describe('useInstallMigrationDashboards', () => {
   describe('on success', () => {
     beforeEach(() => {
       (installMigrationDashboards as jest.Mock).mockResolvedValue(mockResponse);
-      const { result } = renderHook(() => useInstallMigrationDashboards(defaultMigrationStats), {
+      const { result } = renderHook(() => useInstallMigrationDashboard(migrationId), {
         wrapper: TestProviders,
       });
-      result.current.mutate({ ids: ['1', '2'] });
+      result.current.mutate({ migrationDashboard: mockDashboard });
     });
 
     it('shows a success toast', async () => {
       await waitFor(() => {
-        expect(mockAddSuccess).toHaveBeenCalledWith('2 dashboards installed successfully.');
+        expect(mockAddSuccess).toHaveBeenCalledWith('1 dashboard installed successfully.');
+      });
+    });
+
+    it('reports translated dashboard install telemetry', async () => {
+      await waitFor(() => {
+        expect(mockReportTranslatedItemInstall).toHaveBeenCalledWith({
+          migrationItem: mockDashboard,
+          enabled: true,
+          error: undefined,
+        });
       });
     });
 
     it('invalidates queries on settled', async () => {
       await waitFor(() => {
-        expect(invalidateDashboards).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateDashboards).toHaveBeenCalledWith(migrationId);
+        expect(invalidateStats).toHaveBeenCalledWith(migrationId);
       });
     });
   });
@@ -111,10 +123,10 @@ describe('useInstallMigrationDashboards', () => {
   describe('on error', () => {
     beforeEach(() => {
       (installMigrationDashboards as jest.Mock).mockRejectedValue(mockError);
-      const { result } = renderHook(() => useInstallMigrationDashboards(defaultMigrationStats), {
+      const { result } = renderHook(() => useInstallMigrationDashboard(migrationId), {
         wrapper: TestProviders,
       });
-      result.current.mutate({ ids: ['1', '2'] });
+      result.current.mutate({ migrationDashboard: mockDashboard });
     });
 
     it('shows an error toast', async () => {
@@ -125,11 +137,22 @@ describe('useInstallMigrationDashboards', () => {
       });
     });
 
+    it('reports translated dashboard install telemetry with error', async () => {
+      await waitFor(() => {
+        expect(mockReportTranslatedItemInstall).toHaveBeenCalledWith({
+          migrationItem: mockDashboard,
+          enabled: true,
+          error: mockError,
+        });
+      });
+    });
+
     it('invalidates queries on settled', async () => {
       await waitFor(() => {
-        expect(invalidateDashboards).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateDashboards).toHaveBeenCalledWith(migrationId);
+        expect(invalidateStats).toHaveBeenCalledWith(migrationId);
       });
     });
   });
 });
+
