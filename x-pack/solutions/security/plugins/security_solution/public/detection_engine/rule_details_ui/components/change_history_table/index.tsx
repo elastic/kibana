@@ -30,8 +30,6 @@ import React, { useState } from 'react';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { Rule } from '../../../rule_management/logic';
-// import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-// import { useKibana } from '../../../../../common/lib/kibana';
 import type { ChangeHistoryResult } from '../../../rule_management/api/hooks/use_change_history';
 import { useChangeHistory } from '../../../rule_management/api/hooks/use_change_history';
 import { DATE_DISPLAY_FORMAT, IGNORED_FIELDS } from './constants';
@@ -72,8 +70,6 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   // Index for `add filter` action and toasts for errors
   // const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
-  // const { addError, addSuccess, remove } = useAppToasts();
-
   // QueryString, Filters, and TimeRange state
   const { data, isFetching } = useChangeHistory({
     id: ruleId,
@@ -105,23 +101,19 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           size="s"
         >
           <div>
-            {`On ${moment(item.timestamp).format()} `}
+            {`On ${moment(item.timestamp).format(DATE_DISPLAY_FORMAT)} `}
             <EuiBadge color="hollow">{item.userId}</EuiBadge>
             {template({ ...item, changes: visibleChanges }, euiTheme)}
           </div>
-          {![RuleChangeTrackingAction.ruleEnable, RuleChangeTrackingAction.ruleDisable].includes(
-            item.action as RuleChangeTrackingAction
-          ) && (
-            <EuiLink
-              onClick={() => {
-                setIsFlyoutOpen(true);
-                setChangeItem(item);
-              }}
-            >
-              {`View `}
-              <EuiIcon type="expand" />
-            </EuiLink>
-          )}
+          <EuiLink
+            onClick={() => {
+              setIsFlyoutOpen(true);
+              setChangeItem(item);
+            }}
+          >
+            {`View `}
+            <EuiIcon type="expand" />
+          </EuiLink>
         </EuiText>
       </EuiTimelineItem>
     );
@@ -187,22 +179,8 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="s" />
-
-      {/* Table with items */}
-      {/* <EuiBasicTable
-        columns={columns}
-        items={items}
-        loading={isFetching}
-        tableCaption="History table"
-        pagination={pagination}
-        onChange={onTableChangeCallback}
-        // itemId={getItemId}
-        // itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
-        data-test-subj="executionsTable"
-      /> */}
-      <EuiTimeline aria-label="Change History table">{items}</EuiTimeline>
+      <EuiTimeline aria-label="Change History timeline">{items}</EuiTimeline>
       <ChangeHistoryFlyout
         isOpen={isFlyoutOpen}
         onClose={() => setIsFlyoutOpen(false)}

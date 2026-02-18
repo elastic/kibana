@@ -7,25 +7,28 @@
 
 import crypto from 'node:crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { RuleTypeSolution } from '@kbn/alerting-types';
+import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
 import type {
   ObjectChange,
   GetHistoryResult,
   LogChangeHistoryOptions,
   ChangeHistoryDocument,
+  GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import type { RuleDomain } from '../../../application/rule/types';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
-const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
-  executionStatus: false,
-  monitoring: false,
-  lastRun: false,
-  nextRun: false,
+export const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
+  attributes: {
+    executionStatus: true,
+    monitoring: true,
+    lastRun: true,
+    nextRun: true,
+    mapped_params: true,
+  },
 };
 
 const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
@@ -44,7 +47,7 @@ export interface RuleChange extends ObjectChange {
 }
 
 export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
-  ruleDomain: RuleDomain;
+  rule: SanitizedRule;
 }
 
 export interface GetRuleHistoryResult extends GetHistoryResult {
@@ -57,7 +60,11 @@ export interface IChangeTrackingService {
   initialize(elasticsearchClient: ElasticsearchClient): void;
   log(change: RuleChange, opts: LogChangeHistoryOptions): void;
   logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): void;
-  getHistory(module: RuleTypeSolution, ruleId: string): Promise<GetHistoryResult>;
+  getHistory(
+    module: RuleTypeSolution,
+    ruleId: string,
+    opts: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult>;
 }
 
 export class ChangeTrackingService implements IChangeTrackingService {
@@ -147,13 +154,17 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
   }
 
-  async getHistory(module: RuleTypeSolution, ruleId: string): Promise<GetHistoryResult> {
+  async getHistory(
+    module: RuleTypeSolution,
+    ruleId: string,
+    opts: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult> {
     const client = this.clients[module];
     if (!client) {
       const error = new Error('Change history client not initialized properly');
       this.logger.error(error);
       throw error;
     }
-    return client.getHistory(RULE_SAVED_OBJECT_TYPE, ruleId);
+    return client.getHistory(RULE_SAVED_OBJECT_TYPE, ruleId, opts);
   }
 }

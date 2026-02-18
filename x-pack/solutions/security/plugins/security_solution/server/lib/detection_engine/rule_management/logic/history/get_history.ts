@@ -6,7 +6,6 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client/rules_client';
-import type { SanitizedRule } from '@kbn/alerting-types';
 import { RuleTypeSolutions } from '@kbn/alerting-types';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server/rules_client/lib/change_tracking';
 import type {
@@ -15,7 +14,6 @@ import type {
   RuleHistoryResult,
 } from '../../../../../../common/api/detection_engine';
 import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
-import type { RuleParams } from '../../../rule_schema';
 
 export interface GetRuleHistoryOptions {
   client: RulesClient;
@@ -51,20 +49,21 @@ export const getRuleHistory = async ({
 };
 
 const mapHistoryItem = (item: RuleChangeHistoryDocument): RuleHistoryResult => {
-  const { user, event, object, ruleDomain, metadata } = item;
+  const { user, event, object, rule: alertingRule, metadata } = item;
   // TODO: Watch out for extra layer of unwrapping below (RuleDomain -> SanitizedRule).
-  const ruleResponse = convertAlertingRuleToRuleResponse(ruleDomain as SanitizedRule<RuleParams>);
+  const rule = convertAlertingRuleToRuleResponse(alertingRule);
   return {
-    id: event.id,
     timestamp: item['@timestamp'],
+    id: event.id,
+    ruleId: rule.id,
     userId: user?.id,
-    revision: ruleDomain?.revision as number | undefined,
+    revision: rule.revision as number | undefined,
     previousRevision: object.oldvalues?.['attributes.revision'] as number | undefined,
-    version: ruleResponse.version as number | undefined,
+    version: rule.version as number | undefined,
     action: event.action,
     changes: object.changes ?? [],
     snapshot: object.snapshot,
-    ruleResponse,
+    rule,
     oldvalues: object.oldvalues,
     metadata,
   };

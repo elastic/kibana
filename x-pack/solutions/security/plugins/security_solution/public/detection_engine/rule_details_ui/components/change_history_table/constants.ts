@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const DATE_DISPLAY_FORMAT = 'MMM D YYYY @ HH:mm';
+export const DATE_DISPLAY_FORMAT = 'MMM D\\, YYYY @ HH:mm';
 
-export const DATE_DISPLAY_FORMAT_WITH_SECONDS = 'MMM D YYYY @ HH:mm:ss';
+export const DATE_DISPLAY_FORMAT_WITH_SECONDS = 'MMM D\\, YYYY @ HH:mm:ss';
 
 export const IGNORED_FIELDS = [
   'attributes.updatedAt',

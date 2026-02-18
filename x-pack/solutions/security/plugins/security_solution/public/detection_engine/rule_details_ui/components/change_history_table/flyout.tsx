@@ -121,7 +121,7 @@ export const ChangeHistoryFlyout = ({ isOpen, onClose, change }: ChangeHistoryFl
           >
             <EuiFlexGroup justifyContent="spaceBetween">
               <RuleAboutSection
-                rule={change.ruleResponse as Partial<RuleResponse>}
+                rule={change.rule as Partial<RuleResponse>}
                 hideName={false}
                 hideDescription={false}
               />
@@ -143,7 +143,7 @@ export const ChangeHistoryFlyout = ({ isOpen, onClose, change }: ChangeHistoryFl
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="spaceBetween">
               <RuleDefinitionSection
-                rule={change.ruleResponse as Partial<RuleResponse>}
+                rule={change.rule as Partial<RuleResponse>}
                 columnWidths={DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS}
               />
             </EuiFlexGroup>
@@ -218,8 +218,9 @@ export const ChangeHistoryFlyout = ({ isOpen, onClose, change }: ChangeHistoryFl
       </EuiFlyoutFooter>
       {isModalOpen && (
         <ChangeHistoryConfirmRestoreModal
+          ruleId={change.ruleId}
+          changeId={change.id}
           onCancel={() => setIsModalOpen(false)}
-          onConfirm={() => {}}
         />
       )}
     </EuiFlyout>

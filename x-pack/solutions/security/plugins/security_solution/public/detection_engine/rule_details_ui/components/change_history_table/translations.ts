@@ -73,7 +73,7 @@ export const CONFIRM_RESTORE_MODAL_TITLE = i18n.translate(
 export const CONFIRM_RESTORE_MODAL_MESSAGE_1 = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreModalMessage1',
   {
-    defaultMessage: 'You are about to restore a previous revision of the rule.',
+    defaultMessage: 'You are about to restore a historical revision of this rule.',
   }
 );
 
@@ -89,6 +89,13 @@ export const CONFIRM_RESTORE_MODAL_MESSAGE_3 = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreModalMessage3',
   {
     defaultMessage: 'Do you wish to continue?',
+  }
+);
+
+export const RULE_RESTORED_SUCESSFULLY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.restoreSuccess',
+  {
+    defaultMessage: 'Rule restored successfully',
   }
 );
 

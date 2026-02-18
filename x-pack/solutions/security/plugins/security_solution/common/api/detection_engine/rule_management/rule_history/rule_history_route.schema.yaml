@@ -15,7 +15,7 @@ paths:
       parameters:
         - name: id
           in: query
-          required: false
+          required: true
           description: The rule's `id` value.
           schema:
             $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
@@ -78,17 +78,57 @@ paths:
                         changedFields:
                           - 'alert.name'
                           - 'alert.tags'
+    patch:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: RestoreRule
+      summary: Restores a historical revisions of a detection rule
+      description: Restores a historical revision of a detection rule.
+      tags:
+        - Rules API
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: The rule's `id` value.
+          schema:
+            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        - name: changeId
+          in: query
+          description: The historical change event Id
+          required: true
+          schema:
+            type: string
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X PATCH "localhost:5601/api/detection_engine/rules/_history?id=6399a03a-9ec2-4c42-8e2a-9e622683cfcd&changeId=MmZVCRRrcU8IXhpdBBau" -H 'kbn-xsrf: true'
+      responses:
+        '200':
+          description: |
+            Successful response
+            > info
 
 components:
   schemas:
     RuleHistoryResult:
       type: object
+      required:
+        - timestamp
+        - id
+        - ruleId
+        - userId
+        - rule
       properties:
         timestamp:
+          type: string
+        id:
           type: string
         userId:
           type: string
         revision:
+          type: integer
+        previousRevision:
           type: integer
         version:
           type: integer
@@ -103,4 +143,6 @@ components:
         snapshot:
           type: object
         metadata:
+          type: object
+        rule:
           type: object

@@ -28,6 +28,7 @@ export interface IDetectionRulesClient {
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
+  restoreRule: (args: RestoreRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
 }
@@ -59,6 +60,11 @@ export interface UpgradePrebuiltRuleArgs {
 export interface RevertPrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
   existingRule: RuleResponse;
+}
+
+export interface RestoreRuleArgs {
+  ruleId: RuleObjectId;
+  changeId: string;
 }
 
 export interface ImportRuleArgs {

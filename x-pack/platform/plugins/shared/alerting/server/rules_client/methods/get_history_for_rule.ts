@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { RuleTypeSolution } from '@kbn/alerting-types';
-import type { ChangeHistoryDocument } from '@kbn/change-history';
+import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
+import type { ChangeHistoryDocument, GetChangeHistoryOptions } from '@kbn/change-history';
 import { transformRuleAttributesToRuleDomain } from '../../application/rule/transforms/transform_rule_attributes_to_rule_domain';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -19,6 +19,7 @@ import type {
   RuleSnapshot,
 } from '../lib/change_tracking';
 import type { RawRule } from '../../types';
+import { transformRuleDomainToRule } from '../../application/rule/transforms';
 
 export interface GetHistoryByParams {
   module: RuleTypeSolution;
@@ -27,9 +28,10 @@ export interface GetHistoryByParams {
   dateEnd?: string;
   user?: string;
   filter?: string;
-  page: number;
-  perPage: number;
-  sort: estypes.Sort;
+  changeId?: string;
+  page?: number;
+  perPage?: number;
+  sort?: estypes.Sort;
 }
 
 export async function getHistoryForRule(
@@ -38,9 +40,10 @@ export async function getHistoryForRule(
 ): Promise<GetRuleHistoryResult> {
   context.logger.debug(`getHistoryForRule(): getting history log for rule ${params.ruleId}`);
 
+  const { module, ruleId, changeId } = params;
   const { id, attributes } = await getRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
-    id: params.ruleId,
+    id: ruleId,
   });
 
   const ruleAuditEventData = {
@@ -61,8 +64,12 @@ export async function getHistoryForRule(
     throw error;
   }
 
-  if (context.changeTrackingService?.initialized(params.module)) {
-    const history = await context.changeTrackingService.getHistory(params.module, params.ruleId);
+  if (context.changeTrackingService?.initialized(module)) {
+    const opts: GetChangeHistoryOptions = {};
+    if (changeId) {
+      opts.additionalFilters = [{ term: { 'event.id': changeId } }];
+    }
+    const history = await context.changeTrackingService.getHistory(module, ruleId, opts);
     const result = {
       startDate: history.startDate,
       total: history.total,
@@ -91,5 +98,6 @@ const mapHistoryItem =
       },
       context.isSystemAction
     );
-    return { ruleDomain, ...item };
+    const rule = transformRuleDomainToRule(ruleDomain) as SanitizedRule;
+    return { ...item, rule };
   };

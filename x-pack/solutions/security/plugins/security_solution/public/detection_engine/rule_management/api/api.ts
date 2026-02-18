@@ -273,6 +273,28 @@ export const fetchRuleChangeHistoryById = async ({
 };
 
 /**
+ * Restores a rule to a previous revision
+ * @param id The rule ID (not rule_id)
+ * @param changeId The historical change id
+ * @returns A promised that gets settled when the restore action is completed
+ */
+export const restoreChangeById = async ({
+  id,
+  changeId,
+  signal,
+}: {
+  id: string;
+  changeId: string;
+  signal?: AbortSignal;
+}): Promise<{ ok: boolean }> =>
+  KibanaServices.get().http.fetch<{ ok: boolean }>(DETECTION_ENGINE_RULES_URL_HISTORY, {
+    method: 'PATCH',
+    version: '2023-10-31',
+    query: { id, changeId },
+    signal,
+  });
+
+/**
  * Fetch rule snooze settings for each provided ruleId
  *
  * @param ids Rule IDs (not rule_id)

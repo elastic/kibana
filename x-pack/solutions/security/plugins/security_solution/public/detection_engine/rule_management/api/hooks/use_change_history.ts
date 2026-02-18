@@ -17,6 +17,8 @@ import { DEFAULT_QUERY_OPTIONS } from './constants';
 export type ChangeHistoryResult = z.infer<typeof ChangeHistoryResult>;
 export const ChangeHistoryResult = z.object({
   timestamp: z.string().datetime(),
+  id: z.string(),
+  ruleId: z.string(),
   revision: z.number().int().optional(),
   previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
@@ -25,10 +27,11 @@ export const ChangeHistoryResult = z.object({
   changes: z.array(z.string()),
   oldvalues: z.object({}).passthrough().optional(),
   snapshot: z.object({}).passthrough().optional(),
-  ruleResponse: z.object({}).passthrough().optional(), // TODO: find a better name
+  rule: z.object({}).passthrough().optional(),
   metadata: z
     .object({
       originalRuleId: z.string(),
+      originalRevision: z.number(),
     })
     .partial()
     .optional(),

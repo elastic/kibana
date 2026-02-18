@@ -66,6 +66,23 @@ export const CHANGE_HISTORY_ACTION_TEMPLATE = {
       {' when importing the rule.'}
     </>
   ),
+  [SecurityRuleChangeTrackingAction.ruleRestore]: (item) => {
+    const { originalRevision } = item.metadata ?? {};
+    return (
+      <>
+        {' made revision '}
+        <EuiBadge color="hollow">{item.revision}</EuiBadge>
+        {' restoring the rule'}
+        {Number(originalRevision) > -1 && (
+          <>
+            {' to revision '}
+            <EuiBadge color="hollow">{originalRevision}</EuiBadge>
+          </>
+        )}
+        {'.'}
+      </>
+    );
+  },
   [RuleChangeTrackingAction.ruleUpdate]: (item, euiTheme) => {
     const changes = renderChanges(item, euiTheme);
     return (

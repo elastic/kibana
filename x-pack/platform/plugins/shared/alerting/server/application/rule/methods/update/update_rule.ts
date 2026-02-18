@@ -51,6 +51,7 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
   action?: ChangeTrackingAction;
+  metadata?: Record<string, unknown>;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -75,6 +76,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     id,
     shouldIncrementRevision = () => true,
     action,
+    metadata,
   } = updateParams;
 
   // Validate update rule data schema
@@ -202,6 +204,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     shouldIncrementRevision,
     isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
     action,
+    metadata,
   });
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -257,6 +260,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   shouldIncrementRevision,
   isSystemAction,
   action,
+  metadata,
 }: {
   context: RulesClientContext;
   updateRuleData: UpdateRuleData<Params>;
@@ -265,6 +269,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   shouldIncrementRevision: (params?: Params) => boolean;
   isSystemAction: (connectorId: string) => boolean;
   action?: ChangeTrackingAction;
+  metadata?: Record<string, unknown>;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
   await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
@@ -365,6 +370,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       action: action ?? RuleChangeTrackingAction.ruleUpdate,
       userId: username ?? 'unknown',
       spaceId: context.spaceId,
+      data: { metadata },
     });
   } catch (e) {
     // Avoid unused API key

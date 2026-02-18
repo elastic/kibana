@@ -20,27 +20,40 @@ import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
 
 export type RuleHistoryResult = z.infer<typeof RuleHistoryResult>;
 export const RuleHistoryResult = z.object({
+  timestamp: z.string(),
   id: z.string(),
-  timestamp: z.string().optional(),
-  userId: z.string().optional(),
+  ruleId: z.string(),
+  userId: z.string(),
   revision: z.number().int().optional(),
   previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
   action: z.string().optional(),
   changes: z.array(z.string()).optional(),
-  oldvalues: z.object({}).passthrough().optional(),
-  snapshot: z.object({}).passthrough().optional(),
-  metadata: z.object({}).passthrough().optional(),
-  ruleDomain: z.object({}).passthrough().optional(),
-  ruleResponse: z.object({}).passthrough().optional(),
+  oldvalues: z.object({}).optional(),
+  snapshot: z.object({}).optional(),
+  metadata: z.object({}).optional(),
+  rule: z.object({}).optional(),
 });
+
+export type RestoreRuleRequestQuery = z.infer<typeof RestoreRuleRequestQuery>;
+export const RestoreRuleRequestQuery = z.object({
+  /**
+   * The rule's `id` value.
+   */
+  id: RuleObjectId,
+  /**
+   * The historical change event Id
+   */
+  changeId: z.string(),
+});
+export type RestoreRuleRequestQueryInput = z.input<typeof RestoreRuleRequestQuery>;
 
 export type RuleHistoryRequestQuery = z.infer<typeof RuleHistoryRequestQuery>;
 export const RuleHistoryRequestQuery = z.object({
   /**
    * The rule's `id` value.
    */
-  id: RuleObjectId.optional(),
+  id: RuleObjectId,
   /**
    * Page number
    */
