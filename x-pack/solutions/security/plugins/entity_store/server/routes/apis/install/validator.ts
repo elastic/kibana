@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { fromKueryExpression } from '@kbn/es-query';
 import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';

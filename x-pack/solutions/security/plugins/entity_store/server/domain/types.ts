@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { EngineDescriptor } from './definitions/saved_objects';
 import type { EntityStoreStatus } from '../../common';
 export type { EntityStoreStatus };

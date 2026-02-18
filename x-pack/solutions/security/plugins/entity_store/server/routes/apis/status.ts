@@ -6,7 +6,7 @@
  */
 
 import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
