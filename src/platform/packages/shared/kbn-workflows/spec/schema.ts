@@ -506,6 +506,21 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   startedAt: z.string().optional(),
 });
 
+export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.output'),
+  status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
+  with: z.record(z.string(), z.any()),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
+
+export const WorkflowFailStepSchema = BaseStepSchema.extend({
+  type: z.literal('workflow.fail'),
+  with: z.object({
+    message: z.string(),
+  }),
+}).extend(StepWithIfConditionSchema.shape);
+export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -553,6 +568,53 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
+/* --- Outputs --- */
+// Outputs support the same types as inputs
+export const WorkflowOutputTypeEnum = WorkflowInputTypeEnum;
+
+const WorkflowOutputBaseSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  required: z.boolean().optional(),
+});
+
+export const WorkflowOutputStringSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('string'),
+});
+export type WorkflowOutputString = z.infer<typeof WorkflowOutputStringSchema>;
+
+export const WorkflowOutputNumberSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('number'),
+});
+export type WorkflowOutputNumber = z.infer<typeof WorkflowOutputNumberSchema>;
+
+export const WorkflowOutputBooleanSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('boolean'),
+});
+export type WorkflowOutputBoolean = z.infer<typeof WorkflowOutputBooleanSchema>;
+
+export const WorkflowOutputChoiceSchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('choice'),
+  options: z.array(z.string()),
+});
+export type WorkflowOutputChoice = z.infer<typeof WorkflowOutputChoiceSchema>;
+
+export const WorkflowOutputArraySchema = WorkflowOutputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+});
+export type WorkflowOutputArray = z.infer<typeof WorkflowOutputArraySchema>;
+
+export const WorkflowOutputSchema = z.union([
+  WorkflowOutputStringSchema,
+  WorkflowOutputNumberSchema,
+  WorkflowOutputBooleanSchema,
+  WorkflowOutputChoiceSchema,
+  WorkflowOutputArraySchema,
+]);
+export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
+
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -578,6 +640,8 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowOutputStepSchema,
+    WorkflowFailStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -592,6 +656,8 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowOutputStepSchema.shape.type.value,
+  WorkflowFailStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -612,6 +678,7 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
+  outputs: z.array(WorkflowOutputSchema).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
@@ -680,6 +747,7 @@ const WorkflowSchemaForAutocompleteBase = z
       ])
       .optional()
       .catch(undefined),
+    outputs: z.array(WorkflowOutputSchema).optional().catch(undefined),
     consts: WorkflowConstsSchema.optional(),
     steps: z
       .array(
@@ -785,6 +853,17 @@ export const WorkflowContextSchema = z.object({
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  output: z
+    .record(
+      z.string(),
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
   parent: z
@@ -799,8 +878,9 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs and consts of different types
+  // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
+  output: z.object({}),
   consts: z.object({}),
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)

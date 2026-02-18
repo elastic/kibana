@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
+import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -105,13 +106,19 @@ export function getCompletionItemProvider(
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
 
+      const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
+        autocompleteContext.path,
+        autocompleteContext.focusedStepInfo,
+        autocompleteContext.yamlDocument,
+        autocompleteContext.absoluteOffset
+      );
+
       let isIncomplete = false;
 
-      {
-        // Get suggestions from all stored YAML providers (excluding workflow provider)
+      if (!shouldUseExclusiveSuggestions) {
         const allYamlProviders = getAllYamlProviders();
 
-        // Call all stored providers and add their suggestions incrementally
+
         for (const yamlProvider of allYamlProviders) {
           if (yamlProvider.provideCompletionItems) {
             try {
@@ -134,8 +141,7 @@ export function getCompletionItemProvider(
         }
       }
 
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
+      // Workflow-specific suggestions (variables, connectors, workflow outputs, etc.)
       const workflowSuggestions = await getSuggestions({
         ...autocompleteContext,
         model,

@@ -46,6 +46,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './types';
 
 export {

@@ -9,7 +9,7 @@
 
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
-import type { BuiltInStepType } from '@kbn/workflows';
+import type { BuiltInStepType, WorkflowOutput } from '@kbn/workflows';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
@@ -18,15 +18,17 @@ interface GenerateBuiltInStepSnippetOptions {
 
 /**
  * Generates a YAML snippet for a built-in workflow step based on the specified type.
- * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', etc.)
+ * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', 'workflow.output', 'workflow.fail', etc.)
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
+ * @param workflowOutputs - Declared workflow outputs for workflow.output step snippet
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
-  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {}
+  { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},
+  workflowOutputs?: WorkflowOutput[]
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -83,6 +85,24 @@ export function generateBuiltInStepSnippet(
           'workflow-id': 'workflow-id',
           inputs: {},
         },
+      };
+      break;
+    case 'workflow.output': {
+      const withBlock: Record<string, string> = {};
+      if (workflowOutputs && workflowOutputs.length > 0) {
+        workflowOutputs.forEach((output) => {
+          const placeholder = output.type === 'string' ? '"${1:value}"' : '${1:value}';
+          withBlock[output.name] = placeholder;
+        });
+      } else {
+        withBlock.output_name = '${1:value}';
+      }
+      parameters = { with: withBlock };
+      break;
+    }
+    case 'workflow.fail':
+      parameters = {
+        with: { message: '${1:Error message}' },
       };
       break;
     default:

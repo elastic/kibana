@@ -12,7 +12,7 @@
 
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -21,6 +21,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -205,6 +206,50 @@ export class WorkflowExecutionRuntimeManager {
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
         .stackFrames,
     });
+  }
+
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
+    this.workflowExecutionState.updateWorkflowExecution({
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
+    });
+  }
+
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+  }
+
+  public completeAncestorSteps(
+    scopeStack: WorkflowScopeStack,
+    executionStatus: ExecutionStatus,
+    workflowExecutionId: string
+  ): void {
+    let stack = scopeStack;
+    const finishedAt = new Date().toISOString();
+    while (!stack.isEmpty()) {
+      const topFrame = stack.getCurrentScope();
+      stack = stack.exitScope();
+      const stepExecutionId = buildStepExecutionId(
+        workflowExecutionId,
+        topFrame?.stepId ?? '',
+        stack.stackFrames
+      );
+      const existingStep = this.workflowExecutionState.getStepExecution(stepExecutionId);
+      if (existingStep) {
+        const stepUpdate: Partial<EsWorkflowStepExecution> = {
+          id: stepExecutionId,
+          status: executionStatus,
+          finishedAt,
+        };
+        if (existingStep.startedAt) {
+          stepUpdate.executionTimeMs =
+            new Date(finishedAt).getTime() - new Date(existingStep.startedAt).getTime();
+        }
+        this.workflowExecutionState.upsertStep(stepUpdate);
+      }
+    }
   }
 
   public setWorkflowError(error: Error | undefined): void {

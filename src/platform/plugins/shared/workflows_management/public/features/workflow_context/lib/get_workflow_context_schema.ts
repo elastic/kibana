@@ -8,7 +8,7 @@
  */
 
 import type { Document } from 'yaml';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowOutput, WorkflowYaml } from '@kbn/workflows';
 import {
   AlertEventPropsSchema,
   BaseEventSchema,
@@ -62,6 +62,64 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   return eventSchema.optional();
 }
 
+function outputToSchema(field: WorkflowOutput): z.ZodType {
+  let valueSchema: z.ZodType;
+  switch (field.type) {
+    case 'string':
+      valueSchema = z.string();
+      break;
+    case 'number':
+      valueSchema = z.number();
+      break;
+    case 'boolean':
+      valueSchema = z.boolean();
+      break;
+    case 'choice': {
+      const opts = field.options ?? [];
+      valueSchema = z.any();
+      if (opts.length > 0) {
+        const literals = opts.map((o) => z.literal(o));
+        valueSchema = z.union(literals);
+      }
+      break;
+    }
+    case 'array': {
+      const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+      const { minItems, maxItems } = field;
+      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
+        let s = schema;
+        if (minItems != null) s = s.min(minItems);
+        if (maxItems != null) s = s.max(maxItems);
+        return s;
+      };
+      valueSchema = z.union(
+        arraySchemas.map(applyConstraints) as [
+          z.ZodArray<z.ZodString>,
+          z.ZodArray<z.ZodNumber>,
+          z.ZodArray<z.ZodBoolean>
+        ]
+      );
+      break;
+    }
+    default:
+      valueSchema = z.any();
+      break;
+  }
+  return valueSchema;
+}
+
+function buildOutputsSchema(
+  outputs: WorkflowOutput[] | undefined
+): z.ZodObject<Record<string, z.ZodType>> {
+  const outputsObject: Record<string, z.ZodType> = {};
+  if (outputs && Array.isArray(outputs)) {
+    for (const output of outputs) {
+      outputsObject[output.name] = outputToSchema(output);
+    }
+  }
+  return Object.keys(outputsObject).length > 0 ? z.object(outputsObject) : z.object({});
+}
+
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
@@ -94,6 +152,7 @@ export function getWorkflowContextSchema(
   // (from buildInputsZodValidator) while the base schema expects ZodObject; runtime shape is compatible.
   return DynamicWorkflowContextSchema.extend({
     inputs: inputsSchema,
+    output: buildOutputsSchema(definition.outputs as WorkflowOutput[] | undefined),
     // transform an object of consts to an object
     // with the const name as the key and inferred type as the value
     consts: z.object({

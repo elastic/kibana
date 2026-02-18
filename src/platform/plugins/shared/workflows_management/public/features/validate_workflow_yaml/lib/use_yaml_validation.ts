@@ -21,6 +21,7 @@ import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -119,6 +120,7 @@ export function useYamlValidation(
         ...validateStepNameUniqueness(yamlDocument),
         ...validateLiquidTemplate(model.getValue()),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+        ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
           ? validateWorkflowInputs(workflowLookup, workflows, lineCounter)
@@ -290,6 +292,23 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
       decorations.push({
         range: createRange(validationResult),
         options: createSelectionDecoration(validationResult),
+      });
+    } else if (validationResult.owner === 'workflow-output-validation') {
+      markers.push({
+        ...marker,
+        severity: SEVERITY_MAP[validationResult.severity],
+        message: validationResult.message,
+        source: 'workflow-output-validation',
+      });
+      decorations.push({
+        range: createRange(validationResult),
+        options: {
+          inlineClassName: `workflow-output-validation-${validationResult.severity}`,
+          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
+        },
       });
     } else {
       if (validationResult.severity !== null) {
