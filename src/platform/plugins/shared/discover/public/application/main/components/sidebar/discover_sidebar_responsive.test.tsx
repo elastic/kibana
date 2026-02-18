@@ -271,6 +271,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
 }
 
 // FLAKY: https://github.com/elastic/kibana/issues/217005
+// FLAKY: https://github.com/elastic/kibana/issues/225125
 describe.skip('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
