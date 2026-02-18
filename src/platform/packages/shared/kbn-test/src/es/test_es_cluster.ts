@@ -165,6 +165,11 @@ export interface CreateTestEsClusterOptions {
    * Files to mount inside ES containers
    */
   files?: string[];
+  /**
+   * Secure settings files to add to the ES keystore via `elasticsearch-keystore add-file`.
+   * Each entry is a `setting_name=/path/to/file` string.
+   */
+  secureFiles?: string[];
 }
 
 export function createTestEsCluster<
@@ -190,6 +195,7 @@ export function createTestEsCluster<
     transportPort,
     onEarlyExit,
     files,
+    secureFiles,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -282,6 +288,11 @@ export function createTestEsCluster<
         installPath = esFrom;
       } else {
         throw new Error(`unknown option esFrom "${esFrom}"`);
+      }
+
+      if (secureFiles?.length) {
+        const pairs = secureFiles.map((kv) => kv.split('=').map((v) => v.trim()));
+        await firstNode.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
       }
 
       // Collect promises so we can run them in parallel
