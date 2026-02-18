@@ -20,6 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   describe('Bulk Create Alert Action API', function () {
+    this.tags(['skipServerless']);
     let roleAuthc: RoleCredentials;
 
     before(async () => {
