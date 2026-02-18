@@ -13,12 +13,10 @@ Both return headers you can spread into `apiClient` requests (`apiKeyHeader` or 
 
 ## Choose an auth type [choose-auth-type]
 
-| Endpoint prefix | Recommended auth |
-| --- | --- |
-| `api/*` | API key |
-| `internal/*` | Cookie-based session |
-
-Public Kibana APIs: `https://www.elastic.co/docs/api/doc/kibana`
+| Endpoint                                                                                  | Recommended auth     |
+| ----------------------------------------------------------------------------------------- | -------------------- |
+| [Public APIs](https://www.elastic.co/docs/api/doc/kibana) (usually starting with `api/*`) | API key              |
+| Internal APIs (usually starting with `internal/*`)                                        | Cookie-based session |
 
 ## API key auth [api-key-auth]
 
@@ -63,4 +61,3 @@ apiTest('calls an internal endpoint', async ({ apiClient, samlAuth }) => {
 - Prefer minimal permissions; avoid `admin` unless required.
 - Reuse credentials within a suite when possible.
 - Include required headers (`kbn-xsrf`, and `x-elastic-internal-origin` for internal endpoints).
-

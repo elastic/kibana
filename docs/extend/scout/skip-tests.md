@@ -6,12 +6,12 @@ navigation_title: Skip tests
 
 There are multiple ways to ensure a Scout test or test suite does not run at all, or runs only in certain environments.
 
-:::::{note}
+:::::{tip}
 Best practices when skipping tests:
 
 - Skipping is usually temporary—re-enable as soon as possible.
 - Create a tracking issue in the Kibana repo (label: `skipped-test`) and link it in a comment next to the skip.
-- Internal (Elasticians): AppEx QA maintains guidance on tracking skipped tests.
+- AppEx QA maintains internal documentation (for Elasticians only) on [tracking skipped tests](https://docs.elastic.dev/appex-qa/track-skipped-tests).
   :::::
 
 ## Skip tests in all test runs [skip-tests-everywhere]

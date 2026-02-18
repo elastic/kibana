@@ -15,9 +15,7 @@ Scout API tests validate HTTP endpoints with realistic scoped credentials.
 
 See [best practices for API tests](./best-practices.md#api-tests).
 
-Example test (Console):
-
-- `https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts`
+Example test ([Console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/test/scout/api/tests/spec_definitions.spec.ts)).
 
 ## Save the test file [save-api-test-file]
 

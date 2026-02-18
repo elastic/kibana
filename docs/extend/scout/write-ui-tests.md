@@ -12,9 +12,7 @@ Scout UI tests are Playwright tests that use Scout fixtures and page objects for
 - Navigate and interact via `pageObjects`
 - Use `test.step` for multi-step flows you want to read in reports
 
-Example test (APM):
-
-- `https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts`
+Example test ([APM](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts)).
 
 ## Save the test file [scout-write-ui-tests-save]
 
@@ -29,4 +27,3 @@ Spec files must end with `.spec.ts`.
 - [Page objects](./page-objects.md)
 - [Fixtures](./fixtures.md)
 - [Run tests](./run-tests.md) and [Debugging](./debugging.md)
-

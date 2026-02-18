@@ -164,7 +164,7 @@ curl -XPOST \
 :::::
 
 :::::::{note}
-Internal (Elasticians): provisioning Cloud users/roles and populating `cloudUsersFilePath` is internal-only; see internal AppEx QA documentation.
+Internal (Elasticians): provisioning Cloud users/roles and populating `<kibana root>/.ftr/role_users.json` is internal-only; see [internal AppEx QA documentation](https://docs.elastic.dev/appex-qa/create-cloud-users).
 :::::::
 
 ### Run on Cloud with the Scout CLI [scout-run-tests-cloud-cli]
@@ -191,4 +191,4 @@ node scripts/scout.js run-tests \
 
 ## Run Scout tests with QAF (internal) [scout-run-tests-qaf]
 
-Internal (Elasticians): QAF is an internal tool. For QAF workflows, refer to internal AppEx QA documentation.
+QAF is an internal tool for Elasticians only. To run Scout tests with QAF, refer to [internal AppEx QA documentation](https://docs.elastic.dev/appex-qa/qaf/guides/run-scout-tests-with-qaf).
