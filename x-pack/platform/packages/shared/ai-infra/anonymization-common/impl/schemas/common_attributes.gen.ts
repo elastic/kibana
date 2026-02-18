@@ -49,14 +49,42 @@ export const FieldRule = z.object({
   field: z.string(),
   allowed: z.boolean(),
   anonymized: z.boolean(),
-  entityClass: z.string().optional(),
+  entityClass: z
+    .enum([
+      'PER',
+      'ORG',
+      'LOC',
+      'MISC',
+      'HOST_NAME',
+      'USER_NAME',
+      'IP',
+      'EMAIL',
+      'CLOUD_ACCOUNT',
+      'ENTITY_NAME',
+      'RESOURCE_NAME',
+      'RESOURCE_ID',
+    ])
+    .optional(),
 });
 
 export type RegexRule = z.infer<typeof RegexRule>;
 export const RegexRule = z.object({
   id: z.string(),
   type: z.literal('regex'),
-  entityClass: z.string(),
+  entityClass: z.enum([
+    'PER',
+    'ORG',
+    'LOC',
+    'MISC',
+    'HOST_NAME',
+    'USER_NAME',
+    'IP',
+    'EMAIL',
+    'CLOUD_ACCOUNT',
+    'ENTITY_NAME',
+    'RESOURCE_NAME',
+    'RESOURCE_ID',
+  ]),
   pattern: z.string(),
   enabled: z.boolean(),
 });
@@ -65,8 +93,8 @@ export type NerRule = z.infer<typeof NerRule>;
 export const NerRule = z.object({
   id: z.string(),
   type: z.literal('ner'),
-  modelId: z.string(),
-  allowedEntityClasses: z.array(z.string()),
+  modelId: z.string().optional(),
+  allowedEntityClasses: z.array(z.enum(['PER', 'ORG', 'LOC', 'MISC'])),
   enabled: z.boolean(),
 });
 

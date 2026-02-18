@@ -21,14 +21,14 @@ describe('processMatches', () => {
   const phoneRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'PHONE',
+    entityClass: 'MISC',
     pattern: '\\d{3}-\\d{3}-\\d{4}',
   };
 
   const domainRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'DOMAIN',
+    entityClass: 'HOST_NAME',
     pattern: '[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
   };
 
@@ -65,7 +65,7 @@ describe('processMatches', () => {
     start,
     end: start + value.length,
     matchValue: value,
-    class_name: 'PHONE',
+    class_name: 'MISC',
     ruleIndex,
   });
 
@@ -81,7 +81,7 @@ describe('processMatches', () => {
     start,
     end: start + value.length,
     matchValue: value,
-    class_name: 'DOMAIN',
+    class_name: 'HOST_NAME',
     ruleIndex,
   });
 
@@ -114,7 +114,7 @@ describe('processMatches', () => {
     });
 
     const emailMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-123-4567', class_name: 'PHONE' });
+    const phoneMask = getEntityMask({ value: '555-123-4567', class_name: 'MISC' });
     expect(result.records[0].content).toBe(`Email ${emailMask} or call ${phoneMask}`);
     expect(result.anonymizations).toHaveLength(2);
     expect(result.anonymizations[0]).toEqual({
@@ -123,7 +123,7 @@ describe('processMatches', () => {
     });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
-      entity: { value: '555-123-4567', class_name: 'PHONE', mask: phoneMask },
+      entity: { value: '555-123-4567', class_name: 'MISC', mask: phoneMask },
     });
   });
 
@@ -145,7 +145,7 @@ describe('processMatches', () => {
     });
 
     const emailMask = getEntityMask({ value: 'maria@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'PHONE' });
+    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC' });
     const emailMask2 = getEntityMask({ value: 'diego@example.org', class_name: 'EMAIL' });
     expect(result.records[0].content).toBe(`Email: ${emailMask}`);
     expect(result.records[0].data).toBe(`Phone: ${phoneMask}`);
@@ -157,7 +157,7 @@ describe('processMatches', () => {
     });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
-      entity: { value: '555-1234', class_name: 'PHONE', mask: phoneMask },
+      entity: { value: '555-1234', class_name: 'MISC', mask: phoneMask },
     });
     expect(result.anonymizations[2]).toEqual({
       rule: { type: 'RegExp' },

@@ -7,6 +7,34 @@
 
 import { z } from '@kbn/zod';
 
+/**
+ * Entity classes produced by NER models (CoNLL-03 standard classes).
+ * These are the only classes a NER model may emit; used to filter model output.
+ */
+export const NER_ENTITY_CLASSES = ['PER', 'ORG', 'LOC', 'MISC'] as const;
+export type NerEntityClass = (typeof NER_ENTITY_CLASSES)[number];
+
+/**
+ * Full canonical set of anonymization entity class labels.
+ * Includes NER classes plus domain-specific field labels.
+ * Use these as token prefixes in masks (e.g. `HOST_NAME_abc123`).
+ */
+export const ANONYMIZATION_ENTITY_CLASSES = [
+  ...NER_ENTITY_CLASSES,
+  'HOST_NAME',
+  'USER_NAME',
+  'IP',
+  'EMAIL',
+  'CLOUD_ACCOUNT',
+  'ENTITY_NAME',
+  'RESOURCE_NAME',
+  'RESOURCE_ID',
+] as const;
+export type AnonymizationEntityClass = (typeof ANONYMIZATION_ENTITY_CLASSES)[number];
+
+export const anonymizationEntityClassSchema = z.enum(ANONYMIZATION_ENTITY_CLASSES);
+export const nerEntityClassSchema = z.enum(NER_ENTITY_CLASSES);
+
 export const fieldRuleSchema = z.object({
   /** ECS or custom field name (e.g., `host.name`). */
   field: z.string(),
@@ -18,7 +46,7 @@ export const fieldRuleSchema = z.object({
    * Token prefix/class label (e.g., `HOST_NAME`, `USER_NAME`).
    * Required when `anonymized` is true.
    */
-  entityClass: z.string().optional(),
+  entityClass: anonymizationEntityClassSchema.optional(),
 });
 
 export const regexRuleSchema = z.object({
@@ -26,8 +54,8 @@ export const regexRuleSchema = z.object({
   id: z.string(),
   /** Must be `"regex"`. */
   type: z.literal('regex'),
-  /** Token prefix/class label (e.g., `FINANCE_ID`, `EMAIL`). */
-  entityClass: z.string(),
+  /** Token prefix/class label. Must be one of the canonical anonymization entity classes. */
+  entityClass: anonymizationEntityClassSchema,
   /** The regular expression pattern. */
   pattern: z.string(),
   /** Whether the rule is active. */
@@ -39,10 +67,16 @@ export const nerRuleSchema = z.object({
   id: z.string(),
   /** Must be `"ner"`. */
   type: z.literal('ner'),
-  /** The identifier for the NER model. */
-  modelId: z.string(),
-  /** List of permitted entity classes (e.g., `["PER", "ORG", "LOC"]`). */
-  allowedEntityClasses: z.array(z.string()),
+  /**
+   * The Elasticsearch ML model ID to use for NER inference.
+   * When omitted, the deployment falls back to the `ai:nerModelId` UI setting.
+   */
+  modelId: z.string().optional(),
+  /**
+   * Subset of NER model output classes to retain.
+   * Must be chosen from the CoNLL-03 standard classes: PER, ORG, LOC, MISC.
+   */
+  allowedEntityClasses: z.array(nerEntityClassSchema),
   /** Whether the rule is active. */
   enabled: z.boolean(),
 });

@@ -31,9 +31,19 @@ export {
   nerRuleSchema,
   replacementsSetSchema,
   tokenSourceEntrySchema,
+  anonymizationEntityClassSchema,
+  nerEntityClassSchema,
+  ANONYMIZATION_ENTITY_CLASSES,
+  NER_ENTITY_CLASSES,
 } from './src/schemas';
+
+export type { AnonymizationEntityClass, NerEntityClass } from './src/schemas';
 
 export { generateToken } from './src/generate_token';
 export { replaceTokensWithOriginals } from './src/replace_tokens_with_originals';
 export { resolveEffectivePolicy } from './src/resolve_effective_policy';
+export {
+  suggestEntityClassForField,
+  ECS_ENTITY_CLASS_MAP,
+} from './src/ecs_entity_class_suggestions';
 export * from './impl/schemas';

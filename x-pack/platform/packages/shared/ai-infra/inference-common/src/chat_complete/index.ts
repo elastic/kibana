@@ -90,6 +90,7 @@ export {
 export type {
   AnonymizationRule,
   AnonymizationEntity,
+  AnonymizationEntityClass,
   Anonymization,
   Deanonymization,
   AnonymizationOutput,

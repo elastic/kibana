@@ -63,11 +63,21 @@ export async function executeNerRule({
   state,
   rule,
   esClient,
+  salt,
 }: {
   state: AnonymizationState;
   rule: NamedEntityRecognitionRule;
   esClient: ElasticsearchClient;
+  salt?: string;
 }): Promise<AnonymizationState> {
+  const { modelId } = rule;
+  if (!modelId) {
+    throw new Error(
+      `NER rule has no modelId and no fallback was resolved. ` +
+        `Please set the 'ai:nerModelId' advanced setting or specify modelId in the rule.`
+    );
+  }
+
   const anonymizations: Anonymization[] = state.anonymizations.concat();
 
   const allowedNerEntities = rule.allowedEntityClasses;
@@ -109,7 +119,7 @@ export async function executeNerRule({
               span?.setAttribute('input.value', JSON.stringify(docs));
 
               const response = await esClient.ml.inferTrainedModel({
-                model_id: rule.modelId,
+                model_id: modelId,
                 docs,
                 timeout: `${rule.timeoutSeconds ?? 30}s`,
               });
@@ -123,7 +133,7 @@ export async function executeNerRule({
           // The model was not found, probably not downloaded.
           if (isNotFoundError(error)) {
             throw new Error(
-              `The NER model '${rule.modelId}' was not found. ` +
+              `The NER model '${modelId}' was not found. ` +
                 `Please download and deploy the model before enabling anonymization. ` +
                 `For instructions, see: ${NER_DOCS_URL_DOWNLOAD_MODEL}`,
               { cause: error }
@@ -133,7 +143,7 @@ export async function executeNerRule({
           // The model is available but not currently deployed.
           if (isModelNotDeployedError(error)) {
             throw new Error(
-              `The NER model '${rule.modelId}' is not deployed. ` +
+              `The NER model '${modelId}' is not deployed. ` +
                 `Please deploy the model before enabling anonymization. ` +
                 `For instructions, see: ${NER_DOCS_URL_DEPLOY_MODEL}`,
               { cause: error }
@@ -142,7 +152,7 @@ export async function executeNerRule({
 
           // Other error, rethrow.
           const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
+          throw new Error(`Inference failed for NER model '${modelId}': ${errorMessage}`, {
             cause: error,
           });
         });
@@ -174,7 +184,10 @@ export async function executeNerRule({
 
             const entityText = anonymizedValue.slice(from, to);
 
-            const mask = getEntityMask({ class_name: entity.class_name, value: entityText });
+            const mask = getEntityMask(
+              { class_name: entity.class_name, value: entityText, field: key },
+              salt
+            );
 
             anonymizedValue = before + mask + after;
             offset += mask.length - entityText.length;

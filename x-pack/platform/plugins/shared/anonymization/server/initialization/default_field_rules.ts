@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type { FieldRule } from '@kbn/anonymization-common';
-
-/**
- * Entity class mappings for fields that are anonymized by default.
- * Aligns with the Security Solution's default anonymization field list.
- */
-const DEFAULT_ENTITY_CLASSES: Record<string, string> = {
-  'cloud.account.name': 'CLOUD_ACCOUNT',
-  'entity.name': 'ENTITY_NAME',
-  'host.ip': 'IP',
-  'host.name': 'HOST_NAME',
-  'user.name': 'USER_NAME',
-  'user.target.name': 'USER_NAME',
-  'resource.name': 'RESOURCE_NAME',
-  'resource.id': 'RESOURCE_ID',
-};
+import { type FieldRule, suggestEntityClassForField } from '@kbn/anonymization-common';
 
 /**
  * Fields that are allowed by default for the alerts data view profile.
@@ -203,7 +188,7 @@ export const getDefaultAlertFieldRules = (): FieldRule[] => {
       field,
       allowed: isAllowed || isAnonymized,
       anonymized: isAnonymized,
-      entityClass: isAnonymized ? DEFAULT_ENTITY_CLASSES[field] : undefined,
+      entityClass: isAnonymized ? suggestEntityClassForField(field) : undefined,
     };
   });
 };

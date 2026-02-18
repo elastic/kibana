@@ -19,6 +19,9 @@ import type {
   updateAnonymizationProfileRequestSchema,
 } from './schemas';
 
+export type { AnonymizationEntityClass, NerEntityClass } from './schemas';
+export { ANONYMIZATION_ENTITY_CLASSES, NER_ENTITY_CLASSES } from './schemas';
+
 /**
  * A per-field rule specifying whether the field is allowed as context,
  * and whether its value should be anonymized (tokenized).

@@ -11,16 +11,38 @@ interface AnonymizationRuleBase {
   enabled: boolean;
 }
 
+/**
+ * All recognized entity class labels. Shared by field rules, regex rules, and NER output.
+ * NER models additionally constrain their output to the CoNLL-03 subset: PER, ORG, LOC, MISC.
+ */
+export type AnonymizationEntityClass =
+  | 'PER'
+  | 'ORG'
+  | 'LOC'
+  | 'MISC'
+  | 'HOST_NAME'
+  | 'USER_NAME'
+  | 'IP'
+  | 'EMAIL'
+  | 'CLOUD_ACCOUNT'
+  | 'ENTITY_NAME'
+  | 'RESOURCE_NAME'
+  | 'RESOURCE_ID';
+
 export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
   type: 'NER';
-  modelId: string;
+  /**
+   * The Elasticsearch ML model ID to use for NER inference.
+   * When omitted, falls back to the `ai:nerModelId` UI setting.
+   */
+  modelId?: string;
   timeoutSeconds?: number;
   allowedEntityClasses?: Array<'PER' | 'ORG' | 'LOC' | 'MISC'>;
 }
 export interface RegexAnonymizationRule extends AnonymizationRuleBase {
   type: 'RegExp';
   pattern: string;
-  entityClass: string;
+  entityClass: AnonymizationEntityClass;
   mask?: RuleMaskType;
 }
 

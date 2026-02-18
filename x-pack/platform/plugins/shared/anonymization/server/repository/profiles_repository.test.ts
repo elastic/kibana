@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { ProfilesRepository } from './profiles_repository';
 
 const createRepository = () => {
@@ -111,10 +112,10 @@ describe('ProfilesRepository.update', () => {
     const { repository, esClientMock } = createRepository();
     const getSpy = jest.spyOn(repository, 'get');
 
-    const existingProfile = {
+    const existingProfile: AnonymizationProfile = {
       id: 'profile-id',
       name: 'Existing Profile',
-      targetType: 'data_view' as const,
+      targetType: 'data_view',
       targetId: 'security-solution-default',
       rules: {
         fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
@@ -131,7 +132,6 @@ describe('ProfilesRepository.update', () => {
           {
             id: 'ner-1',
             type: 'ner' as const,
-            modelId: 'model-1',
             allowedEntityClasses: ['PER'],
             enabled: true,
           },

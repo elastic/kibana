@@ -72,6 +72,7 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
+  type AnonymizationEntityClass,
   type CustomToolChoice,
   type ToolCallArgumentsOfToolDefinition,
   type ToolCallOfToolDefinitions,
@@ -174,4 +175,4 @@ export {
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
 
-export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';
+export { aiAnonymizationSettings, aiNerModelId } from './src/ui_settings/settings_keys';

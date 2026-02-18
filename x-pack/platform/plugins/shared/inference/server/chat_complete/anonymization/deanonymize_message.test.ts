@@ -214,11 +214,11 @@ describe('deanonymizeMessage', () => {
     );
   });
 
-  it('deanonymizes WEBSITE masks produced by anonymizeMessages', async () => {
+  it('deanonymizes HOST_NAME masks produced by anonymizeMessages', async () => {
     const websiteRule: AnonymizationRule = {
       type: 'RegExp',
       enabled: true,
-      entityClass: 'WEBSITE',
+      entityClass: 'HOST_NAME',
       pattern: '\\b(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}\\b',
     };
 
@@ -262,7 +262,7 @@ describe('deanonymizeMessage', () => {
       {
         start: urlStart,
         end: urlEnd,
-        entity: anonymizations.find((a) => a.entity.class_name === 'WEBSITE')!.entity,
+        entity: anonymizations.find((a) => a.entity.class_name === 'HOST_NAME')!.entity,
       },
     ];
 

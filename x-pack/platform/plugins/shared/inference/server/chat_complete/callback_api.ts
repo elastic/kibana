@@ -155,64 +155,69 @@ export function createChatCompleteCallbackApi({
                   salt: salt ?? undefined,
                   effectivePolicy,
                 })
-              )
-            ),
-            switchMap((anonymization) => {
-              const connector = executor.getConnector();
-              const connectorType = connector.type;
-              const inferenceAdapter = getInferenceAdapter(connectorType);
+              ).pipe(
+                switchMap((anonymization) => {
+                  const connector = executor.getConnector();
+                  const connectorType = connector.type;
+                  const inferenceAdapter = getInferenceAdapter(connectorType);
 
-              if (!inferenceAdapter) {
-                return throwError(() =>
-                  createInferenceRequestError(
-                    `Adapter for type ${connectorType} not implemented`,
-                    400
-                  )
-                );
-              }
-              const systemWithAnonymizationInstructions = anonymization.system
-                ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
-                : system;
-
-              return withChatCompleteSpan(
-                {
-                  system: systemWithAnonymizationInstructions,
-                  messages: anonymization.messages,
-                  tools,
-                  toolChoice,
-                  model: {
-                    id: modelName ?? getConnectorDefaultModel(connector),
-                    family: getConnectorFamily(connector),
-                    provider: getConnectorProvider(connector),
-                  },
-                  ...metadata?.attributes,
-                },
-                () => {
-                  return inferenceAdapter
-                    .chatComplete({
-                      system: systemWithAnonymizationInstructions,
-                      executor,
-                      messages: anonymization.messages,
-                      toolChoice,
-                      tools,
-                      temperature,
-                      logger,
-                      functionCalling,
-                      modelName,
-                      abortSignal,
-                      metadata,
-                      timeout,
-                      stream,
-                    })
-                    .pipe(
-                      chunksIntoMessage({
-                        toolOptions: { toolChoice, tools },
-                        logger,
-                      })
+                  if (!inferenceAdapter) {
+                    return throwError(() =>
+                      createInferenceRequestError(
+                        `Adapter for type ${connectorType} not implemented`,
+                        400
+                      )
                     );
-                }
-              ).pipe(deanonymizeMessage(anonymization));
-            })
+                  }
+                  const systemWithAnonymizationInstructions = anonymization.system
+                    ? addAnonymizationInstruction(
+                        anonymization.system,
+                        anonymizationRules,
+                        effectivePolicy
+                      )
+                    : system;
+
+                  return withChatCompleteSpan(
+                    {
+                      system: systemWithAnonymizationInstructions,
+                      messages: anonymization.messages,
+                      tools,
+                      toolChoice,
+                      model: {
+                        id: modelName ?? getConnectorDefaultModel(connector),
+                        family: getConnectorFamily(connector),
+                        provider: getConnectorProvider(connector),
+                      },
+                      ...metadata?.attributes,
+                    },
+                    () => {
+                      return inferenceAdapter
+                        .chatComplete({
+                          system: systemWithAnonymizationInstructions,
+                          executor,
+                          messages: anonymization.messages,
+                          toolChoice,
+                          tools,
+                          temperature,
+                          logger,
+                          functionCalling,
+                          modelName,
+                          abortSignal,
+                          metadata,
+                          timeout,
+                          stream,
+                        })
+                        .pipe(
+                          chunksIntoMessage({
+                            toolOptions: { toolChoice, tools },
+                            logger,
+                          })
+                        );
+                    }
+                  ).pipe(deanonymizeMessage(anonymization));
+                })
+              )
+            )
           );
         })
       )

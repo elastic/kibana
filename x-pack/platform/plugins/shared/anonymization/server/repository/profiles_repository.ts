@@ -10,6 +10,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AnonymizationProfile,
   AnonymizationProfileRules,
+  AnonymizationEntityClass,
+  NerEntityClass,
   FindAnonymizationProfilesQuery,
 } from '@kbn/anonymization-common';
 import { ANONYMIZATION_PROFILES_INDEX } from '../../common';
@@ -38,7 +40,7 @@ interface EsProfileDocument {
     ner_rules: Array<{
       id: string;
       type: string;
-      model_id: string;
+      model_id?: string;
       allowed_entity_classes: string[];
       enabled: boolean;
     }>;
@@ -371,12 +373,12 @@ export class ProfilesRepository {
           field: r.field,
           allowed: r.allowed,
           anonymized: r.anonymized,
-          entityClass: r.entity_class,
+          entityClass: r.entity_class as AnonymizationEntityClass | undefined,
         })),
         regexRules: (doc.rules.regex_rules ?? []).map((r) => ({
           id: r.id,
           type: 'regex' as const,
-          entityClass: r.entity_class,
+          entityClass: r.entity_class as AnonymizationEntityClass,
           pattern: r.pattern,
           enabled: r.enabled,
         })),
@@ -384,7 +386,7 @@ export class ProfilesRepository {
           id: r.id,
           type: 'ner' as const,
           modelId: r.model_id,
-          allowedEntityClasses: r.allowed_entity_classes,
+          allowedEntityClasses: r.allowed_entity_classes as NerEntityClass[],
           enabled: r.enabled,
         })),
       },

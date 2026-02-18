@@ -11,7 +11,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AnonymizationPlugin } from './plugin';
 import { ProfilesRepository } from './repository';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import type { AnonymizationProfile, AnonymizationEntityClass } from '@kbn/anonymization-common';
 
 jest.mock('./system_index', () => ({
   ensureProfilesIndex: jest.fn().mockResolvedValue(undefined),
@@ -34,7 +34,7 @@ const createProfile = ({
     field: string;
     allowed: boolean;
     anonymized: boolean;
-    entityClass?: string;
+    entityClass?: AnonymizationEntityClass;
   }>;
 }): AnonymizationProfile => ({
   id: `${targetType}-${targetId}`,

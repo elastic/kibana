@@ -204,6 +204,7 @@ export async function anonymizeRecords({
         state,
         rule: nerRule,
         esClient,
+        salt,
       });
     } catch (error) {
       if (!shouldIgnoreNerModelError(error)) {

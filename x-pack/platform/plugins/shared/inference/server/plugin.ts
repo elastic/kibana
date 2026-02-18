@@ -13,7 +13,7 @@ import type {
   AnonymizationSettings,
   ChatCompleteAnonymizationTarget,
 } from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings, aiNerModelId } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
@@ -133,7 +133,11 @@ export class InferencePlugin
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string | undefined>(aiAnonymizationSettings);
+
+      const [settingsStr, defaultModelId] = await Promise.all([
+        uiSettingsClient.get<string | undefined>(aiAnonymizationSettings),
+        uiSettingsClient.get<string>(aiNerModelId),
+      ]);
 
       if (!settingsStr) {
         return [];
@@ -141,7 +145,12 @@ export class InferencePlugin
 
       try {
         const settings = JSON.parse(settingsStr) as AnonymizationSettings;
-        return settings.rules || [];
+        return (settings.rules || []).map((rule) => {
+          if (rule.type === 'NER' && !rule.modelId && defaultModelId) {
+            return { ...rule, modelId: defaultModelId };
+          }
+          return rule;
+        });
       } catch (error) {
         this.logger.error('Failed to parse anonymization settings:', error);
         return [];
