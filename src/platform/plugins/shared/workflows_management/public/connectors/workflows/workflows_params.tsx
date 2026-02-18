@@ -96,7 +96,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         config={{
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
-              const enabledDiff = Number(b.enabled) - Number(a.enabled);
+              const enabledDiff = Number(!!b.enabled) - Number(!!a.enabled);
               if (enabledDiff !== 0) return enabledDiff;
 
               const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
