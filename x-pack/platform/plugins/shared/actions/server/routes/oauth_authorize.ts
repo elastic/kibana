@@ -140,14 +140,25 @@ export const oauthAuthorizeRoute = (
             spaceId,
           });
 
-          const authorizationUrl = oauthService.buildAuthorizationUrl({
-            baseAuthorizationUrl: oauthConfig.authorizationUrl,
-            clientId: oauthConfig.clientId,
-            scope: oauthConfig.scope,
-            redirectUri,
-            state: state.state,
-            codeChallenge,
-          });
+          let authorizationUrl: string;
+          if (oauthConfig.authTypeId === 'ears') {
+            authorizationUrl = oauthService.buildEarsAuthorizationUrl({
+              baseAuthorizationUrl: oauthConfig.authorizationUrl,
+              scope: oauthConfig.scope,
+              callbackUri: redirectUri,
+              state: state.state,
+              pkceChallenge: codeChallenge,
+            });
+          } else {
+            authorizationUrl = oauthService.buildAuthorizationUrl({
+              baseAuthorizationUrl: oauthConfig.authorizationUrl,
+              clientId: oauthConfig.clientId,
+              scope: oauthConfig.scope,
+              redirectUri,
+              state: state.state,
+              codeChallenge,
+            });
+          }
 
           return res.ok({
             body: {

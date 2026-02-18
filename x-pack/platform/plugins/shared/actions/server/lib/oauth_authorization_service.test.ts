@@ -48,6 +48,7 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
         clientId: 'secret-client-id',
         scope: 'openid email',
@@ -86,6 +87,7 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://config-provider.example.com/authorize',
         clientId: 'config-client-id',
         scope: 'profile',
@@ -112,6 +114,7 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
         clientId: 'client-id',
         scope: undefined,
@@ -153,14 +156,22 @@ describe('OAuthAuthorizationService', () => {
       mockActionsClient.get.mockResolvedValue(getResult);
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
     it.each([
-      ['authorizationUrl', { clientId: 'client-id' }],
-      ['clientId', { authorizationUrl: 'https://provider.example.com/authorize' }],
-    ])('throws when missing required OAuth config (%s)', async (_, secrets) => {
+      [
+        'authorizationUrl',
+        { clientId: 'client-id' },
+        'Connector missing required OAuth configuration (authorizationUrl)',
+      ],
+      [
+        'clientId',
+        { authorizationUrl: 'https://provider.example.com/authorize' },
+        'Connector missing required OAuth configuration (authorizationUrl, clientId)',
+      ],
+    ])('throws when missing required OAuth config (%s)', async (_, secrets, expectedError) => {
       const service = createService();
       const getResult = createMockConnector({
         id: 'connector-1',
@@ -174,9 +185,7 @@ describe('OAuthAuthorizationService', () => {
         },
       });
 
-      await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
-      );
+      await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(expectedError);
     });
   });
 

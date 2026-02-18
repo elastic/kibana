@@ -19,6 +19,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
+import { requestEarsToken } from '../lib/request_ears_token';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
@@ -81,6 +82,8 @@ interface OAuthConnectorSecrets {
 }
 
 interface OAuthConnectorConfig {
+  authType?: string;
+  auth?: { type?: string };
   clientId?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
@@ -362,36 +365,55 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
-          // Extract OAuth config - for connector specs, secrets are stored directly
-          const clientId = secrets.clientId || config?.clientId;
-          const clientSecret = secrets.clientSecret;
+          const authType = config?.authType || config?.auth?.type;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
-          const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true; // Default to true (OAuth 2.0 recommended practice)
-          if (!clientId || !clientSecret || !tokenUrl) {
-            throw new Error(
-              'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
-            );
+
+          if (!tokenUrl) {
+            throw new Error('Connector missing required OAuth configuration (tokenUrl)');
           }
 
-          // Build the redirect URI (must match the one sent to the authorization endpoint)
-          const redirectUri = OAuthAuthorizationService.getRedirectUri(
-            coreStart.http.basePath.publicBaseUrl
-          );
+          let tokenResult;
+          if (authType === 'ears') {
+            // EARS flow: JSON body with { code, pkce_verifier }, no client credentials
+            tokenResult = await requestEarsToken(
+              tokenUrl,
+              logger,
+              {
+                code,
+                pkceVerifier: oauthState.codeVerifier,
+              },
+              configurationUtilities
+            );
+          } else {
+            // Standard OAuth Authorization Code flow
+            const clientId = secrets.clientId || config?.clientId;
+            const clientSecret = secrets.clientSecret;
+            const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
+            if (!clientId || !clientSecret) {
+              throw new Error(
+                'Connector missing required OAuth configuration (clientId, clientSecret)'
+              );
+            }
 
-          // Exchange authorization code for tokens
-          const tokenResult = await requestOAuthAuthorizationCodeToken(
-            tokenUrl,
-            logger,
-            {
-              code,
-              redirectUri,
-              codeVerifier: oauthState.codeVerifier,
-              clientId,
-              clientSecret,
-            },
-            configurationUtilities,
-            useBasicAuth
-          );
+            // Build the redirect URI (must match the one sent to the authorization endpoint)
+            const redirectUri = OAuthAuthorizationService.getRedirectUri(
+              coreStart.http.basePath.publicBaseUrl
+            );
+
+            tokenResult = await requestOAuthAuthorizationCodeToken(
+              tokenUrl,
+              logger,
+              {
+                code,
+                redirectUri,
+                codeVerifier: oauthState.codeVerifier,
+                clientId,
+                clientSecret,
+              },
+              configurationUtilities,
+              useBasicAuth
+            );
+          }
           routeLogger.debug(
             `Successfully exchanged authorization code for access token for connectorId: ${oauthState.connectorId}`
           );

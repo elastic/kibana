@@ -180,3 +180,18 @@ export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
     defaultMessage: 'Verification mode',
   }
 );
+
+export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
+  defaultMessage: 'OAuth via Elastic-owned apps',
+});
+
+export const EARS_AUTHORIZATION_URL_LABEL = i18n.translate(
+  'connectorSpecs.earsAuthorizationUrl.label',
+  {
+    defaultMessage: 'Authorization URL',
+  }
+);
+
+export const EARS_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.earsTokenUrl.label', {
+  defaultMessage: 'Token URL',
+});
