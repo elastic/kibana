@@ -37,3 +37,32 @@ export const SummarizeStreamsPrompt = createPrompt({
     toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
   })
   .get();
+
+export function createSummarizeStreamsPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'summarize_streams',
+    input: z.object({
+      streamInsights: z.string(),
+    }),
+  })
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: userPromptTemplate,
+        },
+      },
+      tools: {
+        [SUBMIT_INSIGHTS_TOOL_NAME]: {
+          description: 'Submit system-level insights correlating across streams',
+          schema: insightsSchema,
+        },
+      },
+      toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+    })
+    .get();
+}

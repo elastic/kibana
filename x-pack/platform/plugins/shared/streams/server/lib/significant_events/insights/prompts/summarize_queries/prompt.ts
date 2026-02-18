@@ -38,3 +38,33 @@ export const SummarizeQueriesPrompt = createPrompt({
     toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
   })
   .get();
+
+export function createSummarizeQueriesPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'summarize_queries',
+    input: z.object({
+      streamName: z.string(),
+      queries: z.string(),
+    }),
+  })
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: userPromptTemplate,
+        },
+      },
+      tools: {
+        [SUBMIT_INSIGHTS_TOOL_NAME]: {
+          description: 'Submit the identified insights for this stream',
+          schema: insightsSchema,
+        },
+      },
+      toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+    })
+    .get();
+}

@@ -22,7 +22,12 @@ export const streamsPromptsSOAttributesV3 = streamsPromptsSOAttributesV2.extends
   systemsPromptOverride: schema.maybe(schema.string()),
 });
 
-export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV3>;
+export const streamsPromptsSOAttributesV4 = streamsPromptsSOAttributesV3.extends({
+  summarizeQueriesPromptOverride: schema.maybe(schema.string()),
+  summarizeStreamsPromptOverride: schema.maybe(schema.string()),
+});
+
+export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV4>;
 
 export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
   return {
@@ -56,6 +61,13 @@ export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
         schemas: {
           forwardCompatibility: streamsPromptsSOAttributesV3.extends({}, { unknowns: 'ignore' }),
           create: streamsPromptsSOAttributesV3,
+        },
+      },
+      '4': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: streamsPromptsSOAttributesV4.extends({}, { unknowns: 'ignore' }),
+          create: streamsPromptsSOAttributesV4,
         },
       },
     },
