@@ -10,5 +10,6 @@
 import { createPlaywrightConfig } from '../../..';
 
 export default createPlaywrightConfig({
-  testDir: './tests',
+  testDir: './parallel_tests',
+  workers: 2,
 });
