@@ -49,7 +49,9 @@ function toDisplayName(modelId) {
  * @returns {string} YAML block for one preconfigured connector
  */
 function endpointToYaml(ep) {
-  const modelId = ep.service_settings?.model_id || ep.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
+  const modelId =
+    ep.service_settings?.model_id ||
+    ep.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
   const id = toConnectorId(modelId);
   const name = toDisplayName(modelId);
   return `  ${id}:
