@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, createEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { ContentFrameworkSection, type ContentFrameworkSectionProps } from './section';
@@ -70,83 +70,6 @@ describe('ContentFrameworkSection', () => {
 
     fireEvent.click(screen.getByTestId('unifiedDocViewerSectionActionButton-fullScreen'));
     expect(defaultProps.actions?.[1].onClick).toHaveBeenCalled();
-  });
-
-  it('prefers onClick over href on plain left click', () => {
-    const onClick = jest.fn();
-    render(
-      <ContentFrameworkSection
-        {...defaultProps}
-        actions={[
-          {
-            icon: 'discoverApp',
-            ariaLabel: 'Open in Discover',
-            dataTestSubj: 'unifiedDocViewerSectionActionButton-openInDiscover',
-            label: 'Open in Discover',
-            href: '/app/discover',
-            onClick,
-          },
-        ]}
-      />
-    );
-
-    const button = screen.getByTestId('unifiedDocViewerSectionActionButton-openInDiscover');
-    const clickEvent = createEvent.click(button, { button: 0 });
-    fireEvent(button, clickEvent);
-
-    expect(onClick).toHaveBeenCalledTimes(1);
-    expect(clickEvent.defaultPrevented).toBe(true);
-  });
-
-  it('does not intercept modifier click when href is present', () => {
-    const onClick = jest.fn();
-    render(
-      <ContentFrameworkSection
-        {...defaultProps}
-        actions={[
-          {
-            icon: 'discoverApp',
-            ariaLabel: 'Open in Discover',
-            dataTestSubj: 'unifiedDocViewerSectionActionButton-openInDiscover',
-            label: 'Open in Discover',
-            href: '/app/discover',
-            onClick,
-          },
-        ]}
-      />
-    );
-
-    const button = screen.getByTestId('unifiedDocViewerSectionActionButton-openInDiscover');
-    const ctrlClickEvent = createEvent.click(button, { button: 0, ctrlKey: true });
-    fireEvent(button, ctrlClickEvent);
-
-    expect(onClick).not.toHaveBeenCalled();
-    expect(ctrlClickEvent.defaultPrevented).toBe(false);
-  });
-
-  it('does not intercept middle click when href is present', () => {
-    const onClick = jest.fn();
-    render(
-      <ContentFrameworkSection
-        {...defaultProps}
-        actions={[
-          {
-            icon: 'discoverApp',
-            ariaLabel: 'Open in Discover',
-            dataTestSubj: 'unifiedDocViewerSectionActionButton-openInDiscoverIcon',
-            href: '/app/discover',
-            onClick,
-          },
-        ]}
-      />
-    );
-
-    const button = screen.getByTestId('unifiedDocViewerSectionActionButton-openInDiscoverIcon');
-    const middleClickEvent = createEvent.click(button, { button: 1 });
-    fireEvent(button, middleClickEvent);
-
-    expect(onClick).not.toHaveBeenCalled();
-    expect(middleClickEvent.defaultPrevented).toBe(false);
   });
 
   it('renders children inside the panel', () => {

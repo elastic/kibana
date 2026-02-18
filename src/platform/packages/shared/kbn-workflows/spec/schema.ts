@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
 import { z } from '@kbn/zod/v4';
-import { JsonModelShapeSchema } from './json_model_shape_schema';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
-import { isValidJsonSchema } from './lib/validate_json_schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { TriggerSchema } from './schema/triggers/trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -90,58 +89,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
   return schema;
 }
 
-/* --- Triggers --- */
-export const AlertRuleTriggerSchema = z.object({
-  type: z.literal('alert'),
-  with: z
-    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
-    .optional(),
-});
-
-export const ScheduledTriggerSchema = z.object({
-  type: z.literal('scheduled'),
-  with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
-    z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
-    }),
-    z.object({
-      rrule: z.object({
-        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-        interval: z.number().int().positive(),
-        tzid: z
-          .enum(moment.tz.names() as [string, ...string[]])
-          .optional()
-          .default('UTC'),
-        dtstart: z.string().optional(),
-        byhour: z.array(z.number().int().min(0).max(23)).optional(),
-        byminute: z.array(z.number().int().min(0).max(59)).optional(),
-        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-      }),
-    }),
-  ]),
-});
-
-export const ManualTriggerSchema = z.object({
-  type: z.literal('manual'),
-});
-
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
-
-export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type.value,
-  ScheduledTriggerSchema.shape.type.value,
-  ManualTriggerSchema.shape.type.value,
-];
-export type TriggerType = (typeof TriggerTypes)[number];
-
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({
   timeout: DurationSchema.optional(),
@@ -149,7 +96,7 @@ export const TimeoutPropSchema = z.object({
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
-  foreach: z.string().optional(),
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
@@ -166,7 +113,6 @@ export const StepWithOnFailureSchema = z.object({
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
-  'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithIfConditionSchema)
@@ -264,6 +210,22 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
+// Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
+export const KibanaStepMetaSchema = {
+  forceServerInfo: z
+    .boolean()
+    .optional()
+    .describe('Force using the server info URL (internal host:port) instead of the public URL'),
+  forceLocalhost: z
+    .boolean()
+    .optional()
+    .describe('Force using localhost:5601 instead of the configured URL'),
+  debug: z
+    .boolean()
+    .optional()
+    .describe('Include the resolved full URL in the step output for debugging'),
+};
+
 // Generic Kibana step schema for backend validation
 export const KibanaStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
@@ -279,6 +241,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         headers: z.record(z.string(), z.string()).optional(),
       }),
       fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -300,6 +263,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         perPage: z.number().optional(),
         status: z.string().optional(),
         fetcher: FetcherConfigSchema,
+        ...KibanaStepMetaSchema,
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
@@ -321,7 +285,7 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
-  foreach: z.string(),
+  foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
@@ -452,47 +416,6 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputArraySchema,
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
-
-// JSON Schema model structure
-// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
-// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
-// structured data models.
-export const JsonModelSchema = JsonModelShapeSchema.refine(
-  (data) => {
-    // Validate that properties is a valid JSON Schema object
-    if (data.properties) {
-      // Validate each property is a valid JSON Schema
-      for (const value of Object.values(data.properties)) {
-        // $ref objects are valid JSON Schema but can't be validated in isolation
-        // since they reference definitions that exist in the parent schema
-        if (typeof value === 'object' && value !== null && '$ref' in value) {
-          // $ref is a valid JSON Schema construct, skip validation
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-        if (!isValidJsonSchema(value)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'properties must contain valid JSON Schema definitions' }
-).refine(
-  (data) => {
-    // Validate that required fields exist in properties
-    if (data.required && data.properties) {
-      for (const field of data.required) {
-        if (!(field in data.properties)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'required fields must exist in properties' }
-);
-export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
@@ -649,6 +572,8 @@ export const WorkflowExecutionContextSchema = z.object({
   isTestRun: z.boolean(),
   startedAt: z.date(),
   url: z.string(),
+  executedBy: z.string().optional(),
+  triggeredBy: z.string().optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -662,7 +587,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 // Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
 // Once a Zod-compatible version is available, we should import and use it instead.
-const AlertSchema = z.object({
+export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
@@ -671,7 +596,7 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const RuleSchema = z.object({
+export const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
   tags: z.array(z.string()),
@@ -680,12 +605,27 @@ const RuleSchema = z.object({
   ruleTypeId: z.string(),
 });
 
-export const EventSchema = z.object({
+/**
+ * Alert-specific event properties. Only present when the workflow has an alert trigger.
+ */
+export const AlertEventPropsSchema = z.object({
   alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
-  spaceId: z.string(),
   params: z.any(),
 });
+
+/**
+ * Base event properties that are always present regardless of trigger type.
+ */
+export const BaseEventSchema = z.object({
+  spaceId: z.string(),
+});
+
+/**
+ * Full event schema (used for runtime validation of alert-triggered workflows).
+ * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
+ */
+export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -716,6 +656,9 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 

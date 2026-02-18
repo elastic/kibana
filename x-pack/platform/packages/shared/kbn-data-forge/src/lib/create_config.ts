@@ -69,6 +69,7 @@ export function createConfig(partialConfig: PartialConfig = {}) {
       ...(partialConfig.indexing ?? {}),
     },
     schedule: partialConfig.schedule ?? [schedule],
+    destination: partialConfig.destination ?? { type: 'elasticsearch' },
   };
 
   const decodedConfig = ConfigRT.decode(config);

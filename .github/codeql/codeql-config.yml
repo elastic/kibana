@@ -8,6 +8,7 @@ paths-ignore:
   - '**/.storybook/**'
   - '**/*-mocks/**'
   - '**/*.cy.*'
+  - '**/*.md'
   - '**/*.yaml'
   - '**/*.hbs'
   - '**/*.njk'

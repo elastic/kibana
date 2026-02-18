@@ -60,7 +60,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/core-saved-objects-api-server'
-  - '@kbn/content-management-table-list-view'
+  - '@kbn/content-management-tabbed-table-list-view'
   - '@kbn/content-management-table-list-view-table'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/content-management-content-editor'
@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/logging'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-panel-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
@@ -110,10 +109,12 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
+  - '@kbn/scout'
+  - '@kbn/test'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
-  - '@kbn/image-embeddable-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -127,6 +128,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
     - '!target/**/*'
 tasks:
   jest:

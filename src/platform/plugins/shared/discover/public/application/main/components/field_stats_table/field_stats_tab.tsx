@@ -8,14 +8,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import { filter, map } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/common/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FieldStatisticsTable } from './field_stats_table';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useAppStateSelector } from '../../state_management/redux';
+import {
+  selectTabCombinedFilters,
+  useAppStateSelector,
+  useCurrentTabSelector,
+} from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FetchStatus } from '../../../types';
 import type { FieldStatisticsTableProps } from './types';
@@ -31,9 +34,8 @@ type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filter
 
 export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo((props) => {
   const services = useDiscoverServices();
-  const { query, filters } = useQuerySubscriber({
-    data: services.data,
-  });
+  const query = useAppStateSelector((state) => state.query);
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const isEsql = useIsEsqlMode();
   const hideAggregatedPreview = useAppStateSelector((state) => state.hideAggregatedPreview);
 

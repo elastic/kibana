@@ -26,8 +26,11 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const promqlCommand = command as ESQLAstPromqlCommand;
   const newColumns: string[] = [];
 
-  // "step" param acts as a bucket and creates a step column
-  if (hasParam(promqlCommand, PromqlParamName.Step)) {
+  // "step" or "buckets" param creates a step column in the output
+  if (
+    hasParam(promqlCommand, PromqlParamName.Step) ||
+    hasParam(promqlCommand, PromqlParamName.Buckets)
+  ) {
     newColumns.push(PromqlParamName.Step);
   }
 
