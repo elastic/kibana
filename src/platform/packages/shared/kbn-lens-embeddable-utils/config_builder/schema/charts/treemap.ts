@@ -48,7 +48,8 @@ const treemapSharedStateSchema = {
           schema.arrayOf(
             schema.oneOf([schema.literal('value'), schema.literal('percent')], {
               meta: { description: 'Legend value display mode' },
-            })
+            }),
+            { maxSize: 2 }
           )
         ),
       },
