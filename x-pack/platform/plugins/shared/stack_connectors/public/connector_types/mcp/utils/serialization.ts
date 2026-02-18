@@ -47,7 +47,7 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
     credential
   ) {
     return buildSerializedResult(formData, configHeaders, secretHeaders, {
-      serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential),
+      serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential as string),
       hasAuth: false,
     });
   }
