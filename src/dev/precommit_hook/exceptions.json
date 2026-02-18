@@ -208,6 +208,7 @@
     "src/core/packages/test-helpers": "'test-helpers' should be snake_case",
     "src/core/packages/ui-settings": "'ui-settings' should be snake_case",
     "src/core/packages/usage-data": "'usage-data' should be snake_case",
+    "src/core/packages/user-activity": "'user-activity' should be snake_case",
     "src/core/packages/user-profile": "'user-profile' should be snake_case",
     "src/core/packages/user-settings": "'user-settings' should be snake_case",
     "src/core/test-helpers": "'test-helpers' should be snake_case",
