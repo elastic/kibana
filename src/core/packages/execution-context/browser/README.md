@@ -1,16 +1,8 @@
 # @kbn/core-execution-context-browser
 
-Browser-side execution context helps Kibana associate **user interactions** and **HTTP requests** with a meaningful “where did this come from?” context (app/page/entity), so server-side work can be traced and correlated (APM, Elasticsearch `x-opaque-id`, logs).
+Browser-side execution context helps Kibana associate **HTTP requests** with a meaningful “where did this come from?” context (app/page/entity). Core includes this context in the `x-kbn-context` header on `core.http.fetch(...)` requests so the server can propagate it (for example into Elasticsearch `x-opaque-id` for slow log tracing).
 
 This package contains the **public contract types** for `core.executionContext` in the browser. The common data shape is `KibanaExecutionContext` from [`@kbn/core-execution-context-common`](../common).
-
-## When and why to set execution context
-
-- **App-level context**: set when your app mounts and update on route/page changes.
-- **Entity context**: set when the user is focused on a specific entity (dashboard id, visualization id, rule id, etc.).
-- **Embeddables/components**: use `child` to describe nested work initiated by a component inside a parent context.
-
-Core uses the current execution context to populate the `x-kbn-context` header on `core.http.fetch(...)` requests (including optional per-request overrides via `HttpFetchOptions.context`).
 
 ## How to set it (recommended)
 
@@ -70,6 +62,6 @@ await core.http.fetch('/api/my_plugin/do_something', {
 
 `KibanaExecutionContext.space` is the active space id. In the browser, the Spaces plugin keeps it in sync by calling `core.executionContext.set({ space })`, so most plugins shouldn’t need to set it themselves.
 
-## Size/encoding constraints
+## Keep it small
 
-The `x-kbn-context` header is URI-encoded JSON and is length-limited (truncated to approximately 1024 characters) to align with the W3C baggage header constraints. Keep context small and avoid sensitive values (especially in `description` and `meta`).
+The `x-kbn-context` header is URI-encoded JSON and is size-limited. Keep context values small and avoid sensitive data (especially in `description` and `meta`).
