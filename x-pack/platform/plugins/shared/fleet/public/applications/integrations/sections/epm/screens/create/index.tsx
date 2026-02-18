@@ -7,11 +7,17 @@
 
 import React from 'react';
 
+import { ExperimentalFeaturesService } from '../../../../services';
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
 export const CreateIntegration = React.memo(() => {
-  const { automaticImportVTwo } = useStartServices();
+  const { automaticImport, automaticImportVTwo } = useStartServices();
   useBreadcrumbs('integration_create');
-  const CreateAutomaticImport = automaticImportVTwo?.components.CreateIntegration;
+
+  const useVTwo = ExperimentalFeaturesService.get().newBrowseIntegrationUx;
+  const CreateAutomaticImport = useVTwo
+    ? automaticImportVTwo?.components.CreateIntegration
+    : automaticImport?.components.CreateIntegration;
+
   return CreateAutomaticImport ? <CreateAutomaticImport /> : null;
 });
