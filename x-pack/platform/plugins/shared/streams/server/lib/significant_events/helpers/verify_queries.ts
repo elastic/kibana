@@ -44,7 +44,7 @@ export async function verifyQueries(
   const { esClient, logger } = dependencies;
 
   const validQueries = queries.filter((query) => isKqlQueryValid(query.kql));
-  if (!queries.length) {
+  if (!validQueries.length) {
     return {
       totalCount: 0,
       queries: [],
