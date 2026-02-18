@@ -211,5 +211,13 @@ describe('PagerDuty Schema', () => {
         })
       ).toThrow();
     });
+
+    it('validates customDetails as a JSON string and coerces to object', () => {
+      const customDetailsObject = { key: 'value' };
+      const result = ParamsSchema.parse({
+        customDetails: JSON.stringify(customDetailsObject),
+      });
+      expect(result.customDetails).toEqual(customDetailsObject);
+    });
   });
 });
