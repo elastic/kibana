@@ -1912,6 +1912,8 @@
       "@kbn/saved-search-component/*": ["src/platform/packages/shared/kbn-saved-search-component/*"],
       "@kbn/saved-search-plugin": ["src/platform/plugins/shared/saved_search"],
       "@kbn/saved-search-plugin/*": ["src/platform/plugins/shared/saved_search/*"],
+      "@kbn/scheduling-types": ["src/platform/packages/shared/kbn-scheduling-types"],
+      "@kbn/scheduling-types/*": ["src/platform/packages/shared/kbn-scheduling-types/*"],
       "@kbn/scout": ["src/platform/packages/shared/kbn-scout"],
       "@kbn/scout/*": ["src/platform/packages/shared/kbn-scout/*"],
       "@kbn/scout-info": ["src/platform/packages/private/kbn-scout-info"],
