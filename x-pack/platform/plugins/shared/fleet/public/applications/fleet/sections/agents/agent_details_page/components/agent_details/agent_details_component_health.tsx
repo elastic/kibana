@@ -135,7 +135,7 @@ export const AgentDetailsComponentHealth: React.FunctionComponent<{
                     <EuiText size="s">
                       <strong>
                         {i18n.translate('xpack.fleet.agentDetails.componentHealthOverallLabel', {
-                          defaultMessage: 'Collector Status: ',
+                          defaultMessage: 'Collector status: ',
                         })}
                       </strong>
                     </EuiText>
