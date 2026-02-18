@@ -14,7 +14,11 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  GrantAPIKeyResult,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
@@ -218,32 +222,59 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        let createUiamApiKeyResult;
+        let createUiamApiKeyResult: GrantAPIKeyResult | null | undefined;
         const shouldCreateUiamApiKey = this.isUiamSupported && this.isUiamEnabled;
 
+        const invalidateUiamApiKey = async (id?: string) => {
+          if (!id) return;
+          const invalidateUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.invalidate(
+            request,
+            { id }
+          );
+          if (invalidateUiamApiKeyResult && invalidateUiamApiKeyResult.error_count > 0) {
+            this.logger.error(
+              `Failed to invalidate UIAM API key for alerting rule : ${name}: ${invalidateUiamApiKeyResult.error_details
+                ?.map((error) => error.reason)
+                .join(', ')}  `
+            );
+          }
+        };
+
         if (shouldCreateUiamApiKey) {
+          // if this throws we return bad request where this function is called from
           createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
             name: `uiam-${name}`,
           });
+
+          if (!createUiamApiKeyResult) {
+            this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+            return { apiKeysEnabled: false };
+          }
         }
 
-        const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
-          request,
-          {
+        let createEsAPIKeyResult;
+        try {
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          }
-        );
+          });
+        } catch (err) {
+          // if the ES API key creation failed, we need to invalidate the UIAM API key
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          // rethrow the error to be handled by the caller
+          throw err;
+        }
 
-        if (!createAPIKeyResult || (shouldCreateUiamApiKey && !createUiamApiKeyResult)) {
-          this.logger.error(`Failed to create API key for alerting rule : ${name}`);
+        // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
+        if (!createEsAPIKeyResult) {
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
-          result: createAPIKeyResult,
+          result: createEsAPIKeyResult,
           ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },

@@ -308,6 +308,70 @@ describe('RulesClientFactory', () => {
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
 
+  test('createAPIKey() invalidates UIAM API key when ES API key creation returns null', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      isUiamSupported: true,
+      isUiamEnabled: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce({
+        api_key: 'uiam-key',
+        id: 'uiam-id',
+        name: 'uiam-name',
+      }),
+      invalidate: jest.fn().mockResolvedValueOnce({}),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
+      id: 'uiam-id',
+    });
+  });
+
+  test('createAPIKey() returns { apiKeysEnabled: false } when UIAM API key creation fails', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      isUiamSupported: true,
+      isUiamEnabled: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce(null),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
+  });
+
   test('createAPIKey() returns an API key when security is enabled', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
@@ -356,6 +420,45 @@ describe('RulesClientFactory', () => {
     await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TLS disabled"`
     );
+  });
+
+  test('createAPIKey() invalidates UIAM API key when ES API key creation throws', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      isUiamSupported: true,
+      isUiamEnabled: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce({
+        api_key: 'uiam-key',
+        id: 'uiam-id',
+        name: 'uiam-name',
+      }),
+      invalidate: jest.fn().mockResolvedValueOnce({
+        invalidated_api_keys: [{ id: 'uiam-id', invalidated: true }],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      }),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
+      new Error('TLS disabled')
+    );
+
+    await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"TLS disabled"`
+    );
+    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
+      id: 'uiam-id',
+    });
   });
 
   test('create() calls getSpaceId to derive spaceId from request', async () => {
