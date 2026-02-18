@@ -43,7 +43,6 @@ export const getFromPreloaded = async ({
   history?: History<unknown>;
 }): Promise<PersistedDoc | undefined> => {
   const { notifications, spaces, attributeService } = lensServices;
-  let doc: LensDocument;
 
   try {
     const docFromSavedObject = await (initialInput.savedObjectId
@@ -52,14 +51,17 @@ export const getFromPreloaded = async ({
 
     // By value - use initialInput.attributes
     if (!docFromSavedObject) {
-      // @TODO: it would be nice to address this type checks once for all
-      doc = {
-        ...initialInput.attributes,
-        type: LENS_EMBEDDABLE_TYPE,
-      } as LensDocument;
+      const { attributes } = initialInput;
+
+      if (!attributes) {
+        throw new Error('Missing attributes in by-value input');
+      }
 
       return {
-        doc,
+        doc: {
+          ...attributes,
+          type: LENS_EMBEDDABLE_TYPE,
+        },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
@@ -84,15 +86,12 @@ export const getFromPreloaded = async ({
       });
     }
 
-    const { id, ...initialInputWithoutPanelId } = initialInput;
-    doc = {
-      ...initialInputWithoutPanelId,
-      ...attributes,
-      type: LENS_EMBEDDABLE_TYPE,
-    };
-
     return {
-      doc,
+      doc: {
+        ...attributes,
+        type: LENS_EMBEDDABLE_TYPE,
+        savedObjectId: initialInput.savedObjectId,
+      },
       sharingSavedObjectProps: {
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,

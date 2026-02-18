@@ -217,13 +217,11 @@ const EditLensConfiguration: FC<
         : undefined,
     visualizationType: attributes.visualizationType,
   };
-
   const lensStore: LensRootStore = makeConfigureStore(
     storeDeps,
     undefined,
     updatingMiddleware(updatePanelState)
   );
-
   lensStore.dispatch(
     loadInitial({
       initialInput: {
