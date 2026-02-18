@@ -1636,7 +1636,7 @@
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.6.1",
     "@types/adm-zip": "0.5.0",
-    "@types/archiver": "6.0.3",
+    "@types/archiver": "7.0.0",
     "@types/async": "3.2.25",
     "@types/aws4": "1.11.3",
     "@types/base64-js": "1.5.0",
