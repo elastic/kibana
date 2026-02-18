@@ -39,7 +39,28 @@ describe('extractDashboardState', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: controlGroupInput94,
       });
-      expect(dashboardState.pinned_panels).toEqual(controlGroupInput94.controls);
+      expect(dashboardState.pinned_panels).toEqual([
+        {
+          config: {
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            selected_options: ['win 7'],
+          },
+          grow: true,
+          type: 'optionsListControl',
+          width: 'small',
+        },
+        {
+          config: {
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'name.keyword',
+            selected_options: ['US'],
+          },
+          grow: false,
+          type: 'optionsListControl',
+          width: 'medium',
+        },
+      ]);
     });
   });
 
@@ -64,9 +85,9 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            selectedOptions: ['win 7'],
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            selected_options: ['win 7'],
           },
           grow: true,
           type: 'optionsListControl',
@@ -102,19 +123,19 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            useGlobalFilters: false,
-            ignoreValidations: false,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            use_global_filters: false,
+            ignore_validations: false,
           },
           type: 'optionsListControl',
         },
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'name.keyword',
-            useGlobalFilters: false,
-            ignoreValidations: false,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'name.keyword',
+            use_global_filters: false,
+            ignore_validations: false,
           },
           type: 'optionsListControl',
         },
@@ -146,19 +167,19 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            useGlobalFilters: false,
-            ignoreValidations: false,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            use_global_filters: false,
+            ignore_validations: false,
           },
           type: 'optionsListControl',
         },
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'name.keyword',
-            useGlobalFilters: false,
-            ignoreValidations: false,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'name.keyword',
+            use_global_filters: false,
+            ignore_validations: false,
           },
           type: 'optionsListControl',
         },
@@ -192,19 +213,19 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            useGlobalFilters: true,
-            ignoreValidations: true,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            use_global_filters: true,
+            ignore_validations: true,
           },
           type: 'optionsListControl',
         },
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'name.keyword',
-            useGlobalFilters: true,
-            ignoreValidations: true,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'name.keyword',
+            use_global_filters: true,
+            ignore_validations: true,
           },
           type: 'optionsListControl',
         },
@@ -242,9 +263,9 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'name.keyword',
-            selectedOptions: ['US', 'Canada'],
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'name.keyword',
+            selected_options: ['US', 'Canada'],
           },
           type: 'optionsListControl',
           grow: true,
@@ -253,9 +274,9 @@ describe('extractDashboardState', () => {
         },
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            selectedOptions: ['win 7'],
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            selected_options: ['win 7'],
           },
           type: 'optionsListControl',
           grow: false,
@@ -292,10 +313,10 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            useGlobalFilters: false,
-            ignoreValidations: false,
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            use_global_filters: false,
+            ignore_validations: false,
           },
           uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
           type: 'optionsListControl',
@@ -325,9 +346,9 @@ describe('extractDashboardState', () => {
       expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
-            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-            fieldName: 'machine.os.keyword',
-            selectedOptions: ['win 7'],
+            data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            field_name: 'machine.os.keyword',
+            selected_options: ['win 7'],
           },
           uid: '8311639d-92e5-4aa5-99a4-9502b10eead5',
           grow: true,
