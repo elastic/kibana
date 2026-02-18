@@ -167,4 +167,3 @@ describe('calculateFlyoutContentHeight', () => {
     expect(getBoundingClientRectSpy).toHaveBeenCalledTimes(1);
   });
 });
-
