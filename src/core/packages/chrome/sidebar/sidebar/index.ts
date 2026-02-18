@@ -9,7 +9,23 @@
 
 import type { Observable } from 'rxjs';
 import type { ComponentType } from 'react';
-import type { z } from '@kbn/zod/v4';
+import type { SidebarStoreConfig } from './src/create_sidebar_store';
+
+// ============================================================================
+// Store Types
+// ============================================================================
+
+export type {
+  SetState,
+  GetState,
+  SidebarContext,
+  SidebarStoreConfig,
+} from './src/create_sidebar_store';
+export { createSidebarStore } from './src/create_sidebar_store';
+
+// ============================================================================
+// App ID Types
+// ============================================================================
 
 /** Production sidebar app IDs */
 export const VALID_SIDEBAR_APP_IDS = [] as const;
@@ -33,63 +49,59 @@ export function isValidSidebarAppId(appId: string): appId is SidebarAppId {
   return false;
 }
 
-/** Props passed to sidebar app components */
-export interface SidebarComponentProps<TParams = {}> {
-  /** Current params */
-  params: TParams;
-  /** Update params (merges with existing, persists to localStorage) */
-  setParams: (params: Partial<TParams>) => void;
-  /** Close the sidebar */
-  onClose: () => void;
-}
+/**
+ * Props passed to sidebar app components.
+ * - With store: receives state + actions + onClose
+ * - Without store: receives only onClose
+ */
+export type SidebarComponentProps<
+  TState = undefined,
+  TActions = undefined
+> = TState extends undefined
+  ? { onClose: () => void }
+  : { state: TState; actions: TActions; onClose: () => void };
 
-export type SidebarComponentType<TParams = {}> = ComponentType<SidebarComponentProps<TParams>>;
+/** Component type for sidebar apps */
+export type SidebarComponentType<TState = undefined, TActions = undefined> = ComponentType<
+  SidebarComponentProps<TState, TActions>
+>;
 
-/** Accessibility status of a sidebar app. */
-export type SidebarAppStatus = 'accessible' | 'inaccessible';
+/** Status of a sidebar app. */
+export type SidebarAppStatus = 'available' | 'pending' | 'unavailable';
 
-/** App definition for sidebar registration */
-export interface SidebarAppDefinition<TParams = {}> {
+/** Config for sidebar app registration. `status` and `restoreOnReload` are optional with defaults. */
+export interface SidebarAppConfig<TState = undefined, TActions = undefined> {
   /** Unique identifier */
   appId: SidebarAppId;
-  /** Accessibility status. Defaults to `accessible`. Use the returned updater for async checks. */
+  /** App status. Defaults to `available`. Use the returned updater for async checks. */
   status?: SidebarAppStatus;
   /**
    * Whether to restore on page reload. Defaults to true.
-   * Use as last resort. Apps should use `params` for state restoration.
+   * Use as last resort. Apps should use store state for restoration.
    */
   restoreOnReload?: boolean;
   /** Async component loader */
-  loadComponent: () => Promise<SidebarComponentType<TParams>>;
+  loadComponent: () => Promise<SidebarComponentType<TState, TActions>>;
   /**
-   * Returns Zod schema for params structure and defaults.
-   * If omitted, params is empty and setParams throws.
-   * Use `.default()` on fields. Params persist to localStorage.
-   *
-   * @example
-   * ```typescript
-   * import { z } from '@kbn/zod/v4';
-   *
-   * const getMyParamsSchema = () => z.object({
-   *   userName: z.string().default(''),
-   *   count: z.number().default(0),
-   * });
-   *
-   * type MyParams = z.infer<ReturnType<typeof getMyParamsSchema>>;
-   *
-   * registerApp<MyParams>({
-   *   appId: 'myApp',
-   *   getParamsSchema: getMyParamsSchema,
-   *   loadComponent: () => import('./my_app').then((m) => m.MyApp),
-   * });
-   * ```
+   * Optional store for state management. Created via `createSidebarStore`.
+   * If omitted, the app is stateless and only receives `onClose` prop.
+   * State persists to localStorage.
    */
-  getParamsSchema?: () => z.ZodType<TParams>;
+  store?: SidebarStoreConfig<TState, TActions>;
 }
+
+/** Complete app definition after registration, with defaults applied */
+export type SidebarAppDefinition<TState = undefined, TActions = undefined> = SidebarAppConfig<
+  TState,
+  TActions
+> & {
+  status: SidebarAppStatus;
+  restoreOnReload: boolean;
+};
 
 /** Sidebar app update payload */
 export interface SidebarAppUpdate {
-  /** Accessibility status. Defaults to `accessible` when omitted. */
+  /** App status. When omitted, status is unchanged. */
   status?: SidebarAppStatus;
 }
 
@@ -99,21 +111,31 @@ export type SidebarAppUpdater = (update: SidebarAppUpdate) => void;
 /** Sidebar setup contract */
 export interface SidebarSetup {
   /** Register a sidebar app */
-  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): SidebarAppUpdater;
+  registerApp<TState = undefined, TActions = undefined>(
+    app: SidebarAppConfig<TState, TActions>
+  ): SidebarAppUpdater;
 }
 
-/** App-bound API obtained via `sidebar.getApp(appId)` */
-export interface SidebarApp<TParams = {}> {
-  /** Open sidebar to this app with optional initial params */
-  open: (params?: Partial<TParams>) => void;
+/**
+ * App-bound API obtained via `sidebar.getApp(appId)`.
+ * All methods are present regardless of whether the app has a store.
+ * For stateless apps, `actions` is undefined and `getState()` returns undefined.
+ */
+export interface SidebarApp<TState = undefined, TActions = undefined> {
+  /** Open sidebar to this app */
+  open: () => void;
   /** Close sidebar */
   close: () => void;
-  /** Update params (merges with existing) */
-  setParams: (params: Partial<TParams>) => void;
-  /** Get current params */
-  getParams: () => TParams;
-  /** Observable of params */
-  getParams$: () => Observable<TParams>;
+  /** Bound actions to modify state. Undefined for stateless apps. */
+  actions: TActions;
+  /** Get current state. Returns undefined for stateless apps. */
+  getState: () => TState;
+  /** Observable of state. Emits undefined for stateless apps. */
+  getState$: () => Observable<TState>;
+  /** Current app status */
+  getStatus: () => SidebarAppStatus;
+  /** Observable of app status */
+  getStatus$: () => Observable<SidebarAppStatus>;
 }
 
 /** Sidebar start contract */
@@ -137,7 +159,9 @@ export interface SidebarStart {
   /** Check if app is registered */
   hasApp: (appId: SidebarAppId) => boolean;
   /** Get app-bound API */
-  getApp: <TParams = {}>(appId: SidebarAppId) => SidebarApp<TParams>;
+  getApp: <TState = undefined, TActions = undefined>(
+    appId: SidebarAppId
+  ) => SidebarApp<TState, TActions>;
   /** Get app definition */
   getAppDefinition: (appId: SidebarAppId) => SidebarAppDefinition;
 }

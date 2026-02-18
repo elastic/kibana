@@ -10,7 +10,7 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { EntityType } from '../entity_schema';
+import type { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import type { EngineDescriptor } from './constants';
 import { LogExtractionState, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './engine_descriptor_type';
@@ -23,12 +23,13 @@ export class EngineDescriptorClient {
     private readonly logger: Logger
   ) {}
 
-  async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
-    return this.soClient.find<EngineDescriptor>({
+  async getAll(): Promise<EngineDescriptor[]> {
+    const { saved_objects } = await this.soClient.find<EngineDescriptor>({
       type: EngineDescriptorTypeName,
-      filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
       namespaces: [this.namespace],
     });
+
+    return saved_objects.map((engine) => engine.attributes);
   }
 
   async findOrThrow(entityType: EntityType): Promise<EngineDescriptor> {
@@ -101,5 +102,13 @@ export class EngineDescriptorClient {
 
   private getSavedObjectId(entityType: EntityType): string {
     return `${EngineDescriptorTypeName}-${entityType}-${this.namespace}`;
+  }
+
+  private find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
+    return this.soClient.find<EngineDescriptor>({
+      type: EngineDescriptorTypeName,
+      filter: `${EngineDescriptorTypeName}.attributes.type: ${entityType}`,
+      namespaces: [this.namespace],
+    });
   }
 }
