@@ -15,10 +15,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProfileFormContent } from '../profiles/components/profile_form/profile_form_content';
-import { ProfileFormFooter } from '../profiles/components/profile_form/profile_form_footer';
-import type { ProfileFormProps } from '../profiles/components/profile_form/profile_form_props';
-import { ProfileFormProvider } from '../profiles/components/profile_form/profile_form_provider';
+import { ProfileFormContent } from '../profile_form/profile_form_content';
+import { ProfileFormFooter } from '../profile_form/profile_form_footer';
+import type { ProfileFormProps } from '../profile_form/profile_form_props';
+import { ProfileFormProvider } from '../profile_form/profile_form_provider';
 
 export type ProfileFlyoutProps = ProfileFormProps;
 

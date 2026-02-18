@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup, IToasts } from '@kbn/core/public';
-import type { TargetType } from './target_types';
+import type { TargetType } from './common/target_types';
 
 export interface TrustedNerModelOption {
   id: string;

@@ -18,8 +18,39 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TARGET_TYPE_FILTER_OPTIONS } from '../profiles/components/constants';
-import type { TargetType } from '../profiles/types';
+import {
+  TARGET_TYPE_DATA_VIEW,
+  TARGET_TYPE_INDEX,
+  TARGET_TYPE_INDEX_PATTERN,
+  type TargetType,
+} from '../common/target_types';
+
+const TARGET_TYPE_FILTER_OPTIONS: Array<{ value: '' | TargetType; text: string }> = [
+  {
+    value: '',
+    text: i18n.translate('anonymizationUi.profiles.targetTypeFilter.any', {
+      defaultMessage: 'Any target type',
+    }),
+  },
+  {
+    value: TARGET_TYPE_INDEX,
+    text: i18n.translate('anonymizationUi.profiles.targetTypeOption.index', {
+      defaultMessage: 'index',
+    }),
+  },
+  {
+    value: TARGET_TYPE_INDEX_PATTERN,
+    text: i18n.translate('anonymizationUi.profiles.targetTypeOption.indexPattern', {
+      defaultMessage: 'index_pattern',
+    }),
+  },
+  {
+    value: TARGET_TYPE_DATA_VIEW,
+    text: i18n.translate('anonymizationUi.profiles.targetTypeOption.dataView', {
+      defaultMessage: 'data_view',
+    }),
+  },
+];
 
 interface ProfilesToolbarProps {
   modeLabel: string;

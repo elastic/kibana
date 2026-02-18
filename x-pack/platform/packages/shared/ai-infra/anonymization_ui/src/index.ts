@@ -14,12 +14,12 @@ export {
   type ProfileFormProps,
   ProfileFormProvider,
   ProfileFormFooter,
-  useDeleteProfileFlow,
   useProfileEditor,
   useProfileForm,
-  useProfilesListView,
   ProfileFlyout,
   ProfilesToolbar,
   ProfilesTable,
   DeleteProfileModal,
-} from './profiles';
+} from './profile_form';
+export { useProfilesListView } from './anonymization_profiles_section/hooks/use_profiles_list_view';
+export { useDeleteProfileFlow } from './anonymization_profiles_section/hooks/use_delete_profile_flow';

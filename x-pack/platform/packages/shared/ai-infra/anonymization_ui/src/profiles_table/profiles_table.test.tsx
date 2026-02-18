@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
-import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../target_types';
+import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../common/target_types';
 import { ProfilesTable } from './profiles_table';
 
 const createProfile = (id: string, name: string): AnonymizationProfile => ({

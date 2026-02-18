@@ -9,18 +9,13 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfileFlyout } from './profile_flyout';
-import { useTargetIdField } from '../profiles/components/profile_form/hooks/use_target_id_field';
 
-jest.mock('../profiles/components/profile_form/hooks/use_target_id_field', () => ({
-  useTargetIdField: jest.fn(),
-}));
-
-const baseTargetIdField = {
+const createBaseTargetIdField = () => ({
   targetIdOptions: [],
   selectedTargetIdOptions: [],
-  selectedTargetDisplayName: undefined,
+  selectedTargetDisplayName: '',
   targetIdHelpText: null,
-  targetIdAsyncError: undefined,
+  targetIdAsyncError: '',
   isTargetIdValidating: false,
   isTargetIdLoading: false,
   onTargetIdSearchChange: jest.fn(),
@@ -28,7 +23,40 @@ const baseTargetIdField = {
   onTargetIdSelectChange: jest.fn(),
   onTargetIdCreateOption: undefined,
   validateAndHydrateTargetId: jest.fn().mockResolvedValue(true),
-};
+});
+
+let mockTargetIdField = createBaseTargetIdField();
+
+jest.mock('../profile_form/profile_form_provider', () => {
+  const mockReact = jest.requireActual('react');
+  const { ProfileFormContextProvider } = jest.requireActual('../profile_form/profile_form_context');
+
+  return {
+    // @ts-expect-error Jest mock props are runtime-only in this test.
+    ProfileFormProvider: (providerProps) => {
+      const { children, ...props } = providerProps;
+      const onSubmitWithTargetValidation = async () => {
+        const isTargetValid = await mockTargetIdField.validateAndHydrateTargetId();
+        if (!isTargetValid) {
+          return;
+        }
+        await props.onSubmit();
+      };
+
+      return mockReact.createElement(
+        ProfileFormContextProvider,
+        {
+          value: {
+            ...props,
+            onSubmit: onSubmitWithTargetValidation,
+            targetIdField: mockTargetIdField,
+          },
+        },
+        children
+      );
+    },
+  };
+});
 
 const renderFlyout = (overrides: Partial<React.ComponentProps<typeof ProfileFlyout>> = {}) => {
   const onSubmit = jest.fn().mockResolvedValue(undefined);
@@ -68,14 +96,14 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof ProfileFlyo
 describe('ProfileFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useTargetIdField).mockReturnValue(baseTargetIdField);
+    mockTargetIdField = createBaseTargetIdField();
   });
 
   it('disables save while async target validation has an error', () => {
-    jest.mocked(useTargetIdField).mockReturnValue({
-      ...baseTargetIdField,
+    mockTargetIdField = {
+      ...createBaseTargetIdField(),
       targetIdAsyncError: 'Target id must resolve to a concrete index',
-    });
+    };
 
     renderFlyout();
 
@@ -84,10 +112,10 @@ describe('ProfileFlyout', () => {
 
   it('validates current target before submit', async () => {
     const validateAndHydrateTargetId = jest.fn().mockResolvedValue(true);
-    jest.mocked(useTargetIdField).mockReturnValue({
-      ...baseTargetIdField,
+    mockTargetIdField = {
+      ...createBaseTargetIdField(),
       validateAndHydrateTargetId,
-    });
+    };
     const { onSubmit } = renderFlyout();
 
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
