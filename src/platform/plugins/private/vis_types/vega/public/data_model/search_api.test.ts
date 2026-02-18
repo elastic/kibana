@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extendSearchParamsWithRuntimeFields } from './search_api';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { of } from 'rxjs';
 
-import type { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
+
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { getSearchParamsFromRequest, SearchRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+import { extendSearchParamsWithRuntimeFields, SearchAPI } from './search_api';
 
 const mockComputedFields = (
   dataViewsStart: DataViewsPublicPluginStart,
@@ -52,7 +56,7 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     `);
   });
 
-  test('should use runtime mappings from spec if it is specified', async () => {
+  test('should use runtime mappings from spec if specified', async () => {
     const requestParams = {
       runtime_mappings: {
         test: {},
@@ -70,5 +74,91 @@ describe('extendSearchParamsWithRuntimeFields', () => {
         },
       }
     `);
+  });
+});
+
+describe('SearchAPI', () => {
+  let mockSearch: jest.Mock;
+  let dataViewsStart: DataViewsPublicPluginStart;
+  let mockDependencies: any;
+
+  beforeEach(() => {
+    dataViewsStart = dataViewPluginMocks.createStartContract();
+    mockSearch = jest.fn().mockReturnValue(
+      of({
+        rawResponse: [],
+        isPartial: false,
+        isRunning: false,
+      })
+    );
+    mockDependencies = {
+      search: {
+        search: mockSearch,
+      },
+      indexPatterns: dataViewsStart,
+      uiSettings: {
+        get: jest.fn(),
+      },
+    };
+    mockComputedFields(dataViewsStart, 'test-index', {});
+  });
+
+  describe('search', () => {
+    test('should call search with the correct params', (done) => {
+      const searchAPI = new SearchAPI(mockDependencies);
+      const searchRequest: SearchRequest<estypes.SearchRequest> = {
+        index: 'test-index',
+        runtime_mappings: {},
+      };
+      searchAPI.search([searchRequest]).subscribe(() => {
+        expect(mockSearch).toHaveBeenCalled();
+        const searchRequestParams = mockSearch.mock.calls[0][0].params;
+        expect(searchRequestParams).toMatchObject(searchRequest);
+        done();
+      });
+    });
+
+    test('should include and elevate body params in the search request', (done) => {
+      const searchAPI = new SearchAPI(mockDependencies);
+      const searchRequest: SearchRequest<estypes.SearchRequest> = {
+        index: 'test-index',
+        body: {
+          // @ts-expect-error - testing deprecated body params
+          runtime_mappings: {},
+        },
+      };
+      searchAPI.search([searchRequest]).subscribe(() => {
+        expect(mockSearch).toHaveBeenCalled();
+        const searchRequestParams = mockSearch.mock.calls[0][0].params;
+        expect(searchRequestParams).toEqual({
+          index: 'test-index',
+          runtime_mappings: {},
+        });
+        done();
+      });
+    });
+
+    test('should use root params over body params in the search request', (done) => {
+      const searchAPI = new SearchAPI(mockDependencies);
+      const searchRequest: SearchRequest<estypes.SearchRequest> = {
+        index: 'test-index',
+        body: {
+          // @ts-expect-error - testing deprecated body params
+          runtime_mappings: {
+            test: { type: 'keyword' },
+          },
+        },
+        runtime_mappings: {},
+      };
+      searchAPI.search([searchRequest]).subscribe(() => {
+        expect(mockSearch).toHaveBeenCalled();
+        const searchRequestParams = mockSearch.mock.calls[0][0].params;
+        expect(searchRequestParams).toEqual({
+          index: 'test-index',
+          runtime_mappings: {},
+        });
+        done();
+      });
+    });
   });
 });
