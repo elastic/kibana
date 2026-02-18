@@ -13,9 +13,12 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
+import {
+  initializeUnsavedChanges,
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing';
 
 import type { ImageEmbeddableState } from '../../server';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
