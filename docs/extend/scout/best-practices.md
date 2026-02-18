@@ -37,7 +37,7 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 | What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                                   |
 | Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                                  |
 | How do I write good **page objects**?                                | [Page object tips](#page-object-tips)                                                                         |
-| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops--fix-the-source-code)       |
+| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                            |
 | Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                       |
 
 **API tests**
@@ -140,10 +140,10 @@ Best practices specific to UI tests.
 
 Default to [parallel UI suites](./parallelism.md) when possible. Parallel workers share the same Kibana/ES deployment, but run in isolated Spaces.
 
-| Run in **parallel**                                                                                     | Run **sequentially**                          |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| UI tests (most suites)                                                                                  | API tests                                     |
-| Suites that can share pre-ingested data (often via the [global setup hook](./global-setup-hook.md))     | Suites requiring a “clean” Elasticsearch state |
+| Run in **parallel**                                                                                 | Run **sequentially**                           |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| UI tests (most suites)                                                                              | API tests                                      |
+| Suites that can share pre-ingested data (often via the [global setup hook](./global-setup-hook.md)) | Suites requiring a “clean” Elasticsearch state |
 
 ### Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
 
@@ -217,7 +217,7 @@ await page.testSubj.click('myButton');
 await expect(page.testSubj.locator('successToast')).toBeVisible();
 ```
 
-### Don't use manual retry loops [dont-use-manual-retry-loops--fix-the-source-code]
+### Don't use manual retry loops [dont-use-manual-retry-loops]
 
 If an action fails, don’t wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs).
 
@@ -364,11 +364,11 @@ Best practices specific to API tests.
 
 Use the right fixture for the right purpose:
 
-| Fixture                       | Use for |
-| ----------------------------- | ------- |
+| Fixture                       | Use for                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------- |
 | `apiClient`                   | The endpoint under test (with scoped credentials from [API auth](./api-auth.md)) |
-| `apiServices`                 | Setup/teardown and side effects |
-| `kbnClient`, `esClient`, etc. | Lower-level setup when `apiServices` doesn’t have a suitable helper |
+| `apiServices`                 | Setup/teardown and side effects                                                  |
+| `kbnClient`, `esClient`, etc. | Lower-level setup when `apiServices` doesn’t have a suitable helper              |
 
 Prefer tests that read like “call endpoint X as role Y, assert outcome”.
 
@@ -410,4 +410,3 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
   });
 });
 ```
-
