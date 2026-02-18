@@ -113,12 +113,12 @@ export const checkForNoReadableIndices = async (args: {
 
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString.trimEnd(),
+      message: errorString,
     });
 
     return {
       foundNoIndices: true,
-      warningMessage: errorString.trimEnd(),
+      warningMessage: errorString,
     };
   }
 
