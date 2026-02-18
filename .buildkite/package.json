@@ -10,7 +10,7 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "axios": "^1.13.4",
-    "diff": "^4.0.4",
+    "diff": "^8.0.3",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.1",
     "minimatch": "^5.0.1",
