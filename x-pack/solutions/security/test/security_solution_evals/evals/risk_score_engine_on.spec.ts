@@ -46,7 +46,7 @@ evaluate.describe(
         riskScore: Math.floor(Math.random() * 100),
       });
       await quickApiClient.initRiskEngine();
-      await waitForRiskScoresToBePresent({ es: esClient, log, scoreCount: 20 });
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
     });
 
     evaluate.afterAll(async ({ esClient, log, quickApiClient, supertest }) => {
