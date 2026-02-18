@@ -47,9 +47,9 @@ import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_d
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
 import { useKibana, useUiSetting$ } from '../common/lib/kibana/kibana_react';
-import { useRuleDetailsUrlPathWithLandingTab } from '../detection_engine/rule_management_ui/components/rules_table/use_rule_details_url_with_landing_tab';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../exceptions/hooks/use_endpoint_exceptions_capability';
+import { getRuleDetailsTabUrl } from '../common/components/link_to/redirect_to_detection_engine';
 
 /**
  * Component to redirect to rule details with the appropriate landing tab.
@@ -58,13 +58,13 @@ import { useEndpointExceptionsCapability } from '../exceptions/hooks/use_endpoin
 export const RuleDetailsRedirect: React.FC = () => {
   const { detailName } = useParams<{ detailName: string }>();
   const location = useLocation();
-  const { ruleDetailsUrlPathWithLandingTab } = useRuleDetailsUrlPathWithLandingTab(detailName);
+  const defaultLandingPageWithTab = getRuleDetailsTabUrl(detailName, RuleDetailTabs.overview);
 
   return (
     <Redirect
       to={{
         ...location,
-        pathname: `/rules${ruleDetailsUrlPathWithLandingTab}`,
+        pathname: `/rules${defaultLandingPageWithTab}`,
         search: location.search,
       }}
     />
@@ -72,12 +72,9 @@ export const RuleDetailsRedirect: React.FC = () => {
 };
 
 export const RuleDetailsTabGuard: React.FC = () => {
-  const { detailName, tabName } = useParams<{ detailName: string; tabName: string }>();
-  const location = useLocation();
+  const { tabName } = useParams<{ detailName: string; tabName: string }>();
   const { alertsPrivileges, rulesPrivileges } = useUserPrivileges();
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
-  const { ruleDetailsUrlPathWithLandingTab: defaultLandingPageWithTab } =
-    useRuleDetailsUrlPathWithLandingTab(detailName);
 
   const canReadAlerts = alertsPrivileges.alerts.read;
   const canReadExceptions = rulesPrivileges.exceptions.read;
@@ -97,15 +94,7 @@ export const RuleDetailsTabGuard: React.FC = () => {
 
   // Redirect if no access to the requested tab
   if (!canAccessTab) {
-    return (
-      <Redirect
-        to={{
-          ...location,
-          pathname: `/rules${defaultLandingPageWithTab}`,
-          search: location.search,
-        }}
-      />
-    );
+    return <RuleDetailsRedirect />;
   }
 
   return <RuleDetailsPage />;
