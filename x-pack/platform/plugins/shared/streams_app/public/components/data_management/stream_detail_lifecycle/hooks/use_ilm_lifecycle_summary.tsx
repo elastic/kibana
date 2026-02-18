@@ -261,10 +261,10 @@ export const useIlmLifecycleSummary = ({
     applyOverwrite(uiState.deleteContext);
   };
 
-  const overwriteEditPolicy = async () => {
+  const overwriteEditPolicy = async (esPhasesOverride?: EsIlmPolicyPhases) => {
     if (!isIlm) return;
 
-    const nextEsPhases = uiState.pendingEditEsPhases;
+    const nextEsPhases = esPhasesOverride ?? uiState.pendingEditEsPhases;
     if (!nextEsPhases) return;
 
     try {
@@ -450,13 +450,13 @@ export const useIlmLifecycleSummary = ({
       const isManaged = currentPolicy.current.meta?.managed === true;
 
       const modifiedPhases = buildModifiedPhasesFromEdit(currentPolicy.current, nextPhases);
-      dispatchUi({ type: 'setPendingEditEsPhases', payload: modifiedPhases });
 
       if (resources.length === 0 && !isManaged) {
-        await overwriteEditPolicy();
+        await overwriteEditPolicy(modifiedPhases);
         return;
       }
 
+      dispatchUi({ type: 'setPendingEditEsPhases', payload: modifiedPhases });
       dispatchUi({ type: 'openEditModal', payload: { isManaged } });
     } catch (error) {
       notifications.toasts.addError(error as Error, {
