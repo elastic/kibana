@@ -52,7 +52,12 @@ export class EnterIfNodeImpl implements NodeImplementation {
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
     this.stepExecutionRuntime.setInput({
+      rawCondition: thenNode.condition as string,
       condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
+    // set the condition result to the step state so that it can be used in the exit node
+    this.stepExecutionRuntime.setCurrentStepState({
       conditionResult: evaluatedConditionResult,
     });
 
