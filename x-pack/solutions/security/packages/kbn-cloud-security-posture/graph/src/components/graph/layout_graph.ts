@@ -9,7 +9,13 @@ import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
+import {
+  isEntityNode,
+  isConnectorNode,
+  isStackNode,
+  isStackedLabel,
+  compareConnectorNodes,
+} from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
@@ -180,15 +186,7 @@ const layoutStackedLabels = (
   const children = nodes
     .filter((child) => isConnectorNode(child.data) && child.parentId === groupNode.id)
     // Sort: 1) relationship nodes on top, label nodes below  2) alphabetical by label within each group
-    .sort((a, b) => {
-      // Primary sort: relationship before label
-      if (a.data.shape === 'relationship' && b.data.shape === 'label') return -1;
-      if (a.data.shape === 'label' && b.data.shape === 'relationship') return 1;
-      // Secondary sort: alphabetical by label
-      const labelA = ('label' in a.data && a.data.label) || '';
-      const labelB = ('label' in b.data && b.data.label) || '';
-      return labelA.localeCompare(labelB);
-    });
+    .sort((a, b) => compareConnectorNodes(a.data, b.data));
   const stackSize = children.length;
   const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
   const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
@@ -313,21 +311,9 @@ const handleMultipleChildren = (
     const commonCenterY = calculateCenterY(allChildren, Y);
 
     // Sort siblings: relationship nodes first (top), then label nodes, then by label alphabetically
-    siblingsWithSharedChildren.sort((a, b) => {
-      const nodeA = helpers.nodesById[a]?.data;
-      const nodeB = helpers.nodesById[b]?.data;
-      const shapeA = nodeA?.shape;
-      const shapeB = nodeB?.shape;
-
-      // Primary sort: relationship before label
-      if (shapeA === 'relationship' && shapeB === 'label') return -1;
-      if (shapeA === 'label' && shapeB === 'relationship') return 1;
-
-      // Secondary sort: alphabetical by label for deterministic ordering
-      const labelA = (nodeA && 'label' in nodeA && nodeA.label) || '';
-      const labelB = (nodeB && 'label' in nodeB && nodeB.label) || '';
-      return labelA.localeCompare(labelB);
-    });
+    siblingsWithSharedChildren.sort((a, b) =>
+      compareConnectorNodes(helpers.nodesById[a]?.data, helpers.nodesById[b]?.data)
+    );
 
     const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
     const siblingCount = siblingsWithSharedChildren.length;
