@@ -133,6 +133,20 @@ export const ENTITY_RELATIONSHIP_FIELDS = [
   'Supervises',
 ] as const;
 
+// Keys must match ENTITY_RELATIONSHIP_FIELDS values which use Entity Store naming convention
+/* eslint-disable @typescript-eslint/naming-convention */
+export const ENTITY_RELATIONSHIP_LABELS: Record<
+  (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
+  string
+> = {
+  Accesses_frequently: 'Accesses frequently',
+  Communicates_with: 'Communicates with',
+  Depends_on: 'Depends on',
+  Owns: 'Owns',
+  Supervises: 'Supervises',
+};
+/* eslint-enable @typescript-eslint/naming-convention */
+
 /**
  * ECS entity actor fields used for graph visualization.
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.

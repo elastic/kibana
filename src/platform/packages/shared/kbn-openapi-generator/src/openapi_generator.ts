@@ -43,6 +43,10 @@ export interface GeneratorConfig {
    * @default undefined
    */
   schemaNameTransform?: 'pascalCase';
+  /**
+   * This forces the generator to use the Zod v4 import.
+   */
+  experimentallyImportZodV4?: boolean;
 }
 
 export const generate = async (config: GeneratorConfig) => {
@@ -71,6 +75,7 @@ export const generate = async (config: GeneratorConfig) => {
         generatedPath: getGeneratedFilePath(sourcePath),
         generationContext: getGenerationContext(parsedSchema, {
           schemaNameTransform: config.schemaNameTransform,
+          experimentallyImportZodV4: config.experimentallyImportZodV4,
         }),
       };
     })
@@ -117,6 +122,7 @@ export const generate = async (config: GeneratorConfig) => {
       },
       config: {
         schemaNameTransform: config.schemaNameTransform,
+        experimentallyImportZodV4: config.experimentallyImportZodV4,
       },
     });
 

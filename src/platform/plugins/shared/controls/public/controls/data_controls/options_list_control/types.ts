@@ -42,7 +42,7 @@ interface PublishesOptions {
  * and then passes to the UI component. Excludes any managed state properties that don't end up being used
  * by the component
  */
-export type OptionsListComponentState = Pick<DataControlState, 'fieldName'> &
+export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
   SelectionsState &
   EditorState &
   TemporaryState & {
