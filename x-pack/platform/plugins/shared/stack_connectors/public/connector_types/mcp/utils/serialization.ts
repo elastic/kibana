@@ -37,8 +37,7 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
   const secretHeaders = toHeadersRecord(headers, HeaderFieldType.SECRET);
 
   const serverUrl = formData.config?.serverUrl ?? '';
-  const credential =
-    formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
+  const credential = formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
 
   if (
     formData.config?.authType === MCPAuthType.ApiKeyInUrl &&
