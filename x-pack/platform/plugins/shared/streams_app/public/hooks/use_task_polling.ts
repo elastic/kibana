@@ -22,22 +22,38 @@ export function useTaskPolling(
       return;
     }
 
-    const intervalId = setInterval(async () => {
-      const polledTask = await poll();
+    let timeoutId: NodeJS.Timeout | undefined;
+    let isMounted = true;
 
-      // We expect the polling endpoint to report if a task becomes stale so the UI can poll until that happens
-      // leaving the server to control the time thresholds for staleness
-      if (
-        polledTask.status !== TaskStatus.InProgress &&
-        polledTask.status !== TaskStatus.BeingCanceled
-      ) {
-        clearInterval(intervalId);
-        refresh();
-      }
-    }, 2000);
+    const scheduleNextPoll = () => {
+      timeoutId = setTimeout(async () => {
+        const polledTask = await poll();
+
+        if (!isMounted) {
+          return;
+        }
+
+        // We expect the polling endpoint to report if a task becomes stale so the UI can poll until that happens
+        // leaving the server to control the time thresholds for staleness
+        if (
+          polledTask.status !== TaskStatus.InProgress &&
+          polledTask.status !== TaskStatus.BeingCanceled
+        ) {
+          refresh();
+          return;
+        }
+
+        scheduleNextPoll();
+      }, 2000);
+    };
+
+    scheduleNextPoll();
 
     return () => {
-      clearInterval(intervalId);
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, [task?.status, poll, refresh]);
 }
