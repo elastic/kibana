@@ -249,7 +249,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    registerTools(agentBuilder, core, logger, this.config.experimentalFeatures).catch((error) => {
+    const experimentalFeatures = this.config.experimentalFeatures;
+    const endpointAppContextService = this.endpointAppContextService;
+
+    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -260,9 +263,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerSkills({
       agentBuilder,
+      experimentalFeatures,
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
+      options: { endpointAppContextService },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
