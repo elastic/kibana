@@ -37,23 +37,16 @@ export class StepExecutionRepository {
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
   }
 
-  public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
+  public async bulkCreate(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
     if (stepExecutions.length === 0) {
       return;
     }
 
-    stepExecutions.forEach((stepExecution) => {
-      if (!stepExecution.id) {
-        throw new Error('Step execution ID is required for upsert');
-      }
-    });
-
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
       index: this.indexName,
       body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
+        { index: { _id: stepExecution.id } },
+        stepExecution,
       ]),
     });
 
@@ -67,7 +60,7 @@ export class StepExecutionRepository {
         }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
+        `Failed to create ${erroredDocuments.length} step executions: ${JSON.stringify(
           erroredDocuments
         )}`
       );

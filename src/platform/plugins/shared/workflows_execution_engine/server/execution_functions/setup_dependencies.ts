@@ -25,6 +25,7 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 
 import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 
 const defaultWorkflowSettings: WorkflowSettings = {
   timeout: '6h',
@@ -45,15 +46,17 @@ export async function setupDependencies(
 
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const executionStateRepository = new ExecutionStateRepository(internalEsClient);
 
-  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
+  const executions = await executionStateRepository.getExecutions(
+    new Set([workflowRunId]),
     spaceId
   );
 
-  if (!workflowExecution) {
+  if (!(workflowRunId in executions)) {
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
+  const workflowExecution = executions[workflowRunId] as EsWorkflowExecution;
 
   if (!fakeRequest) {
     logger.error('Cannot execute a workflow without Kibana Request');
@@ -90,6 +93,7 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
+    executionStateRepository,
     workflowExecutionRepository,
     stepExecutionRepository
   );

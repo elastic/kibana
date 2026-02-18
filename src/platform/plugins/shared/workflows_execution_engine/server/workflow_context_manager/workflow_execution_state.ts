@@ -10,8 +10,15 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type { EsExecution, EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import {
+  type EsExecution,
+  type EsWorkflowExecution,
+  type EsWorkflowStepExecution,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
@@ -28,17 +35,20 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private executionStateRepository: ExecutionStateRepository
+    private executionStateRepository: ExecutionStateRepository,
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private stepExecutionRepository: StepExecutionRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
 
   public async load(): Promise<void> {
     const foundSteps = await this.executionStateRepository.getExecutions(
-      this.workflowExecution.stepExecutionIds ?? []
+      new Set(this.workflowExecution.stepExecutionIds ?? []),
+      this.workflowExecution.spaceId
     );
-    foundSteps.forEach((stepExecution) =>
-      this.stepExecutions.set(stepExecution.id, stepExecution as EsWorkflowStepExecution)
+    Object.entries(foundSteps).forEach(([id, stepExecution]) =>
+      this.stepExecutions.set(id, stepExecution as EsWorkflowStepExecution)
     );
     this.buildStepIdExecutionIdIndex();
   }
@@ -51,11 +61,14 @@ export class WorkflowExecutionState {
     this.workflowExecution = {
       ...this.workflowExecution,
       ...workflowExecution,
+      id: this.workflowExecution.id,
+      type: 'workflow',
+      stepExecutionIds: Array.from(this.stepExecutions.values())
+        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
+        .map((stepExecution) => stepExecution.id),
     };
-    this.changes.set(this.workflowExecution.id, {
-      ...this.workflowExecution,
-      ...workflowExecution,
-    });
+
+    this.changes.set(this.workflowExecution.id, this.workflowExecution);
   }
 
   public getAllStepExecutions(): EsWorkflowStepExecution[] {
@@ -112,11 +125,50 @@ export class WorkflowExecutionState {
   }
 
   public async flush(): Promise<void> {
-    if (this.changes.size) {
-      await this.executionStateRepository.bulkUpsert(Array.from(this.changes.values()));
+    if (!this.changes.size) {
+      return;
     }
 
+    const changes = Array.from(this.changes.values());
     this.changes.clear();
+
+    const tasks: Promise<void>[] = [];
+
+    tasks.push(this.executionStateRepository.bulkUpsert(changes));
+
+    if (isTerminalStatus(this.workflowExecution.status)) {
+      tasks.push(
+        this.workflowExecutionRepository.createWorkflowExecution(
+          this.workflowExecution as EsWorkflowExecution,
+          {
+            refresh: false,
+          }
+        )
+      );
+    }
+
+    const stepChanges = Array.from(changes).filter(
+      (change) => change.type === 'step' && change.status && isTerminalStatus(change.status)
+    ) as EsWorkflowStepExecution[];
+
+    if (stepChanges.length) {
+      tasks.push(
+        this.stepExecutionRepository.bulkCreate(
+          stepChanges.map(
+            (stepChange) => this.stepExecutions.get(stepChange.id) as EsWorkflowStepExecution
+          )
+        )
+      );
+    }
+
+    await Promise.all(tasks);
+
+    // if (isTerminalStatus(this.workflowExecution.status)) {
+    //   await new Promise((resolve) => setTimeout(resolve, 4000));
+    //   await this.executionStateRepository.bulkDelete(
+    //     new Set([this.workflowExecution.id, ...(this.workflowExecution.stepExecutionIds ?? [])])
+    //   );
+    // }
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
@@ -133,19 +185,25 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      type: 'step',
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.changes.set(step.id as string, newStep);
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
+    const finalUpdate: Partial<EsWorkflowStepExecution> = {
+      ...step,
+      type: 'step',
+    };
+
     this.stepExecutions.set(step.id!, {
       ...this.stepExecutions.get(step.id!),
-      ...step,
+      ...finalUpdate,
     } as EsWorkflowStepExecution);
     this.changes.set(step.id as string, {
       ...(this.changes.get(step.id as string) || {}),
-      ...step,
+      ...finalUpdate,
     });
   }
 
