@@ -98,15 +98,9 @@ export function SignificantEventsTable({
               if (query.feature?.name) {
                 setSelectedFeature(featuresByName[query.feature.name]);
               }
-            }}
-            iconOnClick={() => {
-              if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
-              }
-            }}
-            iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
+            }}'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
               {
+                defaultMessage: 'O              {
                 defaultMessage: 'Open feature details',
               }
             )}
