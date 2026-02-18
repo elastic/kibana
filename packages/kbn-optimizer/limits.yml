@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 13752
+  automaticImportVTwo: 15226
   banners: 4087
   canvas: 14881
   cases: 225900
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   dashboardAgent: 5135
   dashboardEnhanced: 11651
   dashboardMarkdown: 4994
-  data: 494465
+  data: 494550
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -46,7 +46,7 @@ pageLoadAssetSize:
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28131
+  discover: 28284
   discoverEnhanced: 5517
   discoverShared: 2322
   elasticAssistant: 338870
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 4488
   enterpriseSearch: 37566
   entityStore: 71717
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -85,7 +85,7 @@ pageLoadAssetSize:
   graph: 9924
   grokdebugger: 5484
   home: 13091
-  imageEmbeddable: 6325
+  imageEmbeddable: 6272
   indexLifecycleManagement: 29818
   indexManagement: 35522
   inference: 10368
@@ -108,9 +108,9 @@ pageLoadAssetSize:
   links: 8620
   lists: 5093
   logsDataAccess: 7900
-  logsShared: 101273
+  logsShared: 82701
   logstash: 15882
-  maintenanceWindows: 8783
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -118,7 +118,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 12376
+  navigation: 11814
   newsfeed: 11369
   noDataPage: 1749
   observability: 107797
@@ -210,6 +210,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52268
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 21318
   workplaceAIApp: 65547
