@@ -13,9 +13,9 @@ import {
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
-} from '@kbn/streams-ai/src/significant_events/types';
+} from '@kbn/streams-ai/src/sig_events/significant_events/types';
 import { generateSignificantEvents } from '@kbn/streams-ai';
-import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
+import { significantEventsPrompt } from '@kbn/streams-ai/src/sig_events/significant_events/prompt';
 
 import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';

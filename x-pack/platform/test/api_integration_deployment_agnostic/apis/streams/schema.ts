@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
-import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/stream_management/index_templates/generate_index_template';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';

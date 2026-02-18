@@ -7,7 +7,7 @@
 
 import type { BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { featuresPrompt } from '@kbn/streams-ai/src/sig_events/features/prompt';
 import { get } from 'lodash';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
