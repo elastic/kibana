@@ -24,7 +24,7 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
-  - '@kbn/datemath'
+  - '@kbn/eval-kql'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/cloud-plugin'
   - '@kbn/utility-types'
