@@ -59,6 +59,26 @@ toc:
       - file: external-plugin-functional-tests.md
       - file: external-plugin-localization.md
       - file: testing-kibana-plugin.md
+  - file: scout.md
+    children:
+      - file: scout/introduction.md
+      - file: scout/setup-plugin.md
+      - file: scout/run-tests.md
+      - file: scout/debugging.md
+      - file: scout/reporting.md
+      - file: scout/fixtures.md
+      - file: scout/page-objects.md
+      - file: scout/api-services.md
+      - file: scout/browser-auth.md
+      - file: scout/api-auth.md
+      - file: scout/write-ui-tests.md
+      - file: scout/write-api-tests.md
+      - file: scout/a11y-checks.md
+      - file: scout/parallelism.md
+      - file: scout/deployment-tags.md
+      - file: scout/skip-tests.md
+      - file: scout/global-setup-hook.md
+      - file: scout/best-practices.md
   - file: advanced.md
     children:
       - file: running-elasticsearch.md
