@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-export { useSubAction } from './use_sub_action';
-
 export {
   useConnectorOAuthConnect,
   OAuthRedirectMode,
   type ConnectorOAuthConnectProps,
   type ConnectorOAuthConnect,
+} from './use_connector_oauth_connect';
+
+export {
   useConnectorOAuthDisconnect,
   type ConnectorOAuthDisconnectProps,
   type ConnectorOAuthDisconnect,
-  useOAuthRedirectResult,
-  type OAuthRedirectResultProps,
-} from './oauth';
+} from './use_connector_oauth_disconnect';
+
+export { useOAuthRedirectResult, type OAuthRedirectResultProps } from './use_oauth_redirect_result';

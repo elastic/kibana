@@ -107,7 +107,18 @@ export {
   deprecatedMessage,
 } from './common';
 
-export { useSubAction } from './application/hooks';
+export {
+  useSubAction,
+  useConnectorOAuthConnect,
+  OAuthRedirectMode,
+  type ConnectorOAuthConnectProps,
+  type ConnectorOAuthConnect,
+  useConnectorOAuthDisconnect,
+  type ConnectorOAuthDisconnectProps,
+  type ConnectorOAuthDisconnect,
+  useOAuthRedirectResult,
+  type OAuthRedirectResultProps,
+} from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,
