@@ -41,6 +41,23 @@ export interface RuleGrouping {
 }
 
 /**
+ * Recovery policy type - determines how recovery is detected.
+ * - 'query': Uses a custom ES|QL query to detect recovery
+ * - 'no_breach': Recovers when the alert condition is no longer breached
+ */
+export type RecoveryPolicyType = 'query' | 'no_breach';
+
+/**
+ * Recovery policy configuration that determines how alerts recover.
+ */
+export interface RecoveryPolicy {
+  /** Recovery detection type */
+  type: RecoveryPolicyType;
+  /** ES|QL query for recovery detection (when type is 'query') */
+  query?: string;
+}
+
+/**
  * Form values for creating a new alerting rule.
  * This interface defines the contract for the rule creation form,
  * independent of the API schema to allow for controlled evolution.
@@ -52,4 +69,5 @@ export interface FormValues {
   schedule: RuleSchedule;
   evaluation: RuleEvaluation;
   grouping?: RuleGrouping;
+  recoveryPolicy?: RecoveryPolicy;
 }

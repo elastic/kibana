@@ -8,17 +8,14 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import type { HttpStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from './types';
+import type { RuleFormServices } from './rule_form';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
-export interface RuleFieldsServices {
-  http: HttpStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-}
+import { StateTransitionsFieldGroup } from './field_groups/state_transitions_field_group';
+
+/** @deprecated Use RuleFormServices from rule_form.tsx */
+export type RuleFieldsServices = RuleFormServices;
 
 export interface RuleFieldsProps {
   services: RuleFieldsServices;
@@ -40,6 +37,8 @@ export const RuleFields: React.FC<RuleFieldsProps> = ({ services, query }) => {
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup services={services} />
+      <EuiSpacer size="m" />
+      <StateTransitionsFieldGroup services={services} />
     </>
   );
 };
