@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { casesSchemaV9 } from '../schemas';
 
@@ -35,5 +36,18 @@ export const modelVersion9: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: casesSchemaV9.extends({}, { unknowns: 'ignore' }),
+    create: casesSchemaV9.extends(
+      {
+        // NOTE: this aligns the SO schema with persisted severity here
+        // x-pack/platform/plugins/shared/cases/server/common/types/case.ts
+        severity: schema.oneOf([
+          schema.literal(0),
+          schema.literal(10),
+          schema.literal(20),
+          schema.literal(30),
+        ]),
+      },
+      { unknowns: 'ignore' }
+    ),
   },
 };
