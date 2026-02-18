@@ -32,7 +32,7 @@ describe('OpAMPComponentHealth', () => {
       },
     });
 
-    expect(component.getByText(/Collector Status:/)).toBeInTheDocument();
+    expect(component.getByText(/Collector status:/)).toBeInTheDocument();
     expect(component.getByText('Healthy')).toBeInTheDocument();
   });
 
