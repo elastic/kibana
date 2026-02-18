@@ -347,11 +347,11 @@ export function getAllConnectorsWithDynamic(
 }
 
 export const getWorkflowZodSchema = (
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  registeredTriggerIds: string[] = []
 ): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  const registeredTriggers = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
 };
 
 export const getWorkflowZodSchemaLoose = (

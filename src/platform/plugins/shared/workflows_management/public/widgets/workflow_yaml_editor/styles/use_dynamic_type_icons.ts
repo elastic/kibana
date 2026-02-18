@@ -14,13 +14,10 @@ import { triggerSchemas } from '../../../../common/trigger_schemas';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
-  getStepIconBase64,
-  type GetStepIconBase64Params,
-} from '../../../shared/ui/step_icons/get_step_icon_base64';
-import {
-  getTriggerBoltFallbackDataUrl,
-  getTriggerIconBase64,
-} from '../../../shared/ui/step_icons/get_trigger_icon_base64';
+  getIconBase64,
+  type GetIconBase64Params,
+} from '../../../shared/ui/step_icons/get_icon_base64';
+import { getTriggerBoltFallbackDataUrl } from '../../../shared/ui/step_icons/get_trigger_icon_base64';
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import {
@@ -28,8 +25,8 @@ import {
   triggerTypeToCssClass,
 } from '../ui/decorations/use_trigger_type_decorations';
 
-/** Step/connector or trigger item for icon resolution; isTrigger selects getTriggerIconBase64 vs getStepIconBase64. */
-export interface ConnectorTypeInfoMinimal extends GetStepIconBase64Params {
+/** Step/connector or trigger item for icon resolution; isTrigger selects trigger vs step icon resolution. */
+export interface ConnectorTypeInfoMinimal extends Omit<GetIconBase64Params, 'kind'> {
   displayName: string;
   isTrigger?: boolean;
 }
@@ -159,7 +156,7 @@ export function useDynamicTypeIcons(
     .join(',');
   const injectionRunIdRef = useRef(0);
   const lastInjectedShadowCssRef = useRef<string | null>(null);
-  const customTriggerIds = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
+  const customTriggerIds = triggerSchemas.getRegisteredIds();
   // Detect custom trigger in content: known registered ids OR pattern "type: x.y" (custom triggers use dots; built-in are manual/alert/scheduled).
   // This ensures we re-run and retry when loading saved YAML that has a custom trigger before the extension has registered.
   const contentHasCustomTrigger = Boolean(
@@ -277,12 +274,10 @@ async function injectDynamicConnectorIcons(
     let iconBase64: string | undefined;
     const isTrigger = 'isTrigger' in connector && connector.isTrigger;
     try {
-      iconBase64 = isTrigger
-        ? await getTriggerIconBase64({
-            actionTypeId: connector.actionTypeId,
-            icon: connector.icon,
-          })
-        : await getStepIconBase64(connector);
+      iconBase64 = await getIconBase64({
+        ...connector,
+        kind: isTrigger ? 'trigger' : 'step',
+      });
     } catch {
       if (isTrigger) {
         iconBase64 = getTriggerBoltFallbackDataUrl();
@@ -436,12 +431,10 @@ async function injectDynamicShadowIcons(
 
     let iconBase64: string | undefined;
     try {
-      iconBase64 = isTriggerConnector
-        ? await getTriggerIconBase64({
-            actionTypeId: connector.actionTypeId,
-            icon: connector.icon,
-          })
-        : await getStepIconBase64(connector);
+      iconBase64 = await getIconBase64({
+        ...connector,
+        kind: isTriggerConnector ? 'trigger' : 'step',
+      });
     } catch {
       if (isTriggerConnector && boltUrl) {
         iconBase64 = boltUrl;

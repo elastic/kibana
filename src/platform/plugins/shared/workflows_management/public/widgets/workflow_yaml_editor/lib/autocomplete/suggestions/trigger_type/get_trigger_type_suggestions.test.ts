@@ -13,7 +13,7 @@ import {
   getTriggerTypeSuggestions,
 } from './get_trigger_type_suggestions';
 
-jest.mock('../../../../../../../common/trigger_schemas', () => ({
+jest.mock('../../../../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: () => [] },
 }));
 

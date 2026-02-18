@@ -13,7 +13,7 @@ import {
   ManualTriggerSchema,
   ScheduledTriggerSchema,
 } from '@kbn/workflows';
-import { triggerSchemas } from '../../../../../../../common/trigger_schemas';
+import { triggerSchemas } from '../../../../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 /** Shape used for both built-in and registered trigger suggestions */

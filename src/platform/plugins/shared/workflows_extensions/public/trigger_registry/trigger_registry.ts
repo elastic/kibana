@@ -30,17 +30,6 @@ export class PublicTriggerRegistry {
         `Trigger definition for "${id}" is already registered. Each trigger must have a unique identifier.`
       );
     }
-
-    if (definition.conditionExamples?.length) {
-      const schema = createConditionExamplesSchema(definition.eventSchema);
-      const parsed = schema.safeParse(definition.conditionExamples);
-      if (!parsed.success) {
-        const first = parsed.error.issues[0];
-        const path = first.path?.length ? `[${first.path.join('.')}] ` : '';
-        throw new Error(`Trigger "${id}": conditionExamples ${path}${first.message}`);
-      }
-    }
-
     this.registry.set(id, definition);
   }
 

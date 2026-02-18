@@ -25,7 +25,7 @@ import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
-  useFocusedStepOutline,
+  useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
@@ -63,6 +63,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
@@ -215,7 +216,6 @@ export const WorkflowYAMLEditor = ({
   // Styles
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
@@ -398,6 +398,8 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useFocusedStepDecoration(editorRef.current);
+
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -453,7 +455,12 @@ export const WorkflowYAMLEditor = ({
     }
 
     const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
-      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+      dispatch(
+        setCursorPosition({
+          lineNumber: event.position.lineNumber,
+          column: event.position.column,
+        })
+      );
     });
 
     return () => disposable.dispose();
@@ -537,7 +544,7 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchemaStrict, notifications]);
 
   return (
-    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"

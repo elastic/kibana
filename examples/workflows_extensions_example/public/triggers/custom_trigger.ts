@@ -12,9 +12,7 @@ import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import React from 'react';
 import { commonCustomTriggerDefinition } from '../../common/triggers/custom_trigger';
 
-export const customTriggerPublicDefinition: PublicTriggerDefinition<
-  typeof commonCustomTriggerDefinition.eventSchema
-> = {
+export const customTriggerPublicDefinition: PublicTriggerDefinition = {
   ...commonCustomTriggerDefinition,
   title: i18n.translate('workflowsExtensionsExample.customTrigger.title', {
     defaultMessage: 'Custom trigger',

@@ -39,7 +39,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The trigger definition
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
-  registerTrigger(definition: ServerTriggerDefinition): void;
+  registerTriggerDefinition(definition: ServerTriggerDefinition): void;
 }
 
 /**
@@ -50,7 +50,7 @@ export interface WorkflowsExtensionsTriggerListStartContract {
    * Get all registered trigger definitions.
    * @returns Array of all registered trigger definitions
    */
-  listTriggers(): ServerTriggerDefinition[];
+  getAllTriggerDefinitions(): ServerTriggerDefinition[];
 }
 
 /**
