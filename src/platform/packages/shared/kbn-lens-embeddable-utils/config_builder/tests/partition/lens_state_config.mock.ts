@@ -185,6 +185,8 @@ export const treemapLegacyBasicState = {
           numberDisplay: 'percent',
           legendDisplay: 'default',
           nestedLegend: true,
+          legendPosition: 'left',
+          legendStats: ['value'],
           collapseFns: {},
           categoryDisplay: 'default',
         },

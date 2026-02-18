@@ -31,6 +31,9 @@ const legendSchemaProps = {
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
   size: legendSizeSchema,
   position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
+  should_truncate: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to truncate legend items' } })
+  ),
 };
 
 const labelsSchemaProps = {
@@ -94,9 +97,27 @@ const heatmapSharedStateSchema = {
             ),
           })
         ),
+        stroke_width: schema.maybe(
+          schema.number({ meta: { description: 'Grid cell border width in pixels' } })
+        ),
+        stroke_color: schema.maybe(
+          schema.string({ meta: { description: 'Grid cell border color' } })
+        ),
       },
       { meta: { id: 'heatmapCells', description: 'Cells configuration' } }
     )
+  ),
+  percentage_mode: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to show values as percentages' } })
+  ),
+  show_tooltip: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to show tooltips' } })
+  ),
+  highlight_in_hover: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to highlight cells on legend hover' } })
+  ),
+  aria_label: schema.maybe(
+    schema.string({ meta: { description: 'Accessibility label for the chart' } })
   ),
 };
 

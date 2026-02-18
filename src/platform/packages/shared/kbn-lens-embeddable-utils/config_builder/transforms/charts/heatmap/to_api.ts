@@ -37,6 +37,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: legend.maxLines,
       size: legend.legendSize,
+      should_truncate: legend.shouldTruncate,
     }),
   };
 }
@@ -89,9 +90,17 @@ function reverseBuildVisualizationState(
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig),
-    cells: {
+    cells: stripUndefined({
       labels: { visible: visualization.gridConfig.isCellLabelVisible },
-    },
+      stroke_width: visualization.gridConfig.strokeWidth,
+      stroke_color: visualization.gridConfig.strokeColor,
+    }),
+    ...stripUndefined({
+      percentage_mode: visualization.percentageMode,
+      show_tooltip: visualization.showTooltip,
+      highlight_in_hover: visualization.highlightInHover,
+      aria_label: visualization.ariaLabel,
+    }),
   } satisfies Partial<HeatmapState>;
 
   const paletteProps = {

@@ -113,6 +113,27 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
+const gaugeStateExtraOptionsSchema = {
+  /**
+   * Whether to respect the palette ranges for min/max
+   */
+  respect_ranges: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to respect palette ranges for min/max' } })
+  ),
+  /**
+   * Common label outside the chart
+   */
+  common_label: schema.maybe(
+    schema.string({ meta: { description: 'Common label outside the chart' } })
+  ),
+  /**
+   * Accessibility label for the chart
+   */
+  aria_label: schema.maybe(
+    schema.string({ meta: { description: 'Accessibility label for the chart' } })
+  ),
+};
+
 export const gaugeStateSchemaNoESQL = schema.object(
   {
     type: schema.literal('gauge'),
@@ -121,6 +142,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetSchema,
     ...gaugeStateSharedOptionsSchema,
+    ...gaugeStateExtraOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */
@@ -139,6 +161,7 @@ export const gaugeStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...gaugeStateSharedOptionsSchema,
+    ...gaugeStateExtraOptionsSchema,
     /**
      * Primary value configuration, must define operation.
      */

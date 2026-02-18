@@ -80,6 +80,9 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
     index: 'comprehensive-index',
     time_field: '@timestamp',
   },
+  respect_ranges: true,
+  common_label: 'Bytes',
+  aria_label: 'Gauge chart',
   metric: {
     operation: 'average',
     field: 'bytes',

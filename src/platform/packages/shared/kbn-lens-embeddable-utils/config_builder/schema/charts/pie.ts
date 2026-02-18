@@ -31,6 +31,7 @@ import {
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { positionSchema } from '../alignments';
 import { groupIsNotCollapsed } from '../../utils';
 
 /**
@@ -44,6 +45,14 @@ const pieStateSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visible: legendVisibleSchema,
         size: legendSizeSchema,
+        position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
+        values: schema.maybe(
+          schema.arrayOf(
+            schema.oneOf([schema.literal('value'), schema.literal('percent')], {
+              meta: { description: 'Legend value display mode' },
+            })
+          )
+        ),
       },
       { meta: { id: 'pieLegend', description: 'Legend configuration for pie/donut chart' } }
     )

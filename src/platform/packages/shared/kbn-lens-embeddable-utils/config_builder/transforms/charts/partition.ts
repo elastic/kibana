@@ -192,7 +192,13 @@ function convertAPILegendDisplayOption(
   option: PartitionState
 ): Pick<
   PartitionLens['state']['visualization']['layers'][0],
-  'legendDisplay' | 'nestedLegend' | 'legendMaxLines' | 'legendSize' | 'truncateLegend'
+  | 'legendDisplay'
+  | 'nestedLegend'
+  | 'legendMaxLines'
+  | 'legendSize'
+  | 'truncateLegend'
+  | 'legendPosition'
+  | 'legendStats'
 > {
   const legend = option?.legend;
   const legendOptions = legend
@@ -201,6 +207,8 @@ function convertAPILegendDisplayOption(
         legendSize: legend?.size,
         legendMaxLines: legend?.truncate_after_lines,
         truncateLegend: legend?.truncate_after_lines != null,
+        legendPosition: 'position' in legend ? legend?.position : undefined,
+        legendStats: 'values' in legend ? legend?.values : undefined,
       })
     : {};
   if (legend?.visible === 'auto' || legend?.visible == null) {
@@ -423,6 +431,8 @@ function fromLensStateToSharedPartitionAPI(
     truncate_after_lines: layerState.legendMaxLines,
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: layerState.legendSize,
+    position: layerState.legendPosition,
+    values: layerState.legendStats,
   });
   const valueDisplay = stripUndefined({
     mode: convertStateValueDisplayToAPI(layerState.numberDisplay),

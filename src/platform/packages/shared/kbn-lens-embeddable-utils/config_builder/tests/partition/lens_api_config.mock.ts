@@ -139,6 +139,8 @@ export const esqlCharts = [
     legend: {
       visible: 'auto',
       nested: false,
+      position: 'left',
+      values: ['value'],
     },
     value_display: {
       mode: 'percentage',

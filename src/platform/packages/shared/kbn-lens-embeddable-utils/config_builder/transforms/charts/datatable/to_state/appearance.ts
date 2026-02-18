@@ -98,10 +98,12 @@ export function buildAppearanceState(
   | 'density'
   | 'paging'
   | 'sorting'
+  | 'showRowNumbers'
 > {
   return {
     ...buildDensityState(config),
     ...buildPagingState(config),
     ...buildSortingState(config),
+    ...(config.show_row_numbers != null ? { showRowNumbers: config.show_row_numbers } : {}),
   };
 }

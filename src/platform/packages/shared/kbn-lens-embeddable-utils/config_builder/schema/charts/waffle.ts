@@ -24,6 +24,7 @@ import {
   validateMultipleMetricsCriteria,
   valueDisplaySchema,
 } from './partition_shared';
+import { positionSchema } from '../alignments';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
@@ -51,6 +52,7 @@ export const waffleStateSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visible: legendVisibleSchema,
         size: legendSizeSchema,
+        position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
       },
       { meta: { id: 'waffleLegend', description: 'Legend configuration for waffle chart' } }
     )

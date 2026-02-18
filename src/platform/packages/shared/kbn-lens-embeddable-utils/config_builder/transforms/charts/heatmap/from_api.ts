@@ -73,6 +73,8 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
         xTitle: layer.axes?.x?.title?.value,
         yTitle: layer.axes?.y?.title?.value,
         xAxisLabelRotation,
+        strokeWidth: layer.cells?.stroke_width,
+        strokeColor: layer.cells?.stroke_color,
       }),
     },
     legend: {
@@ -82,8 +84,15 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: layer.legend?.size as LegendSize,
+        shouldTruncate: layer.legend?.should_truncate,
       }),
     },
+    ...stripUndefined({
+      percentageMode: layer.percentage_mode,
+      showTooltip: layer.show_tooltip,
+      highlightInHover: layer.highlight_in_hover,
+      ariaLabel: layer.aria_label,
+    }),
     ...(basePalette && {
       palette: {
         ...basePalette,

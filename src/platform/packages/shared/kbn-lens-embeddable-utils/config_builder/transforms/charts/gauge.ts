@@ -77,6 +77,9 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
       ? { labelMajorMode: 'custom', labelMajor: layer.metric.title }
       : { labelMajorMode: 'auto' }),
     labelMinor: layer.metric.sub_title,
+    ...(layer.respect_ranges != null ? { respectRanges: layer.respect_ranges } : {}),
+    ...(layer.common_label ? { commonLabel: layer.common_label } : {}),
+    ...(layer.aria_label ? { ariaLabel: layer.aria_label } : {}),
   };
 }
 
@@ -173,6 +176,9 @@ function reverseBuildVisualizationState(
     type: 'gauge',
     dataset: dataset satisfies GaugeState['dataset'],
     ...props,
+    ...(visualization.respectRanges != null ? { respect_ranges: visualization.respectRanges } : {}),
+    ...(visualization.commonLabel ? { common_label: visualization.commonLabel } : {}),
+    ...(visualization.ariaLabel ? { aria_label: visualization.ariaLabel } : {}),
   } as GaugeState;
 }
 
