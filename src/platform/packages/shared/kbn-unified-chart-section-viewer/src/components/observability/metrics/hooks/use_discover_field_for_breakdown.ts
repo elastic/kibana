@@ -62,7 +62,9 @@ function hasMatchingDimensionForBreakdown(
   breakdownField: string | undefined,
   dimensions: Dimension[]
 ): boolean {
-  return Boolean(breakdownField && dimensions.some((dimension) => dimension.name === breakdownField));
+  return Boolean(
+    breakdownField && dimensions.some((dimension) => dimension.name === breakdownField)
+  );
 }
 
 function getMatchingDimension(
