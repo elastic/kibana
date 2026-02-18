@@ -62,7 +62,7 @@ export function LensRenderer({
   id,
   query,
   filters,
-  time_range,
+  timeRange,
   disabledActions,
   searchSessionId,
   forceDSL,
@@ -91,7 +91,7 @@ export function LensRenderer({
     props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
   );
 
-  const searchApi = useSearchApi({ query, filters, timeRange: time_range });
+  const searchApi = useSearchApi({ query, filters, timeRange });
 
   const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
 
