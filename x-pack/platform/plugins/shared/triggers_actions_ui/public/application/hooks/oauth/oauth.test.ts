@@ -17,9 +17,7 @@ describe('stripOAuthCallbackQueryParams', () => {
   it('preserves non-OAuth query params', () => {
     const url =
       'https://localhost:5601/app/connectors?page=1&oauth_authorization=error&connector_id=abc';
-    expect(stripOAuthCallbackQueryParams(url)).toBe(
-      'https://localhost:5601/app/connectors?page=1'
-    );
+    expect(stripOAuthCallbackQueryParams(url)).toBe('https://localhost:5601/app/connectors?page=1');
   });
 
   it('returns the URL unchanged when no OAuth params are present', () => {

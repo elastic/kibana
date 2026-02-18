@@ -117,9 +117,7 @@ describe('useOAuthRedirectResult', () => {
     renderHook(() => useOAuthRedirectResult({}));
 
     expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('page=2'));
-    expect(mockReplace).toHaveBeenCalledWith(
-      expect.not.stringContaining('oauth_authorization')
-    );
+    expect(mockReplace).toHaveBeenCalledWith(expect.not.stringContaining('oauth_authorization'));
     expect(mockReplace).toHaveBeenCalledWith(expect.not.stringContaining('connector_id'));
   });
 
