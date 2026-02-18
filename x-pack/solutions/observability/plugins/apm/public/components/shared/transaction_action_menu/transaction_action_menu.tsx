@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
-  ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
@@ -28,6 +27,8 @@ import useAsync from 'react-use/lib/useAsync';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -120,10 +121,16 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, share } = useApmPluginContext();
+  const { core, uiActions, share, metricsDataAccess } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
+
+  const metricsIndicesAsync = useAsync(() => {
+    return metricsDataAccess?.metricsClient.metricsIndices() ?? Promise.resolve(undefined);
+  }, [metricsDataAccess]);
+
+  const metricsIndices = metricsIndicesAsync.value?.metricIndices;
 
   const logsLocator = getLogsLocatorFromUrlService(share.url)!;
 
@@ -133,6 +140,8 @@ function ActionMenuSections({
 
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
   const {
     query: { rangeFrom, rangeTo, environment },
@@ -157,13 +166,15 @@ function ActionMenuSections({
     logsLocator,
     dataViewId: dataView?.id,
     assetDetailsLocator,
+    discoverLocator,
+    metricsIndices,
   });
 
   const externalMenuItems = useAsync(() => {
     return transaction
       ? getContextMenuItemsFromActions({
           uiActions,
-          triggerId: ObservabilityTriggerId.ApmTransactionContextMenu,
+          triggerId: O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER,
           context: transaction,
         })
       : Promise.resolve([]);

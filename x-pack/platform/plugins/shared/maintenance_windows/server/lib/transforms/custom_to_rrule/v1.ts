@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Frequency } from '@kbn/rrule';
+import type { RRuleRequestV1 } from '../../../routes/schemas/r_rule';
+import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
+import {
+  DEFAULT_TIMEZONE,
+  INTERVAL_FREQUENCY_REGEXP,
+} from '../../../routes/schemas/schedule/constants';
+
+const transformEveryToFrequency = (frequency?: string) => {
+  switch (frequency) {
+    case 'y':
+      return Frequency.YEARLY;
+    case 'M':
+      return Frequency.MONTHLY;
+    case 'w':
+      return Frequency.WEEKLY;
+    case 'd':
+      return Frequency.DAILY;
+    case 'h':
+      return Frequency.HOURLY;
+    default:
+      return;
+  }
+};
+
+export const transformCustomScheduleToRRule = (
+  schedule: ScheduleRequest
+): {
+  rRule: RRuleRequestV1;
+} => {
+  const { recurring, start, timezone } = schedule;
+
+  const [, interval, frequency] = recurring?.every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
+  const transformedFrequency = transformEveryToFrequency(frequency);
+
+  return {
+    rRule: {
+      byweekday: recurring?.onWeekDay,
+      bymonthday: recurring?.onMonthDay,
+      bymonth: recurring?.onMonth,
+      until: recurring?.end,
+      count: recurring?.occurrences,
+      interval: interval ? parseInt(interval, 10) : undefined,
+      freq: transformedFrequency,
+      dtstart: start,
+      tzid: timezone ?? DEFAULT_TIMEZONE,
+    },
+  };
+};

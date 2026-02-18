@@ -279,6 +279,12 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  {
+    name: '@elastic/ecs',
+    importNames: ['EcsFlat'],
+    message:
+      'Do not import fields metadata directly in Kibana, as they can bloat the bundle size. Instead, consume metadata fields from @kbn/fields-metadata-plugin, which handles scoped field metadata retrieval (ECS, OTel, etc.).',
+  },
   ...[
     'Alt',
     'Alternative',
@@ -794,6 +800,7 @@ module.exports = {
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
+        '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
       ],
       rules: {
@@ -1053,6 +1060,16 @@ module.exports = {
             name: 'semver',
             message: 'Please use "semver/*/{function}" instead',
           },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/platform/plugins/shared/fields_metadata/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          // Exclude @elastic/ecs from restricted imports for the fields metadata plugin.
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== '@elastic/ecs'),
         ],
       },
     },
@@ -2701,8 +2718,9 @@ module.exports = {
         ],
       },
     },
+    // Custom rules for scout tests
     {
-      // Custom rules for scout tests
+      // Platform & Solutions
       files: [
         'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
@@ -2712,17 +2730,25 @@ module.exports = {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
+        '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
-      // Ensure correct expect import path in solutions scout API tests
-      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      // Platform & Solutions API Tests
+      files: [
+        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+      ],
       rules: {
-        '@kbn/eslint/scout_expect_import': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          { alternativeFixtures: ['esClient'] },
+        ],
       },
     },
     {

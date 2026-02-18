@@ -32,10 +32,18 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
 
-  const getInstalledIntegrations =
-    getIntegrations?.data?.items?.filter(
-      (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
-    ) || [];
+  const allRules = useMemo(
+    () => getDetectionRules.data?.data || [],
+    [getDetectionRules.data?.data]
+  );
+
+  const getInstalledIntegrations = useMemo(() => {
+    return (
+      getIntegrations?.data?.items?.filter(
+        (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
+      ) || []
+    );
+  }, [getIntegrations?.data?.items]);
 
   const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
 
@@ -50,29 +58,41 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [integrationDisplayNames.data]
   );
 
+  // Create a Set for O(1) lookups instead of O(n) with .includes()
+  const installedIntegrationSet = useMemo(
+    () => new Set(getInstalledIntegrations.map((item) => item.name)),
+    [getInstalledIntegrations]
+  );
+
+  // Get enabled rules from all rules
+  const enabledRules = useMemo(() => allRules.filter((rule) => rule.enabled), [allRules]);
+
+  // Get unique integration names from enabled rules
+  const relatedIntegrationNames = useMemo(() => {
+    const uniqueNames = new Set<string>();
+
+    enabledRules.forEach((rule) => {
+      (rule.related_integrations || []).forEach((integration) => {
+        if (integration.package) {
+          uniqueNames.add(integration.package);
+        }
+      });
+    });
+
+    return [...uniqueNames];
+  }, [enabledRules]);
+
   const installedIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations || []).map(
-      (integration) => ({
-        label: getIntegrationDisplayName(integration),
-        key: integration,
-      })
-    );
-  }, [
-    getIntegrationDisplayName,
-    installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations,
-  ]);
+    return relatedIntegrationNames
+      .filter((name) => installedIntegrationSet.has(name))
+      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+  }, [relatedIntegrationNames, installedIntegrationSet, getIntegrationDisplayName]);
 
   const missingIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || []).map(
-      (integration) => ({
-        label: getIntegrationDisplayName(integration),
-        key: integration,
-      })
-    );
-  }, [
-    getIntegrationDisplayName,
-    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations,
-  ]);
+    return relatedIntegrationNames
+      .filter((name) => !installedIntegrationSet.has(name))
+      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+  }, [relatedIntegrationNames, installedIntegrationSet, getIntegrationDisplayName]);
 
   const chartBaseTheme = useMemo(
     () => ({
@@ -177,6 +197,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     ],
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
   );
+
   const isLoading = getIntegrations.isLoading || getDetectionRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [

@@ -97,7 +97,7 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink href="https://ela.st/workflows-docs" target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"

@@ -65,13 +65,9 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
-    plugins.embeddable.registerTransforms(
-      SEARCH_EMBEDDABLE_TYPE,
-      getSearchEmbeddableTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+      getTransforms: getSearchEmbeddableTransforms,
+    });
 
     core.pricing.registerProductFeatures([
       {
