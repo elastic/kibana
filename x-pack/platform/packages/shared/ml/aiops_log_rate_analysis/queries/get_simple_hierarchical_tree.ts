@@ -129,7 +129,7 @@ function dfDepthFirstSearch(
     displayParent.addNode(displayNode);
   }
 
-  let nextField: string | undefined;
+  let nextField: string;
   let nextFieldValueCounts: Record<string, number> = {};
   let nextFieldIndex = fieldIndex + 1;
   while (true) {
