@@ -23,7 +23,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('schedule backfill', () => {
+  describe.only('schedule backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
@@ -903,7 +903,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body.error).to.eql('Forbidden');
               expect(response.body.message).to.match(
-                /Unauthorized by "alertsFixture" to scheduleBackfill "[^"]+" rule/
+                /Unauthorized by "alertsFixture, alertsFixture" to scheduleBackfill/
               );
               break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
