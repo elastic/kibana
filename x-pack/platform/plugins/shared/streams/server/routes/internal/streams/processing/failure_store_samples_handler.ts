@@ -12,6 +12,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
+import { parseError } from '../../../../lib/streams/errors/parse_error';
 import { simulateProcessing } from './simulation_handler';
 
 const DEFAULT_SAMPLE_SIZE = 100;
@@ -216,7 +217,8 @@ async function fetchFailureStoreDocuments({
       .filter((doc): doc is FlattenRecord => doc !== undefined);
   } catch (error) {
     // If the failure store doesn't exist or is empty, return empty array
-    if (error.meta?.statusCode === 404) {
+    const { statusCode } = parseError(error);
+    if (statusCode === 404) {
       return [];
     }
     throw error;
