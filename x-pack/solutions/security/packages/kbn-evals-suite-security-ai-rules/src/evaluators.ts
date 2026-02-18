@@ -6,7 +6,7 @@
  */
 
 import type { InferenceClient } from '@kbn/inference-common';
-import type { Evaluator } from '@kbn/evals';
+import type { Evaluator, Example } from '@kbn/evals';
 import type { ReferenceRule } from '../datasets/sample_rules';
 import {
   normalizeQuery,
@@ -28,7 +28,7 @@ export function createRuleEvaluators({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Array<Evaluator<{ prompt: string }, ReferenceRule, RuleGenerationTaskOutput>> {
+}): Array<Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput>> {
   return [
     createQuerySyntaxValidityEvaluator(),
     createFieldCoverageEvaluator(),
@@ -43,8 +43,7 @@ export function createRuleEvaluators({
  * Validates that generated query is syntactically valid ESQL
  */
 function createQuerySyntaxValidityEvaluator(): Evaluator<
-  { prompt: string },
-  ReferenceRule,
+  Example<{ prompt: string }, ReferenceRule>,
   RuleGenerationTaskOutput
 > {
   return {
@@ -79,8 +78,7 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<
  * Checks if generated rule includes key required fields
  */
 function createFieldCoverageEvaluator(): Evaluator<
-  { prompt: string },
-  ReferenceRule,
+  Example<{ prompt: string }, ReferenceRule>,
   RuleGenerationTaskOutput
 > {
   return {
@@ -115,8 +113,7 @@ function createFieldCoverageEvaluator(): Evaluator<
  * Compares MITRE ATT&CK techniques between generated and reference
  */
 function createMitreAccuracyEvaluator(): Evaluator<
-  { prompt: string },
-  ReferenceRule,
+  Example<{ prompt: string }, ReferenceRule>,
   RuleGenerationTaskOutput
 > {
   return {
@@ -159,7 +156,7 @@ function createQuerySimilarityEvaluator({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Evaluator<{ prompt: string }, ReferenceRule, RuleGenerationTaskOutput> {
+}): Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput> {
   return {
     name: 'Query Similarity',
     kind: 'LLM',
@@ -244,7 +241,7 @@ function createSemanticCorrectnessEvaluator({
   inferenceClient,
 }: {
   inferenceClient: InferenceClient;
-}): Evaluator<{ prompt: string }, ReferenceRule, RuleGenerationTaskOutput> {
+}): Evaluator<Example<{ prompt: string }, ReferenceRule>, RuleGenerationTaskOutput> {
   return {
     name: 'Semantic Correctness',
     kind: 'LLM',

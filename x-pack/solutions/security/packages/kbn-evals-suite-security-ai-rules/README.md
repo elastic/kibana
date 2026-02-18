@@ -12,6 +12,14 @@ This package evaluates the quality of AI-generated detection rules against known
 - Query semantic similarity (LLM-as-judge)
 - Semantic correctness of threat detection (LLM-as-judge)
 
+## API Flow Parity
+
+The eval suite intentionally follows the same rule-generation API flow as the Security Solution UI:
+
+- Prompt submission uses `POST /api/agent_builder/converse/async`
+- Rule extraction reads `tool_result` events for `security.create_detection_rule`
+- If async parsing fails, the suite falls back to `POST /api/agent_builder/converse` for resilience
+
 ## Package Structure
 
 ```
@@ -223,7 +231,7 @@ GET .kibana-evaluations/_search
 
 ### Error: "API endpoint not found"
 
-**Problem**: The AI rule creation API is not available.
+**Problem**: The AI rule creation APIs are not available.
 
 **Solution**:
 1. Verify feature flag is enabled in `kibana.dev.yml`:
@@ -232,6 +240,7 @@ GET .kibana-evaluations/_search
      - aiRuleCreationEnabled
    ```
 2. Restart Kibana after configuration changes
+3. Confirm Agent Builder routes are reachable (`/api/agent_builder/converse/async` and `/api/agent_builder/converse`)
 
 ### Low Scores on All Evaluators
 

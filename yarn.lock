@@ -6905,6 +6905,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-ai-rules@link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-streams@link:x-pack/platform/packages/shared/kbn-evals-suite-streams":
   version "0.0.0"
   uid ""
