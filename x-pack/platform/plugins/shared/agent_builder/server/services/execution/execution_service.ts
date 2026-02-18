@@ -91,7 +91,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
 
-    const validatedAttachments = await this.validateAttachmentsIfProvided(params.nextInput.attachments);
+    const validatedAttachments = await this.validateAttachmentsIfProvided(
+      params.nextInput.attachments
+    );
     const validatedParams = validatedAttachments
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
