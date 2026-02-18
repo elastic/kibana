@@ -31,7 +31,22 @@ groups:
         description: |
           REQUIRED
           Multiline string. Can include tables, lists, code examples, etc.
-        # state: OPTIONAL One of deprecated/hidden/tech-preview
+        # applies_to: OPTIONAL, applicability metadata (recommended)
+        #   Supports docs-builder applies_to syntax. You can use either a mapping form:
+        #
+        #   applies_to:
+        #     stack: ga 9.2
+        #     ess: ga
+        #     self: ga
+        #
+        #   Or an inline list form:
+        #
+        #   applies_to:
+        #     - "stack: ga 9.2"
+        #     - "ess: ga"
+        #     - "self: ga"
+        #
+        # state: OPTIONAL (legacy) One of deprecated/hidden/tech-preview
         # deprecation_details: "" OPTIONAL
         # note: "" OPTIONAL
         # tip: "" OPTIONAL
@@ -43,11 +58,81 @@ groups:
         #   - option: OPTIONAL
         #     description: "" OPTIONAL
         # type: OPTIONAL ONe of static/dynamic
-        # platforms: OPTIONAL, list each supported platform
+        # platforms: OPTIONAL (legacy), list each supported platform
         #   - cloud
         #   - serverless
         #   - self-managed
+        # settings: OPTIONAL, nested settings list
+        #   Child settings inherit applies_to from the parent unless overridden.
+        #   - setting: "[n].url"
+        #     description: |
+        #       REQUIRED
         # example: |
           OPTIONAL
           Multiline string. Can include tables, lists, code examples, etc.
+```
+
+## Example
+
+The following example shows a fully populated document with page metadata, group metadata, nested settings, and multiple `applies_to` statements.
+
+```yaml
+---
+product: Kibana
+collection: Example settings collection
+id: example-settings
+page_description: |
+  This page demonstrates the full settings documentation schema.
+
+  Settings descriptions can include inline applies annotations, for example:
+  {applies_to}`stack: ga 9.2` and {applies_to}`ess: ga`.
+
+groups:
+  - group: Example group
+    id: example-group
+    description: |
+      These settings are examples for documentation structure and applicability tagging.
+    example: |
+      ```yaml
+      my.parent.setting:
+        child: value
+      ```
+
+    settings:
+      - setting: my.parent.setting
+        id: my-parent-setting
+        description: |
+          Parent setting with nested child settings.
+        datatype: string
+        default: ""
+        applies_to:
+          stack: ga 9.2
+          ess: ga
+          self: ga
+
+        settings:
+          - setting: "[n].url"
+            description: |
+              Child setting inheriting the parent's applicability.
+            datatype: string
+
+          - setting: "[n].serverlessOnly"
+            description: |
+              Child setting overriding applicability using the inline list form.
+            datatype: bool
+            default: false
+            applies_to:
+              - "serverless: ga"
+
+      - setting: my.deprecated.setting
+        description: |
+          This setting is deprecated.
+        datatype: bool
+        default: false
+        applies_to:
+          - "stack: deprecated 9.3+"
+          - "ess: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated starting in 9.3."
+---
 ```
