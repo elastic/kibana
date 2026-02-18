@@ -349,14 +349,50 @@ describe('NotificationPolicyClient', () => {
       ]);
     });
 
-    it('rethrows unexpected errors', async () => {
-      mockSavedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('unexpected get error'));
+    it('ignores documents with non-404 errors and returns valid documents', async () => {
+      const validAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-valid',
+        description: 'policy-valid description',
+        destinations: [{ type: 'workflow', id: 'workflow-valid' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-valid',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: validAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'policy-id-error-500',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'Something went wrong',
+            },
+          },
+        ],
+      });
 
-      await expect(
-        client.getNotificationPolicies({
-          ids: ['policy-id-get-error'],
-        })
-      ).rejects.toThrow('unexpected get error');
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-valid', 'policy-id-error-500'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-valid',
+          version: 'WzEsMV0=',
+          ...validAttributes,
+        },
+      ]);
     });
   });
 
