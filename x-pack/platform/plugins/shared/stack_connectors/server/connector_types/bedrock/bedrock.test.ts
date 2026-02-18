@@ -154,9 +154,39 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke`,
             service: 'bedrock',
           },
+          { accessKeyId: '123', secretAccessKey: 'secret' }
+        );
+      });
+
+      it('passes an explicit region to the signer for custom endpoints', async () => {
+        mockSigner.mockClear();
+        const customConnector = new BedrockConnector({
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
+          config: {
+            apiUrl: 'https://custom.endpoint.example',
+            region: 'us-west-1',
+            defaultModel: DEFAULT_BEDROCK_MODEL,
+          },
+          secrets: { accessKey: '123', secret: 'secret' },
+          logger,
+          services: actionsMock.createServices(),
+        });
+        // @ts-ignore
+        customConnector.request = mockRequest;
+
+        await customConnector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
+
+        expect(mockSigner).toHaveBeenCalledWith(
+          expect.objectContaining({
+            host: 'custom.endpoint.example',
+            region: 'us-west-1',
+            service: 'bedrock',
+          }),
           { accessKeyId: '123', secretAccessKey: 'secret' }
         );
       });
@@ -255,6 +285,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/invoke-with-response-stream`,
             service: 'bedrock',
           },
@@ -973,6 +1004,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            region: 'us-east-1',
             path: `/model/${encodedModel}/converse-stream`,
             service: 'bedrock',
           },
