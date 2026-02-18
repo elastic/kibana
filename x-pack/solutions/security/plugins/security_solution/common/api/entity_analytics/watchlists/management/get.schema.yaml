@@ -27,3 +27,14 @@ paths:
             application/json:
               schema:
                 $ref: "./common.schema.yaml#/components/schemas/WatchlistObject"
+              examples:
+                GetWatchlistResponse:
+                  summary: Watchlist details
+                  value:
+                    id: watchlist-123
+                    name: High Risk Vendors
+                    description: High risk vendor watchlist
+                    riskModifier: 1.5
+                    managed: false
+                    createdAt: "2026-01-28T12:00:00.000Z"
+                    updatedAt: "2026-02-18T12:00:00.000Z"
