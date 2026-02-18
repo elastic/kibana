@@ -48,8 +48,10 @@ export async function getToolHandler({
     dataSources.apmIndexPatterns.transaction,
     dataSources.apmIndexPatterns.span,
     dataSources.apmIndexPatterns.error,
-  ];
-  const indices = [...dataSources.logIndexPatterns, ...apmIndexPatterns];
+  ].flatMap((pattern) => pattern.split(','));
+
+  const indices = [...apmIndexPatterns, ...dataSources.logIndexPatterns];
+
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 

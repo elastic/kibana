@@ -12,6 +12,20 @@ import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
 
+interface ServiceAggregate {
+  serviceName: string;
+  count: number;
+  errorCount: number;
+}
+
+interface ServicesAgg {
+  buckets?: {
+    key: unknown;
+    doc_count: number;
+    error_count?: { doc_count: number };
+  }[];
+}
+
 export async function getTraceDocuments({
   esClient,
   traceIds,
@@ -31,6 +45,7 @@ export async function getTraceDocuments({
 }): Promise<
   {
     items: Record<string, unknown>[];
+    services: ServiceAggregate[];
     error?: string;
     isTruncated: boolean;
   }[]
@@ -51,6 +66,19 @@ export async function getTraceDocuments({
           ],
         },
       },
+      aggs: {
+        services: {
+          terms: {
+            field: 'service.name',
+            size: 100,
+          },
+          aggs: {
+            error_count: {
+              filter: { term: { 'event.outcome': 'failure' } },
+            },
+          },
+        },
+      },
     },
   ]);
   const msearchResponse = await esClient.asCurrentUser.msearch({
@@ -62,12 +90,21 @@ export async function getTraceDocuments({
       return {
         items: [],
         error: `Failed to fetch trace documents for trace.id ${traceId}: ${response.error.type}: ${response.error.reason}`,
+        services: [],
         isTruncated: false,
       };
     }
-
+    const serviceAggs = (response.aggregations?.services as ServicesAgg)?.buckets ?? [];
+    const services = serviceAggs
+      .map((bucket) => ({
+        serviceName: bucket.key as string,
+        count: bucket.doc_count,
+        errorCount: bucket.error_count?.doc_count ?? 0,
+      }))
+      .sort((a, b) => b.count - a.count);
     return {
       items: response.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
+      services,
       isTruncated: getTotalHits(response) > size,
     };
   });
