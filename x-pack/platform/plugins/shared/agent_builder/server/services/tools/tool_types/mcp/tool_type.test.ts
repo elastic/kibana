@@ -8,7 +8,7 @@
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getMcpToolType, listMcpTools } from './tool_type';
+import { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
 
 jest.mock('@n8n/json-schema-to-zod', () => ({
   jsonSchemaToZod: jest.fn(),
@@ -127,6 +127,60 @@ describe('MCP tool_type', () => {
           connectorId: 'test-connector-id',
         })
       ).rejects.toThrow('Failed to list MCP tools');
+    });
+
+    it('should prefer serviceMessage over message when both are present', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Streamable HTTP error: missing required Authorization header',
+      });
+
+      await expect(
+        listMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+        })
+      ).rejects.toThrow('Streamable HTTP error: missing required Authorization header');
+    });
+  });
+
+  describe('getNamedMcpTools', () => {
+    it('should return filtered tools matching the requested names', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'ok',
+        data: mockToolsResponse,
+      });
+
+      const result = await getNamedMcpTools({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'test-connector-id',
+        toolNames: ['test_tool'],
+        logger: mockLogger as any,
+      });
+
+      expect(result).toEqual([{ name: 'test_tool', description: 'Test tool description' }]);
+    });
+
+    it('should throw and log when the connector execution fails', async () => {
+      mockActionsClient.execute.mockResolvedValue({
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Streamable HTTP error: missing required Authorization header',
+      });
+
+      await expect(
+        getNamedMcpTools({
+          actions: mockActions,
+          request: mockRequest,
+          connectorId: 'test-connector-id',
+          toolNames: ['test_tool'],
+          logger: mockLogger as any,
+        })
+      ).rejects.toThrow('Streamable HTTP error: missing required Authorization header');
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
