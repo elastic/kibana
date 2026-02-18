@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { restoreTSBuildArtifacts } from './restore_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
+  getGcloudAccessToken,
   getPullRequestNumber,
   isCiEnvironment,
   readRecentCommitShas,
   resolveCurrentCommitSha,
+  resolveUpstreamRemote,
 } from './utils';
 
 jest.mock('./utils', () => ({
   buildCandidateShaList: jest.fn(),
+  getGcloudAccessToken: jest.fn(),
   getPullRequestNumber: jest.fn(),
   isCiEnvironment: jest.fn(),
   readRecentCommitShas: jest.fn(),
   resolveCurrentCommitSha: jest.fn(),
+  resolveUpstreamRemote: jest.fn(),
   withGcsAuth: jest.fn((_, action: () => Promise<unknown>) => action()),
 }));
 
@@ -33,11 +38,17 @@ jest.mock('./file_system/gcs_file_system', () => ({
   })),
 }));
 
+// Mock globby to simulate a fresh checkout (no existing build artifacts).
+jest.mock('globby', () => jest.fn().mockResolvedValue([]));
+
 const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction<
   typeof buildCandidateShaList
 >;
 const mockedGetPullRequestNumber = getPullRequestNumber as jest.MockedFunction<
   typeof getPullRequestNumber
+>;
+const mockedGetGcloudAccessToken = getGcloudAccessToken as jest.MockedFunction<
+  typeof getGcloudAccessToken
 >;
 const mockedIsCiEnvironment = isCiEnvironment as jest.MockedFunction<typeof isCiEnvironment>;
 const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
@@ -46,6 +57,9 @@ const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
 const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as jest.MockedFunction<
   typeof resolveCurrentCommitSha
 >;
+const mockedResolveUpstreamRemote = resolveUpstreamRemote as jest.MockedFunction<
+  typeof resolveUpstreamRemote
+>;
 
 const createLog = (): SomeDevLog => {
   return {
@@ -53,6 +67,7 @@ const createLog = (): SomeDevLog => {
     warning: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
+    verbose: jest.fn(),
   } as unknown as SomeDevLog;
 };
 
@@ -66,11 +81,16 @@ describe('restoreTSBuildArtifacts', () => {
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedReadRecentCommitShas.mockResolvedValue([]);
     mockedBuildCandidateShaList.mockReturnValue([]);
+    mockedGetGcloudAccessToken.mockResolvedValue(undefined);
+    mockedResolveUpstreamRemote.mockResolvedValue(undefined);
+    // Mock Fs.promises.access so the local cache path is considered reachable in tests.
+    jest.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
     restoreSpy = jest.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(false);
   });
 
   afterEach(() => {
     restoreSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   it('logs when there is no commit history to restore', async () => {

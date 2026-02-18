@@ -15,17 +15,19 @@ import globby from 'globby';
 import {
   MAX_COMMITS_TO_CHECK,
   CACHE_INVALIDATION_FILES,
-  CACHE_MATCH_GLOBS,
   CACHE_IGNORE_GLOBS,
   LOCAL_CACHE_ROOT,
+  TYPES_DIRECTORY_GLOB,
 } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
+  getCommitDistanceInfo,
+  getGcloudAccessToken,
   getPullRequestNumber,
-  isGcloudAvailable,
   isCiEnvironment,
+  logArtifactFreshness,
   readMainBranchCommitShas,
   readRecentCommitShas,
   resolveCurrentCommitSha,
@@ -35,9 +37,39 @@ import {
 
 export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   try {
+    // If build artifacts already exist from a previous (possibly aborted) run,
+    // skip the archive restore entirely. tsc's incremental build (-b) will
+    // detect which projects are up-to-date and only rebuild what's needed —
+    // which is faster than wiping everything and restoring from a cache archive.
+    if (!isCiEnvironment()) {
+      const existingDirs = await globby(TYPES_DIRECTORY_GLOB, {
+        cwd: REPO_ROOT,
+        onlyDirectories: true,
+        followSymbolicLinks: false,
+        ignore: CACHE_IGNORE_GLOBS,
+      });
+
+      if (existingDirs.length > 0) {
+        log.info(
+          `Found ${existingDirs.length} existing type cache directories — skipping archive restore (tsc incremental build will handle it).`
+        );
+        return;
+      }
+    }
+
     log.info(`Restoring TypeScript build artifacts`);
-    const currentSha = await resolveCurrentCommitSha();
-    const history = await readRecentCommitShas(MAX_COMMITS_TO_CHECK);
+
+    // Group 1: kick off all independent operations in parallel.
+    // getGcloudAccessToken doubles as an availability check (~1-2s gcloud CLI
+    // call) and returns the token for direct HTTP requests later, avoiding a
+    // second gcloud invocation.
+    const [currentSha, history, upstreamRemote, accessToken] = await Promise.all([
+      resolveCurrentCommitSha(),
+      readRecentCommitShas(MAX_COMMITS_TO_CHECK),
+      resolveUpstreamRemote(),
+      isCiEnvironment() ? Promise.resolve(undefined) : getGcloudAccessToken(),
+    ]);
+
     const candidateShas = buildCandidateShaList(currentSha, history);
 
     if (candidateShas.length === 0) {
@@ -62,14 +94,11 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     // Local development: try GCS first (using developer's own gcloud auth),
     // then fall back to the local file system cache.
-    if (await isGcloudAvailable()) {
-      log.info('gcloud CLI detected, attempting to restore from GCS...');
+    if (accessToken) {
+      log.info('gcloud auth detected, attempting to restore from GCS...');
       try {
-        const gcsFs = new GcsFileSystem(log);
+        const gcsFs = new GcsFileSystem(log, accessToken);
 
-        // Find the remote pointing to elastic/kibana (handles forks where
-        // origin is the user's fork and upstream is elastic/kibana).
-        const upstreamRemote = await resolveUpstreamRemote();
         if (!upstreamRemote) {
           log.warning(
             'Could not find a git remote for elastic/kibana. ' +
@@ -77,25 +106,23 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
           );
         }
 
-        // Fetch the latest main from upstream so we have fresh SHAs to match against GCS.
-        if (upstreamRemote) {
-          try {
-            log.info(`Fetching latest main from ${upstreamRemote}...`);
-            await execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], {
-              cwd: REPO_ROOT,
-            });
-          } catch (fetchError) {
-            const details = fetchError instanceof Error ? fetchError.message : String(fetchError);
+        // Group 2: fetch upstream main and list GCS archives in parallel.
+        // These are both network calls (~1-3s each) that don't depend on each other.
+        const fetchUpstream = upstreamRemote
+          ? execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], { cwd: REPO_ROOT })
+              .then(() => {
+                log.verbose(`Fetched latest main from ${upstreamRemote}.`);
+              })
+              .catch((fetchError) => {
+                const details =
+                  fetchError instanceof Error ? fetchError.message : String(fetchError);
+                log.warning(`Failed to fetch ${upstreamRemote}/main: ${details}`);
+              })
+          : Promise.resolve();
 
-            log.warning(`Failed to fetch ${upstreamRemote}/main: ${details}`);
-          }
-        }
+        const gcsListPromise = gcsFs.listAvailableCommitShas();
 
-        // List available archives in GCS with a single gcloud command,
-        // then intersect with upstream main candidates locally.
-        const mainShas = upstreamRemote ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK) : [];
-        const gcsCandidateShas = buildCandidateShaList(currentSha, mainShas);
-        const availableShas = await gcsFs.listAvailableCommitShas();
+        const [, availableShas] = await Promise.all([fetchUpstream, gcsListPromise]);
 
         if (availableShas.size === 0) {
           log.warning(
@@ -104,32 +131,48 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
           );
         }
 
+        // Group 3: read main branch SHAs (needs fetch to have completed).
+        // CI archives artifacts under the commit SHA of each Buildkite build,
+        // which is the HEAD of the PR branch (not the merge commit on main).
+        // Therefore we search:
+        //   1. HEAD history — includes commits CI built for the current branch
+        //   2. upstream/main history — in case CI also archives main builds
+        const mainShas = upstreamRemote
+          ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK)
+          : [];
+        const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
+
         const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
 
         if (matchedShas.length > 0) {
+          const bestMatch = matchedShas[0];
+
           log.info(
-            `Found ${
-              matchedShas.length
-            } matching archive(s) in GCS, restoring best match (${matchedShas[0].slice(0, 12)})...`
+            `Found ${matchedShas.length} matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
           );
+
+          if (currentSha) {
+            const distanceInfo = await getCommitDistanceInfo(currentSha, bestMatch);
+            if (distanceInfo) {
+              logArtifactFreshness(log, currentSha, bestMatch, distanceInfo);
+            }
+          }
 
           const gcsRestoreOptions = {
             ...restoreOptions,
             shas: matchedShas,
+            skipExistenceCheck: true,
           };
 
           const restored = await gcsFs.restoreArchive(gcsRestoreOptions);
 
           if (restored) {
-            await cacheArtifactsLocally(log, currentSha ?? matchedShas[0], prNumber);
-
             return;
           }
-        } else if (availableShas.size > 0 && upstreamRemote) {
+        } else if (availableShas.size > 0) {
           log.info(
-            `None of the ${gcsCandidateShas.length} candidate commit(s) from ${upstreamRemote}/main matched ` +
-              `the ${availableShas.size} archived commit(s) in GCS. ` +
-              `Try: git fetch ${upstreamRemote} main`
+            `None of the ${gcsCandidateShas.length} candidate commit(s) matched ` +
+              `the ${availableShas.size} archived commit(s) in GCS.`
           );
         }
 
@@ -147,7 +190,7 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       await Fs.promises.access(LOCAL_CACHE_ROOT);
     } catch {
       log.info(
-        'No local cache exists yet. Run with --with-archive after a successful type check to populate it.'
+        'No local cache exists yet. It will be populated after this type check completes.'
       );
       return;
     }
@@ -160,33 +203,3 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   }
 }
 
-/**
- * After a successful GCS restore, snapshot the extracted artifacts into the
- * local file system cache so that subsequent offline runs can reuse them.
- */
-async function cacheArtifactsLocally(log: SomeDevLog, commitSha: string, prNumber?: string) {
-  try {
-    const files = await globby(CACHE_MATCH_GLOBS, {
-      cwd: REPO_ROOT,
-      dot: true,
-      followSymbolicLinks: false,
-      ignore: CACHE_IGNORE_GLOBS,
-    });
-
-    if (files.length === 0) {
-      log.verbose('No artifacts to cache locally after GCS restore.');
-      return;
-    }
-
-    log.info(`Caching ${files.length} restored artifacts to local file system...`);
-    await new LocalFileSystem(log).updateArchive({
-      files,
-      sha: commitSha,
-      prNumber,
-      cacheInvalidationFiles: CACHE_INVALIDATION_FILES,
-    });
-  } catch (cacheError) {
-    const details = cacheError instanceof Error ? cacheError.message : String(cacheError);
-    log.warning(`Failed to cache GCS artifacts locally: ${details}`);
-  }
-}

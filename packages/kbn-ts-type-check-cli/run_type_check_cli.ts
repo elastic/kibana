@@ -15,17 +15,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
-import execa from 'execa';
 
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
-import { isCiEnvironment } from './src/archive/utils';
-
-const rel = (from: string, to: string) => {
-  const path = Path.relative(from, to);
-  return path.startsWith('.') ? path : `./${path}`;
-};
+import { detectLocalChanges, isCiEnvironment } from './src/archive/utils';
+import { runTscWithProgress } from './src/run_tsc_with_progress';
 
 async function createTypeCheckConfigs(
   log: SomeDevLog,
@@ -36,6 +31,7 @@ async function createTypeCheckConfigs(
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects);
+
   for (const project of queue) {
     const config = project.config;
     const base = project.getBase();
@@ -87,20 +83,23 @@ async function createTypeCheckConfigs(
   );
 }
 
-async function detectLocalChanges(): Promise<boolean> {
-  const { stdout } = await execa('git', ['status', '--porcelain'], {
-    cwd: REPO_ROOT,
-  });
-
-  return stdout.trim().length > 0;
-}
-
 run(
   async ({ log, flagsReader, procRunner }) => {
     // Lazy-load so --help can run before TS project metadata is available.
     const { TS_PROJECTS } = await import('@kbn/ts-projects');
+
+    const shouldCleanup = flagsReader.boolean('cleanup');
     const shouldCleanCache = flagsReader.boolean('clean-cache');
     const shouldUseArchive = flagsReader.boolean('with-archive');
+    const shouldRestoreOnly = flagsReader.boolean('restore-artifacts');
+
+    const isVerbose = flagsReader.boolean('verbose');
+    const projectFilter = flagsReader.path('project');
+
+    if (shouldRestoreOnly) {
+      await restoreTSBuildArtifacts(log);
+      return;
+    }
 
     if (shouldCleanCache) {
       await asyncForEachWithLimit(TS_PROJECTS, 10, async (proj) => {
@@ -109,11 +108,14 @@ run(
           recursive: true,
         });
       });
+
       await Fsp.rm(LOCAL_CACHE_ROOT, {
         force: true,
         recursive: true,
       });
+
       log.warning('Deleted all TypeScript caches');
+
       return;
     }
 
@@ -121,19 +123,17 @@ run(
       './root_refs_config'
     );
 
-    // if the tsconfig.refs.json file is not self-managed then make sure it has
-    // a reference to every composite project in the repo
-    await updateRootRefsConfig(log);
+    let restorePromise: Promise<void> = Promise.resolve();
 
     if (shouldUseArchive && !shouldCleanCache) {
-      await restoreTSBuildArtifacts(log);
+      restorePromise = restoreTSBuildArtifacts(log);
     } else if (shouldCleanCache && shouldUseArchive) {
       log.info('Skipping TypeScript cache restore because --clean-cache was provided.');
     } else {
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
     }
 
-    const projectFilter = flagsReader.path('project');
+    await Promise.all([updateRootRefsConfig(log), restorePromise]);
 
     const projects = TS_PROJECTS.filter(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
@@ -142,33 +142,43 @@ run(
     const created = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
 
     let didTypeCheckFail = false;
-    try {
+
+    const tscOptions = {
+      cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+      args: [
+        '-b',
+        Path.relative(
+          REPO_ROOT,
+          projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
+        ),
+        '--pretty',
+        ...(isVerbose ? ['--verbose'] : []),
+        ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
+      ],
+      env: { NODE_OPTIONS: '--max-old-space-size=10240' },
+      cwd: REPO_ROOT,
+    };
+
+    const useProgressBar = !isCiEnvironment() && !isVerbose;
+
+    if (useProgressBar) {
+      log.info('Building TypeScript projects to check types...');
+
+      const success = await runTscWithProgress({ ...tscOptions, log });
+
+      didTypeCheckFail = !success;
+    } else {
       log.info(
-        `Building TypeScript projects to check types (For visible, though excessive, progress info you can pass --verbose)`
+        `Building TypeScript projects to check types${
+          isVerbose ? '' : ' (pass --verbose for detailed output)'
+        }`
       );
 
-      const relative = Path.relative(
-        REPO_ROOT,
-        projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
-      );
-
-      await procRunner.run('tsc', {
-        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
-        args: [
-          '-b',
-          relative,
-          '--pretty',
-          ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
-          ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
-        ],
-        env: {
-          NODE_OPTIONS: '--max-old-space-size=10240',
-        },
-        cwd: REPO_ROOT,
-        wait: true,
-      });
-    } catch (error) {
-      didTypeCheckFail = true;
+      try {
+        await procRunner.run('tsc', { ...tscOptions, wait: true });
+      } catch (error) {
+        didTypeCheckFail = true;
+      }
     }
 
     const hasLocalChanges = shouldUseArchive ? await detectLocalChanges() : false;
@@ -190,7 +200,7 @@ run(
     }
 
     // cleanup if requested
-    if (flagsReader.boolean('cleanup')) {
+    if (shouldCleanup) {
       log.verbose('cleaning up');
       await cleanupRootRefsConfig();
 
@@ -216,7 +226,13 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
+      boolean: [
+        'clean-cache',
+        'cleanup',
+        'extended-diagnostics',
+        'with-archive',
+        'restore-artifacts',
+      ],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -230,7 +246,14 @@ run(
                                   Locally, this will try to fetch from GCS first (requires gcloud auth login)
                                   and fall back to the local cache. Downloaded archives are cached locally
                                   for offline reuse.
+        --restore-artifacts     Only restore cached build artifacts (from GCS or local cache) without
+                                  running the type check. Useful for pre-populating the cache.
       `,
     },
   }
 );
+
+const rel = (from: string, to: string) => {
+  const path = Path.relative(from, to);
+  return path.startsWith('.') ? path : `./${path}`;
+};

@@ -62,6 +62,10 @@ export abstract class AbstractFileSystem {
     shas: string[];
     prNumber?: string;
     cacheInvalidationFiles?: string[];
+    /** When true, skip the per-SHA hasArchive() check. Use when the caller
+     *  has already verified that the provided SHAs have archives (e.g. via
+     *  listAvailableCommitShas). */
+    skipExistenceCheck?: boolean;
   }): Promise<boolean> {
     const prArchiveId = options.prNumber ? join(PULL_REQUESTS_PATH, options.prNumber) : undefined;
 
@@ -90,10 +94,12 @@ export abstract class AbstractFileSystem {
 
       this.log.verbose(`[${i + 1}/${totalShas}] Checking ${shortSha}...`);
 
-      const metadata = await this.readMetadata(this.getMetadataPath(archiveId));
-      const storedFileHashes = metadata?.fileHashes;
+      const archiveExists = options.skipExistenceCheck || (await this.hasArchive(archivePath));
 
-      if (await this.hasArchive(archivePath)) {
+      if (archiveExists) {
+        const metadata = await this.readMetadata(this.getMetadataPath(archiveId));
+        const storedFileHashes = metadata?.fileHashes;
+
         const hashCheckResult = doHashesMatch({
           currentFileHashes,
           storedFileHashes,
