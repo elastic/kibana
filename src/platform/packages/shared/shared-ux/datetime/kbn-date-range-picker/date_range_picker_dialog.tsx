@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
+import React, {
+  type KeyboardEvent,
+  type MutableRefObject,
+  type PropsWithChildren,
+  useCallback,
+} from 'react';
 import { css } from '@emotion/react';
 
 import { EuiPopover } from '@elastic/eui';
@@ -79,22 +84,23 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       display="block"
       ownFocus={false}
       panelPaddingSize="none"
-    >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        css={css({
+      panelRef={(node) => {
+        (panelRef as MutableRefObject<HTMLDivElement | null>).current =
+          node as HTMLDivElement | null;
+      }}
+      panelProps={{
+        id: panelId,
+        'aria-label': 'Date range picker dialog',
+        'aria-modal': undefined,
+        tabIndex: -1,
+        onKeyDown: onPanelKeyDown,
+        css: css({
           inlineSize: maxWidth,
           maxInlineSize: '100%',
-        })}
-        ref={panelRef}
-        id={panelId}
-        role="dialog"
-        aria-label="Date range picker dialog"
-        tabIndex={-1}
-        onKeyDown={onPanelKeyDown}
-      >
-        {children}
-      </div>
+        }),
+      }}
+    >
+      {children}
     </EuiPopover>
   );
 }
