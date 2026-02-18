@@ -53,7 +53,10 @@ export async function resumeWorkflow({
     workflowsExecutionEngine
   );
 
-  await workflowRuntime.resume();
+  const shouldContinue = await workflowRuntime.resume();
+  if (!shouldContinue) {
+    return;
+  }
 
   await workflowExecutionLoop({
     workflowRuntime,

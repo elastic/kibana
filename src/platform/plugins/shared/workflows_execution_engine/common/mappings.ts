@@ -60,6 +60,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     concurrencyGroupKey: {
       type: 'keyword',
     },
+    parentWorkflowExecutionId: {
+      type: 'keyword',
+    },
   },
 };
 

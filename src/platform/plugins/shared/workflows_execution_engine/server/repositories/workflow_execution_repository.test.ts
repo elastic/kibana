@@ -410,6 +410,129 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
+  describe('getNonTerminalChildExecutions', () => {
+    it('should query for non-terminal child executions by parent execution ID', async () => {
+      const mockExecutions = [
+        { _id: 'child-1', _source: { id: 'child-1', status: ExecutionStatus.RUNNING } },
+        { _id: 'child-2', _source: { id: 'child-2', status: ExecutionStatus.WAITING } },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
+      });
+
+      const result = await repository.getNonTerminalChildExecutions('parent-exec-1', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { parentWorkflowExecutionId: 'parent-exec-1' } },
+              { term: { spaceId: 'default' } },
+              { terms: { status: [...NonTerminalExecutionStatuses] } },
+            ],
+          },
+        },
+        _source: ['id', 'status'],
+        size: 1000,
+      });
+
+      expect(result).toEqual([
+        { id: 'child-1', status: ExecutionStatus.RUNNING },
+        { id: 'child-2', status: ExecutionStatus.WAITING },
+      ]);
+    });
+
+    it('should return empty array when no children exist', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const result = await repository.getNonTerminalChildExecutions('parent-exec-1', 'default');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should respect space isolation', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getNonTerminalChildExecutions('parent-exec-1', 'space-1');
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { spaceId: 'space-1' } }]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should respect custom size parameter', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getNonTerminalChildExecutions('parent-exec-1', 'default', 50);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 50,
+        })
+      );
+    });
+
+    it('should cap size at 10000', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getNonTerminalChildExecutions('parent-exec-1', 'default', 20000);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 10000,
+        })
+      );
+    });
+
+    it('should filter out entries with missing source data', async () => {
+      const mockExecutions = [
+        { _id: 'child-1', _source: undefined },
+        { _id: 'child-2', _source: { id: 'child-2', status: ExecutionStatus.RUNNING } },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
+      });
+
+      const result = await repository.getNonTerminalChildExecutions('parent-exec-1', 'default');
+
+      expect(result).toEqual([{ id: 'child-2', status: ExecutionStatus.RUNNING }]);
+    });
+  });
+
+  describe('getNonTerminalChildExecutionIds', () => {
+    it('should return only IDs from getNonTerminalChildExecutions', async () => {
+      const mockExecutions = [
+        { _id: 'child-1', _source: { id: 'child-1', status: ExecutionStatus.RUNNING } },
+        { _id: 'child-2', _source: { id: 'child-2', status: ExecutionStatus.WAITING } },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
+      });
+
+      const result = await repository.getNonTerminalChildExecutionIds('parent-exec-1', 'default');
+
+      expect(result).toEqual(['child-1', 'child-2']);
+    });
+  });
+
   describe('getRunningExecutionsByConcurrencyGroup', () => {
     it('should query for non-terminal execution IDs by concurrency group key', async () => {
       const mockExecutions = [

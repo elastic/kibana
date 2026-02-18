@@ -270,6 +270,65 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Retrieves non-terminal child workflow execution IDs for a given parent execution.
+   * Uses the indexed `parentWorkflowExecutionId` field for efficient lookup.
+   *
+   * @param parentExecutionId - The ID of the parent workflow execution.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param size - Optional maximum number of results (default: 1000).
+   * @returns A promise that resolves to an array of child execution IDs.
+   */
+  public async getNonTerminalChildExecutionIds(
+    parentExecutionId: string,
+    spaceId: string,
+    size: number = 1000
+  ): Promise<string[]> {
+    const children = await this.getNonTerminalChildExecutions(parentExecutionId, spaceId, size);
+    return children.map(({ id }) => id);
+  }
+
+  /**
+   * Retrieves non-terminal child workflow executions (id + status) for a given parent execution.
+   * Uses the indexed `parentWorkflowExecutionId` field for efficient lookup.
+   *
+   * @param parentExecutionId - The ID of the parent workflow execution.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param size - Optional maximum number of results (default: 1000).
+   * @returns A promise that resolves to an array of { id, status } objects.
+   */
+  public async getNonTerminalChildExecutions(
+    parentExecutionId: string,
+    spaceId: string,
+    size: number = 1000
+  ): Promise<Array<{ id: string; status: EsWorkflowExecution['status'] }>> {
+    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id' | 'status'>>({
+      index: this.indexName,
+      query: {
+        bool: {
+          filter: [
+            { term: { parentWorkflowExecutionId: parentExecutionId } },
+            { term: { spaceId } },
+            { terms: { status: [...NonTerminalExecutionStatuses] } },
+          ],
+        },
+      },
+      _source: ['id', 'status'],
+      size: Math.min(size, 10000),
+    });
+
+    return response.hits.hits
+      .map((hit) => {
+        const id = hit._source?.id ?? hit._id;
+        const status = hit._source?.status;
+        return id && status ? { id, status } : undefined;
+      })
+      .filter(
+        (entry): entry is { id: string; status: EsWorkflowExecution['status'] } =>
+          entry !== undefined
+      );
+  }
+
+  /**
    * Retrieves non-terminal workflow execution IDs by concurrency group key.
    * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
    * to make room for new executions.

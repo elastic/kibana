@@ -11,6 +11,7 @@ import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import { cancelDescendantExecutions } from '../workflow_execution_loop/cancel_descendant_executions';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -168,6 +169,19 @@ export class ConcurrencyManager {
       // Propagate cancellation to running tasks (can be done in parallel)
       await Promise.all(
         executionIdsToCancel.map((id) => this.workflowTaskManager.forceRunIdleTasks(id))
+      );
+
+      // Propagate cancellation to descendant executions of each cancelled workflow
+      await Promise.all(
+        executionIdsToCancel.map((id) =>
+          cancelDescendantExecutions(
+            id,
+            spaceId,
+            this.workflowExecutionRepository,
+            this.workflowTaskManager,
+            `Cancelled due to concurrency limit (max: ${maxConcurrency})`
+          )
+        )
       );
 
       return true; // Execution can proceed after cancelling old ones

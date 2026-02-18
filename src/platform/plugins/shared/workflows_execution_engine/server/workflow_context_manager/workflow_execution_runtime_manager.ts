@@ -377,13 +377,19 @@ export class WorkflowExecutionRuntimeManager {
     await this.workflowExecutionState.flush();
   }
 
-  public async resume(): Promise<void> {
+  public async resume(): Promise<boolean> {
     await this.workflowExecutionState.load();
+
+    if (isTerminalStatus(this.workflowExecution.status)) {
+      return false;
+    }
+
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
+    return true;
   }
 
   public async saveState(): Promise<void> {

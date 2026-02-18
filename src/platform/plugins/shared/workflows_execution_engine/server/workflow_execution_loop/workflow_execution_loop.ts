@@ -9,6 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
+import { cancelDescendantExecutions } from './cancel_descendant_executions';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
@@ -80,4 +81,19 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.workflowLogger.flushEvents();
   finalLogFlushSpan?.end();
+
+  // When this execution is cancelled or timed out, propagate cancellation
+  // to any running child/grandchild workflow executions.
+  const finalExecution = params.workflowExecutionState.getWorkflowExecution();
+  if (
+    finalExecution.status === ExecutionStatus.CANCELLED ||
+    finalExecution.status === ExecutionStatus.TIMED_OUT
+  ) {
+    await cancelDescendantExecutions(
+      finalExecution.id,
+      finalExecution.spaceId,
+      params.workflowExecutionRepository,
+      params.workflowTaskManager
+    );
+  }
 }

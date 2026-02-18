@@ -144,6 +144,31 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     }));
   }
 
+  public async getNonTerminalChildExecutionIds(
+    parentExecutionId: string,
+    spaceId: string,
+    size: number = 1000
+  ): Promise<string[]> {
+    const children = await this.getNonTerminalChildExecutions(parentExecutionId, spaceId, size);
+    return children.map(({ id }) => id);
+  }
+
+  public async getNonTerminalChildExecutions(
+    parentExecutionId: string,
+    spaceId: string,
+    size: number = 1000
+  ): Promise<Array<{ id: string; status: EsWorkflowExecution['status'] }>> {
+    return Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) =>
+          exec.parentWorkflowExecutionId === parentExecutionId &&
+          exec.spaceId === spaceId &&
+          !TerminalExecutionStatuses.includes(exec.status)
+      )
+      .map((exec) => ({ id: exec.id, status: exec.status }))
+      .slice(0, Math.min(size, 10000));
+  }
+
   public async getRunningExecutionsByConcurrencyGroup(
     concurrencyGroupKey: string,
     spaceId: string,

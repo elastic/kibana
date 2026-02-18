@@ -244,6 +244,35 @@ describe('WorkflowExecutionRuntimeManager', () => {
         status: ExecutionStatus.RUNNING,
       });
     });
+
+    it('should return true when workflow is not in terminal state', async () => {
+      const result = await underTest.resume();
+      expect(result).toBe(true);
+    });
+
+    it('should return false and skip execution when workflow is already cancelled', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        status: ExecutionStatus.CANCELLED,
+        currentNodeId: 'node2',
+      } as Partial<EsWorkflowExecution>);
+
+      const result = await underTest.resume();
+
+      expect(result).toBe(false);
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should return false and skip execution when workflow is already completed', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        status: ExecutionStatus.COMPLETED,
+        currentNodeId: 'node2',
+      } as Partial<EsWorkflowExecution>);
+
+      const result = await underTest.resume();
+
+      expect(result).toBe(false);
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
   });
 
   describe('saveState', () => {

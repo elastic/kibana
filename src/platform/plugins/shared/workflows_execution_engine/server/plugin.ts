@@ -49,6 +49,7 @@ import { generateExecutionTaskScope } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { cancelDescendantExecutions } from './workflow_execution_loop/cancel_descendant_executions';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -506,6 +507,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const parentWorkflowExecutionId = context.parentWorkflowExecutionId as string | undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -518,6 +520,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        ...(parentWorkflowExecutionId ? { parentWorkflowExecutionId } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
@@ -748,14 +751,30 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
+      const cancellationTimestamp = new Date().toISOString();
+      const isIdle = [
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.PENDING,
+      ].includes(workflowExecution.status);
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
+        cancelledAt: cancellationTimestamp,
         cancelledBy: 'system', // TODO: set user if available
+        finishedAt: isIdle ? cancellationTimestamp : undefined,
+        ...(isIdle ? { status: ExecutionStatus.CANCELLED } : {}),
       });
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+
+      // Propagate cancellation to all descendant (child, grandchild, etc.) executions
+      await cancelDescendantExecutions(
+        workflowExecutionId,
+        spaceId,
+        workflowExecutionRepository,
+        workflowTaskManager
+      );
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
