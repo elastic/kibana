@@ -6,23 +6,23 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { createAnonymizationProfilesClient } from './services/profiles/client';
-import { useDeleteProfileFlow } from './hooks/use_delete_profile_flow';
-import { useProfileForm } from './hooks/use_profile_form';
-import { useProfilesListView } from './hooks/use_profiles_list_view';
 import { TARGET_TYPE_INDEX } from '../target_types';
+import { createAnonymizationProfilesClient } from '../profiles/services/profiles/client';
+import { useDeleteProfileFlow } from '../profiles/hooks/use_delete_profile_flow';
+import { useProfileForm } from '../profiles/hooks/use_profile_form';
+import { useProfilesListView } from '../profiles/hooks/use_profiles_list_view';
 import { useAnonymizationProfilesSectionState } from './use_anonymization_profiles_section_state';
 
-jest.mock('./services/profiles/client', () => ({
+jest.mock('../profiles/services/profiles/client', () => ({
   createAnonymizationProfilesClient: jest.fn(),
 }));
-jest.mock('./hooks/use_delete_profile_flow', () => ({
+jest.mock('../profiles/hooks/use_delete_profile_flow', () => ({
   useDeleteProfileFlow: jest.fn(),
 }));
-jest.mock('./hooks/use_profile_form', () => ({
+jest.mock('../profiles/hooks/use_profile_form', () => ({
   useProfileForm: jest.fn(),
 }));
-jest.mock('./hooks/use_profiles_list_view', () => ({
+jest.mock('../profiles/hooks/use_profiles_list_view', () => ({
   useProfilesListView: jest.fn(),
 }));
 

@@ -9,9 +9,9 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfileFlyout } from './profile_flyout';
-import { useTargetIdField } from '../profile_form/hooks/use_target_id_field';
+import { useTargetIdField } from '../profiles/components/profile_form/hooks/use_target_id_field';
 
-jest.mock('../profile_form/hooks/use_target_id_field', () => ({
+jest.mock('../profiles/components/profile_form/hooks/use_target_id_field', () => ({
   useTargetIdField: jest.fn(),
 }));
 

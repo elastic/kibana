@@ -6,18 +6,18 @@
  */
 
 export { createAnonymizationProfilesClient } from './services/profiles/client';
-export { AnonymizationProfilesSection } from './anonymization_profiles_section';
-export type { AnonymizationProfilesSectionProps } from './anonymization_profiles_section';
+export { AnonymizationProfilesSection } from '../anonymization_profiles_section/anonymization_profiles_section';
+export type { AnonymizationProfilesSectionProps } from '../anonymization_profiles_section/anonymization_profiles_section';
 export { ProfileForm } from './components/profile_form/profile_form';
 export { ProfileFormContent } from './components/profile_form/profile_form_content';
 export type { ProfileFormProps } from './components/profile_form/profile_form_props';
 export { ProfileFormProvider } from './components/profile_form/profile_form_provider';
-export { ProfileFlyout } from './components/flyout/profile_flyout';
-export type { ProfileFlyoutProps } from './components/flyout/profile_flyout';
+export { ProfileFlyout } from '../profile_flyout/profile_flyout';
+export type { ProfileFlyoutProps } from '../profile_flyout/profile_flyout';
 export { ProfileFormFooter } from './components/profile_form/profile_form_footer';
-export { ProfilesToolbar } from './components/toolbar/profiles_toolbar';
-export { ProfilesTable } from './components/table/profiles_table';
-export { DeleteProfileModal } from './components/delete_modal/delete_profile_modal';
+export { ProfilesToolbar } from '../profiles_toolbar/profiles_toolbar';
+export { ProfilesTable } from '../profiles_table/profiles_table';
+export { DeleteProfileModal } from '../delete_profile_modal/delete_profile_modal';
 export { useProfilesListView } from './hooks/use_profiles_list_view';
 export { useProfileEditor } from './hooks/use_profile_editor';
 export { useProfileForm } from './hooks/use_profile_form';

@@ -8,10 +8,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import type { AnonymizationUiServices } from '../contracts';
-import { useDeleteProfileFlow } from './hooks/use_delete_profile_flow';
-import { useProfileForm } from './hooks/use_profile_form';
-import { useProfilesListView } from './hooks/use_profiles_list_view';
-import { createAnonymizationProfilesClient } from './services/profiles/client';
+import { useDeleteProfileFlow } from '../profiles/hooks/use_delete_profile_flow';
+import { useProfileForm } from '../profiles/hooks/use_profile_form';
+import { useProfilesListView } from '../profiles/hooks/use_profiles_list_view';
+import { createAnonymizationProfilesClient } from '../profiles/services/profiles/client';
 
 export type AnonymizationMode = 'manage' | 'readOnly' | 'hidden';
 

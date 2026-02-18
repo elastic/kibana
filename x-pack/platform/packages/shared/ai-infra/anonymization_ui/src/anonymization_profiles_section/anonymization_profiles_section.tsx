@@ -14,17 +14,17 @@ import type {
   FetchPreviewDocument,
   TrustedNerModelOption,
 } from '../contracts';
-import { DeleteProfileModal } from './components/delete_modal/delete_profile_modal';
-import { ProfileFlyout } from './components/flyout/profile_flyout';
-import { ProfilesTable } from './components/table/profiles_table';
-import { ProfilesToolbar } from './components/toolbar/profiles_toolbar';
-import { createTargetLookupClient } from './services/target_lookup/client';
-import { useDataViewsList } from './services/target_lookup/hooks/use_data_views_list';
+import { DeleteProfileModal } from '../delete_profile_modal/delete_profile_modal';
+import { ProfileFlyout } from '../profile_flyout/profile_flyout';
+import { ProfilesTable } from '../profiles_table/profiles_table';
+import { ProfilesToolbar } from '../profiles_toolbar/profiles_toolbar';
+import { TARGET_TYPE_DATA_VIEW } from '../target_types';
+import { createTargetLookupClient } from '../profiles/services/target_lookup/client';
+import { useDataViewsList } from '../profiles/services/target_lookup/hooks/use_data_views_list';
 import {
   useAnonymizationProfilesSectionState,
   type AnonymizationMode,
 } from './use_anonymization_profiles_section_state';
-import { TARGET_TYPE_DATA_VIEW } from '../target_types';
 
 export interface AnonymizationProfilesSectionProps {
   fetch: AnonymizationUiServices['http']['fetch'];

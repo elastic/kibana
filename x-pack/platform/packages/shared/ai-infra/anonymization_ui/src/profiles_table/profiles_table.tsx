@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiBasicTable, type Criteria, type EuiBasicTableColumn } from '@elastic/eui';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
-import { TARGET_TYPE_DATA_VIEW } from '../../../target_types';
+import { TARGET_TYPE_DATA_VIEW } from '../target_types';
 
 interface ProfilesTableProps {
   profiles: AnonymizationProfile[];

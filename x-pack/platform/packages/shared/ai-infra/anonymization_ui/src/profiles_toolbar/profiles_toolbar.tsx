@@ -18,8 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TARGET_TYPE_FILTER_OPTIONS } from '../constants';
-import type { TargetType } from '../../types';
+import { TARGET_TYPE_FILTER_OPTIONS } from '../profiles/components/constants';
+import type { TargetType } from '../profiles/types';
 
 interface ProfilesToolbarProps {
   modeLabel: string;
