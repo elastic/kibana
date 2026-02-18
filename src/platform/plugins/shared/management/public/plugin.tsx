@@ -153,9 +153,9 @@ export class ManagementPlugin
         const fleetResult = await coreStart.plugins.onStart<{
           fleet: { config: { isAirGapped?: boolean } };
         }>('fleet');
-        const isAirGapped = Boolean(
-          fleetResult.fleet.found && fleetResult.fleet.contract.config.isAirGapped
-        );
+        const isAirGapped =
+          Boolean(fleetResult.fleet.found && fleetResult.fleet.contract.config.isAirGapped) &&
+          !Boolean(deps.cloud?.isCloudEnabled);
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),

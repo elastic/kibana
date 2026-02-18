@@ -107,7 +107,9 @@ export class MonitoringPlugin
           share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           cloudBaseUrl: plugins.cloud?.baseUrl,
-          isAirGapped: Boolean(pluginsStart.fleet?.config?.isAirGapped),
+          isAirGapped:
+            Boolean(pluginsStart.fleet?.config?.isAirGapped) &&
+            !Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
