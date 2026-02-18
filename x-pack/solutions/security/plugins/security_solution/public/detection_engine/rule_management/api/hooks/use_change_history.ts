@@ -18,6 +18,7 @@ export type ChangeHistoryResult = z.infer<typeof ChangeHistoryResult>;
 export const ChangeHistoryResult = z.object({
   timestamp: z.string().datetime(),
   revision: z.number().int().optional(),
+  previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
   userId: z.string(),
   action: z.string(),

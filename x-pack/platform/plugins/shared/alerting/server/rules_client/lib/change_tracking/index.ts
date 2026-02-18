@@ -9,9 +9,15 @@ import crypto from 'node:crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
-import type { ObjectChange, GetHistoryResult, LogChangeHistoryOptions } from '@kbn/change-history';
+import type {
+  ObjectChange,
+  GetHistoryResult,
+  LogChangeHistoryOptions,
+  ChangeHistoryDocument,
+} from '@kbn/change-history';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
+import type { RuleDomain } from '../../../application/rule/types';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
@@ -26,12 +32,23 @@ const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
   params: { apiKey: true },
 };
 
+export interface RuleSnapshot {
+  attributes: RawRule;
+  references: SavedObjectReference[];
+}
+
 export interface RuleChange extends ObjectChange {
   module: RuleTypeSolution;
-  current?: RawRule;
-  next: RawRule;
-  currentReferences?: [] | SavedObjectReference[];
-  nextReferences?: [] | SavedObjectReference[];
+  before?: RuleSnapshot;
+  after: RuleSnapshot;
+}
+
+export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
+  ruleDomain: RuleDomain;
+}
+
+export interface GetRuleHistoryResult extends GetHistoryResult {
+  items: RuleChangeHistoryDocument[];
 }
 
 export interface IChangeTrackingService {
@@ -100,13 +117,13 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
-      const { id, type, current, next, module } = change;
+      const { objectId, objectType, before, after, module } = change;
       let objects = result.get(module);
       if (!objects) {
         result.set(module, (objects = []));
       }
       // TODO: Dont forget `references`, these are kept separate in the SOs
-      objects.push({ id, type, current, next });
+      objects.push({ objectType, objectId, before, after });
       return result;
     }, new Map<RuleTypeSolution, ObjectChange[]>());
 

@@ -6,12 +6,19 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-import type { GetHistoryResult } from '@kbn/change-history';
+import type { ChangeHistoryDocument } from '@kbn/change-history';
+import { transformRuleAttributesToRuleDomain } from '../../application/rule/transforms/transform_rule_attributes_to_rule_domain';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getRuleSo } from '../../data/rule';
 import type { RulesClientContext } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type {
+  GetRuleHistoryResult,
+  RuleChangeHistoryDocument,
+  RuleSnapshot,
+} from '../lib/change_tracking';
+import type { RawRule } from '../../types';
 
 export interface GetHistoryByParams {
   module: RuleTypeSolution;
@@ -28,7 +35,7 @@ export interface GetHistoryByParams {
 export async function getHistoryForRule(
   context: RulesClientContext,
   params: GetHistoryByParams
-): Promise<GetHistoryResult> {
+): Promise<GetRuleHistoryResult> {
   context.logger.debug(`getHistoryForRule(): getting history log for rule ${params.ruleId}`);
 
   const { id, attributes } = await getRuleSo({
@@ -55,10 +62,34 @@ export async function getHistoryForRule(
   }
 
   if (context.changeTrackingService?.initialized(params.module)) {
-    return await context.changeTrackingService.getHistory(params.module, params.ruleId);
+    const history = await context.changeTrackingService.getHistory(params.module, params.ruleId);
+    const result = {
+      startDate: history.startDate,
+      total: history.total,
+      items: history.items.map(mapHistoryItem(context)),
+    };
+    return result;
   }
   return {
     total: 0,
     items: [],
   };
 }
+
+const mapHistoryItem =
+  (context: RulesClientContext) =>
+  (item: ChangeHistoryDocument): RuleChangeHistoryDocument => {
+    const { attributes, references } = (item.object.snapshot ?? {}) as unknown as RuleSnapshot;
+
+    const ruleDomain = transformRuleAttributesToRuleDomain(
+      attributes as RawRule,
+      {
+        id: item.object.id,
+        logger: context.logger,
+        ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId!),
+        references,
+      },
+      context.isSystemAction
+    );
+    return { ruleDomain, ...item };
+  };

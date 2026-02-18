@@ -20,16 +20,19 @@ import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
 
 export type RuleHistoryResult = z.infer<typeof RuleHistoryResult>;
 export const RuleHistoryResult = z.object({
+  id: z.string(),
   timestamp: z.string().optional(),
   userId: z.string().optional(),
   revision: z.number().int().optional(),
+  previousRevision: z.number().int().optional(),
   version: z.number().int().optional(),
   action: z.string().optional(),
   changes: z.array(z.string()).optional(),
   oldvalues: z.object({}).passthrough().optional(),
   snapshot: z.object({}).passthrough().optional(),
-  ruleResponse: z.object({}).passthrough().optional(),
   metadata: z.object({}).passthrough().optional(),
+  ruleDomain: z.object({}).passthrough().optional(),
+  ruleResponse: z.object({}).passthrough().optional(),
 });
 
 export type RuleHistoryRequestQuery = z.infer<typeof RuleHistoryRequestQuery>;

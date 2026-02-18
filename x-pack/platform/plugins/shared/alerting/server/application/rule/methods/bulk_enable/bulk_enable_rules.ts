@@ -20,6 +20,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { pick } from 'lodash';
 import { type RuleChange } from '../../../../rules_client/lib/change_tracking';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
@@ -355,20 +356,18 @@ const bulkEnableRulesWithOCC = async (
     const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
     const original = rulesFinderRules.find((r) => r.id === rule.id);
     return {
-      id: rule.id,
-      type: rule.type,
+      objectId: rule.id,
+      objectType: rule.type,
       module: type.solution,
-      current: original?.attributes,
-      currentReferences: original?.references,
-      next: rule.attributes,
-      nextReferences: rule.references,
+      before: original ? pick(original, ['attributes', 'references']) : undefined,
+      after: pick(rule, ['attributes', 'references']),
     } as RuleChange;
   });
   context.changeTrackingService?.logBulk(changes, {
     action: RuleChangeTrackingAction.ruleEnable,
     userId: username ?? 'unknown',
     spaceId: context.spaceId,
-    overrides: { metadata: { bulkCount: rulesToEnable.length } },
+    data: { metadata: { bulkCount: rulesToEnable.length } },
   });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping

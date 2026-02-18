@@ -6,9 +6,9 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client/rules_client';
-import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import { RuleTypeSolutions } from '@kbn/alerting-types';
+import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server/rules_client/lib/change_tracking';
 import type {
   Page,
   PerPage,
@@ -50,20 +50,21 @@ export const getRuleHistory = async ({
   };
 };
 
-const mapHistoryItem = (item: ChangeHistoryDocument): RuleHistoryResult => {
-  const { user, event, object, metadata } = item;
+const mapHistoryItem = (item: RuleChangeHistoryDocument): RuleHistoryResult => {
+  const { user, event, object, ruleDomain, metadata } = item;
+  // TODO: Watch out for extra layer of unwrapping below (RuleDomain -> SanitizedRule).
+  const ruleResponse = convertAlertingRuleToRuleResponse(ruleDomain as SanitizedRule<RuleParams>);
   return {
+    id: event.id,
     timestamp: item['@timestamp'],
     userId: user?.id,
-    revision: object.snapshot?.revision as number | undefined,
-    version: object.snapshot?.params?.version as number | undefined,
+    revision: ruleDomain?.revision as number | undefined,
+    previousRevision: object.oldvalues?.['attributes.revision'] as number | undefined,
+    version: ruleResponse.version as number | undefined,
     action: event.action,
     changes: object.changes ?? [],
     snapshot: object.snapshot,
-    ruleResponse: convertAlertingRuleToRuleResponse({
-      id: crypto.randomUUID(), // TODO: Fix this, snapshots for newly created rules do not have an ID. Maybe also look into the updatedAt ISOString->Date conversion.
-      ...object.snapshot,
-    } as SanitizedRule<RuleParams>),
+    ruleResponse,
     oldvalues: object.oldvalues,
     metadata,
   };

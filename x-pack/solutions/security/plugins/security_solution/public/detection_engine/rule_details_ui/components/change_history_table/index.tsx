@@ -5,49 +5,41 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import moment from 'moment';
-import { css } from '@emotion/react';
 import {
+  EuiAvatar,
+  EuiBadge,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiBadge,
-  EuiSpacer,
-  EuiTimeline,
-  EuiTimelineItem,
-  EuiText,
-  EuiAvatar,
   EuiIcon,
   EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTimeline,
+  EuiTimelineItem,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import moment from 'moment';
+import React, { useState } from 'react';
 
 // import type { Filter, Query } from '@kbn/es-query';
 // import { FILTERS } from '@kbn/es-query';
 
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { Rule } from '../../../../rule_management/logic';
-import { HeaderSection } from '../../../../../common/components/header_section';
+import { HeaderSection } from '../../../../common/components/header_section';
+import type { Rule } from '../../../rule_management/logic';
 // import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 // import { useKibana } from '../../../../../common/lib/kibana';
-import * as i18n from './translations';
-import type { ChangeHistoryResult } from '../../../../rule_management/api/hooks/use_change_history';
-import { useChangeHistory } from '../../../../rule_management/api/hooks/use_change_history';
-import { RuleDetailTabs } from '../use_rule_details_tabs';
-import { useRuleDetailsContext } from '../rule_details_context';
+import type { ChangeHistoryResult } from '../../../rule_management/api/hooks/use_change_history';
+import { useChangeHistory } from '../../../rule_management/api/hooks/use_change_history';
+import { DATE_DISPLAY_FORMAT, IGNORED_FIELDS } from './constants';
+import { useRuleDetailsContext } from '../../pages/rule_details/rule_details_context';
+import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { CHANGE_HISTORY_ACTION_TEMPLATE } from './templates';
-import { ChangeHistoryFlyout } from './change_history_flyout';
-
-export const IGNORED_FIELDS = [
-  'updatedAt',
-  'revision',
-  'params.meta.kibana_siem_app_url',
-  'params.timestampOverrideFallbackDisabled',
-  'params.ruleSource.isCustomized',
-  'params.ruleSource.customizedFields',
-];
+import { ChangeHistoryFlyout } from './flyout';
+import * as i18n from './translations';
 
 interface ChangeHistoryTableProps {
   ruleId: string;
@@ -113,7 +105,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           size="s"
         >
           <div>
-            {`On ${moment(item.timestamp).format('MMM D YYYY @ HH.mm')} `}
+            {`On ${moment(item.timestamp).format()} `}
             <EuiBadge color="hollow">{item.userId}</EuiBadge>
             {template({ ...item, changes: visibleChanges }, euiTheme)}
           </div>
@@ -150,7 +142,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
         size="s"
       >
         <p>
-          {`On ${moment(data?.startDate).format('MMM D YYYY @ HH.mm')} `}
+          {`On ${moment(data?.startDate).format(DATE_DISPLAY_FORMAT)} `}
           {`Rule history tracking started`}
         </p>
       </EuiText>

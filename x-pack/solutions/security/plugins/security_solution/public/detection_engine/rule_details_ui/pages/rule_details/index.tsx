@@ -118,7 +118,7 @@ import {
 } from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
-import { ChangeHistoryTable } from './change_history_table/change_history_table';
+import { ChangeHistoryTable } from '../../components/change_history_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 

@@ -8,6 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -67,6 +68,7 @@ export const importRule = async ({
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+      action: SecurityRuleChangeTrackingAction.ruleImport,
     });
 
     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule

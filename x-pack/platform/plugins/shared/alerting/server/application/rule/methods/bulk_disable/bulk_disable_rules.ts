@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
@@ -251,20 +252,18 @@ const bulkDisableRulesWithOCC = async (
     const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
     const original = rulesFinderRules.find((r) => r.id === rule.id);
     return {
-      id: rule.id,
-      type: rule.type,
+      objectId: rule.id,
+      objectType: rule.type,
       module: type.solution,
-      current: original?.attributes,
-      currentReferences: original?.references,
-      next: rule.attributes,
-      nextReferences: rule.references,
+      before: original ? pick(original, ['attributes', 'references']) : undefined,
+      after: pick(rule, ['attributes', 'references']),
     } as RuleChange;
   });
   context.changeTrackingService?.logBulk(changes, {
     action: RuleChangeTrackingAction.ruleDisable,
     userId: username ?? 'unknown',
     spaceId: context.spaceId,
-    overrides: { metadata: { bulkCount: rulesToDisable.length } },
+    data: { metadata: { bulkCount: rulesToDisable.length } },
   });
 
   const taskIdsToDisable: string[] = [];

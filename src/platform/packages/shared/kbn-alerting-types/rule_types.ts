@@ -34,6 +34,7 @@ export enum SecurityRuleChangeTrackingAction {
   ruleInstall = 'rule-install',
   ruleDuplicate = 'rule-duplicate',
   ruleUpgrade = 'rule-upgrade',
+  ruleImport = 'rule-import',
 }
 
 export enum RuleChangeTrackingAction {

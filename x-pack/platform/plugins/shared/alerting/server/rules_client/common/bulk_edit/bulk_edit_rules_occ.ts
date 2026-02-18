@@ -13,6 +13,7 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { pick } from 'lodash';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -198,20 +199,18 @@ async function saveBulkUpdatedRules({
       const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
       const original = originalRules.find((r) => rule.id === r.id);
       return {
-        id: rule.id,
-        type: rule.type,
+        objectId: rule.id,
+        objectType: rule.type,
         module: type.solution,
-        current: original?.attributes,
-        currentReferences: original?.references,
-        next: rule.attributes,
-        nextReferences: rule.references,
+        before: original ? pick(original, ['attributes', 'references']) : undefined,
+        after: pick(rule, ['attributes', 'references']),
       };
     }) as RuleChange[];
     context.changeTrackingService?.logBulk(changes, {
       userId: (await context.getUserName()) ?? 'unknown',
       action: RuleChangeTrackingAction.ruleUpdate,
       spaceId: context.spaceId,
-      overrides: { metadata: { bulkCount: rules.length } },
+      data: { metadata: { bulkCount: rules.length } },
     });
   } catch (e) {
     // avoid unused newly generated API keys

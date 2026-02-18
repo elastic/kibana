@@ -1,12 +1,15 @@
 {
-  "@timestamp": "2026-02-06T10:51:40.791Z",
+  "@timestamp": "2026-02-12T16:20:14.434Z",
   "event": {
-    "id": "16Ii5UJKjcf_Yhc6OLcN",
+    "id": "9__f4o5MUM2rC1gn4Wnp",
+    "module": "security",
     "dataset": "alerting-rules",
+    "action": "rule-update",
     "type": "change",
     "outcome": "success",
-    "module": "security",
-    "action": "rule-update"
+    "group": {
+      "id": "294be1ba4264f077e33f656df8c633f5"
+    }
   },
   "kibana": {
     "space_id": "default",
@@ -17,73 +20,78 @@
   },
   "object": {
     "changes": [
-      "name",
+      "actions",
       "updatedAt",
-      "revision"
+      "revision",
+      "params.meta.kibana_siem_app_url",
+      "params.timestampOverrideFallbackDisabled",
+      "params.filters"
     ],
     "oldvalues": {
-      "name": "AWS EFS File System Deleted (test6)",
-      "updatedAt": "2026-02-06T10:34:13.686Z",
-      "revision": 5
+      "actions": [],
+      "updatedAt": "2026-02-11T14:00:58.733Z",
+      "revision": 0
     },
-    "id": "774e359f-009a-41cf-a258-a0fc67286c72",
+    "id": "4287d39f-4404-4b20-8a11-762a8339c6e8",
     "type": "alert",
-    "hash": "1a0a3f31407a325dbb92ba4295576651fd5d4d0c280a2dc3d9c67071af67c0ea",
+    "hash": "ed93977ee74861cfa40c252b356341ed8ead8474ed91be87c28a440195e25a6d",
     "snapshot": {
-      "name": "AWS EFS File System Deleted (test7)",
+      "name": "Remote File Download via Desktopimgdownldr Utility",
       "tags": [
-        "Domain: Cloud",
-        "Data Source: AWS",
-        "Data Source: Amazon Web Services",
-        "Data Source: AWS EFS",
-        "Tactic: Impact",
-        "Resources: Investigation Guide"
+        "Domain: Endpoint",
+        "OS: Windows",
+        "Use Case: Threat Detection",
+        "Tactic: Command and Control",
+        "Resources: Investigation Guide",
+        "Data Source: Elastic Endgame",
+        "Data Source: Elastic Defend",
+        "Data Source: Windows Security Event Logs",
+        "Data Source: Microsoft Defender for Endpoint",
+        "Data Source: SentinelOne",
+        "Data Source: Sysmon",
+        "Data Source: Crowdstrike"
       ],
       "enabled": false,
-      "alertTypeId": "siem.queryRule",
+      "alertTypeId": "siem.eqlRule",
       "consumer": "siem",
       "legacyId": null,
       "schedule": {
         "interval": "5m"
       },
-      "actions": [],
+      "actions": [
+        {
+          "params": {
+            "message": "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+            "to": [
+              "test@test.com"
+            ],
+            "subject": "tests"
+          },
+          "actionTypeId": ".email",
+          "frequency": {
+            "summary": true,
+            "notifyWhen": "onActiveAlert",
+            "throttle": null
+          },
+          "group": "default",
+          "uuid": "30feab82-0997-486f-b2bf-ac22005cda2d",
+          "actionRef": "action_0"
+        }
+      ],
       "params": {
         "author": [
-          "Austin Songer",
           "Elastic"
         ],
-        "description": "Identifies the deletion of an Amazon EFS file system using the \"DeleteFileSystem\" API operation. Deleting an EFS file system permanently removes all stored data and cannot be reversed. This action is rare in most environments and typically limited to controlled teardown workflows. Adversaries with sufficient permissions may delete a file system to destroy evidence, disrupt workloads, or impede recovery efforts.",
-        "note": "## Triage and analysis\n\n### Investigating AWS EFS File System Deleted\n\nAmazon Elastic File System (EFS) provides scalable, shared file storage used by EC2, container workloads, analytics jobs, and other persistent applications. Deleting an EFS file system (`DeleteFileSystem`) permanently removes all stored data and cannot be recovered. Mount targets must already be deleted, but those operations are common and do not themselves indicate malicious behavior. This rule focuses exclusively on the irreversible destructive event, which may signal intentional data destruction, ransomware preparation, or a post-compromise cleanup effort.\n\n#### Possible investigation steps\n\n- **Identify the actor and calling context**\n  - Review `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id`.\n  - Check `source.ip`, `user_agent.original`, and whether the call originated via console, IAM role, STS session, or long-lived IAM key.\n  - Verify whether this principal typically manages EFS resources or teardown activities.\n\n- **Determine what was deleted**\n  - Inspect `aws.cloudtrail.request_parameters` to identify the deleted file system ID.\n  - Map the resource to:\n    - Application or owner team\n    - Environment classification (prod / dev / test)\n    - Dependency surfaces (EC2 instances, ECS tasks, Lambda, analytics pipelines)\n\n- **Reconstruct timeline and intent**\n  - Use `@timestamp` to correlate with:\n    - Recent `UpdateFileSystem` events (e.g., deletion protection, lifecycle policies)\n    - IAM policy or trust policy changes\n    - EC2 or container runtime disruption shortly before deletion\n    - Unexpected regional activity or off-hours execution\n  - Determine if mount target deletions occurred immediately beforehand (expected lifecycle) or unexpectedly earlier (possibly suspicious when paired with other anomalies).\n\n- **Correlate with broader account activity**\n  - Pivot in CloudTrail on:\n    - The same access key or session\n    - The same EFS file system ID\n  - Look for:\n    - Privilege escalation (new policy attachments, role assumptions)\n    - Lateral movement (SSM sessions, unusual EC2 access)\n    - Signs of cleanup or anti-forensics (CloudWatch log group deletions, RDS snapshot deletions)\n    - Network isolation actions (security-group or NACL updates)\n\n- **Validate with owners**\n  - Confirm with application or infrastructure teams:\n    - Whether the deletion was planned, approved, or part of an environment teardown\n    - Whether a migration or infrastructure rotation is in progress\n    - Whether the deleted file system contained production or sensitive workloads\n\n### False positive analysis\n\n- **Expected teardown activity**\n  - Some pipelines (Terraform, CloudFormation, CDK, custom IaC) delete file systems as part of environment rotation or decommissioning.\n  - Add exceptions for known automation roles or environment tags (e.g., `Environment=Dev`).\n\n- **Ephemeral test environments**\n  - Development, QA, or integration test accounts may routinely create and destroy EFS file systems.\n  - Suppress events for non-production accounts where destructive operations are normal.\n\n- **Automated housekeeping**\n  - Internal tooling or lifecycle processes may remove unused EFS resources.\n  - Identify automation roles and use exceptions based on `aws.cloudtrail.user_identity.arn` or `user_agent.original`.\n\n### Response and remediation\n\n- **Contain and secure**\n  - If unauthorized, revoke or disable the credentials used for the deletion.\n  - Review CloudTrail for additional destructive or privilege-escalating operations from the same actor.\n  - Validate whether any associated compute workloads (EC2, ECS, Lambda) show compromise indicators.\n\n- **Assess impact**\n  - Identify workloads impacted by the file system deletion.\n  - Determine whether alternate backups exist (EFS-to-EFS Backup, AWS Backup vaults).\n  - Evaluate operational disruption and data-loss implications, especially for compliance-bound data.\n\n- **Recover (if possible)**\n  - Restore from AWS Backup if a protected resource existed.\n  - Rebuild infrastructure dependencies that relied on the deleted file system.\n\n- **Hardening and prevention**\n  - Restrict use of `elasticfilesystem:DeleteFileSystem` to tightly controlled IAM roles.\n  - Use IAM conditions (e.g., `aws:PrincipalArn`, `aws:SourceIp`, `aws:RequestedRegion`) to limit destructive operations.\n  - Ensure AWS Backup policies include EFS resources with sufficient retention.\n  - Use AWS Config or Security Hub controls to detect:\n    - EFS file systems without backup plans\n    - Unexpected changes to file system policies\n\n### Additional information\n- **[AWS IR Playbooks](https://github.com/aws-samples/aws-incident-response-playbooks/blob/c151b0dc091755fffd4d662a8f29e2f6794da52c/playbooks/)** \n- **[AWS Customer Playbook Framework](https://github.com/aws-samples/aws-customer-playbook-framework/tree/a8c7b313636b406a375952ac00b2d68e89a991f2/docs)** \n- **Security Best Practices:** [AWS Knowledge Center – Security Best Practices](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/).\n",
-        "falsePositives": [
-          "Legitimate teardown or environment decommissioning processes may delete EFS file systems. Verify whether the calling user, role, automation system, or CI/CD workflow is expected to perform destructive actions in the affected account. File system deletions by unfamiliar identities, from unusual IP addresses, or occurring outside approved change windows should be carefully reviewed. If known automation routinely deletes ephemeral test file systems, consider adding scoped exceptions."
-        ],
-        "from": "now-6m",
-        "ruleId": "536997f7-ae73-447d-a12d-bff1e8f5f0a0",
-        "investigationFields": {
-          "field_names": [
-            "@timestamp",
-            "user.name",
-            "user_agent.original",
-            "source.ip",
-            "aws.cloudtrail.user_identity.arn",
-            "aws.cloudtrail.user_identity.type",
-            "aws.cloudtrail.user_identity.access_key_id",
-            "event.action",
-            "event.outcome",
-            "cloud.account.id",
-            "cloud.region",
-            "aws.cloudtrail.request_parameters"
-          ]
-        },
+        "description": "Identifies the desktopimgdownldr utility being used to download a remote file. An adversary may use desktopimgdownldr to download arbitrary files as an alternative to certutil.",
+        "note": "## Triage and analysis\n\n### Investigating Remote File Download via Desktopimgdownldr Utility\n\nAttackers commonly transfer tooling or malware from external systems into a compromised environment using the command and control channel. However, they can also abuse signed utilities to drop these files.\n\nThe `Desktopimgdownldr.exe` utility is used to to configure lockscreen/desktop image, and can be abused with the `lockscreenurl` argument to download remote files and tools, this rule looks for this behavior.\n\n> **Note**:\n> This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/current/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n> This investigation guide uses the [Investigate Markdown Plugin](https://www.elastic.co/guide/en/security/current/interactive-investigation-guides.html) introduced in Elastic Stack version 8.8.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - !{investigate{\"label\":\"Alerts associated with the user in the last 48h\",\"providers\":[[{\"excluded\":false,\"field\":\"event.kind\",\"queryType\":\"phrase\",\"value\":\"signal\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"user.id\",\"queryType\":\"phrase\",\"value\":\"{{user.id}}\",\"valueType\":\"string\"}]],\"relativeFrom\":\"now-48h/h\",\"relativeTo\":\"now\"}}\n  - !{investigate{\"label\":\"Alerts associated with the host in the last 48h\",\"providers\":[[{\"excluded\":false,\"field\":\"event.kind\",\"queryType\":\"phrase\",\"value\":\"signal\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"host.name\",\"queryType\":\"phrase\",\"value\":\"{{host.name}}\",\"valueType\":\"string\"}]],\"relativeFrom\":\"now-48h/h\",\"relativeTo\":\"now\"}}\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Check the reputation of the domain or IP address used to host the downloaded file or if the user downloaded the file from an internal system.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the file using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n        - !{investigate{\"label\":\"Investigate the Subject Process Network Events\",\"providers\":[[{\"excluded\":false,\"field\":\"event.category\",\"queryType\":\"phrase\",\"value\":\"network\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"process.entity_id\",\"queryType\":\"phrase\",\"value\":\"{{process.entity_id}}\",\"valueType\":\"string\"}]]}}\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the target host after the registry modification.\n\n### False positive analysis\n\n- This activity is unusual but can be done by administrators. Benign true positives (B-TPs) can be added as exceptions if necessary.\n- Analysts can dismiss the alert if the downloaded file is a legitimate image.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "falsePositives": [],
+        "from": "now-9m",
+        "ruleId": "15c0b7a7-9c34-4869-b25b-fa6518414899",
         "immutable": true,
         "ruleSource": {
           "type": "external",
-          "isCustomized": true,
-          "customizedFields": [
-            {
-              "fieldName": "name"
-            }
-          ],
+          "isCustomized": false,
+          "customizedFields": [],
           "hasBaseVersion": true
         },
         "license": "Elastic License v2",
@@ -102,63 +110,93 @@
           {
             "framework": "MITRE ATT&CK",
             "tactic": {
-              "id": "TA0040",
-              "name": "Impact",
-              "reference": "https://attack.mitre.org/tactics/TA0040/"
+              "id": "TA0011",
+              "name": "Command and Control",
+              "reference": "https://attack.mitre.org/tactics/TA0011/"
             },
             "technique": [
               {
-                "id": "T1485",
-                "name": "Data Destruction",
-                "reference": "https://attack.mitre.org/techniques/T1485/"
+                "id": "T1105",
+                "name": "Ingress Tool Transfer",
+                "reference": "https://attack.mitre.org/techniques/T1105/"
               }
             ]
           }
         ],
         "to": "now",
         "references": [
-          "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteFileSystem.html",
-          "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteMountTarget.html"
+          "https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/"
         ],
-        "version": 211,
+        "version": 318,
         "exceptionsList": [],
         "relatedIntegrations": [
           {
-            "package": "aws",
-            "version": "^5.0.0",
-            "integration": "cloudtrail"
+            "package": "endpoint",
+            "version": "^9.0.0"
+          },
+          {
+            "package": "windows",
+            "version": "^3.0.0"
+          },
+          {
+            "package": "system",
+            "version": "^2.0.0"
+          },
+          {
+            "package": "m365_defender",
+            "version": "^3.0.0"
+          },
+          {
+            "package": "sentinel_one_cloud_funnel",
+            "version": "^1.9.0"
+          },
+          {
+            "package": "crowdstrike",
+            "version": "^1.51.0"
           }
         ],
         "requiredFields": [
           {
-            "name": "event.action",
+            "name": "event.type",
             "type": "keyword",
             "ecs": true
           },
           {
-            "name": "event.dataset",
+            "name": "host.os.type",
             "type": "keyword",
             "ecs": true
           },
           {
-            "name": "event.outcome",
+            "name": "process.args",
             "type": "keyword",
             "ecs": true
           },
           {
-            "name": "event.provider",
+            "name": "process.name",
+            "type": "keyword",
+            "ecs": true
+          },
+          {
+            "name": "process.pe.original_file_name",
             "type": "keyword",
             "ecs": true
           }
         ],
         "setup": "",
-        "type": "query",
-        "language": "kuery",
+        "type": "eql",
+        "language": "eql",
         "index": [
-          "filebeat-*",
-          "logs-aws.cloudtrail-*"
+          "endgame-*",
+          "logs-crowdstrike.fdr*",
+          "logs-endpoint.events.process-*",
+          "logs-m365_defender.event-*",
+          "logs-sentinel_one_cloud_funnel.*",
+          "logs-system.security*",
+          "logs-windows.forwarded*",
+          "logs-windows.sysmon_operational-*",
+          "winlogbeat-*"
         ],
-        "query": "event.dataset: \"aws.cloudtrail\" \n    and event.provider: \"elasticfilesystem.amazonaws.com\" \n    and event.action: \"DeleteFileSystem\" \n    and event.outcome: \"success\"\n",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (process.name : \"desktopimgdownldr.exe\" or ?process.pe.original_file_name == \"desktopimgdownldr.exe\") and\n  process.args : \"/lockscreenurl:http*\"\n",
         "filters": []
       },
       "mapped_params": {
@@ -167,8 +205,8 @@
       },
       "createdBy": "elastic",
       "updatedBy": "elastic",
-      "createdAt": "2026-02-03T14:09:59.822Z",
-      "updatedAt": "2026-02-06T10:51:07.088Z",
+      "createdAt": "2026-02-11T14:00:58.733Z",
+      "updatedAt": "2026-02-12T16:20:11.421Z",
       "apiKey": null,
       "apiKeyOwner": null,
       "apiKeyCreatedByUser": null,
@@ -177,17 +215,30 @@
       "muteAll": false,
       "mutedInstanceIds": [],
       "executionStatus": {
-        "status": "warning",
-        "lastDuration": 138,
-        "lastExecutionDate": "2026-02-06T09:29:34.882Z",
-        "error": null,
-        "warning": {
-          "reason": "ruleExecution",
-          "message": "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.,This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+        "status": "pending",
+        "lastExecutionDate": "2026-02-11T14:00:58.733Z"
+      },
+      "monitoring": {
+        "run": {
+          "history": [],
+          "calculated_metrics": {
+            "success_ratio": 0
+          },
+          "last_run": {
+            "timestamp": "2026-02-11T14:00:58.733Z",
+            "metrics": {
+              "duration": 0,
+              "total_search_duration_ms": null,
+              "total_indexing_duration_ms": null,
+              "total_alerts_detected": null,
+              "total_alerts_created": null,
+              "gap_duration_s": null
+            }
+          }
         }
       },
       "snoozeSchedule": [],
-      "revision": 6,
+      "revision": 1,
       "running": false,
       "artifacts": {
         "dashboards": [],
@@ -197,23 +248,7 @@
       },
       "meta": {
         "versionApiKeyLastmodified": "9.4.0"
-      },
-      "scheduledTaskId": "774e359f-009a-41cf-a258-a0fc67286c72",
-      "lastRun": {
-        "outcomeOrder": 10,
-        "alertsCount": {
-          "new": 0,
-          "ignored": 0,
-          "recovered": 0,
-          "active": 0
-        },
-        "outcomeMsg": [
-          "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
-        ],
-        "warning": null,
-        "outcome": "warning"
-      },
-      "nextRun": "2026-02-06T09:34:34.827Z"
+      }
     }
   }
 }

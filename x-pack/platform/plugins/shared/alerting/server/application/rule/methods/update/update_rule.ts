@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
+import { isEqual, omit, pick } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import type { ChangeTrackingAction } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
@@ -264,7 +264,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   validatedRuleTypeParams: Params;
   shouldIncrementRevision: (params?: Params) => boolean;
   isSystemAction: (connectorId: string) => boolean;
-  action: ChangeTrackingAction;
+  action?: ChangeTrackingAction;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
   await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
@@ -352,11 +352,14 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 
     // Success? Track changes
     const change = {
-      id,
-      type: RULE_SAVED_OBJECT_TYPE,
+      objectId: id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
       module: ruleType.solution,
-      current: originalRuleSavedObject.attributes,
-      next: updatedRuleAttributes,
+      before: pick(originalRuleSavedObject, ['attributes', 'references']),
+      after: {
+        attributes: updatedRuleAttributes,
+        references: extractedReferences,
+      },
     };
     context.changeTrackingService?.log(change, {
       action: action ?? RuleChangeTrackingAction.ruleUpdate,
