@@ -66,21 +66,20 @@ describe('registerOverviewEmbeddableTransforms', () => {
     expect(() => schemaWithDrilldowns.validate({ ...validState, drilldowns: [] })).not.toThrow();
   });
 
-  it('should register the correct transforms with drilldownTransforms', () => {
+  it('should register transforms that return transformOut', () => {
     registerOverviewEmbeddableTransforms(embeddableSetupMock);
 
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
     const { getTransforms: getTransformsFromSetup } = callArgs[1];
     const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
-    // Check that transforms have both transformIn and transformOut (required for drilldowns)
-    expect(transforms).toHaveProperty('transformIn');
     expect(transforms).toHaveProperty('transformOut');
-    expect(typeof transforms.transformIn).toBe('function');
-    expect(typeof transforms.transformOut).toBe('function');
+    const transformOut = transforms.transformOut;
+    expect(typeof transformOut).toBe('function');
+    if (!transformOut) throw new Error('transformOut is required');
 
     const testState = { slo_id: 'test', overview_mode: 'single' as const };
-    expect((transforms as any).transformOut(testState)).toMatchObject({
+    expect(transformOut(testState)).toMatchObject({
       slo_id: 'test',
       overview_mode: 'single',
     });
@@ -228,7 +227,6 @@ describe('registerOverviewEmbeddableTransforms', () => {
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
       const transforms = getTransformsFromSetup!(createMockDrilldownTransforms());
 
-      expect(transforms).toHaveProperty('transformIn');
       expect(transforms).toHaveProperty('transformOut');
       expect(typeof transforms.transformOut).toBe('function');
     });
@@ -249,7 +247,8 @@ describe('registerOverviewEmbeddableTransforms', () => {
         title: 'Test Title',
       };
 
-      const transformed = (transforms as any).transformOut(legacyState as any);
+      const transformOut = transforms.transformOut!;
+      const transformed = transformOut(legacyState);
 
       expect(transformed).toMatchObject({
         slo_id: 'legacy-slo-id',
@@ -275,7 +274,8 @@ describe('registerOverviewEmbeddableTransforms', () => {
         title: 'Test Title',
       };
 
-      const transformed = (transforms as any).transformOut(newState as any);
+      const transformOut = transforms.transformOut!;
+      const transformed = transformOut(newState);
 
       expect(transformed).toMatchObject({
         slo_id: 'new-slo-id',
