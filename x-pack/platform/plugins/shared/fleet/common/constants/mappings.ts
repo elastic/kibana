@@ -401,6 +401,23 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    service: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        instance: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
     non_identifying_attributes: {
       properties: {
         host: {
@@ -422,6 +439,26 @@ export const AGENT_MAPPINGS = {
               type: 'keyword',
             },
           },
+        },
+      },
+    },
+    host: {
+      properties: {
+        arch: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+    os: {
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'keyword',
         },
       },
     },
