@@ -33,6 +33,7 @@ import {
   extractDissectPattern,
   groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
+import type { Logger } from '@kbn/logging';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/errors/security_error';
@@ -332,10 +333,10 @@ async function processGrokPatterns({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
@@ -355,6 +356,7 @@ async function processGrokPatterns({
           body: {
             connector_id: connectorId,
             sample_messages: group.messages,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             review_fields: getGrokReviewFields(group.nodes as any, 10),
           },
         },
@@ -474,10 +476,10 @@ async function processDissectPattern({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 

@@ -24,6 +24,7 @@ export function RedirectTo<
   const router = useStreamsAppRouter();
   const currentParams = useStreamsAppParams('/*');
   useLayoutEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     router.replace(path, ...([merge({}, currentParams, params)] as any));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
