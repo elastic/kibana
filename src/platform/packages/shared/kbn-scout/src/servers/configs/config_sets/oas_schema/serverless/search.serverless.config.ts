@@ -7,25 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from './serverless.base.config';
-import type { ScoutServerConfig } from '../../../../types';
+import { servers as defaultConfig } from '../../default/serverless/search.serverless.config';
+import type { ScoutServerConfig } from '../../../../../types';
 
+/**
+ * Custom Scout server configuration for OAS (OpenAPI Specification) schema validation tests.
+ * Enables the OAS endpoint which is required for schema validation.
+ *
+ * This config is automatically used when running tests from:
+ * dashboard/test/scout_oas_schema/
+ *
+ * Usage:
+ *   node scripts/scout.js start-server --arch serverless --domain search --serverConfigSet oas_schema
+ */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
-  esTestCluster: {
-    ...defaultConfig.esTestCluster,
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.security.authc.api_key.cache.max_keys=70000',
-    ],
-  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=security',
-      '--coreApp.allowDynamicConfigOverrides=true',
-      `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+      // Enable OpenAPI specification endpoint for schema validation tests
+      '--server.oas.enabled=true',
     ],
   },
 };
