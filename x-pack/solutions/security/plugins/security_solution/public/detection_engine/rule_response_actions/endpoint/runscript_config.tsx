@@ -10,6 +10,7 @@ import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/for
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
+  EuiHorizontalRule,
   EuiIconTip,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,6 +18,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -198,12 +200,15 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     const { onChange: fieldOnChange, value } = field;
     const getTestId = useTestIdGenerator(dataTestSubj);
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
+
     type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
     const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
       linux: { isValid: true },
       macos: { isValid: true },
       windows: { isValid: true },
     });
+
+    const [showColumnLayout, setShowColumnLayout] = useState(false);
 
     const emitUseFieldChange = useCallback(
       (newValue: AutomatedRunScriptConfig) => {
@@ -225,6 +230,64 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
       return null;
     }
 
+    const osConfigs = (['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
+      (osType, index) => {
+        const osConfig = (
+          <RunScriptOsTypeConfig
+            key={osType}
+            showColumnLayout={showColumnLayout}
+            platform={osType}
+            showFieldLabels={showColumnLayout ? true : index === 0}
+            config={value[osType]}
+            data-test-subj={getTestId(osType)}
+            onChange={({ updatedConfig, isValid, errors }) => {
+              const updatedValidationState: RunscriptOsValidationState = {
+                ...osValidationState,
+                [osType]: { isValid, errors },
+              };
+
+              setOsValidationState(updatedValidationState);
+              onChange({
+                isValid: Object.values(updatedValidationState).every(
+                  ({ isValid: isOsValueValid }) => isOsValueValid
+                ),
+                errors: Object.entries(updatedValidationState).reduce(
+                  (acc, [platform, osValidationResult]) => {
+                    if (!osValidationResult.isValid) {
+                      acc.push(
+                        ...(osValidationResult.errors ?? []).map(
+                          (errorMessage) =>
+                            `${OS_TITLES[platform as keyof typeof OS_TITLES]}: ${errorMessage}`
+                        )
+                      );
+                    }
+
+                    return acc;
+                  },
+                  [] as string[]
+                ),
+              });
+              emitUseFieldChange({
+                ...value,
+                [osType]: updatedConfig,
+              });
+            }}
+          />
+        );
+
+        if (showColumnLayout) {
+          return osConfig;
+        }
+
+        return (
+          <div key={osType}>
+            <EuiSpacer size="m" />
+            {osConfig}
+          </div>
+        );
+      }
+    );
+
     return (
       <EuiFormRow
         fullWidth
@@ -233,54 +296,28 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
         data-test-subj={dataTestSubj}
       >
         <EuiText size="s">
-          {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
-            (osType, index) => {
-              return (
-                <div key={osType}>
-                  <EuiSpacer size="m" />
-                  <RunScriptOsTypeConfig
-                    platform={osType}
-                    showFieldLabels={index === 0}
-                    config={value[osType]}
-                    data-test-subj={getTestId(osType)}
-                    onChange={({ updatedConfig, isValid, errors }) => {
-                      const updatedValidationState: RunscriptOsValidationState = {
-                        ...osValidationState,
-                        [osType]: { isValid, errors },
-                      };
+          {/* FIXME:PT delete switch. Only here for dev. */}
+          <EuiSwitch
+            label="Show column layout"
+            checked={showColumnLayout}
+            onChange={() => setShowColumnLayout((existingValue) => !existingValue)}
+          />
+          <EuiHorizontalRule />
+          <EuiSpacer size="l" />
 
-                      setOsValidationState(updatedValidationState);
-                      onChange({
-                        isValid: Object.values(updatedValidationState).every(
-                          ({ isValid: isOsValueValid }) => isOsValueValid
-                        ),
-                        errors: Object.entries(updatedValidationState).reduce(
-                          (acc, [platform, osValidationResult]) => {
-                            if (!osValidationResult.isValid) {
-                              acc.push(
-                                ...(osValidationResult.errors ?? []).map(
-                                  (errorMessage) =>
-                                    `${
-                                      OS_TITLES[platform as keyof typeof OS_TITLES]
-                                    }: ${errorMessage}`
-                                )
-                              );
-                            }
-
-                            return acc;
-                          },
-                          [] as string[]
-                        ),
-                      });
-                      emitUseFieldChange({
-                        ...value,
-                        [osType]: updatedConfig,
-                      });
-                    }}
-                  />
-                </div>
-              );
-            }
+          {showColumnLayout ? (
+            <EuiFlexGroup
+              data-test-subj="runscript-column-layout"
+              responsive={false}
+              wrap={false}
+              gutterSize="l"
+            >
+              <EuiFlexItem>{osConfigs[0]}</EuiFlexItem>
+              <EuiFlexItem>{osConfigs[1]}</EuiFlexItem>
+              <EuiFlexItem>{osConfigs[2]}</EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            osConfigs
           )}
         </EuiText>
       </EuiFormRow>
@@ -300,11 +337,21 @@ export interface RunScriptOsTypeConfigProps {
   ) => void;
   /** If `true` (default) each field will include a label */
   showFieldLabels?: boolean;
+
+  // FIXME:PT Delete once we have agreement on UI layout
+  showColumnLayout?: boolean;
 }
 
 /** @private */
 const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
-  ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
+  ({
+    config,
+    onChange,
+    'data-test-subj': dataTestSubj,
+    platform,
+    showFieldLabels = true,
+    showColumnLayout = false,
+  }) => {
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
     interface OsConfigValidationResult extends ValidationState {
@@ -431,12 +478,13 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
       <EuiFlexGroup
         key={platform}
         gutterSize="s"
-        alignItems="flexStart"
+        alignItems={showColumnLayout ? undefined : 'flexStart'}
         justifyContent="spaceBetween"
         data-test-subj={dataTestSubj}
+        direction={showColumnLayout ? 'column' : 'row'}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={showFieldLabels}>
+        <EuiFlexItem grow={showColumnLayout ? true : false}>
+          <EuiFormRow hasEmptyLabelSpace={showFieldLabels} fullWidth>
             <EuiFlexGroup
               responsive={false}
               wrap={false}
@@ -456,9 +504,10 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={showColumnLayout ? true : 2}>
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
+            fullWidth
             helpText={
               // FIXME:PT implement way to view script definition details - use component from Ash's PR
               scriptSelected ? 'TBD: Click here to view script definition details' : undefined
@@ -472,9 +521,10 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={showColumnLayout ? true : 2}>
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
+            fullWidth
             labelAppend={
               showFieldLabels && !scriptSelected?.requiresInput ? (
                 <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
@@ -498,10 +548,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={showColumnLayout ? true : false}>
           <EuiFormRow
             isInvalid={!currentValidationState.timeout.isValid}
             error={currentValidationState.timeout.errors?.join('; ')}
+            fullWidth
             helpText={
               currentValidationState.timeout.isValid && config.scriptId
                 ? SCRIPT_TIMEOUT_HELP
