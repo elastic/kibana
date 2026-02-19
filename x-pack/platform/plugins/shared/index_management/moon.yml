@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/test-eui-helpers'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/cloud'
 tags:
   - plugin
   - prod
