@@ -246,5 +246,5 @@ function isValidDatasourceState(
 }
 
 function isSavedToLibrary(persistedDoc: LensDocument | undefined) {
-  return Boolean(persistedDoc && 'id' in persistedDoc && persistedDoc.id);
+  return Boolean(persistedDoc && persistedDoc.savedObjectId);
 }
