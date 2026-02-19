@@ -142,6 +142,12 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'network_direction':
+      if (processor.target_field) {
+        fields.push(processor.target_field);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -266,6 +272,9 @@ export function getProcessorOutputType(
     case 'sort':
       return 'unknown';
 
+    case 'network_direction':
+      return 'string';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -359,6 +368,7 @@ export function getExpectedInputType(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'network_direction':
     case 'manual_ingest_pipeline':
       return null;
     default: {
@@ -423,6 +433,12 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'split':
       case 'sort':
         if (step.from) fieldsUsed.push(step.from);
+        break;
+      case 'network_direction':
+        fieldsUsed.push(step.source_ip, step.destination_ip);
+        if ('internal_networks_field' in step && step.internal_networks_field) {
+          fieldsUsed.push(step.internal_networks_field);
+        }
         break;
       case 'append':
       case 'drop_document':

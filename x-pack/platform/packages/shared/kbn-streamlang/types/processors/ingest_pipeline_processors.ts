@@ -28,6 +28,7 @@ import type {
   SplitProcessor,
   SortProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -155,6 +156,12 @@ export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -182,4 +189,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineSplitProcessor
   | IngestPipelineSortProcessor
   | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineManualIngestPipelineProcessor;
