@@ -6,11 +6,12 @@
  */
 
 import type { TriggerDefinition, TriggerMatchResult, ActiveTrigger } from './types';
-import { TriggerId } from './types';
+// import { TriggerId } from './types';
 
+// TODO: Re-enable trigger definitions
 const TRIGGER_DEFINITIONS: readonly TriggerDefinition[] = [
-  { id: TriggerId.Attachment, sequence: '@' },
-  { id: TriggerId.Prompt, sequence: '/p' },
+  // { id: TriggerId.Attachment, sequence: '@' },
+  // { id: TriggerId.Prompt, sequence: '/p' },
 ];
 
 // Sorted once at module load — longest sequence first for greedy matching
