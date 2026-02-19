@@ -177,7 +177,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             deprecationInfo.replaced_by
           ).join(', ')}`
         : deprecationInfo.description
-      : undefined;
+      : i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputTooltip', {
+          defaultMessage: 'This input is deprecated.',
+        });
 
     // Check if any vars or streams in this input are deprecated
     const hasDeprecatedFeatures = useMemo(() => {
@@ -224,13 +226,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                           type="warning"
                           color="warning"
                           position="top"
-                          content={
-                            deprecatedInputTooltip ||
-                            i18n.translate(
-                              'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputTooltip',
-                              { defaultMessage: 'This input is deprecated.' }
-                            )
-                          }
+                          content={deprecatedInputTooltip}
                         />
                       </span>
                     </EuiFlexItem>

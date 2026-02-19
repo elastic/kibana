@@ -240,6 +240,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isDeprecatedStream = !!packageInputStream.deprecated;
     const hasDeprecatedVars = (packageInputStream.vars || []).some((v) => !!v.deprecated);
     const showStreamDeprecationIcon = isDeprecatedStream || hasDeprecatedVars;
+    const streamDeprecationTooltip = isDeprecatedStream
+      ? packageInputStream.deprecated?.description ||
+        i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamTooltip', {
+          defaultMessage: 'This data stream is deprecated.',
+        })
+      : i18n.translate(
+          'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamVarsTooltip',
+          {
+            defaultMessage: 'This data stream contains deprecated variables.',
+          }
+        );
 
     // Hide deprecated streams entirely on new installations
     if (!isEditPage && isDeprecatedStream) {
@@ -286,21 +297,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                 type="warning"
                                 color="warning"
                                 position="top"
-                                content={
-                                  isDeprecatedStream
-                                    ? packageInputStream.deprecated?.description ||
-                                      i18n.translate(
-                                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamTooltip',
-                                        { defaultMessage: 'This data stream is deprecated.' }
-                                      )
-                                    : i18n.translate(
-                                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedStreamVarsTooltip',
-                                        {
-                                          defaultMessage:
-                                            'This data stream contains deprecated variables.',
-                                        }
-                                      )
-                                }
+                                content={streamDeprecationTooltip}
                               />
                             </span>
                           </EuiFlexItem>

@@ -92,7 +92,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
           // Hide deprecated vars on new installations
-          if (!isEditPage && varDef.deprecated) {
+          if (!isEditPage && !!varDef.deprecated) {
             return;
           }
 
