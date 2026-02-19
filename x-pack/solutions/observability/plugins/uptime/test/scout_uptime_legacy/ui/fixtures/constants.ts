@@ -7,6 +7,7 @@
 
 export const ES_ARCHIVES = {
   FULL_HEARTBEAT:
-    'x-pack/solutions/observability/plugins/uptime/test/scout/ui/es_archiver/full_heartbeat',
-  BROWSER: 'x-pack/solutions/observability/plugins/uptime/test/scout/ui/es_archiver/browser',
+    'x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/es_archiver/full_heartbeat',
+  BROWSER:
+    'x-pack/solutions/observability/plugins/uptime/test/scout_uptime_legacy/ui/es_archiver/browser',
 } as const;

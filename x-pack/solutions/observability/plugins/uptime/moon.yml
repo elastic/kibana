@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/connector-schemas'
   - '@kbn/kql'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -101,6 +102,7 @@ fileGroups:
     - public/legacy_uptime/components/monitor/status_details/location_map/embeddables/low_poly_layer.json
     - server/**/*
     - server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json
+    - test/scout_uptime_legacy/**/*
     - '!target/**/*'
 tasks:
   jest:
