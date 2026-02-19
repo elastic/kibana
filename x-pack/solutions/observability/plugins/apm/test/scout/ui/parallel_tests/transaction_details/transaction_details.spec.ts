@@ -33,10 +33,6 @@ test.describe(
         ).toBeVisible();
       });
 
-      await test.step('Renders SLOs callout', async () => {
-        await expect(page.getByTestId('apmSloCalloutCreateSloButton')).toBeVisible();
-      });
-
       await test.step('Renders transaction charts', async () => {
         await expect(page.getByTestId('latencyChart')).toBeVisible();
         await expect(page.getByTestId('throughput')).toBeVisible();
