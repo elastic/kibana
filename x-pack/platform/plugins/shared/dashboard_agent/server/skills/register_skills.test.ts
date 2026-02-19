@@ -10,13 +10,13 @@ import { dashboardManagementSkill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
-  it('registers the dashboard management skill', () => {
+  it('registers the dashboard management skill', async () => {
     const register = jest.fn();
     const agentBuilder = {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    await registerSkills(agentBuilder);
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
