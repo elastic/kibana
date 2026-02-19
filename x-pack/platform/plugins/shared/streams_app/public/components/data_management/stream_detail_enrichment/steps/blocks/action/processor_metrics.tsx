@@ -78,12 +78,10 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
 export const ProcessorMetricBadges = ({
   detected_fields,
   failed_rate,
-  skipped_rate,
   parsed_rate,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
   const parsedRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
-  const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
@@ -163,6 +161,21 @@ export const ProcessorMetricBadges = ({
           >
             <EuiTextColor color="default">{skippedRate}</EuiTextColor>
           </EuiToolTip>
+      {detectedFieldsCount > 0 && (
+        <EuiFlexItem>
+          <EuiBadge
+            color="hollow"
+            title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
+              defaultMessage:
+                '{detectedFieldsCount, plural, one {# field was parsed on the sampled documents: } other {# fields were parsed on the sampled documents:\n}}{detectedFields}',
+              values: { detectedFieldsCount, detectedFields: detected_fields.join('\n') },
+            })}
+          >
+            {i18n.translate('xpack.streams.processorMetricBadges.fieldsBadgeLabel', {
+              defaultMessage: '{detectedFieldsCount, plural, one {# field } other {# fields}}',
+              values: { detectedFieldsCount },
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
