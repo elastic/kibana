@@ -111,6 +111,9 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
               data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
               css={css`
                 font-weight: ${euiTheme.font.weight.medium};
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
               `}
             >
               {title}
