@@ -118,11 +118,9 @@ export const ManageIntegrationsTable: React.FC<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
-                onClick={() => {
-                  application.navigateToApp('automaticImportVTwo', {
-                    path: `/edit/${item.integrationId}`,
-                  });
-                }}
+                href={application.getUrlForApp('automaticImportVTwo', {
+                  path: `/edit/${item.integrationId}`,
+                })}
               >
                 {title}
               </EuiLink>
