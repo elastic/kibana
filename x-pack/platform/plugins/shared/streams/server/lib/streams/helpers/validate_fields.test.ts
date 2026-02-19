@@ -408,6 +408,7 @@ describe('validateDescendantFields', () => {
 describe('validateSystemFields', () => {
   it('should allow system fields on root stream', () => {
     const definition = createWiredStreamDefinition('logs', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       '@timestamp': { type: 'system' as any },
     });
 
@@ -416,6 +417,7 @@ describe('validateSystemFields', () => {
 
   it('should throw for system fields on child stream', () => {
     const definition = createWiredStreamDefinition('logs.child', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       'attributes.custom': { type: 'system' as any },
     });
 
