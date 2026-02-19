@@ -51,11 +51,11 @@ Fixtures, page objects, and API helpers defined in `@kbn/scout` can be imported 
 
 We welcome contributions to one of the Scout packages.
 
-| If your helper/code…                  | Put it…                                                                                                   | Examples                                        |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| Is reusable across many plugins/teams | In `@kbn/scout`                                                                                           | Generic fixtures, page objects, and API helpers |
-| Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers  |
-| Is specific to one plugin             | In your plugin’s `test/scout` directory                                                                   | Plugin-only locators and setup helpers          |
+| If your helper/code…                  | Put it…                                                                                                   | Examples                                           |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Is reusable across many plugins/teams | In `@kbn/scout`                                                                                           | Generic fixtures, page objects, and API helpers    |
+| Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
+| Is specific to one plugin or package  | In your plugin or package’s `test/scout` directory                                                        | Components specific to your plugin or package only |
 
 ## Need help?
 
