@@ -30,8 +30,8 @@ export function registerGetWorkflowExecutionByIdRoute({
           workflowExecutionId: schema.string(),
         }),
         query: schema.object({
-          includeInput: schema.boolean({ defaultValue: true }),
-          includeOutput: schema.boolean({ defaultValue: true }),
+          includeInput: schema.boolean({ defaultValue: false }),
+          includeOutput: schema.boolean({ defaultValue: false }),
         }),
       },
     },

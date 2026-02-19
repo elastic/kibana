@@ -63,8 +63,8 @@ export const getWorkflowExecution = async ({
   stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
-  includeInput = true,
-  includeOutput = true,
+  includeInput = false,
+  includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     // Use direct GET by _id for O(1) lookup performance instead of search

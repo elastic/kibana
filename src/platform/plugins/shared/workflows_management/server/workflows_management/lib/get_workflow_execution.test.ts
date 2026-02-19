@@ -122,7 +122,7 @@ describe('getWorkflowExecution', () => {
       );
     });
 
-    it('should default includeInput and includeOutput to true when omitted', async () => {
+    it('should default includeInput and includeOutput to false when omitted', async () => {
       await getWorkflowExecution({
         ...baseParams,
         esClient: mockEsClient,
@@ -130,7 +130,9 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(mockEsClient.mget).toHaveBeenCalledWith(
-        expect.not.objectContaining({ _source_excludes: expect.anything() })
+        expect.objectContaining({
+          _source_excludes: ['input', 'output'],
+        })
       );
     });
   });
