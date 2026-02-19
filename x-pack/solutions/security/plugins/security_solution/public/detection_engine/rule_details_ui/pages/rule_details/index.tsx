@@ -204,11 +204,14 @@ const defaultGroupingOptions = [
   },
 ];
 
-const defaultPanelOptions = {
+const DEFAULT_PANEL_HEADER_OPTIONS = {
   border: true,
   hideSubtitle: true,
-};
+} as const;
 
+/**
+ * Cutoff at which the About and Definition sections stack vertically to prevent content squishing (600px for About and 400px for Definition)
+ */
 const ABOUT_CONTENT_STACK_WIDTH_THRESHOLD = 1000;
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
@@ -787,7 +790,7 @@ export const RuleDetailsPage = connector(
                                     <StepPanel
                                       loading={isLoading}
                                       title={ruleI18n.DEFINITION}
-                                      headerProps={defaultPanelOptions}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
                                     >
                                       {rule !== null && !isStartingJobs && (
                                         <RuleDefinitionSection
@@ -806,7 +809,7 @@ export const RuleDetailsPage = connector(
                                     <StepPanel
                                       loading={isLoading}
                                       title={ruleI18n.SCHEDULE}
-                                      headerProps={defaultPanelOptions}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
                                     >
                                       {rule != null && <RuleScheduleSection rule={rule} />}
                                     </StepPanel>
@@ -820,7 +823,7 @@ export const RuleDetailsPage = connector(
                                       <StepPanel
                                         loading={isLoading}
                                         title={ruleI18n.ACTIONS}
-                                        headerProps={defaultPanelOptions}
+                                        headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
                                       >
                                         <StepRuleActionsReadOnly
                                           addPadding={false}
