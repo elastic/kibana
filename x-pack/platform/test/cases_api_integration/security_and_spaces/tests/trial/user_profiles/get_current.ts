@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       let apiKey: SecurityCreateApiKeyResponse;
       let noProfileHeaders: Record<string, string>;
 
-      // For profile is not available tests, we need an API key without security or API
+      // For "profile is not available" tests, we need an API key without security or API key
       // privileges to ensure that requests will not be able to retrieve profile info
       const roleDescriptors: Record<string, SecurityRoleDescriptor> = {
         some_role: {
@@ -48,7 +48,10 @@ export default function ({ getService }: FtrProviderContext) {
           applications: [
             {
               application: 'kibana-.kibana',
-              privileges: ['*'], // 'feature_securitySolutionCases.all', <- not sure why this was not enough
+              privileges: [
+                'feature_securitySolutionCasesV2.all',
+                'feature_securitySolutionFixture.all',
+              ],
               resources: ['*'],
             },
           ],

@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
-    it(`find a users with name that includes 'read'`, async () => {
+    it(`find users with name that includes 'read'`, async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
@@ -284,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteUsersAndRoles(getService, users, roles);
       });
 
-      it('finds 6 profiles when searching for the name sec when a user has both security and observability privileges', async () => {
+      it(`finds 6 profiles when searching for the name 'sec' when a user has both security and observability privileges`, async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
           req: {
