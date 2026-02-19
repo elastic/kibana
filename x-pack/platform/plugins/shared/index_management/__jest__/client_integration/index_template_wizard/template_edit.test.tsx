@@ -99,7 +99,8 @@ describe('<TemplateEdit />', () => {
     jest.useRealTimers();
   });
 
-  describe('without mappings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253550
+  describe.skip('without mappings', () => {
     const templateToEdit = fixtures.getTemplate({
       name: 'index_template_without_mappings',
       indexPatterns: ['indexPattern1'],
