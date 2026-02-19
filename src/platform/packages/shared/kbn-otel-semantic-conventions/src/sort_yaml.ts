@@ -8,7 +8,7 @@
  */
 
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 
 interface YamlAttribute {
   name?: string;
@@ -61,7 +61,7 @@ export function sortYamlFile(inputFile: string, outputFile: string): void {
   try {
     // Read and parse the YAML file
     const yamlContent = fs.readFileSync(inputFile, 'utf8');
-    const data = yaml.load(yamlContent) as ResolvedSemconvYaml;
+    const data = parse(yamlContent) as ResolvedSemconvYaml;
 
     if (!data || !data.groups) {
       throw new Error('Invalid YAML structure: missing "groups" property');
@@ -74,11 +74,11 @@ export function sortYamlFile(inputFile: string, outputFile: string): void {
     };
 
     // Write the sorted YAML back to file
-    const sortedYaml = yaml.dump(sortedData, {
+    const sortedYaml = stringify(sortedData, {
       indent: 2,
       lineWidth: -1, // Disable line wrapping
-      noRefs: true, // Disable anchors/references
-      sortKeys: false, // We handle sorting manually for better control
+      aliasDuplicateObjects: false, // Disable anchors/references
+      sortMapEntries: false, // We handle sorting manually for better control
     });
 
     fs.writeFileSync(outputFile, sortedYaml, 'utf8');
