@@ -21,11 +21,7 @@ export interface Props {
   navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNav = ({
-  isCollapsed$,
-  initialIsCollapsed,
-  navProps,
-}: Props) => {
+export const GridLayoutProjectSideNav = ({ isCollapsed$, initialIsCollapsed, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, initialIsCollapsed);
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
