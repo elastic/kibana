@@ -10,9 +10,8 @@ import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { getConnectorList, getDefaultConnector } from './utils';
 
-import type { EsqlServerPluginStart } from '../../types';
+import type { EsqlServerPluginStart } from '../types';
 
 export const registerNLtoESQLRoute = (
   router: IRouter,
@@ -38,15 +37,14 @@ export const registerNLtoESQLRoute = (
       const logger = context.logger.get();
       try {
         const { query } = request.body;
-        const [, { inference, actions }] = await getStartServices();
+        const [, { inference }] = await getStartServices();
 
-        const connectors = await getConnectorList({ actions, request });
-        const connector = getDefaultConnector({ connectors });
+        const defaultConnector = await inference.getDefaultConnector(request);
 
         const result = await lastValueFrom(
           naturalLanguageToEsql({
             client: inference.getClient({ request }),
-            connectorId: connector.connectorId,
+            connectorId: defaultConnector.connectorId,
             input: query,
             functionCalling: 'auto',
             logger,

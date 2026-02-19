@@ -9,8 +9,9 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const visorWidthPercentage = 0.5;
+export const visorWidthPercentage = 0.6;
 export const dropdownWidthPercentage = 0.35;
+export const MODE_SELECT_WIDTH = 160;
 const visorGradientPadding = '1px';
 const visorGradient =
   'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
@@ -54,8 +55,6 @@ export const visorStyles = (
     comboBoxWrapper: {
       background: euiTheme.colors.backgroundBasePlain,
       justifyContent: 'center',
-      borderBottomLeftRadius: euiTheme.size.s,
-      borderTopLeftRadius: euiTheme.size.s,
       paddingLeft: '2px',
       flexGrow: 1,
       maxWidth: `${
@@ -118,6 +117,42 @@ export const visorStyles = (
           box-shadow: none !important;
           outline: none !important;
         }
+      }
+    `,
+    modeSelectWrapper: css`
+      background: ${euiTheme.colors.backgroundBasePlain};
+      border-bottom-left-radius: ${euiTheme.size.s};
+      border-top-left-radius: ${euiTheme.size.s};
+      padding-left: 2px;
+      flex-shrink: 0;
+      flex-grow: 0;
+      width: ${MODE_SELECT_WIDTH}px;
+
+      .euiComboBox__inputWrap {
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        &:focus-within,
+        &:hover {
+          box-shadow: none !important;
+          outline: none !important;
+        }
+      }
+    `,
+    nlInputWrapper: css`
+      background: ${euiTheme.colors.backgroundBasePlain};
+      justify-content: center;
+      border-bottom-right-radius: ${euiTheme.size.s};
+      border-top-right-radius: ${euiTheme.size.s};
+      padding-right: 2px;
+    `,
+    nlInput: css`
+      box-shadow: none;
+      border: none;
+      &:focus,
+      &:hover {
+        box-shadow: none !important;
+        outline: none !important;
       }
     `,
     searchFieldStyles: css`

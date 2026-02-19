@@ -19,7 +19,7 @@ import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
 import { registerLookupIndexRoutes } from './lookup_index';
 import { registerGetSourcesRoute } from './get_all_sources';
 import { registerGetTimeFieldRoute } from './get_timefield';
-import { registerNLtoESQLRoute } from './nl_to_esql/nl_to_esql_route';
+import { registerNLtoESQLRoute } from './nl_to_esql_route';
 
 export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,

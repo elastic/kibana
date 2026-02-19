@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -21,8 +22,12 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
+import { ModeSelector, VisorMode } from './mode_selector';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
+import { extractQueryFromLLMMessage } from './utils';
+
+export { VisorMode } from './mode_selector';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -38,7 +43,11 @@ export interface QuickSearchVisorProps {
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Filter your data using KQL syntax',
+  defaultMessage: 'Filter your data using KQL',
+});
+
+const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
+  defaultMessage: 'Describe the query you want in plain language',
 });
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
@@ -53,12 +62,16 @@ export function QuickSearchVisor({
   onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql } = kibana.services;
+  const { kql, core } = kibana.services;
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
+  const [nlValue, setNlValue] = useState('');
+  const [isNlLoading, setIsNlLoading] = useState(false);
   const kqlInputRef = useRef<HTMLDivElement>(null);
+  const nlInputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
@@ -86,6 +99,31 @@ export function QuickSearchVisor({
     [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
+  const onNlSubmit = useCallback(async () => {
+    const trimmed = nlValue.trim();
+    if (!trimmed || isNlLoading) return;
+
+    setIsNlLoading(true);
+    try {
+      const result = await core.http.post<{ content: string }>('/internal/esql/nl_to_esql', {
+        body: JSON.stringify({ query: trimmed }),
+      });
+      if (result.content) {
+        const extractedQuery = extractQueryFromLLMMessage(result.content);
+        if (extractedQuery) {
+          onUpdateAndSubmitQuery(extractedQuery);
+        }
+        setNlValue('');
+      }
+    } finally {
+      setIsNlLoading(false);
+    }
+  }, [nlValue, isNlLoading, core.http, onUpdateAndSubmitQuery]);
+
+  const onModeChange = useCallback((mode: VisorMode) => {
+    setVisorMode(mode);
+  }, []);
+
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
     const sources = sourceFromUpdatedQuery
@@ -106,12 +144,15 @@ export function QuickSearchVisor({
   }, [query, selectedSources]);
 
   useEffect(() => {
-    if (isVisible && kqlInputRef.current) {
-      // Find the textarea within the KQL input and focus it
-      const textArea = kqlInputRef.current.querySelector('textarea');
-      textArea?.focus();
+    if (isVisible) {
+      if (visorMode === VisorMode.KQL && kqlInputRef.current) {
+        const textArea = kqlInputRef.current.querySelector('textarea');
+        textArea?.focus();
+      } else if (visorMode === VisorMode.NaturalLanguage && nlInputRef.current) {
+        nlInputRef.current.focus();
+      }
     }
-  }, [isVisible]);
+  }, [isVisible, visorMode]);
 
   const comboBoxWidth = useMemo(() => {
     const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
@@ -148,42 +189,71 @@ export function QuickSearchVisor({
           responsive={false}
           css={styles.visorGradientBox}
         >
-          <EuiFlexItem css={styles.comboBoxWrapper}>
-            <SourcesDropdown
-              currentSources={selectedSources.map((source) => source.label)}
-              onChangeSources={(newSources) => {
-                setSelectedSources(newSources.map((source) => ({ label: source })));
-                userSelectedSourceRef.current = true;
-              }}
-            />
+          <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
+            <ModeSelector onModeChange={onModeChange} />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.separator} />
-          <EuiFlexItem css={styles.searchWrapper}>
-            <div ref={kqlInputRef}>
-              <KQLComponent
-                isDisabled={!isVisible}
-                iconType="search"
-                disableLanguageSwitcher={true}
-                indexPatterns={selectedSources.map((source) => source.label)}
-                bubbleSubmitEvent={false}
-                query={{
-                  query: searchValue,
-                  language: 'kuery',
+          {visorMode === VisorMode.KQL ? (
+            <>
+              <EuiFlexItem css={styles.comboBoxWrapper}>
+                <SourcesDropdown
+                  currentSources={selectedSources.map((source) => source.label)}
+                  onChangeSources={(newSources) => {
+                    setSelectedSources(newSources.map((source) => ({ label: source })));
+                    userSelectedSourceRef.current = true;
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={styles.separator} />
+              <EuiFlexItem css={styles.searchWrapper}>
+                <div ref={kqlInputRef}>
+                  <KQLComponent
+                    isDisabled={!isVisible}
+                    iconType="search"
+                    disableLanguageSwitcher={true}
+                    indexPatterns={selectedSources.map((source) => source.label)}
+                    bubbleSubmitEvent={false}
+                    query={{
+                      query: searchValue,
+                      language: 'kuery',
+                    }}
+                    disableAutoFocus={false}
+                    placeholder={searchPlaceholder}
+                    onChange={(newQuery) => {
+                      onKqlValueChange(newQuery.query as string);
+                    }}
+                    onSubmit={(newQuery) => {
+                      onKqlSubmit(newQuery.query as string);
+                    }}
+                    appName="esqlEditorVisor"
+                    dataTestSubj="esqlVisorKQLQueryInput"
+                    size="s"
+                  />
+                </div>
+              </EuiFlexItem>
+            </>
+          ) : (
+            <EuiFlexItem css={styles.nlInputWrapper}>
+              <EuiFieldText
+                inputRef={nlInputRef}
+                compressed
+                fullWidth
+                icon="sparkles"
+                placeholder={nlPlaceholder}
+                value={nlValue}
+                isLoading={isNlLoading}
+                disabled={!isVisible || isNlLoading}
+                onChange={(e) => setNlValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onNlSubmit();
+                  }
                 }}
-                disableAutoFocus={false}
-                placeholder={searchPlaceholder}
-                onChange={(newQuery) => {
-                  onKqlValueChange(newQuery.query as string);
-                }}
-                onSubmit={(newQuery) => {
-                  onKqlSubmit(newQuery.query as string);
-                }}
-                appName="esqlEditorVisor"
-                dataTestSubj="esqlVisorKQLQueryInput"
-                size="s"
+                data-test-subj="esqlVisorNLQueryInput"
+                css={styles.nlInput}
               />
-            </div>
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>

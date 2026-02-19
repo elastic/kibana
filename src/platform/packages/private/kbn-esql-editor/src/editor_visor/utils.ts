@@ -44,3 +44,17 @@ export const generateIndexPatterns = (sourceNames: string[]): string[] => {
 
   return filteredPatterns.sort();
 };
+
+export const extractQueryFromLLMMessage = (text: string): string | null => {
+  // This regular expression looks for a code block
+  // (``` followed by an optional language identifier)
+  // and captures the content inside.
+  const regex = /```(?:esql)?\n([\s\S]*?)\n```/;
+  const match = text.match(regex);
+
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+
+  return null;
+};

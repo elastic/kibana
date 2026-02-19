@@ -22,8 +22,7 @@
       "fileUpload",
       "fieldFormats",
       "kql",
-      "inference",
-      "actions"
+      "inference"
     ],
     "requiredBundles": [
       "kibanaReact",
