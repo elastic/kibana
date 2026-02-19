@@ -50,6 +50,7 @@ export function DateRangePickerControl() {
     panelId,
     initialFocus,
     timeWindowButtonsConfig,
+    _onInputChange,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
@@ -77,6 +78,7 @@ export function DateRangePickerControl() {
       const newText =
         currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
       setText(newText);
+      _onInputChange?.(newText);
       return newText;
     },
   });
@@ -86,7 +88,9 @@ export function DateRangePickerControl() {
   };
 
   const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
+    const nextValue = event.target.value;
+    setText(nextValue);
+    _onInputChange?.(nextValue);
   };
 
   const onInputKeyDown = (event: KeyboardEvent) => {
@@ -106,6 +110,7 @@ export function DateRangePickerControl() {
 
   const onInputClear = () => {
     setText('');
+    _onInputChange?.('');
     inputRef.current?.focus();
   };
 

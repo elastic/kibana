@@ -56,6 +56,9 @@ export interface DateRangePickerProps {
   /** Show invalid state */
   isInvalid?: boolean;
 
+  /** Called when the editing input text changes. */
+  _onInputChange?: (value: string) => void;
+
   /**
    * Reduce input height and padding
    * @default true

@@ -75,6 +75,19 @@ describe('DateRangePickerControl', () => {
       expect(button).toHaveTextContent('Last 20 minutes');
     });
 
+    it('calls _onInputChange when typing and clearing input', () => {
+      const onInputChange = jest.fn();
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} _onInputChange={onInputChange} />);
+
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'last 15 minutes' } });
+
+      expect(onInputChange).toHaveBeenCalledWith('last 15 minutes');
+
+      fireEvent.click(screen.getByLabelText('Clear input'));
+      expect(onInputChange).toHaveBeenCalledWith('');
+    });
+
     it('closes on outside click and returns to idle mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);

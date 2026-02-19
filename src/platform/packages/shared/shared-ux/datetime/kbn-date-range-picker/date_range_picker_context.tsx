@@ -86,6 +86,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   onPresetSave?: (option: TimeRangeBoundsOption) => void;
   /** Called when the user wants to delete a saved preset. */
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
+  /** Called when the editing input text changes. */
+  _onInputChange?: (value: string) => void;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -119,6 +121,7 @@ export function DateRangePickerProvider({
   recent = [],
   onPresetSave,
   onPresetDelete,
+  _onInputChange,
 }: PropsWithChildren<DateRangePickerProps>) {
   const { euiTheme } = useEuiTheme();
   const maxWidth = euiTheme.components.forms.maxWidth;
@@ -221,6 +224,7 @@ export function DateRangePickerProvider({
       recent,
       onPresetSave,
       onPresetDelete,
+      _onInputChange,
     }),
     [
       text,
@@ -240,6 +244,7 @@ export function DateRangePickerProvider({
       recent,
       onPresetSave,
       onPresetDelete,
+      _onInputChange,
     ]
   );
 
