@@ -13,7 +13,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 import {
   annotationsResponseSchema,
   deleteAnnotationSchema,
@@ -37,6 +37,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
  */
 export function annotationRoutes(
   { router, routeGuard }: RouteInitialization,
+  serverless: ServerlessInfo,
   securityPlugin?: SecurityPluginSetup
 ) {
   /**
@@ -66,7 +67,7 @@ export function annotationRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
         try {
-          const { getAnnotations } = annotationServiceProvider(client);
+          const { getAnnotations } = annotationServiceProvider(client, serverless);
           const resp = await getAnnotations(request.body);
 
           return response.ok({
@@ -107,7 +108,7 @@ export function annotationRoutes(
             throw getAnnotationsFeatureUnavailableErrorMessage();
           }
 
-          const { indexAnnotation } = annotationServiceProvider(client);
+          const { indexAnnotation } = annotationServiceProvider(client, serverless);
 
           const currentUser =
             securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
@@ -154,7 +155,7 @@ export function annotationRoutes(
           }
 
           const annotationId = request.params.annotationId;
-          const { deleteAnnotation } = annotationServiceProvider(client);
+          const { deleteAnnotation } = annotationServiceProvider(client, serverless);
           const resp = await deleteAnnotation(annotationId);
 
           return response.ok({

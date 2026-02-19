@@ -25,6 +25,7 @@ import {
   getAnnotationFieldValue,
 } from '../../../common/types/annotations';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { ServerlessInfo } from '../../types';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -69,7 +70,10 @@ export interface AggByJob {
   latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
 }
 
-export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
+export function annotationProvider(
+  { asInternalUser }: IScopedClusterClient,
+  serverless: ServerlessInfo
+) {
   // Find the index the annotation is stored in.
   async function fetchAnnotationIndex(id: string) {
     const searchParams: estypes.SearchRequest = {
@@ -112,6 +116,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       body: annotation,
       refresh: 'wait_for',
       require_alias: true,
+      ...(serverless.isServerless && serverless.cpsEnabled
+        ? { project_routing: '_alias:_origin' }
+        : {}),
     };
 
     if (typeof annotation._id !== 'undefined') {
@@ -294,6 +301,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
           ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
         },
       },
+      ...(serverless.isServerless && serverless.cpsEnabled
+        ? { project_routing: '_alias:_origin' }
+        : {}),
     };
 
     try {
@@ -385,6 +395,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
           },
         },
       },
+      ...(serverless.isServerless && serverless.cpsEnabled
+        ? { project_routing: '_alias:_origin' }
+        : {}),
     };
 
     const body = await asInternalUser.search<Annotation>(params, { maxRetries: 0 });
@@ -406,6 +419,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       index,
       id,
       refresh: 'wait_for',
+      ...(serverless.isServerless && serverless.cpsEnabled
+        ? { project_routing: '_alias:_origin' }
+        : {}),
     };
 
     return await asInternalUser.delete(deleteParams);

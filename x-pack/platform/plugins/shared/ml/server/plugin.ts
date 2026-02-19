@@ -26,7 +26,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { PluginsSetup, PluginsStart, RouteInitialization, ServerlessInfo } from './types';
 import { type MlCapabilities, alertingFeatures } from '../common/types/capabilities';
 import { notificationsRoutes } from './routes/notifications';
 import {
@@ -103,7 +103,7 @@ export class MlServerPlugin
     nlp: true,
   };
   private compatibleModuleType: CompatibleModule | null = null;
-  private isServerless: boolean;
+  private serverless: ServerlessInfo;
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
@@ -112,7 +112,11 @@ export class MlServerPlugin
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
 
     const config = ctx.config.get();
-    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
+    this.serverless = {
+      isServerless: ctx.env.packageInfo.buildFlavor === 'serverless',
+      cpsEnabled: false,
+    };
     initEnabledFeatures(this.enabledFeatures, config);
     this.compatibleModuleType = config.compatibleModuleType ?? null;
     this.enabledFeatures = Object.freeze(this.enabledFeatures);
@@ -123,6 +127,7 @@ export class MlServerPlugin
     this.security = plugins.security;
     this.home = plugins.home;
     this.cases = plugins.cases;
+    this.serverless.cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -222,9 +227,11 @@ export class MlServerPlugin
       () => this.auditService,
       () => this.isMlReady,
       this.compatibleModuleType,
-      this.enabledFeatures
+      this.enabledFeatures,
+      this.serverless
     );
 
+    // should this contain serverless?
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       routeGuard: new RouteGuard(
@@ -235,7 +242,8 @@ export class MlServerPlugin
         plugins.security?.authz,
         () => this.isMlReady,
         () => this.dataViews,
-        coreSetup.getStartServices
+        coreSetup.getStartServices,
+        this.serverless
       ),
       mlLicense: this.mlLicense,
       getEnabledFeatures: () => this.enabledFeatures,
@@ -243,15 +251,15 @@ export class MlServerPlugin
 
     // Register Anomaly Detection routes
     if (this.enabledFeatures.ad) {
-      annotationRoutes(routeInit, plugins.security);
+      annotationRoutes(routeInit, this.serverless, plugins.security);
       calendars(routeInit);
       dataFeedRoutes(routeInit);
-      dataRecognizer(routeInit, this.compatibleModuleType);
+      dataRecognizer(routeInit, this.compatibleModuleType, this.serverless);
       filtersRoutes(routeInit);
-      jobAuditMessagesRoutes(routeInit);
+      jobAuditMessagesRoutes(routeInit, this.serverless);
       jobRoutes(routeInit);
-      jobServiceRoutes(routeInit);
-      resultsServiceRoutes(routeInit);
+      jobServiceRoutes(routeInit, this.serverless);
+      resultsServiceRoutes(routeInit, this.serverless);
       jobValidationRoutes(routeInit);
     }
 
@@ -270,7 +278,7 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    managementRoutes(routeInit);
+    managementRoutes(routeInit, this.serverless);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
@@ -279,9 +287,9 @@ export class MlServerPlugin
       getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
-      isServerless: this.isServerless,
+      serverless: this.serverless,
     });
-    notificationsRoutes(routeInit);
+    notificationsRoutes(routeInit, this.serverless);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });

@@ -20,6 +20,7 @@ import type {
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '../../../common/types/notifications';
+import type { ServerlessInfo } from '../../types';
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
 
@@ -32,7 +33,8 @@ export class NotificationsService {
   constructor(
     private readonly scopedClusterClient: IScopedClusterClient,
     private readonly mlSavedObjectService: MLSavedObjectService,
-    private readonly enabledFeatures: MlFeatures
+    private readonly enabledFeatures: MlFeatures,
+    private readonly serverless: ServerlessInfo
   ) {}
 
   private getDefaultCountResponse() {
@@ -136,6 +138,9 @@ export class NotificationsService {
                   ],
                 },
               },
+              ...(this.serverless.isServerless && this.serverless.cpsEnabled
+                ? { project_routing: '_alias:_origin' }
+                : {}),
             },
             { maxRetries: 0 }
           );
@@ -249,6 +254,9 @@ export class NotificationsService {
               terms: { field: 'level' },
             },
           },
+          ...(this.serverless.isServerless && this.serverless.cpsEnabled
+            ? { project_routing: '_alias:_origin' }
+            : {}),
         });
 
         if (!responseBody.aggregations) {

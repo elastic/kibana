@@ -184,10 +184,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
       aggs,
       ...runtimeMappings,
-      // @ts-expect-error datafeed types need updating
       ...(datafeedConfig?.project_routing
-        ? // @ts-expect-error datafeed types need updating
-          { project_routing: datafeedConfig.project_routing }
+        ? { project_routing: datafeedConfig.project_routing }
         : {}),
     };
 
@@ -424,10 +422,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         ...body,
         ...getIndicesOptions(datafeedConfig),
-        // @ts-expect-error datafeed types need updating
         ...(datafeedConfig?.project_routing
-          ? // @ts-expect-error datafeed types need updating
-            { project_routing: datafeedConfig.project_routing }
+          ? { project_routing: datafeedConfig.project_routing }
           : {}),
       },
       { maxRetries: 0 }

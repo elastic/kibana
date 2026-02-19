@@ -8,6 +8,7 @@
 import { createContext, type FC, useContext } from 'react';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -125,6 +126,8 @@ export interface AiopsAppContextValue {
   embeddingOrigin: string;
   /** Observability AI Assistant */
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  /** CPS plugin for project routing */
+  cps?: CPSPluginStart;
 }
 
 /**

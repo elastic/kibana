@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -36,6 +36,7 @@ import {
   getScoresByBucketSchema,
   getInfluencerValueMaxScoreByTimeSchema,
 } from './schemas/results_service_schema';
+import { anomalyChartsDataProvider } from '../models/results_service/anomaly_charts';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);
@@ -115,7 +116,10 @@ function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
+export function resultsServiceRoutes(
+  { router, routeGuard }: RouteInitialization,
+  serverless: ServerlessInfo
+) {
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/top_influencers`,
@@ -443,7 +447,11 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
+          const { getDatafeedResultsChartData } = resultsServiceProvider(
+            mlClient,
+            client,
+            serverless
+          );
           const resp = await getDatafeedResultsChartData(request.body);
 
           return response.ok({
@@ -478,7 +486,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getAnomalyChartsData } = resultsServiceProvider(mlClient, client);
+          const { getAnomalyChartsData } = anomalyChartsDataProvider(mlClient, client);
           const resp = await getAnomalyChartsData(request.body);
 
           return response.ok({
@@ -513,7 +521,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getRecordsForCriteria } = resultsServiceProvider(mlClient, client);
+          const { getRecordsForCriteria } = anomalyChartsDataProvider(mlClient, client);
 
           const { jobIds, criteriaFields, earliestMs, latestMs, threshold, interval } =
             request.body;

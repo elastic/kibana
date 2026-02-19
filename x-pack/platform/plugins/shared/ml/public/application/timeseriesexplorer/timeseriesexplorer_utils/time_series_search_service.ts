@@ -79,6 +79,7 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
       }
 
       return mlResultsService.getModelPlotOutput(
+        // !!!!!!!!!!!!!!!!!!!!!
         job.job_id,
         detectorIndex,
         criteriaFields,
@@ -96,6 +97,7 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
 
       return mlResultsService
         .getMetricData(
+          // !!!!!!!!!!!!!!!!!!!!!
           chartConfig.datafeedConfig.indices.join(','),
           entityFields,
           chartConfig.datafeedConfig.query,
@@ -171,6 +173,7 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
         const entityFieldNames: string[] = blankEntityFields.map((f) => f.fieldName);
         mlApi
           .getCardinalityOfFields({
+            // !!!!!!!!!!!!!!!!!!!!!
             index: chartConfig.datafeedConfig.indices.join(','),
             fieldNames: entityFieldNames,
             query: chartConfig.datafeedConfig.query,

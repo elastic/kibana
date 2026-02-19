@@ -62,6 +62,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
       ];
     }, [jobId]);
 
+    // here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     useEffect(
       function fetchAndCreateDataView() {
         if (!dataViewsService || disabled) return;
@@ -71,6 +72,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
 
         const fetchDataView = async () => {
           try {
+            // ask someone about getFieldsForWildcard, should it take project routing?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             const allFields = await dataViewsService.getFieldsForWildcard({
               pattern: ML_RESULTS_INDEX_PATTERN,
             });
@@ -157,6 +159,8 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           <EuiSpacer size="s" />
 
           {unifiedSearch ? (
+            // does this need project routing too ?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // shit it really does !!!!!!!!!!!!
             <unifiedSearch.ui.SearchBar
               appName="ML"
               iconType="search"

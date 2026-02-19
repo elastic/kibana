@@ -10,5 +10,4 @@ export const createMlResultsServiceMock = () => ({
   getRecordsForCriteria: jest.fn(),
   getScheduledEventsByBucket: jest.fn(),
   fetchPartitionFieldsValues: jest.fn(),
-  getEventDistributionData: jest.fn(),
 });

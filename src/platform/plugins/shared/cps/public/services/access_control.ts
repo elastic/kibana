@@ -83,6 +83,15 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
       },
     ],
   },
+  ml: {
+    defaultAccess: ProjectRoutingAccess.DISABLED,
+    routeRules: [
+      {
+        pattern: /ml\/aiops/,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
+    ],
+  },
 };
 
 /**

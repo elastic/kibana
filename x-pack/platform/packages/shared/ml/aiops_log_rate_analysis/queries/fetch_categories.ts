@@ -63,7 +63,7 @@ export const getCategoryRequest = (
   fieldName: string,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
-  const { index, timeFieldName } = params;
+  const { index, timeFieldName, projectRouting } = params;
 
   const query = getQueryWithParams({
     params,
@@ -81,6 +81,7 @@ export const getCategoryRequest = (
     undefined,
     query,
     undefined,
+    projectRouting,
     wrap,
     undefined,
     undefined,

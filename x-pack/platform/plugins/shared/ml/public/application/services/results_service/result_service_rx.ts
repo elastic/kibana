@@ -82,6 +82,7 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
     ): Observable<MetricData> {
       const scriptFields = datafeedConfig?.script_fields;
       const aggFields = getDatafeedAggregations(datafeedConfig);
+      const projectRouting = datafeedConfig?.project_routing;
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
@@ -153,6 +154,7 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
         ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
           ? { runtime_mappings: datafeedConfig?.runtime_mappings }
           : {}),
+        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
       };
 
       if (shouldCriteria.length > 0) {

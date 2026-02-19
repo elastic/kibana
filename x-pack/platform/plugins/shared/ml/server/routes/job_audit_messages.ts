@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 import {
   jobAuditMessagesQuerySchema,
@@ -18,7 +18,10 @@ import {
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitialization) {
+export function jobAuditMessagesRoutes(
+  { router, routeGuard }: RouteInitialization,
+  serverless: ServerlessInfo
+) {
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages/{jobId}`,
@@ -44,7 +47,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
-            const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+            const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, serverless);
             const { jobId } = request.params;
             const { from, start, end } = request.query;
             const resp = await getJobAuditMessages(mlSavedObjectService, {
@@ -88,7 +91,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
-            const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+            const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, serverless);
             const { from } = request.query;
             const resp = await getJobAuditMessages(mlSavedObjectService, { from });
 
@@ -126,7 +129,11 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
-            const { clearJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+            const { clearJobAuditMessages } = jobAuditMessagesProvider(
+              client,
+              mlClient,
+              serverless
+            );
             const { jobId, notificationIndices } = request.body;
             const resp = await clearJobAuditMessages(jobId, notificationIndices);
 

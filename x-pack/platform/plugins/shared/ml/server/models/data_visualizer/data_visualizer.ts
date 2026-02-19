@@ -440,10 +440,9 @@ export class DataVisualizer {
       ...(isPopulatedObject(combinedRuntimeMappings)
         ? { runtime_mappings: combinedRuntimeMappings }
         : {}),
-      // @ts-expect-error datafeed types need updating
+
       ...(datafeedConfig?.project_routing
-        ? // @ts-expect-error datafeed types need updating
-          { project_routing: datafeedConfig.project_routing }
+        ? { project_routing: datafeedConfig.project_routing }
         : {}),
     };
 

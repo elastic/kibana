@@ -84,6 +84,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -201,6 +202,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -212,6 +214,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           intervalMs,
           additionalFilter
         ),
@@ -263,6 +266,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     cancelRequest,
     runValidateFieldRequest,
     searchQuery,
+    cps?.cpsManager,
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
@@ -361,6 +365,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                             color="subdued"
                             type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -393,6 +398,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                             color="subdued"
                             type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

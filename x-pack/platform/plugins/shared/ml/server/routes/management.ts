@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 import { listTypeSchema } from './schemas/management_schema';
 
 import { jobServiceProvider } from '../models/job_service';
@@ -24,7 +24,10 @@ import { filterForEnabledFeatureModels } from './trained_models';
 /**
  * Routes for management service
  */
-export function managementRoutes({ router, routeGuard, getEnabledFeatures }: RouteInitialization) {
+export function managementRoutes(
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  serverless: ServerlessInfo
+) {
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/management/list/{listType}`,
@@ -59,7 +62,7 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
 
             switch (listType) {
               case 'anomaly-detector':
-                const { jobsSummary } = jobServiceProvider(client, mlClient);
+                const { jobsSummary } = jobServiceProvider(client, mlClient, serverless);
                 const [jobs, adJobStatus] = await Promise.all([jobsSummary(), jobsSpaces()]);
 
                 const adJobsWithSpaces: AnomalyDetectionManagementItems[] = jobs.map((job) => {

@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 import {
   categorizationFieldValidationSchema,
   basicChartSchema,
@@ -37,7 +37,10 @@ import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
+export function jobServiceRoutes(
+  { router, routeGuard }: RouteInitialization,
+  serverless: ServerlessInfo
+) {
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_start_datafeeds`,
@@ -61,7 +64,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { forceStartDatafeeds } = jobServiceProvider(client, mlClient);
+          const { forceStartDatafeeds } = jobServiceProvider(client, mlClient, serverless);
           const { datafeedIds, start, end } = request.body;
           const resp = await forceStartDatafeeds(datafeedIds, start, end);
 
@@ -97,7 +100,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { stopDatafeeds } = jobServiceProvider(client, mlClient);
+          const { stopDatafeeds } = jobServiceProvider(client, mlClient, serverless);
           const { datafeedIds } = request.body;
           const resp = await stopDatafeeds(datafeedIds);
 
@@ -135,7 +138,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const alerting = await context.alerting;
           const rulesClient = await alerting?.getRulesClient();
-          const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
+          const { deleteJobs } = jobServiceProvider(client, mlClient, serverless, rulesClient);
 
           const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
 
@@ -173,7 +176,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { closeJobs } = jobServiceProvider(client, mlClient);
+          const { closeJobs } = jobServiceProvider(client, mlClient, serverless);
           const { jobIds } = request.body;
           const resp = await closeJobs(jobIds);
 
@@ -209,7 +212,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { resetJobs } = jobServiceProvider(client, mlClient);
+          const { resetJobs } = jobServiceProvider(client, mlClient, serverless);
           const { jobIds, deleteUserAnnotations } = request.body;
           const resp = await resetJobs(jobIds, deleteUserAnnotations);
 
@@ -246,7 +249,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { forceStopAndCloseJob } = jobServiceProvider(client, mlClient);
+          const { forceStopAndCloseJob } = jobServiceProvider(client, mlClient, serverless);
           const { jobId } = request.body;
           const resp = await forceStopAndCloseJob(jobId);
 
@@ -283,7 +286,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const alerting = await context.alerting;
           const rulesClient = await alerting?.getRulesClient();
-          const { jobsSummary } = jobServiceProvider(client, mlClient, rulesClient);
+          const { jobsSummary } = jobServiceProvider(client, mlClient, serverless, rulesClient);
           const { jobIds } = request.body;
           const resp = await jobsSummary(jobIds);
 
@@ -318,7 +321,12 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const alerting = await context.alerting;
           const rulesClient = await alerting?.getRulesClient();
-          const { getJobIdsWithGeo } = jobServiceProvider(client, mlClient, rulesClient);
+          const { getJobIdsWithGeo } = jobServiceProvider(
+            client,
+            mlClient,
+            serverless,
+            rulesClient
+          );
 
           const resp = await getJobIdsWithGeo();
 
@@ -350,7 +358,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { jobsWithTimerange } = jobServiceProvider(client, mlClient);
+          const { jobsWithTimerange } = jobServiceProvider(client, mlClient, serverless);
           const resp = await jobsWithTimerange();
 
           return response.ok({
@@ -385,7 +393,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getJobForCloning } = jobServiceProvider(client, mlClient);
+          const { getJobForCloning } = jobServiceProvider(client, mlClient, serverless);
           const { jobId, retainCreatedBy } = request.body;
 
           const resp = await getJobForCloning(jobId, retainCreatedBy);
@@ -424,7 +432,12 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           const alerting = await context.alerting;
           const rulesClient = await alerting?.getRulesClient();
 
-          const { createFullJobsList } = jobServiceProvider(client, mlClient, rulesClient);
+          const { createFullJobsList } = jobServiceProvider(
+            client,
+            mlClient,
+            serverless,
+            rulesClient
+          );
           const { jobIds } = request.body;
           const resp = await createFullJobsList(jobIds);
 
@@ -456,7 +469,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
         try {
-          const { getAllGroups } = jobServiceProvider(client, mlClient);
+          const { getAllGroups } = jobServiceProvider(client, mlClient, serverless);
           const resp = await getAllGroups();
 
           return response.ok({
@@ -491,7 +504,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { updateGroups } = jobServiceProvider(client, mlClient);
+          const { updateGroups } = jobServiceProvider(client, mlClient, serverless);
           const { jobs } = request.body;
           const resp = await updateGroups(jobs);
 
@@ -523,7 +536,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
         try {
-          const { blockingJobTasks } = jobServiceProvider(client, mlClient);
+          const { blockingJobTasks } = jobServiceProvider(client, mlClient, serverless);
           const resp = await blockingJobTasks();
 
           return response.ok({
@@ -559,7 +572,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { jobsExist } = jobServiceProvider(client, mlClient);
+          const { jobsExist } = jobServiceProvider(client, mlClient, serverless);
           const { jobIds, allSpaces } = request.body;
           const resp = await jobsExist(jobIds, allSpaces);
 
@@ -599,7 +612,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           try {
             const { indexPattern } = request.params;
             const isRollup = request.query?.rollup === 'true';
-            const { newJobCaps } = jobServiceProvider(client, mlClient);
+            const { newJobCaps } = jobServiceProvider(client, mlClient, serverless);
 
             const dataViewsService = await getDataViewsService();
             const resp = await newJobCaps(indexPattern, isRollup, dataViewsService);
@@ -652,7 +665,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             projectRouting,
           } = request.body;
 
-          const { newJobLineChart } = jobServiceProvider(client, mlClient);
+          const { newJobLineChart } = jobServiceProvider(client, mlClient, serverless);
           const resp = await newJobLineChart(
             indexPatternTitle,
             timeField,
@@ -714,7 +727,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             projectRouting,
           } = request.body;
 
-          const { newJobPopulationChart } = jobServiceProvider(client, mlClient);
+          const { newJobPopulationChart } = jobServiceProvider(client, mlClient, serverless);
           const resp = await newJobPopulationChart(
             indexPatternTitle,
             timeField,
@@ -757,7 +770,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
         try {
-          const { getAllJobAndGroupIds } = jobServiceProvider(client, mlClient);
+          const { getAllJobAndGroupIds } = jobServiceProvider(client, mlClient, serverless);
           const resp = await getAllJobAndGroupIds();
 
           return response.ok({
@@ -792,7 +805,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { getLookBackProgress } = jobServiceProvider(client, mlClient);
+          const { getLookBackProgress } = jobServiceProvider(client, mlClient, serverless);
           const { jobId, start, end } = request.body;
           const resp = await getLookBackProgress(jobId, start, end);
 
@@ -889,7 +902,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { topCategories } = jobServiceProvider(client, mlClient);
+          const { topCategories } = jobServiceProvider(client, mlClient, serverless);
           const { jobId, count } = request.body;
           const resp = await topCategories(jobId, count);
 
@@ -984,7 +997,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
-          const { revertModelSnapshot } = jobServiceProvider(client, mlClient);
+          const { revertModelSnapshot } = jobServiceProvider(client, mlClient, serverless);
           const { jobId, snapshotId, replay, end, deleteInterveningResults, calendarEvents } =
             request.body;
           const resp = await revertModelSnapshot(
@@ -1030,7 +1043,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const bulkJobs = request.body;
 
-          const { bulkCreate } = jobServiceProvider(client, mlClient);
+          const { bulkCreate } = jobServiceProvider(client, mlClient, serverless);
           const jobs = (Array.isArray(bulkJobs) ? bulkJobs : [bulkJobs]) as Array<{
             job: Job;
             datafeed: Datafeed;

@@ -22,14 +22,15 @@ import {
   dataRecognizerConfigResponse,
   jobExistsResponse,
 } from './schemas/modules';
-import type { RouteInitialization } from '../types';
+import type { RouteInitialization, ServerlessInfo } from '../types';
 
 /**
  * Recognizer routes.
  */
 export function dataRecognizer(
   { router, routeGuard }: RouteInitialization,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  serverless: ServerlessInfo
 ) {
   router.versioned
     .get({
@@ -82,7 +83,8 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType
+              compatibleModuleType,
+              serverless
             );
             const results = await dr.findMatches(indexPatternTitle, filter);
 
@@ -140,7 +142,8 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType
+              compatibleModuleType,
+              serverless
             );
             const results = await dr.findIndexMatches(moduleId, size);
 
@@ -210,7 +213,8 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType
+              compatibleModuleType,
+              serverless
             );
 
             const results =
@@ -294,7 +298,8 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType
+              compatibleModuleType,
+              serverless
             );
             const result = await dr.setup(
               moduleId,
@@ -379,7 +384,8 @@ export function dataRecognizer(
               dataViewsService,
               mlSavedObjectService,
               request,
-              compatibleModuleType
+              compatibleModuleType,
+              serverless
             );
             const result = await dr.dataRecognizerJobsExist(moduleId);
 
