@@ -6,7 +6,7 @@
  */
 
 import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
-import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
+import { buildAlertEventsFromEsqlResponse, buildRecoveryAlertEvents } from './build_alert_events';
 
 describe('buildAlertEventsFromEsqlResponse', () => {
   beforeAll(() => {
@@ -59,5 +59,76 @@ describe('buildAlertEventsFromEsqlResponse', () => {
 
     // Different grouping should produce different group_hash
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
+  });
+});
+
+describe('buildRecoveryAlertEvents', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('creates recovered events for active groups not in the breached set', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      scheduled_timestamp: '2024-12-31T23:59:00.000Z',
+      rule: { id: 'rule-123', version: 1 },
+      group_hash: 'hash-b',
+      data: {},
+      status: 'recovered',
+      source: 'internal',
+      type: 'signal',
+    });
+  });
+
+  it('returns empty array when all active groups are still breaching', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
+  });
+
+  it('returns recovered events for all active groups when none are breaching', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [{ group_hash: 'hash-a' }, { group_hash: 'hash-b' }],
+      breachedGroupHashes: new Set(),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toHaveLength(2);
+    expect(events.map((e) => e.group_hash)).toEqual(['hash-a', 'hash-b']);
+    expect(events.every((e) => e.status === 'recovered')).toBe(true);
+  });
+
+  it('returns empty array when there are no active groups', () => {
+    const events = buildRecoveryAlertEvents({
+      ruleId: 'rule-123',
+      ruleVersion: 1,
+      activeGroupHashes: [],
+      breachedGroupHashes: new Set(['hash-a']),
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    expect(events).toEqual([]);
   });
 });

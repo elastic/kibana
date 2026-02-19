@@ -12,6 +12,7 @@ import { stableStringify } from '@kbn/std';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
+import type { ActiveAlertGroupHash } from '../director/queries';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -105,4 +106,39 @@ export function buildAlertEventsFromEsqlResponse({
 
     return doc;
   });
+}
+
+export interface BuildRecoveryAlertEventsOpts {
+  ruleId: string;
+  ruleVersion: number;
+  activeGroupHashes: ActiveAlertGroupHash[];
+  breachedGroupHashes: Set<string>;
+  scheduledTimestamp: string;
+}
+
+/**
+ * Creates `recovered` alert events for groups that were previously in a non-inactive
+ * episode state but are no longer present in the current breached set.
+ */
+export function buildRecoveryAlertEvents({
+  ruleId,
+  ruleVersion,
+  activeGroupHashes,
+  breachedGroupHashes,
+  scheduledTimestamp,
+}: BuildRecoveryAlertEventsOpts): AlertEvent[] {
+  const wroteAt = new Date().toISOString();
+
+  return activeGroupHashes
+    .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
+    .map(({ group_hash }) => ({
+      '@timestamp': wroteAt,
+      scheduled_timestamp: scheduledTimestamp,
+      rule: { id: ruleId, version: ruleVersion },
+      group_hash,
+      data: {},
+      status: 'recovered' as const,
+      source: 'internal',
+      type: 'signal' as const,
+    }));
 }

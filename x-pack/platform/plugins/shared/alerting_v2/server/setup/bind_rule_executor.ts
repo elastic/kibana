@@ -17,6 +17,7 @@ import {
   ValidateRuleStep,
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
+  CreateRecoveryEventsStep,
 } from '../lib/rule_executor/steps';
 import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
@@ -47,6 +48,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
