@@ -8,11 +8,11 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ValidationOptions } from '@kbn/esql-language';
 
-type ValidateQueryCallbacks = Parameters<typeof validateQuery>[1];
+export type ValidateEsqlQueryCallbacks = Parameters<typeof validateQuery>[1];
 
 export const validateEsqlQuery = async (
   query: string,
-  callbacks?: ValidateQueryCallbacks,
+  callbacks?: ValidateEsqlQueryCallbacks,
   options?: ValidationOptions
 ): Promise<string | undefined> => {
   const { errors } = await validateQuery(query, callbacks, options);

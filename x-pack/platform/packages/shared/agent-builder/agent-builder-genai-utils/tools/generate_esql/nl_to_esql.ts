@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { EsqlResponse } from '../utils/esql';
+import type { EsqlResponse, ValidateEsqlQueryCallbacks } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 
@@ -74,6 +74,11 @@ export interface GenerateEsqlOptions {
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
+  /**
+   * Optional callbacks for extended ES|QL validation (e.g. getSources, getColumnsFor, getPolicies).
+   * When provided, validation can detect unknown indices, wrong columns, etc., without executing the query.
+   */
+  esqlCallbacks?: ValidateEsqlQueryCallbacks;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -86,6 +91,7 @@ export const generateEsql = async ({
   additionalContext,
   maxRetries = 3,
   rowLimit,
+  esqlCallbacks,
   model,
   esClient,
   logger,
@@ -99,6 +105,7 @@ export const generateEsql = async ({
     logger,
     docBase,
     events,
+    esqlCallbacks,
   });
 
   return withActiveInferenceSpan(

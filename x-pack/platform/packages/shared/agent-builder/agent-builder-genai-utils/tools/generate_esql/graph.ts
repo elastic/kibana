@@ -13,6 +13,7 @@ import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
+import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
 import { extractEsqlQueries, executeEsql, validateEsqlQuery } from '../utils/esql';
 import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
@@ -63,12 +64,14 @@ export const createNlToEsqlGraph = ({
   docBase,
   logger,
   events,
+  esqlCallbacks,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
   logger?: Logger;
   events?: ToolEventEmitter;
+  esqlCallbacks?: ValidateEsqlQueryCallbacks;
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
@@ -207,7 +210,7 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
-    const errorMessage = await validateEsqlQuery(query);
+    const errorMessage = await validateEsqlQuery(query, esqlCallbacks);
     const action: ValidateQueryAction = {
       type: 'validate_query',
       success: !errorMessage,
@@ -244,7 +247,7 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
-    const validationError = await validateEsqlQuery(query);
+    const validationError = await validateEsqlQuery(query, esqlCallbacks);
     if (validationError) {
       return {
         actions: [
