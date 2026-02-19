@@ -40,7 +40,7 @@ export class DashboardAgentPlugin
     this.logger.debug('Setting up Dashboard skills and tools');
 
     getIsDashboardAgentEnabled(coreSetup)
-      .then((isDashboardAgentEnabled) => {
+      .then(async (isDashboardAgentEnabled) => {
         if (!isDashboardAgentEnabled) {
           this.logger.debug(
             `Skipping dashboard skill and tools registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
@@ -48,7 +48,7 @@ export class DashboardAgentPlugin
           return;
         }
 
-        this.registerToolsAndSkills(setupDeps);
+        await this.registerToolsAndSkills(setupDeps);
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
@@ -57,12 +57,12 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  private registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
+  private async registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
     // Register the dashboard attachment type
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
     // Register dashboard skills for the default agent.
-    registerSkills(setupDeps.agentBuilder);
+    await registerSkills(setupDeps.agentBuilder);
   }
 
   start(
