@@ -75,6 +75,13 @@ describe('PROMQL Validation', () => {
     test('valid buckets value', () => {
       promqlExpectErrors('PROMQL buckets=6 start=?_tstart end=?_tend (avg(doubleField))', []);
     });
+
+    test('invalid scrape_interval format', () => {
+      promqlExpectErrors(
+        'PROMQL scrape_interval=abc start=?_tstart end=?_tend (rate(counterIntegerField))',
+        ['[PROMQL] Invalid scrape_interval value']
+      );
+    });
   });
 
   describe('query presence', () => {
@@ -150,10 +157,7 @@ describe('PROMQL Validation', () => {
       [
         'unknown metric name without index reports unknown column',
         'PROMQL step=5m (rate(bytes))',
-        [
-          '[PROMQL] Argument types require (v=range_vector) for function "rate"',
-          'Unknown column "bytes"',
-        ],
+        ['Unknown column "bytes"'],
       ],
     ])('%s', (_title, query, expected) => {
       promqlExpectErrors(query, expected);
@@ -166,10 +170,11 @@ describe('PROMQL Validation', () => {
       );
     });
 
-    test('type mismatch: rate expects range vector', () => {
-      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (rate(counterIntegerField))', [
-        '[PROMQL] Argument types require (v=range_vector) for function "rate"',
-      ]);
+    test('rate accepts instant_vector (implicit range selector)', () => {
+      promqlExpectErrors(
+        'PROMQL step=5m start=?_tstart end=?_tend (rate(counterIntegerField))',
+        []
+      );
     });
 
     test('type mismatch: quantile expects scalar as first arg', () => {

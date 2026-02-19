@@ -37,6 +37,7 @@ export interface SingleAgentMenuCallbacks {
   onReassignClick: () => void;
   onUpgradeClick: () => void;
   onViewAgentJsonClick: () => void;
+  onViewAgentPolicyClick: () => void;
   onMigrateAgentClick: () => void;
   onRequestDiagnosticsClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
@@ -228,7 +229,22 @@ export function useSingleAgentMenuItems({
       ),
       panelTitle: 'Maintenance and diagnostics',
       children: [
-        // View agent JSON - always available
+        // View agent policy - available when agent has a policy
+        {
+          id: 'view-agent-policy',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyText"
+              defaultMessage="View agent policy"
+            />
+          ),
+          icon: 'inspect',
+          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
+          onClick: () => {
+            callbacks.onViewAgentPolicyClick();
+          },
+          'data-test-subj': 'viewAgentPolicyBtn',
+        },
         viewAgentJsonMenuItem,
       ],
     };
@@ -372,6 +388,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
+    authz.fleet.readAgentPolicies,
   ]);
 
   return menuItems;
