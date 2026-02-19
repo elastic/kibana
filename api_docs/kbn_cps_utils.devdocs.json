@@ -640,7 +640,7 @@
             "label": "settingsComponent",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
             "lineNumber": 37,
@@ -780,7 +780,7 @@
             "label": "settingsComponent",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
             "lineNumber": 36,
