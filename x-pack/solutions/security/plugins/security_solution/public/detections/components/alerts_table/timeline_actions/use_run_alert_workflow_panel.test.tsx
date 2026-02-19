@@ -30,11 +30,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useKibana: jest.fn(),
   };
 });
-jest.mock('@kbn/workflows-management-plugin/public', () => ({
-  useRunWorkflowAction: () => mockUseRunWorkflowAction(),
-}));
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('@kbn/workflows-ui', () => ({
+  useRunWorkflowAction: () => mockUseRunWorkflowAction(),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
