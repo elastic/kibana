@@ -54,7 +54,9 @@
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
     "@kbn/std",
-    "@kbn/eval-kql"
+    "@kbn/eval-kql",
+    "@kbn/alerting-plugin",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
