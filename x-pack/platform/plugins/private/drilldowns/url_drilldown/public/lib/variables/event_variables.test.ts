@@ -73,9 +73,7 @@ describe('on_click_value', () => {
 
 describe('on_click_row', () => {
   test('getEventVariableList() returns correct list of runtime variables', () => {
-    const vars = getEventVariableList({
-      triggers: [ON_CLICK_ROW],
-    });
+    const vars = getEventVariableList(ON_CLICK_ROW);
     expect(vars.map(({ label }) => label)).toEqual([
       'event.values',
       'event.keys',

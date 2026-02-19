@@ -10,7 +10,7 @@ import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { RawValue } from '../../common/constants';
 
 export function isUrlDrilldown(action: Action) {
-  return action.type === 'URL_DRILLDOWN';
+  return action.type === 'url_drilldown';
 }
 
 // ON_CLICK_VALUE is coupled with expressions and Datatable type
