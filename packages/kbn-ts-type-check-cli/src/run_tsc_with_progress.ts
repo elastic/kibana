@@ -33,9 +33,10 @@ export async function runTscWithProgress(options: {
   args: string[];
   env: Record<string, string>;
   cwd: string;
+  type: string;
   log: SomeDevLog;
 }): Promise<boolean> {
-  const { cmd, args, env, cwd, log } = options;
+  const { cmd, args, env, cwd, log, type } = options;
 
   const child = execa(cmd, [...args, '--verbose'], {
     cwd,
@@ -47,6 +48,8 @@ export async function runTscWithProgress(options: {
 
   let totalProjects = 0;
   let completedProjects = 0;
+  let builtProjects = 0;
+  let skippedProjects = 0;
   let parsingProjectList = false;
   let barStarted = false;
   const errorLines: string[] = [];
@@ -62,7 +65,8 @@ export async function runTscWithProgress(options: {
 
   const bar = new SingleBar({
     barsize: 30,
-    format: ' Type checking [{bar}] {value}/{total} projects | {elapsed} | {project}',
+    format:
+      ' Type checking [{bar}] {value}/{total} projects | {elapsed} | {built} needed to be rechecked | Checking {project}',
     hideCursor: true,
     clearOnComplete: true,
   });
@@ -91,7 +95,13 @@ export async function runTscWithProgress(options: {
       parsingProjectList = false;
 
       if (totalProjects > 0 && !barStarted) {
-        bar.start(totalProjects, 0, { elapsed: formatElapsed(), project: '' });
+        bar.start(totalProjects, 0, {
+          elapsed: formatElapsed(),
+          project: '',
+          status: '',
+          built: 0,
+          skipped: 0,
+        });
         barStarted = true;
       }
     }
@@ -100,10 +110,14 @@ export async function runTscWithProgress(options: {
     const buildingMatch = plain.match(/Building project '([^']+)'/);
     if (buildingMatch) {
       completedProjects++;
+      builtProjects++;
       if (barStarted) {
         bar.update(completedProjects, {
           elapsed: formatElapsed(),
           project: extractProjectName(buildingMatch[1]),
+          status: 'checking',
+          built: builtProjects,
+          skipped: skippedProjects,
         });
       }
       return;
@@ -112,10 +126,14 @@ export async function runTscWithProgress(options: {
     const upToDateMatch = plain.match(/Project '([^']+)' is up to date/);
     if (upToDateMatch) {
       completedProjects++;
+      skippedProjects++;
       if (barStarted) {
         bar.update(completedProjects, {
           elapsed: formatElapsed(),
           project: extractProjectName(upToDateMatch[1]),
+          status: 'cache hit - no rebuild needed',
+          built: builtProjects,
+          skipped: skippedProjects,
         });
       }
       return;
@@ -169,13 +187,15 @@ export async function runTscWithProgress(options: {
 
   if (result.killed || result.signal) {
     log.warning(
-      `Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`
+      `[${type}] Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`
     );
   } else if (result.exitCode === 0) {
-    log.info(`Type checked ${totalProjects} projects successfully in ${elapsed}.`);
+    log.info(
+      `[${type}] Type checked ${totalProjects} projects successfully in ${elapsed} (${builtProjects} built, ${skippedProjects} up-to-date).`
+    );
   } else {
     log.error(
-      `Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
+      `[${type}] Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
     );
   }
 

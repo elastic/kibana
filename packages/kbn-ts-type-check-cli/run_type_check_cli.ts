@@ -133,7 +133,7 @@ run(
       log.info(`[Full pass] Checking ${projects.length + 1} projects...`);
 
       if (useProgressBar) {
-        didTypeCheckFail = !(await runTscWithProgress({ ...tscOptions, log }));
+        didTypeCheckFail = !(await runTscWithProgress({ ...tscOptions, log, type: 'Full pass' }));
       } else {
         try {
           await procRunner.run('tsc', { ...tscOptions, wait: true });
@@ -333,7 +333,7 @@ export async function runFailFastCheck(options: {
   let failed = false;
 
   if (useProgressBar) {
-    const success = await runTscWithProgress({ ...failFastOptions, log });
+    const success = await runTscWithProgress({ ...failFastOptions, log, type: 'First pass' });
     if (!success) {
       failed = true;
     }
