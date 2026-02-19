@@ -602,7 +602,12 @@ describe('<Graph />', () => {
           { id: 'target1', label: 'Target 1', color: 'primary', shape: 'hexagon' },
           { id: 'target2', label: 'Target 2', color: 'primary', shape: 'rectangle' },
           { id: 'rel-owns', label: 'Owns', shape: 'relationship', isOrigin: true },
-          { id: 'rel-communicates', label: 'Communicates with', shape: 'relationship', isOrigin: true },
+          {
+            id: 'rel-communicates',
+            label: 'Communicates with',
+            shape: 'relationship',
+            isOrigin: true,
+          },
           { id: 'rel-depends', label: 'Depends on', shape: 'relationship' },
         ] as NodeViewModel[],
         edges: [
