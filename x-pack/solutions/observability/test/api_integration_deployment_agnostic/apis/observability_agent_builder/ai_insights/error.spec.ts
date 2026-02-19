@@ -120,16 +120,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(userMessage.content).to.contain('stripe.com');
         });
 
-        it('includes TraceServices aggregation with all services', () => {
-          expect(userMessage.content).to.contain('<TraceServices>');
-          expect(userMessage.content).to.contain('serviceName');
-          expect(userMessage.content).to.contain('count');
-          expect(userMessage.content).to.contain('errorCount');
-
-          // Verify all services from the distributed trace are present
+        it('includes all services from the distributed trace in TraceDocuments', () => {
           for (const service of traceData.services) {
             expect(userMessage.content).to.contain(service);
           }
+        });
+
+        it('includes parent.id for trace hierarchy', () => {
+          expect(userMessage.content).to.contain('parent.id');
+        });
+
+        it('includes event.outcome to show success/failure status', () => {
+          expect(userMessage.content).to.contain('event.outcome');
+          expect(userMessage.content).to.contain('failure');
+          expect(userMessage.content).to.contain('success');
+        });
+
+        it('includes span destinations for dependency analysis', () => {
+          expect(userMessage.content).to.contain('span.destination.service.resource');
+          expect(userMessage.content).to.contain('postgresql');
+          expect(userMessage.content).to.contain('stripe.com');
+        });
+
+        it('includes duration fields for timing analysis', () => {
+          expect(userMessage.content).to.match(/span\.duration\.us|transaction\.duration\.us/);
+        });
+
+        it('includes error exception message in trace documents', () => {
+          expect(userMessage.content).to.contain('error.exception.message');
         });
       });
 
