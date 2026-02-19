@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -128,10 +129,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const { manageAgents } = useUiPrivileges();
 
   const {
-    services: { application, chrome },
+    services: { application, uiSettings },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
-  const hasDataSources = chrome.navLinks.get('data_sources') !== undefined;
+  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -224,7 +225,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
-    ...(hasDataSources
+    ...(isDataSourcesEnabled
       ? [
           <EuiContextMenuItem
             key="sources"
