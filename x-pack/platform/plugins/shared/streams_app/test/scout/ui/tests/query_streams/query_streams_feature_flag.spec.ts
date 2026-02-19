@@ -43,10 +43,8 @@ test.describe(
     test('should properly show query streams UI when feature flag is on', async ({
       page,
       pageObjects,
-      apiServices,
       kbnClient,
     }) => {
-      await apiServices.streams.enable();
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
