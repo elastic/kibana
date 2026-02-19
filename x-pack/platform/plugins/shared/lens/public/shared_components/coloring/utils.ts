@@ -72,7 +72,7 @@ export function getAccessorTypeFromOperation(
     !isBucketed && isDataTypeNumeric(dataType) && !hasArraySupport
   );
   const isBucketableTypeFromOperationType = Boolean(
-    isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
+    isBucketed || (dataType !== 'number' && !hasArraySupport)
   );
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
