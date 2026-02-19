@@ -17,7 +17,7 @@ import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
-import { reducer } from './state_reducer';
+import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
 
 /**
@@ -52,7 +52,7 @@ const resolveInitialPageSize = (
  * Internal provider component that manages the runtime state of the content list.
  *
  * This provider:
- * - Manages client-controlled state (search, filters, sort, pagination) via reducer.
+ * - Manages client-controlled state (search, filters, sort, pagination, selection) via reducer.
  * - Uses React Query for data fetching with caching and deduplication.
  * - Combines client state with query data for a unified state interface.
  *
@@ -88,13 +88,14 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     return undefined;
   }, [search]);
 
-  // Initial client state (search, filters, sort, page).
+  // Initial client state (search, filters, sort, page, selection).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
       search: { queryText: initialSearch ?? '' },
       filters: { ...DEFAULT_FILTERS, search: initialSearch },
       sort: initialSort,
       page: { index: 0, size: initialPageSize },
+      selection: { ...DEFAULT_SELECTION },
     }),
     [initialSort, initialPageSize, initialSearch]
   );

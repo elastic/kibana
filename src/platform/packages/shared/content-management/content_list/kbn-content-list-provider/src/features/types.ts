@@ -21,6 +21,13 @@ export interface ContentListFeatures {
   pagination?: PaginationConfig | boolean;
   /** Search configuration. */
   search?: SearchConfig | boolean;
+  /**
+   * Selection configuration.
+   * When `true` (default), row selection checkboxes are shown and bulk
+   * actions are enabled. Set to `false` to disable selection entirely.
+   * Selection is automatically disabled when `isReadOnly` is `true`.
+   */
+  selection?: boolean;
 }
 
 /**
@@ -76,4 +83,6 @@ export interface ContentListSupports {
   pagination: boolean;
   /** Whether search is supported. */
   search: boolean;
+  /** Whether item selection and bulk actions are supported. */
+  selection: boolean;
 }

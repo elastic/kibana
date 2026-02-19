@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useColumns } from './use_columns';
-export { useSorting } from './use_sorting';
-export { useSelection, type UseSelectionReturn } from './use_selection';
+export type { UseContentListSelectionReturn } from './types';
+export { useContentListSelection } from './use_content_list_selection';

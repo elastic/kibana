@@ -22,3 +22,7 @@ export { useContentListPagination } from './pagination';
 // Search feature.
 export type { SearchConfig, UseContentListSearchReturn } from './search';
 export { useContentListSearch } from './search';
+
+// Selection feature.
+export type { UseContentListSelectionReturn } from './selection';
+export { useContentListSelection } from './selection';

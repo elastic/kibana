@@ -13,8 +13,11 @@
  * Provides toolbar components for content list UIs, including filters and actions.
  */
 
-// Main component (includes `ContentListToolbar.Filters` namespace).
+// Main component (includes `ContentListToolbar.Filters` and `ContentListToolbar.SelectionBar` namespaces).
 export { ContentListToolbar, type ContentListToolbarProps } from './src/content_list_toolbar';
 
 // Filter declarative components for direct imports.
 export { Filters, SortFilter, type FiltersProps, type SortFilterProps } from './src/filters';
+
+// Selection bar component for direct imports.
+export { SelectionBar, type SelectionBarProps } from './src/selection_bar';
