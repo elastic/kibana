@@ -23,7 +23,7 @@ mapped_pages:
 | [console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md) | Console provides the user with tools for storing and executing requests against Elasticsearch. |
 | [contentManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/content_management/README.md) | The content management plugin provides functionality to manage content in Kibana. |
 | [controls](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/controls/README.mdx) | The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps. |
-| [cps](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/cps/README.md) | Retrieves project tags from Elasticsearch using the /_project/tags endpoint. |
+| [cps](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/cps/README.md) | This plugin implements the Cross-Project Search (CPS) logic for Kibana. CPS enables users to search data across multiple Elastic projects as if it were local, without needing to manually specify project names in queries. |
 | [customIntegrations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/custom_integrations/README.md) | Register add-data cards |
 | [dashboard](kibana-dashboard-plugin.md) | - Registers the dashboard application. - Adds a dashboard embeddable that can be used in other applications. |
 | [dashboardMarkdown](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/dashboard_markdown/README.md) | This plugin provides a simple Markdown component for embedding editable Markdown content in Kibana dashboards. |
@@ -154,7 +154,7 @@ mapped_pages:
 | [encryptedSavedObjects](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/encrypted_saved_objects/README.md) | The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with security and spaces filtering. |
 | [enterpriseSearch](https://github.com/elastic/kibana/blob/main/x-pack/solutions/search/plugins/enterprise_search/README.md) | This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search. |
 | [entityManager](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/entity_manager/README.md) | This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more. |
-| [entityStore](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/entity_store/README.md) | Central place for Entities management and logs extraction |
+| [entityStore](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/entity_store/README.md) | Central place for Entities management and logs extraction. |
 | [eventLog](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/event_log/README.md) | The event log plugin provides a persistent history of alerting and action activities. |
 | [exploratoryView](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/exploratory_view/README.md) | A shared component for visualizing observability data types via lens embeddable. For further details. |
 | [features](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/features/README.md) | The features plugin enhance Kibana with a per-feature privilege system. |
