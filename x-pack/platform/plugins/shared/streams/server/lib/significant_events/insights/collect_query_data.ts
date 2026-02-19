@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
-import type { Insight } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
-import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
 
 export interface QueryData {
   title: string;
@@ -28,36 +26,6 @@ export interface QueryData {
 
 const SAMPLE_EVENTS_COUNT = 5;
 const CURRENT_WINDOW_MINUTES = 15;
-
-/**
- * Safely extracts insights from an LLM response.
- */
-export function extractInsightsFromResponse(
-  response: { toolCalls?: Array<{ function: { name: string; arguments: unknown } }> },
-  logger: Logger
-): Insight[] {
-  if (!response.toolCalls || response.toolCalls.length === 0) {
-    logger.warn('LLM response has no tool calls');
-    return [];
-  }
-
-  const toolCall = response.toolCalls.find((tc) => tc.function?.name === SUBMIT_INSIGHTS_TOOL_NAME);
-
-  if (!toolCall || !toolCall.function?.arguments) {
-    logger.warn(`${SUBMIT_INSIGHTS_TOOL_NAME} tool call missing arguments`);
-    return [];
-  }
-
-  const { insights, errors: validationErrors } = parseInsightsWithErrors(
-    toolCall.function.arguments
-  );
-
-  if (validationErrors) {
-    logger.warn(`Insights validation failed: ${validationErrors.message}`);
-  }
-
-  return insights;
-}
 
 export async function collectQueryData({
   query,
