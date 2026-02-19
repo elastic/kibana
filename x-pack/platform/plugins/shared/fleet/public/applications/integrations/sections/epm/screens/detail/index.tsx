@@ -476,14 +476,13 @@ export function Detail() {
 
   const showVersionSelect = useMemo(
     () =>
-      prereleaseIntegrationsEnabled &&
       latestGAVersion &&
       latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
         packageInfo.version === latestPrereleaseVersion),
-    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
   );
 
   const versionOptions = useMemo(
