@@ -60,3 +60,8 @@ export const selectHasRoutingChanges = createSelector(
     });
   }
 );
+
+/**
+ * Selects whether the new stream should be created as a draft.
+ */
+export const selectCreateAsDraft = (context: StreamRoutingContext) => context.createAsDraft;

@@ -35,7 +35,7 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
+import { getInheritedFieldsFromAncestors, getParentId, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, validateStreamlang } from '@kbn/streamlang';
@@ -106,11 +106,27 @@ export const simulateProcessing = async ({
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
-    await Promise.all([
-      streamsClient.getStream(params.path.name),
-      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
-    ]);
+  const stream = await streamsClient.getStream(params.path.name);
+
+  // For draft wired streams, we need to fetch documents from the parent stream
+  // since draft streams don't have their own data stream
+  const isDraftStream =
+    Streams.WiredStream.Definition.is(stream) && stream.ingest.wired.draft === true;
+  let indexSourceStreamName = params.path.name;
+
+  if (isDraftStream) {
+    const parentId = getParentId(params.path.name);
+    if (!parentId) {
+      throw new Error(`Draft stream ${params.path.name} must have a parent stream`);
+    }
+    indexSourceStreamName = parentId;
+  }
+
+  const { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps } = await getStreamIndex(
+    scopedClusterClient,
+    streamsClient,
+    indexSourceStreamName
+  );
 
   const streamFields = await getStreamFields(streamsClient, stream);
 

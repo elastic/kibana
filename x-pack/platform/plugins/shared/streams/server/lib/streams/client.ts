@@ -295,17 +295,23 @@ export class StreamsClient {
 
   /**
    * Forks a stream into a child with a specific condition.
+   *
+   * @param draft - If true, creates a draft child stream that is persisted but not materialized
+   *                in Elasticsearch (no templates, pipelines, or data streams). Draft streams
+   *                can be previewed via ESQL queries and later materialized by removing the draft flag.
    */
   async forkStream({
     parent,
     name,
     where: condition,
     status,
+    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
+    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -350,6 +356,7 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
+                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },

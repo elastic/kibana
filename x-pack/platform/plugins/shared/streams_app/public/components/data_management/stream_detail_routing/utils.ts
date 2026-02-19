@@ -66,12 +66,16 @@ export const buildRoutingSaveRequestPayload = (
   };
 };
 
-export const buildRoutingForkRequestPayload = (rule: RoutingDefinition) => {
+export const buildRoutingForkRequestPayload = (
+  rule: RoutingDefinition,
+  options?: { draft?: boolean }
+) => {
   return {
     where: rule.where,
     status: rule.status,
     stream: {
       name: rule.destination,
     },
+    ...(options?.draft ? { draft: true } : {}),
   };
 };
