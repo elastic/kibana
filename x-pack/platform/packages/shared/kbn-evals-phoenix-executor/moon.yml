@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/gen-ai-functional-testing'
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-runner'
+  - '@kbn/scout'
 tags:
   - test-helper
   - package
