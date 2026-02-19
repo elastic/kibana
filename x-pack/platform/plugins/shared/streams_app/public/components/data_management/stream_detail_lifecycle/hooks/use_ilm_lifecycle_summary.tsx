@@ -449,6 +449,7 @@ export const useIlmLifecycleSummary = ({
           onBack={handleBackFromCreatePolicy}
           onSave={handleCreatePolicy}
           isLoading={isProcessing}
+          originalPolicyName={policyName}
         />
       )}
     </>
