@@ -4,7 +4,7 @@ navigation_title: Global setup hook
 
 # Global setup hook [scout-global-setup-hook]
 
-Use a global setup hook to run code **once** before any tests start (even with multiple workers). This is most useful for [parallel suites](./parallelism.md), where you want shared data/setup to exist before workers begin.
+Use a global setup hook to run code **once** before any tests start (even with multiple workers). This is most useful for [parallel suites](./parallelism.md), where you want shared data/setup to exist before workers begin. It is also supported by non-parallel test suites.
 
 **Common uses**:
 

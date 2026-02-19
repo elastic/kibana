@@ -6,6 +6,10 @@ navigation_title: Write UI tests
 
 Scout UI tests are Playwright tests that use Scout fixtures and page objects for readable, maintainable flows.
 
+:::::{note}
+[Set up your plugin or package](./setup-plugin.md) first.
+:::::
+
 ## A good starting pattern [scout-write-ui-tests-pattern]
 
 - Authenticate with `browserAuth` in `beforeEach`

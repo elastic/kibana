@@ -6,6 +6,10 @@ navigation_title: Write API tests
 
 Scout API tests validate HTTP endpoints with realistic scoped credentials.
 
+:::::{note}
+[Set up your plugin or package](./setup-plugin.md) first.
+:::::
+
 ## Recommended structure [api-test-suite-anatomy]
 
 1. **Prepare** with higher-privilege helpers (`apiServices`, `kbnClient`, `esArchiver`, …)

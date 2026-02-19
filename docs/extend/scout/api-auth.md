@@ -13,10 +13,10 @@ Both return headers you can spread into `apiClient` requests (`apiKeyHeader` or 
 
 ## Choose an auth type [choose-auth-type]
 
-| Endpoint                                                                                  | Recommended auth     |
-| ----------------------------------------------------------------------------------------- | -------------------- |
-| [Public APIs](https://www.elastic.co/docs/api/doc/kibana) (usually starting with `api/*`) | API key              |
-| Internal APIs (usually starting with `internal/*`)                                        | Cookie-based session |
+| Endpoint                                                                                  | Recommended auth     | Fixture       |
+| ----------------------------------------------------------------------------------------- | -------------------- | ------------- |
+| [Public APIs](https://www.elastic.co/docs/api/doc/kibana) (usually starting with `api/*`) | API key              | `requestAuth` |
+| Internal APIs (usually starting with `internal/*`)                                        | Cookie-based session | `samlAuth`    |
 
 ## API key auth [api-key-auth]
 
@@ -38,8 +38,6 @@ apiTest('calls a public API', async ({ apiClient }) => {
 });
 ```
 
-Use `getApiKeyForCustomRole()` when you need fine-grained permissions.
-
 ## Cookie-based auth [cookie-auth]
 
 Use an interactive session to simulate how the Kibana UI calls internal endpoints:
@@ -55,6 +53,11 @@ apiTest('calls an internal endpoint', async ({ apiClient, samlAuth }) => {
   expect(res.statusCode).toBe(200);
 });
 ```
+
+## Predefined and custom roles
+
+- **Predefined roles**: built-in roles like `admin`, `editor`, `viewer`. Use `getApiKey()` (or `getApiKeyForViewer()` etc). Privileges are resolved from the appropriate `roles.yml` file.
+- **Custom roles**: roles you define for a specific test with explicit and fine-grained Elasticsearch/Kibana privileges.
 
 ## Best practices [best-practices]
 
