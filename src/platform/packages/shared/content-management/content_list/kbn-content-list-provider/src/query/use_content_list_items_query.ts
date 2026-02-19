@@ -50,8 +50,8 @@ export const useContentListItemsQuery = (
   );
 
   // React Query for data fetching.
-  // `keepPreviousData` keeps the previous page visible while the next page loads,
-  // preventing the table from collapsing to zero rows and causing a scroll-to-top.
+  // `keepPreviousData` retains the previous results while a new query loads,
+  // preventing the table from flashing empty when page, filters, or search text change.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
     keepPreviousData: true,
@@ -87,7 +87,8 @@ export const useContentListItemsQuery = (
   return {
     items: query.data?.items ?? [],
     totalItems: query.data?.total ?? 0,
-    isLoading: query.isLoading || query.isFetching,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error,
     refetch: query.refetch,
   };

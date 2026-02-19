@@ -8,6 +8,7 @@
  */
 
 import { EuiDelayRender } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState, useMemo } from 'react';
@@ -34,11 +35,12 @@ export const fullScreenButtonLabel = i18n.translate(
 );
 
 const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
-  defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
+  defaultMessage:
+    'A summary of key spans in the trace. Click the waterfall to view the full trace timeline.',
 });
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-  defaultMessage: 'Trace',
+  defaultMessage: 'Trace summary',
 });
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
@@ -62,6 +64,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
   });
+
   const actionId = 'traceWaterfallFullScreenAction';
 
   const actions = useMemo(
@@ -102,12 +105,31 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         actions={actions}
       >
         {docId ? (
-          <FocusedTraceWaterfall
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            docId={docId}
-          />
+          <div
+            data-test-subj="unifiedDocViewerObservabilityTracesTraceWaterfallClickArea"
+            aria-label={fullScreenButtonLabel}
+            tabIndex={0}
+            onClick={() => setShowFullScreenWaterfall(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setShowFullScreenWaterfall(true);
+              }
+            }}
+            css={css`
+              &,
+              & * {
+                cursor: pointer;
+              }
+            `}
+          >
+            <FocusedTraceWaterfall
+              traceId={traceId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              docId={docId}
+            />
+          </div>
         ) : null}
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
