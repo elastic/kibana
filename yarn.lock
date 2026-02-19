@@ -4690,7 +4690,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/anonymization-ui@link:x-pack/platform/packages/shared/ai-infra/anonymization_ui":
+"@kbn/anonymization-ui@link:x-pack/platform/packages/shared/ai-infra/anonymization-ui":
   version "0.0.0"
   uid ""
 
