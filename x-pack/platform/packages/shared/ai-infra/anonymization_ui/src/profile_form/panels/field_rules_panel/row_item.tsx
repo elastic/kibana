@@ -117,7 +117,7 @@ export const FieldRulesPanelRowItem = ({
           <EuiText size="xs">
             <EuiTextColor color="subdued">
               {i18n.translate('anonymizationUi.profiles.fieldRules.rowEntityClassNotUsed', {
-                defaultMessage: 'Mask not used',
+                defaultMessage: 'Entity class not used',
               })}
             </EuiTextColor>
           </EuiText>

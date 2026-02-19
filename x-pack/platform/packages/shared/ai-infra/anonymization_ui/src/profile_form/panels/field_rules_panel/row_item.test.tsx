@@ -55,7 +55,7 @@ describe('FieldRulesPanelRowItem', () => {
     });
 
     expect(screen.queryByRole('combobox', { name: 'Entity class for field host.name' })).toBeNull();
-    expect(screen.getByText('Mask not used')).toBeTruthy();
+    expect(screen.getByText('Entity class not used')).toBeTruthy();
   });
 
   it('forwards selected policy from segmented control', () => {
