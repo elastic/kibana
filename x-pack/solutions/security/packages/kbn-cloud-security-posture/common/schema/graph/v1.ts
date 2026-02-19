@@ -24,8 +24,8 @@ export const entityIdSchema = schema.object({
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
-  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
   query: schema.object({
+    pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
     // Origin event IDs - optional, may be empty when opening from entity flyout
     originEventIds: schema.maybe(
       schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }))

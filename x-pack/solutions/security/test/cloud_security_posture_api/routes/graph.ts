@@ -212,8 +212,8 @@ export default function (providerContext: FtrProviderContext) {
         const pinnedIds = Array.from({ length: 1025 }, (_, idx) => `id-${idx}`);
 
         await postGraph(supertest, {
-          pinnedIds,
           query: {
+            pinnedIds,
             originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
@@ -446,8 +446,8 @@ export default function (providerContext: FtrProviderContext) {
           }).expect(result(200));
 
           const emptyPinnedResponse = await postGraph(supertest, {
-            pinnedIds: [],
             query: {
+              pinnedIds: [],
               indexPatterns: ['logs-*'],
               originEventIds: pinTestOriginEventIds,
               start: '2024-09-01T00:00:00Z',
@@ -472,8 +472,12 @@ export default function (providerContext: FtrProviderContext) {
         it('should extract pinned actors and targets from grouped nodes', async () => {
           // Render: 3 single actors + 1 actor group; 3 single targets + 1 target group.
           const response = await postGraph(supertest, {
-            pinnedIds: ['group-actor-1@example.com', 'group-actor-2@example.com', 'group-target-3'],
             query: {
+              pinnedIds: [
+                'group-actor-1@example.com',
+                'group-actor-2@example.com',
+                'group-target-3',
+              ],
               indexPatterns: ['logs-*'],
               originEventIds: [],
               start: '2024-09-01T00:00:00Z',
@@ -548,8 +552,8 @@ export default function (providerContext: FtrProviderContext) {
         it('should not change already single entities when pinned alongside grouped ones', async () => {
           // Render: solo actor + pinned actor + grouped actors (5); solo target + pinned target + grouped targets (4).
           const response = await postGraph(supertest, {
-            pinnedIds: ['solo-actor@example.com', 'group-actor-1@example.com'],
             query: {
+              pinnedIds: ['solo-actor@example.com', 'group-actor-1@example.com'],
               indexPatterns: ['logs-*'],
               originEventIds: [],
               start: '2024-09-01T00:00:00Z',
@@ -607,8 +611,8 @@ export default function (providerContext: FtrProviderContext) {
         it('should pin an event by document id and pin related entities', async () => {
           // Render: event is pinned by doc id, so its actor/target become single nodes; remaining entities stay grouped.
           const response = await postGraph(supertest, {
-            pinnedIds: ['group-doc-1'],
             query: {
+              pinnedIds: ['group-doc-1'],
               indexPatterns: ['logs-*'],
               originEventIds: [],
               start: '2024-09-01T00:00:00Z',
@@ -663,8 +667,8 @@ export default function (providerContext: FtrProviderContext) {
         it('should ignore pinnedIds that do not exist', async () => {
           // Render: actor group of 6 + target group of 5 (no extra singles).
           const response = await postGraph(supertest, {
-            pinnedIds: ['non-existent-entity-id'],
             query: {
+              pinnedIds: ['non-existent-entity-id'],
               indexPatterns: ['logs-*'],
               originEventIds: [],
               start: '2024-09-01T00:00:00Z',

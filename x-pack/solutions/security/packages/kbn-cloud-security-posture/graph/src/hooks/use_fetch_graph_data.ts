@@ -85,8 +85,7 @@ export const useFetchGraphData = ({
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
   const queryClient = useQueryClient();
-  const { pinnedIds } = req;
-  const { esQuery, originEventIds, start, end } = req.query;
+  const { esQuery, originEventIds, start, end, pinnedIds } = req.query;
   const {
     services: { http },
   } = useKibana();

@@ -307,9 +307,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
+          pinnedIds,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
-        pinnedIds,
       },
       options: {
         refetchOnWindowFocus: false,
