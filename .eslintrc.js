@@ -1884,6 +1884,19 @@ module.exports = {
     },
 
     /**
+     * Streams overrides
+     */
+    {
+      files: [
+        'x-pack/platform/plugins/shared/streams/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/streams_app/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
      * Discover overrides
      */
     {
