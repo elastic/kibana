@@ -12,6 +12,7 @@ import { expandAliases } from './expand_aliases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
+import type { IndicesTemplateMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { AutoCompleteContext } from '../autocomplete/types';
 
 function fc(f1: { name: string }, f2: { name: string }) {
@@ -27,6 +28,14 @@ function fc(f1: { name: string }, f2: { name: string }) {
 function f(name: string, type?: string) {
   return { name, type: type || 'string' };
 }
+
+const createLegacyTemplateMapping = (order = 0): IndicesTemplateMapping => ({
+  aliases: {},
+  index_patterns: [],
+  mappings: {},
+  order,
+  settings: {},
+});
 
 describe('Autocomplete entities', () => {
   let mapping: AutocompleteInfo['mapping'];
@@ -431,9 +440,9 @@ describe('Autocomplete entities', () => {
   describe('Templates', function () {
     test('templates, index templates, component templates', function () {
       legacyTemplate.loadTemplates({
-        test_index1: { order: 0 },
-        test_index2: { order: 0 },
-        test_index3: { order: 0 },
+        test_index1: createLegacyTemplateMapping(),
+        test_index2: createLegacyTemplateMapping(),
+        test_index3: createLegacyTemplateMapping(),
       });
 
       indexTemplate.loadTemplates({
