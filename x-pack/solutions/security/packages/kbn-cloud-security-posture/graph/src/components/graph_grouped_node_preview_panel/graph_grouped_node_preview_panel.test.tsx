@@ -500,7 +500,10 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
         render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
-        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'index');
+        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute(
+          'data-euiicon-type',
+          'magnifyWithExclamation'
+        );
       });
 
       it('should use generic icon and "Entities" label when entities have mixed ECS parent types', () => {

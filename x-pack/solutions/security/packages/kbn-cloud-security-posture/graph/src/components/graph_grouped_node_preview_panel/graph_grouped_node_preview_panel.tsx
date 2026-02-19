@@ -73,9 +73,9 @@ const useContentMetadata = (
       const firstType = entityItems[0].type;
       const allSameType = entityItems.every((e) => e.type === firstType);
 
-      if (allSameType) {
+      if (allSameType && firstType !== undefined) {
         return {
-          icon: entityItems[0].icon || 'index',
+          icon: entityItems[0].icon || 'magnifyWithExclamation',
           groupedItemsType: translateEntityType(firstType),
         };
       }
