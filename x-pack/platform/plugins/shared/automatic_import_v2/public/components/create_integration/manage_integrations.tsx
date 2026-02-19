@@ -38,6 +38,28 @@ function getStatusColor(
   }
 }
 
+const ManageIntegrationsLoading = React.memo(() => (
+  <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
+));
+ManageIntegrationsLoading.displayName = 'ManageIntegrationsLoading';
+
+const ManageIntegrationsError = React.memo<{ error?: Error | null }>(({ error }) => (
+  <EuiCallOut
+    announceOnMount
+    color="danger"
+    iconType="error"
+    title={
+      <FormattedMessage
+        id="xpack.automaticImportV2.manageIntegrations.errorTitle"
+        defaultMessage="Unable to load integrations"
+      />
+    }
+  >
+    <EuiText size="s">{error?.message}</EuiText>
+  </EuiCallOut>
+));
+ManageIntegrationsError.displayName = 'ManageIntegrationsError';
+
 export const ManageIntegrations = React.memo(() => {
   const { integrations, isLoading, isError, error } = useGetAllIntegrations();
 
@@ -93,21 +115,9 @@ export const ManageIntegrations = React.memo(() => {
       />
       <KibanaPageTemplate.Section grow>
         {isLoading ? (
-          <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
+          <ManageIntegrationsLoading />
         ) : isError ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            iconType="error"
-            title={
-              <FormattedMessage
-                id="xpack.automaticImportV2.manageIntegrations.errorTitle"
-                defaultMessage="Unable to load integrations"
-              />
-            }
-          >
-            <EuiText size="s">{error?.message}</EuiText>
-          </EuiCallOut>
+          <ManageIntegrationsError error={error} />
         ) : (
           <EuiBasicTable
             items={integrations}
