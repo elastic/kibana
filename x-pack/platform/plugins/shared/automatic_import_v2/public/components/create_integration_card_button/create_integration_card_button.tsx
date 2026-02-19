@@ -27,10 +27,34 @@ export interface CreateIntegrationSideCardButtonProps {
   compressed?: boolean;
 }
 
+const useStyles = (compressed: boolean, borderRadius: string) => ({
+  panel: css`
+    background-color: #d7e3e6;
+    border-color: #b9c8d0;
+    border-radius: ${borderRadius};
+  `,
+  image: css`
+    width: ${compressed ? '84px' : '108px'};
+    min-width: ${compressed ? '84px' : '108px'};
+    display: block;
+  `,
+  buttonLink: css`
+    display: block;
+    text-decoration: none;
+  `,
+  buttonPanel: css`
+    width: 100%;
+    border: none;
+    border-radius: ${borderRadius};
+    background-color: #bccbe4;
+  `,
+});
+
 export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideCardButtonProps>(
   ({ compressed = false }) => {
     const { getUrlForApp, navigateToUrl } = useKibana().services.application;
     const { euiTheme } = useEuiTheme();
+    const styles = useStyles(compressed, String(euiTheme.border.radius.medium ?? '4px'));
 
     const createHref = useMemo(
       () => getUrlForApp('integrations', { path: '/create' }),
@@ -64,11 +88,7 @@ export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideC
         hasBorder={true}
         paddingSize={compressed ? 's' : 'm'}
         data-test-subj="createIntegrationCardButton"
-        css={css`
-          background-color: #d7e3e6;
-          border-color: #b9c8d0;
-          border-radius: ${euiTheme.border.radius.medium};
-        `}
+        css={styles.panel}
       >
         <EuiTitle size="xxs">
           <h3>
@@ -83,15 +103,7 @@ export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideC
 
         <EuiFlexGroup gutterSize={compressed ? 's' : 'm'} responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiImage
-              alt=""
-              src={autoImportIntegrationsImage}
-              css={css`
-                width: ${compressed ? '84px' : '108px'};
-                min-width: ${compressed ? '84px' : '108px'};
-                display: block;
-              `}
-            />
+            <EuiImage alt="" src={autoImportIntegrationsImage} css={styles.image} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size={compressed ? 'xs' : 's'}>
@@ -126,22 +138,9 @@ export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideC
           href={createHref}
           onClick={navigateToCreate}
           data-test-subj="createNewIntegrationLink"
-          css={css`
-            display: block;
-            text-decoration: none;
-          `}
+          css={styles.buttonLink}
         >
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            paddingSize="s"
-            css={css`
-              width: 100%;
-              border: none;
-              border-radius: ${euiTheme.border.radius.medium};
-              background-color: #bccbe4;
-            `}
-          >
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" css={styles.buttonPanel}>
             <EuiFlexGroup
               gutterSize="xs"
               alignItems="center"
