@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { containsPatternTargets } from './target_patterns';
+import { isIndexPattern } from './target_patterns';
 
-describe('containsPatternTargets', () => {
-  it('returns true for wildcard targets', () => {
-    expect(containsPatternTargets('*')).toBe(true);
-    expect(containsPatternTargets('logs-*')).toBe(true);
+describe('isIndexPattern', () => {
+  it('returns false for standalone wildcard target', () => {
+    expect(isIndexPattern('*')).toBe(false);
+  });
+
+  it('returns true for wildcard index patterns', () => {
+    expect(isIndexPattern('logs-*')).toBe(true);
   });
 
   it('returns true for comma-separated index patterns', () => {
-    expect(containsPatternTargets('logs-*,auditbeat-*')).toBe(true);
+    expect(isIndexPattern('logs-*,auditbeat-*')).toBe(true);
   });
 
   it('returns true for multiple comma-separated indices', () => {
-    expect(containsPatternTargets('logs-test,auditbeat-test')).toBe(true);
+    expect(isIndexPattern('logs-test,auditbeat-test')).toBe(true);
   });
 
   it('returns false for concrete single targets', () => {
-    expect(containsPatternTargets('kibana_sample_data_logs')).toBe(false);
+    expect(isIndexPattern('kibana_sample_data_logs')).toBe(false);
   });
 });

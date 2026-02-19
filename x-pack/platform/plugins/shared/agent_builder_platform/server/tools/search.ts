@@ -44,10 +44,7 @@ Note:
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     schema: searchSchema,
-    handler: async (
-      { query: nlQuery, index = '*' },
-      { esClient, modelProvider, logger, events }
-    ) => {
+    handler: async ({ query: nlQuery, index }, { esClient, modelProvider, logger, events }) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const results = await runSearchTool({
         nlQuery,

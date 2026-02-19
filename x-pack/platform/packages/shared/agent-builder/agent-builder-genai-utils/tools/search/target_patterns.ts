@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const containsPatternTargets = (target: string): boolean => {
-  return target.includes('*') || target.includes(',');
+export const isIndexPattern = (target: string): boolean => {
+  return target !== '*' && (target.includes('*') || target.includes(','));
 };

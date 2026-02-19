@@ -23,7 +23,7 @@ import {
   naturalLanguageSearchToolName,
 } from './inner_tools';
 import { getSearchPrompt } from './prompts';
-import { containsPatternTargets } from './target_patterns';
+import { isIndexPattern } from './target_patterns';
 import type { SearchTarget } from './types';
 import { progressMessages } from './i18n';
 
@@ -62,7 +62,7 @@ export const createSearchToolGraph = ({
   events: ToolEventEmitter;
 }) => {
   const hasPatternTarget = (state: StateType) => {
-    return Boolean(state.targetPattern && containsPatternTargets(state.targetPattern));
+    return Boolean(state.targetPattern && isIndexPattern(state.targetPattern));
   };
 
   const getTools = (state: StateType) => {
@@ -81,13 +81,13 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
-    if (state.targetPattern && containsPatternTargets(state.targetPattern)) {
+    if (state.targetPattern && isIndexPattern(state.targetPattern)) {
       const sources = await listSearchSources({
         pattern: state.targetPattern,
         excludeIndicesRepresentedAsDatastream: true,
         excludeIndicesRepresentedAsAlias: false,
         esClient,
-        includeKibanaIndices: state.targetPattern !== '*',
+        includeKibanaIndices: true,
       });
       const matchedResourceCount =
         sources.indices.length + sources.aliases.length + sources.data_streams.length;
