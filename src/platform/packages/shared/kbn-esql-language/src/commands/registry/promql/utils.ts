@@ -1398,6 +1398,7 @@ export enum PromqlParamName {
   Start = 'start',
   End = 'end',
   Buckets = 'buckets',
+  ScrapeInterval = 'scrape_interval',
 }
 
 export interface PromqlParamDefinition {
@@ -1432,6 +1433,11 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
     name: PromqlParamName.Buckets,
     description: 'Number of time buckets (alternative to step)',
+    valueType: PromqlParamValueType.Static,
+  },
+  {
+    name: PromqlParamName.ScrapeInterval,
+    description: 'Scrape interval for implicit range selector window (e.g. 1m)',
     valueType: PromqlParamValueType.Static,
   },
 ];
