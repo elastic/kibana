@@ -264,7 +264,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : someNewAgentPoliciesHaveAllAgentIncompatible ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError"
-                    defaultMessage="The selected agent policies have all agents in a version non compatible with the integration."
+                    defaultMessage="None of the agents using the selected agent policies are compatible with this integration."
                   />
                 ) : null
               }
