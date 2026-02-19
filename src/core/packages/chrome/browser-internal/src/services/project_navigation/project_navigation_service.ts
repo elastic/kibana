@@ -46,8 +46,6 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -58,7 +56,6 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
-  featureFlags: FeatureFlagsStart;
   uiSettings: IUiSettingsClient;
 }
 
