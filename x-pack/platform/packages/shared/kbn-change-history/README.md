@@ -47,7 +47,7 @@ All persisted documents follow the same schema (see below).
 - **`logBulk(changes, opts)`**
   Same as `log` for multiple changes in one bulk request. When `changes.length > 1`, documents are grouped with a shared event group id (or `opts.correlationId` if provided). `opts` is the same `LogChangeHistoryOptions` object.
 
-- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `timestamp` (ISO8601 string; defaults to now), `correlationId` (groups bulk events when set), change `data` (partial `event`, `tags`, and `metadata` to merge into the document), `excludeFields` (nested key/value map to exclude fields from the diff), `sensitiveFields` (nested key/value map for fields to mask instead of store in plain form), `diffDocCalculation` (function `(opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff`; when omitted, a default diff is used).
+- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `timestamp` (ISO8601 string; defaults to now), `correlationId` (groups bulk events when set), change `data` (partial `event`, `tags`, and `metadata` to merge into the document), `ignoreFields` (nested key/value map of fields to ignore in the diff calculation), `maskFields` (nested key/value map of “sensitive” fields to mask instead of storing data in plain form), `diffDocCalculation` (function `(opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff`; when omitted, a default diff is used).
 
 - **`getHistory(objectType, objectId, opts?)`**
   Returns a promise with `{ startDate?, total, items }`. Filters by `object.type` and `object.id`. Optional `opts` is `GetChangeHistoryOptions`: `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100), `transportOpts`. Results are sorted by `@timestamp` then `event.id` descending by default.
@@ -81,9 +81,12 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object`           | `object`           | The tracked object.                                                                               |
 | `object.id`        | `keyword`          | Unique id of the target object in Kibana.                                                         |
 | `object.type`      | `keyword`          | Type of the target object in Kibana.                                                              |
-| `object.hash`      | `keyword`          | Hash of the `object.snapshot` to identify the payload.                                            |
+| `object.hash`      | `keyword`          | SHA256 of the `object.snapshot` to identify changes in the payload.                                            |
 | `object.sequence`  | `keyword`          | Sequence identifier for ordering. (Optional)                                                      |
-| `object.changes`   | `keyword`          | List of field names that changed. (Optional)                                                      |
+| `object.fields`    | `object`           | Categorization of field names affected by the change. (Optional)                                  |
+| `object.fields.changed` | `keyword`     | List of field names that changed. (Optional)                                                      |
+| `object.fields.masked`  | `keyword`     | List of field names that were masked. (Optional)                                                  |
+| `object.fields.ignored` | `keyword`     | List of field names that were ignored in the diff. (Optional)                                     |
 | `object.oldvalues` | `object` (dynamic) | Previous values for changed fields. (Optional)                                                    |
 | `object.snapshot`  | `object` (dynamic) | Full snapshot after the change. (Optional)                                                        |
 | `tags`             | `keyword`          | Optional list of tags for the event.                                                              |
@@ -158,7 +161,7 @@ await client.log(change, {
 const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
 const { object } = items.shift();
 console.log(
-  `We have just updated the following fields: \n${object.changes)}`
+  `We have just updated the following fields: \n${object.fields?.changed}`
 );
 ```
 
@@ -204,23 +207,26 @@ await client.log(
 );
 ```
 
-### Field exclusions and sensitive fields
+### Ignored and masked fields
 
-Dealing with domain-specific data that should be excluded or masked.
+Dealing with domain-specific data that should be ignored in the diff or masked in the stored snapshot.
 
 ```ts
 await client.log(change, {
   action: 'rule-update',
   userId,
   spaceId,
-  // Keys with truthy values are excluded from the diff (and their nested descendants)
-  excludeFields: {
+  // Fields that should not participate in the diff (e.g. volatile or system fields)
+  ignoreFields: {
     updatedAt: true,
     monitoringData: true,
-    'params.isUpdated': true,
+    params { isUpdated: true },
   },
   // Fields containing sensitive data that should be masked
-  sensitiveFields: ['user.email', 'params.apiKey'],
+  maskFields: {
+    user: { email: true },
+    apiKey: true,
+  },
 });
 ```
 

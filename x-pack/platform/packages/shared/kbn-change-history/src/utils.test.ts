@@ -6,7 +6,155 @@
  */
 
 // import flatten from 'flat';
-import { standardDiffDocCalculation } from './utils';
+import { sha256, maskSensitiveFields, standardDiffDocCalculation } from './utils';
+
+describe('#maskSensitiveFields', () => {
+  const maskedValuePattern = /^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*[a-f0-9]{12}$/;
+
+  describe('when maskFields is not provided', () => {
+    it('should return snapshot unchanged and empty masked array', () => {
+      const snapshot = { user: { email: 'bob@example.com' } };
+      const result = maskSensitiveFields(snapshot);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+  });
+
+  describe('when maskFields is undefined', () => {
+    it('should return snapshot unchanged and empty masked array', () => {
+      const snapshot = { secret: 'sensitive' };
+      const result = maskSensitiveFields(snapshot, undefined);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+  });
+
+  describe('single field masking', () => {
+    it('should mask a top-level string field and list it in masked', () => {
+      const snapshot = { user: { email: 'bob@example.com' } };
+      const maskFields = { user: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.email).not.toBe('bob@example.com');
+    });
+
+    it('should mask a nested field when only that path is in maskFields', () => {
+      const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
+      const maskFields = { user: { email: true } };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.name).toBe('Bob');
+    });
+  });
+
+  describe('multiple fields masking', () => {
+    it('should mask multiple string fields and list all in masked', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', apiKey: 'secret-key-123' },
+        token: 'abc-token',
+      };
+      const maskFields = { user: true, token: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.apiKey).toMatch(maskedValuePattern);
+      expect(result.snapshot.token).toMatch(maskedValuePattern);
+    });
+  });
+
+  describe('non-string values', () => {
+    it('should not mask non-string values even when key is in maskFields', () => {
+      const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
+      const maskFields = { config: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+
+    it('should mask only string fields and leave numbers/booleans unchanged', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', count: 5, active: true },
+      };
+      const maskFields = { user: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.count).toBe(5);
+      expect(result.snapshot.user.active).toBe(true);
+    });
+  });
+
+  describe('unmasked fields', () => {
+    it('should leave unmasked fields unchanged', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', name: 'Bob' },
+        title: 'My Dashboard',
+      };
+      const maskFields = { user: { email: true } };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.snapshot.user.name).toBe('Bob');
+      expect(result.snapshot.title).toBe('My Dashboard');
+    });
+  });
+
+  describe('masking format', () => {
+    it('should produce deterministic masked value for same input', () => {
+      const snapshot = { secret: 'same-value' };
+      const maskFields = { secret: true };
+      const result1 = maskSensitiveFields(snapshot, maskFields);
+      const result2 = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result1.snapshot.secret).toBe(result2.snapshot.secret);
+    });
+
+    it('should use last 12 chars of sha256 in masked value', () => {
+      const snapshot = { secret: 'test' };
+      const maskFields = { secret: true };
+      const sha256Value = sha256('test');
+      const maskedValue = `****************${sha256Value.slice(-12)}`;
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.snapshot.secret).toEqual(maskedValue);
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle empty snapshot', () => {
+      const result = maskSensitiveFields({}, { user: true });
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual({});
+    });
+
+    it('should handle empty string value', () => {
+      const snapshot = { secret: '' };
+      const maskFields = { secret: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['secret']);
+      expect(result.snapshot.secret).toMatch(maskedValuePattern);
+    });
+
+    it('should not mutate the original snapshot', () => {
+      const user = { email: 'bob@example.com' };
+      const snapshot = { user };
+      const maskFields = { user: true };
+      maskSensitiveFields(snapshot, maskFields);
+
+      expect(snapshot.user).toBe(user);
+    });
+  });
+});
 
 describe('#standardDiffDocCalculation', () => {
   describe('empty objects', () => {
@@ -423,8 +571,8 @@ describe('#standardDiffDocCalculation', () => {
         title: 'New Title',
         description: 'New Description',
       };
-      const excludeFields = { type: true, description: true };
-      const result = standardDiffDocCalculation({ a, b, excludeFields });
+      const ignoreFields = { type: true, description: true };
+      const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
       expect(result.stats).toEqual({
         total: 1,
@@ -447,8 +595,8 @@ describe('#standardDiffDocCalculation', () => {
         config: { theme: 'light', layout: 'list' },
         metadata: { author: 'Bob', version: 2 },
       };
-      const excludeFields = { config: { layout: true }, metadata: true };
-      const result = standardDiffDocCalculation({ a, b, excludeFields });
+      const ignoreFields = { config: { layout: true }, metadata: true };
+      const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
       expect(result.stats).toEqual({
         total: 1,
@@ -462,8 +610,8 @@ describe('#standardDiffDocCalculation', () => {
     it('should return empty diff when filter excludes all changes', () => {
       const a = { title: 'Old' };
       const b = { title: 'New' };
-      const excludeFields = { title: true };
-      const result = standardDiffDocCalculation({ a, b, excludeFields });
+      const ignoreFields = { title: true };
+      const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
       expect(result.stats).toEqual({
         total: 0,
@@ -486,8 +634,8 @@ describe('#standardDiffDocCalculation', () => {
         author: 'Bob',
         version: 2,
       };
-      const excludeFields = { description: true, version: true };
-      const result = standardDiffDocCalculation({ a, b, excludeFields });
+      const ignoreFields = { description: true, version: true };
+      const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
       expect(result.stats).toEqual({
         total: 2,
@@ -505,8 +653,8 @@ describe('#standardDiffDocCalculation', () => {
       const b = {
         config: { theme: 'light', layout: { columns: 3 } },
       };
-      const excludeFields = { config: { theme: true } };
-      const result = standardDiffDocCalculation({ a, b, excludeFields });
+      const ignoreFields = { config: { theme: true } };
+      const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
       expect(result.fieldChanges).toContain('config.layout.columns');
     });
@@ -568,6 +716,17 @@ describe('#standardDiffDocCalculation', () => {
 
       expect(result.stats.updates).toBe(1);
       expect(result.fieldChanges).toEqual(['my-property']);
+    });
+
+    it('should handle property names with a dot in the middle', () => {
+      const a = { 'user.name': 'Alice', 'config.theme': 'dark' };
+      const b = { 'user.name': 'Bob', 'config.theme': 'light' };
+      const result = standardDiffDocCalculation({ a, b });
+
+      expect(result.stats.updates).toBe(2);
+      expect(result.fieldChanges.sort()).toEqual(['config.theme', 'user.name'].sort());
+      expect(result.oldvalues).toEqual({ 'user.name': 'Alice', 'config.theme': 'dark' });
+      expect(result.newvalues).toEqual({ 'user.name': 'Bob', 'config.theme': 'light' });
     });
 
     it('should handle numeric property names', () => {
@@ -721,112 +880,3 @@ describe('#standardDiffDocCalculation', () => {
     });
   });
 });
-
-// describe('#diffDocSource2', () => {
-//   const a = {
-//     changed1: 123456,
-//     changed2: ['default'],
-//     deleted3: '10.6.0',
-//     ignored4: false,
-//     ignored5: '2025-11-20T15:15:33.389Z',
-//     nested6: {
-//       nestedagain6: {
-//         arrayinsidenested6: [
-//           {
-//             deepnestedinsidearray6: 'some value',
-//           },
-//         ],
-//       },
-//     },
-//     ignored8: NaN, // excluded from JSON (= addition)
-//     null9: null,
-//   };
-
-//   const filter = {
-//     changed1: true,
-//     changed2: true,
-//     deleted3: true,
-//     ignored4: false,
-//     nested6: true,
-//     added7: true,
-//     invalid8: true,
-//     null9: true,
-//   } as SavedObjectsSnapshotFilter;
-
-//   it('can handle an undefined "from" object A', () => {
-//     // Setup
-//     const b = structuredClone(a);
-//     // Execute
-//     const diff = diffDocSource(undefined, b);
-//     // Assert
-//     expect(diff.changedFields).toEqual(Object.keys(flatten.flatten(b, { safe: true })));
-//     expect(diff.stats.additions).toEqual(8);
-//   });
-
-//   it('can handle an undefined "to" object B', () => {
-//     // Setup
-//     // Execute
-//     const diff = diffDocSource(a, undefined);
-//     // Assert
-//     expect(diff.changedFields).toEqual(Object.keys(flatten.flatten(a, { safe: true })));
-//     expect(diff.stats.deletions).toEqual(8);
-//   });
-
-//   it('returns a filtered diff of two JSON-equivalent objects', () => {
-//     // Setup
-//     const b = structuredClone(a);
-//     b.changed1 = 654321;
-//     b.changed2 = ['default', '2'];
-//     delete b.deleted3;
-//     b.ignored4 = undefined;
-//     b.ignored5 = 'something else';
-//     b.nested6.nestedagain6.arrayinsidenested6[0].deepnestedinsidearray6 = 'another value';
-//     b.added7 = 'added property';
-//     b.invalid8 = true;
-//     b.null9 = undefined;
-
-//     // Execute
-//     const diff = diffDocSource(a, b, filter);
-
-//     // Assert
-//     expect(diff.stats.total).toEqual(7);
-//     expect(diff).toEqual({
-//       stats: { total: 7, additions: 2, deletions: 2, updates: 3 },
-//       changedFields: [
-//         'changed1',
-//         'changed2',
-//         'deleted3',
-//         'nested6.nestedagain6.arrayinsidenested6',
-//         'null9',
-//         'added7',
-//         'invalid8',
-//       ],
-//       oldValues: {
-//         changed1: 123456,
-//         changed2: ['default'],
-//         deleted3: '10.6.0',
-//         'nested6.nestedagain6.arrayinsidenested6': [
-//           {
-//             deepnestedinsidearray6: 'some value',
-//           },
-//         ],
-//         null9: null,
-//         added7: undefined,
-//         invalid8: undefined, // <-- NaN cannot be translated to JSON
-//       },
-//       newValues: {
-//         changed1: 654321,
-//         changed2: ['default', '2'],
-//         deleted3: undefined,
-//         'nested6.nestedagain6.arrayinsidenested6': [
-//           {
-//             deepnestedinsidearray6: 'another value',
-//           },
-//         ],
-//         null9: undefined,
-//         added7: 'added property',
-//         invalid8: true,
-//       },
-//     });
-//   });
-// });

@@ -53,7 +53,13 @@ export const changeHistoryMappings = {
         type: mappings.keyword(),
         hash: mappings.keyword(),
         sequence: mappings.keyword(),
-        changes: mappings.keyword(),
+        fields: mappings.object({
+          properties: {
+            changed: mappings.keyword(),
+            masked: mappings.keyword(),
+            ignored: mappings.keyword(),
+          },
+        }),
         oldvalues: mappings.object({ properties: {} }), // mappings.flattened(),
         snapshot: mappings.object({ properties: {} }), // mappings.flattened(),
       },

@@ -44,9 +44,13 @@ export interface ChangeHistoryDocument {
   object: {
     id: string; // Unique id of the target object in kibana.
     type: string; // Type of the target object in kibana.
-    hash: string; // SHA256 hash of the object.snapshot to identify the payload.
+    hash: string; // SHA256 hash of the object.snapshot to identify changes in the payload.
     sequence?: string; // Sequence identifier for ordering. (Optional)
-    changes?: string[]; // List of field names that changed. (Optional)
+    fields: {
+      changed?: string[]; // List of field names that changed. (Optional)
+      ignored?: string[]; // List of fields ignored in change calculation (Optional)
+      masked?: string[]; // List of "sensitive data" fields masked in snapshot (Optional)
+    };
     oldvalues?: Record<string, unknown>; // Previous values for changed fields. (Optional)
     snapshot: Record<string, unknown>; // Full snapshot after the change. (Optional)
   };
@@ -80,8 +84,8 @@ export interface LogChangeHistoryOptions {
   spaceId: string;
   correlationId?: string;
   data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
-  excludeFields?: ChangeTrackingExcludeFilter;
-  sensitiveFields?: ChangeTrackingSensitiveDataFilter;
+  ignoreFields?: ChangeTrackingIgnoreFields;
+  maskFields?: ChangeTrackingDataMaskingFields;
   // Optional diff to be used instead of standard diff calculation
   diffDocCalculation?: (opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff;
 }
@@ -111,15 +115,15 @@ export interface GetHistoryResult {
 /**
  * Fields excluded from diff calculation
  */
-export interface ChangeTrackingExcludeFilter {
-  [Key: string]: boolean | ChangeTrackingExcludeFilter;
+export interface ChangeTrackingIgnoreFields {
+  [Key: string]: boolean | ChangeTrackingIgnoreFields;
 }
 
 /**
  * Fields hashed due to sensitive nature (PII, Secret keys, etc)
  */
-export interface ChangeTrackingSensitiveDataFilter {
-  [Key: string]: boolean | ChangeTrackingSensitiveDataFilter;
+export interface ChangeTrackingDataMaskingFields {
+  [Key: string]: boolean | ChangeTrackingDataMaskingFields;
 }
 
 /**
@@ -128,7 +132,7 @@ export interface ChangeTrackingSensitiveDataFilter {
 export interface ChangeTrackingDiffOptions {
   a?: Record<string, any>;
   b?: Record<string, any>;
-  excludeFields?: ChangeTrackingExcludeFilter;
+  ignoreFields?: ChangeTrackingIgnoreFields;
 }
 
 /**
@@ -142,6 +146,7 @@ export interface ChangeTrackingDiff {
     updates: number;
   };
   fieldChanges: Array<string>;
+  ignored: Array<string>;
   oldvalues: Record<string, any>;
   newvalues: Record<string, any>;
 }
