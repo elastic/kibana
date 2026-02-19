@@ -21,7 +21,9 @@
       "share",
       "fileUpload",
       "fieldFormats",
-      "kql"
+      "kql",
+      "inference",
+      "actions"
     ],
     "requiredBundles": [
       "kibanaReact",
