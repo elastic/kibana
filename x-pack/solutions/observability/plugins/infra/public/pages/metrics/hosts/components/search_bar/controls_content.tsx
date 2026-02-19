@@ -94,7 +94,7 @@ export const ControlsContent = ({
             const child = children[childId] as DataControlApi;
 
             child.CustomPrependComponent = () => (
-              <ControlTitle title={child.label$.getValue()} embeddableId={childId} />
+              <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
             );
           });
         })
