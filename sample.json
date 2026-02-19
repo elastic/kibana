@@ -1,254 +1,301 @@
 {
-  "@timestamp": "2026-02-12T16:20:14.434Z",
+  "@timestamp": "2026-02-19T10:03:53.811Z",
   "event": {
-    "id": "9__f4o5MUM2rC1gn4Wnp",
+    "id": "01KHTNP9JKYPYG4WQ1W2BV8QD1",
+    "type": "change",
+    "outcome": "success",
     "module": "security",
     "dataset": "alerting-rules",
     "action": "rule-update",
-    "type": "change",
-    "outcome": "success",
     "group": {
-      "id": "294be1ba4264f077e33f656df8c633f5"
+      "id": "78f9db2cf960e0c38e9ae1ba86698e9b"
     }
-  },
-  "kibana": {
-    "space_id": "default",
-    "version": "9.4.0"
   },
   "user": {
     "id": "elastic"
   },
   "object": {
-    "changes": [
-      "actions",
-      "updatedAt",
-      "revision",
-      "params.meta.kibana_siem_app_url",
-      "params.timestampOverrideFallbackDisabled",
-      "params.filters"
-    ],
-    "oldvalues": {
-      "actions": [],
-      "updatedAt": "2026-02-11T14:00:58.733Z",
-      "revision": 0
-    },
-    "id": "4287d39f-4404-4b20-8a11-762a8339c6e8",
+    "id": "7e571c5c-e110-4eb5-8433-216f2954bd5f",
     "type": "alert",
-    "hash": "ed93977ee74861cfa40c252b356341ed8ead8474ed91be87c28a440195e25a6d",
+    "hash": "44a8e8eb95bbe9f1810c59fdf25398dfa15a4ef2832f415d3f2f9bfce307e7f3",
+    "fields": {
+      "masked": [
+        "attributes.apiKey"
+      ],
+      "changed": [
+        "attributes.name",
+        "attributes.params.ruleSource.customizedFields",
+        "attributes.params.riskScore",
+        "attributes.params.severity",
+        "attributes.updatedAt",
+        "attributes.apiKey",
+        "attributes.revision"
+      ],
+      "ignored": [
+        "attributes.mapped_params.risk_score",
+        "attributes.mapped_params.severity",
+        "attributes.executionStatus.status",
+        "attributes.executionStatus.lastDuration",
+        "attributes.executionStatus.lastExecutionDate",
+        "attributes.executionStatus.error",
+        "attributes.executionStatus.warning.reason",
+        "attributes.executionStatus.warning.message",
+        "attributes.monitoring.run.history",
+        "attributes.monitoring.run.calculated_metrics.success_ratio",
+        "attributes.monitoring.run.calculated_metrics.p99",
+        "attributes.monitoring.run.calculated_metrics.p50",
+        "attributes.monitoring.run.calculated_metrics.p95",
+        "attributes.monitoring.run.last_run.timestamp",
+        "attributes.monitoring.run.last_run.metrics.duration",
+        "attributes.monitoring.run.last_run.metrics.total_search_duration_ms",
+        "attributes.monitoring.run.last_run.metrics.total_indexing_duration_ms",
+        "attributes.monitoring.run.last_run.metrics.total_alerts_detected",
+        "attributes.monitoring.run.last_run.metrics.total_alerts_created",
+        "attributes.monitoring.run.last_run.metrics.gap_duration_s",
+        "attributes.lastRun.outcomeOrder",
+        "attributes.lastRun.alertsCount.new",
+        "attributes.lastRun.alertsCount.ignored",
+        "attributes.lastRun.alertsCount.recovered",
+        "attributes.lastRun.alertsCount.active",
+        "attributes.lastRun.outcomeMsg",
+        "attributes.lastRun.warning",
+        "attributes.lastRun.outcome",
+        "attributes.nextRun"
+      ]
+    },
     "snapshot": {
-      "name": "Remote File Download via Desktopimgdownldr Utility",
-      "tags": [
-        "Domain: Endpoint",
-        "OS: Windows",
-        "Use Case: Threat Detection",
-        "Tactic: Command and Control",
-        "Resources: Investigation Guide",
-        "Data Source: Elastic Endgame",
-        "Data Source: Elastic Defend",
-        "Data Source: Windows Security Event Logs",
-        "Data Source: Microsoft Defender for Endpoint",
-        "Data Source: SentinelOne",
-        "Data Source: Sysmon",
-        "Data Source: Crowdstrike"
-      ],
-      "enabled": false,
-      "alertTypeId": "siem.eqlRule",
-      "consumer": "siem",
-      "legacyId": null,
-      "schedule": {
-        "interval": "5m"
-      },
-      "actions": [
-        {
-          "params": {
-            "message": "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
-            "to": [
-              "test@test.com"
-            ],
-            "subject": "tests"
-          },
-          "actionTypeId": ".email",
-          "frequency": {
-            "summary": true,
-            "notifyWhen": "onActiveAlert",
-            "throttle": null
-          },
-          "group": "default",
-          "uuid": "30feab82-0997-486f-b2bf-ac22005cda2d",
-          "actionRef": "action_0"
-        }
-      ],
-      "params": {
-        "author": [
-          "Elastic"
+      "attributes": {
+        "name": "AWS Redshift Cluster Creation",
+        "tags": [
+          "Domain: Cloud",
+          "Data Source: AWS",
+          "Data Source: Amazon Web Services",
+          "Data Source: AWS Redshift",
+          "Use Case: Asset Visibility",
+          "Tactic: Persistence",
+          "Resources: Investigation Guide"
         ],
-        "description": "Identifies the desktopimgdownldr utility being used to download a remote file. An adversary may use desktopimgdownldr to download arbitrary files as an alternative to certutil.",
-        "note": "## Triage and analysis\n\n### Investigating Remote File Download via Desktopimgdownldr Utility\n\nAttackers commonly transfer tooling or malware from external systems into a compromised environment using the command and control channel. However, they can also abuse signed utilities to drop these files.\n\nThe `Desktopimgdownldr.exe` utility is used to to configure lockscreen/desktop image, and can be abused with the `lockscreenurl` argument to download remote files and tools, this rule looks for this behavior.\n\n> **Note**:\n> This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/current/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n> This investigation guide uses the [Investigate Markdown Plugin](https://www.elastic.co/guide/en/security/current/interactive-investigation-guides.html) introduced in Elastic Stack version 8.8.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - !{investigate{\"label\":\"Alerts associated with the user in the last 48h\",\"providers\":[[{\"excluded\":false,\"field\":\"event.kind\",\"queryType\":\"phrase\",\"value\":\"signal\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"user.id\",\"queryType\":\"phrase\",\"value\":\"{{user.id}}\",\"valueType\":\"string\"}]],\"relativeFrom\":\"now-48h/h\",\"relativeTo\":\"now\"}}\n  - !{investigate{\"label\":\"Alerts associated with the host in the last 48h\",\"providers\":[[{\"excluded\":false,\"field\":\"event.kind\",\"queryType\":\"phrase\",\"value\":\"signal\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"host.name\",\"queryType\":\"phrase\",\"value\":\"{{host.name}}\",\"valueType\":\"string\"}]],\"relativeFrom\":\"now-48h/h\",\"relativeTo\":\"now\"}}\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Check the reputation of the domain or IP address used to host the downloaded file or if the user downloaded the file from an internal system.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the file using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n        - !{investigate{\"label\":\"Investigate the Subject Process Network Events\",\"providers\":[[{\"excluded\":false,\"field\":\"event.category\",\"queryType\":\"phrase\",\"value\":\"network\",\"valueType\":\"string\"},{\"excluded\":false,\"field\":\"process.entity_id\",\"queryType\":\"phrase\",\"value\":\"{{process.entity_id}}\",\"valueType\":\"string\"}]]}}\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the target host after the registry modification.\n\n### False positive analysis\n\n- This activity is unusual but can be done by administrators. Benign true positives (B-TPs) can be added as exceptions if necessary.\n- Analysts can dismiss the alert if the downloaded file is a legitimate image.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
-        "falsePositives": [],
-        "from": "now-9m",
-        "ruleId": "15c0b7a7-9c34-4869-b25b-fa6518414899",
-        "immutable": true,
-        "ruleSource": {
-          "type": "external",
-          "isCustomized": false,
-          "customizedFields": [],
-          "hasBaseVersion": true
+        "enabled": true,
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
+        "legacyId": null,
+        "schedule": {
+          "interval": "10m"
         },
-        "license": "Elastic License v2",
-        "outputIndex": "",
-        "meta": {
-          "kibana_siem_app_url": ""
-        },
-        "maxSignals": 100,
-        "riskScore": 47,
-        "riskScoreMapping": [],
-        "severity": "medium",
-        "severityMapping": [],
-        "timestampOverride": "event.ingested",
-        "timestampOverrideFallbackDisabled": false,
-        "threat": [
-          {
-            "framework": "MITRE ATT&CK",
-            "tactic": {
-              "id": "TA0011",
-              "name": "Command and Control",
-              "reference": "https://attack.mitre.org/tactics/TA0011/"
-            },
-            "technique": [
+        "actions": [],
+        "params": {
+          "author": [
+            "Elastic"
+          ],
+          "description": "Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities.",
+          "note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating AWS Redshift Cluster Creation\n\nAmazon Redshift is a data warehousing service that allows for scalable data storage and analysis. In a secure environment, only authorized users should create Redshift clusters. Adversaries might exploit misconfigured permissions to create clusters, potentially leading to data exfiltration or unauthorized data processing. The detection rule monitors for successful cluster creation events, especially by non-admin users, to identify potential misuse or misconfigurations.\n\n### Possible investigation steps\n\n- Review the CloudTrail logs for the event.dataset:aws.cloudtrail and event.provider:redshift.amazonaws.com to confirm the details of the CreateCluster event, including the timestamp and the user who initiated the action.\n- Identify the IAM role or user associated with the event.action:CreateCluster and verify if this user is expected to have permissions to create Redshift clusters. Check for any recent changes to their permissions or roles.\n- Investigate the event.outcome:success to ensure that the cluster creation was indeed successful and determine the region and account where the cluster was created.\n- Examine the configuration of the newly created Redshift cluster to ensure it adheres to security best practices, such as encryption settings, VPC configurations, and access controls.\n- Cross-reference the user activity with other logs or alerts to identify any unusual patterns or behaviors that might indicate misuse or compromise, such as multiple cluster creation attempts or access from unfamiliar IP addresses.\n- Contact the user or team responsible for the account to verify if the cluster creation was intentional and authorized, and document their response for future reference.\n\n### False positive analysis\n\n- Routine maintenance or testing activities by non-admin users can trigger alerts. To manage this, create exceptions for specific users or roles known to perform these tasks regularly.\n- Automated scripts or third-party tools that create clusters as part of their normal operation may cause false positives. Identify these tools and exclude their associated user accounts or roles from the detection rule.\n- Development or staging environments where non-admin users are permitted to create clusters for testing purposes can lead to alerts. Implement environment-specific exclusions to prevent unnecessary alerts.\n- Temporary permissions granted to non-admin users for specific projects can result in cluster creation alerts. Monitor and document these permissions, and adjust the detection rule to account for these temporary changes.\n\n### Response and remediation\n\n- Immediately isolate the Redshift cluster to prevent any unauthorized access or data exfiltration. This can be done by modifying the security group rules to restrict inbound and outbound traffic.\n- Review the IAM roles and permissions associated with the user who created the cluster. Revoke any unnecessary permissions and ensure that the principle of least privilege is enforced.\n- Conduct a thorough audit of recent CloudTrail logs to identify any other unauthorized activities or anomalies associated with the same user or related accounts.\n- If data exfiltration is suspected, initiate a data integrity check and consider restoring from a known good backup to ensure no data tampering has occurred.\n- Notify the security team and relevant stakeholders about the incident for further investigation and to determine if additional security measures are needed.\n- Implement additional monitoring and alerting for Redshift cluster creation events, especially focusing on non-administrative users, to quickly detect similar activities in the future.\n- Consider enabling multi-factor authentication (MFA) for all users with permissions to create or modify Redshift clusters to add an extra layer of security.",
+          "falsePositives": [
+            "Valid clusters may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+          ],
+          "from": "now-1h",
+          "ruleId": "015cca13-8832-49ac-a01b-a396114809f6",
+          "immutable": true,
+          "ruleSource": {
+            "type": "external",
+            "isCustomized": true,
+            "customizedFields": [
               {
-                "id": "T1105",
-                "name": "Ingress Tool Transfer",
-                "reference": "https://attack.mitre.org/techniques/T1105/"
+                "fieldName": "risk_score"
+              },
+              {
+                "fieldName": "severity"
               }
-            ]
+            ],
+            "hasBaseVersion": true
+          },
+          "license": "Elastic License v2",
+          "outputIndex": "",
+          "meta": {
+            "kibana_siem_app_url": ""
+          },
+          "maxSignals": 100,
+          "riskScore": 99,
+          "riskScoreMapping": [],
+          "severity": "critical",
+          "severityMapping": [],
+          "timestampOverride": "event.ingested",
+          "timestampOverrideFallbackDisabled": false,
+          "threat": [
+            {
+              "framework": "MITRE ATT&CK",
+              "tactic": {
+                "id": "TA0003",
+                "name": "Persistence",
+                "reference": "https://attack.mitre.org/tactics/TA0003/"
+              },
+              "technique": []
+            }
+          ],
+          "to": "now",
+          "references": [
+            "https://docs.aws.amazon.com/redshift/latest/APIReference/API_CreateCluster.html"
+          ],
+          "version": 207,
+          "exceptionsList": [],
+          "relatedIntegrations": [
+            {
+              "package": "aws",
+              "version": "^2.0.0",
+              "integration": "cloudtrail"
+            }
+          ],
+          "requiredFields": [
+            {
+              "name": "event.action",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.dataset",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.outcome",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.provider",
+              "type": "keyword",
+              "ecs": true
+            }
+          ],
+          "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "filebeat-*",
+            "logs-aws.cloudtrail-*"
+          ],
+          "query": "event.dataset:aws.cloudtrail and event.provider:redshift.amazonaws.com and event.action:CreateCluster and event.outcome:success\n",
+          "filters": []
+        },
+        "mapped_params": {
+          "risk_score": 99,
+          "severity": "80-critical"
+        },
+        "createdBy": "elastic",
+        "updatedBy": "elastic",
+        "createdAt": "2026-02-19T09:16:36.940Z",
+        "updatedAt": "2026-02-19T10:03:52.918Z",
+        "apiKey": "****************e67a829c15eb",
+        "apiKeyOwner": "elastic",
+        "apiKeyCreatedByUser": false,
+        "throttle": null,
+        "notifyWhen": null,
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "warning",
+          "lastDuration": 40,
+          "lastExecutionDate": "2026-02-19T09:58:27.858Z",
+          "error": null,
+          "warning": {
+            "reason": "ruleExecution",
+            "message": "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.,This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
           }
-        ],
-        "to": "now",
-        "references": [
-          "https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/"
-        ],
-        "version": 318,
-        "exceptionsList": [],
-        "relatedIntegrations": [
-          {
-            "package": "endpoint",
-            "version": "^9.0.0"
-          },
-          {
-            "package": "windows",
-            "version": "^3.0.0"
-          },
-          {
-            "package": "system",
-            "version": "^2.0.0"
-          },
-          {
-            "package": "m365_defender",
-            "version": "^3.0.0"
-          },
-          {
-            "package": "sentinel_one_cloud_funnel",
-            "version": "^1.9.0"
-          },
-          {
-            "package": "crowdstrike",
-            "version": "^1.51.0"
-          }
-        ],
-        "requiredFields": [
-          {
-            "name": "event.type",
-            "type": "keyword",
-            "ecs": true
-          },
-          {
-            "name": "host.os.type",
-            "type": "keyword",
-            "ecs": true
-          },
-          {
-            "name": "process.args",
-            "type": "keyword",
-            "ecs": true
-          },
-          {
-            "name": "process.name",
-            "type": "keyword",
-            "ecs": true
-          },
-          {
-            "name": "process.pe.original_file_name",
-            "type": "keyword",
-            "ecs": true
-          }
-        ],
-        "setup": "",
-        "type": "eql",
-        "language": "eql",
-        "index": [
-          "endgame-*",
-          "logs-crowdstrike.fdr*",
-          "logs-endpoint.events.process-*",
-          "logs-m365_defender.event-*",
-          "logs-sentinel_one_cloud_funnel.*",
-          "logs-system.security*",
-          "logs-windows.forwarded*",
-          "logs-windows.sysmon_operational-*",
-          "winlogbeat-*"
-        ],
-        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (process.name : \"desktopimgdownldr.exe\" or ?process.pe.original_file_name == \"desktopimgdownldr.exe\") and\n  process.args : \"/lockscreenurl:http*\"\n",
-        "filters": []
-      },
-      "mapped_params": {
-        "risk_score": 47,
-        "severity": "40-medium"
-      },
-      "createdBy": "elastic",
-      "updatedBy": "elastic",
-      "createdAt": "2026-02-11T14:00:58.733Z",
-      "updatedAt": "2026-02-12T16:20:11.421Z",
-      "apiKey": null,
-      "apiKeyOwner": null,
-      "apiKeyCreatedByUser": null,
-      "throttle": null,
-      "notifyWhen": null,
-      "muteAll": false,
-      "mutedInstanceIds": [],
-      "executionStatus": {
-        "status": "pending",
-        "lastExecutionDate": "2026-02-11T14:00:58.733Z"
-      },
-      "monitoring": {
-        "run": {
-          "history": [],
-          "calculated_metrics": {
-            "success_ratio": 0
-          },
-          "last_run": {
-            "timestamp": "2026-02-11T14:00:58.733Z",
-            "metrics": {
-              "duration": 0,
-              "total_search_duration_ms": null,
-              "total_indexing_duration_ms": null,
-              "total_alerts_detected": null,
-              "total_alerts_created": null,
-              "gap_duration_s": null
+        },
+        "monitoring": {
+          "run": {
+            "history": [
+              {
+                "duration": 41,
+                "success": true,
+                "timestamp": 1771493649272
+              },
+              {
+                "duration": 45,
+                "success": true,
+                "timestamp": 1771493800548
+              },
+              {
+                "duration": 40,
+                "success": true,
+                "timestamp": 1771494110925
+              },
+              {
+                "duration": 45,
+                "success": true,
+                "timestamp": 1771494340746
+              },
+              {
+                "duration": 40,
+                "success": true,
+                "timestamp": 1771495107858
+              }
+            ],
+            "calculated_metrics": {
+              "success_ratio": 1,
+              "p99": 45,
+              "p50": 41,
+              "p95": 45
+            },
+            "last_run": {
+              "timestamp": "2026-02-19T09:58:27.858Z",
+              "metrics": {
+                "duration": 40,
+                "total_search_duration_ms": null,
+                "total_indexing_duration_ms": null,
+                "total_alerts_detected": null,
+                "total_alerts_created": null,
+                "gap_duration_s": null
+              }
             }
           }
-        }
+        },
+        "snoozeSchedule": [],
+        "revision": 7,
+        "running": false,
+        "artifacts": {
+          "dashboards": [],
+          "investigation_guide": {
+            "blob": ""
+          }
+        },
+        "meta": {
+          "versionApiKeyLastmodified": "9.4.0"
+        },
+        "scheduledTaskId": "7e571c5c-e110-4eb5-8433-216f2954bd5f",
+        "lastRun": {
+          "outcomeOrder": 10,
+          "alertsCount": {
+            "new": 0,
+            "ignored": 0,
+            "recovered": 0,
+            "active": 0
+          },
+          "outcomeMsg": [
+            "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+          ],
+          "warning": null,
+          "outcome": "warning"
+        },
+        "nextRun": "2026-02-19T10:08:27.832Z"
       },
-      "snoozeSchedule": [],
-      "revision": 1,
-      "running": false,
-      "artifacts": {
-        "dashboards": [],
-        "investigation_guide": {
-          "blob": ""
+      "references": []
+    },
+    "oldvalues": {
+      "attributes.name": "AWS Redshift Cluster Creation (test1)",
+      "attributes.params.ruleSource.customizedFields": [
+        {
+          "fieldName": "name"
         }
-      },
-      "meta": {
-        "versionApiKeyLastmodified": "9.4.0"
-      }
+      ],
+      "attributes.params.riskScore": 21,
+      "attributes.params.severity": "low",
+      "attributes.updatedAt": "2026-02-19T09:58:43.027Z",
+      "attributes.apiKey": "****************4c8874e516f2",
+      "attributes.revision": 6
     }
+  },
+  "kibana": {
+    "space_id": "default",
+    "version": "9.4.0"
   }
 }

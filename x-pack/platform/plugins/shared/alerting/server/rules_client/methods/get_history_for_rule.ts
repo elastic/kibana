@@ -18,7 +18,6 @@ import type {
   RuleChangeHistoryDocument,
   RuleSnapshot,
 } from '../lib/change_tracking';
-import type { RawRule } from '../../types';
 import { transformRuleDomainToRule } from '../../application/rule/transforms';
 
 export interface GetHistoryByParams {
@@ -89,7 +88,7 @@ const mapHistoryItem =
     const { attributes, references } = (item.object.snapshot ?? {}) as unknown as RuleSnapshot;
 
     const ruleDomain = transformRuleAttributesToRuleDomain(
-      attributes as RawRule,
+      attributes,
       {
         id: item.object.id,
         logger: context.logger,

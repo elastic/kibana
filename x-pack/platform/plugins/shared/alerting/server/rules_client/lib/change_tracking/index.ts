@@ -21,7 +21,7 @@ import { ChangeHistoryClient } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
-export const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
+export const ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS = {
   attributes: {
     executionStatus: true,
     monitoring: true,
@@ -32,7 +32,7 @@ export const ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS = {
 };
 
 const ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS = {
-  params: { apiKey: true },
+  attributes: { apiKey: true },
 };
 
 export interface RuleSnapshot {
@@ -144,11 +144,12 @@ export class ChangeTrackingService implements IChangeTrackingService {
           await client.logBulk(groupedChanges, {
             ...opts,
             correlationId,
-            excludeFields: ALERTING_RULE_CHANGE_HISTORY_EXCLUSIONS,
-            sensitiveFields: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
+            ignoreFields: ALERTING_RULE_CHANGE_HISTORY_IGNORE_FIELDS,
+            maskFields: ALERTING_RULE_CHANGE_HISTORY_SENSITIVE_FIELDS,
           });
         } catch (err) {
-          this.logger.error(new Error('Error saving change history', { cause: err }));
+          const error = new Error(`Error saving change history: ${err}`, { cause: err });
+          this.logger.error(error);
         }
       }
     }

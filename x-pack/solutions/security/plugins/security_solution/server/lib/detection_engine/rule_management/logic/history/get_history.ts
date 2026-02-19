@@ -61,7 +61,7 @@ const mapHistoryItem = (item: RuleChangeHistoryDocument): RuleHistoryResult => {
     previousRevision: object.oldvalues?.['attributes.revision'] as number | undefined,
     version: rule.version as number | undefined,
     action: event.action,
-    changes: object.changes ?? [],
+    changes: object.fields.changed ?? [],
     snapshot: object.snapshot,
     rule,
     oldvalues: object.oldvalues,
