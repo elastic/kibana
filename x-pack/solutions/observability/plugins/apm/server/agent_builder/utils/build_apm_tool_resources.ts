@@ -16,6 +16,7 @@ import { getMlClient } from '../../lib/helpers/get_ml_client';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getRandomSamplerSeed } from '../../lib/helpers/get_random_sampler';
 
 export interface ApmToolResources {
   apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
@@ -83,7 +84,6 @@ export async function buildApmToolResources({
     },
   });
 
-  // static seed is used to ensure consistent sampling across requests
   const randomSamplerSeed = getRandomSamplerSeed(coreStart, request);
 
   const mlClientPromise = getMlClient({
