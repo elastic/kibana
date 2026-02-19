@@ -137,7 +137,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
     ...(primaryMetric.alignments
       ? {
-          valuesTextAlign: primaryMetric.alignments.value,
+          primaryAlign: primaryMetric.alignments.value,
           titlesTextAlign: primaryMetric.alignments.labels,
         }
       : {}),
@@ -151,7 +151,10 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
           ...('prefix' in secondaryMetric && secondaryMetric.prefix
-            ? { secondaryPrefix: secondaryMetric.prefix }
+            ? { secondaryLabel: secondaryMetric.prefix }
+            : {}),
+          ...('label_position' in secondaryMetric && secondaryMetric.label_position
+            ? { secondaryLabelPosition: secondaryMetric.label_position }
             : {}),
           secondaryAlign:
             'alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined,
@@ -240,7 +243,7 @@ function buildFromTextBasedLayer(
             ? {
                 background_chart: {
                   type: 'bar',
-                  goal_value: getValueApiColumn(visualization.maxAccessor, layer),
+                  max_value: getValueApiColumn(visualization.maxAccessor, layer),
                   ...(visualization.progressDirection
                     ? { direction: visualization.progressDirection }
                     : {}),
@@ -293,7 +296,7 @@ function buildFromFormBasedLayer(
       ? {
           background_chart: {
             type: 'bar',
-            goal_value: maxValue,
+            max_value: maxValue,
             ...(visualization.progressDirection
               ? { direction: visualization.progressDirection }
               : {}),
@@ -388,9 +391,16 @@ function enrichConfigurationWithVisualizationProperties(
       };
     }
 
-    if (visualization.valuesTextAlign || visualization.titlesTextAlign) {
+    if (
+      visualization.primaryAlign ||
+      visualization.valuesTextAlign ||
+      visualization.titlesTextAlign
+    ) {
       primaryMetric.alignments = {
-        value: visualization.valuesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value:
+          visualization.primaryAlign ??
+          visualization.valuesTextAlign ??
+          LENS_METRIC_STATE_DEFAULTS.primaryAlign,
         labels: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
       };
     }
@@ -403,8 +413,12 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
-    if (visualization.secondaryPrefix) {
-      secondaryMetric.prefix = visualization.secondaryPrefix;
+    if (visualization.secondaryLabel || visualization.secondaryPrefix) {
+      secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    }
+
+    if (visualization.secondaryLabelPosition) {
+      secondaryMetric.label_position = visualization.secondaryLabelPosition;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -512,7 +526,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   if (primaryMetric.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.goal_value);
+    const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
@@ -540,7 +554,7 @@ function getValueColumns(layer: MetricStateESQL) {
       ? [
           getValueColumn(
             getAccessorName('max'),
-            primaryMetric.background_chart.goal_value.column,
+            primaryMetric.background_chart.max_value.column,
             'number'
           ),
         ]

@@ -57,7 +57,7 @@ describe('AlertDetailsRedirect', () => {
         timerange:
           "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
-          '!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,selectedOptions:!(),title:Status))',
+          '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
         flyout:
           '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
       });
@@ -96,7 +96,7 @@ describe('AlertDetailsRedirect', () => {
         timerange:
           "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
-          '!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,selectedOptions:!(),title:Status))',
+          '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
         flyout:
           '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
       });
@@ -134,7 +134,7 @@ describe('AlertDetailsRedirect', () => {
         timerange:
           "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
-          '!((displaySettings:(hideActionBar:!f),exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,selectedOptions:!(),title:Status))',
+          '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
         flyout:
           '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.internal.alerts-security.alerts-default,scopeId:alerts-page)))',
       });

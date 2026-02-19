@@ -72,9 +72,9 @@ async function getCreationOptions(
     await controlGroupStateBuilder.addDataControlFromField(
       controlGroupState,
       {
-        dataViewId: dataView.id ?? '',
+        data_view_id: dataView.id ?? '',
         title: 'Node name',
-        fieldName: 'service.node.name',
+        field_name: 'service.node.name',
         width: 'medium',
         grow: true,
       },

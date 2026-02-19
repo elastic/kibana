@@ -26,6 +26,38 @@ import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 const { emptyField, startsWithField, containsCharsField } = fieldValidators;
 
+const MAX_POLICY_NAME_BYTES = 255;
+
+const getPolicyNameIsBeyondMaxBytes = (policyName: string) => {
+  return (
+    window.TextEncoder && new window.TextEncoder().encode(policyName).length > MAX_POLICY_NAME_BYTES
+  );
+};
+
+const getFirstAvailableCopyName = ({
+  originalPolicyName,
+  policyNames,
+}: {
+  originalPolicyName: string;
+  policyNames: string[];
+}) => {
+  const existing = new Set(policyNames);
+
+  // If the shortest candidate is already too long, any other single-digit suffix will be too.
+  if (getPolicyNameIsBeyondMaxBytes(`${originalPolicyName}-2`)) {
+    return '';
+  }
+
+  for (let i = 2; i <= 9; i++) {
+    const candidate = `${originalPolicyName}-${i}`;
+    if (!existing.has(candidate) && !getPolicyNameIsBeyondMaxBytes(candidate)) {
+      return candidate;
+    }
+  }
+
+  return '';
+};
+
 const i18nTexts = {
   errors: {
     policyNameRequiredMessage: i18n.translate('xpack.streams.createPolicyModal.emptyNameError', {
@@ -83,7 +115,7 @@ export const createPolicyNameValidations = ({
     {
       validator: (arg) => {
         const policyName = arg.value;
-        if (window.TextEncoder && new window.TextEncoder().encode(policyName).length > 255) {
+        if (getPolicyNameIsBeyondMaxBytes(policyName)) {
           return {
             message: i18nTexts.errors.policyNameTooLongErrorMessage,
           };
@@ -108,6 +140,7 @@ export interface CreatePolicyModalProps {
   onBack: () => void;
   onSave: (policyName: string) => void;
   isLoading?: boolean;
+  originalPolicyName: string;
 }
 
 export function CreatePolicyModal({
@@ -115,11 +148,12 @@ export function CreatePolicyModal({
   onBack,
   onSave,
   isLoading = false,
+  originalPolicyName,
 }: CreatePolicyModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const { form } = useForm({
     defaultValue: {
-      policyName: '',
+      policyName: getFirstAvailableCopyName({ originalPolicyName, policyNames }),
     },
   });
 
@@ -191,7 +225,7 @@ export function CreatePolicyModal({
               data-test-subj="createPolicyModal-saveButton"
               fill
               onClick={handleSave}
-              disabled={!form.isValid || isLoading}
+              disabled={form.isValid === false || isLoading}
               isLoading={isLoading}
             >
               {i18n.translate('xpack.streams.createPolicyModal.saveButton', {
