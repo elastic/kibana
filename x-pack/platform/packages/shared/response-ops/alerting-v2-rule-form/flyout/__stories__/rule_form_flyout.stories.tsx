@@ -86,7 +86,6 @@ export const Dynamic: DynamicStory = {
   args: {
     services: mockServices,
     query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*) BY host.name',
-    isQueryInvalid: false,
     push: true,
     onClose: action('onClose'),
   },
@@ -109,13 +108,13 @@ export const Standalone: StandaloneStory = {
 };
 
 /**
- * Dynamic flyout with invalid query error
+ * Dynamic flyout with syntactically invalid query
+ * Form validates ES|QL syntax automatically
  */
-export const WithInvalidQuery: DynamicStory = {
+export const WithSyntaxError: DynamicStory = {
   args: {
     services: mockServices,
-    query: 'INVALID QUERY',
-    isQueryInvalid: true,
+    query: 'FROM |',
     push: true,
     onClose: action('onClose'),
   },
@@ -139,7 +138,6 @@ export const ComposableDynamic: ComposableStory = {
         formId={RULE_FORM_ID}
         onSubmit={action('onSubmit')}
         query="FROM logs-* | STATS count = COUNT(*) BY host.name"
-        isQueryInvalid={false}
         services={mockFormServices}
       />
     </RuleFormFlyout>

@@ -5,20 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, type FieldErrors } from 'react-hook-form';
 import type { FormValues } from '../form/types';
+
+/**
+ * Recursively extracts all error messages from a nested FieldErrors object.
+ * Handles both flat errors (e.g., { name: { message: "..." } })
+ * and nested errors (e.g., { evaluation: { query: { base: { message: "..." } } } })
+ */
+const extractErrorMessages = (errors: FieldErrors): string[] => {
+  const messages: string[] = [];
+
+  for (const value of Object.values(errors)) {
+    if (!value) continue;
+
+    // If this level has a message, it's a leaf error node
+    if (typeof value.message === 'string' && value.message.length > 0) {
+      messages.push(value.message);
+    } else if (typeof value === 'object') {
+      // Recurse into nested objects (excluding known FieldError properties)
+      messages.push(...extractErrorMessages(value as FieldErrors));
+    }
+  }
+
+  return messages;
+};
 
 export const ErrorCallOut: React.FC = () => {
   const {
     formState: { errors, isSubmitted },
   } = useFormContext<FormValues>();
 
-  const errorMessages = Object.values(errors)
-    .map((error) => error?.message)
-    .filter((message): message is string => typeof message === 'string' && message.length > 0);
+  const errorMessages = useMemo(() => extractErrorMessages(errors), [errors]);
 
   const isFormInvalid = errorMessages.length > 0 && isSubmitted;
 

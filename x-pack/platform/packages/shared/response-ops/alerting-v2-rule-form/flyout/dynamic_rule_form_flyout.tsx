@@ -22,8 +22,6 @@ export interface DynamicRuleFormFlyoutProps {
   onClose?: () => void;
   /** The query that drives form values - changes will sync to form state */
   query: string;
-  /** Whether the query has validation errors from the parent (e.g., Discover) */
-  isQueryInvalid?: boolean;
   /** Required services */
   services: {
     http: HttpStart;
@@ -45,7 +43,6 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   push,
   onClose,
   query,
-  isQueryInvalid,
   services,
 }) => {
   const { http, notifications, data, dataViews } = services;
@@ -66,7 +63,6 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
         formId={RULE_FORM_ID}
         onSubmit={handleSubmit}
         query={query}
-        isQueryInvalid={isQueryInvalid}
         services={{ http, data, dataViews }}
       />
     </RuleFormFlyout>

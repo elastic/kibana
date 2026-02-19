@@ -28,15 +28,15 @@ export const useQueryColumns = ({ query, search, onSuccess }: UseQueryColumnsPro
   const columnsQuery = useQuery({
     queryKey: ['queryColumns', query],
     queryFn: async ({ signal }) => {
-      const rawColumns = await getESQLQueryColumnsRaw({
+      return getESQLQueryColumnsRaw({
         esqlQuery: query,
         search,
         signal,
         dropNullColumns: true,
       });
-
-      return rawColumns.map(({ name, type }) => ({ name, type }));
     },
+    // Transform raw columns to only include name and type
+    select: (rawColumns) => rawColumns.map(({ name, type }) => ({ name, type })),
     enabled: Boolean(query),
     refetchOnWindowFocus: false,
     retry: false,

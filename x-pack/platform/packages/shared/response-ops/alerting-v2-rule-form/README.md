@@ -11,13 +11,11 @@ Use `DynamicRuleFormFlyout` when the form needs to react to external query chang
 ```tsx
 import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 
-function MyComponent({ services, query, isQueryInvalid, onClose }) {
+function MyComponent({ services, query, onClose }) {
   return (
     <DynamicRuleFormFlyout
       services={services}
       query={query}
-      defaultTimeField="@timestamp"
-      isQueryInvalid={isQueryInvalid}
       onClose={onClose}
     />
   );
@@ -63,7 +61,7 @@ For advanced customization, use the composable pattern with the base `RuleFormFl
 ```tsx
 import { RuleFormFlyout, DynamicRuleForm } from '@kbn/alerting-v2-rule-form';
 
-function DiscoverRuleFlyout({ services, query, isQueryInvalid, onClose }) {
+function DiscoverRuleFlyout({ services, query, onClose }) {
   return (
     <RuleFormFlyout
       services={{
@@ -75,8 +73,6 @@ function DiscoverRuleFlyout({ services, query, isQueryInvalid, onClose }) {
     >
       <DynamicRuleForm
         query={query}
-        defaultTimeField="@timestamp"
-        isQueryInvalid={isQueryInvalid}
         services={{
           http: services.http,
           data: services.data,

@@ -133,7 +133,6 @@ describe('useCreateRule', () => {
   });
 
   it('shows error toast on failure', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
@@ -163,7 +162,6 @@ describe('useCreateRule', () => {
       );
       expect(onSuccess).not.toHaveBeenCalled();
     });
-    consoleErrorSpy.mockRestore();
   });
 
   it('includes all form fields in the request payload', async () => {

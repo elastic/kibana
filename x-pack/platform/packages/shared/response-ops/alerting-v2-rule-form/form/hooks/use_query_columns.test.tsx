@@ -102,7 +102,6 @@ describe('useQueryColumns', () => {
     const mockColumns = [{ name: 'test', type: 'keyword' }];
     mockGetESQLQueryColumnsRaw.mockResolvedValue(mockColumns);
     const search = createMockSearch();
-    const wrapper = createWrapper();
 
     const { rerender } = renderHook(
       ({ query }) =>
@@ -110,7 +109,7 @@ describe('useQueryColumns', () => {
           query,
           search,
         }),
-      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper }
+      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper: createQueryClientWrapper() }
     );
 
     // Change query to trigger refetch

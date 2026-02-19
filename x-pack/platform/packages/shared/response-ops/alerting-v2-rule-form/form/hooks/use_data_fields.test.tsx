@@ -124,7 +124,6 @@ describe('useDataFields', () => {
 
     const http = httpServiceMock.createStartContract();
     const dataViews = dataViewPluginMocks.createStartContract();
-    const wrapper = createWrapper();
 
     const { result, rerender } = renderHook(
       ({ query }) =>
@@ -133,7 +132,7 @@ describe('useDataFields', () => {
           http,
           dataViews,
         }),
-      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper }
+      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {

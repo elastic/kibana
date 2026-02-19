@@ -147,13 +147,13 @@ describe('DynamicRuleForm', () => {
     });
   });
 
-  it('renders without error when isQueryInvalid is true', () => {
-    // The isQueryInvalid prop sets a form error on the query field,
-    // but it only displays in ErrorCallOut after form submission
+  it('renders without error when query has syntax errors', () => {
+    // Form validates ES|QL syntax via validateEsqlQuery, but errors only
+    // display in ErrorCallOut after form submission
     const Wrapper = createQueryClientWrapper();
     render(
       <Wrapper>
-        <DynamicRuleForm {...defaultProps} query="INVALID" isQueryInvalid={true} />
+        <DynamicRuleForm {...defaultProps} query="FROM |" />
       </Wrapper>
     );
 
@@ -161,18 +161,18 @@ describe('DynamicRuleForm', () => {
     expect(screen.getByText('Rule details')).toBeInTheDocument();
   });
 
-  it('handles isQueryInvalid prop changes', () => {
+  it('handles query prop changes from invalid to valid', () => {
     const Wrapper = createQueryClientWrapper();
     const { rerender } = render(
       <Wrapper>
-        <DynamicRuleForm {...defaultProps} query="INVALID" isQueryInvalid={true} />
+        <DynamicRuleForm {...defaultProps} query="FROM |" />
       </Wrapper>
     );
 
     // Query becomes valid - should not crash
     rerender(
       <Wrapper>
-        <DynamicRuleForm {...defaultProps} query="FROM logs-*" isQueryInvalid={false} />
+        <DynamicRuleForm {...defaultProps} query="FROM logs-*" />
       </Wrapper>
     );
 

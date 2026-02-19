@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import React from 'react';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from './types';
 import { RuleForm, type RuleFormServices } from './rule_form';
 import { useFormDefaults } from './hooks/use_form_defaults';
@@ -17,8 +18,6 @@ export interface DynamicRuleFormProps {
   formId: string;
   /** The query that drives form values - changes will sync to form state */
   query: string;
-  /** Whether the query has validation errors from the parent (e.g., Discover) */
-  isQueryInvalid?: boolean;
   /** Services required for form fields */
   services: RuleFormServices;
   /** Submit handler */
@@ -40,7 +39,6 @@ export interface DynamicRuleFormProps {
 export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   formId,
   query,
-  isQueryInvalid,
   services,
   onSubmit,
 }) => {
@@ -55,25 +53,20 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
     },
   });
 
-  const { setError, clearErrors } = methods;
-
-  // Handle query validation errors from the parent
-  useEffect(() => {
-    if (isQueryInvalid) {
-      setError('evaluation.query.base', {
-        type: 'manual',
-        message: i18n.translate('xpack.alertingV2.ruleForm.invalidQueryError', {
-          defaultMessage:
-            'The query resulted in an error. Please review the query before saving the rule.',
-        }),
-      });
-    } else {
-      clearErrors('evaluation.query.base');
-    }
-  }, [isQueryInvalid, setError, clearErrors]);
-
   return (
     <FormProvider {...methods}>
+      {/* Hidden field to validate the ES|QL query */}
+      <Controller
+        name="evaluation.query.base"
+        control={methods.control}
+        rules={{
+          required: i18n.translate('xpack.alertingV2.ruleForm.queryRequiredError', {
+            defaultMessage: 'ES|QL query is required.',
+          }),
+          validate: (value) => validateEsqlQuery(value) ?? true,
+        }}
+        render={() => <></>}
+      />
       <RuleForm formId={formId} services={services} onSubmit={onSubmit} />
     </FormProvider>
   );
