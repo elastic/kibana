@@ -83,8 +83,7 @@
       "viewMode": "documents",
       "hideAggregatedPreview": false,
       "hits": 0,
-      "version": 1,
-      "chartInterval": "1h"
+      "version": 1
     },
     {
       "title": "Saved search (ES|QL text-based)",
@@ -97,8 +96,7 @@
         "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
       },
       "isTextBasedQuery": true,
-      "timeRestore": false,
-      "chartInterval": "auto"
+      "timeRestore": false
     }
   ]
 }
