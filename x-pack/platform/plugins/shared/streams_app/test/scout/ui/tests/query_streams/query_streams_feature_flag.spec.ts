@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { test } from '../../fixtures';
+
+test.describe(
+  'Query streams - feature flag gating',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamMainPage();
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+      });
+    });
+
+    test('should properly gate query streams when feature flag is off', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+      });
+      await page.reload();
+      await expect(pageObjects.streams.createQueryStreamButton).not.toBeVisible();
+    });
+
+    test('should properly gate query streams when feature flag is on', async ({
+      page,
+      pageObjects,
+      kbnClient,
+    }) => {
+      await kbnClient.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+      });
+      await page.reload();
+
+      await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
+    });
+  }
+);
