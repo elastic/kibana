@@ -583,6 +583,27 @@ export class WorkflowsService {
         refresh: true,
       });
 
+      const changeHistoryClient = this.getChangeHistoryClient();
+      if (changeHistoryClient?.isInitialized()) {
+        try {
+          await changeHistoryClient.log(
+            {
+              objectType: 'workflow',
+              objectId: id,
+              before: JSON.parse(JSON.stringify(existingDocument._source)),
+              after: JSON.parse(JSON.stringify(finalData)),
+            },
+            {
+              action: 'workflow-update',
+              userId: authenticatedUser,
+              spaceId,
+            }
+          );
+        } catch (err) {
+          this.logger.warn(`Failed to log workflow update to change history: ${err}`);
+        }
+      }
+
       // Update task scheduler if needed
       if (shouldUpdateScheduler && this.taskScheduler) {
         try {
