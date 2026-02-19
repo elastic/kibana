@@ -66,6 +66,7 @@ async function importMcpTools(
   connectorId: string,
   tools: Array<ImportedTool>,
   name: string,
+  namespace: string,
   logger: Logger
 ): Promise<string[]> {
   if (tools.length === 0) {
@@ -96,7 +97,7 @@ async function importMcpTools(
         request,
         connectorId,
         tools: dataSourceTools,
-        namespace: name,
+        namespace,
       });
       importedToolIds = results.map((result) => result.toolId);
       logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
@@ -170,6 +171,7 @@ export async function createDataSourceAndRelatedResources(
         finalStackConnectorId,
         stackConnectorConfig.importedTools,
         name,
+        `${type}.${slugify(name)}`,
         logger
       );
       toolIds.push(...importedToolIds);
