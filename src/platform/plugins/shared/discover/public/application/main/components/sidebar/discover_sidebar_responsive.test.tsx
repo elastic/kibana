@@ -153,6 +153,8 @@ jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
+const defaultMockServices = createMockServices();
+
 function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
@@ -227,7 +229,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
 ): Promise<MountReturn<WithReactTestingLibrary>> {
   let comp: ReactWrapper<TestWrapperProps>;
   const stateContainer = getStateContainer(appStateParams);
-  const mockedServices = services ?? createMockServices();
+  const mockedServices = services ?? defaultMockServices;
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
@@ -258,21 +260,15 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
     return undefined as MountReturn<WithReactTestingLibrary>;
   }
 
-  await act(async () => {
+  await rtlAct(async () => {
     comp = mountWithIntl(component);
-    // wait for lazy modules
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    comp.update();
   });
-
   comp!.update();
 
   return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/217005
-// FLAKY: https://github.com/elastic/kibana/issues/225125
-describe.skip('discover responsive sidebar', function () {
+describe('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
@@ -288,9 +284,7 @@ describe.skip('discover responsive sidebar', function () {
   });
 
   afterEach(() => {
-    mockCalcFieldCounts.mockClear();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
-    mockGetRecommendedFieldsAccessor.mockClear();
+    jest.clearAllMocks();
     resetExistingFieldsCache();
   });
 
@@ -837,8 +831,7 @@ describe.skip('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(0);
   }, 10000);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225126
-  describe.skip('search bar customization', () => {
+  describe('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {
       mockUseCustomizations = false;
       const comp = await mountComponent({
@@ -883,8 +876,7 @@ describe.skip('discover responsive sidebar', function () {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253542
-  describe.skip('recommended fields', () => {
+  describe('recommended fields', () => {
     it('should call getRecommendedFieldsAccessor on component mount', async () => {
       await mountComponent(props);
 
