@@ -6700,6 +6700,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eval-kql@link:src/platform/packages/shared/kbn-eval-kql":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
   version "0.0.0"
   uid ""
