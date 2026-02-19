@@ -81,7 +81,7 @@ export function getValueColumns(config: DatatableStateESQL) {
       getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy.column)
     ),
     ...config.metrics.map((metric, index) =>
-      getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column, 'number')
+      getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column, 'number', true)
     ),
   ];
 }
@@ -95,6 +95,6 @@ export function buildVisualizationState(config: DatatableState): DatatableVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     ...buildAppearanceState(config),
-    columns: metrics.concat(rows, splitMetrics),
+    columns: rows.concat(splitMetrics, metrics),
   };
 }

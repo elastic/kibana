@@ -34,7 +34,7 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
         responseType: 'json',
         body: {},
       });
-      expect(install.statusCode).toBe(200);
+      expect(install.statusCode).toBe(201);
 
       const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
         headers: defaultHeaders,
