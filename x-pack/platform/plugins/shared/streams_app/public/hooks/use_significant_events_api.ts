@@ -8,7 +8,6 @@
 import { useAbortController } from '@kbn/react-hooks';
 import type {
   StreamQuery,
-  StreamQueryInput,
   System,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -16,7 +15,7 @@ import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQueryInput;
+  index: StreamQuery;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -87,7 +86,13 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             name,
           },
           body: {
-            operations,
+            operations: operations.map((op) => {
+              if ('index' in op) {
+                const { esql: _esql, ...index } = op.index;
+                return { index };
+              }
+              return op;
+            }),
           },
         },
       });
