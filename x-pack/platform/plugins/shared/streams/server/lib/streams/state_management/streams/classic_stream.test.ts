@@ -7,8 +7,27 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { ClassicStream } from './classic_stream';
-import type { StateDependencies } from '../types';
+import type { StateDependencies, StreamChange } from '../types';
 import type { State } from '../state';
+import type { StreamChangeStatus } from '../stream_active_record/stream_active_record';
+
+interface ClassicStreamChanges {
+  processing: boolean;
+  field_overrides: boolean;
+  failure_store: boolean;
+  lifecycle: boolean;
+  settings: boolean;
+  query_streams: boolean;
+}
+
+interface ClassicStreamTestable {
+  _changes: ClassicStreamChanges;
+  doHandleUpsertChange(
+    definition: Streams.all.Definition,
+    desiredState: State,
+    startingState: State
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
+}
 
 describe('ClassicStream', () => {
   const createMockDependencies = (): StateDependencies =>
@@ -76,9 +95,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.processing).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.processing).toBe(false);
     });
 
     it('sets processing to true when processing.steps is non-empty for new stream', async () => {
@@ -100,9 +123,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.processing).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.processing).toBe(true);
     });
 
     it('sets lifecycle to false when using inherit lifecycle for new stream', async () => {
@@ -119,7 +146,11 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(false);
     });
@@ -138,7 +169,11 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(true);
     });
@@ -157,9 +192,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.settings).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.settings).toBe(false);
     });
 
     it('sets settings to true when settings is non-empty for new stream', async () => {
@@ -176,9 +215,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.settings).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.settings).toBe(true);
     });
 
     it('sets field_overrides to false when field_overrides is undefined for new stream', async () => {
@@ -195,9 +238,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.field_overrides).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
     });
 
     it('sets field_overrides to false when field_overrides is empty object for new stream', async () => {
@@ -214,9 +261,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.field_overrides).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
     });
 
     it('sets field_overrides to true when field_overrides is non-empty for new stream', async () => {
@@ -233,9 +284,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.field_overrides).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(true);
     });
 
     it('sets failure_store to false when using inherit failure_store for new stream', async () => {
@@ -252,9 +307,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.failure_store).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.failure_store).toBe(false);
     });
 
     it('sets failure_store to true when using non-inherit failure_store for new stream', async () => {
@@ -271,9 +330,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.failure_store).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.failure_store).toBe(true);
     });
 
     it('sets all _changes to false when creating stream with all empty/default values', async () => {
@@ -282,13 +345,17 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.processing).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.processing).toBe(false);
       expect(stream.hasChangedLifecycle()).toBe(false);
-      expect((stream as any)._changes.settings).toBe(false);
-      expect((stream as any)._changes.field_overrides).toBe(false);
-      expect((stream as any)._changes.failure_store).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.settings).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.failure_store).toBe(false);
     });
   });
 
@@ -324,9 +391,13 @@ describe('ClassicStream', () => {
         new Map([['logs-test-default', { definition: existingDefinition }]])
       );
 
-      await (stream as any).doHandleUpsertChange(newDefinition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        startingState,
+        startingState
+      );
 
-      expect((stream as any)._changes.processing).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.processing).toBe(true);
     });
 
     it('sets processing to false when processing unchanged for existing stream', async () => {
@@ -348,9 +419,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const startingState = createMockState(new Map([['logs-test-default', { definition }]]));
 
-      await (stream as any).doHandleUpsertChange(definition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        startingState,
+        startingState
+      );
 
-      expect((stream as any)._changes.processing).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.processing).toBe(false);
     });
 
     it('sets lifecycle to true when lifecycle changed for existing stream', async () => {
@@ -379,7 +454,11 @@ describe('ClassicStream', () => {
         new Map([['logs-test-default', { definition: existingDefinition }]])
       );
 
-      await (stream as any).doHandleUpsertChange(newDefinition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(true);
     });
@@ -398,7 +477,11 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const startingState = createMockState(new Map([['logs-test-default', { definition }]]));
 
-      await (stream as any).doHandleUpsertChange(definition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(false);
     });
@@ -429,9 +512,13 @@ describe('ClassicStream', () => {
         new Map([['logs-test-default', { definition: existingDefinition }]])
       );
 
-      await (stream as any).doHandleUpsertChange(newDefinition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        startingState,
+        startingState
+      );
 
-      expect((stream as any)._changes.field_overrides).toBe(true);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(true);
     });
 
     it('sets field_overrides to false when field_overrides unchanged for existing stream', async () => {
@@ -448,9 +535,13 @@ describe('ClassicStream', () => {
       const stream = new ClassicStream(definition, createMockDependencies());
       const startingState = createMockState(new Map([['logs-test-default', { definition }]]));
 
-      await (stream as any).doHandleUpsertChange(definition, startingState, startingState);
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        startingState,
+        startingState
+      );
 
-      expect((stream as any)._changes.field_overrides).toBe(false);
+      expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
     });
   });
 });

@@ -7,8 +7,28 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { WiredStream } from './wired_stream';
-import type { StateDependencies } from '../types';
+import type { StateDependencies, StreamChange } from '../types';
 import type { State } from '../state';
+import type { StreamChangeStatus } from '../stream_active_record/stream_active_record';
+
+interface WiredStreamChanges {
+  ownFields: boolean;
+  ownRouting: boolean;
+  routing: boolean;
+  processing: boolean;
+  lifecycle: boolean;
+  settings: boolean;
+  failure_store: boolean;
+}
+
+interface WiredStreamTestable {
+  _changes: WiredStreamChanges;
+  doHandleUpsertChange(
+    definition: Streams.all.Definition,
+    desiredState: State,
+    startingState: State
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
+}
 
 describe('WiredStream', () => {
   const createMockDependencies = (): StateDependencies =>
@@ -61,7 +81,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedFields()).toBe(false);
     });
@@ -83,7 +107,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedFields()).toBe(true);
     });
@@ -102,9 +130,13 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.routing).toBe(false);
+      expect((stream as unknown as WiredStreamTestable)._changes.routing).toBe(false);
     });
 
     it('sets routing to true when routing is non-empty for new stream', async () => {
@@ -124,9 +156,13 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.routing).toBe(true);
+      expect((stream as unknown as WiredStreamTestable)._changes.routing).toBe(true);
     });
 
     it('sets processing to false when processing.steps is empty for new stream', async () => {
@@ -143,9 +179,13 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.processing).toBe(false);
+      expect((stream as unknown as WiredStreamTestable)._changes.processing).toBe(false);
     });
 
     it('sets processing to true when processing.steps is non-empty for new stream', async () => {
@@ -167,9 +207,13 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
-      expect((stream as any)._changes.processing).toBe(true);
+      expect((stream as unknown as WiredStreamTestable)._changes.processing).toBe(true);
     });
 
     it('sets lifecycle to false when using inherit lifecycle for new stream', async () => {
@@ -186,7 +230,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(false);
     });
@@ -205,7 +253,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(true);
     });
@@ -224,7 +276,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedSettings()).toBe(false);
     });
@@ -243,7 +299,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedSettings()).toBe(true);
     });
@@ -262,7 +322,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedFailureStore()).toBe(false);
     });
@@ -281,7 +345,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedFailureStore()).toBe(true);
     });
@@ -292,11 +360,15 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const emptyState = createMockState();
 
-      await (stream as any).doHandleUpsertChange(definition, emptyState, emptyState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        emptyState,
+        emptyState
+      );
 
       expect(stream.hasChangedFields()).toBe(false);
-      expect((stream as any)._changes.routing).toBe(false);
-      expect((stream as any)._changes.processing).toBe(false);
+      expect((stream as unknown as WiredStreamTestable)._changes.routing).toBe(false);
+      expect((stream as unknown as WiredStreamTestable)._changes.processing).toBe(false);
       expect(stream.hasChangedLifecycle()).toBe(false);
       expect(stream.hasChangedSettings()).toBe(false);
       expect(stream.hasChangedFailureStore()).toBe(false);
@@ -330,7 +402,11 @@ describe('WiredStream', () => {
         new Map([['logs.test', { definition: existingDefinition }]])
       );
 
-      await (stream as any).doHandleUpsertChange(newDefinition, startingState, startingState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedFields()).toBe(true);
     });
@@ -349,7 +425,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const startingState = createMockState(new Map([['logs.test', { definition }]]));
 
-      await (stream as any).doHandleUpsertChange(definition, startingState, startingState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedFields()).toBe(false);
     });
@@ -380,7 +460,11 @@ describe('WiredStream', () => {
         new Map([['logs.test', { definition: existingDefinition }]])
       );
 
-      await (stream as any).doHandleUpsertChange(newDefinition, startingState, startingState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        newDefinition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(true);
     });
@@ -399,7 +483,11 @@ describe('WiredStream', () => {
       const stream = new WiredStream(definition, createMockDependencies());
       const startingState = createMockState(new Map([['logs.test', { definition }]]));
 
-      await (stream as any).doHandleUpsertChange(definition, startingState, startingState);
+      await (stream as unknown as WiredStreamTestable).doHandleUpsertChange(
+        definition,
+        startingState,
+        startingState
+      );
 
       expect(stream.hasChangedLifecycle()).toBe(false);
     });
