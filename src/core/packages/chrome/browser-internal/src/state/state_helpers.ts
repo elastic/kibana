@@ -12,8 +12,6 @@ import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
 export interface State<T> {
   /** Stable observable - same reference every call */
   $: Observable<T>;
-  /** Raw BehaviorSubject for derived observables */
-  subject$: BehaviorSubject<T>;
   /** Get current value synchronously */
   get: () => T;
   /** Set new value */
@@ -44,7 +42,6 @@ export function createState<T>(initialValue: T): State<T> {
 
   return {
     $: subject$.pipe(distinctUntilChanged()),
-    subject$,
     get: () => subject$.getValue(),
     set: (value: T) => subject$.next(value),
     update: (fn: (current: T) => T) => subject$.next(fn(subject$.getValue())),

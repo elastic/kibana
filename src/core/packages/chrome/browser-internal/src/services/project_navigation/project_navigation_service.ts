@@ -259,13 +259,13 @@ export class ProjectNavigationService {
 
   private findActiveNodes({
     location: _location,
-    flattendTree = this.projectNavigationNavTreeFlattened,
+    flattenedTree = this.projectNavigationNavTreeFlattened,
   }: {
     location?: Location;
-    flattendTree?: Record<string, ChromeProjectNavigationNode>;
+    flattenedTree?: Record<string, ChromeProjectNavigationNode>;
   } = {}): ChromeProjectNavigationNode[][] {
     if (!this.application) return [];
-    if (!Object.keys(flattendTree).length) return [];
+    if (!Object.keys(flattenedTree).length) return [];
 
     const location = _location ?? this.application.history.location;
     let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
@@ -274,7 +274,7 @@ export class ProjectNavigationService {
     // e.g. /app/kibana#/management
     currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
 
-    return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
+    return findActiveNodes(currentPathname, flattenedTree, location, this.http?.basePath.prepend);
   }
 
   /**
