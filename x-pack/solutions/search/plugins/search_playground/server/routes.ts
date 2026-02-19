@@ -32,13 +32,6 @@ import { parseSourceFields } from './utils/parse_source_fields';
 import { getErrorMessage } from '../common/errors';
 import { defineSavedPlaygroundRoutes } from './routes/saved_playgrounds';
 
-const EMPTY_INDICES_ERROR_MESSAGE = i18n.translate(
-  'xpack.searchPlayground.serverErrors.emptyIndices',
-  {
-    defaultMessage: 'Indices cannot be empty',
-  }
-);
-
 export function parseElasticsearchQuery(esQuery: string) {
   return (question: string) => {
     try {
