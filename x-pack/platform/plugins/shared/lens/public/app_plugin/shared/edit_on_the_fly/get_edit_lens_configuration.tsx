@@ -226,8 +226,9 @@ const EditLensConfiguration: FC<
     loadInitial({
       initialInput: {
         id: panelId ?? generateId(),
-        // Add specific Lens 'by reference' or 'by value' properties
-        ...(savedObjectId ? { savedObjectId } : { attributes: currentAttributes }),
+        ...(savedObjectId
+          ? { savedObjectId, attributes: currentAttributes }
+          : { attributes: currentAttributes }),
       } as LensSerializedState,
       inlineEditing: true,
       hideTextBasedEditor,

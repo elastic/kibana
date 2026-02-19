@@ -45,22 +45,23 @@ export const getFromPreloaded = async ({
   const { notifications, spaces, attributeService } = lensServices;
 
   try {
-    const docFromSavedObject = await (initialInput.savedObjectId
+    // If we already have the attributes for a by reference visualization, avoid loading from the library
+    const docFromSavedObject = await (initialInput.savedObjectId && !initialInput.attributes
       ? attributeService.loadFromLibrary(initialInput.savedObjectId)
       : undefined);
 
-    // By value - use initialInput.attributes
     if (!docFromSavedObject) {
       const { attributes } = initialInput;
 
       if (!attributes) {
-        throw new Error('Missing attributes in by-value input');
+        throw new Error('Missing attributes');
       }
 
       return {
         doc: {
           ...attributes,
           type: LENS_EMBEDDABLE_TYPE,
+          ...(initialInput.savedObjectId ? { savedObjectId: initialInput.savedObjectId } : {}),
         },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
