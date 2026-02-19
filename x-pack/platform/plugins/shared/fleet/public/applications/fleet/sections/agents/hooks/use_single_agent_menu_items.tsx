@@ -388,6 +388,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
+    authz.fleet.readAgentPolicies,
   ]);
 
   return menuItems;
