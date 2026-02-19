@@ -36,12 +36,13 @@ import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
-  initialInput?: GroupSloCustomInput;
+  initialInput?: GroupSloCustomInput | SingleSloCustomInput;
   onCreate: (props: SingleSloCustomInput | GroupSloCustomInput) => void;
   onCancel: () => void;
 }
 
 interface SingleConfigurationProps {
+  initialInput?: SingleSloCustomInput;
   onCreate: (props: SingleSloCustomInput) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
@@ -54,11 +55,18 @@ interface GroupConfigurationProps {
   initialInput?: GroupSloCustomInput;
 }
 
-function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
+function SingleSloConfiguration({
+  initialInput,
+  overviewMode,
+  onCreate,
+  onCancel,
+}: SingleConfigurationProps) {
   const [selectedSloDefinition, setSelectedSloDefinition] = useState<
     SearchSLODefinitionItem | undefined
   >();
-  const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(
+    initialInput?.sloInstanceId ?? ALL_VALUE
+  );
   const [hasError, setHasError] = useState(false);
   const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
@@ -92,11 +100,14 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
               <EuiFlexItem data-test-subj="singleSloSelector" grow>
                 <SloDefinitionSelector
                   hasError={hasError && !selectedSloDefinition}
+                  initialSloId={initialInput?.sloId}
+                  initialRemoteName={initialInput?.remoteName}
+                  remoteName={initialInput?.remoteName}
                   onSelected={(slo) => {
                     setSelectedSloDefinition(slo);
                     setHasError(slo === undefined);
-                    // Reset instance selection when SLO changes
-                    if (slo) {
+                    // Reset instance selection when user selects a different SLO
+                    if (slo && slo.id !== initialInput?.sloId) {
                       setSelectedInstanceId(undefined);
                     }
                   }}
@@ -107,6 +118,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
                   <SloInstanceSelector
                     remoteName={selectedSloDefinition.remote?.remoteName}
                     sloId={selectedSloDefinition.id}
+                    initialInstanceId={initialInput?.sloId ? selectedInstanceId : undefined}
                     onSelected={(instanceId) => {
                       setSelectedInstanceId(instanceId);
                     }}
@@ -247,6 +259,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       ) : (
         <SingleSloConfiguration
           overviewMode={overviewMode}
+          initialInput={initialInput as SingleSloCustomInput}
           onCreate={onCreate}
           onCancel={onCancel}
         />

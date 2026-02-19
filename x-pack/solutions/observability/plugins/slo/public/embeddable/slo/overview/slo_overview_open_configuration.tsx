@@ -20,7 +20,7 @@ export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginsStart: SLOPublicPluginsStart,
   sloClient: SLORepositoryClient,
-  initialState?: GroupSloCustomInput
+  initialState?: GroupSloCustomInput | SingleSloCustomInput
 ): Promise<GroupSloCustomInput | SingleSloCustomInput> {
   const { overlays } = coreStart;
 

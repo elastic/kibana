@@ -33,6 +33,8 @@ import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
 import type {
   GroupSloCustomInput,
+  SingleSloCustomInput,
+  OverviewMode,
   SloOverviewApi,
   SloOverviewEmbeddableState,
   SloOverviewState,
@@ -128,29 +130,61 @@ export const getOverviewEmbeddableFactory = ({
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
           defaultMessage: 'criteria',
         }),
-      isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+      isEditingEnabled: () => true,
       onEdit: async function onEdit() {
         try {
+          const { overviewMode } = sloStateManager.getLatestState();
+          const initialConfig =
+            overviewMode === 'single'
+              ? api.getSingleOverviewConfig()
+              : api.getSloGroupOverviewConfig();
           const result = await openSloConfiguration(
             coreStart,
             pluginsStart,
             sloClient,
-            api.getSloGroupOverviewConfig()
+            initialConfig
           );
-          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+          if (result.overviewMode === 'single') {
+            api.updateSingleOverviewConfig(result as SingleSloCustomInput);
+          } else {
+            api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+          }
         } catch (e) {
           return Promise.reject();
         }
       },
       serializeState,
-      getSloGroupOverviewConfig: () => {
+      getSingleOverviewConfig: (): SingleSloCustomInput => {
+        const { sloId, sloInstanceId, remoteName, showAllGroupByInstances } =
+          sloStateManager.getLatestState();
+        return {
+          overviewMode: 'single',
+          sloId,
+          sloInstanceId,
+          remoteName,
+          showAllGroupByInstances,
+        };
+      },
+      updateSingleOverviewConfig: (update: SingleSloCustomInput) => {
+        (
+          sloStateManager.api as unknown as { setOverviewMode: (v: OverviewMode) => void }
+        ).setOverviewMode('single');
+        sloStateManager.api.setSloId(update.sloId);
+        sloStateManager.api.setSloInstanceId(update.sloInstanceId);
+        sloStateManager.api.setRemoteName(update.remoteName);
+        sloStateManager.api.setShowAllGroupByInstances(update.showAllGroupByInstances);
+      },
+      getSloGroupOverviewConfig: (): GroupSloCustomInput => {
         const { groupFilters, overviewMode } = sloStateManager.getLatestState();
         return {
           groupFilters,
-          overviewMode,
+          overviewMode: overviewMode ?? 'groups',
         };
       },
       updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
+        (
+          sloStateManager.api as unknown as { setOverviewMode: (v: OverviewMode) => void }
+        ).setOverviewMode('groups');
         sloStateManager.api.setGroupFilters(update.groupFilters);
       },
     });

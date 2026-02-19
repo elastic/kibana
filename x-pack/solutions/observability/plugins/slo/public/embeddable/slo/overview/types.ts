@@ -50,14 +50,28 @@ export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasDynamicActions &
+  HasSingleOverviewConfig &
   HasSloGroupOverviewConfig &
   HasEditCapabilities &
   HasSupportedTriggers;
+
+export interface HasSingleOverviewConfig {
+  getSingleOverviewConfig: () => SingleSloCustomInput;
+  updateSingleOverviewConfig: (next: SingleSloCustomInput) => void;
+}
 
 export interface HasSloGroupOverviewConfig {
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
   updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
 }
+
+export const apiHasSingleOverviewConfig = (api: unknown | null): api is HasSingleOverviewConfig => {
+  return Boolean(
+    api &&
+      typeof (api as HasSingleOverviewConfig).getSingleOverviewConfig === 'function' &&
+      typeof (api as HasSingleOverviewConfig).updateSingleOverviewConfig === 'function'
+  );
+};
 
 export const apiHasSloGroupOverviewConfig = (
   api: unknown | null
