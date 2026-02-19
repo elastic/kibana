@@ -209,7 +209,9 @@ describe('utils', () => {
 
     it('should handle undefined values', () => {
       expect(compareConnectorNodes(undefined, undefined)).toBe(0);
-      expect(compareConnectorNodes({ shape: 'relationship', label: 'Owns' }, undefined)).toBeGreaterThan(0);
+      expect(
+        compareConnectorNodes({ shape: 'relationship', label: 'Owns' }, undefined)
+      ).toBeGreaterThan(0);
       expect(compareConnectorNodes(undefined, { shape: 'label', label: 'Action' })).toBeLessThan(0);
     });
 
