@@ -9,13 +9,7 @@ import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import {
-  isEntityNode,
-  isConnectorNode,
-  isStackNode,
-  isStackedLabel,
-  compareConnectorNodes,
-} from '../utils';
+import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
@@ -183,10 +177,9 @@ const layoutStackedLabels = (
   groupNode: Node<NodeViewModel>,
   nodes: Array<Node<NodeViewModel>>
 ): { size: Size; children: Array<Node<NodeViewModel>> } => {
-  const children = nodes
-    .filter((child) => isConnectorNode(child.data) && child.parentId === groupNode.id)
-    // Sort: 1) relationship nodes on top, label nodes below  2) alphabetical by label within each group
-    .sort((a, b) => compareConnectorNodes(a.data, b.data));
+  const children = nodes.filter(
+    (child) => isConnectorNode(child.data) && child.parentId === groupNode.id
+  );
   const stackSize = children.length;
   const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
   const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
@@ -210,7 +203,7 @@ const layoutStackedLabels = (
  * Shared context for graph alignment operations.
  * - Y/Height/setY: accessors for node vertical position and height in Dagre
  * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
- * - nodesById: map of node ID to node data for accessing node properties during sorting
+ * - nodesById: map of node ID to node data for accessing node properties
  */
 interface GraphHelpers {
   g: Dagre.graphlib.Graph;
@@ -309,11 +302,6 @@ const handleMultipleChildren = (
     }
     const allChildren = Array.from(allChildrenSet);
     const commonCenterY = calculateCenterY(allChildren, Y);
-
-    // Sort siblings: relationship nodes first (top), then label nodes, then by label alphabetically
-    siblingsWithSharedChildren.sort((a, b) =>
-      compareConnectorNodes(helpers.nodesById[a]?.data, helpers.nodesById[b]?.data)
-    );
 
     const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
     const siblingCount = siblingsWithSharedChildren.length;
