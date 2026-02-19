@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await goToLastPageAndCheckFooterMessage(DEFAULT_SAMPLE_SIZE);
     });
 
-    it('should use custom sample size on Dashboard when specified', async () => {
+    it('should use custom sample size on Dashboard when specified and reset to saved search value after reload', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickAddFromLibrary();
@@ -191,10 +191,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(
-        CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL
-      );
-      await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
+      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+      await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
     });
   });
 }
