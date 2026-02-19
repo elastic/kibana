@@ -22,10 +22,11 @@ import {
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
@@ -53,11 +54,14 @@ interface WorkflowListProps {
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
+  const queryClient = useQueryClient();
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
+  const workflowsRef = useRef(workflows);
+  workflowsRef.current = workflows;
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -73,6 +77,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
+  // Use a ref here to avoid re-rendering when the selected items change
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
   const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
@@ -83,21 +91,28 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, []);
 
   const onRefresh = useCallback(async () => {
+    // Get the previous workflows here, before
+    // the possible cache rewrite can happen
+    const previousWorkflows = workflowsRef.current;
     const result = await refetch();
 
-    if (workflows && result.data && areSimilarResults(result.data, workflows)) {
-      keepPreviousWorkflowOrder({ previousData: workflows, freshData: result.data });
+    if (previousWorkflows && result.data && areSimilarResults(result.data, previousWorkflows)) {
+      const sorted = keepPreviousWorkflowOrder({
+        previousData: previousWorkflows,
+        freshData: result.data,
+      });
+      queryClient.setQueryData(['workflows', search], sorted);
     }
 
-    // Update selected items with fresh data after refetch
-    if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = new Set(selectedItems.map((item) => item.id));
+    const currentSelectedItems = selectedItemsRef.current;
+    if (result.data?.results && currentSelectedItems.length > 0) {
+      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
         selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems, workflows]);
+  }, [refetch, queryClient, search]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
@@ -128,7 +143,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const handleDeleteWorkflow = useCallback(
     (item: WorkflowListItemDto) => setWorkflowToDelete(item),
-    [setWorkflowToDelete]
+    []
   );
 
   const handleConfirmDelete = useCallback(() => {
@@ -163,9 +178,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
-          onRefresh,
         },
         {
+          onSuccess: () => {
+            onRefresh();
+          },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
@@ -515,7 +532,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {workflowToDelete && (
         <EuiConfirmModal
           title={i18n.translate('workflows.workflowList.deleteModal.title', {
-            defaultMessage: `Delete "${workflowToDelete.name}"?`,
+            defaultMessage: 'Delete "{name}"?',
             values: { name: workflowToDelete.name },
           })}
           titleProps={{ id: modalTitleId }}
@@ -534,7 +551,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         >
           <p>
             {i18n.translate('workflows.workflowList.deleteModal.message', {
-              defaultMessage: `Delete the "${workflowToDelete.name}" workflow? This action cannot be undone.`,
+              defaultMessage: 'Delete the "{name}" workflow? This action cannot be undone.',
               values: { name: workflowToDelete.name },
             })}
           </p>

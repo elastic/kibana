@@ -27,10 +27,10 @@ export interface UpdateWorkflowParams {
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
-   * If provided, called instead of the default `refetchQueries` after a successful mutation.
-   * Allows the caller to control how the data is refreshed (e.g. preserving table order).
+   * When true, the mutation will not refetch queries after a successful update.
+   * Useful for bulk operations where the caller handles a single refetch at the end.
    */
-  onRefresh?: () => Promise<void>;
+  skipRefetch?: boolean;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -45,11 +45,6 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
   const telemetry = useTelemetry();
-
-  const getPreviousData = () => {
-    const prevData = queryClient.getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] });
-    return prevData;
-  };
 
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
@@ -66,21 +61,21 @@ export function useWorkflowActions() {
       const previousData = new Map<string, WorkflowListDto>();
 
       // Update all workflow list queries (e.g., different pages, filters)
-      getPreviousData().forEach(([queryKey, data]) => {
-        if (data && data.results) {
-          const queryKeyString = JSON.stringify(queryKey);
-          // Store previous data for rollback on error
-          previousData.set(queryKeyString, data);
+      queryClient
+        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
+        .forEach(([queryKey, data]) => {
+          if (data && data.results) {
+            const queryKeyString = JSON.stringify(queryKey);
+            previousData.set(queryKeyString, data);
 
-          // Immediately update the workflow in the list with new data
-          const optimisticData: WorkflowListDto = {
-            ...data,
-            results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
-          };
+            const optimisticData: WorkflowListDto = {
+              ...data,
+              results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
+            };
 
-          queryClient.setQueryData(queryKey, optimisticData);
-        }
-      });
+            queryClient.setQueryData(queryKey, optimisticData);
+          }
+        });
 
       // Update workflow detail query (used in YAML editor view)
       // But skip optimistic update when saving YAML, as the component manages its own state
@@ -133,7 +128,7 @@ export function useWorkflowActions() {
         error: errorObj,
       });
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: (_, variables) => {
       // Report telemetry for successful update
       // The telemetry service automatically determines which event to publish based on the update
       telemetry.reportWorkflowUpdated({
@@ -149,13 +144,10 @@ export function useWorkflowActions() {
         error: undefined,
       });
 
-      if (variables.onRefresh) {
-        // use the provided logic for refresh when passed
-        await variables.onRefresh();
-      } else {
-        // Refetch to ensure data is in sync with server
-        await queryClient.refetchQueries({ queryKey: ['workflows'] });
-      }
+      queryClient.invalidateQueries({
+        queryKey: ['workflows'],
+        refetchType: variables.skipRefetch ? 'none' : 'active',
+      });
     },
   });
 
@@ -174,22 +166,22 @@ export function useWorkflowActions() {
       const previousData = new Map<string, WorkflowListDto>();
 
       // Update all workflow list queries (e.g., different pages, filters)
-      getPreviousData().forEach(([queryKey, data]) => {
-        if (data && data.results) {
-          const queryKeyString = JSON.stringify(queryKey);
-          // Store previous data for rollback on error
-          previousData.set(queryKeyString, data);
+      queryClient
+        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
+        .forEach(([queryKey, data]) => {
+          if (data && data.results) {
+            const queryKeyString = JSON.stringify(queryKey);
+            previousData.set(queryKeyString, data);
 
-          // Immediately remove deleted workflows from the list and update pagination
-          const optimisticData: WorkflowListDto = {
-            ...data,
-            results: data.results.filter((w) => !ids.includes(w.id)),
-            total: data.total - ids.length,
-          };
+            const optimisticData: WorkflowListDto = {
+              ...data,
+              results: data.results.filter((w) => !ids.includes(w.id)),
+              total: data.total - ids.length,
+            };
 
-          queryClient.setQueryData(queryKey, optimisticData);
-        }
-      });
+            queryClient.setQueryData(queryKey, optimisticData);
+          }
+        });
 
       // Return previous data for potential rollback
       return { previousData };
@@ -334,7 +326,7 @@ export function useWorkflowActions() {
   });
 
   return {
-    updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
+    updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
