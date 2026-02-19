@@ -40,11 +40,6 @@ const COLUMN_SORT_ORDER = {
 };
 
 /**
- * Generate suggestions for the xy chart.
- *
- * @param opts
- */
-/**
  * For TS/PromQL ES|QL queries, prefers 'line' when the x-axis uses a date column (time series),
  * Otherwise returns undefined so the default series type is used.
  */
@@ -67,6 +62,11 @@ function getPreferredSeriesTypeForTimeSeriesQuery(
   }
 }
 
+/**
+ * Generate suggestions for the xy chart.
+ *
+ * @param opts
+ */
 export function getSuggestions({
   table,
   state,
