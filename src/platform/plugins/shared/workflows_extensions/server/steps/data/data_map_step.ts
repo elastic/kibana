@@ -90,9 +90,7 @@ function processFields(
             // use the $map to render the nested array
             const nestedItems: unknown = renderTemplate(mapDir.items, bindings);
 
-            if (nestedItems == null) {
-              result[key] = null;
-            } else if (typeof nestedItems !== 'object' || !Array.isArray(nestedItems)) {
+            if (!Array.isArray(nestedItems)) {
               result[key] = [];
             } else {
               // Build the nested fields spec without the $map directive
