@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
-import { TriggerSchema } from './schema/triggers/trigger_schema';
+import { timezoneNames } from './schema/triggers/timezone_names';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -88,6 +88,75 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 
   return schema;
 }
+
+/* --- Triggers --- */
+export const AlertRuleTriggerSchema = z.object({
+  type: z.literal('alert'),
+  with: z
+    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
+    .optional(),
+});
+
+export const ScheduledTriggerSchema = z.object({
+  type: z.literal('scheduled'),
+  with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
+    z.object({
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
+    }),
+    z.object({
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z
+          .enum(timezoneNames as [string, ...string[]])
+          .optional()
+          .default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
+    }),
+  ]),
+});
+
+export const ManualTriggerSchema = z.object({
+  type: z.literal('manual'),
+});
+
+export const TriggerSchema = z.discriminatedUnion('type', [
+  AlertRuleTriggerSchema,
+  ScheduledTriggerSchema,
+  ManualTriggerSchema,
+]);
+
+/**
+ * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
+ * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
+ */
+export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
+  if (customTriggerIds.length === 0) {
+    return TriggerSchema;
+  }
+  const customSchemas = customTriggerIds.map((id) => z.object({ type: z.literal(id) }));
+  return z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+    ...customSchemas,
+  ]);
+}
+
+export const TriggerTypes = [
+  AlertRuleTriggerSchema.shape.type.value,
+  ScheduledTriggerSchema.shape.type.value,
+  ManualTriggerSchema.shape.type.value,
+];
+export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({
@@ -466,7 +535,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  triggers: z.array(TriggerSchema).min(1),
   inputs: z
     .union([
       // New JSON Schema format
@@ -479,7 +547,9 @@ const WorkflowSchemaBase = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
-export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
+export const WorkflowSchema = WorkflowSchemaBase.extend({
+  triggers: z.array(TriggerSchema).min(1),
+}).transform((data) => {
   // Transform inputs from legacy array format to JSON Schema format
   let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
   if (data.inputs) {
@@ -587,7 +657,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 // Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
 // Once a Zod-compatible version is available, we should import and use it instead.
-const AlertSchema = z.object({
+export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
@@ -596,7 +666,7 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const RuleSchema = z.object({
+export const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
   tags: z.array(z.string()),
@@ -605,12 +675,27 @@ const RuleSchema = z.object({
   ruleTypeId: z.string(),
 });
 
-export const EventSchema = z.object({
+/**
+ * Alert-specific event properties. Only present when the workflow has an alert trigger.
+ */
+export const AlertEventPropsSchema = z.object({
   alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
-  spaceId: z.string(),
   params: z.any(),
 });
+
+/**
+ * Base event properties that are always present regardless of trigger type.
+ */
+export const BaseEventSchema = z.object({
+  spaceId: z.string(),
+});
+
+/**
+ * Full event schema (used for runtime validation of alert-triggered workflows).
+ * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
+ */
+export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -641,6 +726,9 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
