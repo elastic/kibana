@@ -71,6 +71,23 @@ describe('PublicTriggerRegistry', () => {
       };
       expect(() => registry.register(definition)).toThrow(/event\.unknown.*not part of.*event/);
     });
+
+    it('should accept valid defaultCondition', () => {
+      const definition: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        defaultCondition: 'event.message: *test*',
+      };
+      expect(() => registry.register(definition)).not.toThrow();
+      expect(registry.get(triggerId)?.defaultCondition).toBe('event.message: *test*');
+    });
+
+    it('should throw when defaultCondition references a field not in event schema', () => {
+      const definition: PublicTriggerDefinition = {
+        ...defaultDefinition,
+        defaultCondition: 'event.unknown: "x"',
+      };
+      expect(() => registry.register(definition)).toThrow(/invalid defaultCondition/);
+    });
   });
 
   describe('get', () => {
