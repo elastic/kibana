@@ -8,9 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiButton } from '@elastic/eui';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AttachmentsService } from '../../../../../services/attachments/attachements_service';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { CanvasModeFlyout } from './canvas_mode_flyout';
 
 interface AttachmentWithActionsProps {
@@ -29,14 +27,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   isSidebar,
   conversationId,
 }) => {
-  const {
-    services: { settings },
-  } = useKibana();
-  const isExperimentalFeaturesEnabled = settings?.client.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
-
   const [isCanvasFlyoutOpen, setIsCanvasFlyoutOpen] = useState(false);
 
   const openCanvas = useCallback(() => {
@@ -46,10 +36,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   const closeCanvas = useCallback(() => {
     setIsCanvasFlyoutOpen(false);
   }, []);
-
-  if (isExperimentalFeaturesEnabled === false) {
-    return null;
-  }
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
