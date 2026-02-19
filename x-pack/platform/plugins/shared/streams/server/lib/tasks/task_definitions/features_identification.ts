@@ -7,8 +7,11 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
-import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
+import {
+  type IdentifyFeaturesResult,
+  type BaseFeature,
+  isComputedFeature,
+} from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
@@ -101,13 +104,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   ...computedFeatures,
                 ];
 
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
-                  id: identifiedFeatures.map(({ id }) => id),
-                });
-
                 const now = Date.now();
-                const features = identifiedFeatures.map((feature) => {
-                  const existing = existingFeatures.find(({ id }) => id === feature.id);
+                const features = [];
+                for (const feature of identifiedFeatures) {
+                  const existing = await featureClient.findDuplicateFeature({
+                    stream: stream.name,
+                    feature,
+                  });
                   if (existing) {
                     taskContext.logger.debug(
                       `Overwriting feature with id [${
@@ -117,7 +120,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                       )}\nNew feature: ${JSON.stringify(feature)}`
                     );
                   }
-                  return {
+                  features.push({
                     ...feature,
                     status: 'active' as const,
                     last_seen: new Date(now).toISOString(),
@@ -125,8 +128,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     uuid: isComputedFeature(feature)
                       ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
                       : existing?.uuid ?? uuid(),
-                  };
-                });
+                  });
+                }
 
                 await featureClient.bulk(
                   stream.name,

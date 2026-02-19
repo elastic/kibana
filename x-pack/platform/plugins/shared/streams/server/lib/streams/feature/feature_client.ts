@@ -8,8 +8,9 @@
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import { isEqual } from 'lodash';
 import {
   STREAM_NAME,
   FEATURE_ID,
@@ -192,6 +193,26 @@ export class FeatureClient {
 
     return operations.filter(
       (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
+  }
+
+  async findDuplicateFeature({
+    stream,
+    feature,
+  }: {
+    stream: string;
+    feature: BaseFeature;
+  }): Promise<Feature | undefined> {
+    const { hits: existingFeatures } = await this.getFeatures(stream);
+
+    const normalizedId = feature.id.toLowerCase();
+
+    return existingFeatures.find(
+      (existing) =>
+        (existing.type === feature.type &&
+          existing.subtype === feature.subtype &&
+          isEqual(existing.properties, feature.properties)) ||
+        existing.id.toLowerCase() === normalizedId
     );
   }
 }
