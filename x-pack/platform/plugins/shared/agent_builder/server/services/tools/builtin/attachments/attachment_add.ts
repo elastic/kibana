@@ -36,7 +36,7 @@ export const createAttachmentAddTool = ({
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {
     const definition = attachmentsService?.getTypeDefinition(type);
-    const isReadonly = definition?.isReadonly ?? true;
+    const isReadonly = definition?.isReadonly ?? false;
     if (isReadonly) {
       return {
         results: [
