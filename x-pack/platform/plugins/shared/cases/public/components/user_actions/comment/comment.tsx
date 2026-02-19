@@ -22,6 +22,7 @@ import { createExternalReferenceAttachmentUserActionBuilder } from './external_r
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import { createEventAttachmentUserActionBuilder } from '../../attachments/event/event';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
@@ -39,36 +40,37 @@ const getDeleteLabelTitle = ({
   persistableStateAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
+  if (isLegacyAttachmentRequest(comment)) {
+    if (comment.type === AttachmentType.alert) {
+      const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
+      const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
 
-  if (comment.type === AttachmentType.alert) {
-    const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
-    const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
+      return `${i18n.REMOVED_FIELD} ${alertLabel}`;
+    }
 
-    return `${i18n.REMOVED_FIELD} ${alertLabel}`;
-  }
+    if (comment.type === AttachmentType.externalReference) {
+      return getDeleteLabelFromRegistry({
+        caseData,
+        registry: externalReferenceAttachmentTypeRegistry,
+        getId: () => comment.externalReferenceAttachmentTypeId,
+        getAttachmentProps: () => ({
+          externalReferenceId: comment.externalReferenceId,
+          externalReferenceMetadata: comment.externalReferenceMetadata,
+        }),
+      });
+    }
 
-  if (comment.type === AttachmentType.externalReference) {
-    return getDeleteLabelFromRegistry({
-      caseData,
-      registry: externalReferenceAttachmentTypeRegistry,
-      getId: () => comment.externalReferenceAttachmentTypeId,
-      getAttachmentProps: () => ({
-        externalReferenceId: comment.externalReferenceId,
-        externalReferenceMetadata: comment.externalReferenceMetadata,
-      }),
-    });
-  }
-
-  if (comment.type === AttachmentType.persistableState) {
-    return getDeleteLabelFromRegistry({
-      caseData,
-      registry: persistableStateAttachmentTypeRegistry,
-      getId: () => comment.persistableStateAttachmentTypeId,
-      getAttachmentProps: () => ({
-        persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
-        persistableStateAttachmentState: comment.persistableStateAttachmentState,
-      }),
-    });
+    if (comment.type === AttachmentType.persistableState) {
+      return getDeleteLabelFromRegistry({
+        caseData,
+        registry: persistableStateAttachmentTypeRegistry,
+        getId: () => comment.persistableStateAttachmentTypeId,
+        getAttachmentProps: () => ({
+          persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
+          persistableStateAttachmentState: comment.persistableStateAttachmentState,
+        }),
+      });
+    }
   }
 
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
