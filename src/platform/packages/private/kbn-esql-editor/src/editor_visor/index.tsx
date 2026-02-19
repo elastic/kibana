@@ -105,8 +105,12 @@ export function QuickSearchVisor({
 
     setIsNlLoading(true);
     try {
+      const sourceLabels = selectedSources.map((s) => s.label);
       const result = await core.http.post<{ content: string }>('/internal/esql/nl_to_esql', {
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({
+          query: trimmed,
+          ...(sourceLabels.length > 0 && { sources: sourceLabels }),
+        }),
       });
       if (result.content) {
         const extractedQuery = extractQueryFromLLMMessage(result.content);
@@ -115,10 +119,24 @@ export function QuickSearchVisor({
         }
         setNlValue('');
       }
+    } catch (error) {
+      const message =
+        (error as { body?: { message?: string } })?.body?.message ??
+        i18n.translate('esqlEditor.visor.nlError', {
+          defaultMessage: 'Failed to generate ES|QL query',
+        });
+      core.notifications.toasts.addDanger({ title: message });
     } finally {
       setIsNlLoading(false);
     }
-  }, [nlValue, isNlLoading, core.http, onUpdateAndSubmitQuery]);
+  }, [
+    nlValue,
+    isNlLoading,
+    core.http,
+    core.notifications.toasts,
+    onUpdateAndSubmitQuery,
+    selectedSources,
+  ]);
 
   const onModeChange = useCallback((mode: VisorMode) => {
     setVisorMode(mode);

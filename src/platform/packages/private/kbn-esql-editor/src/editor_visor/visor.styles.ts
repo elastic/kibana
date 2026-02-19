@@ -9,7 +9,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const visorWidthPercentage = 0.6;
+export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
 export const MODE_SELECT_WIDTH = 160;
 const visorGradientPadding = '1px';

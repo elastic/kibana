@@ -10,8 +10,64 @@ import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { EsqlService } from '../services/esql_service';
 
 import type { EsqlServerPluginStart } from '../types';
+
+const getSourceNames = async (client: ElasticsearchClient): Promise<string[]> => {
+  const service = new EsqlService({ client });
+  const sources = await service.getAllIndices('local');
+  return sources.filter((s) => !s.hidden).map((s) => s.name);
+};
+
+const MAX_FIELDS = 200;
+
+const getFieldsForSource = async (client: ElasticsearchClient, source: string): Promise<string> => {
+  const response = await client.fieldCaps({
+    index: source,
+    fields: '*',
+    include_unmapped: false,
+  });
+
+  const fields = Object.entries(response.fields)
+    .filter(([fieldName]) => !fieldName.startsWith('_'))
+    .slice(0, MAX_FIELDS)
+    .map(([fieldName, types]) => {
+      const type = Object.keys(types)[0];
+      return `${fieldName}: ${type}`;
+    });
+
+  const totalCount = Object.keys(response.fields).length;
+  let result = fields.join('\n');
+  if (totalCount > MAX_FIELDS) {
+    result += `\n(truncated, showing ${MAX_FIELDS} of ${totalCount} fields)`;
+  }
+
+  return result;
+};
+
+const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {
+  let prompt = `Produce the ES|QL query fenced by the esql tag. Don't explain it.
+
+<AvailableSources>
+The user's cluster has the following data sources:
+${sourceNames.join(', ')}
+Use these exact source names in the FROM clause. Do not invent source names.
+</AvailableSources>`;
+
+  if (fieldsContext) {
+    prompt += `
+
+<FieldsContext>
+The relevant source has the following fields (name: type):
+${fieldsContext}
+Use these exact field names in the query.
+</FieldsContext>`;
+  }
+
+  return prompt;
+};
 
 export const registerNLtoESQLRoute = (
   router: IRouter,
@@ -24,6 +80,7 @@ export const registerNLtoESQLRoute = (
       validate: {
         body: schema.object({
           query: schema.string(),
+          sources: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
       security: {
@@ -36,10 +93,31 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query } = request.body;
+        const { query, sources } = request.body;
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
 
         const defaultConnector = await inference.getDefaultConnector(request);
+
+        if (!defaultConnector) {
+          return response.badRequest({
+            body: {
+              message: 'No AI connector configured. Please set up a connector to use this feature.',
+            },
+          });
+        }
+
+        const sourceNames = sources?.length ? sources : await getSourceNames(client);
+
+        let fieldsContext: string | undefined;
+        if (sources?.length) {
+          try {
+            fieldsContext = await getFieldsForSource(client, sources.join(','));
+          } catch {
+            // non-critical: proceed without field context
+          }
+        }
 
         const result = await lastValueFrom(
           naturalLanguageToEsql({
@@ -48,7 +126,7 @@ export const registerNLtoESQLRoute = (
             input: query,
             functionCalling: 'auto',
             logger,
-            system: "Just produce the query fenced by the esql tag. Don't explain it.",
+            system: buildSystemPrompt(sourceNames, fieldsContext),
           })
         );
         return response.ok({
