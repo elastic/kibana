@@ -6,12 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import Fs from 'fs';
-import Os from 'os';
-import Path from 'path';
-import { Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
-import * as tar from 'tar';
+import { x as tarExtract } from 'tar';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
@@ -84,21 +81,20 @@ export class GcsFileSystem extends AbstractFileSystem {
   }
 
   // ---------------------------------------------------------------------------
-  // Extract — download + decompress the tar.gz archive
+  // Extract — stream HTTP response directly through tar extraction
   // ---------------------------------------------------------------------------
 
   /**
-   * Downloads the archive to a temp file via native `fetch`, then extracts
-   * with the `tar` npm package. Splits into two measured steps so the user
-   * can see where time is actually spent (network vs disk I/O).
+   * Streams the GCS archive directly into `tar.x()` without writing a temp
+   * file. This overlaps network download and disk extraction via backpressure,
+   * eliminating ~350 MB of intermediate disk I/O and reducing wall-clock time
+   * from `download + extract` to roughly `max(download, extract)`.
    */
   protected async extract(archivePath: string): Promise<void> {
     const url = gsUriToHttpsUrl(archivePath);
-    const tmpFile = Path.join(Os.tmpdir(), `kbn-ts-archive-${Date.now()}.tar.gz`);
+    const start = Date.now();
 
     try {
-      // -- Step 1: Download ------------------------------------------------
-      const dlStart = Date.now();
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${this.accessToken}` },
       });
@@ -107,43 +103,42 @@ export class GcsFileSystem extends AbstractFileSystem {
         throw new Error(`GCS download failed: HTTP ${response.status}`);
       }
 
-      await pipeline(Readable.fromWeb(response.body as any), Fs.createWriteStream(tmpFile));
-      const dlElapsed = Date.now() - dlStart;
+      const contentLength = Number(response.headers.get('content-length')) || undefined;
 
-      let sizeBytes: number | undefined;
-      try {
-        const stat = await Fs.promises.stat(tmpFile);
-        sizeBytes = stat.size;
-      } catch {
-        // stat failed — proceed without size info
-      }
+      const sizeLabel = contentLength ? ` (${formatBytes(contentLength)})` : '';
 
-      const sizeLabel = sizeBytes ? ` (${formatBytes(sizeBytes)})` : '';
+      this.log.info(`Streaming & extracting TypeScript build artifacts${sizeLabel}...`);
+
+      let bytesReceived = 0;
+      const meter = new Transform({
+        transform(chunk, _encoding, callback) {
+          bytesReceived += chunk.length;
+          callback(null, chunk);
+        },
+      });
+
+      await pipeline(Readable.fromWeb(response.body as any), meter, tarExtract({ cwd: REPO_ROOT }));
+
+      const elapsed = Date.now() - start;
+
+      const totalSize = contentLength ?? bytesReceived;
+
       const speedLabel =
-        sizeBytes && dlElapsed > 0
-          ? ` at ${formatBytes(Math.round(sizeBytes / (dlElapsed / 1000)))}/s`
+        totalSize && elapsed > 0
+          ? ` at ${formatBytes(Math.round(totalSize / (elapsed / 1000)))}/s`
           : '';
+
       this.log.info(
-        `Downloaded TypeScript build artifacts${sizeLabel} in ${(dlElapsed / 1000).toFixed(
-          1
-        )}s${speedLabel}`
+        `Restored TypeScript build artifacts (${formatBytes(totalSize)}) in ${(
+          elapsed / 1000
+        ).toFixed(1)}s${speedLabel}`
       );
-
-      // -- Step 2: Extract -------------------------------------------------
-      const exStart = Date.now();
-      this.log.info('Extracting archive to disk...');
-
-      await tar.extract({ file: tmpFile, cwd: REPO_ROOT });
-
-      const exElapsed = Date.now() - exStart;
-      this.log.info(`Extracted TypeScript build artifacts in ${(exElapsed / 1000).toFixed(1)}s`);
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
+
       throw new Error(
         `Failed to restore archive from GCS: ${details.replace(this.accessToken, '<redacted>')}`
       );
-    } finally {
-      await Fs.promises.rm(tmpFile, { force: true }).catch(() => {});
     }
   }
 
@@ -245,6 +240,7 @@ export class GcsFileSystem extends AbstractFileSystem {
           prefix: objectPrefix,
           delimiter: '/',
           maxResults: '1000',
+          fields: 'prefixes,nextPageToken',
         });
         if (pageToken) {
           params.set('pageToken', pageToken);

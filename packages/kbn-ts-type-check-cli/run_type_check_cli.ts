@@ -128,19 +128,11 @@ run(
         cwd: REPO_ROOT,
       };
 
+      log.info(`[Full pass] Checking ${projects.length + 1} projects...`);
+
       if (useProgressBar) {
-        log.info('Building TypeScript projects to check types...');
-
-        const success = await runTscWithProgress({ ...tscOptions, log });
-
-        didTypeCheckFail = !success;
+        didTypeCheckFail = !(await runTscWithProgress({ ...tscOptions, log }));
       } else {
-        log.info(
-          `Building TypeScript projects to check types${
-            isVerbose ? '' : ' (pass --verbose for detailed output)'
-          }`
-        );
-
         try {
           await procRunner.run('tsc', { ...tscOptions, wait: true });
         } catch (error) {
@@ -319,7 +311,7 @@ export async function runFailFastCheck(options: {
   const multi = affectedRefs.size > 1;
 
   log.info(
-    `Checking ${affectedRefs.size} changed ${
+    `[First pass] Checking ${affectedRefs.size} changed ${
       multi ? 'projects' : 'project'
     } first (${projectNames.join(', ')}) with ${
       multi ? 'their' : 'its'

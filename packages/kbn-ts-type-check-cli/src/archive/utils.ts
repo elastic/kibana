@@ -88,16 +88,16 @@ export async function resolveUpstreamRemote(): Promise<string | undefined> {
  * These are the commits most likely to have archived artifacts in GCS.
  * Returns an empty array if no suitable remote is found.
  */
-export async function readMainBranchCommitShas(limit: number): Promise<string[]> {
-  const remote = await resolveUpstreamRemote();
-  if (!remote) {
+export async function readMainBranchCommitShas(limit: number, remote?: string): Promise<string[]> {
+  const resolvedRemote = remote ?? (await resolveUpstreamRemote());
+  if (!resolvedRemote) {
     return [];
   }
 
   try {
     const { stdout } = await execa(
       'git',
-      ['rev-list', '--max-count', String(limit), `${remote}/main`],
+      ['rev-list', '--max-count', String(limit), `${resolvedRemote}/main`],
       { cwd: REPO_ROOT }
     );
     return stdout
@@ -324,7 +324,7 @@ export function logArtifactFreshness(
     const freshLine = info.freshness
       ? ` All ${info.freshness.totalProjects} projects should be up-to-date.`
       : '';
-    log.info(`Cache is an exact match for HEAD (${headShort}).${freshLine}`);
+    log.info(`The restored TS cache is an exact match for HEAD (${headShort}).${freshLine}`);
     return;
   }
 
@@ -363,7 +363,7 @@ export function logArtifactFreshness(
     );
   }
 
-  log.info(`Cache is ${info.distance} commit(s) behind HEAD:\n${lines.join('\n')}`);
+  log.info(`The restored TS cache is ${info.distance} commit(s) behind HEAD:\n${lines.join('\n')}`);
 }
 
 export async function cleanTypeCheckArtifacts(log: SomeDevLog) {

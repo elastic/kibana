@@ -8,17 +8,11 @@
  */
 
 import Fs from 'fs';
+import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
-import globby from 'globby';
-import {
-  MAX_COMMITS_TO_CHECK,
-  CACHE_INVALIDATION_FILES,
-  CACHE_IGNORE_GLOBS,
-  LOCAL_CACHE_ROOT,
-  TYPES_DIRECTORY_GLOB,
-} from './constants';
+import { MAX_COMMITS_TO_CHECK, CACHE_INVALIDATION_FILES, LOCAL_CACHE_ROOT } from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
@@ -42,16 +36,11 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     // detect which projects are up-to-date and only rebuild what's needed —
     // which is faster than wiping everything and restoring from a cache archive.
     if (!isCiEnvironment()) {
-      const existingDirs = await globby(TYPES_DIRECTORY_GLOB, {
-        cwd: REPO_ROOT,
-        onlyDirectories: true,
-        followSymbolicLinks: false,
-        ignore: CACHE_IGNORE_GLOBS,
-      });
+      const hasExistingArtifacts = await checkForExistingBuildArtifacts();
 
-      if (existingDirs.length > 0) {
+      if (hasExistingArtifacts) {
         log.info(
-          `Found ${existingDirs.length} existing type cache directories — skipping archive restore (tsc incremental build will handle it).`
+          'Found existing type cache directories — skipping archive restore (tsc incremental build will handle it).'
         );
         return;
       }
@@ -137,7 +126,9 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
         // Therefore we search:
         //   1. HEAD history — includes commits CI built for the current branch
         //   2. upstream/main history — in case CI also archives main builds
-        const mainShas = upstreamRemote ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK) : [];
+        const mainShas = upstreamRemote
+          ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK, upstreamRemote)
+          : [];
         const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
 
         const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
@@ -151,21 +142,30 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
             } matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
           );
 
-          if (currentSha) {
-            const distanceInfo = await getCommitDistanceInfo(currentSha, bestMatch);
-            if (distanceInfo) {
-              logArtifactFreshness(log, currentSha, bestMatch, distanceInfo);
-            }
-          }
-
           const gcsRestoreOptions = {
             ...restoreOptions,
             cacheInvalidationFiles: undefined,
             shas: matchedShas,
             skipExistenceCheck: true,
+            skipClean: true,
           };
 
-          const restored = await gcsFs.restoreArchive(gcsRestoreOptions);
+          // Run the informational freshness check concurrently with the
+          // actual restore so the download starts immediately.
+          const freshnessPromise = currentSha
+            ? getCommitDistanceInfo(currentSha, bestMatch)
+                .then((distanceInfo) => {
+                  if (distanceInfo) {
+                    logArtifactFreshness(log, currentSha, bestMatch, distanceInfo);
+                  }
+                })
+                .catch(() => {})
+            : Promise.resolve();
+
+          const [restored] = await Promise.all([
+            gcsFs.restoreArchive(gcsRestoreOptions),
+            freshnessPromise,
+          ]);
 
           if (restored) {
             return;
@@ -197,10 +197,39 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     await new LocalFileSystem(log).restoreArchive({
       ...restoreOptions,
       cacheInvalidationFiles: undefined,
+      skipClean: true,
     });
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
 
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
   }
+}
+
+/**
+ * Spot-checks a sample of known TS project paths for existing `target/types`
+ * directories. Uses the static `config-paths.json` (which lists every
+ * tsconfig.json in the repo) instead of a filesystem glob — this avoids
+ * scanning `node_modules` and is effectively instant.
+ */
+async function checkForExistingBuildArtifacts(): Promise<boolean> {
+  const configPathsFile = Path.resolve(REPO_ROOT, 'packages/kbn-ts-projects/config-paths.json');
+  const raw = await Fs.promises.readFile(configPathsFile, 'utf8');
+  const tsconfigPaths: string[] = JSON.parse(raw);
+
+  const SAMPLE_SIZE = 10;
+  const step = Math.max(1, Math.floor(tsconfigPaths.length / SAMPLE_SIZE));
+  const sample = tsconfigPaths.filter((_, i) => i % step === 0).slice(0, SAMPLE_SIZE);
+
+  const checks = sample.map(async (tsconfigRel) => {
+    const projectDir = Path.dirname(Path.resolve(REPO_ROOT, tsconfigRel));
+    try {
+      await Fs.promises.access(Path.join(projectDir, 'target', 'types'));
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  return (await Promise.all(checks)).some(Boolean);
 }

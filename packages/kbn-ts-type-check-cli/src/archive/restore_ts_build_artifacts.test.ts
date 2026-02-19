@@ -38,8 +38,9 @@ jest.mock('./file_system/gcs_file_system', () => ({
   })),
 }));
 
-// Mock globby to simulate a fresh checkout (no existing build artifacts).
-jest.mock('globby', () => jest.fn().mockResolvedValue([]));
+// Mock execa to simulate a fresh checkout (no existing build artifacts)
+// and prevent actual git/gcloud commands from running during tests.
+jest.mock('execa', () => jest.fn().mockResolvedValue({ stdout: '' }));
 
 const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction<
   typeof buildCandidateShaList
@@ -83,6 +84,9 @@ describe('restoreTSBuildArtifacts', () => {
     mockedBuildCandidateShaList.mockReturnValue([]);
     mockedGetGcloudAccessToken.mockResolvedValue(undefined);
     mockedResolveUpstreamRemote.mockResolvedValue(undefined);
+    // Mock readFile to return an empty project list for checkForExistingBuildArtifacts,
+    // simulating a fresh checkout with no target/types directories.
+    jest.spyOn(Fs.promises, 'readFile').mockResolvedValue(JSON.stringify([]));
     // Mock Fs.promises.access so the local cache path is considered reachable in tests.
     jest.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
     restoreSpy = jest.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(false);
@@ -122,6 +126,7 @@ describe('restoreTSBuildArtifacts', () => {
       cacheInvalidationFiles: undefined,
       prNumber: '456',
       shas: candidateShas,
+      skipClean: true,
     });
   });
 

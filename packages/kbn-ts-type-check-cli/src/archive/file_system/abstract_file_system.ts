@@ -66,6 +66,10 @@ export abstract class AbstractFileSystem {
      *  has already verified that the provided SHAs have archives (e.g. via
      *  listAvailableCommitShas). */
     skipExistenceCheck?: boolean;
+    /** When true, skip cleaning existing type cache directories and config
+     *  files before extraction. Useful for local dev where the caller has
+     *  already verified no artifacts exist and configs were just generated. */
+    skipClean?: boolean;
   }): Promise<boolean> {
     const prArchiveId = options.prNumber ? join(PULL_REQUESTS_PATH, options.prNumber) : undefined;
 
@@ -83,7 +87,7 @@ export abstract class AbstractFileSystem {
 
     const totalShas = options.shas.length;
 
-    this.log.info(`Searching ${totalShas} candidate commit(s) for cached artifacts...`);
+    this.log.info(`Searching ${totalShas} candidate commit(s) for cached TypeScript artifacts...`);
 
     for (let i = 0; i < totalShas; i++) {
       const sha = options.shas[i];
@@ -97,22 +101,24 @@ export abstract class AbstractFileSystem {
       const archiveExists = options.skipExistenceCheck || (await this.hasArchive(archivePath));
 
       if (archiveExists) {
-        const metadata = await this.readMetadata(this.getMetadataPath(archiveId));
-        const storedFileHashes = metadata?.fileHashes;
+        if (currentFileHashes) {
+          const metadata = await this.readMetadata(this.getMetadataPath(archiveId));
+          const hashCheckResult = doHashesMatch({
+            currentFileHashes,
+            storedFileHashes: metadata?.fileHashes,
+          });
 
-        const hashCheckResult = doHashesMatch({
-          currentFileHashes,
-          storedFileHashes,
-        });
-
-        if (!hashCheckResult.result) {
-          this.log.warning(
-            `Cached TypeScript build artifacts for ${shortSha} found, but cache invalidation files have changed:\n ${hashCheckResult.message}`
-          );
-          return false;
+          if (!hashCheckResult.result) {
+            this.log.warning(
+              `Cached TypeScript build artifacts for ${shortSha} found, but cache invalidation files have changed:\n ${hashCheckResult.message}`
+            );
+            return false;
+          }
         }
 
-        await cleanTypeCheckArtifacts(this.log);
+        if (!options.skipClean) {
+          await cleanTypeCheckArtifacts(this.log);
+        }
 
         this.log.info(`Found archive for ${shortSha}, extracting...`);
 
