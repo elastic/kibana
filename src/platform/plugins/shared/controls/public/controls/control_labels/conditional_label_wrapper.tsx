@@ -10,6 +10,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 
 export const ConditionalLabelWrapper = ({
@@ -20,6 +21,8 @@ export const ConditionalLabelWrapper = ({
   isPinned: boolean;
   label: string | undefined;
 }>) => {
+  const styles = useMemoCss(labelWrapperStyles);
+
   return isPinned ? (
     children
   ) : (
@@ -34,7 +37,7 @@ export const ConditionalLabelWrapper = ({
   );
 };
 
-const styles = {
+const labelWrapperStyles = {
   flexGroup: ({ euiTheme }: UseEuiTheme) =>
     css({
       gap: '1px',
