@@ -887,7 +887,6 @@ describe('FeatureRegistry', () => {
                     { ruleTypeId: 'foo', consumers: ['test-feature'] },
                     { ruleTypeId: 'bar', consumers: ['test-feature'] },
                   ],
-                  read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -987,7 +986,7 @@ describe('FeatureRegistry', () => {
             all: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  manual_run: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -1000,7 +999,7 @@ describe('FeatureRegistry', () => {
             read: {
               alerting: {
                 rule: {
-                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                  read: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
                 },
               },
               savedObject: {
@@ -1552,6 +1551,225 @@ describe('FeatureRegistry', () => {
         ).toThrowErrorMatchingInlineSnapshot(
           `"Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist"`
         );
+      });
+
+      describe('alerting.rule.all', () => {
+        const alertingRuleType = { ruleTypeId: 'myRule', consumers: ['test-feature'] };
+
+        it('rejects when main has alerting.rule.all and sub-features define alerting.rule.*', () => {
+          const feature: KibanaFeatureConfig = {
+            id: 'test-feature',
+            name: 'Test Feature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            alerting: [alertingRuleType],
+            privileges: {
+              all: {
+                alerting: { rule: { all: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+              read: {
+                alerting: { rule: { read: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+            },
+            subFeatures: [
+              {
+                name: 'Manual run',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      {
+                        id: 'manual_run',
+                        name: 'Manual run',
+                        includeIn: 'all',
+                        savedObject: { all: [], read: [] },
+                        alerting: {
+                          rule: {
+                            manual_run: [alertingRuleType],
+                            manage_rule_settings: [alertingRuleType],
+                            read: [alertingRuleType],
+                            enable: [alertingRuleType],
+                            write: [alertingRuleType],
+                          },
+                        },
+                        ui: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+
+          const featureRegistry = new FeatureRegistry();
+
+          expect(() =>
+            featureRegistry.registerKibanaFeature(feature)
+          ).toThrowErrorMatchingInlineSnapshot(
+            `"Feature test-feature: You defined alerting.rule.all at the top, but sub-feature privilege 'manual_run' defined alerting.rule.enable, alerting.rule.manual_run, alerting.rule.manage_rule_settings, alerting.rule.read, alerting.rule.write."`
+          );
+        });
+
+        it('allows main privilege with only alerting.rule.all and no other alerting.rule.*', () => {
+          const feature: KibanaFeatureConfig = {
+            id: 'test-feature',
+            name: 'Test Feature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            alerting: [alertingRuleType],
+            privileges: {
+              all: {
+                alerting: { rule: { all: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+              read: {
+                alerting: { rule: { read: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+            },
+          };
+
+          const featureRegistry = new FeatureRegistry();
+          featureRegistry.registerKibanaFeature(feature);
+          featureRegistry.lockRegistration();
+          const result = featureRegistry.getAllKibanaFeatures();
+          expect(result).toHaveLength(1);
+          expect(result).toMatchSnapshot()
+        });
+
+        it('allows sub-feature to define alerting.rule.all when main does not have rule.all', () => {
+          const feature: KibanaFeatureConfig = {
+            id: 'test-feature',
+            name: 'Test Feature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            alerting: [alertingRuleType],
+            privileges: {
+              all: {
+                alerting: { rule: { read: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+              read: {
+                alerting: { rule: { read: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+            },
+            subFeatures: [
+              {
+                name: 'Sub All',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      {
+                        id: 'sub_all',
+                        name: 'Sub All',
+                        includeIn: 'all',
+                        savedObject: { all: [], read: [] },
+                        alerting: { rule: { all: [alertingRuleType] } },
+                        ui: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+
+          const featureRegistry = new FeatureRegistry();
+          featureRegistry.registerKibanaFeature(feature);
+          featureRegistry.lockRegistration();
+          const result = featureRegistry.getAllKibanaFeatures();
+          expect(result).toHaveLength(1);
+        });
+
+        it('allows a combination of alerting.rule.* at main and sub-feature level when rule.all is not used', () => {
+          const feature: KibanaFeatureConfig = {
+            id: 'test-feature',
+            name: 'Test Feature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            alerting: [alertingRuleType],
+            privileges: {
+              all: {
+                alerting: {
+                  rule: {
+                    read: [alertingRuleType],
+                    write: [alertingRuleType],
+                  },
+                },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+              read: {
+                alerting: { rule: { read: [alertingRuleType] } },
+                savedObject: { all: [], read: [] },
+                ui: [],
+                app: [],
+              },
+            },
+            subFeatures: [
+              {
+                name: 'Manual run',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      {
+                        id: 'manual_run',
+                        name: 'Manual run',
+                        includeIn: 'all',
+                        savedObject: { all: [], read: [] },
+                        alerting: { rule: { manual_run: [alertingRuleType] } },
+                        ui: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Enable and disable',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      {
+                        id: 'enable_disable',
+                        name: 'Enable and disable',
+                        includeIn: 'all',
+                        savedObject: { all: [], read: [] },
+                        alerting: { rule: { enable: [alertingRuleType] } },
+                        ui: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+
+          const featureRegistry = new FeatureRegistry();
+          featureRegistry.registerKibanaFeature(feature);
+          featureRegistry.lockRegistration();
+          const result = featureRegistry.getAllKibanaFeatures();
+          expect(result).toHaveLength(1);
+          expect(result).toMatchSnapshot()
+        });
       });
     });
 

@@ -1,5 +1,312 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`FeatureRegistry Kibana Features alerting alerting.rule.all allows a combination of alerting.rule.* at main and sub-feature level when rule.all is not used 1`] = `
+Array [
+  KibanaFeature {
+    "config": Object {
+      "alerting": Array [
+        Object {
+          "consumers": Array [
+            "test-feature",
+          ],
+          "ruleTypeId": "myRule",
+        },
+      ],
+      "app": Array [],
+      "category": Object {
+        "id": "foo",
+        "label": "foo",
+      },
+      "id": "test-feature",
+      "name": "Test Feature",
+      "privileges": Object {
+        "all": Object {
+          "alerting": Object {
+            "rule": Object {
+              "read": Array [
+                Object {
+                  "consumers": Array [
+                    "test-feature",
+                  ],
+                  "ruleTypeId": "myRule",
+                },
+              ],
+              "write": Array [
+                Object {
+                  "consumers": Array [
+                    "test-feature",
+                  ],
+                  "ruleTypeId": "myRule",
+                },
+              ],
+            },
+          },
+          "app": Array [],
+          "savedObject": Object {
+            "all": Array [
+              "telemetry",
+            ],
+            "read": Array [
+              "config",
+              "config-global",
+              "url",
+              "tag",
+              "cloud",
+            ],
+          },
+          "ui": Array [],
+        },
+        "read": Object {
+          "alerting": Object {
+            "rule": Object {
+              "read": Array [
+                Object {
+                  "consumers": Array [
+                    "test-feature",
+                  ],
+                  "ruleTypeId": "myRule",
+                },
+              ],
+            },
+          },
+          "app": Array [],
+          "savedObject": Object {
+            "all": Array [],
+            "read": Array [
+              "config",
+              "config-global",
+              "telemetry",
+              "url",
+              "tag",
+              "cloud",
+            ],
+          },
+          "ui": Array [],
+        },
+      },
+      "subFeatures": Array [
+        Object {
+          "name": "Manual run",
+          "privilegeGroups": Array [
+            Object {
+              "groupType": "independent",
+              "privileges": Array [
+                Object {
+                  "alerting": Object {
+                    "rule": Object {
+                      "manual_run": Array [
+                        Object {
+                          "consumers": Array [
+                            "test-feature",
+                          ],
+                          "ruleTypeId": "myRule",
+                        },
+                      ],
+                    },
+                  },
+                  "id": "manual_run",
+                  "includeIn": "all",
+                  "name": "Manual run",
+                  "savedObject": Object {
+                    "all": Array [],
+                    "read": Array [],
+                  },
+                  "ui": Array [],
+                },
+              ],
+            },
+          ],
+        },
+        Object {
+          "name": "Enable and disable",
+          "privilegeGroups": Array [
+            Object {
+              "groupType": "independent",
+              "privileges": Array [
+                Object {
+                  "alerting": Object {
+                    "rule": Object {
+                      "enable": Array [
+                        Object {
+                          "consumers": Array [
+                            "test-feature",
+                          ],
+                          "ruleTypeId": "myRule",
+                        },
+                      ],
+                    },
+                  },
+                  "id": "enable_disable",
+                  "includeIn": "all",
+                  "name": "Enable and disable",
+                  "savedObject": Object {
+                    "all": Array [],
+                    "read": Array [],
+                  },
+                  "ui": Array [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    "subFeatures": Array [
+      SubFeature {
+        "config": Object {
+          "name": "Manual run",
+          "privilegeGroups": Array [
+            Object {
+              "groupType": "independent",
+              "privileges": Array [
+                Object {
+                  "alerting": Object {
+                    "rule": Object {
+                      "manual_run": Array [
+                        Object {
+                          "consumers": Array [
+                            "test-feature",
+                          ],
+                          "ruleTypeId": "myRule",
+                        },
+                      ],
+                    },
+                  },
+                  "id": "manual_run",
+                  "includeIn": "all",
+                  "name": "Manual run",
+                  "savedObject": Object {
+                    "all": Array [],
+                    "read": Array [],
+                  },
+                  "ui": Array [],
+                },
+              ],
+            },
+          ],
+        },
+      },
+      SubFeature {
+        "config": Object {
+          "name": "Enable and disable",
+          "privilegeGroups": Array [
+            Object {
+              "groupType": "independent",
+              "privileges": Array [
+                Object {
+                  "alerting": Object {
+                    "rule": Object {
+                      "enable": Array [
+                        Object {
+                          "consumers": Array [
+                            "test-feature",
+                          ],
+                          "ruleTypeId": "myRule",
+                        },
+                      ],
+                    },
+                  },
+                  "id": "enable_disable",
+                  "includeIn": "all",
+                  "name": "Enable and disable",
+                  "savedObject": Object {
+                    "all": Array [],
+                    "read": Array [],
+                  },
+                  "ui": Array [],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+]
+`;
+
+exports[`FeatureRegistry Kibana Features alerting alerting.rule.all allows main privilege with only alerting.rule.all and no other alerting.rule.* 1`] = `
+Array [
+  KibanaFeature {
+    "config": Object {
+      "alerting": Array [
+        Object {
+          "consumers": Array [
+            "test-feature",
+          ],
+          "ruleTypeId": "myRule",
+        },
+      ],
+      "app": Array [],
+      "category": Object {
+        "id": "foo",
+        "label": "foo",
+      },
+      "id": "test-feature",
+      "name": "Test Feature",
+      "privileges": Object {
+        "all": Object {
+          "alerting": Object {
+            "rule": Object {
+              "all": Array [
+                Object {
+                  "consumers": Array [
+                    "test-feature",
+                  ],
+                  "ruleTypeId": "myRule",
+                },
+              ],
+            },
+          },
+          "app": Array [],
+          "savedObject": Object {
+            "all": Array [
+              "telemetry",
+            ],
+            "read": Array [
+              "config",
+              "config-global",
+              "url",
+              "tag",
+              "cloud",
+            ],
+          },
+          "ui": Array [],
+        },
+        "read": Object {
+          "alerting": Object {
+            "rule": Object {
+              "read": Array [
+                Object {
+                  "consumers": Array [
+                    "test-feature",
+                  ],
+                  "ruleTypeId": "myRule",
+                },
+              ],
+            },
+          },
+          "app": Array [],
+          "savedObject": Object {
+            "all": Array [],
+            "read": Array [
+              "config",
+              "config-global",
+              "telemetry",
+              "url",
+              "tag",
+              "cloud",
+            ],
+          },
+          "ui": Array [],
+        },
+      },
+    },
+    "subFeatures": Array [],
+  },
+]
+`;
+
 exports[`FeatureRegistry Kibana Features prevents features from being registered with a catalogue entry of "" 1`] = `"[catalogue.0]: Does not satisfy regexp /^[a-zA-Z0-9:_-]+$/"`;
 
 exports[`FeatureRegistry Kibana Features prevents features from being registered with a catalogue entry of "contains space" 1`] = `"[catalogue.0]: Does not satisfy regexp /^[a-zA-Z0-9:_-]+$/"`;
