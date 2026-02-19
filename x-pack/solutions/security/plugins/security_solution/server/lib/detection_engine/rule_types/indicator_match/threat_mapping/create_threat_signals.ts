@@ -389,6 +389,9 @@ export const createThreatSignals = async ({
     signalsCount: results.createdSignalsCount,
     responseActions: completeRule.ruleParams.responseActions,
   });
+  // Restore totalEventsFound since combineConcurrentResults doesn't carry it through
+  results.totalEventsFound = eventCount;
+
   ruleExecutionLogger.trace('Indicator matching rule has completed');
   return results;
 };
