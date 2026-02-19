@@ -29,7 +29,7 @@ jest.mock('./utils', () => ({
   readRecentCommitShas: jest.fn(),
   resolveCurrentCommitSha: jest.fn(),
   resolveUpstreamRemote: jest.fn(),
-  withGcsAuth: jest.fn((_, action: () => Promise<unknown>) => action()),
+  withGcsAuth: jest.fn((_, action: (token: string) => Promise<unknown>) => action('mock-token')),
 }));
 
 jest.mock('./file_system/gcs_file_system', () => ({
@@ -119,7 +119,7 @@ describe('restoreTSBuildArtifacts', () => {
 
     expect(restoreSpy).toHaveBeenCalledTimes(1);
     expect(restoreSpy).toHaveBeenCalledWith({
-      cacheInvalidationFiles: ['yarn.lock', '.nvmrc', '.node-version'],
+      cacheInvalidationFiles: undefined,
       prNumber: '456',
       shas: candidateShas,
     });

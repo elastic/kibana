@@ -50,7 +50,7 @@ ${refs.map((p) => `        { "path": ${JSON.stringify(p)} },`).join('\n')}
  * Get repo-relative paths of files changed in the working tree
  * (staged, unstaged, and untracked .ts/.tsx files).
  */
-async function getChangedFiles(): Promise<Set<string>> {
+export async function getChangedFiles(): Promise<Set<string>> {
   try {
     const { stdout } = await execa('git', ['diff', '--name-only', 'HEAD', '--diff-filter=ACMR'], {
       cwd: REPO_ROOT,
@@ -70,7 +70,7 @@ async function getChangedFiles(): Promise<Set<string>> {
  * Map changed files to the set of project config paths that contain them.
  * Uses the deepest matching project directory for each file.
  */
-function getAffectedProjectRefs(changedFiles: Set<string>, refs: string[]): Set<string> {
+export function getAffectedProjectRefs(changedFiles: Set<string>, refs: string[]): Set<string> {
   const projectDirs = refs.map((ref) => ({
     ref,
     dir: normalize(Path.dirname(ref.replace(/^\.\//, ''))),
@@ -100,27 +100,13 @@ export async function updateRootRefsConfig(log: ToolingLog) {
     );
   }
 
-  const allRefs = TS_PROJECTS.flatMap((p) => {
+  const refs = TS_PROJECTS.flatMap((p) => {
     if (p.isTypeCheckDisabled()) {
       return [];
     }
 
     return `./${normalize(Path.relative(REPO_ROOT, p.typeCheckConfigPath))}`;
   }).sort((a, b) => a.localeCompare(b));
-
-  const changedFiles = await getChangedFiles();
-  const affectedRefs = getAffectedProjectRefs(changedFiles, allRefs);
-
-  // Put affected projects first so tsc reaches them earlier in the build.
-  const prioritized = allRefs.filter((r) => affectedRefs.has(r));
-  const rest = allRefs.filter((r) => !affectedRefs.has(r));
-  const refs = [...prioritized, ...rest];
-
-  if (prioritized.length > 0) {
-    log.info(
-      `Prioritizing ${prioritized.length} project(s) with local changes in the build order.`
-    );
-  }
 
   log.debug('updating', ROOT_REFS_CONFIG_PATH);
   await Fsp.writeFile(ROOT_REFS_CONFIG_PATH, generateTsConfig(refs) + '\n');

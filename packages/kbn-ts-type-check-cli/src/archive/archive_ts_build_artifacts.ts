@@ -53,7 +53,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
     };
 
     if (isCiEnvironment()) {
-      await withGcsAuth(log, () => new GcsFileSystem(log).updateArchive(options));
+      await withGcsAuth(log, (token) => new GcsFileSystem(log, token).updateArchive(options));
     }
   } catch (error) {
     const archiveErrorDetails = error instanceof Error ? error.message : String(error);

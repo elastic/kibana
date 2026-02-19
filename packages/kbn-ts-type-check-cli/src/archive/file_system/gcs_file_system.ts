@@ -9,17 +9,14 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
+import * as tar from 'tar';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
-import {
-  GCS_BUCKET_NAME,
-  GCS_BUCKET_PATH,
-  GCS_BUCKET_URI,
-  GCS_COMMITS_PREFIX,
-  COMMITS_PATH,
-} from '../constants';
-import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';
+import { GCS_BUCKET_NAME, GCS_BUCKET_PATH, GCS_BUCKET_URI, COMMITS_PATH } from '../constants';
+import { getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
@@ -39,15 +36,14 @@ function formatBytes(bytes: number): string {
 }
 
 export class GcsFileSystem extends AbstractFileSystem {
-  private accessToken: string | undefined;
+  private accessToken: string;
 
   /**
-   * @param accessToken  When provided, GCS operations use direct HTTP requests
-   *   (via `curl`) instead of the `gcloud` CLI. This eliminates ~2-3 seconds
-   *   of Python CLI startup overhead per invocation.  Pass `undefined` to use
-   *   the original `gcloud`-based implementation for comparison.
+   * @param accessToken  OAuth2 access token used for all GCS operations via
+   *   native `fetch`, eliminating the ~2-3 s Python CLI startup overhead that
+   *   `gcloud` commands incur.  Obtain one with `getGcloudAccessToken()`.
    */
-  constructor(log: SomeDevLog, accessToken?: string) {
+  constructor(log: SomeDevLog, accessToken: string) {
     super(log);
     this.accessToken = accessToken;
   }
@@ -91,69 +87,27 @@ export class GcsFileSystem extends AbstractFileSystem {
   // Extract — download + decompress the tar.gz archive
   // ---------------------------------------------------------------------------
 
-  protected async extract(archivePath: string): Promise<void> {
-    if (this.accessToken) {
-      return this.extractDirect(archivePath, this.accessToken);
-    }
-    return this.extractWithGcloud(archivePath);
-  }
-
-  /** Original implementation: `gcloud storage cat | tar xz` */
-  private async extractWithGcloud(archivePath: string): Promise<void> {
-    this.log.info(`Streaming TypeScript build artifacts from ${archivePath}`);
-
-    const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
-
-    const tarArgs = ['--extract', '--file', '-', '--gzip', ...extractBaseArgs];
-
-    const tarProcess = execa('tar', tarArgs, {
-      cwd: REPO_ROOT,
-      stdin: 'pipe',
-      stdout: 'ignore',
-      stderr: 'inherit',
-      env: resolveTarEnvironment(),
-      buffer: false,
-    });
-
-    const catProcess = execa('gcloud', ['storage', 'cat', archivePath], {
-      cwd: REPO_ROOT,
-      stdout: 'pipe',
-      stderr: 'inherit',
-      buffer: false,
-    });
-
-    if (!catProcess.stdout || !tarProcess.stdin) {
-      tarProcess.kill();
-
-      catProcess.kill();
-
-      throw new Error('Failed to establish stream between gcloud and tar.');
-    }
-
-    catProcess.stdout.pipe(tarProcess.stdin);
-
-    await Promise.all([catProcess, tarProcess]);
-  }
-
   /**
-   * Fast implementation that splits download and extraction into two measured
-   * steps so the user can see where time is actually spent.
-   *
-   * 1. `curl` downloads the archive to a temp file (network-bound).
-   * 2. `tar xzf` extracts from that file (disk I/O-bound).
-   *
-   * This also means a failed extraction doesn't require re-downloading.
+   * Downloads the archive to a temp file via native `fetch`, then extracts
+   * with the `tar` npm package. Splits into two measured steps so the user
+   * can see where time is actually spent (network vs disk I/O).
    */
-  private async extractDirect(archivePath: string, token: string): Promise<void> {
+  protected async extract(archivePath: string): Promise<void> {
     const url = gsUriToHttpsUrl(archivePath);
     const tmpFile = Path.join(Os.tmpdir(), `kbn-ts-archive-${Date.now()}.tar.gz`);
 
     try {
       // -- Step 1: Download ------------------------------------------------
       const dlStart = Date.now();
-      await execa('curl', ['-sSLf', '-o', tmpFile, '-H', `Authorization: Bearer ${token}`, url], {
-        stderr: 'pipe',
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${this.accessToken}` },
       });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`GCS download failed: HTTP ${response.status}`);
+      }
+
+      await pipeline(Readable.fromWeb(response.body as any), Fs.createWriteStream(tmpFile));
       const dlElapsed = Date.now() - dlStart;
 
       let sizeBytes: number | undefined;
@@ -179,32 +133,16 @@ export class GcsFileSystem extends AbstractFileSystem {
       const exStart = Date.now();
       this.log.info('Extracting archive to disk...');
 
-      const tarArgs = [
-        '--extract',
-        '--file',
-        tmpFile,
-        '--gzip',
-        '--directory',
-        REPO_ROOT,
-        ...getTarPlatformOptions(),
-      ];
-
-      await execa('tar', tarArgs, {
-        cwd: REPO_ROOT,
-        stdout: 'ignore',
-        stderr: 'inherit',
-        env: resolveTarEnvironment(),
-      });
+      await tar.extract({ file: tmpFile, cwd: REPO_ROOT });
 
       const exElapsed = Date.now() - exStart;
       this.log.info(`Extracted TypeScript build artifacts in ${(exElapsed / 1000).toFixed(1)}s`);
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
       throw new Error(
-        `Failed to restore archive from GCS: ${details.replace(token, '<redacted>')}`
+        `Failed to restore archive from GCS: ${details.replace(this.accessToken, '<redacted>')}`
       );
     } finally {
-      // Clean up the temp file regardless of success or failure.
       await Fs.promises.rm(tmpFile, { force: true }).catch(() => {});
     }
   }
@@ -214,31 +152,23 @@ export class GcsFileSystem extends AbstractFileSystem {
   // ---------------------------------------------------------------------------
 
   protected async hasArchive(archivePath: string): Promise<boolean> {
-    const commands: Array<[cmd: string, args: string[]]> = [
-      ['gcloud', ['storage', 'ls', '--uri', archivePath]],
-      ['gsutil', ['-q', 'ls', archivePath]],
-    ];
+    const url = gsUriToHttpsUrl(archivePath);
+    const start = Date.now();
 
-    for (const [cmd, args] of commands) {
-      const start = Date.now();
+    try {
+      const response = await fetch(url, {
+        method: 'HEAD',
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+      });
 
-      try {
-        await execa(cmd, args, {
-          cwd: REPO_ROOT,
-          stdio: 'ignore',
-        });
-
-        this.log.verbose(`  hasArchive(${cmd}): found (${Date.now() - start}ms)`);
-
-        return true;
-      } catch (error) {
-        this.log.verbose(`  hasArchive(${cmd}): not found (${Date.now() - start}ms)`);
-
-        continue;
-      }
+      this.log.verbose(
+        `  hasArchive: ${response.ok ? 'found' : response.status} (${Date.now() - start}ms)`
+      );
+      return response.ok;
+    } catch (error) {
+      this.log.verbose(`  hasArchive: failed (${Date.now() - start}ms)`);
+      return false;
     }
-
-    return false;
   }
 
   // ---------------------------------------------------------------------------
@@ -246,60 +176,24 @@ export class GcsFileSystem extends AbstractFileSystem {
   // ---------------------------------------------------------------------------
 
   protected async readMetadata(metadataPath: string): Promise<ArchiveMetadata | undefined> {
-    if (this.accessToken) {
-      return this.readMetadataDirect(metadataPath, this.accessToken);
-    }
-    return this.readMetadataWithGcloud(metadataPath);
-  }
-
-  /** Original implementation: tries `gcloud storage cat`, falls back to `gsutil cat`. */
-  private async readMetadataWithGcloud(metadataPath: string): Promise<ArchiveMetadata | undefined> {
-    const commands: Array<[cmd: string, args: string[]]> = [
-      ['gcloud', ['storage', 'cat', metadataPath]],
-      ['gsutil', ['cat', metadataPath]],
-    ];
-
-    for (const [cmd, args] of commands) {
-      const start = Date.now();
-
-      try {
-        const { stdout } = await execa(cmd, args, {
-          cwd: REPO_ROOT,
-          stderr: 'ignore',
-        });
-
-        this.log.verbose(`  readMetadata(${cmd}): success (${Date.now() - start}ms)`);
-
-        return JSON.parse(stdout) as ArchiveMetadata;
-      } catch (error) {
-        this.log.verbose(`  readMetadata(${cmd}): failed (${Date.now() - start}ms)`);
-        continue;
-      }
-    }
-
-    return undefined;
-  }
-
-  /** Fast implementation: `curl` — skips ~2-3s of gcloud CLI startup for a ~300-byte JSON file. */
-  private async readMetadataDirect(
-    metadataPath: string,
-    token: string
-  ): Promise<ArchiveMetadata | undefined> {
     const url = gsUriToHttpsUrl(metadataPath);
     const start = Date.now();
 
     try {
-      const { stdout } = await execa(
-        'curl',
-        ['-sSLf', '-H', `Authorization: Bearer ${token}`, url],
-        { stderr: 'ignore' }
-      );
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+      });
 
-      this.log.verbose(`  readMetadata(curl): success (${Date.now() - start}ms)`);
+      if (!response.ok) {
+        this.log.verbose(`  readMetadata: ${response.status} (${Date.now() - start}ms)`);
+        return undefined;
+      }
 
-      return JSON.parse(stdout) as ArchiveMetadata;
+      const data = (await response.json()) as ArchiveMetadata;
+      this.log.verbose(`  readMetadata: success (${Date.now() - start}ms)`);
+      return data;
     } catch (error) {
-      this.log.verbose(`  readMetadata(curl): failed (${Date.now() - start}ms)`);
+      this.log.verbose(`  readMetadata: failed (${Date.now() - start}ms)`);
       return undefined;
     }
   }
@@ -309,19 +203,22 @@ export class GcsFileSystem extends AbstractFileSystem {
   // ---------------------------------------------------------------------------
 
   protected async writeMetadata(metadataPath: string, data: ArchiveMetadata): Promise<void> {
-    const tempDir = await Fs.promises.mkdtemp(Path.join(Os.tmpdir(), 'kbn-ts-metadata-'));
-    const tempFilePath = Path.join(tempDir, 'metadata.json');
+    const objectPath = metadataPath.replace(`gs://${GCS_BUCKET_NAME}/`, '');
+    const uploadUrl =
+      `https://storage.googleapis.com/upload/storage/v1/b/${GCS_BUCKET_NAME}/o` +
+      `?uploadType=media&name=${encodeURIComponent(objectPath)}`;
 
-    try {
-      await Fs.promises.writeFile(tempFilePath, JSON.stringify(data), 'utf8');
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-      await execa('gcloud', ['storage', 'cp', tempFilePath, metadataPath], {
-        cwd: REPO_ROOT,
-        stdout: 'inherit',
-        stderr: 'inherit',
-      });
-    } finally {
-      await Fs.promises.rm(tempDir, { recursive: true, force: true });
+    if (!response.ok) {
+      throw new Error(`Failed to upload metadata: HTTP ${response.status}`);
     }
   }
 
@@ -329,54 +226,12 @@ export class GcsFileSystem extends AbstractFileSystem {
   // List available commit SHAs in GCS
   // ---------------------------------------------------------------------------
 
-  async listAvailableCommitShas(): Promise<Set<string>> {
-    if (this.accessToken) {
-      return this.listAvailableCommitShasDirect(this.accessToken);
-    }
-    return this.listAvailableCommitShasWithGcloud();
-  }
-
-  /** Original implementation: `gcloud storage ls`. */
-  private async listAvailableCommitShasWithGcloud(): Promise<Set<string>> {
-    const prefix = `${GCS_COMMITS_PREFIX}/`;
-    const start = Date.now();
-
-    try {
-      const { stdout } = await execa('gcloud', ['storage', 'ls', prefix], {
-        cwd: REPO_ROOT,
-        stderr: 'ignore',
-      });
-
-      const shas = new Set<string>();
-      for (const line of stdout.split('\n')) {
-        const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith(prefix)) {
-          continue;
-        }
-        // Lines look like: gs://ci-typescript-archives/ts_type_check/commits/<sha>/
-        const sha = trimmed.slice(prefix.length).replace(/\/$/, '');
-        if (sha.length > 0) {
-          shas.add(sha);
-        }
-      }
-
-      this.log.info(
-        `Listed ${shas.size} available archive(s) from GCS via gcloud (${Date.now() - start}ms)`
-      );
-      return shas;
-    } catch (error) {
-      const details = error instanceof Error ? error.message : String(error);
-      this.log.verbose(`Failed to list GCS archives: ${details} (${Date.now() - start}ms)`);
-      return new Set();
-    }
-  }
-
   /**
-   * Fast implementation: GCS JSON API via `curl`.
-   * Hits `storage.googleapis.com/storage/v1/b/{bucket}/o` with a prefix and
-   * delimiter, avoiding the ~3-4s gcloud CLI startup.
+   * Lists commit SHAs with archived artifacts in GCS using the JSON API.
+   * Paginates through `storage.googleapis.com/storage/v1/b/{bucket}/o` with
+   * a prefix + delimiter to enumerate "directory" prefixes.
    */
-  private async listAvailableCommitShasDirect(token: string): Promise<Set<string>> {
+  async listAvailableCommitShas(): Promise<Set<string>> {
     const objectPrefix = `${GCS_BUCKET_PATH}/${COMMITS_PATH}/`;
     const baseUrl = `https://storage.googleapis.com/storage/v1/b/${GCS_BUCKET_NAME}/o`;
     const start = Date.now();
@@ -395,14 +250,15 @@ export class GcsFileSystem extends AbstractFileSystem {
           params.set('pageToken', pageToken);
         }
 
-        const url = `${baseUrl}?${params}`;
-        const { stdout } = await execa(
-          'curl',
-          ['-sSLf', '-H', `Authorization: Bearer ${token}`, url],
-          { stderr: 'ignore' }
-        );
+        const response = await fetch(`${baseUrl}?${params}`, {
+          headers: { Authorization: `Bearer ${this.accessToken}` },
+        });
 
-        const data = JSON.parse(stdout) as {
+        if (!response.ok) {
+          throw new Error(`GCS API returned ${response.status}`);
+        }
+
+        const data = (await response.json()) as {
           prefixes?: string[];
           nextPageToken?: string;
         };
@@ -426,7 +282,7 @@ export class GcsFileSystem extends AbstractFileSystem {
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
       this.log.verbose(
-        `Failed to list GCS archives via API: ${details.replace(token, '<redacted>')} (${
+        `Failed to list GCS archives: ${details.replace(this.accessToken, '<redacted>')} (${
           Date.now() - start
         }ms)`
       );

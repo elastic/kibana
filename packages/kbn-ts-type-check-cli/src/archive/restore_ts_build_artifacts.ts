@@ -85,8 +85,8 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     };
 
     if (isCiEnvironment()) {
-      await withGcsAuth(log, async () => {
-        await new GcsFileSystem(log).restoreArchive(restoreOptions);
+      await withGcsAuth(log, async (token) => {
+        await new GcsFileSystem(log, token).restoreArchive(restoreOptions);
       });
 
       return;
@@ -160,6 +160,7 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
           const gcsRestoreOptions = {
             ...restoreOptions,
+            cacheInvalidationFiles: undefined,
             shas: matchedShas,
             skipExistenceCheck: true,
           };
@@ -193,7 +194,10 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       return;
     }
 
-    await new LocalFileSystem(log).restoreArchive(restoreOptions);
+    await new LocalFileSystem(log).restoreArchive({
+      ...restoreOptions,
+      cacheInvalidationFiles: undefined,
+    });
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
 

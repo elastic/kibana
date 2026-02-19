@@ -19,7 +19,7 @@ jest.mock('./utils', () => ({
   getPullRequestNumber: jest.fn(),
   isCiEnvironment: jest.fn(),
   resolveCurrentCommitSha: jest.fn(),
-  withGcsAuth: jest.fn((_, action: () => Promise<unknown>) => action()),
+  withGcsAuth: jest.fn((_, action: (token: string) => Promise<unknown>) => action('mock-token')),
 }));
 
 jest.mock('./file_system/gcs_file_system', () => ({

@@ -123,7 +123,7 @@ export async function detectLocalChanges(): Promise<boolean> {
 
 export async function withGcsAuth<TReturn>(
   log: SomeDevLog,
-  action: () => Promise<TReturn>
+  action: (accessToken: string) => Promise<TReturn>
 ): Promise<TReturn> {
   await execa(GCLOUD_ACTIVATE_SCRIPT, [GCS_BUCKET_NAME], {
     cwd: REPO_ROOT,
@@ -131,7 +131,11 @@ export async function withGcsAuth<TReturn>(
   });
 
   try {
-    return await action();
+    const token = await getGcloudAccessToken();
+    if (!token) {
+      throw new Error('Failed to obtain GCS access token after activating service account.');
+    }
+    return await action(token);
   } finally {
     try {
       await execa(GCLOUD_ACTIVATE_SCRIPT, ['--unset-impersonation'], {
@@ -355,8 +359,7 @@ export function logArtifactFreshness(
       `  ${chalk[freshnessColor(freshPercent)](
         `${freshProjects} projects (~${freshPercent}%) up-to-date.`
       )}
-
-${chalk.blue('tsc will verify changed files.')}`
+`
     );
   }
 
