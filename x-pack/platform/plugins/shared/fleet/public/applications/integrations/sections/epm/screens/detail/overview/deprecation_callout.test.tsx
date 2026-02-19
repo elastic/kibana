@@ -9,11 +9,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { DeprecationCallout, DeprecatedFeaturesCallout } from './deprecation_callout';
 
 const mockUseLink = jest.fn();
+
+jest.mock('../../../../../../../../common/services/packages_with_integrations', () => ({
+  doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
+}));
 
 jest.mock('../../../../../../../hooks', () => {
   const actual = jest.requireActual('../../../../../../../hooks');
@@ -207,6 +211,70 @@ describe('DeprecationCallout', () => {
     const warningIcon = container.querySelector('[data-euiicon-type="warning"]');
     expect(warningIcon).toBeInTheDocument();
   });
+
+  it('should show deprecation callout when integrationInfo is deprecated and package has multiple integrations', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        { name: 'integration-a', title: 'A', description: 'A desc' },
+        {
+          name: 'integration-b',
+          title: 'B',
+          description: 'B desc',
+          deprecated: { description: 'Integration B is deprecated' },
+        },
+      ],
+    };
+    const integrationInfo = {
+      name: 'integration-b',
+      title: 'B',
+      description: 'B desc',
+      deprecated: { description: 'Integration B is deprecated' },
+    } as RegistryPolicyTemplate;
+
+    render(
+      <I18nProvider>
+        <DeprecationCallout
+          packageInfo={packageInfo as PackageInfo}
+          integrationInfo={integrationInfo}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('deprecationCallout')).toBeInTheDocument();
+    expect(screen.getByText('Integration B is deprecated')).toBeInTheDocument();
+  });
+
+  it('should not show deprecation callout for a non-deprecated integration in a multi-integration package', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        { name: 'integration-a', title: 'A', description: 'A desc' },
+        {
+          name: 'integration-b',
+          title: 'B',
+          description: 'B desc',
+          deprecated: { description: 'B is deprecated' },
+        },
+      ],
+    };
+    const integrationInfo = {
+      name: 'integration-a',
+      title: 'A',
+      description: 'A desc',
+    } as RegistryPolicyTemplate;
+
+    render(
+      <I18nProvider>
+        <DeprecationCallout
+          packageInfo={packageInfo as PackageInfo}
+          integrationInfo={integrationInfo}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('deprecationCallout')).not.toBeInTheDocument();
+  });
 });
 
 describe('DeprecatedFeaturesCallout', () => {
@@ -357,6 +425,54 @@ describe('DeprecatedFeaturesCallout', () => {
     expect(
       screen.getByText(/This data stream is deprecated. Use the new CEL stream instead./)
     ).toBeInTheDocument();
+  });
+
+  it('should render deprecated policy template as a feature when package has single policy template', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'default',
+          title: 'Default Template',
+          description: 'Default template',
+          deprecated: {
+            description: 'This policy template is deprecated.',
+          },
+          inputs: [],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
+    expect(screen.getByText(/Default Template/)).toBeInTheDocument();
+    expect(screen.getByText(/This policy template is deprecated./)).toBeInTheDocument();
+  });
+
+  it('should not render deprecated policy template as a feature when package has multiple policy templates', () => {
+    const packageInfo = {
+      name: 'test-package',
+      policy_templates: [
+        {
+          name: 'a',
+          title: 'Template A',
+          description: 'A desc',
+          deprecated: {
+            description: 'Template A is deprecated.',
+          },
+          inputs: [],
+        },
+        {
+          name: 'b',
+          title: 'Template B',
+          description: 'B desc',
+          inputs: [],
+        },
+      ],
+    };
+
+    renderCallout(packageInfo);
+    expect(screen.queryByTestId('deprecatedFeaturesCallout')).not.toBeInTheDocument();
   });
 
   it('should render multiple deprecated features', () => {

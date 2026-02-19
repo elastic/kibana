@@ -11,12 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getNormalizedInputs } from '../../../../../../../../common/services';
+import { doesPackageHaveIntegrations } from '../../../../../../../../common/services/packages_with_integrations';
 import { useLink } from '../../../../../../../hooks';
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
-export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
+export const DeprecationCallout: React.FC<{
+  packageInfo: PackageInfo;
+  integrationInfo?: RegistryPolicyTemplate;
+}> = ({ packageInfo, integrationInfo }) => {
   const { getHref } = useLink();
-  const deprecated = packageInfo?.conditions?.deprecated || packageInfo?.deprecated;
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  const deprecated =
+    packageInfo?.conditions?.deprecated ||
+    packageInfo?.deprecated ||
+    (hasIntegrations && integrationInfo?.deprecated ? integrationInfo.deprecated : undefined);
+
   return (
     <>
       {' '}
@@ -72,10 +81,12 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
   packageInfo,
 }) => {
   interface DeprecatedFeature {
-    type: 'input' | 'variable' | 'data stream';
+    type: 'input' | 'variable' | 'data stream' | 'policy template';
     name: string;
     description: string;
   }
+
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
 
   const deprecatedVars = (
     vars: Array<{ deprecated?: { description: string }; title?: string; name: string }>
@@ -89,6 +100,18 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
           description: v.deprecated.description,
         })
       );
+
+  const deprecatedPolicyTemplateFeatures = hasIntegrations
+    ? []
+    : (packageInfo.policy_templates || [])
+        .filter((pt) => !!pt.deprecated)
+        .map(
+          (pt): DeprecatedFeature => ({
+            type: 'policy template',
+            name: pt.title,
+            description: pt.deprecated!.description,
+          })
+        );
 
   const deprecatedInputFeatures = (packageInfo.policy_templates || []).flatMap((policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
@@ -124,6 +147,7 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
   const deprecatedPackageVars = deprecatedVars(packageInfo.vars || []);
 
   const deprecatedFeatures = [
+    ...deprecatedPolicyTemplateFeatures,
     ...deprecatedInputFeatures,
     ...deprecatedStreamFeatures,
     ...deprecatedPackageVars,

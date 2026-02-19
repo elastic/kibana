@@ -297,7 +297,7 @@ export const OverviewPage: React.FC<Props> = memo(
           <EuiSpacer size="s" />
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
-          <DeprecationCallout packageInfo={packageInfo} />
+          <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
           <DeprecatedFeaturesCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
 

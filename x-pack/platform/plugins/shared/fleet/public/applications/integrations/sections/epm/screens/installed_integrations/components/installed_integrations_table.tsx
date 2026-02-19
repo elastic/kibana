@@ -146,6 +146,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
               const isDeprecated = !!item?.deprecated;
+              const hasDeprecatedPolicyTemplates =
+                !isDeprecated && (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
               return (
                 <EuiLink href={url}>
@@ -173,6 +175,20 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                             'xpack.fleet.installedIntegrations.deprecatedTooltip',
                             {
                               defaultMessage: 'This integration is deprecated',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    {hasDeprecatedPolicyTemplates && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                            {
+                              defaultMessage: 'This integration has deprecated features',
                             }
                           )}
                         />
