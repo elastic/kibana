@@ -379,7 +379,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description: (
                 <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
-                  {agent.capabilities.sort().map((capability) => (
+                  {agent.capabilities?.sort().map((capability) => (
                     <FlexItemWithMinWidth grow={false} key={capability}>
                       <EuiDescriptionListDescription
                         css={`
