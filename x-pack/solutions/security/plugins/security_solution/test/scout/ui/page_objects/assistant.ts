@@ -73,6 +73,11 @@ export class AssistantPage {
       .locator('[data-test-subj="messageText"]');
   }
 
+  /** Returns the "Investigate in timeline" button inside a rendered code block */
+  get investigateInTimelineButton(): Locator {
+    return this.page.locator('button[aria-label="Investigate in timeline"]');
+  }
+
   // ── Actions ─────────────────────────────────────────────────────────────
 
   async openAssistant(context?: 'rule' | 'alert') {
@@ -127,6 +132,21 @@ export class AssistantPage {
   async typeAndSendMessage(message: string) {
     await this.userPrompt.click();
     await this.userPrompt.fill(message);
+    await this.submitButton.click();
+  }
+
+  /**
+   * Type a multi-line message using Shift+Enter for newlines and then submit.
+   * Needed for code blocks that must preserve literal newlines in the textarea.
+   */
+  async typeMultiLineAndSend(lines: string[]) {
+    await this.userPrompt.click();
+    for (let i = 0; i < lines.length; i++) {
+      await this.userPrompt.pressSequentially(lines[i], { delay: 10 });
+      if (i < lines.length - 1) {
+        await this.page.keyboard.press('Shift+Enter');
+      }
+    }
     await this.submitButton.click();
   }
 

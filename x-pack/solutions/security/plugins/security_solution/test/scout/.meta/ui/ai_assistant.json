@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-13T18:55:50.833Z",
-  "sha1": "f895a1956a421e2af68b600eeb9e71a2c28ae4b2",
+  "lastModified": "2026-02-19T12:49:43.753Z",
+  "sha1": "32efa261e1dc6f6b7502dca33fec859ba474e539",
   "tests": [
     {
       "id": "e10b7aba254c752-af29967c4812fcd",
@@ -67,44 +67,44 @@
       }
     },
     {
-      "id": "b631a6bb8cb0e87-5eb1cec978fc45b",
-      "title": "ES|QL Assistant should properly propagate esql query to discover",
-      "expectedStatus": "skipped",
+      "id": "b631a6bb8cb0e87-d0a7d31481692f7",
+      "title": "ES|QL / KQL / EQL Assistant Query Propagation should propagate ES|QL query to discover via Investigate in timeline",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
-        "line": 18,
+        "line": 55,
         "column": 9
       }
     },
     {
-      "id": "b631a6bb8cb0e87-3e69777d8d1a72b",
-      "title": "ES|QL Assistant should properly propagate KQL query",
-      "expectedStatus": "skipped",
+      "id": "b631a6bb8cb0e87-c362421fa982f57",
+      "title": "ES|QL / KQL / EQL Assistant Query Propagation should propagate KQL query to timeline via Investigate in timeline",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
-        "line": 22,
+        "line": 89,
         "column": 9
       }
     },
     {
-      "id": "b631a6bb8cb0e87-0daf81641a10a6a",
-      "title": "ES|QL Assistant should properly propagate EQL query",
-      "expectedStatus": "skipped",
+      "id": "b631a6bb8cb0e87-93bb5adb5c111da",
+      "title": "ES|QL / KQL / EQL Assistant Query Propagation should propagate EQL query to timeline via Investigate in timeline",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
-        "line": 26,
+        "line": 123,
         "column": 9
       }
     },
