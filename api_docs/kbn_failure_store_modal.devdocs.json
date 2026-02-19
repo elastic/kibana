@@ -14,6 +14,8 @@
           "({ onCloseModal, onSaveModal, failureStoreProps, showIlmDescription, inheritOptions, canShowDisableLifecycle, disableButtonLabel, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "Props"
             ],
             "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+            "lineNumber": 71,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -51,6 +55,8 @@
           "{ failureStoreEnabled: boolean; } & ({ inherit: boolean; } | { customRetentionPeriod?: string | undefined; } | { retentionDisabled?: boolean | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

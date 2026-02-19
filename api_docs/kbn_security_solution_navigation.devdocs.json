@@ -46,6 +46,8 @@
           "<string>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               "<string>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,6 +106,8 @@
           "<string>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,6 +129,8 @@
               "<string>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,6 +166,8 @@
           "<string>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +189,8 @@
               "<string>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -200,6 +212,8 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,6 +230,8 @@
               "; }>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",
+            "lineNumber": 13,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,6 +261,8 @@
           "; }"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -272,6 +290,8 @@
           "; }"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -307,6 +327,8 @@
           "; }"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -341,6 +363,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -362,6 +386,8 @@
               ".accordion"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,6 +399,8 @@
             "label": "label",
             "description": [],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,6 +422,8 @@
               "<T>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -418,6 +448,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -432,6 +464,8 @@
               "readonly T[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -446,6 +480,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,6 +503,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +520,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,6 +543,8 @@
               "<T>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -527,6 +569,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -549,6 +593,8 @@
               "<T>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,6 +609,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -577,6 +625,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,6 +641,8 @@
               "T"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,6 +658,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,6 +674,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,6 +697,8 @@
               "<T>[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -652,6 +710,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,6 +727,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -681,6 +743,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -695,6 +759,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -709,6 +775,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -723,6 +791,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -737,6 +807,8 @@
               "{ text: string; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -769,6 +841,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -790,6 +864,8 @@
               ".separator"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -804,6 +880,8 @@
               "readonly T[]"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -836,6 +914,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -857,6 +937,8 @@
               ".title | undefined"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,6 +953,8 @@
               "readonly T[]"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -882,6 +966,8 @@
             "label": "label",
             "description": [],
             "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -898,6 +984,8 @@
         "label": "LinkCategoryType",
         "description": [],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -912,6 +1000,8 @@
           "\nNavigation group names.\nThey are nodes used to group links in the navigationTree but don't have a page on their own.\nAll values need to have the \"securityGroup:\" prefix to avoid collisions with regular `SecurityPageName`\nsince they are mixed together in the navigationTree."
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -924,6 +1014,8 @@
         "label": "SecurityPageName",
         "description": [],
         "path": "src/platform/packages/shared/deeplinks/security/deep_links.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -943,6 +1035,8 @@
           "\"securitySolution.attacksAlertsAlignment\""
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -958,6 +1052,8 @@
           "(param: { appId?: string | undefined; deepLinkId?: string | undefined; path?: string | undefined; absolute?: boolean | undefined; }) => string"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -973,6 +1069,8 @@
               "{ appId?: string | undefined; deepLinkId?: string | undefined; path?: string | undefined; absolute?: boolean | undefined; }"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+            "lineNumber": 13,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -998,6 +1096,8 @@
           "<T>[]"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1015,6 +1115,8 @@
           ") => void"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1031,6 +1133,8 @@
               "NavigateToAppOptions"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1048,6 +1152,8 @@
           "\"securitySolutionUI\""
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

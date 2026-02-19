@@ -10,7 +10,7 @@ import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
 import { ClassicStream } from '../streams/classic_stream';
 import { WiredStream } from '../streams/wired_stream';
-import { GroupStream } from '../streams/group_stream';
+import { QueryStream } from '../streams/query_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
@@ -21,8 +21,8 @@ export function streamFromDefinition(
     return new WiredStream(definition, dependencies);
   } else if (Streams.ClassicStream.Definition.is(definition)) {
     return new ClassicStream(definition, dependencies);
-  } else if (Streams.GroupStream.Definition.is(definition)) {
-    return new GroupStream(definition, dependencies);
+  } else if (Streams.QueryStream.Definition.is(definition)) {
+    return new QueryStream(definition, dependencies);
   }
 
   throw new Error('Unsupported stream type');

@@ -31,6 +31,8 @@
           "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
         "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

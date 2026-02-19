@@ -11,10 +11,9 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { extractLensReferences } from '../../common/references';
 
 export const redirectToDashboard = ({
-  embeddableInput: rawState,
+  embeddableInput,
   dashboardId,
   originatingApp,
   getOriginatingPath,
@@ -28,17 +27,12 @@ export const redirectToDashboard = ({
   stateTransfer: LensAppServices['stateTransfer'];
   controlsState?: ControlPanelsState;
 }) => {
-  const { references } = extractLensReferences(rawState);
-
   const appId = originatingApp || 'dashboards';
 
   const embeddablePackages: EmbeddablePackageState[] = [
     {
       type: LENS_EMBEDDABLE_TYPE,
-      serializedState: {
-        rawState,
-        references,
-      },
+      serializedState: embeddableInput,
     },
   ];
 
@@ -47,9 +41,7 @@ export const redirectToDashboard = ({
     embeddablePackages.push({
       type: control.type,
       serializedState: {
-        rawState: {
-          ...omit(control, ['type', 'order', 'width', 'grow']), // add as panel rather than pinned, so strip out unnecessary info
-        },
+        ...omit(control, ['type', 'order', 'width', 'grow']), // add as panel rather than pinned, so strip out unnecessary info
       },
     });
   });

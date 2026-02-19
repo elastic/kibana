@@ -30,7 +30,6 @@
     "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/std",
     "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
     "@kbn/logging",
@@ -41,9 +40,13 @@
     "@kbn/i18n",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
-    "@kbn/observability-nav-icons",
+    "@kbn/agent-builder-browser",
+    "@kbn/sse-utils-server",
+    "@kbn/kibana-utils-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/agent-builder-browser"
+    "@kbn/apm-types",
+    "@kbn/apm-types-shared",
+    "@kbn/observability-utils-server"
   ],
   "exclude": ["target/**/*"]
 }

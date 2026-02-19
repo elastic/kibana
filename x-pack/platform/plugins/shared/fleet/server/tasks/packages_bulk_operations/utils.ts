@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -31,17 +32,21 @@ export interface BulkPackageOperationsTaskParams {
 
 export async function scheduleBulkOperationTask(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: BulkPackageOperationsTaskParams
+  taskParams: BulkPackageOperationsTaskParams,
+  request: KibanaRequest
 ) {
   const id = uuidv4();
-  await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${id}`,
-    scope: ['fleet'],
-    params: taskParams,
-    taskType: TASK_TYPE,
-    runAt: new Date(Date.now() + 3 * 1000),
-    state: {},
-  });
+  await taskManagerStart.ensureScheduled(
+    {
+      id: `${TASK_TYPE}:${id}`,
+      scope: ['fleet'],
+      params: taskParams,
+      taskType: TASK_TYPE,
+      runAt: new Date(Date.now() + 3 * 1000),
+      state: {},
+    },
+    { request }
+  );
 
   return id;
 }

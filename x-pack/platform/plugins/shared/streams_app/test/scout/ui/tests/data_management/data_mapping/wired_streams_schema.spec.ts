@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data mapping - schema editor - Wired Streams',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
@@ -30,15 +31,19 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing mappings before each test
       await apiServices.streams.clearStreamMappings('logs.parent');
       await apiServices.streams.clearStreamMappings('logs.parent.child');
 
       await pageObjects.streams.gotoSchemaEditorTab('logs.parent.child');
-      // Verify this is a wired stream (not classic)
-      await pageObjects.streams.verifyWiredBadge();
+
+      // Wait for the page to be fully loaded before checking for wired badge
+      await page.locator('[data-test-subj="wiredStreamBadge"]').waitFor({
+        state: 'visible',
+        timeout: 30_000,
+      });
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
@@ -56,9 +61,7 @@ test.describe(
       ).toBeVisible();
 
       const parentFieldName = 'attributes.parent_field';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(parentFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(parentFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await pageObjects.streams.reviewStagedFieldMappingChanges();
@@ -95,20 +98,19 @@ test.describe(
 
       // Click the "Add field" button
       await page.getByTestId('streamsAppContentAddFieldButton').click();
-
-      // Wait `/fields_metadata` so that we are sure the ECS/Otel mapping recommendations are available
-      await page.waitForResponse(
-        (response) => response.url().includes('/fields_metadata') && response.ok()
-      );
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
 
-      // Wait for ECS/Otel recommendation to load and field type to be pre-selected
-      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip');
+      // Wait for ECS/Otel recommendation to load - the /fields_metadata call provides type hints
+      // Give extra time for the API response to be processed and the UI to update
+      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip', {
+        timeout: 30_000,
+      });
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(
@@ -146,9 +148,7 @@ test.describe(
 
       const ecsFieldName = 'attributes.process_id';
       const aliasFieldName = 'process_id';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
 
       // Check if the add button is enabled (form should be valid)

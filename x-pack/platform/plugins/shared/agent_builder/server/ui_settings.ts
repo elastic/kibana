@@ -9,27 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
-    [AGENT_BUILDER_ENABLED_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.feature.description', {
-        defaultMessage: 'Enables Elastic Agent Builder.',
-      }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.feature.name', {
-        defaultMessage: 'Elastic Agent Builder',
-      }),
-      schema: schema.boolean(),
-      value: true,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: false,
-    },
     [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
       description: i18n.translate(
         'xpack.agentBuilder.uiSettings.createVisualizations.description',
@@ -62,19 +48,21 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: true,
       readonlyMode: 'ui',
     },
-    [AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.description', {
-        defaultMessage: 'Enables external MCP server support for Elastic Agent Builder.',
-      }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.name', {
-        defaultMessage: 'Elastic Agent Builder: External MCP Server support',
+    [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage: 'Enables experimental features for Elastic Agent Builder.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.experimentalFeatures.name', {
+        defaultMessage: 'Elastic Agent Builder: Experimental Features',
       }),
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
-      requiresPageReload: true,
-      readonly: true,
-      readonlyMode: 'ui',
+      requiresPageReload: false,
+      readonly: false,
     },
   });
 };

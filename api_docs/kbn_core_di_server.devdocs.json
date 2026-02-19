@@ -30,6 +30,8 @@
           "<{}, unknown>[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -47,6 +49,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -72,6 +76,8 @@
           "[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -89,6 +95,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -114,6 +122,8 @@
           "<unknown>[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -131,6 +141,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -159,6 +171,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +189,8 @@
               "Method"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +209,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,6 +227,8 @@
           "\nThe route handler."
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,6 +249,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -263,6 +285,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/capabilities.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -285,6 +309,8 @@
           "SavedObjectsClientContract"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -300,6 +326,8 @@
               "TArgs"
             ],
             "path": "node_modules/@inversifyjs/core/lib/cjs/binding/models/Factory.d.ts",
+            "lineNumber": 1,
+            "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -327,6 +355,8 @@
           "<unknown, unknown, unknown, any>, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -352,6 +382,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -389,6 +421,8 @@
           ">, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -414,6 +448,8 @@
           "<any>, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -441,6 +477,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -466,6 +504,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -493,6 +533,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

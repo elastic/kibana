@@ -20,7 +20,7 @@ interface SLODefinitionResult {
   };
 }
 
-export class SloDefinitionClient {
+export class SLODefinitionClient {
   constructor(
     private repository: SLODefinitionRepository,
     private esClient: ElasticsearchClient,

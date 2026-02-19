@@ -67,7 +67,7 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryLinks = await queryClient.getQueryLinks([
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map((stream) => stream.name),
     ]);
@@ -172,7 +172,7 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryLinks = await queryClient.getQueryLinks([
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map(({ name }) => name),
     ]);

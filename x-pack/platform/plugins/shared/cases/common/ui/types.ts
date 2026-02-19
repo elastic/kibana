@@ -36,6 +36,8 @@ import type {
   Configuration,
   CustomFieldTypes,
   EventAttachment,
+  UnifiedAttachment,
+  CombinedAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -54,7 +56,13 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
@@ -78,6 +86,9 @@ export interface CasesUiConfigType {
   incrementalId: {
     enabled: boolean;
   };
+  templates: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -98,6 +109,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type CombinedAttachmentUI = SnakeToCamelCase<CombinedAttachment>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;

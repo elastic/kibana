@@ -17,7 +17,7 @@ import {
   LOG_LEVEL_REGEX,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -104,7 +104,10 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
+    () =>
+      value
+        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
+        : value,
     [value, row, euiTheme, isDarkTheme]
   );
 

@@ -43,15 +43,30 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/cloud'
   - '@kbn/deeplinks-search'
+  - '@kbn/scout-search'
 tags:
   - plugin
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

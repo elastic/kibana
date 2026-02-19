@@ -12,30 +12,6 @@ The agentBuilder plugin has 4 main packages:
 - `@kbn/agent-builder-browser`: browser-specific types and utilities.
 - `@kbn/agent-builder-genai-utils`: server-side utilities for our built-in tools and agents.
 
-## Enable all feature flags
-
-All features in the AgentBuilder plugin are developed behind UI settings (feature flags). 
-By default, in-progress or experimental features are disabled. 
-To enable all features for development or testing, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:enabled: true
-```
-
-This will ensure all AgentBuilder features are available in your Kibana instance.
-
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:enabled": true
-   }
-}
-```
-
 ## Enabling tracing
 
 AgentBuilder agents are compatible with the Kibana inference tracing.
@@ -96,28 +72,6 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
-### Enabling MCP tools
-
-MCP tools allow you to connect to external MCP servers and use their tools within Agent Builder. To enable MCP tools, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:externalMcp: true
-```
-
-Or via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:externalMcp": true
-   }
-}
-```
-
-Once enabled, you can create MCP tools by configuring an MCP connector and selecting tools from the connected MCP server.
-
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
@@ -171,6 +125,97 @@ Agents can be either built-in or user-defined.
 ### Registering a built-in agent
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
+
+## Hooks
+
+The hooks API lets you register lifecycle callbacks around agent execution. Register hooks
+in your plugin `setup` by calling `agentBuilder.hooks.register`.
+
+### Lifecycle: user prompt → response
+
+A **conversation round** is one turn in the chat: the user sends a message and the agent produces a full response (possibly after multiple LLM calls and tool calls).
+
+| Order | Hook | Layer | When it runs | What you can mutate |
+|-------|------|--------|----------------|---------------------|
+| 1 | `beforeAgent` | Agent | After conversation transformation (e.g. HITL), before agent execution | `nextInput` (user message, attachments, etc.) |
+| 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
+| 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
+| 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
+
+Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
+
+```ts
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+
+export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup) => {
+  if (!agentBuilder) return;
+
+  agentBuilder.hooks.register({
+    id: 'example-hooks',
+    hooks: {
+      [HookLifecycle.beforeAgent]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeAgent');
+          return {
+            nextInput: {
+              ...context.nextInput,
+              message: context.nextInput.message
+                ? `${context.nextInput.message} (hooked)`
+                : undefined,
+            },
+          };
+        },
+      },
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('beforeToolCall');
+          return {
+            toolParams: {
+              ...context.toolParams,
+              _hooked: true,
+            },
+          };
+        },
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: (context) => {
+          console.log('afterToolCall');
+        },
+      },
+    }
+  });
+};
+```
+
+
+### Execution order
+The hook execution respects the priority field  and after that the registration order.
+
+* before* hooks: First to last
+* after* hooks: Last to first (reverse)
+
+#### Execution flow
+```
+Before hooks run in order:
+
+    hook_1 beforeAgent
+    hook_2 beforeAgent
+    hook_3 beforeAgent
+
+    hook_1 beforeToolCall
+    hook_2 beforeToolCall
+    hook_3 beforeToolCall
+
+After hooks run in reverse order:
+
+    hook_3 afterToolCall
+    hook_2 afterToolCall
+    hook_1 afterToolCall
+```
 
 ## MCP Server
 

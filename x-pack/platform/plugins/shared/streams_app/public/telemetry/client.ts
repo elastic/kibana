@@ -26,7 +26,6 @@ import type {
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
-  StreamsDescriptionGeneratedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
   StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
@@ -51,7 +50,6 @@ import {
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
@@ -132,10 +130,6 @@ export class StreamsTelemetryClient {
 
   public trackFeaturesDeleted(params: StreamsFeatureIdentificationDeletedProps) {
     this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE, params);
-  }
-
-  public trackStreamDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
-    this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
   }
 
   public trackTabVisited(params: StreamsTabVisitedProps) {

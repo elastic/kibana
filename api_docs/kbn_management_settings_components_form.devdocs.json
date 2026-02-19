@@ -18,6 +18,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               "FormProps"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/form.tsx",
+            "lineNumber": 46,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+            "lineNumber": 45,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,6 +116,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "FormProviderProps"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/form/services.tsx",
+            "lineNumber": 32,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -162,6 +174,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -195,6 +209,8 @@
           "Services"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/form/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

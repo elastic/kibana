@@ -39,6 +39,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/extract_dissect_pattern.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +57,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/extract_dissect_pattern.ts",
+            "lineNumber": 38,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +97,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,6 +121,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,6 +140,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -172,6 +182,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -192,6 +204,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -207,6 +221,8 @@
               "NormalizedReviewResult"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -222,6 +238,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -258,6 +276,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -278,6 +298,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 23,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +315,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 23,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -312,6 +336,8 @@
           "(messages: string[], params: { patternThreshold?: number | undefined; minProbability?: number | undefined; limit?: number | undefined; } | undefined) => { truncatedPattern: string; probability: number; messages: string[]; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -326,6 +352,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -338,6 +366,8 @@
             "label": "params",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "lineNumber": 23,
+            "columnNumber": 12,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -352,6 +382,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -366,6 +398,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -380,6 +414,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -410,6 +446,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/serialize_ast.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -432,6 +470,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/serialize_ast.ts",
+            "lineNumber": 16,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -454,6 +494,8 @@
           "\nRepresents a delimiter in the delimiter tree"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,6 +509,8 @@
               "The literal delimiter string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,6 +527,8 @@
               "number[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -496,6 +542,8 @@
               "Median position across all messages"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -512,6 +560,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -528,6 +578,8 @@
           "\nThe complete Dissect pattern AST"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -549,6 +601,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -565,6 +619,8 @@
           "\nRepresents a field in the Dissect pattern"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -578,6 +634,8 @@
               "Field name (e.g., \"clientip\", \"field_1\")"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -594,6 +652,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,6 +667,8 @@
               "Position in the original messages"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,6 +692,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -646,6 +710,8 @@
           "\nRepresents a field in the pattern AST"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -660,6 +726,8 @@
               "\"field\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -671,6 +739,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -685,6 +755,8 @@
               "{ rightPadding?: boolean | undefined; skip?: boolean | undefined; namedSkip?: boolean | undefined; append?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -701,6 +773,8 @@
           "\nRepresents a literal delimiter in the pattern AST"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -715,6 +789,8 @@
               "\"literal\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -726,6 +802,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -742,6 +820,8 @@
           "\nModifiers that can be applied to a field"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -758,6 +838,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -774,6 +856,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,6 +874,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -806,6 +892,8 @@
           "\nRepresents a Dissect pattern with metadata"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -828,6 +916,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -851,6 +941,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -867,6 +959,8 @@
           "\nResult from getDissectProcessor()"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -883,6 +977,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -896,6 +992,8 @@
               "The dissect pattern string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,6 +1010,8 @@
               "{ dissect: { field: string; pattern: string; append_separator?: string | undefined; ignore_missing?: boolean | undefined; }; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -928,6 +1028,8 @@
               "{ messageCount: number; delimiterCount?: number | undefined; fieldCount: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -964,6 +1066,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -979,6 +1083,8 @@
           "{ [x: string]: { example_values: string[]; position: number; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1003,6 +1109,8 @@
           "<{ sample_messages: string[]; review_fields: string; }, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/review_fields_prompt.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

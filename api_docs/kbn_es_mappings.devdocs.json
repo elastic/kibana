@@ -43,6 +43,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -68,6 +70,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +97,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -118,6 +124,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +151,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11489,6 +11499,8 @@
           "<...>"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11514,6 +11526,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23561,6 +23575,8 @@
           "<...> : never : never : never; }[P][]) | undefined; }[P] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23586,6 +23602,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23611,6 +23629,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23636,6 +23656,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23672,6 +23694,8 @@
           " | MappingPropertyObjectType"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23689,6 +23713,8 @@
           ", \"properties\"> & { properties: Record<string, S>; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23722,6 +23748,8 @@
           "> ? T : never; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23747,6 +23775,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23770,6 +23800,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23785,6 +23817,8 @@
           "false | \"strict\""
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23810,6 +23844,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23835,6 +23871,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -23866,6 +23904,8 @@
           "<O[\"properties\"][K]> : never : never : never; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-mappings/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -20,7 +20,7 @@ describe('SearchBar', () => {
         onSearch={jest.fn()}
         onAddExceptionClick={jest.fn()}
         isSearching={false}
-        canAddException
+        canAddException={false}
         dataTestSubj="searchBar"
       />
     );
@@ -32,7 +32,7 @@ describe('SearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = render(
       <SearchBar
-        canAddException={false}
+        canAddException={true}
         listType={ExceptionListTypeEnum.DETECTION}
         isSearching={false}
         onSearch={jest.fn()}
@@ -53,7 +53,7 @@ describe('SearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = render(
       <SearchBar
-        canAddException={false}
+        canAddException={true}
         listType={ExceptionListTypeEnum.ENDPOINT}
         isSearching={false}
         onSearch={jest.fn()}
@@ -73,7 +73,7 @@ describe('SearchBar', () => {
     const mockHandleOnSearch = jest.fn();
     const wrapper = render(
       <SearchBar
-        canAddException={false}
+        canAddException={true}
         listType={ExceptionListTypeEnum.ENDPOINT}
         isSearching={false}
         onSearch={mockHandleOnSearch}

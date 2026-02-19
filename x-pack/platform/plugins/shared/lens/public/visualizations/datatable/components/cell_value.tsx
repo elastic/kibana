@@ -80,12 +80,14 @@ export const createGridCell = (
       const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
       const linkColor = euiTheme.colors.link;
 
-      const adjustedLinkColor = backgroundColor
-        ? makeHighContrastColor(
-            isDarkMode ? euiTheme.colors.highlight : linkColor, // preferred foreground color
-            4.5 // WCAG AA contrast ratio (default in EUI)
-          )(backgroundColor)
-        : linkColor;
+      // Only adjust the color for colorMode: cell
+      const adjustedLinkColor =
+        colorMode === 'cell' && backgroundColor
+          ? makeHighContrastColor(
+              isDarkMode ? euiTheme.colors.highlight : linkColor, // preferred foreground color
+              4.5 // WCAG AA contrast ratio (default in EUI)
+            )(backgroundColor)
+          : linkColor;
 
       return (
         <div

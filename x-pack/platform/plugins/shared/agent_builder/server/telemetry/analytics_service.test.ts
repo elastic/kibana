@@ -167,6 +167,69 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportAgentCreated', () => {
+    it('reports the AgentCreated event', () => {
+      service.reportAgentCreated({
+        agentId: agentBuilderDefaultAgentId,
+        toolSelection: [
+          {
+            tool_ids: ['my_custom_tool', 'my_custom_tool'],
+          },
+        ],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
+        agent_id: agentBuilderDefaultAgentId,
+        tool_ids: ['custom-3c9388baa67aef90'],
+      });
+    });
+
+    it('reports a hashed agent_id for custom agents', () => {
+      service.reportAgentCreated({
+        agentId: 'my_custom_agent',
+        toolSelection: [
+          {
+            tool_ids: [],
+          },
+        ],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentCreated, {
+        agent_id: 'custom-da3031a511e7fadf',
+        tool_ids: [],
+      });
+    });
+  });
+
+  describe('reportAgentUpdated', () => {
+    it('reports the AgentUpdated event', () => {
+      service.reportAgentUpdated({
+        agentId: agentBuilderDefaultAgentId,
+        toolSelection: [
+          {
+            tool_ids: ['my_custom_tool', 'my_custom_tool'],
+          },
+        ],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AgentUpdated, {
+        agent_id: agentBuilderDefaultAgentId,
+        tool_ids: ['custom-3c9388baa67aef90'],
+      });
+    });
+  });
+
+  describe('reportToolCreated', () => {
+    it('reports the ToolCreated event', () => {
+      service.reportToolCreated({ toolId: 'my_custom_tool', toolType: 'esql' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ToolCreated, {
+        tool_id: 'custom-3c9388baa67aef90',
+        tool_type: 'esql',
+      });
+    });
+  });
+
   describe('reportRoundError', () => {
     const defaultArgs = {
       agentId: agentBuilderDefaultAgentId,

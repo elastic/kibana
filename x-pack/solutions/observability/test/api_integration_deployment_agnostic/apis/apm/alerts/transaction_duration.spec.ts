@@ -234,7 +234,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    describe('create rule for opbeans-node using kql filter', function () {
+      this.tags('skipCloud');
+
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

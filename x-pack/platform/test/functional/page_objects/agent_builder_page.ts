@@ -359,6 +359,79 @@ export class AgentBuilderPageObject extends FtrService {
     await this.monacoEditor.setCodeEditorValue(query);
   }
 
+  async selectMcpConnector(connectorId: string) {
+    await this.testSubjects.click('agentBuilderMcpConnectorSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`mcpConnectorOption-${connectorId}`);
+    });
+  }
+
+  async selectMcpTool(toolName: string) {
+    await this.testSubjects.click('agentBuilderMcpToolSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`mcpToolOption-${toolName}`);
+    });
+  }
+
+  async waitForMcpToolsToLoad() {
+    // Wait for the MCP tool selector to be enabled (not loading)
+    await this.retry.try(async () => {
+      const comboBox = await this.testSubjects.find('agentBuilderMcpToolSelect');
+      const isDisabled = await comboBox.getAttribute('disabled');
+      if (isDisabled === 'true') {
+        throw new Error('MCP tools still loading');
+      }
+    });
+  }
+
+  /*
+   * ==========================
+   * Tools: bulk import MCP helpers
+   * ==========================
+   */
+  async navigateToBulkImportMcp() {
+    await this.navigateToApp('tools/bulk_import_mcp');
+  }
+
+  async openManageMcpMenu() {
+    await this.testSubjects.click('agentBuilderManageMcpButton');
+  }
+
+  async clickBulkImportMcpMenuItem() {
+    await this.testSubjects.existOrFail('agentBuilderBulkImportMcpMenuItem');
+    await this.testSubjects.click('agentBuilderBulkImportMcpMenuItem');
+  }
+
+  async selectBulkImportConnector(connectorId: string) {
+    await this.testSubjects.click('bulkImportMcpConnectorSelect');
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`bulkImportMcpConnectorOption-${connectorId}`);
+    });
+  }
+
+  async waitForBulkImportToolsToLoad() {
+    await this.retry.try(async () => {
+      const table = await this.testSubjects.find('bulkImportMcpToolsTable');
+      const isLoading = await table.getAttribute('data-is-loading');
+      if (isLoading === 'true') {
+        throw new Error('Bulk import tools still loading');
+      }
+    });
+  }
+
+  async selectBulkImportToolCheckbox(toolName: string) {
+    // EuiInMemoryTable uses itemId="name", so checkbox is checkboxSelectRow-{toolName}
+    await this.testSubjects.click(`checkboxSelectRow-${toolName}`);
+  }
+
+  async setBulkImportNamespace(namespace: string) {
+    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace);
+  }
+
+  async clickBulkImportSubmit() {
+    await this.testSubjects.click('bulkImportMcpToolsImportButton');
+  }
+
   /*
    * ==========================
    * Tools: actions (save, context menu, delete, test flyout)
@@ -417,6 +490,14 @@ export class AgentBuilderPageObject extends FtrService {
     });
   }
 
+  async setToolTestInput(paramName: string, value: string | number) {
+    await this.testSubjects.setValue(`agentBuilderToolTestInput-${paramName}`, String(value));
+  }
+
+  async getToolTestResponse(): Promise<string> {
+    return await this.testSubjects.getVisibleText('agentBuilderToolTestResponse');
+  }
+
   /*
    * ==========================
    * Tools: table helpers
@@ -443,6 +524,14 @@ export class AgentBuilderPageObject extends FtrService {
     await this.clickToolsBulkDelete();
     await this.confirmModalConfirm();
     await this.testSubjects.click('toastCloseButton');
+  }
+
+  toolsSearch() {
+    return {
+      type: async (term: string) => {
+        await this.testSubjects.setValue('agentBuilderToolsSearchInput', term);
+      },
+    };
   }
 
   /*

@@ -13,6 +13,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
+import { GrokPatternDefinition } from './grok_pattern_definition';
 
 export const GrokProcessorForm = () => {
   return (
@@ -27,6 +28,7 @@ export const GrokProcessorForm = () => {
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
       <FieldsAccordion>
+        <GrokPatternDefinition />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </FieldsAccordion>

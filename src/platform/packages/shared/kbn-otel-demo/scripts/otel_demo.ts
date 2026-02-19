@@ -8,24 +8,64 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import chalk from 'chalk';
 import { ensureOtelDemo, patchScenarios } from '../src/ensure_otel_demo';
-import { FAILURE_SCENARIOS, getScenarioById } from '../src/failure_scenarios';
+import type { DemoType } from '../src/types';
+import {
+  listAvailableDemos,
+  getDemoConfig,
+  getDemoScenarios,
+  getScenarioById,
+} from '../src/demo_registry';
 
 run(
   ({ log, addCleanupTask, flags }) => {
+    const demoType = (flags.demo as DemoType | undefined) || 'otel-demo';
+
+    // Validate demo type
+    const availableDemos = listAvailableDemos();
+    if (!availableDemos.includes(demoType)) {
+      throw new Error(
+        `Unknown demo type: ${demoType}. Available: ${availableDemos.join(
+          ', '
+        )}\nUse --list-demos to see details.`
+      );
+    }
+
+    const demoConfig = getDemoConfig(demoType);
+    const demoScenarios = getDemoScenarios(demoType);
+
+    // Handle --list-demos
+    if (flags['list-demos']) {
+      log.info('Available demo environments:');
+      log.info('');
+      for (const type of availableDemos) {
+        const config = getDemoConfig(type);
+        log.info(`  ${type.padEnd(20)} - ${config.displayName}`);
+        log.info(`    ${chalk.dim(config.description)}`);
+        log.info(`    ${chalk.dim('Versions: ' + config.availableVersions.join(', '))}`);
+        log.info('');
+      }
+      return Promise.resolve();
+    }
+
     // Handle --list-scenarios
     if (flags['list-scenarios']) {
-      log.info('Available failure scenarios:');
+      log.info(`Failure scenarios for ${demoConfig.displayName}:`);
       log.info('');
       log.info('DRAMATIC (service-breaking):');
-      FAILURE_SCENARIOS.filter((s) => s.category === 'dramatic').forEach((s) => {
-        log.info(`  ${s.id.padEnd(30)} - ${s.name}`);
-      });
+      demoScenarios
+        .filter((s) => s.category === 'dramatic')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
       log.info('');
       log.info('SUBTLE (degraded performance/observability):');
-      FAILURE_SCENARIOS.filter((s) => s.category === 'subtle').forEach((s) => {
-        log.info(`  ${s.id.padEnd(30)} - ${s.name}`);
-      });
+      demoScenarios
+        .filter((s) => s.category === 'subtle')
+        .forEach((s) => {
+          log.info(`  ${s.id.padEnd(35)} - ${s.name}`);
+        });
       return Promise.resolve();
     }
 
@@ -37,6 +77,7 @@ run(
 
     const configPath = flags.config ? String(flags.config) : undefined;
     const logsIndex = flags['logs-index'] ? String(flags['logs-index']) : 'logs';
+    const version = flags.version ? String(flags.version) : undefined;
     const teardown = Boolean(flags.teardown);
     const patch = Boolean(flags.patch);
     const reset = Boolean(flags.reset);
@@ -46,10 +87,10 @@ run(
     if (flags.scenario) {
       const scenarios = Array.isArray(flags.scenario) ? flags.scenario : [flags.scenario];
       for (const id of scenarios) {
-        const scenario = getScenarioById(String(id));
+        const scenario = getScenarioById(demoType, String(id));
         if (!scenario) {
           throw new Error(
-            `Unknown scenario: ${id}. Use --list-scenarios to see available scenarios.`
+            `Unknown scenario: ${id}. Use --list-scenarios to see available scenarios for ${demoType}.`
           );
         }
         scenarioIds.push(String(id));
@@ -60,6 +101,7 @@ run(
     if (patch || reset) {
       return patchScenarios({
         log,
+        demoType,
         scenarioIds: reset ? [] : scenarioIds,
         reset,
       }).catch((error) => {
@@ -70,44 +112,54 @@ run(
     return ensureOtelDemo({
       log,
       signal: controller.signal,
+      demoType,
       configPath,
       logsIndex,
+      version,
       teardown,
       scenarioIds,
     }).catch((error) => {
-      throw new Error('Failed to manage OTel Demo', { cause: error });
+      throw new Error(`Failed to manage ${demoConfig.displayName}`, { cause: error });
     });
   },
   {
     description: `
-      Start the OpenTelemetry Demo application using Minikube and configure it to send
-      telemetry data (logs, traces, metrics) to your local Elasticsearch instance.
+      Deploy demo microservices applications to Kubernetes (minikube) with logs
+      automatically collected and sent to Elasticsearch via OpenTelemetry Collector.
       
-      Reads Elasticsearch connection details from kibana.dev.yml, generates OpenTelemetry 
-      Collector configuration with elasticsearchexporter, and deploys the OTel Demo to Kubernetes.
+      Supports multiple demo environments:
+        - otel-demo: OpenTelemetry Demo (default)
+        - online-boutique: Google Online Boutique
       
-      Supports failure scenarios to simulate real-world misconfigurations and failures.
+      Reads Elasticsearch connection details from kibana.dev.yml and supports
+      failure scenario injection for testing observability.
     `,
     flags: {
-      string: ['config', 'logs-index', 'scenario'],
-      boolean: ['teardown', 'list-scenarios', 'patch', 'reset'],
+      string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
+      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset'],
       alias: {
         c: 'config',
         s: 'scenario',
         p: 'patch',
         r: 'reset',
+        d: 'demo',
+        v: 'version',
       },
       default: {
+        demo: 'otel-demo',
         'logs-index': 'logs',
       },
       help: `
+        --demo, -d         Demo environment to run (otel-demo, online-boutique)
+        --version, -v      Demo version (defaults to demo's defaultVersion)
         --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
         --logs-index       Index name for logs (defaults to "logs")
-        --teardown         Stop and remove OTel Demo deployment
+        --list-demos       List all available demo environments
+        --list-scenarios   List failure scenarios for selected demo
         --scenario, -s     Apply a failure scenario (can be repeated for multiple scenarios)
         --patch, -p        Patch scenarios onto running cluster (no redeploy)
         --reset, -r        Reset all scenarios to defaults (no redeploy)
-        --list-scenarios   List all available failure scenarios
+        --teardown         Stop and remove demo deployment
       `,
     },
   }

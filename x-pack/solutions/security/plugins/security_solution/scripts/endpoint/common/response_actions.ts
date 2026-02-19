@@ -197,19 +197,20 @@ export const sendEndpointActionResponse = async (
 
     // For `get-file`, upload a file to ES
     if (
-      (action.command === 'execute' || action.command === 'get-file') &&
+      (action.command === 'execute' ||
+        action.command === 'get-file' ||
+        action.command === 'runscript') &&
       !endpointResponse.error
     ) {
       const filePath =
         action.command === 'execute'
           ? '/execute/file/path'
-          : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (
+          : (
               action as unknown as ActionDetails<
                 ResponseActionGetFileOutputContent,
                 ResponseActionGetFileParameters
               >
-            )?.parameters?.path!;
+            )?.parameters?.path ?? '/execute/file/path';
 
       const fileName = basename(filePath.replace(/\\/g, '/'));
       const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -333,6 +334,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as unknown as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
+    case 'runscript':
       const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
         output_file_id: getFileDownloadId(action, action.agents[0]),
       };

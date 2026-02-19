@@ -7,12 +7,14 @@
 
 export {
   ConversationRoundStatus,
+  type ConversationAction,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationInternalState,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,

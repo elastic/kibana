@@ -7,7 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  APPLY_FILTER_TRIGGER,
+  IMAGE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+
 export const LANDING_PAGE_PATH = '/list';
+/** The application ID for the Dashboard app. */
 export const DASHBOARD_APP_ID = 'dashboards';
 export const SEARCH_SESSION_ID = 'searchSessionId';
+/** The number of columns in the dashboard grid layout. */
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+
+export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
+  open_in_new_tab: false,
+  use_time_range: true,
+  use_filters: true,
+};
+
+// Do not change constant value - part of dashboard REST API
+export const DASHBOARD_DRILLDOWN_TYPE = 'dashboard_drilldown';
+
+export const DASHBOARD_DRILLDOWN_SUPPORTED_TRIGGERS = [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];

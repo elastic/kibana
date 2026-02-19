@@ -11,7 +11,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
-import { transformControlGroupIn } from './transform_control_group_in';
+import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
@@ -31,12 +31,11 @@ export const transformDashboardIn = (
     } => {
   try {
     const {
-      controlGroupInput,
+      pinned_panels,
       options,
       filters,
       panels,
       query,
-      references: incomingReferences,
       tags,
       time_range,
       refresh_interval,
@@ -44,9 +43,6 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
-    if (incomingReferences && incomingReferences.length) {
-      throw new Error(`References are not supported.`);
-    }
     const tagReferences = transformTagsIn(tags);
 
     const {
@@ -66,16 +62,14 @@ export const transformDashboardIn = (
       query
     );
 
-    const { controlsJSON, references: controlGroupReferences } =
-      transformControlGroupIn(controlGroupInput);
+    const { pinnedPanels, references: controlGroupReferences } =
+      transformPinnedPanelsIn(pinned_panels);
 
     const attributes = {
       description: '',
       ...rest,
-      ...(controlsJSON && {
-        controlGroupInput: {
-          panelsJSON: controlsJSON,
-        },
+      ...(pinnedPanels && {
+        pinned_panels: { panels: pinnedPanels },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,
@@ -87,6 +81,7 @@ export const transformDashboardIn = (
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
+
     return {
       attributes,
       references: [

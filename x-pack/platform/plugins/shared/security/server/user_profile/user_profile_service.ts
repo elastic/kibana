@@ -136,7 +136,7 @@ export class UserProfileService {
             grant_type: 'access_token',
             access_token: grant.accessToken,
             ...(grant.type === 'uiamAccessToken'
-              ? { client_authentication: { scheme: 'SharedSecret', value: grant.sharedSecret } }
+              ? { client_authentication: grant.clientAuthentication }
               : {}),
           };
 
@@ -158,7 +158,9 @@ export class UserProfileService {
         return parseUserProfileWithSecurity<{}>(response);
       } catch (err) {
         const detailedErrorMessage = getDetailedErrorMessage(err);
-        if (getErrorStatusCode(err) !== 409) {
+        const statusCode = getErrorStatusCode(err);
+        // Retry on 409 (conflict) and 503 (service unavailable) errors
+        if (statusCode !== 409 && statusCode !== 503) {
           this.logger.error(`Failed to activate user profile: ${detailedErrorMessage}.`);
           throw err;
         }

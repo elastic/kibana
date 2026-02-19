@@ -106,16 +106,14 @@ export const DashboardAppNoDataPage = ({
                 {
                   type: 'lens',
                   serializedState: {
-                    rawState: {
-                      attributes: getLensAttributesFromSuggestion({
-                        filters: [],
-                        query: {
-                          esql: esqlQuery,
-                        },
-                        suggestion,
-                        dataView,
-                      }),
-                    },
+                    attributes: getLensAttributesFromSuggestion({
+                      filters: [],
+                      query: {
+                        esql: esqlQuery,
+                      },
+                      suggestion,
+                      dataView,
+                    }),
                   },
                 },
               ],

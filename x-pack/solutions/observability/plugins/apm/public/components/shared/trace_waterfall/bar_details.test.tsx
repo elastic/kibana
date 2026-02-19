@@ -412,4 +412,71 @@ describe('BarDetails', () => {
       });
     });
   });
+
+  describe('in case of cold start', () => {
+    it('renders cold start badge when coldstart is true', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: true,
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(getByText('cold start')).toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is false', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: false,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is undefined', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('in case of service name badge', () => {
+    it('renders service name badge when serviceName is present', () => {
+      const mockItemWithServiceName = {
+        ...mockItem,
+        serviceName: 'my-service',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithServiceName} left={10} />
+      );
+      expect(getByTestId('apmBarDetailsServiceNameBadge')).toBeInTheDocument();
+      expect(getByText('my-service')).toBeInTheDocument();
+    });
+
+    it('does not render service name badge when serviceName is empty', () => {
+      const mockItemWithoutServiceName = {
+        ...mockItem,
+        serviceName: '',
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
+      expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render service name badge when serviceName is undefined', () => {
+      const mockItemWithoutServiceName = {
+        ...mockItem,
+        serviceName: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
+      expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
+    });
+  });
 });

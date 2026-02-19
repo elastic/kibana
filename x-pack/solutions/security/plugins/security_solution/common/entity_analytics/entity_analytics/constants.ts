@@ -7,7 +7,7 @@
 
 // INTERNAL
 const INTERNAL_URL = `/internal/entity_details` as const;
-export const ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL = `${INTERNAL_URL}/highlights` as const;
+export const ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL = `${INTERNAL_URL}/highlights` as const;
 
 // PUBLIC
 export const PUBLIC_URL = `/api/entity_details` as const;

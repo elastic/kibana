@@ -21,6 +21,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +81,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
+            "lineNumber": 12,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,6 +110,8 @@
           "; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,6 +123,8 @@
             "label": "{ parentApi }",
             "description": [],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+            "lineNumber": 36,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,6 +191,8 @@
                   ">; isCompressed?: (() => boolean) | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
+                "lineNumber": 36,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -198,6 +212,8 @@
         "label": "HasPrependWrapperRef",
         "description": [],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -212,6 +228,8 @@
               "React.RefObject<HTMLDivElement>"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -226,6 +244,8 @@
         "label": "PublishesControlsLayout",
         "description": [],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,6 +263,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -315,6 +337,8 @@
           ">; isCompressed?: (() => boolean) | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

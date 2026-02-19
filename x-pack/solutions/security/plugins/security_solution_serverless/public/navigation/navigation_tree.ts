@@ -9,18 +9,12 @@ import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-b
 import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityGroupName,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import {
-  defaultNavigationTree,
-  LazyIconFindings,
-  LazyIconWorkflow,
-  LazyIconIntelligence,
-  LazyIconAgentBuilder,
-} from '@kbn/security-solution-navigation/navigation_tree';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
@@ -44,11 +38,11 @@ export const createNavigationTree = async (
     },
     {
       link: 'discover',
-      icon: 'discoverApp',
+      icon: 'productDiscover',
     },
     defaultNavigationTree.dashboards(),
     defaultNavigationTree.rules(),
-    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? defaultNavigationTree.alertDetections()
       : {
           id: SecurityPageName.alerts,
@@ -56,16 +50,12 @@ export const createNavigationTree = async (
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
     ...(chatExperience === AIChatExperience.Agent
       ? [
           {
-            // TODO: update icon to 'robot' once it's available in EUI
-            icon: LazyIconAgentBuilder,
+            icon: 'productAgent',
             link: 'agent_builder' as AppDeepLinkId,
           },
         ]
@@ -77,8 +67,7 @@ export const createNavigationTree = async (
     },
     {
       id: SecurityPageName.cloudSecurityPostureFindings,
-      // TODO change this to the `bullseye` EUI icon when available
-      icon: LazyIconFindings,
+      icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
     defaultNavigationTree.cases(),
@@ -87,8 +76,7 @@ export const createNavigationTree = async (
     defaultNavigationTree.investigations(),
     {
       id: SecurityPageName.threatIntelligence,
-      // TODO change this to the `compute` EUI icon when available
-      icon: LazyIconIntelligence,
+      icon: 'processor',
       link: securityLink(SecurityPageName.threatIntelligence),
     },
     {

@@ -24,6 +24,8 @@
           "() => void"
         ],
         "path": "packages/kbn-manifest/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

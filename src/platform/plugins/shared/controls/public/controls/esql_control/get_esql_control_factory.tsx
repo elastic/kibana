@@ -12,16 +12,15 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   type PublishingSubject,
   initializeStateManager,
+  initializeUnsavedChanges,
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
@@ -31,11 +30,14 @@ import { initializeESQLControlManager, selectionComparators } from './esql_contr
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { VariableControlsStrings } from './constants';
 
-export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
+export const getESQLControlFactory = (): EmbeddableFactory<
+  OptionsListESQLControlState,
+  ESQLControlApi
+> => {
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const titlesManager = initializeTitleManager(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -45,14 +47,11 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
 
       function serializeState() {
         return {
-          rawState: {
-            ...selections.getLatestState(),
-          },
-          references: [],
+          ...selections.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ESQLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListESQLControlState>({
         uuid,
         parentApi,
         serializeState,
@@ -61,11 +60,12 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
           return {
             ...selectionComparators,
             ...titleComparators,
+            display_settings: 'skip',
           };
         },
         onReset: (lastSaved) => {
-          selections.reinitializeState(lastSaved?.rawState);
-          titlesManager.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved);
+          titlesManager.reinitializeState(lastSaved);
         },
       });
 
@@ -96,15 +96,15 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
-          const onSaveControl = async (updatedState: ESQLControlState) => {
+          const onSaveControl = async (updatedState: OptionsListESQLControlState) => {
             selections.reinitializeState(updatedState);
             titlesManager.reinitializeState(updatedState);
           };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: nextState.esqlQuery,
-              variableType: nextState.variableType,
-              controlType: nextState.controlType,
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
+              queryString: nextState.esql_query,
+              variableType: nextState.variable_type,
+              controlType: nextState.control_type,
               esqlVariables: variablesInParent,
               onSaveControl,
               initialState: nextState,
@@ -118,17 +118,17 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       });
 
       const componentStaticState = {
-        singleSelect: state.singleSelect ?? true,
+        single_select: state.single_select ?? true,
         exclude: false,
-        existsSelected: false,
+        exists_selected: false,
         requestSize: 0,
         sort: undefined,
-        runPastTimeout: false,
+        run_past_timeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
-        fieldName: state.variableName,
-        useGlobalFilters: false,
-        ignoreValidations: false,
-        dataViewId: '',
+        field_name: state.variable_name,
+        use_global_filters: false,
+        ignore_validations: false,
+        data_view_id: '',
         blockingError: undefined,
         filtersLoading: false,
         appliedFilters: undefined,
@@ -203,10 +203,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             value={{
               componentApi,
               displaySettings: {
-                hideActionBar: false,
-                hideExclude: true,
-                hideExists: true,
-                hideSort: true,
+                hide_action_bar: false,
+                hide_exclude: true,
+                hide_exists: true,
+                hide_sort: true,
                 placeholder: VariableControlsStrings.emptySelectionPlaceholder,
               },
               customStrings: {

@@ -28,6 +28,8 @@
         "label": "CategorizeFieldContext",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -68,6 +72,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,6 +85,8 @@
             "label": "originatingApp",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -93,6 +101,8 @@
               "{ from: number; to: number; field?: { name: string; value: string; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +119,8 @@
               ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -123,6 +135,8 @@
         "label": "CreateCategorizationADJobContext",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +179,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +195,8 @@
               "QueryDslQueryContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,6 +211,8 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -211,6 +233,8 @@
           "\"ACTION_CATEGORIZE_FIELD\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -226,6 +250,8 @@
           "\"CATEGORIZE_FIELD_TRIGGER\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,6 +267,8 @@
           "\"createMLADCategorizationJobAction\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,6 +284,8 @@
           "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
         ],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -270,6 +300,8 @@
         "label": "categorizeFieldTrigger",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -281,6 +313,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,6 +326,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -303,6 +339,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

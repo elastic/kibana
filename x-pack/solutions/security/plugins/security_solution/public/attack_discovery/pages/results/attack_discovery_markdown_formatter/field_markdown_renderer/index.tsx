@@ -16,7 +16,7 @@ import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
 
-export const getFieldMarkdownRenderer = (disableActions: boolean) => {
+export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: string) => {
   const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     const { openRightPanel } = useExpandableFlyoutApi();
     const { euiTheme } = useEuiTheme();
@@ -60,6 +60,7 @@ export const getFieldMarkdownRenderer = (disableActions: boolean) => {
         ) : (
           <DraggableBadge
             contextId="fieldMarkdownRenderer"
+            scopeId={scopeId}
             eventId=""
             iconType={icon}
             isAggregatable={false}

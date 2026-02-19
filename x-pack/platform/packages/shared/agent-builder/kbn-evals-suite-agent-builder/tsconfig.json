@@ -12,5 +12,6 @@
     "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/scout",
+    "@kbn/inference-common",
   ]
 }

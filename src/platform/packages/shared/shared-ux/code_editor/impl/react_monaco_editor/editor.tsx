@@ -28,10 +28,10 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
-import { useEuiTheme, EuiPortal, type EuiPortalProps } from '@elastic/eui';
+import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
   import(
@@ -122,12 +122,38 @@ export interface MonacoEditorProps {
    * An event emitted when the content of the current model has changed.
    */
   onChange?: ChangeHandler;
+  /**
+   * Optional z-index to override the default z-index of the overflow widgets container.
+   */
+  overflowWidgetsContainerZIndexOverride?: number;
 }
+
+const applyModelContentChanges = (
+  prevValue: string,
+  changes: monacoEditor.editor.IModelContentChange[]
+): string => {
+  // Monaco reports offsets and lengths relative to the *previous* value. When multiple changes are
+  // present (e.g. multi-cursor edits), apply them from the end of the string towards the start so
+  // earlier edits don't shift the offsets of later ones.
+  const sortedChanges = [...changes].sort((a, b) => b.rangeOffset - a.rangeOffset);
+
+  return sortedChanges.reduce((acc, change) => {
+    const start = change.rangeOffset;
+    // `rangeLength` is the number of chars to replace from the previous value.
+    const end = change.rangeOffset + change.rangeLength;
+    return acc.slice(0, start) + change.text + acc.slice(end);
+  }, prevValue);
+};
 
 // initialize supported languages
 initializeSupportedLanguages();
 
 export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
+const OVERFLOW_WIDGETS_CONTAINER_CLASS = 'monaco-editor-overflowing-widgets-container';
+// eui flyout z-index is 1000 and highly unlikely to change, so we hardcode values here
+// we want to ensure the overflow widgets appear above or below the flyout as needed depending on where the editor is rendered
+const OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT = 900;
+const OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT = 1100;
 
 export function MonacoEditor({
   width = '100%',
@@ -142,6 +168,7 @@ export function MonacoEditor({
   editorWillUnmount,
   onChange,
   className,
+  overflowWidgetsContainerZIndexOverride,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
@@ -162,6 +189,18 @@ export function MonacoEditor({
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  /**
+   * For large models, `editor.getValue()` can be very expensive because it materializes the
+   * full buffer. Keep a shadow copy of the latest value so we can apply incremental edits
+   * using `IModelContentChangedEvent` without forcing a full `getValue()` on every keystroke.
+   */
+  const lastKnownValueRef = useRef<string>(value ?? defaultValue);
+  useEffect(() => {
+    if (typeof value === 'string') {
+      lastKnownValueRef.current = value;
+    }
+  }, [value]);
+
   const style = useMemo(
     () => ({
       width: fixedWidth,
@@ -180,7 +219,15 @@ export function MonacoEditor({
 
     _subscription.current = editor.current!.onDidChangeModelContent((event) => {
       if (!__preventTriggerChangeEvent.current) {
-        onChangeRef.current?.(editor.current!.getValue(), event);
+        const onChangeHandler = onChangeRef.current;
+        if (!onChangeHandler) {
+          return;
+        }
+
+        // Apply incremental changes to the shadow value (avoid `editor.getValue()` in hot path).
+        const nextValue = applyModelContentChanges(lastKnownValueRef.current, event.changes);
+        lastKnownValueRef.current = nextValue;
+        onChangeHandler(nextValue, event);
       }
     });
   };
@@ -205,13 +252,30 @@ export function MonacoEditor({
   }, [euiTheme]);
 
   const initMonaco = () => {
-    const finalValue = value !== null ? value : defaultValue;
+    // Treat `null`/`undefined` as uncontrolled, per the prop contract.
+    const finalValue = value ?? defaultValue;
 
     if (containerElement.current && overflowWidgetsDomNode.current) {
       // add the monaco class name to the overflow widgets dom node so that styles,
       // for it's widgets still apply
       overflowWidgetsDomNode.current?.classList.add('monaco-editor');
+      // for applying styles specific to the overflow widgets container
+      overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+
+      // handle special case of editor being rendered inside a container with a high z-index, like an EUI flyout
+      // if this is the case by default we will just raise the overflow widgets container z-index above the flyout (1000)
+      // more specific edge cases can use the z-index override prop
+      const isInsideStackedContainer =
+        containerElement.current!.closest('.euiFlyout') !== null || // covers both overlay and push flyouts
+        containerElement.current!.closest('[data-euiportal="true"]') !== null; // covers custom portals, like security timeline overlay
+      const defaultZIndex = isInsideStackedContainer
+        ? OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT
+        : OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT;
+
+      overflowWidgetsDomNode.current!.style.zIndex = String(
+        overflowWidgetsContainerZIndexOverride ?? defaultZIndex
+      );
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
@@ -265,7 +329,9 @@ export function MonacoEditor({
   // useLayoutEffect instead of useEffect to mitigate https://github.com/facebook/react/issues/31023 in React@18 Legacy Mode
   useLayoutEffect(() => {
     if (editor.current) {
-      if (value === editor.current.getValue()) {
+      // In controlled mode, `value` changes on every keystroke. Avoid calling `editor.getValue()`
+      // (which materializes the full model) by comparing against our shadow copy first.
+      if (typeof value !== 'string' || value === lastKnownValueRef.current) {
         return;
       }
 
@@ -286,6 +352,9 @@ export function MonacoEditor({
       );
       editor.current.pushUndoStop();
       __preventTriggerChangeEvent.current = false;
+
+      // Keep shadow state in sync for programmatic updates where we suppress onDidChangeModelContent.
+      lastKnownValueRef.current = value;
     }
   }, [value]);
 

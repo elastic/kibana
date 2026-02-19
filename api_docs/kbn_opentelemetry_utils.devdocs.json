@@ -33,6 +33,8 @@
           "Attributes"
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+            "lineNumber": 17,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,6 +66,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+            "lineNumber": 17,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -83,6 +89,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/from_traceparent.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,6 +105,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/from_traceparent.ts",
+            "lineNumber": 18,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,6 +128,8 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/to_traceparent.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -132,6 +144,8 @@
               "SpanContext"
             ],
             "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/to_traceparent.ts",
+            "lineNumber": 12,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -155,6 +169,8 @@
           " | undefined>) => Record<string, any>"
         ],
         "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/unflatten_attributes.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -171,6 +187,8 @@
               " | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/unflatten_attributes.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

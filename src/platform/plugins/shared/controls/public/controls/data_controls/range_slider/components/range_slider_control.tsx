@@ -193,7 +193,7 @@ export const RangeSliderControl: FC<Props> = ({
     <span
       data-shared-item
       css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
-      className="rangeSliderAnchor__button"
+      className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
       data-test-subj={`range-slider-control-${uuid}`}
       data-control-id={uuid}
     >

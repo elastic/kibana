@@ -134,7 +134,12 @@ export const toolToLangchain = async ({
       const input = omit(rawInput, ['_reasoning']);
 
       try {
-        const toolReturn = await tool.execute({ toolParams: input, onEvent, toolCallId });
+        const toolReturn = await tool.execute({
+          toolParams: input,
+          onEvent,
+          toolCallId,
+          source: 'agent',
+        });
         const content = JSON.stringify({ results: toolReturn.results });
         return [content, toolReturn];
       } catch (e) {
@@ -173,7 +178,7 @@ export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMa
   return mapping.get(toolCall.toolName) ?? toolCall.toolName;
 };
 
-function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
+export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
   const reversed = new Map<V, K>();
   for (const [key, value] of map.entries()) {
     if (reversed.has(value)) {
