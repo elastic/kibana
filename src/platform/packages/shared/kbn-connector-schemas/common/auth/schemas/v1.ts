@@ -17,6 +17,7 @@ export const authTypeSchema = z
     z.literal(AuthType.OAuth2ClientCredentials),
     z.literal(null),
   ])
+  .default(AuthType.Basic)
   .optional();
 
 export const hasAuthSchema = z.boolean().default(true);
