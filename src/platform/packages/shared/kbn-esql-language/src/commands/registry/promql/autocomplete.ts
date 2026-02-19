@@ -42,6 +42,7 @@ import {
   getIndexAssignmentContext,
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
+  PromqlParamName,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { SuggestionCategory } from '../../../language/autocomplete/utils';
@@ -77,7 +78,10 @@ export async function autocomplete(
     case 'after_command': {
       const usedParams = getUsedPromqlParamNames(commandText);
       const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
-        (suggestion) => !usedParams.has(suggestion.label)
+        ({ label }) =>
+          !usedParams.has(label) &&
+          !(label === PromqlParamName.Step && usedParams.has(PromqlParamName.Buckets)) &&
+          !(label === PromqlParamName.Buckets && usedParams.has(PromqlParamName.Step))
       );
 
       const canSuggestColumn =
@@ -345,13 +349,24 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  if (param === 'step') {
+  if (param === PromqlParamName.Step) {
     return [
       {
         ...valuePlaceholderConstant,
         label: 'Insert duration',
         text: '"${0:5m}"',
         detail: 'Use units like s, m, h, d',
+      },
+    ];
+  }
+
+  if (param === PromqlParamName.Buckets) {
+    return [
+      {
+        ...valuePlaceholderConstant,
+        label: 'Insert number of buckets',
+        text: '${0:100}',
+        detail: 'Positive integer (default: 100)',
       },
     ];
   }
