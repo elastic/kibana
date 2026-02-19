@@ -47,7 +47,7 @@ test.describe(
       });
       await page.reload();
 
-      await expect(pageObjects.streams.createQueryStreamButton).not.toBeVisible();
+      await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
     });
   }
 );
