@@ -357,7 +357,6 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 **Search**:
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 * Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
-* Fixes Beats tutorial authentication instructions for Serverless environments [#253164]({{kib-pull}}253164).
 * Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
 * Improves copy for missing trace relationships in APM [#251850]({{kib-pull}}251850).
 
