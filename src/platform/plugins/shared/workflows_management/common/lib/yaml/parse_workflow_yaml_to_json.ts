@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodSafeParseResult, ZodTypeAny } from '@kbn/zod/v4';
+import type { ZodSafeParseResult, ZodType } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
@@ -15,7 +15,7 @@ import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
 import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
 import { formatZodError } from '../zod/format_zod_error';
 
-export function parseWorkflowYamlToJSON<T extends ZodTypeAny>(
+export function parseWorkflowYamlToJSON<T extends ZodType>(
   yamlString: string,
   schema: T
 ): ZodSafeParseResult<T> | { success: false; error: Error } {

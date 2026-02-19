@@ -1194,6 +1194,11 @@ export interface SuggestionRequest<T = unknown> {
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
   datasourceId?: string;
+  /**
+   * Optional query (e.g. ES|QL) passed when suggesting from context (e.g. Visualize Editor).
+   * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
+   */
+  query?: AggregateQuery;
 }
 
 /**
@@ -1395,6 +1400,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export interface LensState {

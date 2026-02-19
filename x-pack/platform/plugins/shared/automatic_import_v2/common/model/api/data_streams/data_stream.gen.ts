@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { OriginalSource } from '../../common_attributes.gen';
+import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
 
 export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
 export const DeleteDataStreamRequestParams = z.object({
@@ -78,6 +78,10 @@ export const UploadSamplesToDataStreamRequestBody = z.object({
    * The original source of the samples
    */
   originalSource: OriginalSource,
+  /**
+   * The LangSmith tracing options
+   */
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type UploadSamplesToDataStreamRequestBodyInput = z.input<
   typeof UploadSamplesToDataStreamRequestBody
@@ -92,3 +96,27 @@ export const UploadSamplesToDataStreamResponse = z
     success: z.boolean().optional(),
   })
   .strict();
+
+export type ReanalyzeDataStreamRequestParams = z.infer<typeof ReanalyzeDataStreamRequestParams>;
+export const ReanalyzeDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+
+export type ReanalyzeDataStreamRequestBody = z.infer<typeof ReanalyzeDataStreamRequestBody>;
+export const ReanalyzeDataStreamRequestBody = z.object({
+  /**
+   * The inference connector ID to use for the reanalysis task.
+   */
+  connectorId: NonEmptyString,
+  /**
+   * Optional LangSmith tracing options.
+   */
+  langSmithOptions: LangSmithOptions.optional(),
+});

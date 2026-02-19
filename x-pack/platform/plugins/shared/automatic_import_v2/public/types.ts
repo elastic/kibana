@@ -9,12 +9,16 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { useGetIntegrationById } from './common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AutomaticImportPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AutomaticImportPluginStart {}
+export interface AutomaticImportPluginStart {
+  hooks: {
+    useGetIntegrationById: typeof useGetIntegrationById;
+  };
+}
 
 export interface AutomaticImportPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;

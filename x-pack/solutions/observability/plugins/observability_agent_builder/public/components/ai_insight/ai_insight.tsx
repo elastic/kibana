@@ -14,19 +14,27 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiSkeletonText,
-  EuiMarkdownFormat,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
   useEuiTheme,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
+import {
+  useStreamingAiInsight,
+  type InsightStreamEvent,
+} from '../../hooks/use_streaming_ai_insight';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
+import { LoadingCursor } from './loading_cursor';
+import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 export interface AiInsightResponse {
   summary: string;
@@ -41,17 +49,13 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
-  fetchInsight: () => Promise<AiInsightResponse>;
+  createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
-export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightProps) {
+export function AiInsight({ title, createStream, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [summary, setSummary] = useState('');
-  const [context, setContext] = useState('');
 
   const {
     services: { agentBuilder, application },
@@ -68,25 +72,15 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const handleFetchInsight = useCallback(async () => {
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await fetchInsight();
-      setSummary(response.summary);
-      setContext(response.context);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load AI insight');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fetchInsight]);
+  const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
+    useStreamingAiInsight(createStream);
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
 
     agentBuilder.openConversationFlyout({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
@@ -129,7 +123,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+                    defaultMessage: 'Get helpful insights from our Observability Agent',
                   })}
                 </span>
               </EuiText>
@@ -142,31 +136,83 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
         onToggle={(open) => {
           setIsOpen(open);
           if (open && !error && !summary && !isLoading) {
-            handleFetchInsight();
+            fetch();
           }
         }}
       >
         <EuiSpacer size="m" />
         <EuiPanel color="subdued">
-          {isLoading ? (
-            <EuiSkeletonText lines={3} />
-          ) : error ? (
-            <AiInsightErrorBanner error={error} onRetry={handleFetchInsight} />
+          {error ? (
+            <AiInsightErrorBanner error={error} onRetry={fetch} />
           ) : (
-            <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+            <EuiText size="s">
+              <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+              {isLoading && <LoadingCursor />}
+            </EuiText>
           )}
-        </EuiPanel>
 
-        {!isLoading && Boolean(summary && summary.trim()) ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <StartConversationButton onClick={handleStartConversation} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ) : null}
+          {isLoading ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAgentBuilderStopGeneratingButton"
+                    color="text"
+                    iconType="stop"
+                    size="s"
+                    onClick={stop}
+                  >
+                    {i18n.translate(
+                      'xpack.observabilityAgentBuilder.aiInsight.stopGeneratingButton',
+                      {
+                        defaultMessage: 'Stop generating',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : wasStopped ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAgentBuilderRegenerateButton"
+                    size="s"
+                    iconType="sparkles"
+                    onClick={regenerate}
+                  >
+                    {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
+                      defaultMessage: 'Regenerate',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {Boolean(summary && summary.trim()) && (
+                  <EuiFlexItem grow={false}>
+                    <StartConversationButton onClick={handleStartConversation} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </>
+          ) : Boolean(summary && summary.trim()) ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <StartConversationButton onClick={handleStartConversation} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
+        </EuiPanel>
       </EuiAccordion>
     </EuiPanel>
   );

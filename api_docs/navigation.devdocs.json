@@ -503,6 +503,10 @@
             "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
           },
           {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
             "plugin": "fleet",
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
           },
@@ -1141,6 +1145,10 @@
           {
             "plugin": "discover",
             "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/get_top_nav_badges.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
           },
           {
             "plugin": "discover",

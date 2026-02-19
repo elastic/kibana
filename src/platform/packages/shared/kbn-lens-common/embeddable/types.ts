@@ -193,6 +193,10 @@ export interface LensPublicCallbacks extends LensApiProps {
    * Let the consumer overwrite embeddable user messages
    */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
+  /**
+   * Optional user messages from the consumer.
+   */
+  userMessages?: UserMessage[];
   onAlertRule?: (data: unknown) => void;
 }
 
@@ -298,6 +302,10 @@ export type LensComponentProps = Simplify<
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
+      /**
+       * Optional search term to highlight in the panel title
+       */
+      titleHighlight?: string;
     }
 >;
 
@@ -324,7 +332,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = LensRendererPrivateProps;
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+  hidePanelTitles?: boolean;
+};
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel
@@ -344,10 +354,7 @@ export type LensRuntimeState = Simplify<
 >;
 
 export interface LensHasEditPanel {
-  getEditPanel?: (options?: {
-    closeFlyout?: () => void;
-    showOnly?: boolean;
-  }) => Promise<JSX.Element | undefined>;
+  getEditPanel?: (options?: { closeFlyout?: () => void }) => Promise<JSX.Element | undefined>;
 }
 
 export interface LensInspectorAdapters {
@@ -434,6 +441,9 @@ export interface StructuredDatasourceStates {
   formBased?: FormBasedPersistedState;
   textBased?: TextBasedPersistedState;
 }
+
+/** The supported datasource identifiers */
+export type SupportedDatasourceId = keyof StructuredDatasourceStates;
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<

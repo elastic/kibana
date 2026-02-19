@@ -167,6 +167,7 @@ export function DependencyOperationDetailView() {
     },
     [history]
   );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -211,6 +212,9 @@ export function DependencyOperationDetailView() {
               useLegacy={waterfallFetch.useLegacy}
               unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
               entryTransactionId={selectedSample?.transactionId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              traceId={selectedSample?.traceId}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

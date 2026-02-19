@@ -304,7 +304,7 @@ export class CommandVisitorContext<
         continue;
       }
 
-      if (arg.type === 'query') {
+      if (arg.type === 'query' && 'commands' in arg) {
         const result = this.visitSubQuery(arg);
         yield result;
       }
@@ -572,6 +572,12 @@ export class SampleCommandVisitorContext<
 
 // FUSE
 export class FuseCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
+// MMR
+export class MmrCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}

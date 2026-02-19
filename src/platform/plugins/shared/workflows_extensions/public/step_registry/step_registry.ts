@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './types';
 
 /**
@@ -21,14 +22,20 @@ export class PublicStepRegistry {
    * @param definition - The step definition to register
    * @throws Error if definition for the same step type ID is already registered
    */
-  public register(definition: PublicStepDefinition): void {
+  public register<
+    Input extends z.ZodType = z.ZodType,
+    Output extends z.ZodType = z.ZodType,
+    Config extends z.ZodObject = z.ZodObject
+  >(definition: PublicStepDefinition<Input, Output, Config>): void {
     const stepTypeId = String(definition.id);
     if (this.registry.has(stepTypeId)) {
       throw new Error(
         `Step definition for type "${stepTypeId}" is already registered. Each step type must have unique definition.`
       );
     }
-    this.registry.set(stepTypeId, definition);
+    // Type assertion is safe here because the Map stores the base type
+    // and we don't need to preserve specific generic types after storage
+    this.registry.set(stepTypeId, definition as PublicStepDefinition);
   }
 
   /**

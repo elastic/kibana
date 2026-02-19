@@ -21,8 +21,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const esql = getService('esql');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('opening a new tab', function () {
+    before(async () => {
+      await browser.setWindowSize(1920, 1080);
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     it('should create a new tab in classic mode', async () => {
       // tab 0 - with the default data view
 

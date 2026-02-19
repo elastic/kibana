@@ -11,6 +11,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 export function SearchInferenceManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     InferenceTabularPage: {
@@ -38,6 +39,93 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
 
         expect(hasElser2).to.be(true);
         expect(hasE5).to.be(true);
+      },
+
+      async expectEndpointStatsToBeDisplayed() {
+        // Verify the endpoint stats bar exists
+        await testSubjects.existOrFail('endpointStats');
+        await testSubjects.existOrFail('endpointStatsServicesCount');
+        await testSubjects.existOrFail('endpointStatsModelsCount');
+        await testSubjects.existOrFail('endpointStatsTypesCount');
+        await testSubjects.existOrFail('endpointStatsEndpointsCount');
+
+        // Verify stats show non-zero counts (we have preconfigured endpoints)
+        const servicesCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsServicesCount'),
+          10
+        );
+        const modelsCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsModelsCount'),
+          10
+        );
+        const typesCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsTypesCount'),
+          10
+        );
+        const endpointsCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+          10
+        );
+
+        // We should have at least 1 service, 1 model, 1 type, and 1 endpoint (preconfigured)
+        expect(servicesCount).to.greaterThan(0);
+        expect(modelsCount).to.greaterThan(0);
+        expect(typesCount).to.greaterThan(0);
+        expect(endpointsCount).to.greaterThan(0);
+      },
+
+      async expectEndpointStatsToUpdateOnFilter() {
+        // Get initial endpoint count
+        const initialCount = parseInt(
+          await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+          10
+        );
+
+        // Apply a search filter to reduce results
+        const searchField = await testSubjects.find('search-field-endpoints');
+        await searchField.clearValue();
+        await searchField.type('elser');
+
+        // Wait for table to update and check stats using retry
+        await retry.try(async () => {
+          const filteredCount = parseInt(
+            await testSubjects.getVisibleText('endpointStatsEndpointsCount'),
+            10
+          );
+
+          // Filtered count should be strictly less than initial count to confirm filter works
+          expect(filteredCount).to.be.lessThan(initialCount);
+          expect(filteredCount).to.greaterThan(0);
+        });
+
+        // Clear the search field
+        await searchField.clearValue();
+      },
+
+      async expectModelColumnToBeDisplayed() {
+        // Verify model column cells exist using data-test-subj
+        const modelCells = await testSubjects.findAll('modelCell');
+        expect(modelCells.length).to.greaterThan(0);
+      },
+
+      async expectSearchByModelName() {
+        // Search for a model name that exists in preconfigured endpoints
+        const searchField = await testSubjects.find('search-field-endpoints');
+        await searchField.clearValue();
+        await searchField.type('elser_model');
+
+        // Wait for the table to update
+        const table = await testSubjects.find('inferenceEndpointTable');
+        const rows = await table.findAllByClassName('euiTableRow');
+
+        // Verify results are filtered and contain the searched model
+        expect(rows.length).to.greaterThan(0);
+        const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+        const allContainElser = texts.every((text) => text.toLowerCase().includes('elser'));
+        expect(allContainElser).to.be(true);
+
+        // Clear the search field
+        await searchField.clearValue();
       },
 
       async expectPreconfiguredEndpointsCannotBeDeleted() {

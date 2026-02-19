@@ -8,90 +8,51 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
-import { formatBytes } from '../helpers/format_bytes';
-import { getILMRatios } from '../helpers/helpers';
-import {
-  DataLifecycleSummary,
-  buildLifecyclePhases,
-  type LifecyclePhase,
-} from '../common/data_lifecycle/data_lifecycle_summary';
+import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
+import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
+import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
+import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
 
 interface LifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
+  refreshDefinition?: () => void;
 }
 
-export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) => {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-    isServerless,
-  } = useKibana();
-  const { euiTheme } = useEuiTheme();
-  const { ilmPhases } = useIlmPhasesColorAndDescription();
-
+export const LifecycleSummary = ({
+  definition,
+  stats,
+  refreshDefinition,
+}: LifecycleSummaryProps) => {
   const isIlm = isIlmLifecycle(definition.effective_lifecycle);
   const isDsl = isDslLifecycle(definition.effective_lifecycle);
+  const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
 
-  const { value: ilmStatsValue, loading: ilmLoading } = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!isIlm) {
-        return undefined;
-      }
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-        params: { path: { name: definition.stream.name } },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, definition, isIlm]
+  const ilmSummary = useIlmLifecycleSummary({
+    definition,
+    stats,
+    refreshDefinition,
+    updateStreamLifecycle,
+  });
+  const dslSummary = useDslLifecycleSummary({
+    definition,
+    stats,
+  });
+
+  return (
+    <>
+      <DataLifecycleSummary
+        phases={isIlm ? ilmSummary.phases : dslSummary.phases}
+        loading={isIlm && ilmSummary.loading}
+        downsampleSteps={isDsl ? dslSummary.downsampleSteps : undefined}
+        isIlm={isIlm}
+        onRemovePhase={isIlm ? ilmSummary.onRemovePhase : undefined}
+        onRemoveDownsampleStep={isIlm ? ilmSummary.onRemoveDownsampleStep : undefined}
+        canManageLifecycle={definition.privileges.lifecycle}
+      />
+
+      {ilmSummary.modals}
+    </>
   );
-
-  const getPhases = (): LifecyclePhase[] => {
-    if (isIlm) {
-      const phasesWithGrow = getILMRatios(ilmStatsValue);
-      if (!phasesWithGrow) {
-        return [];
-      }
-      return phasesWithGrow.map((phase, index) => ({
-        color: ilmPhases[phase.name].color,
-        label: phase.name,
-        size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,
-        grow: phase.grow,
-        isDelete: phase.name === 'delete',
-        timelineValue: phasesWithGrow[index + 1]?.min_age,
-      }));
-    }
-
-    if (isDsl) {
-      const lifecycle = definition.effective_lifecycle;
-      const retentionPeriod = isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined;
-      const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
-
-      return buildLifecyclePhases({
-        label: isServerless
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngest', {
-              defaultMessage: 'Successful ingest',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.hot', {
-              defaultMessage: 'Hot',
-            }),
-        color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
-        size: storageSize,
-        retentionPeriod,
-      });
-    }
-
-    return [];
-  };
-
-  return <DataLifecycleSummary phases={getPhases()} loading={isIlm && ilmLoading} />;
 };

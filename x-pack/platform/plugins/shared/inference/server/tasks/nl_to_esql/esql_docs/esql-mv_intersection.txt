@@ -1,0 +1,59 @@
+# MV_INTERSECTION
+
+The MV_INTERSECTION function returns the values that are present in both input fields. If either field is null or if there are no matching values, the function returns `null`.
+
+## Syntax
+
+`MV_INTERSECTION(field1, field2)`
+
+### Parameters
+
+#### field1
+
+Multivalue expression. If this parameter is null, the function returns null.
+
+#### field2
+
+Multivalue expression. If this parameter is null, the function returns null.
+
+## Examples
+
+Find the intersection of two arrays of integers and keep the common values.
+
+```esql
+ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+Find the intersection of two arrays of long integers and keep the values present in both arrays.
+
+```esql
+ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+Find the intersection of two arrays of boolean values and return the shared values.
+
+```esql
+ROW a = [true, false, false, false], b = [false]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+Find the intersection of two arrays of floating-point numbers and output the values they have in common.
+
+```esql
+ROW a = [5.2, 10.5, 1.12345, 2.6928], b = [10.5, 2.6928]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```
+
+Find the intersection of two arrays of strings and display the values that appear in both.
+
+```esql
+ROW a = ["one", "two", "three", "four", "five"], b = ["one", "four"]
+| EVAL finalValue = MV_INTERSECTION(a, b)
+| KEEP finalValue
+```

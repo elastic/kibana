@@ -8,23 +8,17 @@
  */
 
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import {
-  type Filter,
-  type Query,
-  type TimeRange,
-  type AggregateQuery,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
+import { useESQLQueryStats } from '@kbn/esql/public';
+import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { cloneDeep } from 'lodash';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -32,6 +26,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   internalStateActions,
+  selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
@@ -46,8 +41,6 @@ import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
-
-const EMPTY_FILTERS: Filter[] = [];
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -81,16 +74,7 @@ export const DiscoverTopNav = ({
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
   const timeRangeRelative = useCurrentTabSelector((state) => state.globalState.timeRange);
-  const appFilters = useAppStateSelector((state) => state.filters);
-  const globalFilters = useCurrentTabSelector((state) => state.globalState.filters);
-
-  const filtersMemoized = useMemo(() => {
-    if (isOfAggregateQueryType(query)) {
-      return EMPTY_FILTERS;
-    }
-    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
-    return allFilters.length ? cloneDeep(allFilters) : EMPTY_FILTERS;
-  }, [appFilters, globalFilters, query]);
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -128,7 +112,6 @@ export const DiscoverTopNav = ({
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
-    stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
     onUpdateESQLQuery,
@@ -206,6 +189,11 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, stateContainer, updateAppState]
   );
 
+  const esqlQueryStats = useESQLQueryStats(
+    isEsqlMode,
+    stateContainer.dataState.inspectorAdapters.requests
+  );
+
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
@@ -241,6 +229,36 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+  const onDataViewEditedAction = useCurrentTabAction(internalStateActions.onDataViewEdited);
+  const onDataViewEdited = useCallback(
+    (editedDataView: DataView) => {
+      dispatch(onDataViewEditedAction({ editedDataView }));
+    },
+    [dispatch, onDataViewEditedAction]
+  );
+  const createAndAppendAdHocDataView = useCurrentTabAction(
+    internalStateActions.createAndAppendAdHocDataView
+  );
+  const onCreateDefaultAdHocDataView = useCallback(
+    (dataViewSpec: DataViewSpec) => {
+      dispatch(createAndAppendAdHocDataView({ dataViewSpec }));
+    },
+    [dispatch, createAndAppendAdHocDataView]
+  );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
@@ -250,14 +268,23 @@ export const DiscoverTopNav = ({
       },
       currentDataViewId: dataView?.id,
       onAddField: addField,
-      onDataViewCreated: stateContainer.actions.onDataViewCreated,
-      onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
-      onChangeDataView: stateContainer.actions.onChangeDataView,
+      onDataViewCreated,
+      onCreateDefaultAdHocDataView,
+      onChangeDataView,
       adHocDataViews,
       savedDataViews,
-      onEditDataView: stateContainer.actions.onDataViewEdited,
+      onEditDataView: onDataViewEdited,
     };
-  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer]);
+  }, [
+    adHocDataViews,
+    addField,
+    dataView,
+    savedDataViews,
+    onChangeDataView,
+    onDataViewCreated,
+    onDataViewEdited,
+    onCreateDefaultAdHocDataView,
+  ]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
@@ -318,7 +345,7 @@ export const DiscoverTopNav = ({
         onSavedQueryIdChange={updateSavedQueryId}
         disableSubscribingToGlobalDataServices={true}
         query={query}
-        filters={filtersMemoized}
+        filters={filters}
         dateRangeFrom={timeRangeRelative?.from}
         dateRangeTo={timeRangeRelative?.to}
         refreshInterval={refreshInterval?.value}
@@ -340,6 +367,7 @@ export const DiscoverTopNav = ({
         displayStyle="detached"
         textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
         textBasedLanguageModeWarning={esqlModeWarning}
+        enableResourceBrowser={isEsqlMode}
         prependFilterBar={
           searchBarCustomization?.PrependFilterBar ? (
             <searchBarCustomization.PrependFilterBar />
@@ -375,6 +403,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
       />
       {isESQLToDataViewTransitionModalVisible && (

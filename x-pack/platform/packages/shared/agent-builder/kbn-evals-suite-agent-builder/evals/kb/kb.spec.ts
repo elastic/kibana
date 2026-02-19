@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
@@ -27,7 +28,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 });
 evaluate.describe(
   'Default Agent Knowledge Base Retrieval - AgentBuilder',
-  { tag: '@svlSearch' },
+  { tag: tags.serverless.search },
   () => {
     evaluate('text retrieval queries', async ({ evaluateDataset }) => {
       await evaluateDataset({

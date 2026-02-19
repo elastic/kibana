@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
+import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolResultType,
+  isBadRequestError,
 } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
@@ -67,7 +68,13 @@ describe('prepareConversation', () => {
     mockContext = createAgentHandlerContextMock();
     mockAttachmentsService = mockContext.attachments;
     // prepareConversation relies on a real attachmentStateManager (it mutates it).
-    (mockContext as any).attachmentStateManager = createAttachmentStateManager([]);
+    mockContext.attachmentStateManager = createAttachmentStateManager([], {
+      getTypeDefinition: (type: string) => ({
+        id: type,
+        validate: (input: unknown) => ({ valid: true, data: input }),
+        format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+      }),
+    });
 
     mockGetToolResultId.mockReset();
     let idCounter = 0;
@@ -144,7 +151,13 @@ describe('prepareConversation', () => {
   describe('legacy per-round attachments are promoted to conversation attachments and stripped from rounds', () => {
     it('promotes nextInput attachments into attachmentStateManager and strips nextInput attachments', async () => {
       // Use a real attachment state manager (not the jest mock) to assert promotion/versioning behavior
-      (mockContext as any).attachmentStateManager = createAttachmentStateManager([]);
+      mockContext.attachmentStateManager = createAttachmentStateManager([], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
 
       // We only need getTypeDefinition for attachmentTypes; it won't be used for formatting since we strip.
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
@@ -152,7 +165,7 @@ describe('prepareConversation', () => {
         validate: jest.fn(),
         format: jest.fn(),
         getAgentDescription: () => 'desc',
-      } as any);
+      });
 
       const nextInput: ConverseInput = {
         message: 'Hello',
@@ -193,13 +206,19 @@ describe('prepareConversation', () => {
         ],
       };
 
-      (mockContext as any).attachmentStateManager = createAttachmentStateManager([existing]);
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
       mockAttachmentsService.getTypeDefinition.mockReturnValue({
         id: 'text',
         validate: jest.fn(),
         format: jest.fn(),
         getAgentDescription: () => 'desc',
-      } as any);
+      });
 
       const nextInput: ConverseInput = {
         message: 'Hello',
@@ -390,6 +409,59 @@ describe('prepareConversation', () => {
           attachments: [],
         },
       });
+    });
+  });
+
+  describe('action=regenerate', () => {
+    it('throws a bad request error (400) when conversation has no rounds', async () => {
+      await expect(
+        prepareConversation({
+          previousRounds: [],
+          nextInput: { message: 'ignored' },
+          context: mockContext,
+          action: 'regenerate',
+        })
+      ).rejects.toThrow('Cannot regenerate: conversation has no rounds');
+
+      let thrown: unknown;
+      try {
+        await prepareConversation({
+          previousRounds: [],
+          nextInput: { message: 'ignored' },
+          context: mockContext,
+          action: 'regenerate',
+        });
+      } catch (e) {
+        thrown = e;
+      }
+      expect(isBadRequestError(thrown)).toBe(true);
+    });
+
+    it('uses the last round input and ignores nextInput from request', async () => {
+      const lastRoundInput: RoundInput = {
+        message: 'Original message',
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, actor: 'user' as const }],
+      };
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: lastRoundInput,
+          response: { message: 'Response to regenerate' },
+        }),
+      ];
+
+      const result = await prepareConversation({
+        previousRounds,
+        nextInput: { message: 'ignored by regenerate' },
+        context: mockContext,
+        action: 'regenerate',
+      });
+
+      // Strips the last round from previous rounds
+      expect(result.previousRounds).toHaveLength(0);
+
+      // Uses the last round's input (full spread preserves all fields for downstream)
+      expect(result.nextInput.message).toBe('Original message');
     });
   });
 });

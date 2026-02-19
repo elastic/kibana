@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+
 import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import fetch, { type Response } from 'node-fetch';
 import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
 export const download = async (
@@ -43,7 +45,7 @@ export const download = async (
   }
 
   try {
-    await pipeline(res.body, writeStream);
+    await pipeline(Readable.fromWeb(res.body as WebReadableStream), writeStream);
   } catch (err: any) {
     if (err.name === 'AbortError') {
       writeStream.destroy();

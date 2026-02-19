@@ -6,16 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { compact } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
-import type {
-  IlmPolicyDeletePhase,
-  IlmPolicyHotPhase,
-  IlmPolicyPhase,
-  IlmPolicyPhases,
-} from '@kbn/streams-schema';
-import { rolloverCondition } from '../helpers/rollover_condition';
 
 export const useIlmPhasesColorAndDescription = () => {
   const { euiTheme } = useEuiTheme();
@@ -25,73 +17,43 @@ export const useIlmPhasesColorAndDescription = () => {
       ilmPhases: {
         hot: {
           color: euiTheme.colors.severity.risk,
-          description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase, phases: IlmPolicyPhases) => {
-            const hotPhase = phase as IlmPolicyHotPhase;
-            const hasNextPhase = Boolean(
-              phases.warm || phases.cold || phases.frozen || phases.delete
-            );
-            const condition = rolloverCondition(hotPhase.rollover);
-            return compact([
-              i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
-                defaultMessage:
-                  'Recent, frequently-searched data. Best indexing and search performance.',
-              }),
-              hasNextPhase
-                ? condition
-                  ? i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription',
-                      {
-                        defaultMessage:
-                          '*Time since rollover. Current rollover condition: {condition}.',
-                        values: { condition },
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription',
-                      {
-                        defaultMessage:
-                          '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
-                      }
-                    )
-                : '',
-            ]);
-          },
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
+            defaultMessage:
+              'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
+          }),
         },
         warm: {
           color: euiTheme.colors.severity.warning,
-          description: () => [
-            i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
-              defaultMessage:
-                'Frequently searched data, rarely updated. Optimized for search, not indexing.',
-            }),
-          ],
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
+            defaultMessage:
+              'Use for data that is searched occasionally but rarely updated, optimized for search over indexing.',
+          }),
         },
         cold: {
           color: euiTheme.colors.severity.neutral,
-          description: () => [
-            i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
-              defaultMessage:
-                'Data searched infrequently, not updated. Optimized for cost savings over search performance.',
-            }),
-          ],
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
+            defaultMessage:
+              'Use for infrequently searched, read-only data where cost savings are prioritized over performance.',
+          }),
         },
         frozen: {
           color: euiTheme.colors.vis.euiColorVis3,
-          description: () => [
-            i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
+          description: i18n.translate(
+            'xpack.streams.streamDetailLifecycle.frozenPhaseDescription',
+            {
               defaultMessage:
-                'Most cost-effective way to store your data and still be able to search it.',
-            }),
-          ],
+                'Use for long-term retention of searchable data at the lowest possible cost.',
+            }
+          ),
         },
         delete: {
           color: euiTheme.colors.borderBasePlain,
-          description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => [
-            i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
-              defaultMessage: 'Data deleted after {duration}.',
-              values: { duration: phase.min_age! },
-            }),
-          ],
+          description: i18n.translate(
+            'xpack.streams.streamDetailLifecycle.deletePhaseDescription',
+            {
+              defaultMessage: 'Use to delete your data once it has reached a specified age.',
+            }
+          ),
         },
       },
     }),

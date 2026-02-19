@@ -11,7 +11,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
-  watchIds: schema.arrayOf(schema.string()),
+  watchIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
 });
 
 type DeleteWatchPromiseArray = Promise<{

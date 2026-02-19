@@ -281,8 +281,15 @@ const BaseSecretsSchema = schema
     unknowns: 'allow',
   });
 
-export const NewAgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchemaV3 = schema
+  .object({
+    ...AgentPolicyBaseSchema,
+  })
+  .extends({
+    has_agent_version_conditions: schema.maybe(schema.boolean()),
+  });
+
+export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -299,8 +306,7 @@ export const NewAgentPolicySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
-export const AgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchema = AgentPolicySchemaV3.extends({
   id: schema.string(),
   is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
@@ -524,6 +530,18 @@ export const FullAgentPolicyResponseSchema = schema.object({
       download: schema.object({
         sourceURI: schema.string(),
         ssl: schema.maybe(BaseSSLSchema),
+        auth: schema.maybe(
+          schema.object({
+            username: schema.maybe(schema.string()),
+            password: schema.maybe(schema.string()),
+            api_key: schema.maybe(schema.string()),
+            headers: schema.maybe(
+              schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+                maxSize: 100,
+              })
+            ),
+          })
+        ),
         secrets: schema.maybe(BaseSecretsSchema),
         timeout: schema.maybe(schema.string()),
         target_directory: schema.maybe(schema.string()),

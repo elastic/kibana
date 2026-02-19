@@ -89,6 +89,7 @@ export type OnErrorClick = (params: {
   docId: string;
   errorCount: number;
   errorDocId?: string;
+  docIndex?: string;
 }) => void;
 
 interface Props {

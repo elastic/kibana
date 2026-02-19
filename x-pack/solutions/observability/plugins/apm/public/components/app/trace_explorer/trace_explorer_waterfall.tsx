@@ -150,6 +150,9 @@ export function TraceExplorerWaterfall() {
         useLegacy={waterfallFetchResult.useLegacy}
         unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
         entryTransactionId={transactionId}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        traceId={traceId}
       />
     </ResettingHeightRetainer>
   );

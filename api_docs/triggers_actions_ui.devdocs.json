@@ -657,6 +657,43 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getIsExperimentalFeatureEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsExperimentalFeatureEnabled",
+        "description": [],
+        "signature": [
+          "(feature: \"rulesListDatagrid\" | \"stackAlertsPage\" | \"ruleTagFilter\" | \"ruleStatusFilter\" | \"rulesDetailLogs\" | \"ruleUseExecutionStatus\" | \"ruleKqlBar\" | \"isMustacheAutocompleteOn\" | \"showMustacheAutocompleteSwitch\" | \"alertDeletionSettingsEnabled\" | \"unifiedRulesPage\") => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/get_experimental_features.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getIsExperimentalFeatureEnabled.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "\"rulesListDatagrid\" | \"stackAlertsPage\" | \"ruleTagFilter\" | \"ruleStatusFilter\" | \"rulesDetailLogs\" | \"ruleUseExecutionStatus\" | \"ruleKqlBar\" | \"isMustacheAutocompleteOn\" | \"showMustacheAutocompleteSwitch\" | \"alertDeletionSettingsEnabled\" | \"unifiedRulesPage\""
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/get_experimental_features.ts",
+            "lineNumber": 17,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.getTimeFieldOptions",
         "type": "Function",
         "tags": [],
@@ -2913,7 +2950,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
             "lineNumber": 24,
@@ -6440,7 +6477,7 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
         "lineNumber": 10,

@@ -29,7 +29,19 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
+  'Anthropic-Claude-Opus-4-5',
+  'Anthropic-Claude-Opus-4-6',
   'OpenAI-GPT-OSS-120B',
+  'OpenAI-GPT-4-1',
+  'OpenAI-GPT-4-1-Mini',
+  'OpenAI-GPT-5-2',
+  'OpenAI-GPT-OSS-20B',
+  'OpenAI-o4',
+  'OpenAI-o4-Mini',
+  'Google-Gemini-2-5-Pro',
+  'Google-Gemini-2-5-Flash',
+  'Google-Gemini-3-0-Pro',
+  'Google-Gemini-3-0-Flash',
 ];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 

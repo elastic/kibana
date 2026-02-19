@@ -33,12 +33,14 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
-import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/get_service_map_nodes';
+import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
+import type { ServiceMapSelection } from '../popover/popover_content';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  selectedNode: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition;
+  /** Selected node or edge from the service map */
+  selection: ServiceMapSelection;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
@@ -53,7 +55,7 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
   return false;
 }
 
-export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFlyoutProps) {
+export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const {
     query: { rangeFrom, rangeTo },
@@ -70,7 +72,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setFormState] = useState<DiagnosticFormState>({
-    sourceNode: selectedNode.id,
+    sourceNode: selection.id,
     destinationNode: undefined,
     traceId: undefined,
     isValid: false,
