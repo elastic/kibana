@@ -56,7 +56,12 @@ const scheduleSchema = z
 const evaluationQuerySchema = z
   .object({
     base: esqlQuerySchema.describe('Base ES|QL query.'),
-    condition: z.string().min(1).max(5000).describe('Trigger condition (WHERE clause).'),
+    condition: z
+      .string()
+      .min(1)
+      .max(5000)
+      .optional()
+      .describe('Trigger condition (WHERE clause). Required when no_data is configured.'),
   })
   .strict();
 
@@ -174,18 +179,17 @@ export const createRuleDataSchema = z
     notification_policies: z.array(notificationPolicyRefSchema).optional(),
   })
   .strip()
-  /**
-   *
-   * The `.refine` method adds a custom validation to the schema.
-   * In this case, it enforces that the `state_transition` property is only allowed when `kind` is "alert".
-   * The predicate `data.kind === 'alert' || data.state_transition == null` means:
-   * - If the rule kind is "alert", `state_transition` may be present (or absent).
-   * - For any other `kind`, `state_transition` must be `null` or `undefined`.
-   * If validation fails, the specified error message will be associated with the `state_transition` field.
-   */
   .refine((data) => data.kind === 'alert' || data.state_transition == null, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
+  })
+  .refine((data) => data.kind === 'alert' || data.evaluation.query.condition == null, {
+    message: 'evaluation.query.condition is only allowed when kind is "alert".',
+    path: ['evaluation', 'query', 'condition'],
+  })
+  .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
+    message: 'evaluation.query.condition is required when no_data is configured.',
+    path: ['evaluation', 'query', 'condition'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;

@@ -6,7 +6,7 @@
  */
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AlertEpisode } from '../types';
+import type { AlertEpisode, AlertEpisodeSuppression } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
   alertEpisodes: AlertEpisode[]
@@ -25,6 +25,25 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
+    ]),
+  };
+};
+
+export const createAlertEpisodeSuppressionsResponse = (
+  suppressions: AlertEpisodeSuppression[]
+): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'rule_id', type: 'keyword' },
+      { name: 'group_hash', type: 'keyword' },
+      { name: 'episode_id', type: 'keyword' },
+      { name: 'should_suppress', type: 'boolean' },
+    ],
+    values: suppressions.map((suppression) => [
+      suppression.rule_id,
+      suppression.group_hash,
+      suppression.episode_id,
+      suppression.should_suppress,
     ]),
   };
 };
