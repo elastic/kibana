@@ -131,6 +131,10 @@ describe('createConnectorAndRelatedResources', () => {
       execute: jest.fn(),
       getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     },
+    skills: {
+      register: jest.fn(),
+      unregister: jest.fn(),
+    },
   };
 
   const mockRequest = httpServerMock.createKibanaRequest();

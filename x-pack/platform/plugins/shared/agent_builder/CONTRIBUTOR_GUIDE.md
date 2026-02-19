@@ -398,7 +398,7 @@ agentBuilder.skills.register({
   // full text content of the skill, which can be accessed via the filesystem
   content: 'full text content of the skill, in markdown format',
   // list of tools (from the tool registry) which will be enabled when the skill is read
-  getAllowedTools: () => ['platform.core.generate_esql'],
+  getRegistryTools: () => ['platform.core.generate_esql'],
   // list of inline tools which will be enabled when the skill is read
   getInlineTools: () => [myInlineToolDefinition]
 });
