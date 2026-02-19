@@ -138,6 +138,18 @@ describe('EbtTelemetryClient', () => {
         output_tokens_used: 150,
         stream_name: 'test-stream',
         stream_type: 'wired',
+        tool_usage: {
+          get_stream_features: {
+            calls: 1,
+            failures: 0,
+            latency_ms: 100,
+          },
+          add_queries: {
+            calls: 1,
+            failures: 0,
+            latency_ms: 100,
+          },
+        },
       });
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
@@ -149,6 +161,18 @@ describe('EbtTelemetryClient', () => {
           output_tokens_used: 150,
           stream_name: 'test-stream',
           stream_type: 'wired',
+          tool_usage: {
+            get_stream_features: {
+              calls: 1,
+              failures: 0,
+              latency_ms: 100,
+            },
+            add_queries: {
+              calls: 1,
+              failures: 0,
+              latency_ms: 100,
+            },
+          },
         }
       );
     });
