@@ -46,6 +46,27 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
       skip: () => ctx.updatedTypes.length === 0,
     },
     {
+      title: 'Validating updated types against current serverless baseline',
+      task: (_, subtask) => {
+        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes
+          .filter(({ name }) => Boolean(ctx.serverlessFrom!.typeDefinitions[name]))
+          .map(({ name }) => ({
+            title: `Checking updates on type '${name}' against serverless baseline`,
+            task: () =>
+              validateChangesExistingType({
+                from: ctx.serverlessFrom!.typeDefinitions[name],
+                to: ctx.to?.typeDefinitions[name]!,
+              }),
+          }));
+
+        return subtask.newListr<TaskContext>(validateChangesTasks, {
+          exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
+        });
+      },
+      skip: () => !ctx.serverlessFrom || ctx.updatedTypes.length === 0,
+    },
+    {
       title: 'Verifying fixtures for updated types',
       task: (_, subtask) => {
         const loadFixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {

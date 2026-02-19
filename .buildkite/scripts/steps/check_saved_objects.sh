@@ -46,6 +46,25 @@ findExistingSnapshotSha() {
   return 1
 }
 
+resolveCurrentServerlessReleaseSha() {
+  local serverless_release_rev
+  local serverless_release_sha
+
+  serverless_release_rev="$(node scripts/get_serverless_release_sha)"
+  if [[ $? -ne 0 ]]; then
+    echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
+    exit 1
+  fi
+
+  serverless_release_sha="$(git rev-parse "$serverless_release_rev")"
+  if [[ $? -ne 0 || -z "$serverless_release_sha" ]]; then
+    echo "❌ Couldn't expand current serverless release SHA. Aborting Saved Objects checks." >&2
+    exit 1
+  fi
+
+  echo "$serverless_release_sha"
+}
+
 echo --- Check changes in Saved Objects
 
 if is_pr; then
@@ -57,31 +76,24 @@ if is_pr; then
     exit 1
   fi
 
+  SERVERLESS_BASELINE_FLAG=()
+  if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
+    GITHUB_SERVERLESS_RELEASE_SHA="$(resolveCurrentServerlessReleaseSha)"
+    SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_RELEASE_SHA")
+  fi
+
   if ! is_auto_commit_disabled; then
     # The step might update files like removed_types.json and/or SO fixtures
-    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" --fix
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --fix
     check_for_changed_files "node scripts/check_saved_objects" true
   else
-    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV"
+    node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}"
   fi
 else
   # We are on the 'on-merge' pipeline, the goal is to test against current serverless release,
   # and ONLY if we are in the main branch (older versions most likely won't be compatible)
   if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
-    # Obtain the current serverless release SHA from serverless-gitops
-    GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
-    if [[ $? -ne 0 ]]; then
-      echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
-      exit 1
-    fi
-
-    # Expand to get the full SHA
-    GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse "$GITHUB_SERVERLESS_RELEASE_REV")"
-    if [[ $? -ne 0 || -z "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
-      echo "❌ Couldn't expand current serverless release SHA. Skipping check against Serverless baseline."  >&2
-      exit 1
-    fi
-
+    GITHUB_SERVERLESS_RELEASE_SHA="$(resolveCurrentServerlessReleaseSha)"
     # Perform the check against current serverless release
     node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
   fi
