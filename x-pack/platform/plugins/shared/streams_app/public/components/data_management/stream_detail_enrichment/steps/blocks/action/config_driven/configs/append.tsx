@@ -77,16 +77,24 @@ export const appendProcessorConfig: ConfigDrivenProcessorConfiguration<
   ),
   getDocUrl: (docLinks: DocLinksStart) => {
     return (
-      <EuiLink
-        data-test-subj="streamsAppAvailableProcessorsAppendLink"
-        external
-        target="_blank"
-        href={docLinks.links.ingest.append}
-      >
-        {i18n.translate('xpack.streams.availableProcessors.appendLinkLabel', {
-          defaultMessage: 'Appends values to a field.',
-        })}
-      </EuiLink>
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.appendHelpText"
+        defaultMessage="{appendLink}. If the field is missing or a scalar, it's created or converted to an array first."
+        values={{
+          appendLink: (
+            <EuiLink
+              data-test-subj="streamsAppAvailableProcessorsAppendLink"
+              external
+              target="_blank"
+              href={docLinks.links.ingest.append}
+            >
+              {i18n.translate('xpack.streams.availableProcessors.appendLinkLabel', {
+                defaultMessage: 'Append one or more values to an existing array',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
     );
   },
   defaultFormState,

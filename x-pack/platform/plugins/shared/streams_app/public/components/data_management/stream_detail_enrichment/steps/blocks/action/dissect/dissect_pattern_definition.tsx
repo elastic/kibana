@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { useController, useFormContext } from 'react-hook-form';
-import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useKibana } from '../../../../../../../hooks/use_kibana';
 import { useAIFeatures } from '../../../../../../../hooks/use_ai_features';
 import type { ProcessorFormState } from '../../../../types';
 
@@ -23,8 +21,6 @@ const DissectPatternAISuggestions = dynamic(() =>
 );
 
 export const DissectPatternDefinition = () => {
-  const { core } = useKibana();
-  const esDocUrl = core.docLinks.links.ingest.dissectKeyModifiers;
   const aiFeatures = useAIFeatures();
   const { setValue } = useFormContext();
 
@@ -47,27 +43,6 @@ export const DissectPatternDefinition = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsLabel',
           { defaultMessage: 'Pattern' }
         )}
-        helpText={
-          <FormattedMessage
-            id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsHelpText"
-            defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
-            values={{
-              keyModifier: (
-                <EuiLink
-                  data-test-subj="streamsAppDissectPatternDefinitionKeyModifierLink"
-                  target="_blank"
-                  external
-                  href={esDocUrl}
-                >
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.processor.dissectPatternDefinitionsLink',
-                    { defaultMessage: 'key modifier' }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        }
         isInvalid={invalid}
         error={error?.message}
         fullWidth

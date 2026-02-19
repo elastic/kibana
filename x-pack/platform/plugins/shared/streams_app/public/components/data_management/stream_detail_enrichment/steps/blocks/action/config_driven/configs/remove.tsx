@@ -56,7 +56,7 @@ export const removeProcessorConfig: ConfigDrivenProcessorConfiguration<
         href={docLinks.links.ingest.remove}
       >
         {i18n.translate('xpack.streams.availableProcessors.removeLinkLabel', {
-          defaultMessage: 'Removes a field.',
+          defaultMessage: 'Remove a specific field.',
         })}
       </EuiLink>
     );

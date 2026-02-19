@@ -137,7 +137,7 @@ const getAvailableProcessors: (
     getDocUrl: () => (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateHelpText"
-        defaultMessage="Converts a date to a document timestamp."
+        defaultMessage="Convert a date to a document timestamp."
       />
     ),
   },
@@ -157,7 +157,7 @@ const getAvailableProcessors: (
               href={docLinks.links.ingest.dissect}
             >
               {i18n.translate('xpack.streams.availableProcessors.dissectLinkLabel', {
-                defaultMessage: 'dissect',
+                defaultMessage: 'Dissect',
               })}
             </EuiLink>
           ),
@@ -211,7 +211,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.convert}
               >
                 {i18n.translate('xpack.streams.availableProcessors.convertLinkLabel', {
-                  defaultMessage: 'Converts a field to a different data type',
+                  defaultMessage: 'Convert a field to a different data type',
                 })}
               </EuiLink>
             ),
@@ -232,7 +232,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setProcessorHelpText"
-          defaultMessage="{setLink}, creating the field if it doesn't exist or overwriting it if it does."
+          defaultMessage="{setLink}, creating the field if it doesn't exist, or overwriting it if it does."
           values={{
             setLink: (
               <EuiLink
@@ -273,7 +273,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.gsub}
               >
                 {i18n.translate('xpack.streams.availableProcessors.replaceLinkLabel', {
-                  defaultMessage: 'Replaces parts of a string field.',
+                  defaultMessage: 'Replace parts of a string field',
                 })}
               </EuiLink>
             ),
@@ -323,16 +323,24 @@ const getAvailableProcessors: (
     ),
     getDocUrl: (docLinks: DocLinksStart) => {
       return (
-        <EuiLink
-          data-test-subj="streamsAppAvailableProcessorsDropLink"
-          external
-          target="_blank"
-          href={docLinks.links.ingest.drop}
-        >
-          {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
-            defaultMessage: 'Drops the document without raising any errors.',
-          })}
-        </EuiLink>
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dropHelpText"
+          defaultMessage="{dropLink} and prevent it from being indexed without raising errors."
+          values={{
+            dropLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsDropLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.drop}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
+                  defaultMessage: 'Set a condition to drop a document',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
       );
     },
   },
@@ -348,8 +356,9 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
-          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          defaultMessage="Evaluates {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
           values={{
+            expressionNote: <strong>arithmetic or logical expressions</strong>,
             example: (
               <>
                 <EuiCode>bytes / duration </EuiCode>
@@ -382,7 +391,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.uppercase}
               >
                 {i18n.translate('xpack.streams.availableProcessors.uppercaseLinkLabel', {
-                  defaultMessage: 'Converts a string to its uppercase equivalent.',
+                  defaultMessage: 'Convert a string field to uppercase',
                 })}
               </EuiLink>
             ),
@@ -413,7 +422,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.lowercase}
               >
                 {i18n.translate('xpack.streams.availableProcessors.lowercaseLinkLabel', {
-                  defaultMessage: 'Converts a string to its lowercase equivalent.',
+                  defaultMessage: 'Convert a string field to lowercase',
                 })}
               </EuiLink>
             ),
@@ -444,7 +453,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.trim}
               >
                 {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
-                  defaultMessage: 'Trims whitespace from field',
+                  defaultMessage: 'Remove leading and trailing whitespace from a field',
                 })}
               </EuiLink>
             ),

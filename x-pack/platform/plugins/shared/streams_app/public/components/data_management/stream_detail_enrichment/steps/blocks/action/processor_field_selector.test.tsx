@@ -121,7 +121,7 @@ describe('ProcessorFieldSelector', () => {
     it('renders with default labels', () => {
       renderComponent();
 
-      expect(screen.getByLabelText('Source Field')).toBeInTheDocument();
+      expect(screen.getByLabelText('Field')).toBeInTheDocument();
       expect(screen.getByText('Select or enter a field name')).toBeInTheDocument();
     });
 

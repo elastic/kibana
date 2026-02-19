@@ -78,16 +78,24 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
   ),
   getDocUrl: (docLinks: DocLinksStart) => {
     return (
-      <EuiLink
-        data-test-subj="streamsAppAvailableProcessorsRenameLink"
-        external
-        target="_blank"
-        href={docLinks.links.ingest.rename}
-      >
-        {i18n.translate('xpack.streams.availableProcessors.renameLinkLabel', {
-          defaultMessage: 'Renames an existing field.',
-        })}
-      </EuiLink>
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.renameHelpText"
+        defaultMessage="{renameLink}."
+        values={{
+          renameLink: (
+            <EuiLink
+              data-test-subj="streamsAppAvailableProcessorsRenameLink"
+              external
+              target="_blank"
+              href={docLinks.links.ingest.rename}
+            >
+              {i18n.translate('xpack.streams.availableProcessors.renameLinkLabel', {
+                defaultMessage: 'Rename an existing field',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
     );
   },
   defaultFormState,
