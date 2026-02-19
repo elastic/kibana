@@ -6,12 +6,10 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useContext } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import type { WorkflowOption } from '../../components/common/workflow_combo_box';
 import { queryKeys } from '../../query_keys';
-import { AgentBuilderServicesContext } from '../../context/agent_builder_services_context';
 
 interface UseListWorkflowsKibanaServices {
   http?: HttpSetup;
@@ -22,7 +20,6 @@ interface ListWorkflowsResponse {
 }
 
 export const useListWorkflows = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const agentBuilderServices = useContext(AgentBuilderServicesContext);
   const {
     services: { http },
   } = useKibana<UseListWorkflowsKibanaServices>();
@@ -33,19 +30,14 @@ export const useListWorkflows = ({ enabled = true }: { enabled?: boolean } = {})
       if (!http) {
         return { results: [] };
       }
-
-      try {
-        const response = await http.post<ListWorkflowsResponse>('/api/workflows/search', {
-          body: JSON.stringify({
-            size: 1000,
-            page: 1,
-            enabled: [true],
-          }),
-        });
-        return response ?? { results: [] };
-      } catch {
-        return { results: [] };
-      }
+      const response = await http.post<ListWorkflowsResponse>('/api/workflows/search', {
+        body: JSON.stringify({
+          size: 1000,
+          page: 1,
+          enabled: [true],
+        }),
+      });
+      return response ?? { results: [] };
     },
     enabled: enabled && !!http,
   });

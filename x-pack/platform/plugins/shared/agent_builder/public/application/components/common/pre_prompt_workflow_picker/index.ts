@@ -6,4 +6,4 @@
  */
 
 export { PrePromptWorkflowPicker } from './pre_prompt_workflow_picker';
-export type { PrePromptWorkflowPickerProps, WorkflowOption } from './pre_prompt_workflow_picker';
+export type { PrePromptWorkflowPickerProps } from './pre_prompt_workflow_picker';

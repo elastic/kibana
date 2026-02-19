@@ -30,6 +30,7 @@ export const WorkflowComboBox: React.FC<WorkflowComboBoxProps> = ({
   value,
   onChange,
   singleSelection = false,
+  'data-test-subj': dataTestSubj = 'workflowComboBox',
   ...comboBoxProps
 }) => {
   const toOption = (workflow: WorkflowOption): EuiComboBoxOptionOption<string> => ({
@@ -67,7 +68,7 @@ export const WorkflowComboBox: React.FC<WorkflowComboBoxProps> = ({
         onChange(newSelectedOptions.flatMap((option) => (option.value ? [option.value] : [])))
       }
       singleSelection={singleSelection ? { asPlainText: false } : undefined}
-      data-test-subj="workflowComboBox"
+      data-test-subj={dataTestSubj}
     />
   );
 };

@@ -70,7 +70,7 @@ describe('GenAiSettingsApp', () => {
     },
     'genAiSettings:prePromptWorkflowIds': {
       value: [],
-      type: 'json',
+      type: 'array',
     },
     [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,

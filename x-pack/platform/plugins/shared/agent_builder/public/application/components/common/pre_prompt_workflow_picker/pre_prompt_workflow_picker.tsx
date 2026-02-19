@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useId, useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,7 +25,6 @@ export interface PrePromptWorkflowPickerProps {
   error?: string;
   description?: React.ReactNode;
   labelAppend?: React.ReactNode;
-  hideWhenPreExecutionWorkflowDisabled?: boolean;
   'data-test-subj'?: string;
   'aria-label'?: string;
 }
@@ -65,20 +64,18 @@ export const PrePromptWorkflowPicker: React.FC<PrePromptWorkflowPickerProps> = (
   error,
   description = DESCRIPTION,
   labelAppend,
-  hideWhenPreExecutionWorkflowDisabled = false,
   'data-test-subj': dataTestSubj = 'prePromptWorkflowPicker',
   'aria-label': ariaLabel = ARIA_LABEL,
 }) => {
+  const titleId = useId();
   const {
     services: { settings },
   } = useKibana<PrePromptWorkflowPickerKibanaServices>();
   const shouldFetchWorkflows = workflows === undefined;
-  const shouldRender = !hideWhenPreExecutionWorkflowDisabled
-    ? true
-    : isPreExecutionWorkflowEnabled(settings.client);
+  const shouldRender = isPreExecutionWorkflowEnabled(settings.client);
 
   const { data: loadedWorkflows = [], isLoading: isLoadingWorkflows } = useListWorkflows({
-    enabled: shouldFetchWorkflows,
+    enabled: shouldFetchWorkflows && shouldRender,
   });
 
   const workflowOptions = useMemo(() => workflows ?? loadedWorkflows, [workflows, loadedWorkflows]);
@@ -93,7 +90,7 @@ export const PrePromptWorkflowPicker: React.FC<PrePromptWorkflowPickerProps> = (
       direction="row"
       gutterSize="xl"
       alignItems="flexStart"
-      aria-labelledby="pre-execution-workflow-title"
+      aria-labelledby={titleId}
       data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={1}>
@@ -101,7 +98,7 @@ export const PrePromptWorkflowPicker: React.FC<PrePromptWorkflowPickerProps> = (
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiIcon type="play" aria-hidden={true} />
             <EuiTitle size="xs">
-              <h2 id="pre-execution-workflow-title">{TITLE}</h2>
+              <h2 id={titleId}>{TITLE}</h2>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiText size="s" color="subdued">

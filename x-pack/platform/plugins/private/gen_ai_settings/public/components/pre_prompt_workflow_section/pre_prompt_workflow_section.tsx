@@ -9,13 +9,14 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PrePromptWorkflowPicker } from '@kbn/agent-builder-plugin/public';
+import { GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
-const GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS = 'genAiSettings:prePromptWorkflowIds';
-
 function toStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((x): x is string => typeof x === 'string') : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 }
 
 export const PrePromptWorkflowSection: React.FC = () => {
@@ -51,7 +52,6 @@ export const PrePromptWorkflowSection: React.FC = () => {
         value={currentValue}
         onChange={handleChange}
         isDisabled={!canEditAdvancedSettings}
-        hideWhenPreExecutionWorkflowDisabled={true}
         description={i18n.translate('xpack.genAiSettings.preExecutionWorkflow.description', {
           defaultMessage:
             'Runs as soon as an agent is invoked, before the LLM call. This setting applies to all agents.',

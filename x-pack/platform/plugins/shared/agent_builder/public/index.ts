@@ -21,10 +21,8 @@ export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
 export { RobotIcon as agentBuilderIconType };
 export { AGENTBUILDER_FEATURE_ID };
 export { PrePromptWorkflowPicker } from './application/components/common/pre_prompt_workflow_picker';
-export type {
-  PrePromptWorkflowPickerProps,
-  WorkflowOption,
-} from './application/components/common/pre_prompt_workflow_picker';
+export type { PrePromptWorkflowPickerProps } from './application/components/common/pre_prompt_workflow_picker';
+export type { WorkflowOption } from './application/components/common/workflow_combo_box';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
