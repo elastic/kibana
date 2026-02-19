@@ -34,6 +34,7 @@ interface FieldRulesPanelRowItemProps {
 
 export const FIELD_RULE_POLICY_COLUMN_WIDTH = 220;
 export const FIELD_RULE_MASK_COLUMN_WIDTH = 180;
+export const FIELD_RULE_SELECTION_COLUMN_WIDTH = 24;
 const ENTITY_CLASS_OPTIONS = [
   {
     value: '',
@@ -64,7 +65,7 @@ export const FieldRulesPanelRowItem = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ width: FIELD_RULE_SELECTION_COLUMN_WIDTH }}>
         <EuiCheckbox
           id={`fieldRuleSelect-${rule.field}`}
           aria-label={i18n.translate('anonymizationUi.profiles.fieldRules.selectFieldAriaLabel', {
@@ -76,8 +77,8 @@ export const FieldRulesPanelRowItem = ({
           disabled={isRuleDisabled}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
+      <EuiFlexItem style={{ minWidth: 0 }}>
+        <EuiText size="s" style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
           <strong>{rule.field}</strong>
         </EuiText>
       </EuiFlexItem>

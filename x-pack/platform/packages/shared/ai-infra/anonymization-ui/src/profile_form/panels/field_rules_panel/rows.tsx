@@ -21,6 +21,7 @@ import { useFieldRulesPanelContext } from './context';
 import {
   FIELD_RULE_MASK_COLUMN_WIDTH,
   FIELD_RULE_POLICY_COLUMN_WIDTH,
+  FIELD_RULE_SELECTION_COLUMN_WIDTH,
   FieldRulesPanelRowItem,
 } from './row_item';
 
@@ -63,8 +64,8 @@ export const FieldRulesPanelRows = () => {
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} style={{ width: 24 }} />
-        <EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: FIELD_RULE_SELECTION_COLUMN_WIDTH }} />
+        <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="xs">
             <EuiTextColor color="subdued">
               {i18n.translate('anonymizationUi.profiles.fieldRules.header.field', {
