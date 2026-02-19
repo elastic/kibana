@@ -32,7 +32,7 @@ export const IncompatibleAgentVersionCallout: React.FC<{
         ) : (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
-            defaultMessage="The selected agent policies have no agents in a version compatible with the integration."
+            defaultMessage="None of the agents using the selected agent policy are compatible with this integration."
           />
         )}
       </EuiCallOut>
