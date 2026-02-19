@@ -32,6 +32,14 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
+  executionHistory: schema.object({
+    migration: schema.object({
+      olderThan: schema.duration({ defaultValue: '1d' }),
+    }),
+    cleanup: schema.object({
+      olderThan: schema.duration({ defaultValue: '3d' }),
+    }),
+  }),
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;

@@ -57,6 +57,7 @@ export class WorkflowExecutionState {
       ...this.workflowExecution,
       ...workflowExecution,
       id: this.workflowExecution.id,
+      workflowRunId: this.workflowExecution.id,
       type: 'workflow',
       stepExecutionIds: Array.from(this.stepExecutions.values())
         .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
@@ -144,6 +145,7 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      createdAt: step.startedAt,
       type: 'step',
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);

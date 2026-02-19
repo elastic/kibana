@@ -8,7 +8,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { NonTerminalExecutionStatuses, type EsExecution } from '@kbn/workflows';
+import {
+  type EsExecution,
+  NonTerminalExecutionStatuses,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common';
 
 export interface FindExecutionsOptions {
@@ -150,15 +154,53 @@ export class ExecutionStateRepository {
     });
   }
 
-  public async bulkDelete(executionIds: Set<string>): Promise<void> {
-    if (executionIds.size === 0) {
-      return;
-    }
+  /**
+   * Deletes terminal executions older than the given date, but only for workflow runs
+   * where ALL documents (workflow + steps) are in terminal status.
+   * This prevents deleting steps belonging to a workflow that still has active steps.
+   */
+  public async deleteTerminalExecutionsOlderThan(olderThan: Date): Promise<void> {
+    const activeRunIds = await this.getWorkflowRunIdsWithNonTerminalExecutions();
 
-    await this.esClient.bulk({
+    await this.esClient.deleteByQuery({
       index: this.indexName,
-      body: Array.from(executionIds).map((id) => ({ delete: { _id: id } })),
+      wait_for_completion: true,
+      conflicts: 'proceed',
+      query: {
+        bool: {
+          filter: [
+            { terms: { status: [...TerminalExecutionStatuses] } },
+            { range: { createdAt: { lt: olderThan.toISOString() } } },
+          ],
+          ...(activeRunIds.length > 0
+            ? { must_not: [{ terms: { workflowRunId: activeRunIds } }] }
+            : {}),
+        },
+      },
     });
+  }
+
+  private async getWorkflowRunIdsWithNonTerminalExecutions(): Promise<string[]> {
+    const response = await this.esClient.search({
+      index: this.indexName,
+      size: 0,
+      query: {
+        bool: {
+          filter: [{ terms: { status: [...NonTerminalExecutionStatuses] } }],
+        },
+      },
+      aggs: {
+        active_runs: {
+          terms: { field: 'workflowRunId', size: 10000 },
+        },
+      },
+    });
+
+    const aggs = response.aggregations as
+      | { active_runs?: { buckets: Array<{ key: string }> } }
+      | undefined;
+
+    return aggs?.active_runs?.buckets.map((b) => b.key) ?? [];
   }
 
   /**

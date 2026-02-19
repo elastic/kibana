@@ -85,6 +85,7 @@ export interface QueueMetrics {
 
 export interface EsBaseExecution {
   id: string;
+  workflowRunId: string;
   type: unknown;
   spaceId: string;
   status: ExecutionStatus;
@@ -132,7 +133,6 @@ export interface EsWorkflowStepExecution extends EsBaseExecution {
 
   /** Current step's stack frames. */
   scopeStack: StackFrame[];
-  workflowRunId: string;
   workflowId: string;
   duration?: number; // TODO: remove executionTimeMs
   executionTimeMs?: number;

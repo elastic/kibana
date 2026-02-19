@@ -61,7 +61,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
-import { createIndexes } from '../common';
+import { createIndexes, WORKFLOWS_EXECUTION_STATE_INDEX } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -257,30 +257,64 @@ export class WorkflowsExecutionEnginePlugin
         createTaskRunner: () => {
           return {
             run: async () => {
-              // TODO: implement migration logic
-              logger.info('workflow:migrate-executions task triggered (not yet implemented)');
+              try {
+                const [coreStart] = await core.getStartServices();
+                const workflowExecutionRepository = await createWorkflowExecutionRepository(
+                  coreStart.dataStreams,
+                  coreStart.elasticsearch.client.asInternalUser
+                );
+                const stepExecutionRepository = await createStepExecutionRepository(
+                  coreStart.dataStreams,
+                  coreStart.elasticsearch.client.asInternalUser
+                );
+                const executionStateRepository = new ExecutionStateRepository(
+                  coreStart.elasticsearch.client.asInternalUser
+                );
+                const migrationOlderThan = new Date(
+                  Date.now() - config.executionHistory.migration.olderThan.asMilliseconds()
+                );
+                const cleanupOlderThan = new Date(
+                  Date.now() - config.executionHistory.cleanup.olderThan.asMilliseconds()
+                );
+
+                await workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
+                  sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                  olderThan: migrationOlderThan,
+                });
+                await stepExecutionRepository.reindexCompletedStepExecutionsFrom({
+                  sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                  olderThan: migrationOlderThan,
+                });
+                await executionStateRepository.deleteTerminalExecutionsOlderThan(cleanupOlderThan);
+                logger.info(
+                  `Scheduled workflow/step execution migration older than ${migrationOlderThan.toISOString()} and cleanup older than ${cleanupOlderThan.toISOString()}`
+                );
+              } catch (error) {
+                logger.error(`Error during workflow/step execution migration: ${error}`);
+                throw error;
+              }
             },
           };
         },
       },
     });
-    plugins.taskManager.registerTaskDefinitions({
-      'workflow:cleanup-executions': {
-        title: 'Cleanup Stale Executions from Hot Storage',
-        description:
-          'Deletes terminal workflow and step executions older than 3 days from hot storage (execution state)',
-        timeout: '10m',
-        maxAttempts: 3,
-        createTaskRunner: () => {
-          return {
-            run: async () => {
-              // TODO: implement cleanup logic
-              logger.info('workflow:cleanup-executions task triggered (not yet implemented)');
-            },
-          };
-        },
-      },
-    });
+    // plugins.taskManager.registerTaskDefinitions({
+    //   'workflow:cleanup-executions': {
+    //     title: 'Cleanup Stale Executions from Hot Storage',
+    //     description:
+    //       'Deletes terminal workflow and step executions older than 3 days from hot storage (execution state)',
+    //     timeout: '10m',
+    //     maxAttempts: 3,
+    //     createTaskRunner: () => {
+    //       return {
+    //         run: async () => {
+    //           // TODO: implement cleanup logic
+    //           logger.info('workflow:cleanup-executions task triggered (not yet implemented)');
+    //         },
+    //       };
+    //     },
+    //   },
+    // });
     plugins.taskManager.registerTaskDefinitions({
       'workflow:scheduled': {
         title: 'Scheduled Workflow Execution',
@@ -515,7 +549,8 @@ export class WorkflowsExecutionEnginePlugin
       .ensureScheduled({
         id: 'workflow:migrate-executions',
         taskType: 'workflow:migrate-executions',
-        schedule: { interval: '1d' },
+        // schedule: { interval: '1d' },
+        schedule: { interval: '1m' },
         params: {},
         state: {},
         scope: ['workflows'],
@@ -524,18 +559,18 @@ export class WorkflowsExecutionEnginePlugin
         this.logger.error(`Failed to schedule execution migration task: ${err.message}`);
       });
 
-    plugins.taskManager
-      .ensureScheduled({
-        id: 'workflow:cleanup-executions',
-        taskType: 'workflow:cleanup-executions',
-        schedule: { interval: '7d' },
-        params: {},
-        state: {},
-        scope: ['workflows'],
-      })
-      .catch((err: Error) => {
-        this.logger.error(`Failed to schedule execution cleanup task: ${err.message}`);
-      });
+    // plugins.taskManager
+    //   .ensureScheduled({
+    //     id: 'workflow:cleanup-executions',
+    //     taskType: 'workflow:cleanup-executions',
+    //     schedule: { interval: '7d' },
+    //     params: {},
+    //     state: {},
+    //     scope: ['workflows'],
+    //   })
+    //   .catch((err: Error) => {
+    //     this.logger.error(`Failed to schedule execution cleanup task: ${err.message}`);
+    //   });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,

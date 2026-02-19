@@ -22,6 +22,7 @@ export const BASIC_MAPPINGS: Record<PropertyName, MappingProperty> = {
   id: mappings.keyword(),
   spaceId: mappings.keyword(),
   workflowId: mappings.keyword(),
+  workflowRunId: mappings.keyword(),
   status: mappings.keyword(),
   createdAt: mappings.date(),
 };

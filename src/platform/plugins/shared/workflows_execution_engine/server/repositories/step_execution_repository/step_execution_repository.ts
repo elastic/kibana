@@ -8,7 +8,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import {
+  TerminalExecutionStatuses,
+  type EsWorkflowStepExecution,
+  type ExecutionStatus,
+} from '@kbn/workflows';
 import type { StepExecutionDataStreamClient } from './data_stream';
 import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './data_stream';
 
@@ -48,26 +52,32 @@ export class StepExecutionRepository {
     });
   }
 
-  public async reindexFrom(sourceIndex: string, workflowExecutionId: string): Promise<void> {
-    try {
-      const response = await this.esClient.reindex({
-        source: {
-          index: sourceIndex,
-          query: {
-            bool: {
-              filter: [
-                { term: { workflowRunId: workflowExecutionId } },
-                { term: { type: 'step' } },
-              ],
-            },
+  public async reindexCompletedStepExecutionsFrom(params: {
+    sourceIndex: string;
+    olderThan: Date;
+  }): Promise<void> {
+    const { sourceIndex, olderThan } = params;
+
+    await this.esClient.reindex({
+      // wait_for_completion: false,
+      wait_for_completion: true,
+      conflicts: 'proceed',
+      source: {
+        index: sourceIndex,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'step' } },
+              { terms: { status: [...TerminalExecutionStatuses] } },
+              { range: { createdAt: { lt: olderThan.toISOString() } } },
+            ],
           },
         },
-        dest: { index: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM, op_type: 'create' },
-        // wait_for_completion: false,
-      });
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
+      },
+      dest: { index: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM, op_type: 'create' },
+      script: {
+        source: "ctx._source['@timestamp'] = ctx._source.createdAt",
+      },
+    });
   }
 }

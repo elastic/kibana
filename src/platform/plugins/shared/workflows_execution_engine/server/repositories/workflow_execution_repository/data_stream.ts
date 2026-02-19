@@ -40,6 +40,7 @@ const workflowExecutionMappings = {
     finishedAt: mappings.date(),
     duration: mappings.long(),
     triggeredBy: mappings.keyword(),
+    type: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
