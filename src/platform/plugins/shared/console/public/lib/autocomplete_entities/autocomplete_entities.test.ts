@@ -438,7 +438,7 @@ describe('Autocomplete entities', () => {
   });
 
   describe('Templates', function () {
-    test('templates, index templates, component templates', function () {
+    test('legacy templates, index templates, component templates', function () {
       legacyTemplate.loadTemplates({
         test_index1: createLegacyTemplateMapping(),
         test_index2: createLegacyTemplateMapping(),
