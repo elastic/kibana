@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -231,7 +232,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             key="sources"
             icon="plugs"
             onClick={closePopover}
-            href={application.getUrlForApp('data_sources')}
+            href={application.getUrlForApp(DATA_SOURCES_APP_ID)}
             data-test-subj="agentBuilderActionsSources"
           >
             {fullscreenLabels.sources}
