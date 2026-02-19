@@ -35,8 +35,10 @@ if (!prConfig) {
   process.exit(1);
 }
 
-const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
+const GITHUB_PR_LABELS_RAW = process.env.GITHUB_PR_LABELS ?? '';
+const GITHUB_PR_LABELS = GITHUB_PR_LABELS_RAW.split(',').map((label) => label.trim());
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
+const PIPELINE_DEBUG = GITHUB_PR_LABELS.includes('ci:pipeline-debug');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
@@ -47,7 +49,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      emitPipeline([emptyStep]);
+      emitPipeline([emptyStep], { debug: PIPELINE_DEBUG });
       return;
     }
 
@@ -57,7 +59,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
-      emitPipeline(pipeline);
+      emitPipeline(pipeline, { debug: PIPELINE_DEBUG });
       return;
     }
 
@@ -581,7 +583,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
-    emitPipeline(pipeline);
+    emitPipeline(pipeline, { debug: PIPELINE_DEBUG });
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);

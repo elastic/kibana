@@ -9,9 +9,15 @@
 
 import fs from 'fs';
 
-export function emitPipeline(pipelineSteps: string[]) {
+interface EmitPipelineOptions {
+  debug?: boolean;
+}
+
+export function emitPipeline(pipelineSteps: string[], options: EmitPipelineOptions = {}) {
   const pipelineStr = [...new Set(pipelineSteps)].join('\n');
-  console.warn('debug:', pipelineSteps);
+  if (options.debug) {
+    console.warn('debug:', pipelineSteps);
+  }
   console.log(pipelineStr);
 }
 
