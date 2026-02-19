@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
@@ -30,6 +29,8 @@ import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -95,12 +96,11 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
-    ReactDOM.render(
+    createRoot(targetDomElement).render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
   }
 
