@@ -7,11 +7,6 @@
 
 import { MonitorFilters, MonitorOption } from "../../types";
 
-/**
- * Pre 9.4 the time_range state was stored in a camelCased key called timeRange.
- * This transform out function ensures that this state is not dropped when loading from
- * a legacy stored state. This should only be used for embeddables that existed before 9.4.
- */
 interface LegacyStoredFilters {
   monitorIds?: MonitorOption[];
   monitorTypes?: MonitorOption[];
