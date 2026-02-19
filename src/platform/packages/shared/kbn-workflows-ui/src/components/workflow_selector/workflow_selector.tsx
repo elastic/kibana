@@ -234,7 +234,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       return (
         <>
           {search}
-          {list}
+          <div style={{ maxHeight: '50vh', overflowY: 'auto' }}>{list}</div>
           {workflowOptions.length > 0 && (
             <EuiPanel
               paddingSize="s"
