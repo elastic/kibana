@@ -494,14 +494,9 @@ const referenceLineLayerShared = {
   ),
   color: schema.maybe(staticColorSchema),
   decoration_position: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('auto'),
-        schema.literal('left'),
-        schema.literal('right'),
-      ],
-      { meta: { description: 'Position of the icon and label relative to the reference line' } }
-    )
+    schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
+      meta: { description: 'Position of the icon and label relative to the reference line' },
+    })
   ),
   axis: schema.maybe(
     schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
