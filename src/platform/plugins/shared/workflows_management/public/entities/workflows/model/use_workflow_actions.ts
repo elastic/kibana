@@ -66,8 +66,10 @@ export function useWorkflowActions() {
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
+            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
+            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
