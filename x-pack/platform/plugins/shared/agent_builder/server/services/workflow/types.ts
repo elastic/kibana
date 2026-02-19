@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EmbeddableConversationProps } from '../embeddable/types';
+import type { WorkflowExecutionState } from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
 
-export interface OpenConversationFlyoutOptions extends EmbeddableConversationProps {
-  onClose?: () => void;
-}
+export type WorkflowExecutionResult =
+  | { success: true; execution: WorkflowExecutionState }
+  | { success: false; error: string };
