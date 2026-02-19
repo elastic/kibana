@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiButton } from '@elastic/eui';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AttachmentsService } from '../../../../../services/attachments/attachements_service';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { CanvasModeFlyout } from './canvas_mode_flyout';
 
 interface AttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -28,17 +27,15 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   isSidebar,
   conversationId,
 }) => {
-  const {
-    services: { settings },
-  } = useKibana();
-  const isExperimentalFeaturesEnabled = settings?.client.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
+  const [isCanvasFlyoutOpen, setIsCanvasFlyoutOpen] = useState(false);
 
-  if (isExperimentalFeaturesEnabled === false) {
-    return null;
-  }
+  const openCanvas = useCallback(() => {
+    setIsCanvasFlyoutOpen(true);
+  }, []);
+
+  const closeCanvas = useCallback(() => {
+    setIsCanvasFlyoutOpen(false);
+  }, []);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
@@ -53,6 +50,7 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
       // TODO: Implement updateOrigin
       //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
     },
+    openCanvas,
   });
 
   return (
@@ -62,7 +60,17 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
           {button.label}
         </EuiButton>
       ))}
-      {uiDefinition?.renderContent?.({ attachment, isSidebar })}
+      {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+      {isCanvasFlyoutOpen && uiDefinition?.renderCanvasContent && (
+        <CanvasModeFlyout
+          isOpen={isCanvasFlyoutOpen}
+          onClose={closeCanvas}
+          title={attachment.type}
+          isSidebar={isSidebar}
+        >
+          {uiDefinition.renderCanvasContent({ attachment, isSidebar })}
+        </CanvasModeFlyout>
+      )}
     </>
   );
 };
