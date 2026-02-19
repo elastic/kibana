@@ -8,6 +8,7 @@
 import type { Condition } from '@kbn/streamlang';
 import { useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { lastValueFrom } from 'rxjs';
 import { isEmpty } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -75,7 +76,7 @@ export function useReviewSuggestionsForm() {
       setSuggestions(response.partitions);
       setSuggestionReason(response.reason);
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (!isRequestAbortedError(error)) {
         showFetchErrorToast(error);
       }
     } finally {
