@@ -126,6 +126,7 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
+  results.totalEventsFound = eventCount;
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
