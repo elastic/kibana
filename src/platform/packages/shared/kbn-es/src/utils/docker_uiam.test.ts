@@ -94,7 +94,7 @@ describe(`#runUiamContainer()`, () => {
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
             "--name",
             "uiam-cosmosdb",
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251223",
+            "docker.elastic.co/kibana-ci/uiam-azure-cosmos-emulator:latest-verified",
             "--protocol",
             "https",
             "--port",
