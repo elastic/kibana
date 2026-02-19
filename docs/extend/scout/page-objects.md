@@ -44,4 +44,52 @@ export class NewPage {
 }
 ```
 
-Then register it so it becomes available as `pageObjects.newPage` (see `createLazyPageObject` usage in existing plugin fixtures).
+## Register a plugin page object [register-plugin-page-object]
+
+To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
+
+### 1. Register it in `fixtures/page_objects/index.ts`
+
+```ts
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import { NewPage } from './new_page';
+
+export interface MyPluginPageObjects extends PageObjects {
+  newPage: NewPage;
+}
+
+export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): MyPluginPageObjects {
+  return {
+    ...pageObjects,
+    newPage: createLazyPageObject(NewPage, page),
+  };
+}
+```
+
+### 2. Wire it into your plugin `test` fixture
+
+In `<plugin-root>/test/scout/ui/fixtures/index.ts`, extend Scout’s `test` so `pageObjects` uses your extended type:
+
+```ts
+import { test as base } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+
+import type { MyPluginPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
+
+export interface MyPluginTestFixtures extends ScoutTestFixtures {
+  pageObjects: MyPluginPageObjects;
+}
+
+export const test = base.extend<MyPluginTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: MyPluginPageObjects; page: ScoutPage },
+    use: (pageObjects: MyPluginPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
+});
+```
+
+Now your specs can use `pageObjects.newPage` without importing the page object class directly.

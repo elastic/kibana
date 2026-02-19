@@ -21,7 +21,7 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 | Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
 | Where should **shared values** live?     | [Use constants for shared test values](#use-constants-for-shared-test-values)                                          |
 | What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
-| How do I know if my test is **flaky**?   | [Use the Flaky Test Runner to catch flaky tests early](#use-the-flaky-test-runner-to-catch-flaky-tests-early)          |
+| How do I know if my test is **flaky**?   | [Run tests multiple times to catch flakiness](#use-the-flaky-test-runner-to-catch-flaky-tests-early)                   |
 
 **UI tests**
 
@@ -53,6 +53,25 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 ## UI & API tests [ui-and-api-tests]
 
 Best practices that apply to both UI and API tests.
+
+### Design tests with a cloud-first mindset [design-tests-with-a-cloud-first-mindset]
+
+Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
+
+- Tag suites with [deployment tags](./deployment-tags.md) and use `--grep` to target environments.
+- Prefer portable assumptions: don’t depend on “special” Cloud deployment tweaks for correctness.
+
+### Run tests multiple times to catch flakiness [use-the-flaky-test-runner-to-catch-flaky-tests-early]
+
+When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
+
+Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed.
+
+For how to reproduce flakiness locally and in CI (including `--grep` guidance), see [Debug flaky tests](./debugging.md#scout-debugging-flaky-tests).
+
+```bash
+/flaky scoutConfig:<Playwright config path>:<number of runs>
+```
 
 ### Keep test suites independent [keep-test-suites-independent]
 
@@ -139,21 +158,6 @@ await browserAuth.loginWithCustomRole('logs_analyst', {
   kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],
 });
 ```
-
-### Use the Flaky Test Runner [use-the-flaky-test-runner-to-catch-flaky-tests-early]
-
-Use the Flaky Test Runner when you add new tests, fix flakes, or make significant changes. A good starting point is **20–50 runs**.
-
-```bash
-/flaky scoutConfig:<Playwright config path>:<number of runs>
-```
-
-### Design tests with a cloud-first mindset [design-tests-with-a-cloud-first-mindset]
-
-Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
-
-- Tag suites with [deployment tags](./deployment-tags.md) and use `--grep` to target environments.
-- Prefer portable assumptions: don’t depend on “special” Cloud deployment tweaks for correctness.
 
 ---
 

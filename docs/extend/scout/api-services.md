@@ -31,3 +31,31 @@ test.afterAll(async ({ apiServices }) => {
 
 If you find repeated API setup/cleanup code across suites, add a helper to your plugin/solution’s `apiServices` extension. If it’s broadly useful, consider contributing it to `@kbn/scout` or your solution Scout package.
 
+## Extend `apiServices` in your plugin fixtures [extend-apiServices]
+
+You can add plugin-specific helpers by extending the `apiServices` fixture in your `fixtures/index.ts`.
+
+Example (API tests):
+
+```ts
+import type { ApiServicesFixture } from '@kbn/scout';
+import { apiTest as baseApiTest } from '@kbn/scout';
+import {
+  getMyFeatureApiService,
+  type MyFeatureApiService,
+} from '../services/my_feature_api_service';
+
+export interface MyFeatureApiServicesFixture extends ApiServicesFixture {
+  myFeature: MyFeatureApiService;
+}
+
+export const apiTest = baseApiTest.extend<{ apiServices: MyFeatureApiServicesFixture }>({
+  apiServices: async ({ apiServices, kbnClient, log }, use) => {
+    const extendedApiServices = apiServices as MyFeatureApiServicesFixture;
+    extendedApiServices.myFeature = getMyFeatureApiService({ kbnClient, log });
+    await use(extendedApiServices);
+  },
+});
+```
+
+Use the helper for **setup/teardown** (and keep the endpoint under test in `apiClient` for readable, scoped tests). See [best practices](./best-practices.md#api-tests).
