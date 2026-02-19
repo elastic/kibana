@@ -39,7 +39,7 @@ The `--grep` value should match the suite tags you use. See [Deployment tags](./
 
 ## Debug flaky tests [scout-debugging-flaky-tests]
 
-When you add new tests, fix flakes, or make significant changes, run the Flaky Test Runner (recommended: **20–50** runs). See [Best practices](./best-practices.md#use-the-flaky-test-runner-to-catch-flaky-tests-early).
+When you add new tests, fix flakes, or make significant changes, run the same tests multiple times (recommended: **20–50** runs). See [Best practices](./best-practices.md#use-the-flaky-test-runner-to-catch-flaky-tests-early).
 
 ### Repeat the same test locally [scout-debugging-flaky-tests-local]
 
@@ -52,7 +52,7 @@ Example (repeat a single spec 30 times):
 ```bash
 npx playwright test dashboard_search_by_value.spec.ts \
   --project mki \
-  --grep @local-serverless-search \
+  --grep @cloud-serverless-search \
   --config src/platform/plugins/shared/dashboard/test/scout/ui/parallel.playwright.config.ts \
   --repeat-each 30
 ```
