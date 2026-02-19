@@ -90,10 +90,22 @@ export interface WorkflowDetailHeaderProps {
   // TODO: manage it in a workflow state context
   highlightDiff: boolean;
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleVersionHistory?: () => void;
+  isVersionHistoryOpen?: boolean;
 }
 
+const historyButtonLabel = i18n.translate('workflows.workflowDetailHeader.versionHistory', {
+  defaultMessage: 'Version history',
+});
+
 export const WorkflowDetailHeader = React.memo(
-  ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
+  ({
+    isLoading,
+    highlightDiff,
+    setHighlightDiff,
+    onToggleVersionHistory,
+    isVersionHistoryOpen = false,
+  }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
@@ -283,6 +295,20 @@ export const WorkflowDetailHeader = React.memo(
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false} css={styles.separator} />
+                {workflowId && onToggleVersionHistory && (
+                  <EuiToolTip content={historyButtonLabel}>
+                    <EuiButtonIcon
+                      display={isVersionHistoryOpen ? 'fill' : 'base'}
+                      iconType="clock"
+                      size="s"
+                      onClick={onToggleVersionHistory}
+                      disabled={isLoading}
+                      aria-label={historyButtonLabel}
+                      aria-pressed={isVersionHistoryOpen}
+                      data-test-subj="workflowVersionHistoryHeaderButton"
+                    />
+                  </EuiToolTip>
+                )}
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon
                     color="success"

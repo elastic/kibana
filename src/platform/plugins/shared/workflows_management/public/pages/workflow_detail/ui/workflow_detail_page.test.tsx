@@ -53,11 +53,17 @@ jest.mock('./workflow_detail_editor', () => ({
   WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
 }));
 jest.mock('./workflow_detail_layout', () => ({
-  WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
+  WorkflowEditorLayout: ({
+    editor,
+    executionList,
+    executionDetail,
+    versionHistoryPanel,
+  }: any) => (
     <div data-test-subj="workflow-editor-layout">
       {editor}
       {executionList}
       {executionDetail}
+      {versionHistoryPanel}
     </div>
   ),
 }));

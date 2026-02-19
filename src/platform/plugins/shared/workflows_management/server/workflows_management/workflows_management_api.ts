@@ -151,8 +151,14 @@ export class WorkflowsManagementApi {
       from: opts?.from,
       size: opts?.size ?? 100,
     });
+    const startDate =
+      result.startDate instanceof Date
+        ? result.startDate.toISOString()
+        : typeof result.startDate === 'string'
+        ? result.startDate
+        : undefined;
     return {
-      startDate: result.startDate?.toISOString(),
+      startDate,
       total: result.total,
       items: result.items as unknown as Array<Record<string, unknown>>,
     };

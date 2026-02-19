@@ -19,6 +19,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { WorkflowVersionHistoryPanel } from '../../../features/workflow_version_history/ui/workflow_version_history_panel';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -77,6 +78,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
 
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
@@ -115,6 +117,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
+          onToggleVersionHistory={() => setIsVersionHistoryOpen((prev) => !prev)}
+          isVersionHistoryOpen={isVersionHistoryOpen}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -134,6 +138,24 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                   executionId={selectedExecutionId}
                   onClose={onCloseExecutionDetail}
                 />
+              ) : null
+            }
+            versionHistoryPanel={
+              id && isVersionHistoryOpen ? (
+                <div
+                  css={css({
+                    height: '100%',
+                    minHeight: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                  })}
+                >
+                  <WorkflowVersionHistoryPanel
+                    workflowId={id}
+                    onClose={() => setIsVersionHistoryOpen(false)}
+                  />
+                </div>
               ) : null
             }
           />
