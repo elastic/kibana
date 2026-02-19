@@ -23,7 +23,7 @@ interface EndpointAvailability {
   serverless?: boolean;
 }
 
-type UrlParamsValue = '__flag__' | string[];
+type UrlParamsValue = string | string[];
 type UrlParamsDef = Record<string, UrlParamsValue>;
 
 interface EndpointDescription {
@@ -32,7 +32,7 @@ interface EndpointDescription {
   id?: string;
   methods?: string[];
   patterns?: string[];
-  url_params?: Record<string, unknown>;
+  url_params?: UrlParamsDef;
   [key: string]: unknown;
 }
 
