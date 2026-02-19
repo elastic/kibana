@@ -82,6 +82,7 @@ export const searchSessionsUpdateSchema = schema.object({
   updated_at: schema.maybe(schema.string()),
   updated_by: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
+  // The search-sessions saved object definition specifies that the namespaces are 'single', that means only one space is allowed.
   namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   references: schema.maybe(referencesSchema),
   attributes: schema.object({
