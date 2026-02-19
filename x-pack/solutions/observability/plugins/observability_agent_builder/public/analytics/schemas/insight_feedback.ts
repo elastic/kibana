@@ -95,7 +95,7 @@ export const insightFailedEventSchema: EventTypeOpts<InsightFailedEvent> = {
   schema: {
     insightType: insightTypeSchema,
     errorMessage: {
-      type: 'keyword',
+      type: 'text',
       _meta: {
         description: 'The error message from the failed insight generation',
       },
