@@ -14,7 +14,7 @@ import { AiButton } from './ai_button';
 import { AiButtonDefault } from './ai_button_default';
 import { AiButtonEmpty } from './ai_button_empty';
 import { AiButtonIcon } from './ai_button_icon';
-import type { AiButtonVariant } from './ai_button_base';
+import type { AiButtonVariant } from './types';
 
 type AiIconType = 'aiAssistantLogo' | 'sparkles' | 'productAgent';
 
