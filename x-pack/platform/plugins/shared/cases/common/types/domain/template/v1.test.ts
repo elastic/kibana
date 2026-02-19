@@ -8,11 +8,11 @@
 import {
   TemplateSchema,
   ParsedTemplateSchema,
-  ParsedTemplateFieldSchema,
   CreateTemplateInputSchema,
   UpdateTemplateInputSchema,
   PatchTemplateInputSchema,
 } from './v1';
+import { FieldSchema } from './fields';
 
 describe('TemplateSchema', () => {
   const validTemplate = {
@@ -22,6 +22,7 @@ describe('TemplateSchema', () => {
     definition: 'fields:\n  - name: test_field\n    type: keyword',
     templateVersion: 1,
     deletedAt: null,
+    author: 'test-user',
   };
 
   it('validates a valid template', () => {
@@ -117,20 +118,16 @@ describe('TemplateSchema', () => {
   });
 });
 
-describe('ParsedTemplateFieldSchema', () => {
+describe('FieldSchema', () => {
   const validField = {
-    control: 'text-input',
+    control: 'INPUT_TEXT',
     name: 'test_field',
     label: 'Test Field',
     type: 'keyword' as const,
-    metadata: {
-      required: true,
-      default: 'default value',
-    },
   };
 
   it('validates a valid field', () => {
-    const result = ParsedTemplateFieldSchema.safeParse(validField);
+    const result = FieldSchema.safeParse(validField);
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -140,13 +137,12 @@ describe('ParsedTemplateFieldSchema', () => {
 
   it('accepts field without optional label', () => {
     const fieldWithoutLabel = {
-      control: 'text-input',
+      control: 'INPUT_TEXT',
       name: 'test_field',
       type: 'keyword' as const,
-      metadata: {},
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithoutLabel);
+    const result = FieldSchema.safeParse(fieldWithoutLabel);
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -160,15 +156,19 @@ describe('ParsedTemplateFieldSchema', () => {
       type: 'text', // should be 'keyword'
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(invalidField);
+    const result = FieldSchema.safeParse(invalidField);
 
     expect(result.success).toBe(false);
   });
 
   it('accepts metadata with any structure', () => {
     const fieldWithComplexMetadata = {
-      ...validField,
+      control: 'SELECT_BASIC',
+      name: 'test_field',
+      label: 'Test Field',
+      type: 'keyword' as const,
       metadata: {
+        options: ['a', 'b'],
         nested: {
           deeply: {
             value: 123,
@@ -179,7 +179,7 @@ describe('ParsedTemplateFieldSchema', () => {
       },
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithComplexMetadata);
+    const result = FieldSchema.safeParse(fieldWithComplexMetadata);
 
     expect(result.success).toBe(true);
   });
@@ -191,15 +191,15 @@ describe('ParsedTemplateSchema', () => {
     name: 'Test Template',
     owner: 'securitySolution',
     definition: {
+      name: 'template-definition-name',
       fields: [
         {
-          control: 'text-input',
+          control: 'INPUT_TEXT',
           name: 'field1',
           type: 'keyword' as const,
-          metadata: {},
         },
         {
-          control: 'select',
+          control: 'SELECT_BASIC',
           name: 'field2',
           label: 'Field 2',
           type: 'keyword' as const,
@@ -209,6 +209,7 @@ describe('ParsedTemplateSchema', () => {
     },
     templateVersion: 2,
     deletedAt: null,
+    author: 'test-user',
     isLatest: true,
     latestVersion: 2,
   };
@@ -226,6 +227,7 @@ describe('ParsedTemplateSchema', () => {
     const templateWithNoFields = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [],
       },
     };
@@ -258,16 +260,17 @@ describe('ParsedTemplateSchema', () => {
     const templateWithInvalidField = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [
           {
-            control: 'text-input',
+            control: 'INPUT_TEXT',
             name: 'valid_field',
             type: 'keyword' as const,
             metadata: {},
           },
           {
             // missing required properties
-            control: 'select',
+            control: 'SELECT_BASIC',
           },
         ],
       },
@@ -277,11 +280,37 @@ describe('ParsedTemplateSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('rejects parsed template with duplicate field names', () => {
+    const templateWithDuplicateFields = {
+      ...validParsedTemplate,
+      definition: {
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'duplicate_field',
+            type: 'keyword' as const,
+            metadata: {},
+          },
+          {
+            control: 'SELECT_BASIC',
+            name: 'duplicate_field',
+            label: 'Duplicate Field',
+            type: 'keyword' as const,
+            metadata: { options: ['a', 'b'] },
+          },
+        ],
+      },
+    };
+
+    const result = ParsedTemplateSchema.safeParse(templateWithDuplicateFields);
+
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CreateTemplateInputSchema', () => {
   const validCreateInput = {
-    name: 'New Template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: test_field\n    type: keyword',
   };
@@ -354,7 +383,6 @@ describe('CreateTemplateInputSchema', () => {
 
 describe('UpdateTemplateInputSchema', () => {
   const validUpdateInput = {
-    name: 'Updated Template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: updated_field\n    type: keyword',
   };
@@ -410,9 +438,19 @@ describe('UpdateTemplateInputSchema', () => {
     }
   });
 
-  it('requires all fields (PUT semantics)', () => {
+  it('accepts update input without name', () => {
+    const updateWithoutName = {
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: updated_field\n    type: keyword',
+    };
+
+    const result = UpdateTemplateInputSchema.safeParse(updateWithoutName);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('requires owner and definition (PUT semantics)', () => {
     const partialUpdate = {
-      name: 'Just updating name',
       // missing owner and definition
     };
 

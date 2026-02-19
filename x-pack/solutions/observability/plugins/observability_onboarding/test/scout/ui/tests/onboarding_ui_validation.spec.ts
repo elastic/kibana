@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -19,7 +20,13 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'validates main page structure and navigation',
-    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    {
+      tag: [
+        ...tags.stateful.classic,
+        ...tags.serverless.observability.complete,
+        ...tags.serverless.observability.logs_essentials,
+      ],
+    },
     async ({ page, pageObjects }) => {
       await test.step('shows core use case tiles', async () => {
         await expect(pageObjects.onboarding.hostUseCaseTile).toBeVisible();
@@ -83,7 +90,13 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'navigates correctly within Host Auto-Detect flow',
-    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    {
+      tag: [
+        ...tags.stateful.classic,
+        ...tags.serverless.observability.complete,
+        ...tags.serverless.observability.logs_essentials,
+      ],
+    },
     async ({ page, pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
@@ -93,7 +106,13 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'navigates correctly within Host OTel flow',
-    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    {
+      tag: [
+        ...tags.stateful.classic,
+        ...tags.serverless.observability.complete,
+        ...tags.serverless.observability.logs_essentials,
+      ],
+    },
     async ({ page, pageObjects }) => {
       await test.step('navigates correctly when OTel logs card is clicked', async () => {
         await pageObjects.onboarding.selectHostUseCase();
@@ -105,7 +124,13 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'navigates correctly within Kubernetes Host flow',
-    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    {
+      tag: [
+        ...tags.stateful.classic,
+        ...tags.serverless.observability.complete,
+        ...tags.serverless.observability.logs_essentials,
+      ],
+    },
     async ({ page, pageObjects }) => {
       await test.step('navigates correctly when Kubernetes quick-start card is clicked', async () => {
         await pageObjects.onboarding.selectKubernetesUseCase();
@@ -119,7 +144,13 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'Navigates correctly within Kubernetes Host flow using the keyboard only',
-    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    {
+      tag: [
+        ...tags.stateful.classic,
+        ...tags.serverless.observability.complete,
+        ...tags.serverless.observability.logs_essentials,
+      ],
+    },
     async ({ page, pageObjects }) => {
       await test.step('selects Kubernetes use case and shows integration cards', async () => {
         // tab to first item onboarding case card (radio group)
@@ -152,7 +183,7 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'validates logs-essentials tier restrictions',
-    { tag: ['@svlLogsEssentials'] },
+    { tag: tags.serverless.observability.logs_essentials },
     async ({ pageObjects }) => {
       await test.step('hides Application tile in logs-essentials tier', async () => {
         await expect(pageObjects.onboarding.applicationUseCaseTile).toBeHidden();

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type {
   CasesConnectorRunParams,
   OracleRecordAttributes,
@@ -1862,7 +1862,9 @@ const generateId = ({
   spaceId?: string;
   owner?: string;
 }) => {
-  const payload = [ruleId, spaceId, owner, stringify(grouping), counter].filter(Boolean).join(':');
+  const payload = [ruleId, spaceId, owner, stableStringify(grouping), counter]
+    .filter(Boolean)
+    .join(':');
   const hash = createHash('sha256');
 
   hash.update(payload);

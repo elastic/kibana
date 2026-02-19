@@ -41,7 +41,6 @@ import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/type
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 
 function getExtendedMap(
@@ -292,14 +291,11 @@ export function dataFrameAnalyticsRoutes(
           };
 
           try {
-            const resp = await mlClient.putDataFrameAnalytics(
-              {
-                id: analyticsId,
-                // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-                body: request.body,
-              },
-              getAuthorizationHeader(request)
-            );
+            const resp = await mlClient.putDataFrameAnalytics({
+              id: analyticsId,
+              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+              body: request.body,
+            });
 
             if (resp.id && resp.create_time) {
               fullResponse.dataFrameAnalyticsJobsCreated.push({ id: analyticsId });
@@ -357,13 +353,10 @@ export function dataFrameAnalyticsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.evaluateDataFrame(
-            {
-              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.evaluateDataFrame({
+            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+            body: request.body,
+          });
           return response.ok({
             body,
           });
@@ -397,10 +390,7 @@ export function dataFrameAnalyticsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.explainDataFrameAnalytics(
-            request.body,
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.explainDataFrameAnalytics(request.body);
           return response.ok({
             body,
           });
@@ -642,13 +632,10 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { analyticsId } = request.params;
-          const body = await mlClient.updateDataFrameAnalytics(
-            {
-              id: analyticsId,
-              ...request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.updateDataFrameAnalytics({
+            id: analyticsId,
+            ...request.body,
+          });
           return response.ok({
             body,
           });

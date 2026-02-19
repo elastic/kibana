@@ -8,14 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { robotIconType } from '@kbn/observability-nav-icons';
 
 export function StartConversationButton(props: React.ComponentProps<typeof EuiButton>) {
   return (
     <EuiButton
       data-test-subj="aiAgentStartConversationButton"
       fill
-      iconType={robotIconType}
+      iconType="productAgent"
       size="s"
       {...props}
     >

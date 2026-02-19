@@ -112,20 +112,21 @@ describe('getJSDocParamComment', () => {
     expect(comment[0]).toContain('crazy parameter');
   });
 
-  it('does not extract property-level parameter comments (current limitation)', () => {
-    // This test documents current behavior: property-level @param tags like @param obj.hi
-    // are not currently extracted. This will be fixed in Phase 4.1.
+  it('extracts property-level parameter comments for destructured params', () => {
     const node = getNodeByName('crazyFunction');
     expect(node).toBeDefined();
 
-    // Current behavior: property-level tags are not found
     const comment = getJSDocParamComment(node!, 'obj.hi');
-    expect(comment).toBeDefined();
-    expect(comment.length).toBe(0); // Currently returns empty, should be fixed in Phase 4.1
+    expect(comment.length).toBeGreaterThan(0);
+    expect(comment[0]).toContain('Greeting');
 
-    // Also test with destructured parameter name format
-    const comment2 = getJSDocParamComment(node!, '{ fn1, fn2 }.fn1');
-    expect(comment2.length).toBe(0); // Currently returns empty
+    const comment2 = getJSDocParamComment(node!, 'fns.fn1');
+    expect(comment2.length).toBeGreaterThan(0);
+    expect(comment2[0]).toContain('first function');
+
+    const nested = getJSDocParamComment(node!, 'fns.fn1.foo.param');
+    expect(nested.length).toBeGreaterThan(0);
+    expect(nested[0]).toContain('nested parameter for foo');
   });
 
   it('works with JSDoc array input', () => {
@@ -359,38 +360,23 @@ describe('getCommentsFromNode', () => {
   });
 });
 
-describe('property-level JSDoc parameter tags (future enhancement)', () => {
-  it('currently does not support dot notation in parameter names', () => {
-    // This test documents the current limitation
-    // In Phase 4.1, we'll enhance getJSDocParamComment to support:
-    // - @param obj.prop
-    // - @param { fn1, fn2 }.fn1
-    // - @param obj.nested.prop
-
+describe('property-level JSDoc parameter tags', () => {
+  it('supports dot notation in parameter names', () => {
     const node = getNodeByName('crazyFunction');
     expect(node).toBeDefined();
 
-    // Current behavior: dot notation is not supported
     const comment1 = getJSDocParamComment(node!, 'obj.hi');
-    expect(comment1.length).toBe(0);
+    expect(comment1.length).toBeGreaterThan(0);
 
-    const comment2 = getJSDocParamComment(node!, 'obj.nested.prop');
-    expect(comment2.length).toBe(0);
-
-    // Future: should support destructured parameter names
-    const comment3 = getJSDocParamComment(node!, '{ fn1, fn2 }.fn1');
-    expect(comment3.length).toBe(0);
+    const comment3 = getJSDocParamComment(node!, 'fns.fn1');
+    expect(comment3.length).toBeGreaterThan(0);
   });
 
-  it('should support nested property access patterns (future)', () => {
-    // This test documents expected future behavior after Phase 4.1
-    // When property-level JSDoc is implemented, these should work:
-    // - @param obj.prop
-    // - @param obj.nested.prop
-    // - @param { destructured }.prop
-    // - @param { destructured }.nested.prop
+  it('supports nested property access patterns', () => {
+    const node = getNodeByName('crazyFunction');
+    expect(node).toBeDefined();
 
-    // For now, we just document that this is not yet supported
-    expect(true).toBe(true); // Placeholder test
+    const nested = getJSDocParamComment(node!, 'fns.fn1.foo.param');
+    expect(nested.length).toBeGreaterThan(0);
   });
 });
