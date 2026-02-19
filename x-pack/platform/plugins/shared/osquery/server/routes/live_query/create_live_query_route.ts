@@ -50,7 +50,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         },
       },
       async (context, request, response) => {
-        const [coreStartServices] = await osqueryContext.getStartServices();
+        const [coreStartServices, startPlugins] = await osqueryContext.getStartServices();
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
@@ -114,7 +114,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         try {
-          const [, startPlugins] = await osqueryContext.getStartServices();
           const securityStart = (startPlugins as StartPlugins).security;
           const currentUser = await getUserInfo({
             request,
