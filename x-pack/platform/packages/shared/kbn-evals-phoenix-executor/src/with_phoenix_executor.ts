@@ -8,8 +8,14 @@
 import type { InferenceConnector, InferenceConnectorType, Model } from '@kbn/inference-common';
 import { getConnectorFamily, getConnectorModel, getConnectorProvider } from '@kbn/inference-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { EsClient } from '@kbn/scout';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvalsExecutorClient } from '@kbn/evals';
+import type { EvaluationReporter, EvalsExecutorClient } from '@kbn/evals';
+import {
+  EvaluationScoreRepository,
+  mapToEvaluationScoreDocuments,
+  exportEvaluations,
+} from '@kbn/evals';
 import { KibanaPhoenixClient } from './client';
 import { getPhoenixConfig } from './get_phoenix_config';
 
@@ -33,9 +39,11 @@ function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Mod
  * Wraps a Playwright test base (from `@kbn/evals`) to override the `executorClient`
  * fixture with a Phoenix-backed executor when `KBN_EVALS_EXECUTOR=phoenix` is set.
  *
- * Uses an intermediate `_baseExecutorClient` alias to capture the original fixture
- * before overriding it — this is a standard Playwright pattern for referencing the
- * base fixture from within an override of the same name.
+ * When active, the override replaces the base `executorClient` entirely, so it
+ * replicates the teardown that the base fixture normally performs: exporting
+ * evaluation results to Elasticsearch and printing the terminal report.
+ *
+ * When `KBN_EVALS_EXECUTOR` is not `phoenix`, the base is returned unchanged.
  *
  * Usage:
  * ```ts
@@ -47,57 +55,73 @@ function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Mod
  * ```
  */
 export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any }>(base: T): T {
-  return base
-    .extend({
-      _baseExecutorClient: [
-        async (
-          { executorClient }: { executorClient: EvalsExecutorClient },
-          use: (client: EvalsExecutorClient) => Promise<void>
-        ) => {
-          await use(executorClient);
+  if (process.env.KBN_EVALS_EXECUTOR !== 'phoenix') {
+    return base;
+  }
+
+  return base.extend({
+    executorClient: [
+      async (
+        {
+          log,
+          connector,
+          evaluationConnector,
+          repetitions,
+          evaluationsEsClient,
+          reportModelScore,
+        }: {
+          log: SomeDevLog;
+          connector: AvailableConnectorWithId;
+          evaluationConnector: AvailableConnectorWithId;
+          repetitions: number;
+          evaluationsEsClient: EsClient;
+          reportModelScore: EvaluationReporter;
         },
-        { scope: 'worker' },
-      ],
-    })
-    .extend({
-      executorClient: [
-        async (
-          {
-            _baseExecutorClient,
-            log,
-            connector,
-            repetitions,
-          }: {
-            _baseExecutorClient: EvalsExecutorClient;
-            log: SomeDevLog;
-            connector: AvailableConnectorWithId;
-            repetitions: number;
-          },
-          use: (client: EvalsExecutorClient) => Promise<void>
-        ) => {
-          if (process.env.KBN_EVALS_EXECUTOR !== 'phoenix') {
-            await use(_baseExecutorClient);
-            return;
-          }
+        use: (client: EvalsExecutorClient) => Promise<void>
+      ) => {
+        const runId = process.env.TEST_RUN_ID;
+        if (!runId) {
+          throw new Error('TEST_RUN_ID environment variable is required for the Phoenix executor');
+        }
 
-          const runId = process.env.TEST_RUN_ID;
-          if (!runId) {
-            throw new Error(
-              'TEST_RUN_ID environment variable is required for the Phoenix executor'
-            );
-          }
+        const model = buildModelFromConnector(connector);
+        const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
-          await use(
-            new KibanaPhoenixClient({
-              config: getPhoenixConfig(),
-              log,
-              model: buildModelFromConnector(connector),
-              runId,
-              repetitions,
-            })
+        const phoenixClient = new KibanaPhoenixClient({
+          config: getPhoenixConfig(),
+          log,
+          model,
+          runId,
+          repetitions,
+        });
+
+        await use(phoenixClient);
+
+        const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+        const experiments = await phoenixClient.getRanExperiments();
+        const documents = await mapToEvaluationScoreDocuments({
+          experiments,
+          taskModel: model,
+          evaluatorModel,
+          runId,
+          totalRepetitions: repetitions,
+        });
+
+        try {
+          await exportEvaluations(documents, scoreRepository, log);
+        } catch (error) {
+          log.error(
+            `Failed to export evaluation results to Elasticsearch for run ID: ${runId}. ${error}`
           );
-        },
-        { scope: 'worker' },
-      ],
-    }) as unknown as T;
+          throw error;
+        }
+
+        await reportModelScore(scoreRepository, runId, log, {
+          taskModelId: model.id,
+          suiteId: process.env.EVAL_SUITE_ID,
+        });
+      },
+      { scope: 'worker' },
+    ],
+  }) as unknown as T;
 }

@@ -52,6 +52,7 @@ export {
   type EvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
+export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
