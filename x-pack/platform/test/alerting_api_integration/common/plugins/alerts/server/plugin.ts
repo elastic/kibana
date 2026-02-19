@@ -124,7 +124,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: testAlertingFeatures,
+              read: testAlertingFeatures,
+              write: testAlertingFeatures,
+              manual_run: testAlertingFeatures,
+              enable: testAlertingFeatures,
+              manage_rule_settings: testAlertingFeatures,
             },
           },
           ui: [],
@@ -192,6 +196,24 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                   includeIn: 'all',
                   savedObject: { all: [], read: [] },
                   alerting: { rule: { manage_rule_settings: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Write',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Write',
+                  id: 'write',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { write: testAlertingFeatures } },
                   ui: [],
                 },
               ],

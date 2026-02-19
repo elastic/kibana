@@ -315,6 +315,54 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
+      test('grants `write` privileges to rules under feature consumer', () => {
+        const actions = new Actions();
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: [],
+              write: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+          Array [
+            "alerting:alert-type/my-consumer/rule/create",
+            "alerting:alert-type/my-consumer/rule/delete",
+            "alerting:alert-type/my-consumer/rule/update",
+            "alerting:alert-type/my-consumer/rule/updateApiKey",
+            "alerting:alert-type/my-consumer/rule/muteAll",
+            "alerting:alert-type/my-consumer/rule/unmuteAll",
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snooze",
+            "alerting:alert-type/my-consumer/rule/bulkEdit",
+            "alerting:alert-type/my-consumer/rule/bulkDelete",
+            "alerting:alert-type/my-consumer/rule/unsnooze",
+            "alerting:alert-type/my-consumer/rule/runSoon",
+          ]
+        `);
+      });
+
       test('grants `all` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);

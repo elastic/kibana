@@ -149,6 +149,16 @@ export interface FeatureKibanaPrivileges {
        * ```
        */
       manage_rule_settings?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have write access (create, update, delete rules, mute, snooze, etc.) when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    write: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *  }
+       * ```
+       */
+      write?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**

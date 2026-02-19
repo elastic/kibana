@@ -151,6 +151,10 @@ function mergeWithSubFeatures(
           ...(mergedConfig.alerting?.rule?.read ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.read ?? []),
         ]),
+        write: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.write ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.write ?? []),
+        ]),
       },
       alert: {
         all: mergeAlertingEntries([

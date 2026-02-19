@@ -71,6 +71,15 @@ const alertingSchema = schema.arrayOf(
   })
 );
 
+const alertingRuleSchemaSpec = {
+  all: schema.maybe(alertingSchema),
+  enable: schema.maybe(alertingSchema),
+  manual_run: schema.maybe(alertingSchema),
+  manage_rule_settings: schema.maybe(alertingSchema),
+  read: schema.maybe(alertingSchema),
+  write: schema.maybe(alertingSchema),
+};
+
 const casesSchema = schema.arrayOf(schema.string());
 
 const appCategorySchema = schema.object({
@@ -106,15 +115,7 @@ const kibanaPrivilegeSchema = schema.object({
   app: schema.maybe(schema.arrayOf(schema.string())),
   alerting: schema.maybe(
     schema.object({
-      rule: schema.maybe(
-        schema.object({
-          all: schema.maybe(alertingSchema),
-          enable: schema.maybe(alertingSchema),
-          manual_run: schema.maybe(alertingSchema),
-          manage_rule_settings: schema.maybe(alertingSchema),
-          read: schema.maybe(alertingSchema),
-        })
-      ),
+      rule: schema.maybe(schema.object(alertingRuleSchemaSpec)),
       alert: schema.maybe(
         schema.object({
           all: schema.maybe(alertingSchema),
@@ -161,15 +162,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(
     schema.object({
-      rule: schema.maybe(
-        schema.object({
-          all: schema.maybe(alertingSchema),
-          enable: schema.maybe(alertingSchema),
-          read: schema.maybe(alertingSchema),
-          manual_run: schema.maybe(alertingSchema),
-          manage_rule_settings: schema.maybe(alertingSchema),
-        })
-      ),
+      rule: schema.maybe(schema.object(alertingRuleSchemaSpec)),
       alert: schema.maybe(
         schema.object({
           all: schema.maybe(alertingSchema),

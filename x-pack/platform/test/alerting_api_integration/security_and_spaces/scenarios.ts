@@ -297,6 +297,32 @@ export const ManageRuleSettingsOnlyUser: User = {
   },
 };
 
+export const WriteOnlyUser: User = {
+  username: 'write_only',
+  fullName: 'write_only',
+  password: 'write_only-password',
+  role: {
+    name: 'write_only_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['read', 'write'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -309,6 +335,7 @@ export const Users: User[] = [
   ManualRunOnlyUser,
   EnableDisableOnlyUser,
   ManageRuleSettingsOnlyUser,
+  WriteOnlyUser,
 ];
 
 export const Space1: Space = {
@@ -452,6 +479,16 @@ interface ManageRuleSettingsOnlyUserAtSpace1 extends Scenario {
 export const ManageRuleSettingsOnlyUserAtSpace1: ManageRuleSettingsOnlyUserAtSpace1 = {
   id: 'manage_rule_settings_only at space1',
   user: ManageRuleSettingsOnlyUser,
+  space: Space1,
+};
+
+interface WriteOnlyUserAtSpace1 extends Scenario {
+  id: 'write_only at space1';
+}
+
+export const WriteOnlyUserAtSpace1: WriteOnlyUserAtSpace1 = {
+  id: 'write_only at space1',
+  user: WriteOnlyUser,
   space: Space1,
 };
 
