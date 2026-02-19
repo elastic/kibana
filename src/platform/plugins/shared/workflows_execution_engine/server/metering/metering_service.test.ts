@@ -155,25 +155,35 @@ describe('WorkflowsMeteringService', () => {
       expect(mockUsageReportingService.reportUsage).not.toHaveBeenCalled();
     });
 
-    it('should send usage records for all terminal states', async () => {
+    it('should not send usage record for skipped executions', async () => {
       const cloudSetup = createMockCloudSetup();
 
-      const terminalStatuses = [
+      await meteringService.reportWorkflowExecution(
+        createMockExecution({ status: ExecutionStatus.SKIPPED }),
+        cloudSetup
+      );
+
+      expect(mockUsageReportingService.reportUsage).not.toHaveBeenCalled();
+    });
+
+    it('should send usage records for all billable terminal states', async () => {
+      const cloudSetup = createMockCloudSetup();
+
+      const billableStatuses = [
         ExecutionStatus.COMPLETED,
         ExecutionStatus.FAILED,
         ExecutionStatus.CANCELLED,
         ExecutionStatus.TIMED_OUT,
-        ExecutionStatus.SKIPPED,
       ];
 
-      for (const status of terminalStatuses) {
+      for (const status of billableStatuses) {
         await meteringService.reportWorkflowExecution(
           createMockExecution({ status, id: `exec-${status}` }),
           cloudSetup
         );
       }
 
-      expect(mockUsageReportingService.reportUsage).toHaveBeenCalledTimes(terminalStatuses.length);
+      expect(mockUsageReportingService.reportUsage).toHaveBeenCalledTimes(billableStatuses.length);
     });
   });
 

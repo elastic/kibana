@@ -106,7 +106,7 @@ export class WorkflowsExecutionEnginePlugin
       const usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
       this.meteringService = new WorkflowsMeteringService(
         usageReportingService,
-        this.logger.get('metering')
+        this.logger.get('workflowsMetering')
       );
       this.logger.debug('Workflows metering service initialized');
     } else {

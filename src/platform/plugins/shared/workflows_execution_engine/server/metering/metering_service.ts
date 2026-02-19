@@ -9,8 +9,8 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
 import {
   BUCKET_SIZE_MS,
@@ -61,8 +61,12 @@ export class WorkflowsMeteringService {
       return;
     }
 
-    // Only report for terminal states
+    // Only report for terminal states; skip SKIPPED executions since they
+    // were dropped by concurrency limits and never actually ran.
     if (!isTerminalStatus(execution.status as ExecutionStatus)) {
+      return;
+    }
+    if (execution.status === ExecutionStatus.SKIPPED) {
       return;
     }
 
