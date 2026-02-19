@@ -58,9 +58,12 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
 
           if (fieldsForTerms.length === 1) {
-            rowLabel = createFieldFormatter(fieldsForTerms[0], fieldFormatMap, false, dataView)(
-              row.label
-            );
+            rowLabel = createFieldFormatter(
+              fieldsForTerms[0],
+              fieldFormatMap,
+              false,
+              dataView
+            )(row.label);
           }
         }
 
