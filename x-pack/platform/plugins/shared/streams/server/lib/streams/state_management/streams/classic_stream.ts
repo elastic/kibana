@@ -39,7 +39,12 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
-import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
+import {
+  computeChange,
+  formatSettings,
+  settingsUpdateRequiresRollover,
+  validateQueryStreams,
+} from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -95,34 +100,58 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._changes.processing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        _.omit(this._definition.ingest.processing, ['updated_at']),
-        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
-      );
+    const isExistingStream = !!startingStateStreamDefinition;
 
-    this._changes.lifecycle =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+    this._changes.processing = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          _.omit(this._definition.ingest.processing, ['updated_at']),
+          _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
+        ),
+    });
 
-    this._changes.settings =
-      !startingStateStreamDefinition ||
-      !_.isEqual(await this.getEffectiveSettings(), this._definition.ingest.settings);
+    this._changes.lifecycle = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition!.ingest.lifecycle
+        ),
+    });
 
-    this._changes.field_overrides =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.classic.field_overrides,
-        startingStateStreamDefinition.ingest.classic.field_overrides
-      );
+    // Prefetch effective settings for existing streams to allow sync comparison
+    const effectiveSettings = isExistingStream ? await this.getEffectiveSettings() : undefined;
+    this._changes.settings = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () => !_.isEqual(effectiveSettings, this._definition.ingest.settings),
+    });
 
-    this._changes.failure_store =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.failure_store,
-        startingStateStreamDefinition.ingest.failure_store
-      );
+    this._changes.field_overrides = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !!(
+        this._definition.ingest.classic.field_overrides &&
+        Object.keys(this._definition.ingest.classic.field_overrides).length > 0
+      ),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.classic.field_overrides,
+          startingStateStreamDefinition!.ingest.classic.field_overrides
+        ),
+    });
+
+    this._changes.failure_store = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition!.ingest.failure_store
+        ),
+    });
 
     this._changes.query_streams =
       !startingStateStreamDefinition ||
