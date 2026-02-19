@@ -303,6 +303,32 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
+    const currentData = frame.activeData?.[state.layerId];
+
+    const getResolvedDisplayColors = (accessor: string) => {
+      const { palette, colorMapping } = columnMap[accessor] ?? {};
+      const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
+      const { isCategory: isBucketable } = getAccessorType(datasource, accessor, columnMeta?.type);
+      const dataBounds =
+        getDataBoundsForAccessor(accessor, currentData, state.columns) ?? getFallbackDataBounds();
+      const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = resolveColorDefaults(
+        {
+          colorByTerms: isBucketable,
+          palette,
+          colorMapping,
+          paletteService,
+          dataBounds,
+        }
+      );
+
+      return getPaletteDisplayColors(
+        paletteService,
+        palettes,
+        theme.darkMode,
+        resolvedPalette,
+        resolvedColorMapping
+      );
+    };
 
     return {
       groups: [
@@ -333,20 +359,8 @@ export const getDatatableVisualization = ({
               return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
             })
             .map((accessor) => {
-              const {
-                colorMode = 'none',
-                palette,
-                colorMapping,
-                hidden,
-                collapseFn,
-              } = columnMap[accessor] ?? {};
-              const stops = getPaletteDisplayColors(
-                paletteService,
-                palettes,
-                theme.darkMode,
-                palette,
-                colorMapping
-              );
+              const { colorMode = 'none', hidden, collapseFn } = columnMap[accessor] ?? {};
+              const stops = getResolvedDisplayColors(accessor);
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -427,19 +441,8 @@ export const getDatatableVisualization = ({
               return !operation?.isBucketed;
             })
             .map((accessor) => {
-              const {
-                colorMode = 'none',
-                palette,
-                colorMapping,
-                hidden,
-              } = columnMap[accessor] ?? {};
-              const stops = getPaletteDisplayColors(
-                paletteService,
-                palettes,
-                theme.darkMode,
-                palette,
-                colorMapping
-              );
+              const { colorMode = 'none', hidden } = columnMap[accessor] ?? {};
+              const stops = getResolvedDisplayColors(accessor);
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
