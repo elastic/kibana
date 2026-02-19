@@ -27,16 +27,22 @@ const mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy = jest.mocked(
 );
 
 const mockedAgentPolicyService = jest.mocked(agentPolicyService);
+const mockedAppContextService = jest.mocked(appContextService);
 
 describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
   beforeEach(() => {
-    jest.mocked(appContextService).getSecurity.mockReturnValue({
+    mockedAppContextService.getSecurity.mockReturnValue({
       authc: { apiKeys: { areAPIKeysEnabled: async () => true } },
     } as any);
+    mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(
+      savedObjectsClientMock.create()
+    );
 
     mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy.mockReset();
     mockedAgentPolicyService.getLatestFleetPolicy.mockReset();
+    mockedAgentPolicyService.deployPolicies.mockReset();
     mockedAgentPolicyService.deployPolicies.mockImplementation(async () => {});
+    jest.mocked(scheduleDeployAgentPoliciesTask).mockReset();
     mockedAgentPolicyService.list.mockResolvedValue({
       items: [
         {
@@ -137,5 +143,96 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
+  });
+
+  it('should synchronously deploy fleet server policies that are out of sync', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedAgentPolicyService.list.mockResolvedValue({
+      items: [
+        { id: 'fleet-server-policy', revision: 2, is_default_fleet_server: true },
+        { id: 'policy1', revision: 1 },
+      ],
+    } as any);
+
+    // fleet-server-policy is out of sync; policy1 is up to date
+    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
+      if (agentPolicyId === 'fleet-server-policy') {
+        return { revision_idx: 1 } as any;
+      }
+      if (agentPolicyId === 'policy1') {
+        return { revision_idx: 1 } as any;
+      }
+      return null;
+    });
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    // Fleet server policy must be deployed synchronously
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
+      'fleet-server-policy',
+    ]);
+    // Regular policy1 is up to date so the async task should not be scheduled
+    expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
+  });
+
+  it('should synchronously deploy fleet server policies and schedule regular outdated policies async', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedAgentPolicyService.list.mockResolvedValue({
+      items: [
+        { id: 'fleet-server-policy', revision: 2, is_default_fleet_server: true },
+        { id: 'policy1', revision: 3 },
+      ],
+    } as any);
+
+    // Both are out of sync
+    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    // Fleet server policy deployed synchronously
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
+      'fleet-server-policy',
+    ]);
+    // Regular outdated policy still goes through the async task
+    expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
+      { id: 'policy1', spaceId: undefined },
+    ]);
+  });
+
+  it('should synchronously deploy fleet server policies identified by has_fleet_server flag', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedAgentPolicyService.list.mockResolvedValue({
+      items: [{ id: 'custom-fs-policy', revision: 2, has_fleet_server: true }],
+    } as any);
+
+    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
+      'custom-fs-policy',
+    ]);
+    expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
   });
 });
