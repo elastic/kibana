@@ -10,6 +10,7 @@
 import React from 'react';
 import type { ReactNode, PropsWithChildren, ButtonHTMLAttributes, MouseEventHandler } from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 
 import { useDateRangePickerPanelNavigation } from './date_range_picker_panel_navigation';
 import {
@@ -124,11 +125,36 @@ export const PanelListItem = ({
   );
 };
 
-/** A navigation item within the panel body that links to another panel. */
-export const PanelNavItem = ({ children }: PropsWithChildren) => {
-  const euiThemeContext = useEuiTheme();
+interface PanelNavItemProps {
+  /** Main action handler, merged with buttonProps when present */
+  onClick: MouseEventHandler<HTMLButtonElement>;
+  /** Additional props for the main button */
+  buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>;
+  /** Duh */
+  icon?: IconType;
+}
 
-  return <div css={panelNavItemStyles(euiThemeContext).root}>{children}</div>;
+/** A navigation item within the panel body that links to another panel. */
+export const PanelNavItem = ({
+  onClick,
+  buttonProps,
+  icon,
+  children,
+}: PanelNavItemProps & PropsWithChildren) => {
+  const euiThemeContext = useEuiTheme();
+  const styles = panelNavItemStyles(euiThemeContext);
+
+  return (
+    <li css={styles.root}>
+      <button css={styles.button} {...buttonProps} onClick={onClick}>
+        <span css={styles.label}>
+          {icon && <EuiIcon type={icon} size="m" />}
+          {children}
+        </span>
+        <EuiIcon type="arrowRight" size="m" color="subdued" />
+      </button>
+    </li>
+  );
 };
 
 interface PanelBodySectionProps {

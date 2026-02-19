@@ -14,6 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = null;
   const tabs = css`
+    padding-block-start: ${euiTheme.size.s};
     margin-inline: ${euiTheme.size.base};
   `;
   const list = css`

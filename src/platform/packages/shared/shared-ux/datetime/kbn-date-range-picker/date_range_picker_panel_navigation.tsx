@@ -25,7 +25,7 @@ export interface DateRangePickerPanelDescriptor {
   /** Title shown in panel header or breadcrumb */
   title: string;
   /** Icon type passed to `EuiIcon` for the panel navigation item */
-  icon: IconType;
+  icon?: IconType;
 }
 
 /** Context value exposed via `useDateRangePickerPanelNavigation()`. */

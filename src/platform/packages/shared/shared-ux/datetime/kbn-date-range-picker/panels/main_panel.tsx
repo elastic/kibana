@@ -18,6 +18,7 @@ import {
   PanelBodySection,
   PanelFooter,
   PanelListItem,
+  PanelNavItem,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
@@ -92,14 +93,39 @@ const PresetsRecentTabs = () => {
   );
 };
 
+const SubPanelMenu = () => {
+  const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+
+  return (
+    <ul css={styles.list}>
+      <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
+        Calendar
+      </PanelNavItem>
+      <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
+        Custom time range
+      </PanelNavItem>
+      {panelDescriptors.map(({ id, title, icon }) => (
+        <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
+          {title}
+        </PanelNavItem>
+      ))}
+    </ul>
+  );
+};
+
 export function MainPanel() {
   const { navigateTo } = useDateRangePickerPanelNavigation();
 
   return (
     <PanelContainer>
       <PanelBody>
-        <PanelBodySection spacingSide="block">
+        <PanelBodySection spacingSide="none">
           <PresetsRecentTabs />
+        </PanelBodySection>
+        <PanelBodySection spacingSide="none">
+          <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>
       <PanelFooter>

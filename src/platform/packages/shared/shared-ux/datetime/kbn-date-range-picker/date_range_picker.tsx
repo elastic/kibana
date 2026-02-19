@@ -21,6 +21,8 @@ import {
   type DateRangePickerPanelDescriptor,
 } from './date_range_picker_panel_navigation';
 import { MainPanel } from './panels/main_panel';
+import { CalendarPanel } from './panels/calendar_panel';
+import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
 export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
@@ -32,7 +34,7 @@ export interface DateRangePickerPanelConfig {
   /** Title shown in panel header or breadcrumb */
   title: string;
   /** Icon type passed to `EuiIcon` for the panel navigation item */
-  icon: IconType;
+  icon?: IconType;
   /**
    * Panel component to render. Must be a component reference (not an element).
    * Rendered inside the provider tree so it can use
@@ -118,18 +120,24 @@ export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps)
           <DateRangePickerPanel id="main">
             <MainPanel />
           </DateRangePickerPanel>
+          <DateRangePickerPanel id={CalendarPanel.PANEL_ID}>
+            <CalendarPanel />
+          </DateRangePickerPanel>
+          <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
+            <CustomTimeRangePanel />
+          </DateRangePickerPanel>
+          {panels.map(({ id, component: Component }) => (
+            <DateRangePickerPanel key={id} id={id}>
+              <Component />
+            </DateRangePickerPanel>
+          ))}
+          {/* Example panels, can be removed after initial development finishes */}
           <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
             <ExamplePanel />
           </DateRangePickerPanel>
           <DateRangePickerPanel id={ExampleNestedPanel.PANEL_ID}>
             <ExampleNestedPanel />
           </DateRangePickerPanel>
-          {/* TODO Calendar and Custom time range panels go here */}
-          {panels.map(({ id, component: Component }) => (
-            <DateRangePickerPanel key={id} id={id}>
-              <Component />
-            </DateRangePickerPanel>
-          ))}
         </DateRangePickerPanelNavigationProvider>
       </DateRangePickerDialog>
     </DateRangePickerProvider>

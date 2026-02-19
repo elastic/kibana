@@ -148,10 +148,40 @@ export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
 
 export const panelNavItemStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = css`
-    /* TODO */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+    min-block-size: ${euiTheme.size.xl};
+
+    &:hover,
+    &:focus-within {
+      background-color: ${euiTheme.focus.backgroundColor};
+    }
+  `;
+  const button = css`
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+    flex-grow: 1;
+    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+    font-size: ${euiFontSizeFromScale('s', euiTheme)};
+    line-height: ${euiLineHeightFromBaseline('s', euiTheme)};
+    font-weight: ${euiTheme.font.weight.regular};
+    color: ${euiTheme.colors.textParagraph};
+    cursor: pointer;
+    outline-offset: -${euiTheme.focus.width};
+  `;
+  const label = css`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: ${euiTheme.size.s};
   `;
 
-  return { root };
+  return { root, button, label };
 };
 
 export const panelFooterStyles = ({ euiTheme }: UseEuiTheme) => {
