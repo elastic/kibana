@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import {
   SERVICE_NAME,
@@ -29,20 +29,16 @@ import { computeConnectionMetrics } from './get_connection_metrics';
 export async function getImmediateDownstreamDependencies({
   dataRegistry,
   request,
-  logger,
   serviceName,
   startMs,
   endMs,
 }: {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   request: KibanaRequest;
-  logger: Logger;
   serviceName: string;
   startMs: number;
   endMs: number;
 }): Promise<ServiceTopologyResponse> {
-  logger.debug(`Using metrics-based fast path for immediate downstream of "${serviceName}"`);
-
   const statsEntries = await dataRegistry.getData('apmConnectionStats', {
     request,
     start: startMs,

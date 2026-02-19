@@ -97,15 +97,21 @@ async function getDownstreamTopology({
 }): Promise<ServiceTopologyResponse> {
   // Fast path: depth=1 uses pre-aggregated metrics instead of trace scanning
   if (maxDepth === 1) {
+    resources.logger.debug(
+      `Using aggregated traces to return immediate downstream dependencies of "${serviceName}"`
+    );
     return getImmediateDownstreamDependencies({
       dataRegistry: resources.dataRegistry,
       request: resources.request,
-      logger: resources.logger,
       serviceName,
       startMs,
       endMs,
     });
   }
+
+  resources.logger.debug(
+    `Using sampled traces to return downstream dependencies of "${serviceName}"`
+  );
 
   const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
     request: resources.request,
