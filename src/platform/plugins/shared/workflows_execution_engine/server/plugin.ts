@@ -87,7 +87,7 @@ export class WorkflowsExecutionEnginePlugin
     core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
-    this.logger.info('Workflows execution engine setup');
+    this.logger.debug('Workflows execution engine setup');
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
