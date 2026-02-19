@@ -48,7 +48,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
     delete:
       summary: Delete cases
       operationId: deleteCaseDefaultSpace
@@ -67,7 +67,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
       x-code-samples:
         - label: curl
           lang: curl
@@ -115,7 +115,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/_find:
     get:
       summary: Search cases
@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/alerts/{alertId}:
     get:
       summary: Get cases for an alert
@@ -212,7 +212,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/configure:
     get:
       summary: Get case settings
@@ -375,7 +375,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
     post:
       summary: Add case settings
       operationId: setCaseConfigurationDefaultSpace
@@ -543,7 +543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/configure/{configurationId}:
     patch:
       summary: Update case settings
@@ -713,7 +713,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/reporters:
     get:
       summary: Get case creators
@@ -762,7 +762,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/tags:
     get:
       summary: Get case tags
@@ -791,7 +791,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}:
     get:
       summary: Get case information
@@ -820,7 +820,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/alerts:
     get:
       summary: Get all alerts for a case
@@ -849,7 +849,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/comments:
     post:
       summary: Add a case comment or alert
@@ -885,7 +885,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
     delete:
       summary: Delete all case comments and alerts
       operationId: deleteCaseCommentsDefaultSpace
@@ -904,7 +904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
     patch:
       summary: Update a case comment or alert
       operationId: updateCaseCommentDefaultSpace
@@ -939,7 +939,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/comments/_find:
     get:
       summary: Find case comments and alerts
@@ -965,7 +965,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Delete a case comment or alert
@@ -986,7 +986,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
     get:
       summary: Get a case comment or alert
       operationId: getCaseCommentDefaultSpace
@@ -1014,7 +1014,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Push a case to an external service
@@ -1048,7 +1048,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Find case activity
@@ -1090,7 +1090,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/configure/connectors/_find:
     get:
       summary: Get case connectors
@@ -1140,7 +1140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/files:
     post:
       summary: Attach a file to a case
@@ -1175,7 +1175,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/response_4xx'
 components:
   parameters:
     kbn_xsrf:
@@ -1748,7 +1748,6 @@ components:
         - high
         - low
         - medium
-      default: low
     case_tags:
       description: |
         The words and phrases that help categorize cases. It can be an empty array.
@@ -2286,7 +2285,7 @@ components:
         version:
           type: string
           example: WzUzMiwxXQ==
-    4xx_response:
+    response_4xx:
       type: object
       title: Unsuccessful cases API response
       properties:
