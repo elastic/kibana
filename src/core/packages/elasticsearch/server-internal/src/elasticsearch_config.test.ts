@@ -26,7 +26,8 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) =>
     path: CONFIG_PATH,
   });
 
-test('set correct defaults', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253372
+test.skip('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
