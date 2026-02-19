@@ -145,7 +145,7 @@ Before analyzing, establish the environment context:
 
 **Ask the user:**
 > Which environment is this test flaky in?
-> - ESS 
+> - ESS
 > - Serverless (stateless)
 > - MKI (Managed Kubernetes Infrastructure)
 > - Multiple environments (specify which)
@@ -189,9 +189,9 @@ Before analyzing, establish the environment context:
 **When asking questions, explain what you've already checked:**
 
 > I've reviewed the test file and GitHub issue. The test is tagged for `@ess` and `@serverless`.
-> 
+>
 > I can see the error is a timeout on the Fleet API, but I couldn't determine from the issue which specific environment this failure occurred in.
-> 
+>
 > **Could you clarify:** Which environment did this fail in - ESS or Serverless?
 
 **Note:** CI links are often private and inaccessible. Always ask for the error details directly rather than requesting access to CI.
@@ -210,9 +210,9 @@ Don't rely on test names, check always for what the test is doing and asserting.
 **If duplicate found in another Cypress test:**
 > 🔄 **Duplicate Cypress Test Detected**
 > This behavior is already tested in: [location]
-> 
+>
 > **Action:** Compare both tests and recommend keeping the better-written one.
-> 
+>
 > **Evaluate based on:**
 > - Proper use of intercepts and waits (not hardcoded `cy.wait(ms)`)
 > - Clear, descriptive test names and assertions
@@ -220,7 +220,7 @@ Don't rely on test names, check always for what the test is doing and asserting.
 > - Use of `data-test-subj` selectors (not CSS classes or IDs)
 > - Test isolation (doesn't depend on other tests)
 > - Readability and maintainability
-> 
+>
 > **Recommendation format:**
 > - Keep: `[path/to/better-test.cy.ts]` — Reason: [why it's better]
 > - Delete: `[path/to/duplicate-test.cy.ts]` — Reason: [why it's worse]
@@ -228,14 +228,14 @@ Don't rely on test names, check always for what the test is doing and asserting.
 **If duplicate found in API or Unit tests:**
 > 🔄 **Lower-Layer Coverage Exists**
 > This behavior is already tested at a more appropriate layer: [location]
-> 
+>
 > **Action:** Recommend deleting the Cypress test.
-> 
+>
 > **Rationale:**
 > - API/Unit tests are faster and more reliable
 > - E2E tests should focus on user workflows, not data validation
 > - Reduces CI time and flakiness surface area
-> 
+>
 > **Recommendation:**
 > - Delete the Cypress test: `[path/to/cypress-test.cy.ts]`
 > - Existing coverage: `[path/to/api-or-unit-test]`
@@ -243,32 +243,32 @@ Don't rely on test names, check always for what the test is doing and asserting.
 
 **If duplicate found in Scout tests:**
 > ⚠️ **Cypress + Scout Duplicate - Check Environment Coverage**
-> 
+>
 > Duplicates between Cypress and Scout may be **acceptable** depending on environment coverage.
-> 
+>
 > **Important:** Scout tests do NOT run on MKI. Only Cypress tests run on MKI.
-> 
+>
 > **Check the test tags:**
 > - Cypress test: Does it have `@serverless` tag?
-> - Scout test: Does it have `@svlSecurity` tag?
-> 
+> - Scout test: Does it have a tag that contains `serverless-security` in its value?
+>
 > **Decision logic:**
-> 
+>
 > | Cypress Tags | Scout Tags | Recommendation |
 > |--------------|------------|----------------|
-> | `@serverless` | `@svlSecurity` | ✅ Keep both - Cypress provides MKI coverage |
-> | `@ess` only | `@ess` | Delete Cypress - Scout covers ESS |
-> | `@ess` only | `@svlSecurity` | Keep Cypress for ESS, Scout for Serverless |
-> 
+> | `@serverless` | `@*-serverless-security_*` | ✅ Keep both - Cypress provides MKI coverage |
+> | `@ess` only | `@*-stateful-*` | Delete Cypress - Scout covers ESS |
+> | `@ess` only | `@*-serverless-security_*` | Keep Cypress for ESS, Scout for Serverless |
+>
 > **If both have serverless tags:**
 > - ✅ **Keep both tests**
 > - Cypress provides MKI coverage that Scout doesn't have
 > - Document this as intentional duplicate for MKI environment coverage
-> 
+>
 > **If Cypress is ESS-only and Scout covers ESS:**
 > - Recommend deleting the Cypress test
 > - Scout is preferred (better async handling, page objects)
-> 
+>
 > **Recommendation format:**
 > - Keep Cypress: `[path]` — Reason: Provides MKI coverage (has @serverless tag)
 > - Or delete Cypress: `[path]` — Reason: ESS-only, Scout covers this environment
@@ -383,12 +383,12 @@ Check the [Elastic Security Documentation](https://www.elastic.co/docs/solutions
 
 **3. If behavior differs from documentation:**
 > 🐛 **Potential Bug Detected**
-> 
+>
 > Feature: [feature name]
 > Expected (per docs): [documented behavior]
 > Actual: [observed behavior]
 > Doc reference: [link to documentation]
-> 
+>
 > **Recommendation:** File a bug report, not a test fix
 
 **Note:** If documentation is outdated but feature works correctly, file a docs issue instead.
@@ -442,7 +442,7 @@ When a test fails because an element is disabled (`pointer-events: none`, `disab
 Based on the analysis, propose a fix:
 
 > ⚠️ **All proposed fixes MUST follow the good practices in this document.**
-> 
+>
 > Before suggesting any fix, verify it doesn't violate team conventions:
 > - 🚫 **No hardcoded waits** (`cy.wait(ms)`) - Use proper assertions and intercepts
 > - 🚫 **No forced actions** (`{ force: true }`) - Unless absolutely necessary with explanation
@@ -543,9 +543,9 @@ it('adding new assignees via add button in flyout', () => {
   expandFirstAlert();
   const users = [getDefaultUsername()];
   updateAssigneesViaAddButtonInFlyout(users);
-  
+
   cy.pause();  // <-- Execution pauses here, open DevTools to inspect
-  
+
   alertDetailsFlyoutShowsAssignees(users);
 });
 ```
@@ -580,15 +580,15 @@ it.only('adding new assignees via add button in flyout', () => {
   expandFirstAlert();
   const users = [getDefaultUsername()];
   updateAssigneesViaAddButtonInFlyout(users);
-  
+
   // 2. Add debugging before the failing assertion
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).then($el => {
     cy.log('Assignees panel HTML:', $el.html());
   });
-  
+
   // 3. Pause to inspect if needed
   cy.pause();
-  
+
   alertDetailsFlyoutShowsAssignees(users);
 });
 ```
@@ -625,9 +625,9 @@ When suggesting migration, provide this structure:
 
 ```typescript
 // Scout test structure
-import { expect, spaceTest } from '@kbn/scout-security';
+import { expect, tags, spaceTest } from '@kbn/scout-security';
 
-spaceTest.describe('Feature Name', { tag: ['@ess', '@svlSecurity'] }, () => {
+spaceTest.describe('Feature Name', { tag: [...tags.stateful.classic, ...tags.serverless.security_complete] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
     // API-based setup (more reliable than UI setup)
     await apiServices.someService.setupData();
@@ -641,7 +641,7 @@ spaceTest.describe('Feature Name', { tag: ['@ess', '@svlSecurity'] }, () => {
 
   spaceTest('test description', async ({ pageObjects }) => {
     const page = pageObjects.somePage;
-    
+
     await spaceTest.step('Step 1: Navigate', async () => {
       await page.navigate();
     });
@@ -663,7 +663,7 @@ spaceTest.describe('Feature Name', { tag: ['@ess', '@svlSecurity'] }, () => {
 
 ## Common Flaky Patterns
 
-<!-- 
+<!--
 PLACEHOLDER: Add known flaky patterns here
 Format:
 ### Pattern Name
@@ -764,7 +764,7 @@ cy.get('[data-test-subj="input"]').type('value');
 **Note:** This behavior can occur in both ESS and Serverless environments.
 
 ### Pattern: React useEffect Timing with Async Data
-**Symptoms:** 
+**Symptoms:**
 - Filter or state not applied on first render
 - UI shows stale/default values even when data is loaded
 - Test worked before a feature flag change
@@ -1103,16 +1103,16 @@ When deleting a test, also remove code that was ONLY used by that test:
 ```
 □ Check tasks/ files imported by the test
   └─ If task file is only used by deleted test → delete it
-  
+
 □ Check screens/ files imported by tasks
   └─ If screen file is only used by deleted tasks → delete it
-  
+
 □ Check objects/ files imported by the test
   └─ If object is only used by deleted test → delete it
-  
+
 □ Check shared files for orphaned exports
   └─ If a function in a shared file is only used by deleted code → remove it
-  
+
 □ Run grep to verify no other usages exist before deleting
 ```
 
@@ -1253,8 +1253,8 @@ describe('Feature requiring FF', { tags: ['@skipInServerlessMKI'] }, () => {
 
 **Example from server logs:**
 ```
-[v3_linux_anomalous_network_activity] No node found to start datafeed 
-[datafeed-v3_linux_anomalous_network_activity]. Reasons [cannot start datafeed 
+[v3_linux_anomalous_network_activity] No node found to start datafeed
+[datafeed-v3_linux_anomalous_network_activity]. Reasons [cannot start datafeed
 because index [auditbeat-2022] does not have all primary shards active yet.]
 ```
 

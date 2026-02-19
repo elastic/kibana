@@ -10,8 +10,10 @@ import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { InsightsResult } from '@kbn/streams-schema';
+import type { LogMeta } from '@kbn/logging';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
@@ -83,10 +85,12 @@ export async function generateInsights({
       tokensUsed: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
+    if (
+      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
+    ) {
       logger.debug(
         `Context too big when generating system insights, number of streams: ${streamInsightsWithData.length}`,
-        { error }
+        { error } as LogMeta
       );
       return {
         insights: [],
@@ -151,10 +155,12 @@ async function generateStreamInsights({
       tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
     };
   } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
+    if (
+      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
+    ) {
       logger.debug(
         `Context too big when generating insights for stream ${stream.name}, number of queries: ${queryDataList.length}`,
-        { error }
+        { error } as LogMeta
       );
       return {
         insights: [],

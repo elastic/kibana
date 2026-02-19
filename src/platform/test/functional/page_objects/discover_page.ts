@@ -11,6 +11,8 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -520,8 +522,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
@@ -694,7 +700,14 @@ export class DiscoverPageObject extends FtrService {
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.moveMouseTo('kbnQueryBar');
+        } catch {
+          // Ignore if query bar is not present
+        }
+        await this.testSubjects.click('app-menu-overflow-button');
+      });
 
       if (await this.testSubjects.exists('select-text-based-language-btn')) {
         await this.testSubjects.click('select-text-based-language-btn');
@@ -1034,5 +1047,17 @@ export class DiscoverPageObject extends FtrService {
 
   public async ensureNoUnsavedChangesIndicator() {
     await this.testSubjects.missingOrFail('split-button-notification-indicator');
+  }
+
+  public resetQueryMode() {
+    return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public getQueryMode() {
+    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public setQueryMode(mode: string) {
+    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 }

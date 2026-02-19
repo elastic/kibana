@@ -9,6 +9,7 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -16,7 +17,6 @@ import {
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
-import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
@@ -90,7 +90,7 @@ describe('UiamService', () => {
       ).toThrowError('UIAM shared secret is not configured.');
     });
 
-    it('does not create custom dispatcher for `full` verification without custom CAs', () => {
+    it('does not create custom dispatcher for `full` verification without custom TLS settings', () => {
       agentSpy.mockClear();
       new UiamService(loggingSystemMock.createLogger(), {
         enabled: true,
@@ -189,6 +189,54 @@ describe('UiamService', () => {
         connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
       });
     });
+
+    it('creates a custom dispatcher with client certificate and key for mTLS', () => {
+      agentSpy.mockClear();
+      new UiamService(loggingSystemMock.createLogger(), {
+        enabled: true,
+        url: 'https://uiam.service',
+        sharedSecret: 'secret',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
+
+    it('creates a custom dispatcher with mTLS client cert and CAs', () => {
+      agentSpy.mockClear();
+      new UiamService(loggingSystemMock.createLogger(), {
+        enabled: true,
+        url: 'https://uiam.service',
+        sharedSecret: 'secret',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: '/some/ca/path',
+        },
+      });
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
   });
 
   describe('#getAuthenticationHeaders', () => {
@@ -205,14 +253,6 @@ describe('UiamService', () => {
       expect(uiamService.getClientAuthentication()).toEqual({
         scheme: 'SharedSecret',
         value: 'secret',
-      });
-    });
-  });
-
-  describe('#getEsClientAuthenticationHeader', () => {
-    it('returns the ES client authentication header with shared secret', () => {
-      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
       });
     });
   });

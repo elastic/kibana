@@ -17,7 +17,7 @@ import type {
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
-  HASHED_ID,
+  HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
@@ -41,6 +41,7 @@ interface LogsExtractionOptions {
     toDateISO: string;
   };
   abortController?: AbortController;
+  countOnly?: boolean;
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -98,8 +99,7 @@ export class LogsExtractionClient {
         scannedIndices: indexPatterns,
       };
 
-      // With specific window, we don't need to update the pagination timestamp
-      if (opts?.specificWindow) {
+      if (opts?.specificWindow || opts?.countOnly) {
         return operationResult;
       }
 
@@ -131,8 +131,7 @@ export class LogsExtractionClient {
   }) {
     const { docsLimit } = engineDescriptor.logExtractionState;
     const indexPatterns = await this.getIndexPatterns(
-      engineDescriptor.type,
-      engineDescriptor.logExtractionState.additionalIndexPattern
+      engineDescriptor.logExtractionState.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
@@ -162,15 +161,17 @@ export class LogsExtractionClient {
       abortController: opts?.abortController,
     });
 
-    this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-    await ingestEntities({
-      esClient: this.esClient,
-      esqlResponse,
-      esIdField: HASHED_ID,
-      targetIndex: latestIndex,
-      logger: this.logger,
-      abortController: opts?.abortController,
-    });
+    if (!opts?.countOnly) {
+      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      await ingestEntities({
+        esClient: this.esClient,
+        esqlResponse,
+        esIdField: HASHED_ID_FIELD,
+        targetIndex: latestIndex,
+        logger: this.logger,
+        abortController: opts?.abortController,
+      });
+    }
 
     return { esqlResponse, indexPatterns };
   }
@@ -234,12 +235,9 @@ export class LogsExtractionClient {
     return { success: false, error };
   }
 
-  private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string) {
+  public async getIndexPatterns(additionalIndexPatterns: string[] = []): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
-    const cleanAdditionalIndicesPatterns = additionalIndexPatterns
-      .split(',')
-      .filter((index) => index !== '');
-    const indexPatterns: string[] = [updatesDataStream, ...cleanAdditionalIndicesPatterns];
+    const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
 
     try {
       const secSolDataView = await this.dataViewsService.get(

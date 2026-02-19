@@ -188,5 +188,6 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'observability:streamsEnableQueryStreams': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
 }

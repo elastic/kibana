@@ -168,6 +168,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  /**
+   * Enable data source browser suggestion in ES|QL editor.
+   */
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -807,6 +811,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );
