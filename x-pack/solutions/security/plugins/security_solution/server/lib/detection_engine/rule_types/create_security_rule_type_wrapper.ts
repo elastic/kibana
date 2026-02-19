@@ -513,6 +513,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
+                  totalEventsFound:
+                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
@@ -543,6 +545,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const disabledActions = rule.actions.filter(
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
+
+            if (result.totalEventsFound != null) {
+              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
+            }
 
             const createdSignalsCount = result.createdSignals.length;
             ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
