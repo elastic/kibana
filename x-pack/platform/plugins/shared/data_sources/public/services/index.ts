@@ -6,4 +6,3 @@
  */
 
 export { AvailableDataSourcesService } from './data_sources_api';
-export { ActiveSourcesService, createPublicActiveSourcesContract } from './active_sources';

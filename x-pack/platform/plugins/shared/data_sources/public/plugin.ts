@@ -13,7 +13,6 @@ import {
 } from '@kbn/core/public';
 import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerApp } from './application/register';
-import { ActiveSourcesService, createPublicActiveSourcesContract } from './services';
 import type {
   DataSourcesPluginSetup,
   DataSourcesPluginSetupDependencies,
@@ -41,10 +40,6 @@ export class DataSourcesPlugin
     return {};
   }
   start(core: CoreStart): DataSourcesPluginStart {
-    const activeSourcesService = new ActiveSourcesService({ http: core.http });
-
-    return {
-      activeSources: createPublicActiveSourcesContract({ activeSourcesService }),
-    };
+    return {};
   }
 }

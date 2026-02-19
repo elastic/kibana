@@ -8,26 +8,10 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ActiveSource } from './types/connector';
-
-/**
- * Public-facing contract for DataSources active sources service.
- */
-export interface ActiveSourcesServiceStartContract {
-  /**
-   * List all active data sources available.
-   */
-  list(): Promise<ActiveSource[]>;
-}
 
 export interface DataSourcesPluginSetup {}
 
-export interface DataSourcesPluginStart {
-  /**
-   * Active sources service contract, can be used to list active data sources.
-   */
-  activeSources: ActiveSourcesServiceStartContract;
-}
+export interface DataSourcesPluginStart {}
 
 export interface DataSourcesPluginSetupDependencies {}
 

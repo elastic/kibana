@@ -8,5 +8,4 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { DataSourcesPlugin } from './plugin';
 
-export type { DataSourcesPluginSetup, DataSourcesPluginStart } from './types';
 export const plugin = (context: PluginInitializerContext) => new DataSourcesPlugin(context);
