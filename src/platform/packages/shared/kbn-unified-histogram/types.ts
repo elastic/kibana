@@ -34,8 +34,9 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -218,7 +219,7 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * The controls state to use for the chart
    */
-  controlsState?: ControlPanelsState<ESQLControlState>;
+  controlsState?: ControlPanelsState<OptionsListESQLControlState>;
   /**
    * The current columns
    */

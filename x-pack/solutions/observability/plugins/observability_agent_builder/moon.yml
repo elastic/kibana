@@ -53,12 +53,13 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
-  - '@kbn/observability-nav-icons'
   - '@kbn/agent-builder-browser'
   - '@kbn/sse-utils-server'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/server-route-repository-client'
   - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
+  - '@kbn/observability-utils-server'
 tags:
   - plugin
   - prod

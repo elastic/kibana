@@ -1,4 +1,3 @@
-
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
@@ -90,7 +89,6 @@
     "@kbn/aiops-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",
-    "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/discover-contextual-components",
@@ -127,6 +125,7 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
     "@kbn/esql",
+    "@kbn/controls-schemas"
   ],
   "exclude": ["target/**/*"]
 }
