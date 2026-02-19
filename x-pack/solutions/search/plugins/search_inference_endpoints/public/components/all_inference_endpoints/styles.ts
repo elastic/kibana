@@ -8,10 +8,12 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const GroupByFilterButton = ({ euiTheme }: UseEuiTheme) => css`
-  width: ${euiTheme.base * 10}px;
-`;
+export const GroupByFilterButton = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: `${euiTheme.base * 10}px`,
+  });
 
-export const GroupBySelectableContainer = ({ euiTheme }: UseEuiTheme) => css`
-  width: ${euiTheme.base * 10}px;
-`;
+export const GroupBySelectableContainer = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: `${euiTheme.base * 10}px`,
+  });

@@ -233,12 +233,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <GroupBySelect
-                  value={groupBy ?? GroupByOptions.None}
-                  onChange={(value) => {
-                    setGroupBy(value ?? GroupByOptions.None);
-                  }}
-                />
+                <GroupBySelect value={groupBy} onChange={setGroupBy} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
