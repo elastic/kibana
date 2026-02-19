@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { firstValueFrom } from 'rxjs';
@@ -38,13 +33,11 @@ export async function buildApmToolResources({
   plugins,
   request,
   esClient,
-  logger,
 }: {
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   request: KibanaRequest;
   esClient?: IScopedClusterClient;
-  logger: Logger;
 }): Promise<ApmToolResources> {
   const [coreStart, pluginStart] = await core.getStartServices();
   const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
@@ -90,6 +83,9 @@ export async function buildApmToolResources({
       return plugins.apmDataAccess.getApmIndices(soClient);
     },
   });
+
+  // static seed is used to ensure consistent sampling across requests
+  const randomSamplerSeed = getRandomSamplerSeed(coreStart, request);
 
   const mlClientPromise = getMlClient({
     plugins: pluginsAdapter,

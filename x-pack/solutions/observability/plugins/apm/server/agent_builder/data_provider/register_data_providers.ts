@@ -46,7 +46,6 @@ export function registerDataProviders({
         core,
         plugins,
         request,
-        logger,
       });
 
       return getApmServiceSummary({
@@ -69,7 +68,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmExitSpanChangePoints',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       return getExitSpanChangePoints({
         apmEventClient,
@@ -92,7 +91,7 @@ export function registerDataProviders({
       start,
       end,
     }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       return getServiceChangePoints({
         apmEventClient,
@@ -109,7 +108,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmErrorDetails',
     async ({ request, errorId, serviceName, serviceEnvironment, start, end, kuery = '' }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       return getErrorSampleDetails({
         apmEventClient,
@@ -127,12 +126,7 @@ export function registerDataProviders({
     'servicesItems',
     async ({ request, environment, kuery, start, end, searchQuery }) => {
       const { apmEventClient, randomSamplerSeed, mlClient, apmAlertsClient } =
-        await buildApmToolResources({
-          core,
-          plugins,
-          request,
-          logger,
-        });
+        await buildApmToolResources({ core, plugins, request });
 
       const startMs = parseDatemath(start);
       const endMs = parseDatemath(end);
@@ -159,12 +153,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmTraceSampleIds',
     async ({ request, serviceName, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       return getTraceSampleIds({
         config,
@@ -180,12 +169,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmExitSpanSamples',
     async ({ request, traceIds, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       const spans = await fetchExitSpanSamplesFromTraceIds({
         apmEventClient,
@@ -209,12 +193,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmConnectionStatsItems',
     async ({ request, start, end, filter }) => {
-      const { apmEventClient } = await buildApmToolResources({
-        core,
-        plugins,
-        request,
-        logger,
-      });
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
       const items = await getConnectionStatsItems({
         apmEventClient,
@@ -244,7 +223,6 @@ export function registerDataProviders({
         core,
         plugins,
         request,
-        logger,
       });
 
       const { statsItems } = await getConnectionStats({

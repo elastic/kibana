@@ -15,6 +15,8 @@ import type {
 } from '../../../types';
 import { getToolHandler as getLogGroups } from '../../../tools/get_log_groups/handler';
 import { getToolHandler as getRuntimeMetrics } from '../../../tools/get_runtime_metrics/handler';
+import { getToolHandler as getHosts } from '../../../tools/get_hosts/handler';
+import { getToolHandler as getServices } from '../../../tools/get_services/handler';
 import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
 
 export interface SignalFetcherDeps {
@@ -28,6 +30,7 @@ export interface SignalFetcherDeps {
   serviceEnvironment: string;
   transactionType?: string;
   transactionName?: string;
+  hostName: string;
 }
 
 export interface SignalFetcher {
@@ -55,6 +58,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       start,
       end
     ) {
+      if (!serviceName) return null;
       const data = await dataRegistry.getData('apmServiceSummary', {
         request,
         serviceName,
@@ -75,6 +79,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       start,
       end
     ) {
+      if (!serviceName) return null;
       const data = await dataRegistry.getData('apmServiceChangePoints', {
         request,
         serviceName,
@@ -93,6 +98,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       'sudden shifts in throughput/latency/failure rate of downstream dependencies — shows when problems started',
     startOffsetMinutes: 6 * 60,
     async fetch({ dataRegistry, request, serviceName, serviceEnvironment }, start, end) {
+      if (!serviceName) return null;
       const data = await dataRegistry.getData('apmExitSpanChangePoints', {
         request,
         serviceName,
@@ -109,6 +115,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       'Shows downstream dependencies (services and external dependencies), including metrics for latency/througput/error rate. Useful for understanding if the service is a victim of cascading failures.',
     startOffsetMinutes: 24 * 60,
     async fetch({ core, plugins, dataRegistry, request, logger, serviceName }, start, end) {
+      if (!serviceName) return null;
       const data = await getServiceTopology({
         core,
         plugins,
@@ -128,7 +135,16 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     key: 'logGroups',
     description: 'error messages and exception patterns',
     startOffsetMinutes: 15,
-    async fetch({ core, plugins, request, logger, esClient, serviceName }, start, end) {
+    async fetch({ core, plugins, request, logger, esClient, serviceName, hostName }, start, end) {
+      let kqlFilter: string;
+      if (serviceName) {
+        kqlFilter = `service.name: "${serviceName}"`;
+      } else if (hostName) {
+        kqlFilter = `host.name: "${hostName}"`;
+      } else {
+        return null;
+      }
+
       const result = await getLogGroups({
         core,
         plugins,
@@ -137,7 +153,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
         esClient,
         start,
         end,
-        kqlFilter: `service.name: "${serviceName}"`,
+        kqlFilter,
         fields: [],
         includeStackTrace: false,
         includeFirstSeen: false,
@@ -151,6 +167,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     description: 'CPU, memory, GC duration, thread count — indicates internal resource pressure',
     startOffsetMinutes: 15,
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
+      if (!serviceName) return null;
       const result = await getRuntimeMetrics({
         core,
         plugins,
@@ -162,6 +179,58 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
         end,
       });
       return result.nodes.length > 0 ? result.nodes : null;
+    },
+  },
+  {
+    key: 'infraHosts',
+    description: 'CPU, memory, disk, network usage — indicates host-level resource pressure',
+    startOffsetMinutes: 15,
+    async fetch({ request, dataRegistry, serviceName, hostName }, start, end) {
+      const kqlFilter = hostName
+        ? `host.name: "${hostName}"`
+        : serviceName
+        ? `service.name: "${serviceName}"`
+        : null;
+
+      if (!kqlFilter) return null;
+
+      const result = await getHosts({
+        request,
+        dataRegistry,
+        start,
+        end,
+        limit: 10,
+        kqlFilter,
+      });
+
+      return result.hosts.length > 0 ? result.hosts : null;
+    },
+  },
+  {
+    key: 'servicesOnHost',
+    description:
+      'for infrastructure alerts, shows services running on the affected host — helps identify which service may be causing resource pressure',
+    startOffsetMinutes: 15,
+    async fetch(
+      { core, plugins, request, esClient, dataRegistry, logger, serviceName, hostName },
+      start,
+      end
+    ) {
+      if (!hostName || serviceName) return null;
+
+      const result = await getServices({
+        core,
+        plugins,
+        request,
+        esClient,
+        dataRegistry,
+        logger,
+        start,
+        end,
+        kqlFilter: `host.name: "${hostName}"`,
+      });
+
+      return result.services.length > 0 ? result.services : null;
     },
   },
 ];

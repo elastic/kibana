@@ -36,6 +36,7 @@ export interface AlertDocForInsight {
   'service.environment'?: string;
   'transaction.type'?: string;
   'transaction.name'?: string;
+  'host.name'?: string;
   'kibana.alert.start'?: string | number;
   [key: string]: unknown;
 }
@@ -99,8 +100,9 @@ async function fetchAlertContext({
   const serviceEnvironment = alertDoc?.['service.environment'] ?? '';
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
+  const hostName = alertDoc?.['host.name'] ?? '';
 
-  if (!serviceName) {
+  if (!serviceName && !hostName) {
     return { context: 'No related signals available.', signalDescriptions: [] };
   }
 
@@ -121,6 +123,7 @@ async function fetchAlertContext({
       serviceEnvironment,
       transactionType,
       transactionName,
+      hostName,
     },
     alertStart
   );
@@ -164,6 +167,8 @@ function generateAlertSummary({
 
     Available signals (use what's relevant and available):
     ${signalDescriptions.length > 0 ? signalDescriptions.join('\n    ') : 'None available.'}
+
+    Note: Numeric values on a 0-1 scale represent percentages (e.g., 0.95 = 95%, 0.3 = 30%).
 
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);
