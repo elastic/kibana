@@ -12,7 +12,7 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { generateFieldHintCases, buildSingleEntityLookupJoinEsql } from '../graph/utils';
+import { generateFieldHintCases, checkEnrichmentAvailability } from '../graph/utils';
 import type { EntityRecord } from './types';
 
 interface FetchEntitiesParams {
@@ -45,9 +45,12 @@ export const fetchEntities = async ({
   const limit = nodesLimit ?? 1000;
   const resolvedIndexPatterns = indexPatterns ?? ['.alerts-security.alerts-*', 'logs-*'];
 
+  const { isLookupIndexAvailable } = await checkEnrichmentAvailability(esClient, logger, spaceId);
+
   const query = buildEntitiesEsqlQuery({
     indexPatterns: resolvedIndexPatterns,
     lookupIndexName,
+    isLookupIndexAvailable,
     entityCount: entityIds.length,
     limit,
   });
@@ -96,6 +99,7 @@ const buildDslFilter = (entityIds: string[], start: string | number, end: string
 interface BuildEntitiesQueryParams {
   indexPatterns: string[];
   lookupIndexName: string;
+  isLookupIndexAvailable: boolean;
   entityCount: number;
   limit: number;
 }
@@ -103,6 +107,7 @@ interface BuildEntitiesQueryParams {
 const buildEntitiesEsqlQuery = ({
   indexPatterns,
   lookupIndexName,
+  isLookupIndexAvailable,
   entityCount,
   limit,
 }: BuildEntitiesQueryParams): string => {
@@ -126,7 +131,11 @@ ${entityFieldHintCases},
     "entity"
   )
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
-${buildSingleEntityLookupJoinEsql(lookupIndexName)}
+${
+  isLookupIndexAvailable
+    ? buildSingleEntityLookupJoinEsql(lookupIndexName)
+    : buildNoEnrichmentEntityEsql()
+}
 | STATS ecsParentField = MIN(ecsParentField),
   entityName = MIN(entityName),
   entityType = MIN(entityType),
@@ -136,4 +145,29 @@ ${buildSingleEntityLookupJoinEsql(lookupIndexName)}
   timestamp = MAX(timestamp)
     BY entityId
 | LIMIT ${limit}`;
+};
+
+const buildSingleEntityLookupJoinEsql = (lookupIndexName: string): string => {
+  return `// Drop existing entity.id from source docs before LOOKUP JOIN to avoid conflicts
+| DROP entity.id
+| EVAL entity.id = entityId
+| LOOKUP JOIN ${lookupIndexName} ON entity.id
+| EVAL availableInEntityStore = CASE(
+    entity.name IS NOT NULL OR entity.type IS NOT NULL,
+    true,
+    false
+  )
+| EVAL entityName = entity.name
+| EVAL entityType = entity.type
+| EVAL entitySubType = entity.sub_type
+| EVAL hostIp = TO_STRING(host.ip)`;
+};
+
+const buildNoEnrichmentEntityEsql = (): string => {
+  return `// No enrichment available - use null values
+| EVAL entityName = TO_STRING(null)
+| EVAL entityType = TO_STRING(null)
+| EVAL entitySubType = TO_STRING(null)
+| EVAL hostIp = TO_STRING(null)
+| EVAL availableInEntityStore = false`;
 };
