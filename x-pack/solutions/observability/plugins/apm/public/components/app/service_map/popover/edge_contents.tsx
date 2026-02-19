@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+} from '../../../../../common/es_fields/apm';
+import type { ServiceMapEdge } from '../../../../../common/service_map';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -23,26 +27,41 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-export function EdgeContents({ selection, environment, start, end }: ContentsProps) {
+export function EdgeContents({
+  selection: { data: edgeSelectionData },
+  environment,
+  start,
+  end,
+}: ContentsProps<ServiceMapEdge>) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const { offset, comparisonEnabled } = query;
+  const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
-  const isEdgeSelection = isEdge(selection);
-  const sourceData = isEdgeSelection
-    ? selection.data?.sourceData ?? { id: selection.source }
-    : null;
-  const resources = isEdgeSelection ? selection.data?.resources ?? [] : [];
+  const sourceData = edgeSelectionData?.sourceData;
+  const targetData = edgeSelectionData?.targetData;
+  const dependencies = edgeSelectionData?.resources;
   const sourceServiceName =
     sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
-  const dependencies = resources;
+  const dependencyName =
+    targetData && SPAN_DESTINATION_SERVICE_RESOURCE in targetData
+      ? targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
+      : undefined;
+  const discoverQueryParams =
+    sourceServiceName && dependencyName && rangeFrom && rangeTo
+      ? {
+          rangeFrom,
+          rangeTo,
+          serviceName: sourceServiceName,
+          dependencyName,
+        }
+      : undefined;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (sourceServiceName && dependencies.length > 0) {
+      if (sourceServiceName && dependencies && dependencies.length > 0) {
         return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
             query: {
@@ -62,13 +81,29 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  if (!isEdgeSelection) {
-    return null;
-  }
-
   return (
-    <EuiFlexItem>
-      <StatsList data={data} isLoading={isLoading} />
-    </EuiFlexItem>
+    <>
+      <EuiFlexItem>
+        <StatsList data={data} isLoading={isLoading} />
+      </EuiFlexItem>
+      {discoverQueryParams && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
+            <OpenInDiscover
+              dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
+              variant="outlinedButton"
+              indexType="traces"
+              rangeFrom={discoverQueryParams.rangeFrom}
+              rangeTo={discoverQueryParams.rangeTo}
+              queryParams={{
+                serviceName: discoverQueryParams.serviceName,
+                dependencyName: discoverQueryParams.dependencyName,
+              }}
+            />
+          </EuiFlexItem>
+        </>
+      )}
+    </>
   );
 }
