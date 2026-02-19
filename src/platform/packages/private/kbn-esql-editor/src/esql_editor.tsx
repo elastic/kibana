@@ -54,9 +54,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { firstValueFrom, of } from 'rxjs';
 import { QuerySource } from '@kbn/esql-types';
-import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
+import { useLookupIndexCommand } from './lookup_join';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -159,6 +158,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
+  const suppressSuggestionsRef = useRef(false);
 
   const editorCommandDisposables = useRef(
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
@@ -479,6 +479,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const triggerSuggestions = useCallback(() => {
     setTimeout(() => {
+      if (suppressSuggestionsRef.current) {
+        suppressSuggestionsRef.current = false;
+        return;
+      }
       editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
     }, 0);
   }, []);
@@ -664,8 +668,6 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedHistoryStarredItems: fn };
   }, []);
 
-  const canCreateLookupIndex = useCanCreateLookupIndex();
-
   // Extract source command and build minimal query with cluster prefixes
   const minimalQuery = useMemo(() => {
     const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
@@ -714,11 +716,6 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
-  const isResourceBrowserEnabled = useCallback(async () => {
-    const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
-    return Boolean(enableResourceBrowser && currentApp === 'discover');
-  }, [application?.currentAppId$, enableResourceBrowser]);
-
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -727,7 +724,6 @@ const ESQLEditorInternal = function ESQLEditor({
     esqlService,
     histogramBarTarget,
     activeSolutionId: activeSolutionId ?? undefined,
-    canCreateLookupIndex,
     minimalQueryRef,
     abortControllerRef,
     dataSourcesCache,
@@ -738,7 +734,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
-    isResourceBrowserEnabled,
+    enableResourceBrowser,
   });
 
   const {
@@ -754,12 +750,14 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     esqlCallbacks,
+    telemetryService,
   });
 
   const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler } = useSourcesBadge({
     editorRef,
     editorModel,
     openIndicesBrowser,
+    suppressSuggestionsRef,
   });
 
   const {
@@ -779,6 +777,7 @@ const ESQLEditorInternal = function ESQLEditor({
     getTimeRange: () => data.query.timefilter.timefilter.getTime(),
     signal: abortControllerRef.current.signal,
     activeSolutionId: activeSolutionId ?? undefined,
+    telemetryService,
   });
 
   const queryRunButtonProperties = useMemo(() => {
