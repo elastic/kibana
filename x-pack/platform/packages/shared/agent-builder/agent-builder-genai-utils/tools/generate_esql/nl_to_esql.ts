@@ -65,8 +65,8 @@ export interface GenerateEsqlOptions {
    */
   executeQuery?: boolean;
   /**
-   * Maximum number of retries to attempt if the query fails to execute.
-   * Note: this is only relevant if `executeQuery` is `true`
+   * Maximum number of retries if the query fails (execute or AST validation).
+   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
