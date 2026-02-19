@@ -166,7 +166,9 @@ export function EditPolicyModal({
                       data-test-subj={`editPolicyModal-affectedResourcesList-${resource.name}`}
                     >
                       <EuiText size="s">{resource.name}</EuiText>
-                      <EuiText size="s">{affectedResourceTypeLabelMap[resource.type]}</EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {affectedResourceTypeLabelMap[resource.type]}
+                      </EuiText>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ))}
@@ -183,6 +185,7 @@ export function EditPolicyModal({
               data-test-subj="editPolicyModal-cancelButton"
               onClick={onCancel}
               disabled={isProcessing}
+              flush="both"
             >
               {i18n.translate('xpack.streams.editPolicyModal.cancelButton', {
                 defaultMessage: 'Cancel',
