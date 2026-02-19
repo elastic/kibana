@@ -31,7 +31,7 @@ groups:
         description: |
           REQUIRED
           Multiline string. Can include tables, lists, code examples, etc.
-        # applies_to: OPTIONAL, applicability metadata (recommended)
+        # applies_to: MANDATORY applicability metadata
         #   Supports docs-builder applies_to syntax. You can use either a mapping form:
         #
         #   applies_to:
