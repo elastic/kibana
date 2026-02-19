@@ -12,6 +12,7 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
+xpack.profiling.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
