@@ -107,7 +107,7 @@
               ">; customBranding: { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }; userSettings: jest.Mocked<",
               "InternalUserSettingsServiceSetup",
               ">; security: jest.Mocked<",
-              "SecurityServiceSetup",
+              "InternalSecurityServiceSetup",
               ">; userProfile: jest.Mocked<",
               "UserProfileServiceSetup",
               ">; pricing: jest.Mocked<",
