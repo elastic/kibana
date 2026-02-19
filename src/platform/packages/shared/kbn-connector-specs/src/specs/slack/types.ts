@@ -43,15 +43,3 @@ export interface SlackErrorFields {
   needed?: string;
   provided?: string;
 }
-
-export interface SlackSearchMatch {
-  /**
-   * Minimal shape we use for mention extraction.
-   *
-   * Historically this mirrored Slack `search.messages` matches (which included fields like `iid`,
-   * `score`, etc.). Now that we use `assistant.search.context`, we only need rendered text content
-   * and (optionally) Block Kit blocks.
-   */
-  text?: string;
-  blocks?: unknown;
-}

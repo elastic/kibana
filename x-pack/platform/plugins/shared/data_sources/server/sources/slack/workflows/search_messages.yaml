@@ -17,7 +17,7 @@ inputs:
   - name: from_user
     type: string
     required: false
-    description: 'Optional constraint. Slack usernames require space characters replaced by periods, for example John Doe becomes john.doe.'
+    description: 'Optional constraint. Appends `in:<display_name>` to the query. This should be the display name of the user.'
   - name: after
     type: string
     required: false
