@@ -7,15 +7,212 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstAllCommands } from '../../../types';
+import { isMap } from '../../../ast/is';
+import type { ESQLAstAllCommands, ESQLAstMmrCommand } from '../../../types';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
+import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
+import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
+import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import {
+  columnExists,
+  getFieldsSuggestions,
+  handleFragment,
+} from '../../definitions/utils/autocomplete/helpers';
+
+enum MmrPosition {
+  AFTER_MMR_KEYWORD = 'after_mmr_keyword',
+  AFTER_QUERY_VECTOR = 'after_query_vector',
+  AFTER_ON_KEYWORD = 'after_on_keyword',
+  AFTER_FIELD = 'after_field',
+  AFTER_LIMIT_KEYWORD = 'after_limit_keyword',
+  AFTER_LIMIT_VALUE = 'after_limit_value',
+  AFTER_WITH_KEYWORD = 'after_with_keyword',
+  WITHIN_OPTIONS = 'within_options',
+  AFTER_COMMAND = 'after_command',
+}
+
+const queryVectorSuggestion: ISuggestionItem = {
+  label: 'query vector',
+  text: '[${0:0.1}, ${1:0.2}]::dense_vector ',
+  asSnippet: true,
+  kind: 'Value',
+  detail: 'Example query vector',
+  sortText: '1',
+};
+
+async function getDiversifyFieldSuggestions(
+  innerText: string,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    const contextField = context?.columns?.keys().next().value as string | undefined;
+    const label = contextField || 'field';
+    return [
+      {
+        label,
+        text: `${label} `,
+        kind: 'Field',
+        detail: 'Example field',
+        sortText: '1',
+      },
+    ];
+  }
+
+  const types = ['dense_vector'];
+  const fieldSuggestions = await getFieldsSuggestions(types, callbacks.getByType, {
+    addSpaceAfterField: true,
+    openSuggestions: true,
+  });
+
+  const filteredFieldSuggestions = context?.columns
+    ? fieldSuggestions.filter((suggestion) => columnExists(suggestion.label, context))
+    : fieldSuggestions;
+
+  return handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment, context),
+    (_fragment, rangeToReplace) =>
+      filteredFieldSuggestions.map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+      })),
+    () => []
+  );
+}
+
+const limitKeywordSuggestion: ISuggestionItem = {
+  label: 'LIMIT',
+  text: 'LIMIT ',
+  kind: 'Keyword',
+  detail: 'Limit',
+  sortText: '1',
+};
+
+const limitValueSuggestion: ISuggestionItem = {
+  label: '10',
+  text: '10 ',
+  kind: 'Value',
+  detail: 'Example limit',
+  sortText: '1',
+};
+
+const lambdaMapSuggestion: ISuggestionItem = {
+  label: 'lambda',
+  text: '{ "lambda": ${0:0.5} }',
+  asSnippet: true,
+  kind: 'Value',
+  detail: 'MMR options map',
+  sortText: '1',
+};
+
+function getPosition(
+  innerText: string,
+  command: ESQLAstMmrCommand,
+  cursorPosition: number
+): MmrPosition {
+  const commandText = innerText.substring(command.location.min, cursorPosition).toLowerCase();
+
+  const map = isMap(command.namedParameters) ? command.namedParameters : undefined;
+  if (map) {
+    if (map.incomplete && !map.text) {
+      return MmrPosition.AFTER_WITH_KEYWORD;
+    }
+
+    if (map.incomplete) {
+      return MmrPosition.WITHIN_OPTIONS;
+    }
+
+    return MmrPosition.AFTER_COMMAND;
+  }
+
+  if (/\bwith\s*$/i.test(commandText)) {
+    return MmrPosition.AFTER_WITH_KEYWORD;
+  }
+
+  if (/\bwith\s*\{[^}]*$/i.test(commandText)) {
+    return MmrPosition.WITHIN_OPTIONS;
+  }
+
+  if (command.limit?.incomplete || /\blimit\s*$/i.test(commandText)) {
+    return MmrPosition.AFTER_LIMIT_KEYWORD;
+  }
+
+  if (command.limit && !command.limit.incomplete) {
+    return MmrPosition.AFTER_LIMIT_VALUE;
+  }
+
+  if (/\bon\s*$/i.test(commandText) || command.diversifyField?.incomplete) {
+    return MmrPosition.AFTER_ON_KEYWORD;
+  }
+
+  if (command.diversifyField && !command.diversifyField.incomplete) {
+    return MmrPosition.AFTER_FIELD;
+  }
+
+  if (command.queryVector && !command.queryVector.incomplete) {
+    return MmrPosition.AFTER_QUERY_VECTOR;
+  }
+
+  return MmrPosition.AFTER_MMR_KEYWORD;
+}
 
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
-  return [];
+  const innerText = query.substring(0, cursorPosition);
+  const mmrCommand = command as ESQLAstMmrCommand;
+  const position = getPosition(innerText, mmrCommand, cursorPosition);
+
+  switch (position) {
+    case MmrPosition.AFTER_MMR_KEYWORD:
+      return [queryVectorSuggestion, onCompleteItem];
+
+    case MmrPosition.AFTER_QUERY_VECTOR:
+      return [onCompleteItem];
+
+    case MmrPosition.AFTER_ON_KEYWORD:
+      return getDiversifyFieldSuggestions(innerText, callbacks, context);
+
+    case MmrPosition.AFTER_FIELD:
+      return [limitKeywordSuggestion];
+
+    case MmrPosition.AFTER_LIMIT_KEYWORD:
+      return [limitValueSuggestion];
+
+    case MmrPosition.AFTER_LIMIT_VALUE:
+      return [withCompleteItem, pipeCompleteItem];
+
+    case MmrPosition.AFTER_WITH_KEYWORD:
+      return [lambdaMapSuggestion];
+
+    case MmrPosition.WITHIN_OPTIONS: {
+      const availableParameters: MapParameters = {
+        lambda: {
+          type: 'number',
+          description: 'MMR lambda value',
+          suggestions: [
+            {
+              label: '0.5',
+              text: '0.5',
+              kind: 'Value',
+              detail: 'Example lambda',
+            },
+          ],
+        },
+      };
+
+      return getCommandMapExpressionSuggestions(innerText, availableParameters, true);
+    }
+
+    case MmrPosition.AFTER_COMMAND:
+      return [pipeCompleteItem];
+
+    default:
+      return [];
+  }
 }
