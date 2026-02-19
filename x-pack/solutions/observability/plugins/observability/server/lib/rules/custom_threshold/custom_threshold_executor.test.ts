@@ -2449,6 +2449,96 @@ describe('The custom threshold alert type', () => {
         });
       });
 
+      describe("noDataBehavior: 'recover' with groupBy", () => {
+        const instanceIdA = 'a';
+        const instanceIdB = 'b';
+        const execute = () =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'recover',
+            },
+          });
+
+        test('should not report alerts for groups with no data (all groups recover)', async () => {
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // No alerts should be reported - all groups recover
+          expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+          expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
+        });
+
+        test('should report alert only for groups that meet condition, not for no-data groups', async () => {
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: 2,
+                timestamp: new Date().toISOString(),
+                shouldFire: true,
+                isNoData: false,
+                bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // Only group 'a' should be reported (has data and meets condition)
+          // Group 'b' should recover (no alert)
+          expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+          expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
+        });
+      });
+
       describe("noDataBehavior: 'alertOnNoData'", () => {
         const execute = (sourceId: string = 'default') =>
           executor({
@@ -2715,6 +2805,312 @@ describe('The custom threshold alert type', () => {
           });
 
           expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        });
+      });
+
+      describe("noDataBehavior: 'remainActive' with groupBy", () => {
+        const instanceIdA = 'a';
+        const instanceIdB = 'b';
+        const execute = () =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'remainActive',
+            },
+          });
+
+        test('should keep only tracked group alerts active when there is no data', async () => {
+          // Mock: group 'a' is tracked, group 'b' is not tracked
+          services.alertsClient.isTrackedAlert.mockImplementation(
+            (id: string) => id === instanceIdA
+          );
+
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // Only group 'a' should be reported (it was tracked)
+          const reportedAlertA = getLastReportedAlert(instanceIdA);
+          expect(reportedAlertA?.context?.reason).toContain('no data');
+          expect(reportedAlertA?.actionGroup).toEqual(FIRED_ACTION.id);
+          expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
+
+          // Reset mock
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+      });
+
+      describe("noDataBehavior: 'alertOnNoData' with groupBy", () => {
+        const instanceIdA = 'a';
+        const instanceIdB = 'b';
+        const execute = () =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'alertOnNoData',
+            },
+          });
+
+        test('should report NO_DATA alerts for all groups with no data', async () => {
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // Both groups should get NO_DATA alerts
+          expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+          expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
+        });
+
+        test('should report FIRED alert for firing group and NO_DATA for no-data group', async () => {
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: 2,
+                timestamp: new Date().toISOString(),
+                shouldFire: true,
+                isNoData: false,
+                bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+          expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
+        });
+      });
+
+      describe("noDataBehavior: 'remainActive' with groupBy - mixed scenarios", () => {
+        const instanceIdA = 'a';
+        const instanceIdB = 'b';
+        const instanceIdC = 'c';
+        const execute = () =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'remainActive',
+            },
+          });
+
+        test('should handle mixed scenario: firing, no-data tracked, and no-data untracked groups', async () => {
+          // Mock: group 'a' is tracked (was previously active), group 'b' is not tracked, group 'c' has data
+          services.alertsClient.isTrackedAlert.mockImplementation(
+            (id: string) => id === instanceIdA || id === instanceIdC
+          );
+
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+              c: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: 2,
+                timestamp: new Date().toISOString(),
+                shouldFire: true,
+                isNoData: false,
+                bucketKey: { groupBy0: 'c' },
+                flattenGrouping: { groupByField: 'c' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // Group 'a': tracked + no data → should remain active (FIRED)
+          // Group 'b': not tracked + no data → should NOT create new alert
+          // Group 'c': has data + firing → should report FIRED alert
+          expect(getLastReportedAlert(instanceIdA)?.actionGroup).toEqual(FIRED_ACTION.id);
+          expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
+          expect(getLastReportedAlert(instanceIdC)).toHaveAlertAction();
+
+          // Reset mock
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+
+        test('should keep all tracked groups active when all have no data', async () => {
+          // All groups are tracked
+          services.alertsClient.isTrackedAlert.mockReturnValue(true);
+
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // Both groups are tracked, both should remain active
+          expect(getLastReportedAlert(instanceIdA)?.actionGroup).toEqual(FIRED_ACTION.id);
+          expect(getLastReportedAlert(instanceIdB)?.actionGroup).toEqual(FIRED_ACTION.id);
+
+          // Reset mock
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+
+        test('should not create any alerts when no groups are tracked and all have no data', async () => {
+          // No groups are tracked
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+
+          setEvaluationResults([
+            {
+              a: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'a' },
+              },
+              b: {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: 'b' },
+              },
+            },
+          ]);
+
+          await execute();
+
+          // No groups are tracked, no alerts should be created
+          expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+          expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
         });
       });
     });

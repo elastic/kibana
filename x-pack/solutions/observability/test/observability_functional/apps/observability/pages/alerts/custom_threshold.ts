@@ -246,8 +246,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           tags: ['tag1'],
           consumer: 'alerts',
           params: expect.objectContaining({
-            alertOnGroupDisappear: false,
-            alertOnNoData: false,
             criteria: [
               {
                 comparator: 'notBetween',
@@ -271,6 +269,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               },
             ],
             groupBy: ['docker.container.name'],
+            noDataBehavior: 'recover',
             searchConfiguration: {
               index: 'data-view-id_2',
               query: { query: '', language: 'kuery' },
