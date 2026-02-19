@@ -25,7 +25,7 @@ test.describe(
       });
     });
 
-    test('should properly gate query streams when feature flag is off', async ({
+    test('should properly hide query streams UI when feature flag is off', async ({
       page,
       pageObjects,
       kbnClient,
@@ -35,19 +35,26 @@ test.describe(
       });
       await page.reload();
       await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
+
+      await pageObjects.streams.gotoPartitioningTab('logs');
+      await expect(pageObjects.streams.childStreamTypeSelector).toBeHidden();
     });
 
-    test('should properly gate query streams when feature flag is on', async ({
+    test('should properly show query streams UI when feature flag is on', async ({
       page,
       pageObjects,
+      apiServices,
       kbnClient,
     }) => {
+      await apiServices.streams.enable();
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
       await page.reload();
-
       await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
+
+      await pageObjects.streams.gotoPartitioningTab('logs');
+      await expect(pageObjects.streams.childStreamTypeSelector).toBeVisible();
     });
   }
 );

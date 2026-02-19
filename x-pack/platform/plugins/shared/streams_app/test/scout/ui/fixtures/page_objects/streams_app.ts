@@ -32,6 +32,7 @@ export class StreamsApp {
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
   public readonly createQueryStreamButton;
+  public readonly childStreamTypeSelector;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -68,6 +69,7 @@ export class StreamsApp {
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
+    this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
   }
 
   async goto() {
