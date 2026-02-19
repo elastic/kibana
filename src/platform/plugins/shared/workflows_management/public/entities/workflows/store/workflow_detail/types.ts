@@ -50,7 +50,7 @@ export interface WorkflowDetailState {
   /** Loading states for async operations */
   loading: LoadingStates;
   /** Whether the editor has validation errors (strict schema + custom validations) */
-  hasValidationErrors: boolean;
+  hasYamlSchemaValidationErrors: boolean;
   /** Connector flyout state */
   connectorFlyout: {
     isOpen: boolean;

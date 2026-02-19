@@ -14,7 +14,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
-  setHasValidationErrors,
+  setHasYamlSchemaValidationErrors,
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -76,12 +76,12 @@ describe('WorkflowDetailHeader', () => {
     {
       isValid = true,
       hasChanges = false,
-      hasValidationErrors = false,
+      hasYamlSchemaValidationErrors = false,
       serverValid = true,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
-      hasValidationErrors?: boolean;
+      hasYamlSchemaValidationErrors?: boolean;
       serverValid?: boolean;
     } = {}
   ) => {
@@ -98,8 +98,8 @@ describe('WorkflowDetailHeader', () => {
     }
 
     // Simulate strict validation errors from Monaco
-    if (hasValidationErrors) {
-      store.dispatch(setHasValidationErrors(true));
+    if (hasYamlSchemaValidationErrors) {
+      store.dispatch(setHasYamlSchemaValidationErrors(true));
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -175,7 +175,7 @@ describe('WorkflowDetailHeader', () => {
   it('disables run workflow button when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
-      hasValidationErrors: true,
+      hasYamlSchemaValidationErrors: true,
     });
     expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
   });
@@ -183,7 +183,7 @@ describe('WorkflowDetailHeader', () => {
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
-      hasValidationErrors: true,
+      hasYamlSchemaValidationErrors: true,
     });
     const toggle = result.getByRole('switch');
     expect(toggle).toBeDisabled();

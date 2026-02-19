@@ -54,7 +54,7 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
-  setHasValidationErrors,
+  setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
@@ -262,7 +262,7 @@ export const WorkflowYAMLEditor = ({
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
     const hasErrors = validationErrors.some((e) => e.severity === 'error');
-    dispatch(setHasValidationErrors(hasErrors));
+    dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

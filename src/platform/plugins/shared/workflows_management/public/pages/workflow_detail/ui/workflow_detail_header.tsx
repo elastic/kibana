@@ -37,7 +37,7 @@ import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
-  selectHasValidationErrors,
+  selectHasYamlSchemaValidationErrors,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSynced,
@@ -106,7 +106,7 @@ export const WorkflowDetailHeader = React.memo(
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
-    const hasValidationErrors = useSelector(selectHasValidationErrors);
+    const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
     const isYamlSynced = useSelector(selectIsYamlSynced);
@@ -139,7 +139,7 @@ export const WorkflowDetailHeader = React.memo(
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
-    const isValid = isSyntaxValid && !hasValidationErrors && workflow?.valid !== false;
+    const isValid = isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
     const runWorkflowTooltipContent = useMemo(() => {
       return getTestRunTooltipContent({
