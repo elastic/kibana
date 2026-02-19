@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EuiPanel,
@@ -19,14 +19,23 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiButtonIcon,
+  EuiGlobalToastList,
 } from '@elastic/eui';
+import type { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import {
   ContentListProvider,
   useContentListItems,
   useContentListSort,
+  useContentListSearch,
+  useContentListPagination,
   useContentListConfig,
 } from '@kbn/content-list-provider';
-import type { ContentListItem, FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  ContentListItem,
+  ContentListItemConfig,
+  FindItemsParams,
+  FindItemsResult,
+} from '@kbn/content-list-provider';
 import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
@@ -94,6 +103,10 @@ interface StateDiagnosticPanelProps {
   showDescription?: boolean;
   /** Whether the custom type column is shown. */
   showTypeColumn?: boolean;
+  /** Whether the actions column is shown. */
+  showActions?: boolean;
+  /** Whether custom actions (Share, Archive) are mixed in alongside presets. */
+  showCustomActions?: boolean;
 }
 
 /**
@@ -103,10 +116,14 @@ const StateDiagnosticPanel = ({
   defaultOpen = false,
   showDescription = true,
   showTypeColumn = true,
+  showActions = false,
+  showCustomActions = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const { items, totalItems, isLoading, error } = useContentListItems();
+  const { items, totalItems, isLoading, isFetching, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { search } = useContentListSearch();
+  const pagination = useContentListPagination();
   const config = useContentListConfig();
 
   // Generate JSX code based on current configuration.
@@ -130,10 +147,26 @@ const StateDiagnosticPanel = ({
   />`);
     }
 
+    // Actions column.
+    if (showActions) {
+      const actionLines = ['    <Action.Edit />'];
+
+      if (showCustomActions) {
+        actionLines.push(
+          `    <Action id="share" name="Share" icon="share" … />`,
+          `    <Action id="archive" name="Archive" icon="folderClosed" … />`
+        );
+      }
+
+      actionLines.push('    <Action.Delete />');
+
+      columnChildren.push(`  <Column.Actions>\n${actionLines.join('\n')}\n  </Column.Actions>`);
+    }
+
     return `<ContentListTable title="…">
 ${columnChildren.join('\n')}
 </ContentListTable>`;
-  }, [showDescription, showTypeColumn]);
+  }, [showDescription, showTypeColumn, showActions, showCustomActions]);
 
   return (
     <>
@@ -163,6 +196,11 @@ ${columnChildren.join('\n')}
               {isLoading && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="primary">Loading…</EuiBadge>
+                </EuiFlexItem>
+              )}
+              {isFetching && !isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Fetching…</EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -197,6 +235,32 @@ ${columnChildren.join('\n')}
                   {JSON.stringify({ field: sortField, direction: sortDirection }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Search</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ search, isFetching }, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              {pagination.isSupported && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Pagination</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                    {JSON.stringify(
+                      {
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                        totalItems,
+                      },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={2} style={{ minWidth: 300 }}>
                 <EuiTitle size="xxs">
                   <h3>Table JSX</h3>
@@ -252,23 +316,38 @@ interface PlaygroundArgs {
   hasItems: boolean;
   isLoading: boolean;
   isReadOnly: boolean;
+  hasPagination: boolean;
   compressed: boolean;
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
   showTypeColumn: boolean;
+  showActions: boolean;
+  showCustomActions: boolean;
   hasClickableRows: boolean;
   showDiagnostics: boolean;
 }
 
 type PlaygroundStory = StoryObj<PlaygroundArgs>;
 
-const { Column } = ContentListTable;
+const { Column, Action } = ContentListTable;
 
 /**
  * Wrapper component for the Playground story.
  * Handles stable prop references via useMemo.
  */
 const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastIdCounter = useRef(0);
+
+  const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
+    toastIdCounter.current += 1;
+    setToasts((prev) => [...prev, { ...toast, id: String(toastIdCounter.current) }]);
+  }, []);
+
+  const removeToast = useCallback((toast: Toast) => {
+    setToasts((prev) => prev.filter((t) => t.id !== toast.id));
+  }, []);
+
   const labels = useMemo(
     () => ({ entity: args.entityName, entityPlural: args.entityNamePlural }),
     [args.entityName, args.entityNamePlural]
@@ -283,54 +362,120 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   }, [args.isLoading, args.hasItems]);
 
   const itemConfig = useMemo(() => {
-    if (!args.hasClickableRows) {
-      return undefined;
+    const config: ContentListItemConfig = {};
+
+    if (args.hasClickableRows) {
+      config.getHref = (item) => `#/${args.entityName}/${item.id}`;
     }
-    return {
-      getHref: (item: ContentListItem) => `#/${args.entityName}/${item.id}`,
-    };
-  }, [args.hasClickableRows, args.entityName]);
+
+    if (args.showActions) {
+      config.getEditUrl = (item) => `#/${args.entityName}/${item.id}/edit`;
+      // NOTE: `Action.Delete` is currently a no-op stub. This handler exists so
+      // `buildDeleteAction` sees `onDelete` and renders the trash icon. The toast
+      // below won't fire until the Delete Orchestration PR wires the actual flow.
+      config.onDelete = async (items) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        const names = items.map((item) => item.title).join(', ');
+        addToast({
+          title: `Deleted ${items.length} ${
+            items.length === 1 ? args.entityName : args.entityNamePlural
+          }`,
+          text: names,
+          color: 'success',
+        });
+      };
+    }
+
+    return Object.keys(config).length > 0 ? config : undefined;
+  }, [args.hasClickableRows, args.showActions, args.entityName, args.entityNamePlural, addToast]);
+
+  const handleShare = useCallback(
+    (item: ContentListItem) => {
+      addToast({ title: `Shared "${item.title}"`, color: 'primary' });
+    },
+    [addToast]
+  );
+
+  const handleArchive = useCallback(
+    (item: ContentListItem) => {
+      addToast({ title: `Archived "${item.title}"`, color: 'warning' });
+    },
+    [addToast]
+  );
 
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.showActions}`;
 
   return (
-    <ContentListProvider
-      key={key}
-      id="playground"
-      labels={labels}
-      dataSource={dataSource}
-      isReadOnly={args.isReadOnly}
-      item={itemConfig}
-      features={{
-        sorting: {
-          initialSort: { field: 'title', direction: 'asc' },
-        },
-      }}
-    >
-      <ContentListTable
-        title={`${args.entityNamePlural} table`}
-        compressed={args.compressed}
-        tableLayout={args.tableLayout}
+    <>
+      <ContentListProvider
+        key={key}
+        id="playground"
+        labels={labels}
+        dataSource={dataSource}
+        isReadOnly={args.isReadOnly}
+        item={itemConfig}
+        features={{
+          sorting: {
+            initialSort: { field: 'title', direction: 'asc' },
+          },
+          pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
+        }}
       >
-        <Column.Name showDescription={args.showDescription} />
-        {args.showTypeColumn && (
-          <Column
-            id="type"
-            name="Type"
-            width="20%"
-            render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+        <ContentListTable
+          title={`${args.entityNamePlural} table`}
+          compressed={args.compressed}
+          tableLayout={args.tableLayout}
+        >
+          <Column.Name showDescription={args.showDescription} />
+          <Column.UpdatedAt />
+          {args.showTypeColumn && (
+            <Column
+              id="type"
+              name="Type"
+              width="20%"
+              render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+            />
+          )}
+          {args.showActions && (
+            <Column.Actions>
+              <Action.Edit />
+              {args.showCustomActions && (
+                <>
+                  <Action
+                    id="share"
+                    name="Share"
+                    description="Share with team"
+                    icon="share"
+                    type="icon"
+                    onClick={handleShare}
+                  />
+                  <Action
+                    id="archive"
+                    name="Archive"
+                    description="Move to archive"
+                    icon="folderClosed"
+                    type="icon"
+                    onClick={handleArchive}
+                  />
+                </>
+              )}
+              <Action.Delete />
+            </Column.Actions>
+          )}
+        </ContentListTable>
+        {args.showDiagnostics && (
+          <StateDiagnosticPanel
+            defaultOpen
+            showDescription={args.showDescription}
+            showTypeColumn={args.showTypeColumn}
+            showActions={args.showActions}
+            showCustomActions={args.showCustomActions}
           />
         )}
-      </ContentListTable>
-      {args.showDiagnostics && (
-        <StateDiagnosticPanel
-          defaultOpen
-          showDescription={args.showDescription}
-          showTypeColumn={args.showTypeColumn}
-        />
-      )}
-    </ContentListProvider>
+      </ContentListProvider>
+      <EuiGlobalToastList toasts={toasts} dismissToast={removeToast} toastLifeTimeMs={3000} />
+    </>
   );
 };
 
@@ -343,7 +488,10 @@ export const Table: PlaygroundStory = {
     hasItems: true,
     isLoading: false,
     isReadOnly: false,
+    hasPagination: true,
     showTypeColumn: false,
+    showActions: true,
+    showCustomActions: false,
     hasClickableRows: true,
     showDescription: true,
     entityName: 'dashboard',
@@ -378,6 +526,11 @@ export const Table: PlaygroundStory = {
       description: 'Disable all editing and selection.',
       table: { category: 'State' },
     },
+    hasPagination: {
+      control: 'boolean',
+      description: 'Enable pagination in provider config.',
+      table: { category: 'Features' },
+    },
     compressed: {
       control: 'boolean',
       description: 'Use compact table style.',
@@ -398,6 +551,18 @@ export const Table: PlaygroundStory = {
       control: 'boolean',
       description: 'Add a custom "Type" column to demonstrate custom columns.',
       table: { category: 'Columns' },
+    },
+    showActions: {
+      control: 'boolean',
+      description: 'Add Edit and Delete row actions column.',
+      table: { category: 'Actions' },
+    },
+    showCustomActions: {
+      control: 'boolean',
+      description:
+        'Mix in custom Share and Archive actions alongside the built-in presets, demonstrating custom `Action` components.',
+      table: { category: 'Actions' },
+      if: { arg: 'showActions' },
     },
     hasClickableRows: {
       control: 'boolean',

@@ -49,6 +49,19 @@ export const useSourcesBadge = ({
       color: ${euiTheme.colors.primary} !important;
       background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
       box-sizing: border-box;
+      transition: background-color ${euiTheme.animation.fast} ease-in-out,
+        box-shadow ${euiTheme.animation.fast} ease-in-out;
+    }
+
+    .${sourcesBadgeClassName}:hover {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
+    }
+
+    /* Monaco decorations aren't keyboard-focusable DOM nodes, so we use the editor's
+   * focus state to provide a "focus" treatment for the badge.
+   */
+    .monaco-editor:focus-within .${sourcesBadgeClassName} {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
     }
   `;
 
