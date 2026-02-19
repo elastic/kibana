@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ChangeHistoryClient } from '@kbn/change-history';
 import type {
   CoreSetup,
   CoreStart,
@@ -50,13 +51,16 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private changeHistoryClient: ChangeHistoryClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -168,9 +172,18 @@ export class WorkflowsPlugin
     const getWorkflowExecutionEngine = () =>
       getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
-    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
+    this.workflowsService = new WorkflowsService(
+      this.logger,
+      getCoreStart,
+      getPluginsStart,
+      () => this.changeHistoryClient
+    );
 
-    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
+    this.api = new WorkflowsManagementApi(
+      this.workflowsService,
+      getWorkflowExecutionEngine,
+      () => this.changeHistoryClient
+    );
     this.spaces = plugins.spaces?.spacesService;
 
     if (!this.spaces) {
@@ -192,6 +205,22 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Start');
 
     stepSchemas.initialize(plugins.workflowsExtensions);
+
+    // Initialize change history client for workflow versioning (async, non-blocking)
+    const changeHistoryClient = new ChangeHistoryClient({
+      module: 'workflows',
+      dataset: 'workflows',
+      logger: this.logger,
+      kibanaVersion: this.kibanaVersion,
+    });
+    void changeHistoryClient
+      .initialize(core.elasticsearch.client.asInternalUser)
+      .then(() => {
+        this.changeHistoryClient = changeHistoryClient;
+      })
+      .catch((err) => {
+        this.logger.error(`Failed to initialize change history client: ${err}`);
+      });
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);

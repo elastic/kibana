@@ -14,6 +14,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/change-history",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
@@ -79,5 +80,7 @@
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

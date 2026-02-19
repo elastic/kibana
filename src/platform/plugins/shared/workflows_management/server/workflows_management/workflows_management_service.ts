@@ -12,6 +12,7 @@ import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { ChangeHistoryClient } from '@kbn/change-history';
 import type {
   CoreStart,
   ElasticsearchClient,
@@ -103,13 +104,16 @@ export class WorkflowsService {
   private getActionsClientWithRequest: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private readonly getChangeHistoryClient: () => ChangeHistoryClient | null;
 
   constructor(
     logger: Logger,
     getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>,
+    getChangeHistoryClient: () => ChangeHistoryClient | null = () => null
   ) {
     this.logger = logger;
+    this.getChangeHistoryClient = getChangeHistoryClient;
     this.getActionsClient = () =>
       getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>

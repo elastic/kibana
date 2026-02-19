@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { ChangeHistoryClient } from '@kbn/change-history';
 import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -116,8 +117,14 @@ export interface TestWorkflowParams {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
+    private readonly _getChangeHistoryClient: () => ChangeHistoryClient | null = () => null
   ) {}
+
+  /** Returns the change history client when available (after plugin start). Used for version history and restore. */
+  public getChangeHistoryClient(): ChangeHistoryClient | null {
+    return this._getChangeHistoryClient();
+  }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return this.workflowsService.getWorkflows(params, spaceId);
