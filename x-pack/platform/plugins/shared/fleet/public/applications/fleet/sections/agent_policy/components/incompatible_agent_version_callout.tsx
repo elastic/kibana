@@ -27,7 +27,7 @@ export const IncompatibleAgentVersionCallout: React.FC<{
         {incompatibility === 'SOME' ? (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
-            defaultMessage="The selected agent policies have some agent in a version non compatible with the integration."
+            defaultMessage="Some agents using the selected agent policy are running on a version that is not compatible with this integration."
           />
         ) : (
           <FormattedMessage
