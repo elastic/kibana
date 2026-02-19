@@ -552,53 +552,43 @@ export class WorkflowsService {
         refresh: true,
       });
 
-      // Update task scheduler if needed
+      // Update task scheduler if needed — let errors propagate so the save fails
+      // if scheduling cannot be updated. With idempotent scheduling, a retry will succeed.
       if (shouldUpdateScheduler && this.taskScheduler) {
-        try {
-          if (finalData.definition && finalData.valid && finalData.enabled) {
-            // Check if workflow has scheduled triggers before updating scheduler
-            const workflowHasScheduledTriggers = hasScheduledTriggers(
-              finalData.definition.triggers || []
-            );
+        if (finalData.definition && finalData.valid && finalData.enabled) {
+          // Check if workflow has scheduled triggers before updating scheduler
+          const workflowHasScheduledTriggers = hasScheduledTriggers(
+            finalData.definition.triggers || []
+          );
 
-            if (workflowHasScheduledTriggers) {
-              // Get the updated workflow from storage
-              const updatedWorkflow = await this.getWorkflow(id, spaceId);
-              if (updatedWorkflow && updatedWorkflow.definition) {
-                // Convert WorkflowDetailDto to EsWorkflow for scheduler
-                const workflowForScheduler: EsWorkflow = {
-                  ...updatedWorkflow,
-                  definition: updatedWorkflow.definition, // We already checked it's not null
-                  tags: [], // TODO: Add tags support to WorkflowDetailDto
-                  deleted_at: null,
-                  createdAt: new Date(updatedWorkflow.createdAt),
-                  lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
-                };
+          if (workflowHasScheduledTriggers) {
+            // Get the updated workflow from storage
+            const updatedWorkflow = await this.getWorkflow(id, spaceId);
+            if (updatedWorkflow && updatedWorkflow.definition) {
+              // Convert WorkflowDetailDto to EsWorkflow for scheduler
+              const workflowForScheduler: EsWorkflow = {
+                ...updatedWorkflow,
+                definition: updatedWorkflow.definition, // We already checked it's not null
+                tags: [], // TODO: Add tags support to WorkflowDetailDto
+                deleted_at: null,
+                createdAt: new Date(updatedWorkflow.createdAt),
+                lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
+              };
 
-                await this.taskScheduler.updateWorkflowTasks(
-                  workflowForScheduler,
-                  spaceId,
-                  request
-                );
-                this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
-              }
-            } else {
-              // No scheduled triggers, remove any existing scheduled tasks
-              await this.taskScheduler.unscheduleWorkflowTasks(id);
-              this.logger.debug(
-                `Removed scheduled tasks for workflow ${id} (no scheduled triggers)`
-              );
+              await this.taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
+              this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
             }
           } else {
-            // If workflow is invalid or disabled, remove all scheduled tasks
+            // No scheduled triggers, remove any existing scheduled tasks
             await this.taskScheduler.unscheduleWorkflowTasks(id);
-            this.logger.debug(
-              `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
-            );
+            this.logger.debug(`Removed scheduled tasks for workflow ${id} (no scheduled triggers)`);
           }
-        } catch (error) {
-          this.logger.error(`Failed to update scheduled tasks for workflow ${id}: ${error}`);
-          // Don't throw the error - the workflow update should succeed even if scheduler update fails
+        } else {
+          // If workflow is invalid or disabled, remove all scheduled tasks
+          await this.taskScheduler.unscheduleWorkflowTasks(id);
+          this.logger.debug(
+            `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
+          );
         }
       }
 
@@ -659,6 +649,7 @@ export class WorkflowsService {
         });
 
         // Process bulk response to track successes and failures
+        const successfulIds: string[] = [];
         bulkResponse.items.forEach((item) => {
           const operation = item.index;
           if (operation?.error) {
@@ -669,8 +660,27 @@ export class WorkflowsService {
                   ? operation.error.reason ?? JSON.stringify(operation.error)
                   : JSON.stringify(operation.error),
             });
+          } else if (operation?._id) {
+            successfulIds.push(operation._id);
           }
         });
+
+        // Unschedule tasks for successfully deleted workflows to prevent orphaned tasks
+        if (this.taskScheduler && successfulIds.length > 0) {
+          await Promise.allSettled(
+            successfulIds.map((workflowId) =>
+              this.taskScheduler?.unscheduleWorkflowTasks(workflowId)
+            )
+          ).then((results) => {
+            results.forEach((result, i) => {
+              if (result.status === 'rejected') {
+                this.logger.warn(
+                  `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
+                );
+              }
+            });
+          });
+        }
       } catch (error) {
         // If the entire bulk operation fails, mark all as failed
         bulkOperations.forEach((op) => {
