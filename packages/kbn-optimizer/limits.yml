@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 13752
+  automaticImportVTwo: 15226
   banners: 4087
   canvas: 14881
   cases: 225900
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   dashboardAgent: 5135
   dashboardEnhanced: 11651
   dashboardMarkdown: 4994
-  data: 494465
+  data: 494550
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -85,7 +85,7 @@ pageLoadAssetSize:
   graph: 9924
   grokdebugger: 5484
   home: 13091
-  imageEmbeddable: 6325
+  imageEmbeddable: 6272
   indexLifecycleManagement: 29818
   indexManagement: 35522
   inference: 10368
@@ -108,7 +108,7 @@ pageLoadAssetSize:
   links: 8620
   lists: 5093
   logsDataAccess: 7900
-  logsShared: 101273
+  logsShared: 82701
   logstash: 15882
   maintenanceWindows: 8775
   management: 12951
