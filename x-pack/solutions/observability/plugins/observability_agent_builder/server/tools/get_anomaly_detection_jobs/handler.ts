@@ -7,12 +7,14 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
+import { kqlToInfluencerQuery } from './kql_to_influencer_query';
 
 type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 
@@ -28,7 +30,7 @@ export async function getToolHandler({
   anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
-  influencers = [],
+  influencerFilter,
   rangeStart,
   rangeEnd,
 }: {
@@ -43,7 +45,7 @@ export async function getToolHandler({
   anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
-  influencers?: Array<Record<string, string>>;
+  influencerFilter?: string;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -92,7 +94,7 @@ export async function getToolHandler({
               anomalyRecordsLimit,
               minAnomalyScore,
               includeExplanation,
-              influencers,
+              influencerFilter,
               start: rangeStart,
               end: rangeEnd,
             })
@@ -127,7 +129,7 @@ async function getTopAnomalyRecords({
   anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
-  influencers,
+  influencerFilter,
   start,
   end,
 }: {
@@ -136,7 +138,7 @@ async function getTopAnomalyRecords({
   anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
-  influencers: Array<Record<string, string>>;
+  influencerFilter?: string;
   start: string;
   end: string;
 }) {
@@ -154,8 +156,7 @@ async function getTopAnomalyRecords({
     ...(includeExplanation ? ['anomaly_score_explanation'] : []),
   ];
 
-  // Build filter array
-  const filters: Array<Record<string, unknown>> = [
+  const filters: QueryDslQueryContainer[] = [
     { term: { job_id: jobId } },
     { term: { result_type: 'record' } },
     { term: { is_interim: false } },
@@ -163,30 +164,9 @@ async function getTopAnomalyRecords({
     { range: { record_score: { gte: minAnomalyScore } } },
   ];
 
-  // Add nested query for influencer filtering
-  // Returns anomalies matching ANY of the specified influencers
-  if (influencers.length > 0) {
-    filters.push({
-      bool: {
-        should: influencers.map((influencer) => {
-          const [fieldName, fieldValue] = Object.entries(influencer)[0];
-          return {
-            nested: {
-              path: 'influencers',
-              query: {
-                bool: {
-                  filter: [
-                    { term: { 'influencers.influencer_field_name': fieldName } },
-                    { term: { 'influencers.influencer_field_values': fieldValue } },
-                  ],
-                },
-              },
-            },
-          };
-        }),
-        minimum_should_match: 1,
-      },
-    });
+  const influencerQuery = kqlToInfluencerQuery(influencerFilter);
+  if (influencerQuery) {
+    filters.push(influencerQuery);
   }
 
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(

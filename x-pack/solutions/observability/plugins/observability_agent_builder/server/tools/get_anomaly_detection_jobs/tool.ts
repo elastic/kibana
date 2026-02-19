@@ -80,11 +80,11 @@ const getAnomalyDetectionJobsSchema = z.object({
     .describe(
       'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
     ),
-  influencers: z
-    .array(z.record(z.string(), z.string()))
+  influencerFilter: z
+    .string()
     .optional()
     .describe(
-      'Filter anomalies by influencers. Each object has one key (field name) and value. Example: [{ "service.name": "frontend" }, { "host.name": "server-1" }]. Returns anomalies matching ANY of the specified influencers.'
+      'Filter anomalies by influencer fields using KQL syntax. Influencer fields are entity fields like service.name, host.name, kubernetes.pod.name, etc. Examples: \'service.name: "frontend"\', \'service.name: "frontend" AND host.name: "server-1"\', \'NOT host.name: "server-3"\'.'
     ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
@@ -128,7 +128,7 @@ When to use:
         anomalyRecordsLimit,
         minAnomalyScore,
         includeExplanation,
-        influencers,
+        influencerFilter,
         start: rangeStart,
         end: rangeEnd,
       } = toolParams;
@@ -148,7 +148,7 @@ When to use:
           anomalyRecordsLimit,
           minAnomalyScore,
           includeExplanation,
-          influencers,
+          influencerFilter,
           rangeStart,
           rangeEnd,
         });
