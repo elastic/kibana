@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   ContentListProvider,
   type FindItemsResult,
@@ -23,20 +24,22 @@ const mockFindItems = jest.fn(
   })
 );
 
-const createWrapper =
-  (options?: {
-    sortingDisabled?: boolean;
-    searchPlaceholder?: string;
-    sortFields?: Array<{ field: string; name: string }>;
-  }) =>
-  ({ children }: { children: React.ReactNode }) => {
-    const { sortingDisabled, searchPlaceholder, sortFields } = options ?? {};
+interface CreateWrapperOptions {
+  sortingDisabled?: boolean;
+  searchDisabled?: boolean;
+  searchPlaceholder?: string;
+  sortFields?: Array<{ field: string; name: string }>;
+}
 
-    const sorting = sortingDisabled
-      ? (false as const)
-      : sortFields
-      ? { fields: sortFields }
-      : undefined;
+const createWrapper =
+  (options: CreateWrapperOptions = {}) =>
+  ({ children }: { children: React.ReactNode }) => {
+    const { sortingDisabled, searchDisabled, searchPlaceholder, sortFields } = options;
+
+    const features = {
+      sorting: sortingDisabled ? (false as const) : sortFields ? { fields: sortFields } : true,
+      search: searchDisabled ? (false as const) : true,
+    };
 
     return (
       <ContentListProvider
@@ -47,7 +50,7 @@ const createWrapper =
           searchPlaceholder,
         }}
         dataSource={{ findItems: mockFindItems }}
-        features={sorting !== undefined ? { sorting } : undefined}
+        features={features}
       >
         {children}
       </ContentListProvider>
@@ -96,7 +99,7 @@ describe('ContentListToolbar', () => {
       expect(searchBox).toHaveAttribute('placeholder', 'Search\u2026');
     });
 
-    it('renders the search box as disabled', () => {
+    it('renders the search box as enabled by default', () => {
       const Wrapper = createWrapper();
       render(
         <Wrapper>
@@ -105,7 +108,55 @@ describe('ContentListToolbar', () => {
       );
 
       const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      expect(searchBox).not.toBeDisabled();
+    });
+
+    it('renders the search box as disabled when search is disabled', () => {
+      const Wrapper = createWrapper({ searchDisabled: true });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
       expect(searchBox).toBeDisabled();
+    });
+
+    it('calls findItems with search text when user types', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      await userEvent.type(searchBox, 'dashboard');
+
+      // Wait for the incremental search to trigger a refetch with the typed text.
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toContain('dashboard');
+      });
+    });
+
+    it('reflects the search state in the input value', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      expect(searchBox).toHaveValue('');
+
+      await userEvent.type(searchBox, 'test query');
+
+      await waitFor(() => {
+        expect(searchBox).toHaveValue('test query');
+      });
     });
 
     it('uses the configured search placeholder', () => {
