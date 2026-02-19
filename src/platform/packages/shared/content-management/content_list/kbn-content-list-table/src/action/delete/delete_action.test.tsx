@@ -19,7 +19,7 @@ const defaultContext: ActionBuilderContext = {
   },
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true },
+  supports: { sorting: true, pagination: true, search: true, selection: true },
 };
 
 describe('delete action builder', () => {
