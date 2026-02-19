@@ -120,7 +120,6 @@ export const OptionsListControl = ({
     field,
     loading,
     label,
-    fieldName,
     fieldFormatter,
   ] = useBatchedPublishingSubjects(
     componentApi.exclude$,
@@ -130,7 +129,6 @@ export const OptionsListControl = ({
     componentApi.field$,
     componentApi.dataLoading$,
     componentApi.label$,
-    componentApi.fieldName$,
     componentApi.fieldFormatter
   );
 

@@ -11,14 +11,12 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
 import type { HasEditCapabilities, PublishesDataLoading } from '@kbn/presentation-publishing';
-import type { ControlLabelStateManager } from '../control_labels';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  PublishesDataLoading &
-  ControlLabelStateManager['api'];
+  PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
 type HideExistsUnusedState = Pick<OptionsListComponentState, 'exists_selected'>;

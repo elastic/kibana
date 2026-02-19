@@ -246,6 +246,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 

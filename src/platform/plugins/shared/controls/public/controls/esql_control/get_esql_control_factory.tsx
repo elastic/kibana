@@ -75,7 +75,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
       });
 
       const api = finalizeApi({
-        ...labelManager.api,
         ...unsavedChangesApi,
         ...selections.api,
         dataLoading$,
