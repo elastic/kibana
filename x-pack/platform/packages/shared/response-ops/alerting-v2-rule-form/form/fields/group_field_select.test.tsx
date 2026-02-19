@@ -117,7 +117,7 @@ describe('GroupFieldSelect', () => {
     expect(screen.getByText('host.name')).toBeInTheDocument();
   });
 
-  it('calls useQueryColumns with query from form', () => {
+  it('calls useQueryColumns with query and onSuccess from form', () => {
     const Wrapper = createFormWrapper({
       evaluation: {
         query: {
@@ -136,6 +136,7 @@ describe('GroupFieldSelect', () => {
     expect(mockUseQueryColumns).toHaveBeenCalledWith({
       query: 'FROM metrics-* | STATS avg(value) BY region',
       search: expect.any(Function),
+      onSuccess: expect.any(Function),
     });
   });
 

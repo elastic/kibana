@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import React, { useCallback, useMemo } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FormValues } from '../types';
-import { useQueryColumns } from '../hooks/use_query_columns';
+import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
 
 interface GroupBySelectProps {
   services: {
@@ -20,31 +20,35 @@ interface GroupBySelectProps {
 }
 
 export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
-  const { control, setValue, watch } = useFormContext<FormValues>();
+  const { control, setValue, getValues, watch } = useFormContext<FormValues>();
   const query = watch('evaluation.query.base');
+  const groupByRowId = 'ruleV2FormGroupByField';
+
+  // When columns change, filter out any invalid selections
+  const handleColumnsSuccess = useCallback(
+    (cols: QueryColumn[]) => {
+      const validNames = new Set(cols.map((c) => c.name));
+      const currentFields = getValues('grouping.fields') ?? [];
+      if (currentFields.length > 0 && validNames.size > 0) {
+        const validFields = currentFields.filter((val) => validNames.has(val));
+        if (validFields.length !== currentFields.length) {
+          setValue('grouping.fields', validFields);
+        }
+      }
+    },
+    [getValues, setValue]
+  );
+
   const { data: columns, isLoading } = useQueryColumns({
     query,
     search: services.data.search.search,
+    onSuccess: handleColumnsSuccess,
   });
+
   const options = useMemo(
     () => columns.map((col) => ({ label: col.name, value: col.name })),
     [columns]
   );
-  const columnNames = useMemo(() => new Set(columns.map((col) => col.name)), [columns]);
-  const groupByRowId = 'ruleV2FormGroupByField';
-
-  // Watch for changes to grouping.fields
-  const currentGroupingFields = useWatch({ control, name: 'grouping.fields' });
-
-  // When columns change, filter out any invalid selections
-  useEffect(() => {
-    if (currentGroupingFields && currentGroupingFields.length > 0 && columnNames.size > 0) {
-      const validValues = currentGroupingFields.filter((val) => columnNames.has(val));
-      if (validValues.length !== currentGroupingFields.length) {
-        setValue('grouping.fields', validValues);
-      }
-    }
-  }, [columnNames, currentGroupingFields, setValue]);
 
   return (
     <Controller
