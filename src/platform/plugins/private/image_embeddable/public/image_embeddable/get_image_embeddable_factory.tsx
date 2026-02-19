@@ -10,7 +10,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -27,23 +26,19 @@ import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
-export const getImageEmbeddableFactory = ({
-  embeddableEnhanced,
-}: {
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
-}) => {
+export const getImageEmbeddableFactory = () => {
   const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
-      // if it is provided, start the dynamic actions manager
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
@@ -52,7 +47,7 @@ export const getImageEmbeddableFactory = ({
       function serializeState() {
         return {
           ...titleManager.getLatestState(),
-          ...(dynamicActionsManager?.getLatestState() ?? {}),
+          ...drilldownsManager.getLatestState(),
           imageConfig: imageConfig$.getValue(),
         };
       }
@@ -64,25 +59,25 @@ export const getImageEmbeddableFactory = ({
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           imageConfig$.pipe(map(() => undefined)),
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
+          drilldownsManager.anyStateChange$
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip', drilldowns: 'skip' }),
+            ...drilldownsManager.comparators,
             ...titleComparators,
             imageConfig: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
-          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           if (lastSaved) imageConfig$.next(lastSaved.imageConfig);
         },
       });
 
       const embeddable = finalizeApi({
         ...titleManager.api,
-        ...(dynamicActionsManager?.api ?? {}),
+        ...drilldownsManager.api,
         ...unsavedChangesApi,
         dataLoading$,
         supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
@@ -127,8 +122,7 @@ export const getImageEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
-              // if it was started, stop the dynamic actions manager on unmount
-              maybeStopDynamicActions?.stopDynamicActions();
+              drilldownsManager.cleanup();
             };
           }, []);
 
