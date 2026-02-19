@@ -193,6 +193,10 @@ export interface LensPublicCallbacks extends LensApiProps {
    * Let the consumer overwrite embeddable user messages
    */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
+  /**
+   * Optional user messages from the consumer.
+   */
+  userMessages?: UserMessage[];
   onAlertRule?: (data: unknown) => void;
 }
 

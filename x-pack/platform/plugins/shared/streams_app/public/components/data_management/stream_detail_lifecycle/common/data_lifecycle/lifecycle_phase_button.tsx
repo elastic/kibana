@@ -89,6 +89,9 @@ export const LifecyclePhaseButton = ({
               type="trash"
               aria-hidden={true}
               data-test-subj={`${prefix}dataLifecycle-delete-icon`}
+              title={i18n.translate('xpack.streams.streamDetailLifecycle.deletePhase.iconTitle', {
+                defaultMessage: 'Delete phase',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -103,9 +106,10 @@ export const LifecyclePhaseButton = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               maxWidth: '100%',
+              fontWeight: euiTheme.font.weight.semiBold,
             }}
           >
-            <b>{capitalize(label)}</b>
+            {capitalize(label)}
           </EuiText>
           <EuiText
             size="xs"

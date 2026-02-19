@@ -130,7 +130,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
       <EuiPopoverTitle data-test-subj={`${prefix}lifecyclePhase-${label}-popoverTitle`}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.phasePopoverTitleLabel', {
                   defaultMessage: '{phase} phase',
@@ -141,6 +141,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                 <EuiFlexItem
                   grow={false}
                   data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}
+                  style={{ position: 'relative', top: -1 }}
                 >
                   <EuiIconTip
                     type="readOnly"
