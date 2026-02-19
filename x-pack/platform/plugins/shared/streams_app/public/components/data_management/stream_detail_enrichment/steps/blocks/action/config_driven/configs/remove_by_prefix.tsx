@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { RemoveByPrefixProcessor } from '@kbn/streamlang';
@@ -28,12 +27,6 @@ const defaultFormState: RemoveByPrefixProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'from',
-  fieldHelpText: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixFieldHelpText',
-    {
-      defaultMessage: 'The field to be removed. All nested fields (field.*) will also be removed.',
-    }
-  ),
   includeCondition: false,
   includeIgnoreFailures: true,
   includeIgnoreMissing: false,
@@ -54,24 +47,16 @@ export const removeByPrefixProcessorConfig: ConfigDrivenProcessorConfiguration<
   ),
   getDocUrl: (docLinks: DocLinksStart) => {
     return (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixHelpText"
-        defaultMessage="{removeByPrefixLink} The processor removes the field and all its nested fields (field.*)."
-        values={{
-          removeByPrefixLink: (
-            <EuiLink
-              data-test-subj="streamsAppAvailableProcessorsRemoveByPrefixLink"
-              external
-              target="_blank"
-              href={docLinks.links.ingest.remove}
-            >
-              {i18n.translate('xpack.streams.availableProcessors.removeByPrefixLinkLabel', {
-                defaultMessage: 'Removes a field and all nested fields.',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
+      <EuiLink
+        data-test-subj="streamsAppAvailableProcessorsRemoveByPrefixLink"
+        external
+        target="_blank"
+        href={docLinks.links.ingest.remove}
+      >
+        {i18n.translate('xpack.streams.availableProcessors.removeByPrefixLinkLabel', {
+          defaultMessage: 'Removes a field and all nested fields.',
+        })}
+      </EuiLink>
     );
   },
   defaultFormState,

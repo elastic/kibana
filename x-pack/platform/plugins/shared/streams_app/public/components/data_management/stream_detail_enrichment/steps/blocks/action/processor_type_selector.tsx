@@ -200,8 +200,8 @@ const getAvailableProcessors: (
     getDocUrl: (docLinks: DocLinksStart) => {
       return (
         <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
-          defaultMessage="{convertLink}. For example, you can convert a string to an long."
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.convertHelpText"
+          defaultMessage="{convertLink}. For example, convert a string to an integer."
           values={{
             convertLink: (
               <EuiLink
@@ -210,7 +210,7 @@ const getAvailableProcessors: (
                 target="_blank"
                 href={docLinks.links.ingest.convert}
               >
-                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                {i18n.translate('xpack.streams.availableProcessors.convertLinkLabel', {
                   defaultMessage: 'Converts a field to a different data type',
                 })}
               </EuiLink>
@@ -231,8 +231,8 @@ const getAvailableProcessors: (
     getDocUrl: (docLinks: DocLinksStart) => {
       return (
         <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
-          defaultMessage="{setLink} If the field already exists, its value will be replaced with the provided one."
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setProcessorHelpText"
+          defaultMessage="{setLink}, creating the field if it doesn't exist or overwriting it if it does."
           values={{
             setLink: (
               <EuiLink
@@ -241,8 +241,8 @@ const getAvailableProcessors: (
                 target="_blank"
                 href={docLinks.links.ingest.set}
               >
-                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
-                  defaultMessage: 'Sets one field and associates it with the specified value.',
+                {i18n.translate('xpack.streams.availableProcessors.setProcessorLinkLabel', {
+                  defaultMessage: 'Set a specific value for a field',
                 })}
               </EuiLink>
             ),
@@ -323,24 +323,16 @@ const getAvailableProcessors: (
     ),
     getDocUrl: (docLinks: DocLinksStart) => {
       return (
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dropHelpText"
-          defaultMessage="{dropLink} This is useful to prevent the document from getting indexed based on some condition."
-          values={{
-            dropLink: (
-              <EuiLink
-                data-test-subj="streamsAppAvailableProcessorsDropLink"
-                external
-                target="_blank"
-                href={docLinks.links.ingest.drop}
-              >
-                {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
-                  defaultMessage: 'Drops the document without raising any errors.',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiLink
+          data-test-subj="streamsAppAvailableProcessorsDropLink"
+          external
+          target="_blank"
+          href={docLinks.links.ingest.drop}
+        >
+          {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
+            defaultMessage: 'Drops the document without raising any errors.',
+          })}
+        </EuiLink>
       );
     },
   },
@@ -380,7 +372,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uppercaseHelpText"
-          defaultMessage="{uppercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          defaultMessage="{uppercaseLink}. If the field is an array, the processor converts each string in the array."
           values={{
             uppercaseLink: (
               <EuiLink
@@ -411,7 +403,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseHelpText"
-          defaultMessage="{lowercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          defaultMessage="{lowercaseLink}. If the field is an array, the processor converts each string in the array."
           values={{
             lowercaseLink: (
               <EuiLink
@@ -442,7 +434,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.trimHelpText"
-          defaultMessage="{trimLink} If the field is an array of strings, all members of the array will be trimmed."
+          defaultMessage="{trimLink}. If the field is an array, the processor trims each string in the array."
           values={{
             trimLink: (
               <EuiLink
@@ -452,7 +444,7 @@ const getAvailableProcessors: (
                 href={docLinks.links.ingest.trim}
               >
                 {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
-                  defaultMessage: 'Trims whitespace from field.',
+                  defaultMessage: 'Trims whitespace from field',
                 })}
               </EuiLink>
             ),
