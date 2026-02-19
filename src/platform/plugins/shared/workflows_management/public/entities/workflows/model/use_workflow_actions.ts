@@ -134,6 +134,8 @@ export function useWorkflowActions() {
       });
     },
     onSuccess: async (_, variables) => {
+      // Report telemetry for successful update
+      // The telemetry service automatically determines which event to publish based on the update
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
@@ -148,8 +150,10 @@ export function useWorkflowActions() {
       });
 
       if (variables.onRefresh) {
+        // use the provided logic for refresh when passed
         await variables.onRefresh();
       } else {
+        // Refetch to ensure data is in sync with server
         await queryClient.refetchQueries({ queryKey: ['workflows'] });
       }
     },
