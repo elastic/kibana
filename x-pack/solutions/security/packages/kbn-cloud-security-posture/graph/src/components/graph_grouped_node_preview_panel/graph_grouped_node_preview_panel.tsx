@@ -67,13 +67,23 @@ const useContentMetadata = (
 ): ContentMetadata => {
   return useMemo(() => {
     const isEntityMode = type === 'entities';
-    const firstItem = items[0];
 
-    if (isEntityMode && firstItem) {
-      const entityItem = firstItem as EntityItem;
+    if (isEntityMode && items.length > 0) {
+      const entityItems = items as EntityItem[];
+      const firstType = entityItems[0].type;
+      const allSameType = entityItems.every((e) => e.type === firstType);
+
+      if (allSameType) {
+        return {
+          icon: entityItems[0].icon || 'index',
+          groupedItemsType: translateEntityType(firstType),
+        };
+      }
+
+      // Multiple different ECS parent types — use generic icon
       return {
-        icon: entityItem.icon || 'index',
-        groupedItemsType: translateEntityType(entityItem.type),
+        icon: 'magnifyWithExclamation',
+        groupedItemsType: entities,
       };
     }
 

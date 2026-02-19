@@ -503,8 +503,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'index');
       });
 
-      it('should derive groupedItemsType from first entity type - this should never happened', () => {
-        // Test case where entities have mixed types - should use first entity's type
+      it('should use generic icon and "Entities" label when entities have mixed ECS parent types', () => {
         const items = [
           createEntityItem({ type: 'host', icon: 'storage' }),
           createEntityItem({ type: 'user', icon: 'user' }),
@@ -515,10 +514,12 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
         render(<GraphGroupedNodePreviewPanel {...defaultProps} type="entities" />);
 
-        // Should use first entity's type for groupedItemsType
-        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
-        // Should use first entity's icon
-        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute('data-euiicon-type', 'storage');
+        // Mixed types: should fall back to generic icon and label
+        expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
+        expect(screen.getByTestId(ICON_TEST_ID)).toHaveAttribute(
+          'data-euiicon-type',
+          'magnifyWithExclamation'
+        );
       });
     });
 
