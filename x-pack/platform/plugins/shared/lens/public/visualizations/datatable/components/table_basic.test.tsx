@@ -128,7 +128,12 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () =>
+        ({
+          convert: (x) => x,
+          convertToReact: () => undefined,
+          hasReactSupport: () => false,
+        } as unknown as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
