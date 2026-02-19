@@ -1644,7 +1644,7 @@ describe('FeatureRegistry', () => {
           featureRegistry.lockRegistration();
           const result = featureRegistry.getAllKibanaFeatures();
           expect(result).toHaveLength(1);
-          expect(result).toMatchSnapshot()
+          expect(result).toMatchSnapshot();
         });
 
         it('allows sub-feature to define alerting.rule.all when main does not have rule.all', () => {
@@ -1768,7 +1768,7 @@ describe('FeatureRegistry', () => {
           featureRegistry.lockRegistration();
           const result = featureRegistry.getAllKibanaFeatures();
           expect(result).toHaveLength(1);
-          expect(result).toMatchSnapshot()
+          expect(result).toMatchSnapshot();
         });
       });
     });

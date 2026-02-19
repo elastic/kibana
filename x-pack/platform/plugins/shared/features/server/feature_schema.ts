@@ -400,8 +400,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       }
     };
 
-    Object.values(entry?.rule ?? {}).forEach(validateAlertingPrivilege)
-    Object.values(entry?.alert ?? {}).forEach(validateAlertingPrivilege)
+    Object.values(entry?.rule ?? {}).forEach(validateAlertingPrivilege);
+    Object.values(entry?.alert ?? {}).forEach(validateAlertingPrivilege);
 
     seenRuleTypeIds.forEach((ruleTypeId: string) => unseenAlertingRyleTypeIds.delete(ruleTypeId));
     seenConsumers.forEach((consumer: string) => unseenAlertingConsumers.delete(consumer));
@@ -476,13 +476,13 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   // If the main feature has alerting.rule.all defined, sub-features may not define anything in alerting.rule.*
   const mainPrivileges = feature.privileges
-    ? ([feature.privileges.all, feature.privileges.read].filter(Boolean))
+    ? [feature.privileges.all, feature.privileges.read].filter(Boolean)
     : [];
-  const mainHasRuleAll = mainPrivileges.some(
-    (p) => (p.alerting?.rule?.all?.length ?? 0) > 0
-  );
+  const mainHasRuleAll = mainPrivileges.some((p) => (p.alerting?.rule?.all?.length ?? 0) > 0);
   if (mainHasRuleAll) {
-    const alertingRuleKeys = Object.keys(alertingRuleSchemaSpec) as (keyof typeof alertingRuleSchemaSpec)[];
+    const alertingRuleKeys = Object.keys(
+      alertingRuleSchemaSpec
+    ) as (keyof typeof alertingRuleSchemaSpec)[];
     const allSubPrivs = (feature.subFeatures ?? []).flatMap((subFeature) =>
       (subFeature.privilegeGroups ?? []).flatMap((group) => group.privileges ?? [])
     );
@@ -490,17 +490,19 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       .map((subPrivilege) => {
         const rule = subPrivilege.alerting?.rule;
         if (!rule) return null;
-        const defined = alertingRuleKeys.filter(
-          (key) => (rule[key]?.length ?? 0) > 0
-        );
+        const defined = alertingRuleKeys.filter((key) => (rule[key]?.length ?? 0) > 0);
         return defined.length > 0
-          ? `sub-feature privilege '${subPrivilege.id}' defined ${defined.map((k) => `alerting.rule.${k}`).join(', ')}`
+          ? `sub-feature privilege '${subPrivilege.id}' defined ${defined
+              .map((k) => `alerting.rule.${k}`)
+              .join(', ')}`
           : null;
       })
       .filter((v): v is string => v !== null);
     if (subViolations.length > 0) {
       throw new Error(
-        `Feature ${feature.id}: You defined alerting.rule.all at the top, but ${subViolations.join('; ')}.`
+        `Feature ${feature.id}: You defined alerting.rule.all at the top, but ${subViolations.join(
+          '; '
+        )}.`
       );
     }
   }
