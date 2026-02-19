@@ -540,12 +540,14 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
