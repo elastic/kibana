@@ -70,6 +70,9 @@ const fullscreenLabels = {
   tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
   }),
+  sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
+    defaultMessage: 'View all sources',
+  }),
   rename: i18n.translate('xpack.agentBuilder.conversationActions.rename', {
     defaultMessage: 'Rename',
   }),
@@ -125,9 +128,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const { manageAgents } = useUiPrivileges();
 
   const {
-    services: { application },
+    services: { application, chrome },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const hasDataSources = chrome.navLinks.get('data_sources') !== undefined;
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -220,6 +224,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
+    ...(hasDataSources
+      ? [
+          <EuiContextMenuItem
+            key="sources"
+            icon="plugs"
+            onClick={closePopover}
+            href={application.getUrlForApp('data_sources')}
+            data-test-subj="agentBuilderActionsSources"
+          >
+            {fullscreenLabels.sources}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(hasAccessToGenAiSettings
       ? [
           <EuiContextMenuItem
