@@ -207,15 +207,13 @@ export class FeatureClient {
     );
   }
 
-  async findDuplicateFeature({
-    stream,
+  findDuplicateFeature({
+    existingFeatures,
     feature,
   }: {
-    stream: string;
+    existingFeatures: Feature[];
     feature: BaseFeature;
-  }): Promise<Feature | undefined> {
-    const { hits: existingFeatures } = await this.getFeatures(stream);
-
+  }): Feature | undefined {
     const normalizedId = feature.id.toLowerCase();
 
     return existingFeatures.find(

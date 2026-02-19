@@ -107,10 +107,11 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 ];
 
                 const now = Date.now();
+                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
                 const features = [];
                 for (const feature of identifiedFeatures) {
-                  const existing = await featureClient.findDuplicateFeature({
-                    stream: stream.name,
+                  const existing = featureClient.findDuplicateFeature({
+                    existingFeatures,
                     feature,
                   });
                   if (existing) {
