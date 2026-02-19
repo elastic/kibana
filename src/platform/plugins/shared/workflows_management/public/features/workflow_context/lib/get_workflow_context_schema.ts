@@ -61,7 +61,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
-) {
+): typeof DynamicWorkflowContextSchema {
   // If inputs is undefined, try to extract it from the YAML document
   let inputs = definition.inputs;
   if (inputs === undefined && yamlDocument) {
@@ -133,5 +133,5 @@ export function getWorkflowContextSchema(
     }),
     // event schema is dynamic based on triggers
     event: eventSchema,
-  });
+  }) as typeof DynamicWorkflowContextSchema;
 }
