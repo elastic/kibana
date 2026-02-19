@@ -11,6 +11,7 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import { GRAPH_DOCUMENT_DETAILS_LIMIT } from '../../../common/constants';
 import {
   buildActorEntityIdEval,
   buildTargetEntityIdEvals,
@@ -44,7 +45,7 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const limit = 1000;
+  const limit = GRAPH_DOCUMENT_DETAILS_LIMIT;
 
   // Check enrichment availability
   const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(

@@ -12,6 +12,7 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import { GRAPH_DOCUMENT_DETAILS_LIMIT } from '../../../common/constants';
 import { generateFieldHintCases, checkEnrichmentAvailability } from '../graph/utils';
 import type { EntityRecord } from './types';
 
@@ -40,7 +41,7 @@ export const fetchEntities = async ({
   indexPatterns,
 }: FetchEntitiesParams): Promise<EsqlToRecords<EntityRecord>> => {
   const lookupIndexName = getEntitiesLatestIndexName(spaceId);
-  const limit = 1000;
+  const limit = GRAPH_DOCUMENT_DETAILS_LIMIT;
   const resolvedIndexPatterns = indexPatterns ?? ['.alerts-security.alerts-*', 'logs-*'];
 
   const { isLookupIndexAvailable } = await checkEnrichmentAvailability(esClient, logger, spaceId);

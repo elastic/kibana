@@ -38,6 +38,8 @@ export const GRAPH_ENTITIES_API_CURRENT_VERSION = '1';
 export const GRAPH_EVENTS_ROUTE_PATH = '/internal/cloud_security_posture/graph/events';
 export const GRAPH_EVENTS_API_CURRENT_VERSION = '1';
 
+export const GRAPH_DOCUMENT_DETAILS_LIMIT = 1000;
+
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
 export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
