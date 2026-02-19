@@ -14,6 +14,7 @@ import {
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopoverFooter,
   EuiSelectable,
   type EuiSelectableOption,
@@ -22,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -48,6 +50,7 @@ const defaultConfig: WorkflowSelectorConfig = {
     selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
     loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
   },
+  listView: false,
 };
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -226,12 +229,83 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     ? i18n.LOADING_WORKFLOWS
     : undefined;
 
+  const listView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <>
+          {search}
+          {list}
+          {workflowOptions.length > 0 && (
+            <EuiPanel
+              paddingSize="s"
+              hasShadow={false}
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="popout" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPanel>
+          )}
+        </>
+      );
+    },
+    [euiTheme.colors.backgroundBaseSubdued, workflowManagementLinkProps, workflowOptions.length]
+  );
+
+  const popoverView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <EuiInputPopover
+          closePopover={handlePopoverClose}
+          disableFocusTrap
+          closeOnScroll
+          isOpen={isPopoverOpen}
+          input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          panelPaddingSize="none"
+          fullWidth
+        >
+          {list}
+          {workflowOptions.length > 0 && (
+            <EuiPopoverFooter
+              paddingSize="s"
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="popout" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPopoverFooter>
+          )}
+        </EuiInputPopover>
+      );
+    },
+    [
+      euiTheme.colors.backgroundBaseSubdued,
+      handlePopoverClose,
+      isPopoverOpen,
+      workflowManagementLinkProps,
+      workflowOptions.length,
+    ]
+  );
+
   return (
     <EuiFormRow
       label={finalConfig.label}
       labelAppend={
         <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
+          {finalConfig.createWorkflowLinkText}{' '}
+          <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
         </EuiLink>
       }
       helpText={helpText}
@@ -281,35 +355,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           }}
           renderOption={renderWorkflowOption}
         >
-          {(list, search) => (
-            <EuiInputPopover
-              closePopover={handlePopoverClose}
-              disableFocusTrap
-              closeOnScroll
-              isOpen={isPopoverOpen}
-              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
-              panelPaddingSize="none"
-              fullWidth
-            >
-              {list}
-              {workflowOptions.length > 0 && (
-                <EuiPopoverFooter
-                  paddingSize="s"
-                  css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-                >
-                  <EuiText size="s" textAlign="right">
-                    <EuiLink {...workflowManagementLinkProps} external={false}>
-                      <FormattedMessage
-                        id="workflows.params.viewAllWorkflowsLinkText"
-                        defaultMessage="View all workflows"
-                      />
-                      <EuiIcon type="popout" size="s" />
-                    </EuiLink>
-                  </EuiText>
-                </EuiPopoverFooter>
-              )}
-            </EuiInputPopover>
-          )}
+          {finalConfig.listView ? listView : popoverView}
         </EuiSelectable>
       )}
     </EuiFormRow>
