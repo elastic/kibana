@@ -16,6 +16,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -30,7 +31,7 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import { convertRangeToISO } from './helpers';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -80,7 +81,10 @@ export const registerRiskScoringTask = ({
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+
+      const soClient = coreStart.savedObjects.getUnsafeInternalClient({
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      });
 
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
@@ -116,6 +120,7 @@ export const registerRiskScoringTask = ({
       return riskScoreServiceFactory({
         assetCriticalityService,
         esClient,
+        soClient,
         logger,
         riskEngineDataClient,
         riskScoreDataClient,

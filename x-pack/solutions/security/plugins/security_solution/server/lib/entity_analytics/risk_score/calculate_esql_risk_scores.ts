@@ -35,6 +35,8 @@ import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+import type { WatchlistConfigClient } from '../watchlists/management/watchlist_config';
+import type { WatchlistEntitiesService } from '../watchlists/entities/service';
 
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
@@ -44,6 +46,8 @@ export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
     privmonUserCrudService: PrivmonUserCrudService;
+    watchlistConfigClient: WatchlistConfigClient;
+    watchlistEntitiesService: WatchlistEntitiesService;
     esClient: ElasticsearchClient;
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
@@ -200,6 +204,8 @@ export const calculateScoresWithESQL = async (
               deps: {
                 assetCriticalityService: params.assetCriticalityService,
                 privmonUserCrudService: params.privmonUserCrudService,
+                watchlistConfigClient: params.watchlistConfigClient,
+                watchlistEntitiesService: params.watchlistEntitiesService,
                 logger,
               },
               weights: params.weights,

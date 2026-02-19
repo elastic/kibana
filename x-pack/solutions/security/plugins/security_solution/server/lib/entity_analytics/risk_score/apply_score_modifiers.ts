@@ -28,14 +28,19 @@ import {
   buildLegacyCriticalityFields,
 } from './modifiers/asset_criticality';
 
-import { applyPrivmonModifier } from './modifiers/privileged_users';
+// import { applyPrivmonModifier } from './modifiers/privileged_users';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Modifier } from './modifiers/types';
 import { bayesianUpdate } from '../asset_criticality/helpers';
+import { applyWatchlistModifiers } from './modifiers/watchlists_modifiers';
+import type { WatchlistConfigClient } from '../watchlists/management/watchlist_config';
+import type { WatchlistEntitiesService } from '../watchlists/entities/service';
 interface ModifiersUpdateParams {
   now: string;
   deps: {
     privmonUserCrudService: PrivmonUserCrudService;
+    watchlistConfigClient: WatchlistConfigClient;
+    watchlistEntitiesService: WatchlistEntitiesService;
     assetCriticalityService: AssetCriticalityService;
     logger: Logger;
   };
@@ -65,6 +70,17 @@ export const applyScoreModifiers = async ({
     ? getGlobalWeightForIdentifierType(identifierType, weights)
     : undefined;
 
+  const watchlistPromises = await applyWatchlistModifiers({
+    page,
+    globalWeight,
+    deps: {
+      watchlistConfigClient: deps.watchlistConfigClient,
+      watchlistEntityService: deps.watchlistEntitiesService,
+      logger: deps.logger,
+    },
+    experimentalFeatures,
+  });
+
   const modifierPromises = [
     applyCriticalityModifier({
       page,
@@ -72,22 +88,31 @@ export const applyScoreModifiers = async ({
       deps: _.pick(deps, ['assetCriticalityService', 'logger']),
     }),
 
-    applyPrivmonModifier({
-      page,
-      globalWeight,
-      experimentalFeatures,
-      deps: _.pick(deps, ['privmonUserCrudService', 'logger']),
-    }),
+    //
+    ...watchlistPromises,
   ] as const;
 
-  const [criticality, privmon] = await Promise.all(modifierPromises);
+  const [criticality, ...watchlists] = await Promise.all(modifierPromises);
+  const fn = riskScoreDocFactory({ now, identifierField: page.identifierField, globalWeight });
 
-  return _.zipWith(
-    page.buckets,
-    criticality,
-    privmon,
-    riskScoreDocFactory({ now, identifierField: page.identifierField, globalWeight })
-  );
+  const zip = (
+    result: EntityRiskScoreRecord[],
+    buckets: RiskScoreBucket[],
+    crits: Array<Modifier<'asset_criticality'> | undefined>,
+    ...lists: Array<Modifier<'watchlist'> | undefined>[]
+  ) => {
+    if (buckets.length === 0) return result;
+
+    const [bucket, ...bs] = buckets;
+    const [crit, ...cs] = crits;
+    const ws = lists.map(([w]) => w);
+    const tails = lists.map(([, ...rest]) => rest);
+
+    const doc = fn(bucket, crit, ...ws);
+    result.push(doc);
+    return zip(result, bs, cs, ...tails);
+  };
+  return zip([], page.buckets, criticality, ...watchlists);
 };
 
 interface RiskScoreDocFactoryParams {
@@ -101,7 +126,7 @@ export const riskScoreDocFactory =
   (
     bucket: RiskScoreBucket,
     criticalityModifierFields: Modifier<'asset_criticality'> | undefined,
-    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined
+    ...watchlistsModifierFields: Array<Modifier<'watchlist'> | undefined>
   ): EntityRiskScoreRecord => {
     const risk = bucket.top_inputs.risk_details;
 
@@ -112,7 +137,9 @@ export const riskScoreDocFactory =
 
     const totalModifier =
       (criticalityModifierFields?.modifier_value ?? 1) *
-      (privmonWatchlistModifierFields?.modifier_value ?? 1);
+      watchlistsModifierFields.reduce((acc, curr) => acc * (curr?.modifier_value ?? 1), 1);
+    //
+    //  (watchlistsModifierFields?.modifier_value ?? 1);
 
     const originalScore = risk.value.normalized_score * globalWeight;
     const totalScoreWithModifiers = bayesianUpdate({
@@ -128,7 +155,7 @@ export const riskScoreDocFactory =
       calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
-    const appliedModifiers = [criticalityModifierFields, privmonWatchlistModifierFields].filter(
+    const appliedModifiers = [criticalityModifierFields, ...watchlistsModifierFields].filter(
       isDefined
     );
 
