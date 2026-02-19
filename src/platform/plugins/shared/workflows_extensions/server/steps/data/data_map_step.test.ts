@@ -382,7 +382,7 @@ describe('dataMapStepDefinition', () => {
           id: '{{ item.id }}',
           name: '{{ item.name }}',
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
             color: '{{ tag.color }}',
           },
@@ -419,7 +419,7 @@ describe('dataMapStepDefinition', () => {
         fields: {
           id: '{{ item.id }}',
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
             owner: '{{ item.name }}',
           },
@@ -455,10 +455,10 @@ describe('dataMapStepDefinition', () => {
         fields: {
           org_name: '{{ item.name }}',
           departments: {
-            $map: { items: 'item.departments', item: 'dept' },
+            $map: { items: '{{ item.departments }}', item: 'dept' },
             dept_name: '{{ dept.name }}',
             employees: {
-              $map: { items: 'dept.employees', item: 'emp' },
+              $map: { items: '{{ dept.employees }}', item: 'emp' },
               name: '{{ emp.name }}',
               department: '{{ dept.name }}',
               org: '{{ item.name }}',
@@ -506,7 +506,7 @@ describe('dataMapStepDefinition', () => {
             source: 'api',
           },
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
           },
         },
@@ -538,7 +538,7 @@ describe('dataMapStepDefinition', () => {
         fields: {
           id: '{{ item.id }}',
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
             owner: {
               id: '{{ tag.user.id }}',
@@ -566,7 +566,7 @@ describe('dataMapStepDefinition', () => {
         fields: {
           id: '{{ item.id }}',
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
           },
         },
@@ -586,7 +586,7 @@ describe('dataMapStepDefinition', () => {
         fields: {
           id: '{{ item.id }}',
           meta: {
-            $map: { items: 'item.meta', item: 'm' },
+            $map: { items: '{{ item.meta }}', item: 'm' },
             x: '{{ m.x }}',
           },
         },
@@ -631,7 +631,7 @@ describe('dataMapStepDefinition', () => {
       const input = {
         fields: {
           tags: {
-            $map: { items: 'item.tags', item: 'tag', index: 'tag_index' },
+            $map: { items: '{{ item.tags }}', item: 'tag', index: 'tag_index' },
             label: '{{ tag.label }}',
             position: '{{ tag_index }}',
           },
@@ -662,7 +662,7 @@ describe('dataMapStepDefinition', () => {
       const input = {
         fields: {
           tags: {
-            $map: { items: 'item.tags' },
+            $map: { items: '{{ item.tags }}' },
             label: '{{ item.label }}',
             position: '{{ index }}',
           },
@@ -693,7 +693,7 @@ describe('dataMapStepDefinition', () => {
       const input = {
         fields: {
           tags: {
-            $map: { items: 'item.tags', item: 'tag' },
+            $map: { items: '{{ item.tags }}', item: 'tag' },
             label: '{{ tag.label }}',
             position: '{{ index }}',
           },
@@ -718,56 +718,33 @@ describe('dataMapStepDefinition', () => {
       for (let i = 0; i < 11; i++) {
         dataLevel = [{ level: dataLevel }];
       }
-      const config = { items: [{ level: dataLevel }] };
+      const config = { items: { level: dataLevel } };
 
-      function makeLevelFields(): Record<string, unknown> {
-        return {
-          $map: { items: 'l.level', item: 'l' },
-          level: makeLevelFields(),
+      // Build deeply nested fields bottom-up to avoid infinite recursion
+      let deepFields: Record<string, unknown> = {
+        $map: { items: '{{ l.level }}', item: 'l' },
+        id: '{{ l.id }}',
+      };
+      for (let i = 0; i < 11; i++) {
+        deepFields = {
+          $map: { items: i === 10 ? '{{ item.level }}' : '{{ l.level }}', item: 'l' },
+          level: deepFields,
         };
       }
-      const deepFields: Record<string, unknown> = {
-        $map: { items: 'item.level', item: 'l' },
-        level: makeLevelFields(),
-      };
-      // Terminate the deepest level
-      let cursor: Record<string, unknown> = deepFields;
-      for (let i = 0; i < 10; i++) {
-        cursor = cursor.level as Record<string, unknown>;
-      }
-      cursor.level = { $map: { items: 'l.level', item: 'l' }, id: '{{ l.id }}' };
 
       const input = { fields: { level: deepFields } };
       const context = createMockContext(config, input);
-      const result = await dataMapStepDefinition.handler(context);
+      const result: any = await dataMapStepDefinition.handler(context);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toBeDefined();
 
       // Depth limit returns empty array instead of throwing
-      expect(result.error).toBeUndefined();
-      expect(result.output).toBeDefined();
-    });
-
-    it('should cap items when item count limit exceeded', async () => {
-      const config = {
-        items: [{ id: '1', big: Array.from({ length: 10001 }, (_, i) => ({ i })) }],
-      };
-      const input = {
-        fields: {
-          id: '{{ item.id }}',
-          big: {
-            $map: { items: 'item.big', item: 'b' },
-            i: '{{ b.i }}',
-          },
-        },
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataMapStepDefinition.handler(context);
-
-      // Item count is capped, not an error — processes up to MAX_TOTAL_ITEMS
-      expect(result.error).toBeUndefined();
-      expect(result.output).toBeDefined();
-      const output = result.output as Array<{ id: string; big: unknown[] }>;
-      expect(output[0].big.length).toBeLessThanOrEqual(10000);
+      let lastLevel = result.output.level;
+      for (let i = 0; i < 9; i++) {
+        lastLevel = lastLevel[0].level;
+      }
+      expect(lastLevel[0].level).toBeUndefined();
     });
   });
 
@@ -799,14 +776,14 @@ describe('dataMapStepDefinition', () => {
         fields: {
           store: '{{ item.name }}',
           departments: {
-            $map: { items: 'item.departments', item: 'dept' },
+            $map: { items: '{{ item.departments }}', item: 'dept' },
             dept_name: '{{ dept.name }}',
             info: {
               location: '{{ dept.location }}',
               store: '{{ item.name }}',
             },
             products: {
-              $map: { items: 'dept.products', item: 'prod' },
+              $map: { items: '{{ dept.products }}', item: 'prod' },
               sku: '{{ prod.sku }}',
               brand: {
                 name: '{{ prod.brand.name }}',
@@ -860,7 +837,7 @@ describe('dataMapStepDefinition', () => {
           details: {
             category: '{{ item.details.category }}',
             tags: {
-              $map: { items: 'item.details.tags', item: 'tag' },
+              $map: { items: '{{ item.details.tags }}', item: 'tag' },
               label: '{{ tag.label }}',
             },
           },
@@ -906,10 +883,10 @@ describe('dataMapStepDefinition', () => {
       const input = {
         fields: {
           regions: {
-            $map: { items: 'item.regions', item: 'region' },
+            $map: { items: '{{ item.regions }}', item: 'region' },
             region_name: '{{ region.name }}',
             offices: {
-              $map: { items: 'region.offices', item: 'office' },
+              $map: { items: '{{ region.offices }}', item: 'office' },
               city: '{{ office.city }}',
               contact: {
                 phone: '{{ office.contact.phone }}',
@@ -962,10 +939,10 @@ describe('dataMapStepDefinition', () => {
         fields: {
           org: '{{ item.org }}',
           teams: {
-            $map: { items: 'item.teams', item: 'team' },
+            $map: { items: '{{ item.teams }}', item: 'team' },
             team_name: '{{ team.name }}',
             roster: {
-              $map: { items: 'team.members', item: 'member' },
+              $map: { items: '{{ team.members }}', item: 'member' },
               name: '{{ member.name }}',
               team: '{{ team.name }}',
               org: '{{ item.org }}',
@@ -1009,10 +986,10 @@ describe('dataMapStepDefinition', () => {
         fields: {
           id: '{{ item.id }}',
           departments: {
-            $map: { items: 'item.departments', item: 'dept' },
+            $map: { items: '{{ item.departments }}', item: 'dept' },
             name: '{{ dept.name }}',
             employees: {
-              $map: { items: 'dept.employees', item: 'emp' },
+              $map: { items: '{{ dept.employees }}', item: 'emp' },
               name: '{{ emp.name }}',
             },
           },

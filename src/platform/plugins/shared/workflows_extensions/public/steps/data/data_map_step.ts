@@ -29,12 +29,12 @@ export const dataMapStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataMapStep.documentation.details', {
-      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. To map nested arrays, add a {mapDirective} key inside a nested field object with the form {mapDirectiveShape}. The {mapItems} path is resolved from the current context and each element is bound to the name given by {mapItemProp} (defaults to {mapItemDefault}). The iteration index is bound to the name given by {mapIndexProp} (defaults to {mapIndexDefault}). Parent variables remain in scope. Nested objects without {mapDirective} produce literal object output. The output is accessible via {outputSyntax}.`,
+      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. To map nested arrays, add a {mapDirective} key inside a nested field object with the form {mapDirectiveShape}. The {mapItems} value is a Liquid template expression rendered using the current context (the same rendering applied to all other fields) and each element is bound to the name given by {mapItemProp} (defaults to {mapItemDefault}). The iteration index is bound to the name given by {mapIndexProp} (defaults to {mapIndexDefault}). Parent variables remain in scope. Nested objects without {mapDirective} produce literal object output. The output is accessible via {outputSyntax}.`,
       values: {
         itemSyntax: '`{{ item.field }}`',
         indexSyntax: '`{{ index }}`',
         mapDirective: '`$map`',
-        mapDirectiveShape: '`{ items: "...", item?: "...", index?: "..." }`',
+        mapDirectiveShape: '`{ items: "${{ ... }}", item?: "...", index?: "..." }`',
         mapItems: '`items`',
         mapItemProp: '`item`',
         mapItemDefault: '`"item"`',
@@ -149,7 +149,7 @@ export const dataMapStepDefinition: PublicStepDefinition = {
       id: "\${{ item.id }}"
       name: "\${{ item.name }}"
       tags:
-        $map: { items: "item.tags", item: "tag" }
+        $map: { items: "\${{ item.tags }}", item: "tag" }
         label: "\${{ tag.label }}"
         color: "\${{ tag.color }}"
         owner: "\${{ item.name }}"
@@ -164,10 +164,10 @@ export const dataMapStepDefinition: PublicStepDefinition = {
     fields:
       org_name: "\${{ item.name }}"
       departments:
-        $map: { items: "item.departments", item: "dept" }
+        $map: { items: "\${{ item.departments }}", item: "dept" }
         dept_name: "\${{ dept.name }}"
         employees:
-          $map: { items: "dept.employees", item: "emp" }
+          $map: { items: "\${{ dept.employees }}", item: "emp" }
           name: "\${{ emp.name }}"
           department: "\${{ dept.name }}"
           org: "\${{ item.name }}"
@@ -182,7 +182,7 @@ export const dataMapStepDefinition: PublicStepDefinition = {
     fields:
       id: "\${{ item.id }}"
       tags:
-        $map: { items: "item.tags" }
+        $map: { items: "\${{ item.tags }}" }
         label: "\${{ item.label }}"
         position: "\${{ index }}"
 \`\`\``,
@@ -196,7 +196,7 @@ export const dataMapStepDefinition: PublicStepDefinition = {
     fields:
       id: "\${{ item.id }}"
       tags:
-        $map: { items: "item.tags", item: "tag" }
+        $map: { items: "\${{ item.tags }}", item: "tag" }
         label: "\${{ tag.label }}"
         color: "\${{ tag.color }}"
         owner:

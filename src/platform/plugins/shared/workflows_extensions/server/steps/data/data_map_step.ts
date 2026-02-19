@@ -24,17 +24,23 @@ export interface ProcessFieldsOptions {
 }
 
 /**
+ * Checks if a nested field spec has a `$map` directive.
+ */
+function hasMapDirective(spec: FieldsNode): boolean {
+  return typeof spec === 'object' && spec !== null && MAP_DIRECTIVE in spec;
+}
+
+/**
  * Extracts the `$map` directive from a nested field spec, if present.
  * Returns `null` when the spec has no `$map` key or the value is malformed
  * (treated as literal nesting).
  */
-function findMapDirective(spec: Record<string, unknown>): NonNullable<MapDirectiveValue> | null {
-  if (!(MAP_DIRECTIVE in spec)) return null;
-  const raw = spec[MAP_DIRECTIVE] as unknown;
-  if (!raw || typeof raw !== 'object' || !('items' in raw) || typeof raw.items !== 'string') {
+function findMapDirective(spec: Record<string, FieldsNode>): NonNullable<MapDirectiveValue> | null {
+  if (!hasMapDirective(spec)) return null;
+  const obj = spec[MAP_DIRECTIVE];
+  if (!obj || typeof obj !== 'object' || !('items' in obj) || typeof obj.items !== 'string') {
     return null;
   }
-  const obj = raw as MapDirectiveValue;
   const mapDirective: MapDirectiveValue = { items: obj.items };
   if (typeof obj.item === 'string') {
     mapDirective.item = obj.item;
@@ -45,24 +51,15 @@ function findMapDirective(spec: Record<string, unknown>): NonNullable<MapDirecti
   return mapDirective;
 }
 
-/**
- * Resolves a dot-path reference (e.g. "item.tags") against the current bindings.
- */
-function resolvePath(path: string, bindings: Record<string, unknown>): unknown {
-  const segments = path.trim().split('.');
-  let current: unknown = bindings[segments[0]];
-  for (let i = 1; i < segments.length && current != null && typeof current === 'object'; i++) {
-    current = (current as Record<string, unknown>)[segments[i]];
-  }
-  return current;
-}
-
 function processFields(
   fields: Record<string, FieldsNode>,
   options: ProcessFieldsOptions
 ): Record<string, unknown> {
   const { renderTemplate, bindings, depth = 0 } = options;
   const result: Record<string, unknown> = {};
+  if (depth >= MAX_RECURSION_DEPTH) {
+    return result;
+  }
 
   for (const key of Object.keys(fields)) {
     if (key === MAP_DIRECTIVE) {
@@ -71,48 +68,53 @@ function processFields(
       const value = fields[key];
       if (
         typeof value === 'string' ||
+        // only strings or objects should be possible here, but adding other types just in case to be safe
         typeof value === 'number' ||
         typeof value === 'boolean' ||
         value === null ||
         Array.isArray(value)
       ) {
-        result[key] = renderTemplate(value, bindings) as unknown;
+        result[key] = renderTemplate(value, bindings);
       } else {
-        const spec = value as Record<string, unknown>;
-        const mapDir = findMapDirective(spec);
-
-        if (!mapDir) {
-          // Literal nesting — recurse so nested $map directives are still processed
-          result[key] = processFields(spec as Record<string, FieldsNode>, options);
+        // Nested definition
+        const spec = value as Record<string, FieldsNode>;
+        if (!hasMapDirective(spec)) {
+          // Object nesting
+          result[key] = processFields(spec, { ...options, depth: depth + 1 });
         } else {
-          const nestedItems = resolvePath(mapDir.items, bindings);
-
-          if (nestedItems == null) {
-            result[key] = null;
-          } else if (typeof nestedItems !== 'object' || !Array.isArray(nestedItems)) {
-            result[key] = [];
-          } else if (depth + 1 > MAX_RECURSION_DEPTH) {
-            result[key] = [];
+          // Array nesting
+          const mapDir = findMapDirective(spec);
+          if (!mapDir) {
+            result[key] = []; // nested object with invalid $map is defaulted to empty array
           } else {
-            // Build the nested fields spec without the $map directive
-            const nestedFields: Record<string, unknown> = {};
-            for (const k of Object.keys(spec)) {
-              if (k !== MAP_DIRECTIVE) {
-                nestedFields[k] = spec[k];
-              }
-            }
+            // use the $map to render the nested array
+            const nestedItems: unknown = renderTemplate(mapDir.items, bindings);
 
-            result[key] = nestedItems.map((element, idx) =>
-              processFields(nestedFields as Record<string, FieldsNode>, {
-                ...options,
-                bindings: {
-                  ...bindings,
-                  [mapDir.item ?? 'item']: element,
-                  [mapDir.index ?? 'index']: idx,
-                },
-                depth: depth + 1,
-              })
-            );
+            if (nestedItems == null) {
+              result[key] = null;
+            } else if (typeof nestedItems !== 'object' || !Array.isArray(nestedItems)) {
+              result[key] = [];
+            } else {
+              // Build the nested fields spec without the $map directive
+              const nestedFields: Record<string, unknown> = {};
+              for (const k of Object.keys(spec)) {
+                if (k !== MAP_DIRECTIVE) {
+                  nestedFields[k] = spec[k];
+                }
+              }
+
+              result[key] = nestedItems.map((element, idx) =>
+                processFields(nestedFields as Record<string, FieldsNode>, {
+                  ...options,
+                  bindings: {
+                    ...bindings,
+                    [mapDir.item ?? 'item']: element,
+                    [mapDir.index ?? 'index']: idx,
+                  },
+                  depth: depth + 1,
+                })
+              );
+            }
           }
         }
       }
