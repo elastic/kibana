@@ -182,7 +182,7 @@ function containerNodeColumns({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>
             {i18n.translate(
-              'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
+              'xpack.metricsData.metricsTable.container.averageMemoryUsageColumnHeader',
               {
                 defaultMessage: 'Memory usage(avg.)',
               }
