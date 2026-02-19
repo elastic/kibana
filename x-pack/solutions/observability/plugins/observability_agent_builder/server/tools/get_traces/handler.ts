@@ -50,14 +50,14 @@ export async function getToolHandler({
     dataSources.apmIndexPatterns.error,
   ].flatMap((pattern) => pattern.split(','));
 
-  const indices = [...apmIndexPatterns, ...dataSources.logIndexPatterns];
+  const allObservabilityIndices = [...apmIndexPatterns, ...dataSources.logIndexPatterns];
 
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 
   const traceIds = await getTraceIds({
     esClient,
-    indices: index?.split(',') ?? indices,
+    indices: index?.split(',') ?? allObservabilityIndices,
     startTime,
     endTime,
     kqlFilter,
@@ -76,7 +76,7 @@ export async function getToolHandler({
   const traces = await getTraceDocuments({
     esClient,
     traceIds,
-    index: indices,
+    index: allObservabilityIndices,
     startTime: traceTimeWindow.start,
     endTime: traceTimeWindow.end,
     size: maxDocsPerTrace,

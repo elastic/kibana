@@ -11,6 +11,7 @@ import { TRACE_ID } from '@kbn/apm-types';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
+import { DEFAULT_TRACE_FIELDS } from './constants';
 
 export interface ServiceAggregate {
   serviceName: string;
@@ -33,7 +34,7 @@ export async function getTraceDocuments({
   startTime,
   endTime,
   size,
-  fields,
+  fields = DEFAULT_TRACE_FIELDS,
 }: {
   esClient: IScopedClusterClient;
   traceIds: string[];
@@ -41,7 +42,7 @@ export async function getTraceDocuments({
   startTime: number;
   endTime: number;
   size: number;
-  fields: string[];
+  fields?: string[];
 }): Promise<
   {
     items: Record<string, unknown>[];
