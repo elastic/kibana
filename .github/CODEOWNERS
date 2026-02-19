@@ -44,6 +44,7 @@ examples/state_containers_examples @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
+examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
@@ -326,6 +327,9 @@ src/core/packages/usage-data/base-server-internal @elastic/kibana-core
 src/core/packages/usage-data/server @elastic/kibana-core
 src/core/packages/usage-data/server-internal @elastic/kibana-core
 src/core/packages/usage-data/server-mocks @elastic/kibana-core
+src/core/packages/user-activity/server @elastic/kibana-core
+src/core/packages/user-activity/server-internal @elastic/kibana-core
+src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
@@ -1786,8 +1790,6 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
-/src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
@@ -1812,7 +1814,8 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
-# obs-exploration-team
+# obs-exploration-team 
+/x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -3026,6 +3029,7 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/automatic_troubleshooting @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -3283,10 +3287,11 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
 /.agent/skills/ftr-testing/** @elastic/appex-qa
+/.agent/skills/scout-api-testing/** @elastic/appex-qa
 /.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
 /.agent/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
-/.agent/skills/scout-testing/** @elastic/appex-qa
+/.agent/skills/scout-ui-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
