@@ -39,8 +39,6 @@ export interface UseFetchDocumentDetailsParams {
   };
   /** Optional flags */
   options?: {
-    /** Max number of nodes to return */
-    nodesLimit?: number;
     /** Enable / disable the underlying query (defaults true) */
     enabled?: boolean;
     /** Refetch on window focus (defaults true) */
@@ -94,9 +92,8 @@ export const useFetchDocumentDetails = ({
       end,
       page.index,
       page.size,
-      options?.nodesLimit,
     ],
-    [type, normalizedIds, start, end, page.index, page.size, options?.nodesLimit]
+    [type, normalizedIds, start, end, page.index, page.size]
   );
 
   const queryClient = useQueryClient();
@@ -116,7 +113,6 @@ export const useFetchDocumentDetails = ({
         const response = await http.post<EntitiesResponse>(ENTITIES_API, {
           version: '1',
           body: JSON.stringify({
-            nodesLimit: options?.nodesLimit,
             page: {
               index: page.index,
               size: page.size,
@@ -133,7 +129,6 @@ export const useFetchDocumentDetails = ({
         const response = await http.post<EventsResponse>(EVENTS_API, {
           version: '1',
           body: JSON.stringify({
-            nodesLimit: options?.nodesLimit,
             page: {
               index: page.index,
               size: page.size,

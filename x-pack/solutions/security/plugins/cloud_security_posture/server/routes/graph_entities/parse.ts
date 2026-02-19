@@ -10,7 +10,7 @@ import type {
   EntityItem,
   EntitiesResponse,
 } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
-import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import type { EntityRecord } from './types';
 import { transformEntityTypeToIconAndShape } from '../graph/utils';
 
@@ -22,14 +22,9 @@ import { transformEntityTypeToIconAndShape } from '../graph/utils';
 export const parseEntityRecords = (
   logger: Logger,
   records: EntityRecord[],
-  requestedEntityIds: string[],
-  nodesLimit?: number
+  requestedEntityIds: string[]
 ): Omit<EntitiesResponse, 'totalRecords'> => {
   const messages: ApiMessageCode[] = [];
-
-  if (nodesLimit !== undefined && records.length >= nodesLimit) {
-    messages.push(ApiMessageCode.ReachedNodesLimit);
-  }
 
   // Create a map of found entities for quick lookup
   const foundEntitiesMap = new Map<string, EntityRecord>();

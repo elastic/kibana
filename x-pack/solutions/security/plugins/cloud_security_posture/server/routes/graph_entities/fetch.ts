@@ -23,7 +23,6 @@ interface FetchEntitiesParams {
   end: string | number;
   spaceId: string;
   indexPatterns?: string[];
-  nodesLimit?: number;
 }
 
 /**
@@ -39,10 +38,9 @@ export const fetchEntities = async ({
   end,
   spaceId,
   indexPatterns,
-  nodesLimit,
 }: FetchEntitiesParams): Promise<EsqlToRecords<EntityRecord>> => {
   const lookupIndexName = getEntitiesLatestIndexName(spaceId);
-  const limit = nodesLimit ?? 1000;
+  const limit = 1000;
   const resolvedIndexPatterns = indexPatterns ?? ['.alerts-security.alerts-*', 'logs-*'];
 
   const { isLookupIndexAvailable } = await checkEnrichmentAvailability(esClient, logger, spaceId);

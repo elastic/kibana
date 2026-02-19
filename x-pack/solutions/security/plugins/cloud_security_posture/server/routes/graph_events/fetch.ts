@@ -29,7 +29,6 @@ interface FetchEventsParams {
   end: string | number;
   indexPatterns: string[];
   spaceId: string;
-  nodesLimit?: number;
 }
 
 /**
@@ -44,9 +43,8 @@ export const fetchEvents = async ({
   end,
   indexPatterns,
   spaceId,
-  nodesLimit,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const limit = nodesLimit ?? 1000;
+  const limit = 1000;
 
   // Check enrichment availability
   const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(

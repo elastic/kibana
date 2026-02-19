@@ -24,7 +24,6 @@ export interface GetEntitiesParams {
     indexPatterns?: string[];
   };
   spaceId?: string;
-  nodesLimit?: number;
   page: {
     index: number;
     size: number;
@@ -38,7 +37,6 @@ export const getEntities = async ({
   services: { esClient, logger },
   query: { entityIds, indexPatterns, start, end },
   spaceId = 'default',
-  nodesLimit,
   page,
 }: GetEntitiesParams): Promise<EntitiesResponse> => {
   logger.trace(`Fetching entities [entityIds count: ${entityIds.length}] in [spaceId: ${spaceId}]`);
@@ -60,10 +58,9 @@ export const getEntities = async ({
     end,
     indexPatterns,
     spaceId,
-    nodesLimit,
   });
 
-  const response = parseEntityRecords(logger, results.records, pageEntityIds, nodesLimit);
+  const response = parseEntityRecords(logger, results.records, pageEntityIds);
 
   return {
     ...response,

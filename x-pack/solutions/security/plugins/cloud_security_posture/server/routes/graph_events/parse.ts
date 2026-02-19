@@ -10,7 +10,7 @@ import type {
   EventOrAlertItem,
   EventsResponse,
 } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
-import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import type { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import type { EventRecord } from './types';
 import { transformEntityTypeToIconAndShape } from '../graph/utils';
 
@@ -28,14 +28,9 @@ const normalizeToArray = (value?: string | string[] | null): string[] | undefine
  */
 export const parseEventRecords = (
   logger: Logger,
-  records: EventRecord[],
-  nodesLimit?: number
+  records: EventRecord[]
 ): Omit<EventsResponse, 'totalRecords'> => {
   const messages: ApiMessageCode[] = [];
-
-  if (nodesLimit !== undefined && records.length >= nodesLimit) {
-    messages.push(ApiMessageCode.ReachedNodesLimit);
-  }
 
   const events: EventOrAlertItem[] = records.map((record) => {
     const docId = record.docId;

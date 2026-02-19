@@ -36,7 +36,6 @@ export const eventOrAlertItemSchema = schema.object({
 });
 
 export const eventsRequestSchema = schema.object({
-  nodesLimit: schema.maybe(schema.number()),
   page: schema.object({
     index: schema.number({ min: 0 }),
     size: schema.number({ min: 1, max: 50 }),

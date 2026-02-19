@@ -42,7 +42,7 @@ export const defineGraphEventsRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const { nodesLimit, page } = request.body;
+        const { page } = request.body;
         const { eventIds, start, end, indexPatterns } = request.body
           .query as EventsRequest['query'];
         const spaceId = await cspContext.spacesService?.getSpaceId(request);
@@ -69,7 +69,6 @@ export const defineGraphEventsRoute = (router: CspRouter) =>
               indexPatterns,
             },
             spaceId,
-            nodesLimit,
             page,
           });
 

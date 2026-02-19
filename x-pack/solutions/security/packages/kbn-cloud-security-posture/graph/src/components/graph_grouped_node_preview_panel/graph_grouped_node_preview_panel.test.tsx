@@ -613,7 +613,6 @@ describe('GraphGroupedNodePreviewPanel', () => {
           end: '2024-06-02T00:00:00.000Z',
           page: { index: 0, size: 10 },
           options: expect.objectContaining({
-            nodesLimit: 1000,
             enabled: true,
           }),
         })

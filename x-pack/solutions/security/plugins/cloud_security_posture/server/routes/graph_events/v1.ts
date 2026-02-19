@@ -24,7 +24,6 @@ export interface GetEventsParams {
     indexPatterns?: string[];
   };
   spaceId?: string;
-  nodesLimit?: number;
   page: {
     index: number;
     size: number;
@@ -38,7 +37,6 @@ export const getEvents = async ({
   services: { esClient, logger },
   query: { eventIds, indexPatterns, start, end },
   spaceId = 'default',
-  nodesLimit,
   page,
 }: GetEventsParams): Promise<EventsResponse> => {
   // Default index patterns if not provided
@@ -67,10 +65,9 @@ export const getEvents = async ({
     end,
     indexPatterns: resolvedIndexPatterns,
     spaceId,
-    nodesLimit,
   });
 
-  const response = parseEventRecords(logger, results.records, nodesLimit);
+  const response = parseEventRecords(logger, results.records);
 
   return {
     ...response,

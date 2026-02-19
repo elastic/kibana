@@ -105,7 +105,6 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         size: pagination.state.pageSize,
       },
       options: {
-        nodesLimit: 1000,
         enabled: documentIds.length > 0,
       },
     });
