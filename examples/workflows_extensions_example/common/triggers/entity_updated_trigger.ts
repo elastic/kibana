@@ -14,7 +14,7 @@ export const ENTITY_UPDATED_TRIGGER_ID = 'entity.updated' as const;
 
 export const entityUpdatedTriggerEventSchema = z.object({
   message: z.string(),
-  source: z.string().optional(),
+  urgent: z.boolean().optional(),
 });
 
 export type EntityUpdatedTriggerEvent = z.infer<typeof entityUpdatedTriggerEventSchema>;

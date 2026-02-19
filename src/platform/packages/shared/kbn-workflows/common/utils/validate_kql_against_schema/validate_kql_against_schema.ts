@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
+import { fromKueryExpression, getKqlFieldNames } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { isZod } from '@kbn/zod';
 import type { z } from '@kbn/zod/v4';
 import { extractSchemaPropertyPaths } from '../extract_schema_property_paths/extract_schema_property_paths';
@@ -43,7 +44,7 @@ export interface ValidateKqlAgainstSchemaOptions {
  * // { valid: true }
  *
  * validateKqlAgainstSchema('event.unknown: "x"', eventSchema, { fieldPrefix: 'event' });
- * // { valid: false, error: "KQL references field 'event.unknown' which is not in the schema." }
+ * // { valid: false, error: "KQL references field 'event.unknown' which is not part of event properties." }
  *
  * validateKqlAgainstSchema('invalid (', eventSchema);
  * // { valid: false, error: "<parse error message>" }
@@ -61,33 +62,38 @@ export function validateKqlAgainstSchema(
     return { valid: true };
   }
 
-  let kqlFieldPaths: string[];
+  let ast: ReturnType<typeof fromKueryExpression>;
   try {
-    fromKueryExpression(trimmed);
-    kqlFieldPaths = getKqlFieldNamesFromExpression(trimmed);
+    ast = fromKueryExpression(trimmed);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     return { valid: false, error: message };
   }
 
   if (!isZod(schema)) {
-    return { valid: false, error: 'Schema must be a Zod schema.' };
+    return {
+      valid: false,
+      error: i18n.translate('workflows.validateKql.schemaMustBeZod', {
+        defaultMessage: 'Schema must be a Zod schema.',
+      }),
+    };
   }
 
-  const schemaPaths = extractSchemaPropertyPaths(schema).map((p) => p.path);
+  const schemaPathEntries = extractSchemaPropertyPaths(schema);
   const allowedSet = new Set<string>();
 
   if (fieldPrefix) {
     allowedSet.add(fieldPrefix);
-    for (const path of schemaPaths) {
-      allowedSet.add(`${fieldPrefix}.${path}`);
-    }
-  } else {
-    for (const path of schemaPaths) {
-      allowedSet.add(path);
+    if (fieldPrefix.endsWith('.')) {
+      allowedSet.add(fieldPrefix.slice(0, -1));
     }
   }
+  for (const { path } of schemaPathEntries) {
+    const fullPath = fieldPrefix ? `${fieldPrefix}${path}` : path;
+    allowedSet.add(fullPath);
+  }
 
+  const kqlFieldPaths = getKqlFieldNames(ast);
   const normalizedFields = kqlFieldPaths
     .map((field) => (field === null || field === undefined ? '' : String(field).trim()))
     .filter(Boolean);
@@ -99,7 +105,16 @@ export function validateKqlAgainstSchema(
     if (!allowedSet.has(pathToCheck)) {
       return {
         valid: false,
-        error: `KQL references field '${field}' which is not in the schema.`,
+        error: fieldPrefix
+          ? i18n.translate('workflows.validateKql.fieldNotInSchemaWithPrefix', {
+              defaultMessage:
+                'KQL references field "{field}" which is not part of {fieldPrefix}* properties.',
+              values: { field, fieldPrefix },
+            })
+          : i18n.translate('workflows.validateKql.fieldNotInSchema', {
+              defaultMessage: 'KQL references field "{field}" which is not part of the properties.',
+              values: { field },
+            }),
       };
     }
   }

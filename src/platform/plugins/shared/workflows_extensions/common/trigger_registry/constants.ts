@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition } from './step_registry/types';
-export type { CommonTriggerDefinition } from './trigger_registry/types';
-export { EVENT_FIELD_PREFIX } from './trigger_registry/constants';
-export { DataMapStepTypeId } from './steps/data';
+/**
+ * Field prefix used in trigger condition KQL (e.g. "event.severity").
+ * Use this when calling validateKqlAgainstSchema for trigger conditions so paths and error messages stay consistent.
+ */
+export const EVENT_FIELD_PREFIX = 'event.';

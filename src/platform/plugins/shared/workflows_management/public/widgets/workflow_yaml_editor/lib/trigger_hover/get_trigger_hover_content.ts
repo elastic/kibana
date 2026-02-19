@@ -91,12 +91,11 @@ function generateTriggerUsage(
   triggerType: string,
   eventProperties: EventPropertyInfo[]
 ): string {
-  const templateHint = eventProperties.length > 0 ? '`{{ event.<property> }}`' : '`{{ event }}`';
   const lines: string[] = [];
 
   if (eventProperties.length > 0) {
     lines.push('**Event properties:**\n');
-    lines.push(`Access the event properties with ${templateHint}.`);
+    lines.push(`Access the event properties with event.*`);
     lines.push('');
     for (const prop of eventProperties) {
       const typeInfo = prop.type ? ` _(${prop.type})_` : '';

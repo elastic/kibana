@@ -10,6 +10,8 @@
 import { z } from '@kbn/zod/v4';
 import { validateKqlAgainstSchema } from './validate_kql_against_schema';
 
+const EVENT_FIELD_PREFIX = 'event.';
+
 const eventSchema = z.object({
   severity: z.string(),
   message: z.string(),
@@ -25,7 +27,7 @@ describe('validateKqlAgainstSchema', () => {
 
     it('returns valid: false for invalid KQL syntax', () => {
       const result = validateKqlAgainstSchema('invalid ( unclosed', eventSchema, {
-        fieldPrefix: 'event',
+        fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
@@ -35,35 +37,37 @@ describe('validateKqlAgainstSchema', () => {
   describe('fields allowed by schema (with fieldPrefix: "event")', () => {
     it('returns valid: true when KQL uses only schema properties', () => {
       expect(
-        validateKqlAgainstSchema('event.severity: "high"', eventSchema, { fieldPrefix: 'event' })
+        validateKqlAgainstSchema('event.severity: "high"', eventSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
       ).toEqual({ valid: true });
 
       expect(
         validateKqlAgainstSchema('event.message: "error" and event.severity: "high"', eventSchema, {
-          fieldPrefix: 'event',
+          fieldPrefix: EVENT_FIELD_PREFIX,
         })
       ).toEqual({ valid: true });
 
       expect(
         validateKqlAgainstSchema('event.severity >= "high" or event.message: *', eventSchema, {
-          fieldPrefix: 'event',
+          fieldPrefix: EVENT_FIELD_PREFIX,
         })
       ).toEqual({ valid: true });
     });
 
     it('returns valid: false when KQL references a field not in the schema', () => {
       const result = validateKqlAgainstSchema('event.unknown: "x"', eventSchema, {
-        fieldPrefix: 'event',
+        fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result).toEqual({
         valid: false,
-        error: "KQL references field 'event.unknown' which is not in the schema.",
+        error: 'KQL references field "event.unknown" which is not part of event.* properties.',
       });
 
       const result2 = validateKqlAgainstSchema(
         'event.severity: "high" and event.foo.bar: "baz"',
         eventSchema,
-        { fieldPrefix: 'event' }
+        { fieldPrefix: EVENT_FIELD_PREFIX }
       );
       expect(result2.valid).toBe(false);
       expect(result2.error).toContain('event.foo.bar');
@@ -71,7 +75,9 @@ describe('validateKqlAgainstSchema', () => {
 
     it('allows optional schema properties', () => {
       expect(
-        validateKqlAgainstSchema('event.source: "api"', eventSchema, { fieldPrefix: 'event' })
+        validateKqlAgainstSchema('event.source: "api"', eventSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
       ).toEqual({ valid: true });
     });
   });
@@ -89,8 +95,10 @@ describe('validateKqlAgainstSchema', () => {
 
     it('returns valid: false when KQL references a field not in the schema', () => {
       const result = validateKqlAgainstSchema('other: "x"', flatSchema);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain('other');
+      expect(result).toEqual({
+        valid: false,
+        error: 'KQL references field "other" which is not part of the properties.',
+      });
     });
   });
 
@@ -105,18 +113,20 @@ describe('validateKqlAgainstSchema', () => {
 
     it('allows nested paths when they are in the schema', () => {
       expect(
-        validateKqlAgainstSchema('event.user.name: "alice"', nestedSchema, { fieldPrefix: 'event' })
+        validateKqlAgainstSchema('event.user.name: "alice"', nestedSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
       ).toEqual({ valid: true });
       expect(
         validateKqlAgainstSchema('event.user.role: "admin" and event.level > 0', nestedSchema, {
-          fieldPrefix: 'event',
+          fieldPrefix: EVENT_FIELD_PREFIX,
         })
       ).toEqual({ valid: true });
     });
 
     it('rejects nested paths not in the schema', () => {
       const result = validateKqlAgainstSchema('event.user.email: "a@b.com"', nestedSchema, {
-        fieldPrefix: 'event',
+        fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result.valid).toBe(false);
       expect(result.error).toContain('event.user.email');
@@ -125,13 +135,17 @@ describe('validateKqlAgainstSchema', () => {
 
   describe('wildcard field', () => {
     it('allows event.* when fieldPrefix is "event" and schema has properties', () => {
-      expect(validateKqlAgainstSchema('event.*: *', eventSchema, { fieldPrefix: 'event' })).toEqual(
-        { valid: true }
-      );
+      expect(
+        validateKqlAgainstSchema('event.*: *', eventSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
+      ).toEqual({ valid: true });
     });
 
     it('rejects prefix.* when prefix is not in allowed set', () => {
-      const result = validateKqlAgainstSchema('other.*: *', eventSchema, { fieldPrefix: 'event' });
+      const result = validateKqlAgainstSchema('other.*: *', eventSchema, {
+        fieldPrefix: EVENT_FIELD_PREFIX,
+      });
       expect(result.valid).toBe(false);
       expect(result.error).toContain('other.*');
     });

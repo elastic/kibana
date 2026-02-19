@@ -9,19 +9,14 @@
 
 import { validateKqlAgainstSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-
-export interface CreateConditionExamplesSchemaOptions {
-  /** Prefix for schema-derived field paths (e.g. "event" for event.severity). Default "event". */
-  fieldPrefix?: string;
-}
+import { EVENT_FIELD_PREFIX } from '../../common/trigger_registry/constants';
 
 /**
  * Creates a Zod schema for condition examples (title + KQL condition) that validates each
  * condition string with validateKqlAgainstSchema so it must be valid KQL and only reference
- * properties from the given event schema.
+ * properties from the given event schema (using EVENT_FIELD_PREFIX).
  *
  * @param eventSchema - Zod schema for the event payload (e.g. trigger event schema).
- * @param options - Optional; fieldPrefix defaults to "event".
  * @returns Zod array schema for condition examples.
  *
  * @example Valid (event schema has severity and message)
@@ -33,7 +28,7 @@ export interface CreateConditionExamplesSchemaOptions {
  *
  * @example Invalid – field not in schema
  * createConditionExamplesSchema(eventSchema).parse([
- *   { title: 'Bad', condition: 'event.unknown: "x"' }, // throws: KQL references field 'event.unknown' which is not in the schema
+ *   { title: 'Bad', condition: 'event.unknown: "x"' }, // throws: KQL references field 'event.unknown' which is not part of event.* properties.
  * ]);
  *
  * @example Invalid – not valid KQL
@@ -41,14 +36,12 @@ export interface CreateConditionExamplesSchemaOptions {
  *   { title: 'Bad', condition: 'event.severity ( unclosed' }, // throws: parse error
  * ]);
  */
-export function createConditionExamplesSchema(
-  eventSchema: z.ZodType,
-  options: CreateConditionExamplesSchemaOptions = {}
-) {
-  const { fieldPrefix = 'event' } = options;
+export function createConditionExamplesSchema(eventSchema: z.ZodType) {
   const base = z.object({ title: z.string(), condition: z.string() });
   const conditionRefined = base.shape.condition.refine((val: string) => {
-    const result = validateKqlAgainstSchema(val, eventSchema, { fieldPrefix });
+    const result = validateKqlAgainstSchema(val, eventSchema, {
+      fieldPrefix: EVENT_FIELD_PREFIX,
+    });
     return result.valid;
   }, 'Condition must be valid KQL and only reference properties from the event schema.');
   const entrySchema = base.extend({ condition: conditionRefined });
