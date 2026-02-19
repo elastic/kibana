@@ -89,6 +89,34 @@ export interface EmbeddableConversationProps {
    * ```
    */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+
+  /**
+   * Render mode for the conversation component.
+   * - 'full': Complete conversation with history and input (default)
+   * - 'input-only': Just the input component for workplace ai getting started pages
+   *
+   * When 'input-only' is used with `onMessageSubmit`, the component renders
+   * only the conversation input without the message history.
+   *
+   * @default 'full'
+   */
+  renderMode?: 'full' | 'input-only';
+
+  /**
+   * Callback when message is submitted (only used in input-only mode).
+   * If provided with renderMode='input-only', prevents default conversation
+   * creation and calls this callback instead.
+   *
+   * This is useful for embedding the chat input in getting started pages
+   * where you want to redirect to the full Agent Builder app.
+   */
+  onMessageSubmit?: (
+    message: string,
+    context: {
+      agentId?: string;
+      connectorId?: string;
+    }
+  ) => void;
 }
 
 export interface EmbeddableConversationFlyoutProps {

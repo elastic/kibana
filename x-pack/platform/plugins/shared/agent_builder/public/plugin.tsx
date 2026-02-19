@@ -45,6 +45,7 @@ import type {
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import { createEmbeddableConversationComponent } from './embeddable/create_embeddable_conversation_component';
 
 export class AgentBuilderPlugin
   implements
@@ -201,6 +202,12 @@ export class AgentBuilderPlugin
         }
 
         openFlyoutInternal(options);
+      },
+      getEmbeddableConversationComponent: () => {
+        return createEmbeddableConversationComponent({
+          services: internalServices,
+          coreStart: core,
+        });
       },
     };
 

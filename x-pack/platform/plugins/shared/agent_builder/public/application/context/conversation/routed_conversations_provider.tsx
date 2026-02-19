@@ -16,6 +16,7 @@ import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
+import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 import { searchParamNames } from '../../search_param_names';
 import { useConversationActions } from './use_conversation_actions';
 
@@ -37,14 +38,18 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
+  const agentIdFromState = location.state?.agentId;
+  const connectorIdFromState = location.state?.connectorId;
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
   const { agents } = useAgentBuilderAgents();
 
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { selectConnector } = useConnectorSelection();
   const shouldAllowConversationRedirectRef = useRef(true);
   const agentIdSyncedRef = useRef(false);
+  const connectorIdSyncedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -92,22 +97,32 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     onDeleteConversation,
   });
 
-  // Handle agent ID syncing from URL params (moved from useSyncAgentId)
+  // Get agent ID directly from state/params
+  const agentIdFromParams = agentIdFromState || searchParams.get(searchParamNames.agentId);
+  const isAgentIdValid =
+    agentIdFromParams && agents.some((agent) => agent.id === agentIdFromParams);
+
+  // Sync agent ID to conversation actions (for persistence in localStorage)
   useEffect(() => {
-    if (agentIdSyncedRef.current || conversationId) {
+    if (agentIdSyncedRef.current || conversationId || !isAgentIdValid) {
       return;
     }
 
-    // If we don't have a selected agent id, check for a valid agent id in the search params
-    // This is used for the "chat with agent" action on the Agent pages
-    const agentIdParam = searchParams.get(searchParamNames.agentId);
+    conversationActions.setAgentId(agentIdFromParams);
+    agentIdSyncedRef.current = true;
+  }, [agentIdFromParams, isAgentIdValid, conversationId, conversationActions]);
 
-    if (agentIdParam && agents.some((agent) => agent.id === agentIdParam)) {
-      // Agent id passed to sync is valid, set it and mark as synced
-      conversationActions.setAgentId(agentIdParam);
-      agentIdSyncedRef.current = true;
+  // Get connector ID from state/params and sync to localStorage
+  const connectorIdFromParams = connectorIdFromState || searchParams.get(searchParamNames.sourceId);
+
+  useEffect(() => {
+    if (connectorIdSyncedRef.current || conversationId || !connectorIdFromParams) {
+      return;
     }
-  }, [searchParams, agents, conversationId, conversationActions]);
+
+    selectConnector(connectorIdFromParams);
+    connectorIdSyncedRef.current = true;
+  }, [connectorIdFromParams, conversationId, selectConnector]);
 
   const contextValue = useMemo(
     () => ({
@@ -117,8 +132,16 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage: true,
+      agentId: isAgentIdValid ? agentIdFromParams : undefined,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [
+      conversationId,
+      shouldStickToBottom,
+      conversationActions,
+      initialMessage,
+      isAgentIdValid,
+      agentIdFromParams,
+    ]
   );
 
   return (

@@ -5,106 +5,56 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiTextArea,
-  EuiButtonIcon,
-  useEuiTheme,
-  euiShadow,
-  euiShadowHover,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { AGENT_BUILDER_CONVERSATIONS_NEW_PATH } from '../../../common';
 import { useKibana } from '../hooks/use_kibana';
-import { useAgents } from '../hooks/use_agents';
-import { AgentSelector } from './agent_selector/agent_selector';
-import { ConnectorSelector } from './connector_selector/connector_selector';
-
-const INPUT_MIN_HEIGHT = '150px';
 
 const titleStyles = { fontWeight: 400 };
 
 const titleContainerStyles = { width: '100%' };
 
-const fullWidthStyles = { width: '100%' };
-
-const getInputContainerStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
-  return css`
-    width: 100%;
-    min-height: ${INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base};
-    flex-grow: 0;
-    transition: box-shadow 250ms;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    border: none;
-
-    ${euiShadow(euiThemeContext, 's')}
-    &:hover {
-      ${euiShadowHover(euiThemeContext, 's')}
-    }
-    &:focus-within {
-      ${euiShadow(euiThemeContext, 'xl')}
-      :hover {
-        ${euiShadowHover(euiThemeContext, 'xl')}
-      }
-    }
-  `;
-};
-
-const textAreaStyles = css`
-  && {
-    border: none;
-    box-shadow: none;
-    outline: none;
-    padding: 0;
-    resize: none;
-  }
-  &&:focus {
-    border: none;
-    box-shadow: none;
-    outline: none;
-    background-image: none;
-  }
+const fullWidthStyles = css`
+  width: 100%;
 `;
 
 export const ExploreAgentPrompt: React.FC = () => {
   const {
-    services: { application },
+    services: { application, plugins },
   } = useKibana();
-  const euiThemeContext = useEuiTheme();
-  const { data: agents = [] } = useAgents();
-  const [chatInput, setChatInput] = useState('');
-  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
-  const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
 
-  // Set default agent when agents are loaded
-  useEffect(() => {
-    if (agents.length > 0 && !selectedAgentId) {
-      setSelectedAgentId(agents[0].id);
+  // Get the embeddable conversation component from Agent Builder plugin
+  const EmbeddableConversation = useMemo(
+    () => plugins.agentBuilder.getEmbeddableConversationComponent(),
+    [plugins.agentBuilder]
+  );
+
+  const handleMessageSubmit = (
+    message: string,
+    context: { agentId?: string; connectorId?: string }
+  ) => {
+    const searchParams = new URLSearchParams();
+    if (context.agentId) {
+      searchParams.set('agent_id', context.agentId);
     }
-  }, [agents, selectedAgentId]);
-
-  const inputContainerStyles = getInputContainerStyles(euiThemeContext);
-
-  const handleSubmit = () => {
-    if (chatInput.trim() === '') {
-      return;
+    if (context.connectorId) {
+      searchParams.set('source_id', context.connectorId);
     }
 
-    // Navigate to Agent Builder with the message, agent ID, and connector ID in location state
+    const queryString = searchParams.toString();
+    const path = queryString
+      ? `${AGENT_BUILDER_CONVERSATIONS_NEW_PATH}?${queryString}`
+      : AGENT_BUILDER_CONVERSATIONS_NEW_PATH;
+
     application.navigateToApp(AGENT_BUILDER_APP_ID, {
-      path: AGENT_BUILDER_CONVERSATIONS_NEW_PATH,
+      path,
       state: {
-        initialMessage: chatInput.trim(),
-        agentId: selectedAgentId,
-        connectorId: selectedConnectorId,
+        initialMessage: message,
+        agentId: context.agentId,
+        connectorId: context.connectorId,
       },
     });
   };
@@ -128,72 +78,11 @@ export const ExploreAgentPrompt: React.FC = () => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} css={fullWidthStyles}>
-        <EuiFlexGroup
-          css={inputContainerStyles}
-          direction="column"
-          gutterSize="s"
-          responsive={false}
-          alignItems="stretch"
-          justifyContent="center"
-          data-test-subj="workplaceAIExploreAgentInputForm"
-        >
-          <EuiFlexItem>
-            <EuiTextArea
-              placeholder={i18n.translate('xpack.workplaceai.exploreAgentPrompt.inputPlaceholder', {
-                defaultMessage: 'Ask anything',
-              })}
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              rows={3}
-              fullWidth
-              css={textAreaStyles}
-              data-test-subj="workplaceAIExploreAgentInput"
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="s"
-              responsive={false}
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem grow={false}>
-                <ConnectorSelector
-                  selectedConnectorId={selectedConnectorId}
-                  onSelectConnector={setSelectedConnectorId}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <AgentSelector
-                      selectedAgentId={selectedAgentId}
-                      onAgentChange={setSelectedAgentId}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowUp"
-                      aria-label={i18n.translate(
-                        'xpack.workplaceai.exploreAgentPrompt.submitAriaLabel',
-                        {
-                          defaultMessage: 'Submit',
-                        }
-                      )}
-                      color="primary"
-                      display="fill"
-                      size="m"
-                      disabled={chatInput.trim() === ''}
-                      onClick={handleSubmit}
-                      data-test-subj="workplaceAIExploreAgentSubmit"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EmbeddableConversation
+          renderMode="input-only"
+          newConversation={true}
+          onMessageSubmit={handleMessageSubmit}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
