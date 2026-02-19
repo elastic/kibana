@@ -30,6 +30,7 @@ evaluate.describe(
           description:
             'Evaluates AI-generated detection rules against known examples from elastic/detection-rules',
           examples: sampleRules.map((rule) => ({
+            id: rule.id,
             input: { prompt: rule.prompt },
             output: rule,
             metadata: { category: rule.category, difficulty: 'medium', expectedName: rule.name },
@@ -53,6 +54,7 @@ evaluate.describe(
           name: 'security-ai-rules: edge-cases',
           description: 'Tests AI rule generation with edge cases and challenging prompts',
           examples: hardCases.map((c) => ({
+            id: c.id,
             input: { prompt: c.prompt },
             output: c.output,
             metadata: c.metadata,

@@ -12,6 +12,7 @@ export interface RuleThreat {
 }
 
 export interface ReferenceRule {
+  id: string;
   name: string;
   prompt: string;
   description: string;
@@ -36,6 +37,7 @@ export interface ReferenceRule {
  */
 export const sampleRules: ReferenceRule[] = [
   {
+    id: 'winrar-7z-encryption',
     name: 'Encrypting Files with WinRar or 7z',
     prompt: 'Alert when an archiving tool is used to create password-protected archives on Windows',
     description:
@@ -84,6 +86,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'collection',
   },
   {
+    id: 'lsass-malseclogon',
     name: 'Suspicious LSASS Access via MalSecLogon',
     prompt: 'Detect suspicious access to Windows credential storage processes',
     description:
@@ -112,6 +115,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'credential_access',
   },
   {
+    id: 'windows-defender-disabled-powershell',
     name: 'Windows Defender Disabled via PowerShell',
     prompt: 'Alert when endpoint protection is disabled through a scripting engine',
     description:
@@ -139,6 +143,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'defense_evasion',
   },
   {
+    id: 'remote-file-copy-powershell',
     name: 'Remote File Copy via PowerShell',
     prompt: 'Detect when PowerShell is used to download files from the internet',
     description:
@@ -168,6 +173,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'command_and_control',
   },
   {
+    id: 'mimikatz-powershell',
     name: 'Mimikatz PowerShell Module Activity',
     prompt: 'Alert on known credential dumping tools running via PowerShell',
     description:
@@ -195,6 +201,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'credential_access',
   },
   {
+    id: 'clearing-windows-event-logs',
     name: 'Clearing Windows Event Logs',
     prompt: 'Detect when Windows audit logs are cleared or modified',
     description:
@@ -225,6 +232,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'defense_evasion',
   },
   {
+    id: 'suspicious-windows-utility-execution',
     name: 'Suspicious Execution via Windows Utility',
     prompt: 'Alert when built-in Windows utilities execute scripts or remote content',
     description:
@@ -255,6 +263,7 @@ export const sampleRules: ReferenceRule[] = [
     category: 'defense_evasion',
   },
   {
+    id: 'network-connection-windows-binary',
     name: 'Suspicious Network Connection from Windows Binary',
     prompt: 'Detect outbound network connections initiated by Windows system binaries',
     description:

@@ -8,6 +8,7 @@
 import type { ReferenceRule } from './sample_rules';
 
 export interface HardCase {
+  id: string;
   prompt: string;
   output: ReferenceRule;
   metadata: { testType: string; difficulty: string };
@@ -19,8 +20,10 @@ export interface HardCase {
  */
 export const hardCases: HardCase[] = [
   {
+    id: 'vague-suspicious-activity',
     prompt: 'Detect suspicious activity',
     output: {
+      id: 'generic-suspicious-activity',
       name: 'Generic Suspicious Activity',
       description: 'Detects suspicious activity',
       query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
@@ -34,9 +37,11 @@ export const hardCases: HardCase[] = [
     metadata: { testType: 'vague-prompt', difficulty: 'hard' },
   },
   {
+    id: 'complex-apt-zero-day',
     prompt:
       'Create a rule for detecting advanced persistent threat actors using zero-day exploits with polymorphic malware and anti-forensics techniques',
     output: {
+      id: 'complex-apt-detection',
       name: 'Complex APT Detection',
       description: 'Detects advanced persistent threats',
       query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
