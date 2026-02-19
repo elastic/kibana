@@ -11,7 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { IntervalSchedule, RruleSchedule } from '@kbn/scheduling-types';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
@@ -254,7 +254,7 @@ export enum TaskLifecycleResult {
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
 
-export type { IntervalSchedule, RruleSchedule } from '@kbn/scheduling-types';
+export type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface TaskUserScope {
   apiKeyId: string;

@@ -608,7 +608,6 @@ src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-exploration-team
-src/platform/packages/shared/kbn-scheduling-types @elastic/response-ops
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
@@ -1027,6 +1026,7 @@ x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/scheduling-types @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security

@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/scheduling-types",
+  "id": "@kbn/response-ops-scheduling-types",
   "owner": ["@elastic/response-ops"],
   "group": "platform",
   "visibility": "shared"
