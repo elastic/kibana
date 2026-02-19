@@ -87,6 +87,7 @@ describe('TemplatesService', () => {
     isDeleted: false,
     tags: [] as string[],
     author: [] as string[],
+    owner: [] as string[],
     sortField: 'name' as const,
     sortOrder: 'asc' as const,
     search: '',
@@ -111,6 +112,7 @@ describe('TemplatesService', () => {
         isDeleted: false,
         tags: [],
         author: [],
+        owner: [],
         sortField: 'templateId',
         sortOrder: 'asc',
         search: '',
@@ -421,6 +423,22 @@ describe('TemplatesService', () => {
         const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
         const query = searchCall?.query as { bool: { filter?: unknown[] } };
         // Should have at least 2 filters: deletedAt + author
+        expect(query.bool.filter!.length).toBeGreaterThanOrEqual(2);
+      });
+
+      it('passes owner as KQL filter when provided', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+        await service.getAllTemplates({
+          ...defaultFindParams,
+          owner: ['securitySolution', 'observability'],
+        });
+
+        expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
+        const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+        const query = searchCall?.query as { bool: { filter?: unknown[] } };
+        // Should have at least 2 filters: deletedAt + owner
         expect(query.bool.filter!.length).toBeGreaterThanOrEqual(2);
       });
 

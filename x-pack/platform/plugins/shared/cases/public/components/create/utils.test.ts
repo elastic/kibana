@@ -260,6 +260,17 @@ describe('utils', () => {
       });
     });
 
+    it('excludes templateId, templateVersion, and extended_fields from serialized output', () => {
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          templateId: 'tmpl-1',
+          templateVersion: '2',
+          extended_fields: { customKey: 'customValue' },
+        })
+      ).toEqual(serializedFormData);
+    });
+
     it('trims form data', () => {
       const untrimmedData = {
         title: '  title  ',

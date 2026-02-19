@@ -45,6 +45,7 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isDeleted,
     } = params;
 
@@ -57,6 +58,7 @@ export class TemplatesService {
       search,
       tags,
       author,
+      owner,
       isLatest: true,
     });
 
@@ -109,6 +111,7 @@ export class TemplatesService {
     search,
     tags,
     author,
+    owner,
   }: {
     page: number;
     perPage: number;
@@ -121,6 +124,7 @@ export class TemplatesService {
     search?: string;
     tags?: string[];
     author?: string[];
+    owner?: string[];
   }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
       hits: {
@@ -155,6 +159,13 @@ export class TemplatesService {
         ? [
             toElasticsearchQuery(
               fromKueryExpression(author.map((a) => `${SO}.author: "${a}"`).join(' OR '))
+            ),
+          ]
+        : []),
+      ...(owner && owner.length > 0
+        ? [
+            toElasticsearchQuery(
+              fromKueryExpression(owner.map((o) => `${SO}.owner: "${o}"`).join(' OR '))
             ),
           ]
         : []),

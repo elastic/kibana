@@ -75,6 +75,9 @@ export const createFormSerializer = (
     syncAlerts,
     extractObservables,
     customFields,
+    templateId: _templateId,
+    templateVersion: _templateVersion,
+    extended_fields: _extendedFields,
     ...restData
   } = data;
 

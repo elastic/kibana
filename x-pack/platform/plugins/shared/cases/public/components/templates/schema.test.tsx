@@ -111,6 +111,26 @@ describe('Template schema', () => {
               },
             ],
           },
+          "templateId": Object {
+            "defaultValue": "",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
+          },
+          "templateVersion": Object {
+            "defaultValue": "",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
+          },
           "title": Object {
             "label": "Name",
             "labelAppend": <EuiText

@@ -74,6 +74,7 @@ describe('templates_v2 api bulk actions', () => {
         sortOrder: 'asc' as const,
         tags: ['security'],
         author: ['alice'],
+        owner: ['securitySolution'],
         isDeleted: false,
       };
 
@@ -89,6 +90,7 @@ describe('templates_v2 api bulk actions', () => {
           sortOrder: 'asc',
           tags: ['security'],
           author: ['alice'],
+          owner: ['securitySolution'],
           isDeleted: false,
         },
         signal,
@@ -114,6 +116,7 @@ describe('templates_v2 api bulk actions', () => {
         sortOrder: 'asc' as const,
         tags: [] as string[],
         author: [] as string[],
+        owner: [] as string[],
         isDeleted: false,
       };
 

@@ -28,6 +28,7 @@ export const useGetTemplate = (templateId?: string): UseQueryResult<ParsedTempla
     },
     {
       enabled: Boolean(templateId),
+      staleTime: 0,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(
