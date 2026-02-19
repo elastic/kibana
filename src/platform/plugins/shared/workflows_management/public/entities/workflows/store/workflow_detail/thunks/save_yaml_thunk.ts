@@ -45,6 +45,9 @@ export const saveYamlThunk = createAsyncThunk<
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
         await dispatch(loadWorkflowThunk({ id }));
+
+        // Invalidate version history so the sidebar refetches when open
+        queryClient.invalidateQueries({ queryKey: ['workflows', id, 'history'] });
       } else {
         // Create the workflow in the API if the id is not provided
         const workflow = await http.post<WorkflowDetailDto>('/api/workflows', {

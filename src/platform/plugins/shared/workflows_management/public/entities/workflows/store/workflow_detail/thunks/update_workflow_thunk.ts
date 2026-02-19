@@ -46,6 +46,7 @@ export const updateWorkflowThunk = createAsyncThunk<
       // Invalidate relevant queries from react-query cache
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+      queryClient.invalidateQueries({ queryKey: ['workflows', id, 'history'] });
 
       // If the update affects YAML, update content in the editor immediately
       // for better UX, then reload from server to sync

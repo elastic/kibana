@@ -26,10 +26,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowHistory } from '../../../entities/workflows/model/use_workflow_history';
 import type { WorkflowHistoryItem } from '../../../entities/workflows/model/use_workflow_history';
+import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 export interface WorkflowVersionHistoryPanelProps {
   workflowId: string;
   onClose: () => void;
+  /** When true, show a "Current version" card at the top (editing state) above the saved versions list. */
+  hasUnsavedChanges?: boolean;
+  /** Passed to WorkflowUnsavedChangesBadge in the current version card. */
+  highlightDiff?: boolean;
+  setHighlightDiff?: React.Dispatch<React.SetStateAction<boolean>>;
+  lastUpdatedAt?: Date | null;
 }
 
 function getInitial(name: string | undefined, userId: string | undefined): string {
@@ -197,7 +204,14 @@ const getPanelStyles = (euiTheme: {
 });
 
 export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPanelProps>(
-  ({ workflowId, onClose }) => {
+  ({
+    workflowId,
+    onClose,
+    hasUnsavedChanges = false,
+    highlightDiff = false,
+    setHighlightDiff = () => {},
+    lastUpdatedAt = null,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const styles = getPanelStyles(euiTheme);
     const { data, isLoading, error } = useWorkflowHistory(workflowId);
@@ -261,23 +275,46 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
           )}
           {!isLoading && !error && data && (
             <>
-              <div css={styles.currentVersionCard} data-test-subj="workflowVersionHistoryCurrentVersion">
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="workflows.versionHistory.currentVersion"
-                    defaultMessage="Current version"
+              {hasUnsavedChanges && (
+                <div
+                  css={styles.currentVersionCard}
+                  data-test-subj="workflowVersionHistoryCurrentVersion"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="m"
+                    responsive={false}
+                    wrap={false}
+                    css={{ flex: '0 0 auto' }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="workflows.versionHistory.currentVersion"
+                          defaultMessage="Current version"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <WorkflowUnsavedChangesBadge
+                        hasChanges={hasUnsavedChanges}
+                        highlightDiff={highlightDiff}
+                        setHighlightDiff={setHighlightDiff}
+                        lastUpdatedAt={lastUpdatedAt}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    size="s"
+                    color="text"
+                    aria-label={i18n.translate('workflows.versionHistory.currentVersionActions', {
+                      defaultMessage: 'Current version actions',
+                    })}
+                    data-test-subj="workflowVersionHistoryCurrentVersionActions"
                   />
-                </EuiText>
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  size="s"
-                  color="text"
-                  aria-label={i18n.translate('workflows.versionHistory.currentVersionActions', {
-                    defaultMessage: 'Current version actions',
-                  })}
-                  data-test-subj="workflowVersionHistoryCurrentVersionActions"
-                />
-              </div>
+                </div>
+              )}
               {data.items.length === 0 ? (
                 <EuiEmptyPrompt
                   iconType="clock"

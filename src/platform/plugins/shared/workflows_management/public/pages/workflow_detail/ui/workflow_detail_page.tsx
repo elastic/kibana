@@ -23,6 +23,8 @@ import { WorkflowVersionHistoryPanel } from '../../../features/workflow_version_
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
+  selectHasChanges,
+  selectWorkflow,
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
@@ -44,6 +46,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowName = useSelector(selectWorkflowName);
+  const hasUnsavedChanges = useSelector(selectHasChanges);
+  const workflow = useSelector(selectWorkflow);
+  const lastUpdatedAt = workflow?.lastUpdatedAt ? new Date(workflow.lastUpdatedAt) : null;
 
   useWorkflowsBreadcrumbs(workflowName);
 
@@ -154,6 +159,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                   <WorkflowVersionHistoryPanel
                     workflowId={id}
                     onClose={() => setIsVersionHistoryOpen(false)}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                    highlightDiff={highlightDiff}
+                    setHighlightDiff={setHighlightDiff}
+                    lastUpdatedAt={lastUpdatedAt}
                   />
                 </div>
               ) : null
