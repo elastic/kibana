@@ -40,7 +40,6 @@
       "updated_by": null,
       "observables": [],
       "settings": {
-        "syncAlerts": true,
         "extractObservables": false
       }
     }
@@ -86,7 +85,6 @@
       "updated_by": null,
       "observables": [],
       "settings": {
-        "syncAlerts": true,
         "extractObservables": false
       }
     }
