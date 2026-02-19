@@ -19,6 +19,9 @@ export interface WorkflowExecutionState {
   started_at: string;
   finished_at?: string;
   output?: JsonValue;
+  workflow_name?: string;
+  /** Present when status is FAILED; contains the workflow error message. */
+  error_message?: string;
 }
 
 /**
@@ -44,10 +47,15 @@ export const getExecutionState = async ({
     workflow_id: execution.workflowId ?? 'unknown',
     started_at: execution.startedAt,
     finished_at: execution.finishedAt,
+    workflow_name: execution.workflowDefinition.name,
   };
 
   if (execution.status === ExecutionStatus.COMPLETED) {
     state.output = getWorkflowOutput(execution.stepExecutions);
+  }
+
+  if (execution.status === ExecutionStatus.FAILED && execution.error) {
+    state.error_message = execution.error.message;
   }
 
   return state;
