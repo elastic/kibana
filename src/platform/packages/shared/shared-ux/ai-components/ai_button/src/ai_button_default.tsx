@@ -9,14 +9,19 @@
 
 import React from 'react';
 
-import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
+import { AiButtonBase } from './ai_button_base';
+import type { AiButtonProps } from './types';
 
+/** Props for the default text AI button variants (`base` and `accent`). */
 export type AiButtonDefaultProps = Extract<
-  AiButtonBaseProps,
+  AiButtonProps,
   { iconOnly?: false; variant?: 'accent' | 'base' }
 >;
 
+/**
+ * Renders the default text AI button variants (`base` and `accent`).
+ * @param props - Props accepted by the default AI button variant.
+ */
 export const AiButtonDefault = (props: AiButtonDefaultProps) => {
-  const { variant = 'base', ...rest } = props;
-  return <AiButtonBase {...rest} variant={variant} />;
+  return <AiButtonBase {...props} />;
 };

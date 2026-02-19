@@ -10,14 +10,19 @@
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
 
-import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
+import { AiButtonBase } from './ai_button_base';
+import type { AiButtonProps } from './types';
 
+/** Props for the icon-only AI button component. */
 export type AiButtonIconProps = DistributiveOmit<
-  Extract<AiButtonBaseProps, { iconOnly: true }>,
+  Extract<AiButtonProps, { iconOnly: true }>,
   'iconOnly'
 >;
 
+/**
+ * Renders the icon-only AI button.
+ * @param props - Props accepted by the icon-only variant.
+ */
 export const AiButtonIcon = (props: AiButtonIconProps) => {
-  const { variant = 'base', ...rest } = props;
-  return <AiButtonBase {...rest} iconOnly variant={variant} />;
+  return <AiButtonBase {...props} iconOnly />;
 };

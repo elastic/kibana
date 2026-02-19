@@ -10,13 +10,19 @@
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
 
-import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
+import { AiButtonBase } from './ai_button_base';
+import type { AiButtonProps } from './types';
 
-type AiButtonEmptyProps = DistributiveOmit<
-  Extract<AiButtonBaseProps, { iconOnly?: false; variant: 'empty' | 'outlined' }>,
+/** Props for the `AiButtonEmpty` component. */
+export type AiButtonEmptyProps = DistributiveOmit<
+  Extract<AiButtonProps, { iconOnly?: false; variant: 'empty' | 'outlined' }>,
   'variant'
 >;
 
+/**
+ * Renders the empty AI button variant.
+ * @param props - Props accepted by the empty AI button variant.
+ */
 export const AiButtonEmpty = (props: AiButtonEmptyProps) => {
   return <AiButtonBase {...props} variant="empty" />;
 };
