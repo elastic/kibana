@@ -8,33 +8,23 @@
  */
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
-import { getWorkflowExecutionFn } from './get_workflow_executions';
 import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { GetStepExecutions } from '../types';
 
 export function getStepExecutionsFn(
   executionStateRepository: ExecutionStateRepository,
-  workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository
 ): GetStepExecutions {
-  const getWorkflowExecution = getWorkflowExecutionFn(
-    executionStateRepository,
-    workflowExecutionRepository
-  );
-
   return async (executionId: string, spaceId: string) => {
-    const workflowExecution = await getWorkflowExecution(executionId, spaceId);
+    const executionsFromState = await executionStateRepository.getExecutions(
+      new Set([executionId]),
+      spaceId
+    );
 
-    if (!workflowExecution) {
-      return null;
-    }
-
-    if (!isTerminalStatus(workflowExecution.status)) {
+    if (executionsFromState[executionId] && executionsFromState[executionId].type === 'workflow') {
       return (await executionStateRepository.getExecutions(
-        new Set(workflowExecution.stepExecutionIds ?? []),
+        new Set(executionsFromState[executionId].stepExecutionIds ?? []),
         spaceId
       )) as Record<string, EsWorkflowStepExecution>;
     }

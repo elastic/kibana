@@ -723,10 +723,11 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowExecutionId,
+      const result = await executionStateRepository.getExecutions(
+        new Set([workflowExecutionId]),
         spaceId
       );
+      const workflowExecution = result[workflowExecutionId] as EsWorkflowExecution;
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -741,13 +742,15 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
-      });
+      await executionStateRepository.bulkUpdate([
+        {
+          id: workflowExecution.id,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled by user',
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system', // TODO: set user if available
+        },
+      ]);
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
@@ -770,11 +773,7 @@ export class WorkflowsExecutionEnginePlugin
       searchWorkflowExecutions: searchWorkflowExecutionsFn(
         coreStart.elasticsearch.client.asInternalUser
       ),
-      getStepExecutions: getStepExecutionsFn(
-        executionStateRepository,
-        workflowExecutionRepository,
-        stepExecutionRepository
-      ),
+      getStepExecutions: getStepExecutionsFn(executionStateRepository, stepExecutionRepository),
     };
   }
 
