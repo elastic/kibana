@@ -53,7 +53,10 @@ import {
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setHasYamlSchemaValidationErrors,
+  setIsTestModalOpen,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -255,6 +258,12 @@ export const WorkflowYAMLEditor = ({
       yamlDocumentRef,
       workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
     });
+
+  // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
+  useEffect(() => {
+    const hasErrors = validationErrors.some((e) => e.severity === 'error');
+    dispatch(setHasYamlSchemaValidationErrors(hasErrors));
+  }, [validationErrors, dispatch]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
