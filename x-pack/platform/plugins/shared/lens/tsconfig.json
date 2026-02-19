@@ -95,7 +95,6 @@
     "@kbn/field-utils",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
-    "@kbn/presentation-containers",
     "@kbn/discover-utils",
     "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
