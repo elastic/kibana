@@ -10,6 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import {
   type SerializedError,
   type StackFrame,
@@ -23,7 +24,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, evaluateKql } from '../utils';
+import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
