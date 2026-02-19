@@ -12,6 +12,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardState, DashboardPanel } from '../../../server';
 import { getReferencesForPanelId, isDashboardSection } from '../../../common';
 import { embeddableService } from '../../services/kibana_services';
+import { transformType } from '@kbn/embeddable-plugin/public';
 
 export async function transformPanels(panels: DashboardState['panels'], references?: Reference[]) {
   function filterReferences(panelId?: string) {
@@ -33,8 +34,13 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
   });
 }
 
-async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
-  const transformOut = await embeddableService.getLegacyURLTransform(panel.type);
+async function transformPanel(panelIn: DashboardPanel, references?: Reference[]) {
+  const type = await transformType(panelIn.type);
+  const panel = {
+    ...panelIn,
+    type
+  };
+  const transformOut = await embeddableService.getLegacyURLTransform(type);
   if (!transformOut) return panel;
 
   try {

@@ -39,6 +39,11 @@ export {
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
+export async function transformType(type: string) {
+  const { transformType } = await import('./async_module');
+  return transformType(type);
+}
+
 export type { SerializedDrilldowns } from '../server';
 
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Do not change constant value - part of public REST APIs
-export const MARKDOWN_EMBEDDABLE_TYPE = 'markdown';
+export function transformType(type: string) {
+  // Pre 9.4 typed markdown embeddable as DASHBOARD_MARKDOWN
+  if (type === 'DASHBOARD_MARKDOWN') {
+    return 'markdown';
+  }
+
+  return type;
+}

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer, transformType } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
@@ -131,12 +131,13 @@ export const embeddableRendererFactory = (
       const uuid = handlers.getElementId();
       const api = children[uuid];
       if (!api) {
+        const type = await transformType(embeddableType);
         ReactDOM.render(
           renderReactEmbeddable({
             input,
             handlers,
             uuid,
-            type: embeddableType,
+            type,
             container: canvasApi,
             core,
           }),

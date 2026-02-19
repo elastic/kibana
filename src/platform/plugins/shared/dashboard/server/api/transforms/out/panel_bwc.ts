@@ -9,6 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { SavedDashboardPanel } from '../../../dashboard_saved_object';
+import { transformType } from '@kbn/embeddable-plugin/server';
 
 export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjectReference[]) {
   const { id, panelRefName, title, type, ...rest } = panel;
@@ -35,7 +36,7 @@ export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjec
         // <8.19 title stored as siblings to embeddableConfig
         ...(title !== undefined && { title }),
       },
-      type: getPanelType(),
+      type: transformType(getPanelType()),
     },
     panelReferences: transformPanelReferencesOut(panelReferences, panelRefName),
   };
