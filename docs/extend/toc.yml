@@ -5,6 +5,7 @@ toc:
       - file: running-kibana-advanced.md
       - file: sample-data.md
       - file: kibana-debugging.md
+      - file: building-kibana.md
       - file: development-plugin-resources.md
       - file: monorepo-packages.md
   - file: development-best-practices.md
