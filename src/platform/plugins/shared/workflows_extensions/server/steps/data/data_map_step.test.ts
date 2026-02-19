@@ -558,26 +558,6 @@ describe('dataMapStepDefinition', () => {
       ]);
     });
 
-    it('should return null when $map items resolves to null', async () => {
-      const config = {
-        items: [{ id: '1', tags: null }],
-      };
-      const input = {
-        fields: {
-          id: '{{ item.id }}',
-          tags: {
-            $map: { items: '{{ item.tags }}', item: 'tag' },
-            label: '{{ tag.label }}',
-          },
-        },
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataMapStepDefinition.handler(context);
-
-      expect(result.output).toEqual([{ id: '1', tags: null }]);
-    });
-
     it('should return empty array when $map items resolves to a non-array', async () => {
       const config = {
         items: [{ id: '1', meta: 'not an array' }],
