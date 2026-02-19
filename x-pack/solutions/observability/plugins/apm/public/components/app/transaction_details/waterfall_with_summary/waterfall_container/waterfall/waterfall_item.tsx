@@ -211,7 +211,8 @@ function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; 
       color="hollow"
       iconType="dot"
       css={css`
-        max-width: 50%;
+        min-width: 15%;
+        max-width: 30%;
         & .euiBadge__icon {
           color: ${color};
         }
@@ -310,11 +311,11 @@ export function WaterfallItem({
       aria-label={
         onClick
           ? i18n.translate('xpack.apm.waterfall.openDetailsButton', {
-              defaultMessage: 'View details for {name}',
-              values: {
-                name: itemName,
-              },
-            })
+            defaultMessage: 'View details for {name}',
+            values: {
+              name: itemName,
+            },
+          })
           : undefined
       }
       onClick={(e: React.MouseEvent) => {
