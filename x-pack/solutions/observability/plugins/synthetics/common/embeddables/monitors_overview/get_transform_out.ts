@@ -9,7 +9,7 @@ import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
 import { transformFiltersOut } from '../bwc/transform_filters_out';
-import { OverviewMonitorsEmbeddableState } from '../../types';
+import type { OverviewMonitorsEmbeddableState } from '../../types';
 
 export function getTransformOut() {
   function transformOut(
@@ -19,7 +19,7 @@ export function getTransformOut() {
   ): OverviewMonitorsEmbeddableState {
     const transformsFlow = flow(
       transformTitlesOut<OverviewMonitorsEmbeddableState>,
-      transformFiltersOut<OverviewMonitorsEmbeddableState>,
+      transformFiltersOut<OverviewMonitorsEmbeddableState>
     );
     return transformsFlow(storedState);
   }

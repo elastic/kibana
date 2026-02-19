@@ -31,8 +31,11 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../../../common/embeddables/stats_overview/constants';
-import { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
+import {
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+  SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/stats_overview/constants';
+import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {

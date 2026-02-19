@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  monitorOptionSchema,
-  monitorFiltersSchema,
-} from './common_schemas';
+import { monitorOptionSchema, monitorFiltersSchema } from './common_schemas';
 
 describe('Common Schemas', () => {
   describe('monitorOptionSchema', () => {

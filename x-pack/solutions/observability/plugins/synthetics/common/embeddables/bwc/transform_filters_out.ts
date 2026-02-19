@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitorFilters, MonitorOption } from "../../types";
+import type { MonitorFilters, MonitorOption } from '../../types';
 
 interface LegacyStoredFilters {
   monitorIds?: MonitorOption[];
@@ -17,12 +17,18 @@ interface LegacyStoredFilters {
  * This transform out function ensures that this state is not dropped when loading from
  * a legacy stored state.
  */
-export function transformFiltersOut<StateType extends{ filters?: MonitorFilters } >(storedState: StateType) {
+export function transformFiltersOut<StateType extends { filters?: MonitorFilters }>(
+  storedState: StateType
+) {
   if (!storedState.filters) {
     return storedState;
   }
 
-  const { monitorIds: legacyMonitorIds, monitorTypes: legacyMonitorTypes, ...restOfFilters } = storedState.filters as MonitorFilters & LegacyStoredFilters;
+  const {
+    monitorIds: legacyMonitorIds,
+    monitorTypes: legacyMonitorTypes,
+    ...restOfFilters
+  } = storedState.filters as MonitorFilters & LegacyStoredFilters;
   const monitorIds = storedState.filters.monitor_ids ?? legacyMonitorIds;
   const monitorTypes = storedState.filters.monitor_types ?? legacyMonitorTypes;
   return {
@@ -31,6 +37,6 @@ export function transformFiltersOut<StateType extends{ filters?: MonitorFilters 
       ...restOfFilters,
       ...(monitorIds ? { monitor_ids: monitorIds } : {}),
       ...(monitorTypes ? { monitor_types: monitorTypes } : {}),
-    }
-  }
+    },
+  };
 }

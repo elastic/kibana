@@ -8,8 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { monitorFiltersSchema } from './common_schemas';
-import { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../common/embeddables/stats_overview/constants';
 
 /**
@@ -27,7 +27,7 @@ export function getStatsOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldo
     [
       serializedTitlesSchema,
       getDrilldownsSchema(SYNTHETICS_STATS_SUPPORTED_TRIGGERS),
-      statsOverviewCustomStateSchema
+      statsOverviewCustomStateSchema,
     ],
     {
       meta: {
@@ -37,5 +37,7 @@ export function getStatsOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldo
   );
 }
 
-export type OverviewStatsEmbeddableState = TypeOf<ReturnType<typeof getStatsOverviewEmbeddableSchema>>;
+export type OverviewStatsEmbeddableState = TypeOf<
+  ReturnType<typeof getStatsOverviewEmbeddableSchema>
+>;
 export type OverviewStatsEmbeddableCustomState = TypeOf<typeof statsOverviewCustomStateSchema>;

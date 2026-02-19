@@ -10,7 +10,7 @@ import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import { transformFiltersOut } from '../bwc/transform_filters_out';
-import { OverviewStatsEmbeddableState } from '../../types';
+import type { OverviewStatsEmbeddableState } from '../../types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(storedState: OverviewStatsEmbeddableState, references?: Reference[]) {
