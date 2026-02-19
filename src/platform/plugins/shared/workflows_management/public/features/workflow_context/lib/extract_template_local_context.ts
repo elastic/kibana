@@ -14,8 +14,9 @@
  * these variables are not reported as invalid and appear in suggestions.
  *
  * Walks the parsed LiquidJS AST using only declared public API properties:
- * Tag.name, TagToken.args, ForTag.variable/collection/templates,
- * CaptureTag.variable/templates, and Template.children().
+ * Tag.name, AssignTag.localScope(), TagToken.args,
+ * ForTag.variable/collection/templates, CaptureTag.variable/templates,
+ * and Template.children().
  */
 
 import type { AssignTag, CaptureTag, ForTag, Tag, Template } from 'liquidjs';
@@ -37,10 +38,10 @@ export interface ForLoopScope {
 
 export interface TemplateLocalContext {
   /** Assign variables with RHS for type inference. */
-  assignVars: AssignVariable[];
+  readonly assignVars: readonly AssignVariable[];
   /** Capture variable names; capture output is always string. */
-  captureNames: string[];
-  forLoopScopes: ForLoopScope[];
+  readonly captureNames: readonly string[];
+  readonly forLoopScopes: readonly ForLoopScope[];
 }
 
 const EMPTY_CONTEXT: TemplateLocalContext = Object.freeze({
@@ -73,17 +74,6 @@ function isForTagType(tpl: unknown): tpl is ForTag {
 // Assign arg parsing (operates on the public TagToken.args string)
 // ---------------------------------------------------------------------------
 
-const ASSIGN_VARIABLE_NAME_REGEX = /^\w+$/;
-
-export function parseAssignVariableName(args: string): string | null {
-  const trimmed = args.trim();
-  const eqIndex = trimmed.indexOf('=');
-  if (eqIndex === -1) return null;
-  const beforeEq = trimmed.slice(0, eqIndex).trim();
-  const match = beforeEq.match(ASSIGN_VARIABLE_NAME_REGEX);
-  return match ? match[0] : null;
-}
-
 export function parseAssignRhs(args: string): string | null {
   const trimmed = args.trim();
   const eqIndex = trimmed.indexOf('=');
@@ -115,7 +105,7 @@ function getMaxTokenEnd(templates: Template[]): number {
  * Inner loops come later in the array so that when merging into schema, inner wins.
  */
 export function forLoopScopesContainingOffset(
-  forLoopScopes: ForLoopScope[],
+  forLoopScopes: readonly ForLoopScope[],
   offsetInTemplate: number
 ): ForLoopScope[] {
   return forLoopScopes.filter(
@@ -154,7 +144,8 @@ function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAcc
 
     if (token && typeof token.begin === 'number' && typeof token.end === 'number') {
       if (isAssignTagType(tpl)) {
-        const varName = parseAssignVariableName(tpl.token.args);
+        const firstId = tpl.localScope()[Symbol.iterator]().next();
+        const varName = firstId.done ? null : firstId.value.content;
         const rhs = parseAssignRhs(tpl.token.args);
         if (varName && token.end <= beforeOffset) {
           acc.assignVars.push({ name: varName, rhs: rhs ?? '' });
@@ -192,8 +183,9 @@ function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAcc
  * so that assign/capture/for-loop variables are recognized.
  *
  * Walks the parsed AST using only declared public LiquidJS API properties
- * (Tag.name, TagToken.args, ForTag.variable/collection/templates,
- * CaptureTag.variable/templates, Template.children()).
+ * (Tag.name, AssignTag.localScope(), TagToken.args,
+ * ForTag.variable/collection/templates, CaptureTag.variable/templates,
+ * Template.children()).
  *
  * On parse error returns empty context so the editor stays usable
  * (e.g. when the user is mid-edit).

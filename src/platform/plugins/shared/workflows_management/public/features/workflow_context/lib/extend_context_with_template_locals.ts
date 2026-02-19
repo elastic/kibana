@@ -148,6 +148,8 @@ export function extendContextWithTemplateLocals(
     return baseSchema;
   }
 
+  // Zod's .extend() returns a new ZodObject whose generic shape differs from DynamicStepContextSchema;
+  // the cast is necessary because the added keys are dynamic and not reflected in the static type.
   return baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 }
 
