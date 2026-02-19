@@ -185,6 +185,7 @@ export function EditPolicyModal({
               data-test-subj="editPolicyModal-cancelButton"
               onClick={onCancel}
               disabled={isProcessing}
+              flush="both"
             >
               {i18n.translate('xpack.streams.editPolicyModal.cancelButton', {
                 defaultMessage: 'Cancel',
