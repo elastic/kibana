@@ -12,7 +12,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  euiCanAnimate,
+  euiShadowXSmall,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -96,6 +103,15 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
         if (type === 'init') {
           setIsActive(true);
+
+          const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+          const section = currentLayout[sectionId];
+          if (!section.isMainSection && !section.isCollapsed) {
+            const newLayout = cloneDeep(currentLayout);
+            (newLayout[sectionId] as CollapsibleSection).isCollapsed = true;
+            gridLayoutStateManager.gridLayout$.next(newLayout);
+          }
+
           const width = headerRef.getBoundingClientRect().width;
           headerRef.style.position = 'fixed';
           headerRef.style.width = `${width}px`;
@@ -195,6 +211,23 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           gridLayoutStateManager.headerRefs.current[sectionId] = element;
         }}
       >
+        {!readOnly && (
+          <div className="kbnGridSectionHeader--floatingActions">
+            <EuiButtonIcon
+              iconType="move"
+              color="text"
+              size="s"
+              css={styles.floatingMoveHandle}
+              aria-label={i18n.translate('kbnGridLayout.section.floatingMoveSection', {
+                defaultMessage: 'Move section',
+              })}
+              onMouseDown={startDrag}
+              onTouchStart={startDrag}
+              onKeyDown={startDrag}
+              data-test-subj={`kbnGridSectionHeader-${sectionId}--floatingMoveHandle`}
+            />
+          </div>
+        )}
         <GridSectionTitle
           sectionId={sectionId}
           readOnly={readOnly || isActive}
@@ -210,7 +243,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
            */
           !editTitleOpen && (
             <>
-              <EuiFlexItem grow={false} css={styles.visibleOnlyWhenCollapsed}>
+              <EuiFlexItem grow={false}>
                 <EuiText
                   color="subdued"
                   size="s"
@@ -226,39 +259,18 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                   })}
                 </EuiText>
               </EuiFlexItem>
-              {!readOnly && (
-                <>
-                  {!isActive && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        className="kbnGridLayout--deleteSectionIcon"
-                        onClick={confirmDeleteSection}
-                        aria-label={i18n.translate('kbnGridLayout.section.deleteSection', {
-                          defaultMessage: 'Delete section',
-                        })}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem
-                    grow={false}
-                    css={[styles.floatToRight, styles.visibleOnlyWhenCollapsed]}
-                  >
-                    <EuiButtonIcon
-                      iconType="move"
-                      color="text"
-                      className="kbnGridSection--dragHandle"
-                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
-                        defaultMessage: 'Move section',
-                      })}
-                      onMouseDown={startDrag}
-                      onTouchStart={startDrag}
-                      onKeyDown={startDrag}
-                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
-                    />
-                  </EuiFlexItem>
-                </>
+              {!readOnly && !isActive && (
+                <EuiFlexItem grow={false} css={styles.floatToRight}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    className="kbnGridLayout--deleteSectionIcon"
+                    onClick={confirmDeleteSection}
+                    aria-label={i18n.translate('kbnGridLayout.section.deleteSection', {
+                      defaultMessage: 'Delete section',
+                    })}
+                  />
+                </EuiFlexItem>
               )}
             </>
           )
@@ -284,53 +296,99 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
-  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string) =>
-    css({
-      gridColumnStart: 1,
-      gridColumnEnd: -1,
-      gridRowStart: `span 1`,
-      gridRowEnd: `start-${sectionId}`,
-      height: `${euiTheme.size.xl}`,
-      '.kbnGridLayout--deleteSectionIcon': {
-        marginLeft: euiTheme.size.xs,
-      },
-      '.kbnGridLayout--panelCount': {
-        textWrapMode: 'nowrap', // prevent panel count from wrapping
-      },
-      '.kbnGridSection--dragHandle': {
-        cursor: 'move',
-        touchAction: 'none',
-        '&:active, &:hover, &:focus': {
-          transform: 'none !important', // prevent "bump up" that EUI adds on hover
-          backgroundColor: 'transparent',
+  floatingMoveHandle: css({
+    cursor: 'move',
+    touchAction: 'none',
+    '&:active, &:hover, &:focus': {
+      transform: 'none !important',
+      backgroundColor: 'transparent',
+    },
+  }),
+  headerStyles: (themeContext: UseEuiTheme, sectionId: string) => {
+    const { euiTheme } = themeContext;
+    return [
+      css({
+        gridColumnStart: 1,
+        gridColumnEnd: -1,
+        gridRowStart: `span 1`,
+        gridRowEnd: `start-${sectionId}`,
+        height: `${euiTheme.size.xl}`,
+        position: 'relative',
+        '.kbnGridLayout--deleteSectionIcon': {
+          marginLeft: euiTheme.size.xs,
         },
-      },
-
-      // these styles hide the delete + move actions by default and only show them on hover
-      [`.kbnGridLayout--deleteSectionIcon,
-        .kbnGridSection--dragHandle`]: {
-        opacity: '0',
-        [`${euiCanAnimate}`]: {
-          transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
+        '.kbnGridLayout--panelCount': {
+          textWrapMode: 'nowrap',
         },
-      },
-      [`&:hover .kbnGridLayout--deleteSectionIcon, 
-        &:hover .kbnGridSection--dragHandle,
-        &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
-        &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
-        opacity: 1,
-      },
-
-      // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
-      '&.kbnGridSectionHeader--active': {
-        zIndex: euiTheme.levels.modal,
         '.kbnGridSection--dragHandle': {
           cursor: 'move',
-          opacity: 1,
-          pointerEvents: 'auto',
+          touchAction: 'none',
+          '&:active, &:hover, &:focus': {
+            transform: 'none !important',
+            backgroundColor: 'transparent',
+          },
         },
-      },
-    }),
+
+        '.kbnGridSectionHeader--floatingActions': {
+          position: 'absolute',
+          top: -16,
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: euiTheme.size.s,
+          padding: `${euiTheme.size.xs}`,
+          backgroundColor: euiTheme.colors.emptyShade,
+          borderRadius: euiTheme.border.radius.medium,
+          zIndex: euiTheme.levels.menu,
+          opacity: 0,
+          [`${euiCanAnimate}`]: {
+            transition: `opacity ${euiTheme.animation.fast} ease-in`,
+          },
+        },
+
+        [`&:hover .kbnGridSectionHeader--floatingActions,
+          &:has(:focus-visible) .kbnGridSectionHeader--floatingActions`]: {
+          opacity: 1,
+        },
+
+        // these styles hide the delete + move actions by default and only show them on hover
+        [`.kbnGridLayout--deleteSectionIcon,
+          .kbnGridSection--dragHandle`]: {
+          opacity: '0',
+          [`${euiCanAnimate}`]: {
+            transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
+          },
+        },
+        [`&:hover .kbnGridLayout--deleteSectionIcon, 
+          &:hover .kbnGridSection--dragHandle,
+          &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
+          &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
+          opacity: 1,
+        },
+
+        // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
+        '&.kbnGridSectionHeader--active': {
+          zIndex: euiTheme.levels.modal,
+          '.kbnGridSection--dragHandle': {
+            cursor: 'move',
+            opacity: 1,
+            pointerEvents: 'auto',
+          },
+          '.kbnGridSectionHeader--floatingActions': {
+            opacity: 1,
+            pointerEvents: 'auto',
+            cursor: 'move',
+          },
+        },
+      }),
+      css`
+        .kbnGridSectionHeader--floatingActions {
+          ${euiShadowXSmall(themeContext)}
+        }
+      `,
+    ];
+  },
 };
 
 GridSectionHeader.displayName = 'GridSectionHeader';

@@ -98,15 +98,20 @@ export const useLayoutStyles = () => {
         }
       }
 
+      // show accent border on hover of the section header
+      .kbnGridSectionHeader:hover {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        border-radius: ${euiTheme.border.radius.medium};
+      }
+
       // styling for what the grid section header looks like when being dragged
       .kbnGridSectionHeader--active {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         outline: var(--dashboardActivePanelBorderStyle);
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
         padding-left: 8px;
-        // hide accordian arrow + panel count text when row is being dragged
-        & .kbnGridSectionTitle--button svg,
-        & .kbnGridLayout--panelCount {
+        // hide accordion arrow when row is being dragged
+        & .kbnGridSectionTitle--button svg {
           display: none;
         }
       }
