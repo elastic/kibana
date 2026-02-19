@@ -25,6 +25,8 @@ import type {
   LensStoreDeps,
   LensDocument,
   LensSerializedState,
+  LensByRefSerializedState,
+  LensByValueSerializedState,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -222,14 +224,26 @@ const EditLensConfiguration: FC<
     undefined,
     updatingMiddleware(updatePanelState)
   );
+
+  let initialInput: LensSerializedState;
+  const id = panelId ?? generateId();
+  if (savedObjectId) {
+    initialInput = {
+      id,
+      savedObjectId,
+      // @ts-ignore: intentionally include attributes here to avoid triggering loadFromLibrary
+      attributes: currentAttributes,
+    } satisfies LensByRefSerializedState;
+  } else {
+    initialInput = {
+      id,
+      attributes: currentAttributes,
+    } satisfies LensByValueSerializedState;
+  }
+
   lensStore.dispatch(
     loadInitial({
-      initialInput: {
-        id: panelId ?? generateId(),
-        ...(savedObjectId
-          ? { savedObjectId, attributes: currentAttributes }
-          : { attributes: currentAttributes }),
-      } as LensSerializedState,
+      initialInput,
       inlineEditing: true,
       hideTextBasedEditor,
     })
