@@ -24,7 +24,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -67,7 +67,7 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -106,7 +106,7 @@ export const getOverviewEmbeddableFactory = ({
         remoteName: 'referenceEquality',
         overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+        ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
       }),
       onReset: (lastSaved) => {
         dynamicActionsManager?.reinitializeState(lastSaved ?? {});
@@ -121,8 +121,8 @@ export const getOverviewEmbeddableFactory = ({
       ...(dynamicActionsManager?.api ?? {}),
       ...sloStateManager.api,
       defaultTitle$,
-      hideTitle$: titleManager.api.hidePanelTitles$,
-      setHideTitle: titleManager.api.setHidePanelTitles,
+      hideTitle$: titleManager.api.hideTitle$,
+      setHideTitle: titleManager.api.setHideTitle,
       supportedTriggers: () => [],
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -235,7 +235,6 @@ export const getOverviewEmbeddableFactory = ({
         };
 
         const queryClient = new QueryClient();
-
         return (
           <EuiThemeProvider darkMode={true}>
             <KibanaContextProvider services={deps}>
@@ -249,7 +248,19 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+                  {overviewMode === 'groups' ? (
+                    renderOverview()
+                  ) : showAllGroupByInstances ? (
+                    <div
+                      data-test-subj="sloSingleOverviewPanel"
+                      data-shared-item=""
+                      style={{ width: '100%' }}
+                    >
+                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
+                    </div>
+                  ) : (
+                    renderOverview()
+                  )}
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>

@@ -451,6 +451,67 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  redact: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.redact.name', {
+      defaultMessage: 'Redact',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.redact.description', {
+      defaultMessage:
+        'Mask sensitive data in a field using Grok patterns to identify and replace PII',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.redact.usage', {
+      defaultMessage:
+        'Provide the source field and Grok patterns to match sensitive data. Matched content is replaced with the semantic name wrapped in configurable prefix/suffix delimiters.',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.ip', {
+          defaultMessage: 'Redact IP addresses',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{IP:client_ip}"`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.multiple', {
+          defaultMessage: 'Redact multiple sensitive data types with custom delimiters',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{IP:ip_address}"
+    - "%{EMAILADDRESS:email}"
+    - "%{MAC:mac_address}"
+  prefix: "["
+  suffix: "]"`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.redact.examples.custom', {
+          defaultMessage: 'Redact with custom pattern definitions',
+        }),
+        yaml: `- action: redact
+  from: message
+  patterns:
+    - "%{CREDIT_CARD:cc_number}"
+  pattern_definitions:
+    CREDIT_CARD: "\\\\b(?:\\\\d{4}[- ]?){3}\\\\d{4}\\\\b"`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.grokPatterns', {
+        defaultMessage: 'Common patterns include IP, EMAILADDRESS, MAC, UUID, and URI',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.semantic', {
+        defaultMessage:
+          'The semantic name from the pattern (the part after the colon) becomes the replacement text',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.redact.tips.prefix', {
+        defaultMessage: 'Customize prefix and suffix to change how redacted values appear',
+      }),
+    ],
+  },
+
   math: {
     name: i18n.translate('xpack.streamlang.actionMetadata.math.name', {
       defaultMessage: 'Math',

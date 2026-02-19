@@ -180,9 +180,9 @@ function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
 
 function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiBadge color="hollow" iconType="clock">
       {asDuration(item.duration)}
-    </EuiText>
+    </EuiBadge>
   );
 }
 
@@ -198,6 +198,19 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   }
 
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
+}
+
+function ServiceNameBadge({ item }: { item: IWaterfallSpanOrTransaction }) {
+  const serviceName = item.doc.service.name;
+  if (!serviceName) {
+    return null;
+  }
+
+  return (
+    <EuiBadge color="hollow" iconType="dot">
+      {serviceName}
+    </EuiBadge>
+  );
 }
 
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -331,7 +344,7 @@ export function WaterfallItem({
         {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-
+        <ServiceNameBadge item={item} />
         <Duration item={item} />
         {isEmbeddable ? (
           <EmbeddableRelatedErrors

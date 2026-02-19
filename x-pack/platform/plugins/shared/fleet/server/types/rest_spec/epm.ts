@@ -145,6 +145,23 @@ const PackageIconSchema = schema.object({
   dark_mode: schema.maybe(schema.boolean()),
 });
 
+const DeprecationInfoSchema = schema.object({
+  description: schema.string(),
+  since: schema.string(),
+  replaced_by: schema.maybe(
+    schema.recordOf(
+      schema.oneOf([
+        schema.literal('package'),
+        schema.literal('policyTemplate'),
+        schema.literal('input'),
+        schema.literal('dataStream'),
+        schema.literal('variable'),
+      ]),
+      schema.string()
+    )
+  ),
+});
+
 export const PackageInfoSchema = schema
   .object({
     status: schema.maybe(schema.string()),
@@ -154,6 +171,7 @@ export const PackageInfoSchema = schema
     description: schema.maybe(schema.string()),
     title: schema.string(),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -163,6 +181,7 @@ export const PackageInfoSchema = schema
             capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           })
         ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
       })
     ),
     release: schema.maybe(
@@ -208,6 +227,34 @@ export const PackageInfoSchema = schema
     format_version: schema.maybe(schema.string()),
     vars: schema.maybe(
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    var_groups: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          selector_title: schema.string(),
+          description: schema.maybe(schema.string()),
+          options: schema.arrayOf(
+            schema
+              .object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.maybe(schema.string()),
+                vars: schema.arrayOf(schema.string(), { maxSize: 100 }),
+                hide_in_deployment_modes: schema.maybe(
+                  schema.arrayOf(
+                    schema.oneOf([schema.literal('default'), schema.literal('agentless')]),
+                    { maxSize: 2 }
+                  )
+                ),
+              })
+              .extendsDeep({ unknowns: 'allow' }),
+            { maxSize: 20 }
+          ),
+        }),
+        { maxSize: 20 }
+      )
     ),
     latestVersion: schema.maybe(schema.string()),
     discovery: schema.maybe(
@@ -557,7 +604,7 @@ export const GetKnowledgeBaseRequestSchema = {
 export const GetBulkAssetsRequestSchema = {
   body: schema.object({
     assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
-      maxSize: 1000,
+      maxSize: 10000,
     }),
   }),
 };

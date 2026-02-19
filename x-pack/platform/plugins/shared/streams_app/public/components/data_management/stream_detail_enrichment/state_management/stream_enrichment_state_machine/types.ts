@@ -47,6 +47,7 @@ export interface StreamEnrichmentServiceDependencies {
 
 export interface StreamEnrichmentInput {
   definition: Streams.ingest.all.GetResponse;
+  grokCollection: GrokCollection;
 }
 
 export interface StreamEnrichmentContextType {

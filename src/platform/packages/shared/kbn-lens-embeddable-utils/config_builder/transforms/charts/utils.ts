@@ -18,7 +18,9 @@ import type {
 
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
-import { isTextBasedLayer } from '../utils';
+import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
+import { LENS_LAYER_SUFFIX } from '../constants';
+import type { APIAdHocDataView, APIDataView } from '../columns/types';
 import type { AnyMetricLensStateColumn } from '../columns/types';
 
 export function getSharedChartLensStateToAPI(
@@ -92,7 +94,28 @@ type OptionalProperties<T extends Record<string, any> | undefined> = Pick<
 export function stripUndefined<T extends Record<string, any> | undefined>(
   obj: OptionalProperties<T>
 ): OptionalProperties<T> {
-  return pickBy(obj, (value) => value !== undefined) as OptionalProperties<T>;
+  return pickBy(obj, nonNullable) as OptionalProperties<T>;
+}
+
+export function getDataViewsMetadata(
+  usedDataviews: Record<string, APIDataView | APIAdHocDataView>
+) {
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.entries(usedDataviews).filter(
+    (v): v is [string, { id: string; type: 'dataView' }] => v[1].type === 'dataView'
+  );
+
+  const regularDataViewsMap = Object.fromEntries(
+    regularDataViews.map(([key, { id }]) => [key, id])
+  );
+  // merge both internal references and regularDataViews into a single map { layerId => dataViewId }
+  const dataViewLayerToIdMap: Record<string, string> = Object.fromEntries([
+    ...Object.entries(regularDataViewsMap).map(([layerId, dataViewId]) => [layerId, dataViewId]),
+    ...internalReferences.map((ref) => [ref.name.replace(LENS_LAYER_SUFFIX, ''), ref.id]),
+  ]);
+  const references = regularDataViews.length ? buildReferences(regularDataViewsMap) : [];
+
+  return { adHocDataViews, internalReferences, references, dataViewLayerToIdMap };
 }
 
 /**

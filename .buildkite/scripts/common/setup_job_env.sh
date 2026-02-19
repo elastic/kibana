@@ -148,6 +148,77 @@ EOF
   fi
 }
 
+# Set up Kibana Evals secrets
+{
+  if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
+    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
+
+    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    # Validate config shape (safe; does not print secrets)
+    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+
+    # EVAL connectors
+    # NOTE: `@kbn/evals` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
+    LITELLM_BASE_URL="$(jq -r '.litellm.baseUrl // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_VIRTUAL_KEY="$(jq -r '.litellm.virtualKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_TEAM_ID="$(jq -r '.litellm.teamId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_TEAM_NAME="$(jq -r '.litellm.teamName // "kibana-ci-evals"' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Eval suites require this for the LLM-as-a-judge connector selection
+    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+
+    # NOTE: bash `set -e` does not reliably fail the script for errors inside `$(...)` in all contexts.
+    # Generate into a variable, then explicitly validate it, so we never feed empty/invalid data into JSON.parse below.
+    if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
+      KIBANA_TESTING_AI_CONNECTORS="$(
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+          --base-url "$LITELLM_BASE_URL" \
+          --team-id "$LITELLM_TEAM_ID" \
+          --api-key "$LITELLM_VIRTUAL_KEY" \
+          --model-prefix "llm-gateway/"
+      )"
+    else
+      KIBANA_TESTING_AI_CONNECTORS="$(
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+          --base-url "$LITELLM_BASE_URL" \
+          --team-name "$LITELLM_TEAM_NAME" \
+          --api-key "$LITELLM_VIRTUAL_KEY" \
+          --model-prefix "llm-gateway/"
+      )"
+    fi
+    export KIBANA_TESTING_AI_CONNECTORS
+
+    if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
+      echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
+      exit 1
+    fi
+
+    # Sanity-check: EVALUATION_CONNECTOR_ID must match a generated connector id
+    if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+      if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
+        echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated LiteLLM connectors."
+        echo "Sample generated connector ids:"
+        node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
+        exit 1
+      fi
+    fi
+
+    # Elasticsearch cluster for evaluation results export
+    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Optional: separate cluster for trace-based evaluators
+    export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Optional: trace exporters for the Playwright worker process (supports http/grpc/phoenix/langfuse)
+    TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
+      export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
+    fi
+  fi
+}
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
@@ -199,6 +270,19 @@ EOF
   export VAULT_ROLE_ID
   VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
   export VAULT_SECRET_ID
+}
+
+# Set up EIS Cloud Connected Mode (CCM) API key
+# Note: This secret is in the legacy vault, requires approle authentication
+{
+  if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
+    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
+    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+  fi
 }
 
 # Inject moon remote-cache credentials on CI

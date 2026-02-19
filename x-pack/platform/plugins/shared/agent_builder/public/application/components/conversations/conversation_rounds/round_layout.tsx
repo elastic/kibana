@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
@@ -18,11 +20,13 @@ import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
+import { RoundAttachmentReferences } from './round_attachment_references';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
   rawRound: ConversationRound;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 const labels = {
@@ -35,6 +39,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
+  conversationAttachments,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
@@ -105,7 +110,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} attachments={input.attachments} />
+        <RoundInput
+          input={input.message}
+          attachmentRefs={input.attachment_refs}
+          conversationAttachments={conversationAttachments}
+          fallbackAttachments={input.attachments}
+        />
       </EuiFlexItem>
 
       {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
@@ -142,8 +152,15 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               response={response}
               steps={steps}
               isLoading={isLoadingCurrentRound}
+              isLastRound={isCurrentRound}
             />
           </EuiFlexItem>
+          <EuiSpacer />
+          <RoundAttachmentReferences
+            attachmentRefs={input.attachment_refs}
+            conversationAttachments={conversationAttachments}
+            actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+          />
         </EuiFlexItem>
       )}
 

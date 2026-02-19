@@ -32,7 +32,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import type { SearchBarCustomization } from '../../../../customizations';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
@@ -47,11 +47,6 @@ const mockSearchBarCustomization: SearchBarCustomization = {
     .mockName('CustomDataViewPickerMock'),
 };
 
-const mockFieldListCustomisation: FieldListCustomization = {
-  id: 'field_list',
-  logsFieldsEnabled: true,
-};
-
 let mockUseCustomizations = false;
 
 jest.mock('../../../../customizations', () => ({
@@ -64,8 +59,6 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
-      case 'field_list':
-        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }
@@ -277,7 +270,9 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
-describe('discover responsive sidebar', function () {
+// FLAKY: https://github.com/elastic/kibana/issues/217005
+// FLAKY: https://github.com/elastic/kibana/issues/225125
+describe.skip('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
@@ -842,7 +837,8 @@ describe('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(0);
   }, 10000);
 
-  describe('search bar customization', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/225126
+  describe.skip('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {
       mockUseCustomizations = false;
       const comp = await mountComponent({
@@ -887,7 +883,8 @@ describe('discover responsive sidebar', function () {
     });
   });
 
-  describe('recommended fields', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253542
+  describe.skip('recommended fields', () => {
     it('should call getRecommendedFieldsAccessor on component mount', async () => {
       await mountComponent(props);
 

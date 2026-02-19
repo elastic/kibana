@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import {
+  useKibanaContextForPlugin,
+  useKibanaEnvironmentContext,
+} from '../../../../hooks/use_kibana';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
 const KUBERNETES_FEEDBACK_LINK = 'https://ela.st/k8s-feedback';
@@ -30,6 +33,10 @@ export const SurveyKubernetes = () => {
   const markToastAsSeen = () => setIsToastSeen(true);
 
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
+  const { services } = useKibanaContextForPlugin();
+  const isFeedbackEnabled = services.notifications.feedback.isEnabled();
+
+  if (!isFeedbackEnabled) return null;
 
   return (
     <>

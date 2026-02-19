@@ -109,10 +109,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
     "@kbn/zod",
-    "@kbn/reporting-public",
-    "@kbn/field-formats-plugin",
     "@kbn/core-security-server",
-    "@kbn/core-http-server-utils",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
     "@kbn/lock-manager",
@@ -128,6 +125,8 @@
     "@kbn/react-query",
     "@kbn/fs",
     "@kbn/kql",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/reporting-common",
+    "@kbn/reporting-plugin"
   ]
 }

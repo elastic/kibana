@@ -13,7 +13,7 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-common';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
-import { DEFAULT_LAYER_ID } from '../../../../types';
+import { DEFAULT_LAYER_ID } from '../../../../constants';
 import { fromMetricAPItoLensState } from '../../../columns/metric';
 import { getValueColumn } from '../../../columns/esql_column';
 import { addLayerColumn, generateLayer } from '../../../utils';
@@ -81,7 +81,7 @@ export function getValueColumns(config: DatatableStateESQL) {
       getValueColumn(getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index), splitBy.column)
     ),
     ...config.metrics.map((metric, index) =>
-      getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column, 'number')
+      getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column, 'number', true)
     ),
   ];
 }
@@ -95,6 +95,6 @@ export function buildVisualizationState(config: DatatableState): DatatableVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     ...buildAppearanceState(config),
-    columns: metrics.concat(rows, splitMetrics),
+    columns: rows.concat(splitMetrics, metrics),
   };
 }

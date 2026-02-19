@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -55,9 +56,24 @@ function isAttachmentReferencedInRounds(
   return false;
 }
 
+const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: unknown }> }) => {
+  if (attachment.client_id) {
+    return true;
+  }
+
+  return attachment.versions.some((version) => {
+    if (!version?.data || typeof version.data !== 'object') {
+      return false;
+    }
+
+    return Boolean((version.data as { client_id?: string }).client_id);
+  });
+};
+
 export function registerAttachmentRoutes({
   router,
   getInternalServices,
+  coreSetup,
   logger,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -163,12 +179,24 @@ export function registerAttachmentRoutes({
               ),
               type: schema.string({
                 meta: {
-                  description: 'The type of the attachment (e.g., text, json, visualization_ref).',
+                  description: 'The type of the attachment (e.g., text, esql, visualization).',
                 },
               }),
-              data: schema.any({
-                meta: { description: 'The attachment data/content.' },
-              }),
+              data: schema.maybe(
+                schema.any({
+                  meta: {
+                    description: 'The attachment data/content. Required unless origin is provided.',
+                  },
+                })
+              ),
+              origin: schema.maybe(
+                schema.any({
+                  meta: {
+                    description:
+                      'Origin/reference info for by-reference attachments (e.g. saved_object_id). When provided without data, the content is resolved once at creation time.',
+                  },
+                })
+              ),
               description: schema.maybe(
                 schema.string({
                   meta: { description: 'Human-readable description of the attachment.' },
@@ -190,7 +218,7 @@ export function registerAttachmentRoutes({
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
         const { conversation_id: conversationId } = request.params;
-        const { id, type, data, description, hidden } = request.body;
+        const { id, type, data, origin, description, hidden } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
@@ -200,7 +228,7 @@ export function registerAttachmentRoutes({
         });
 
         // Check for duplicate ID if provided
-        if (id && stateManager.get(id)) {
+        if (id && stateManager.getAttachmentRecord(id)) {
           return response.conflict({
             body: { message: `Attachment with ID '${id}' already exists` },
           });
@@ -208,7 +236,19 @@ export function registerAttachmentRoutes({
 
         let attachment;
         try {
-          attachment = await stateManager.add({ id, type, data, description, hidden });
+          const [coreStart] = await coreSetup.getStartServices();
+          const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+          const resolveContext = {
+            request,
+            spaceId,
+            savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+          };
+
+          attachment = await stateManager.add(
+            { id, type, data, origin, description, hidden },
+            ATTACHMENT_REF_ACTOR.user,
+            resolveContext
+          );
         } catch (e) {
           return response.badRequest({
             body: { message: e.message },
@@ -286,7 +326,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -393,7 +433,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -409,22 +449,19 @@ export function registerAttachmentRoutes({
         }
 
         if (permanent) {
+          if (hasClientId(existing)) {
+            return response.conflict({
+              body: {
+                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
+              },
+            });
+          }
+
           // Check if attachment is referenced in rounds
           if (isAttachmentReferencedInRounds(attachmentId, conversation.rounds)) {
             return response.conflict({
               body: {
                 message: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
-              },
-            });
-          }
-
-          // Check if attachment has client_id (from flyout config)
-          const latestVersion = stateManager.getLatest(attachmentId);
-          const versionData = latestVersion?.data as Record<string, unknown> | undefined;
-          if (versionData?.client_id) {
-            return response.conflict({
-              body: {
-                message: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
               },
             });
           }
@@ -516,7 +553,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -538,7 +575,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const restored = stateManager.get(attachmentId)!;
+        const restored = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({
@@ -609,7 +646,7 @@ export function registerAttachmentRoutes({
         const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
           getTypeDefinition: attachmentsService.getTypeDefinition,
         });
-        const existing = stateManager.get(attachmentId);
+        const existing = stateManager.getAttachmentRecord(attachmentId);
 
         if (!existing) {
           return response.notFound({
@@ -625,7 +662,7 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const renamed = stateManager.get(attachmentId)!;
+        const renamed = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
         await client.update({

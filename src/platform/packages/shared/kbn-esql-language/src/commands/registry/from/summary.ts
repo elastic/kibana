@@ -9,13 +9,15 @@
 
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLCommandOption, ESQLCommand, ESQLAstQueryExpression } from '../../../types';
-import type { ESQLCommandSummary } from '../types';
+import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { isColumn, isOptionNode, isSubQuery } from '../../../ast';
 
 function aggregateSummary(source: ESQLCommandSummary, target: ESQLCommandSummary) {
   source.newColumns?.forEach((col) => target.newColumns?.add(col));
   source.renamedColumnsPairs?.forEach((pair) => target.renamedColumnsPairs?.add(pair));
   source.metadataColumns?.forEach((col) => target.metadataColumns?.add(col));
+  source.aggregates?.forEach((aggregate) => target.aggregates?.add(aggregate));
+  source.grouping?.forEach((group) => target.grouping?.add(group));
 }
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
@@ -33,6 +35,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set(metadataColumns);
+  const allAggregates = new Set<FieldSummary>();
+  const allGroupings = new Set<FieldSummary>();
 
   for (const subquery of subqueries) {
     const subquerySummary = processSubquery(subquery.child, query);
@@ -40,6 +44,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
       newColumns: allNewColumns,
       renamedColumnsPairs: allRenamedColumnsPairs,
       metadataColumns: allMetadataColumns,
+      aggregates: allAggregates,
+      grouping: allGroupings,
     });
   }
 
@@ -54,6 +60,8 @@ function processSubquery(subquery: ESQLAstQueryExpression, query: string): ESQLC
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
+  const allAggregates = new Set<FieldSummary>();
+  const allGroupings = new Set<FieldSummary>();
 
   for (const subCommand of subquery.commands) {
     const commandDef = esqlCommandRegistry.getCommandByName(subCommand.name);
@@ -64,6 +72,8 @@ function processSubquery(subquery: ESQLAstQueryExpression, query: string): ESQLC
         newColumns: allNewColumns,
         renamedColumnsPairs: allRenamedColumnsPairs,
         metadataColumns: allMetadataColumns,
+        aggregates: allAggregates,
+        grouping: allGroupings,
       });
     }
   }
@@ -72,5 +82,7 @@ function processSubquery(subquery: ESQLAstQueryExpression, query: string): ESQLC
     newColumns: allNewColumns,
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,
+    aggregates: allAggregates,
+    grouping: allGroupings,
   };
 }

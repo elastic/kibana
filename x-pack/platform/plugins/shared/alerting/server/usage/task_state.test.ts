@@ -940,11 +940,11 @@ describe('telemetry task state', () => {
     });
   });
 
-  describe('v7', () => {
-    const v7 = stateSchemaByVersion[7];
+  describe('v9', () => {
+    const v9 = stateSchemaByVersion[9];
 
     it('should set defaults for gap auto fill scheduler telemetry fields', () => {
-      const result = v7.up({});
+      const result = v9.up({});
       expect(result).toEqual(
         expect.objectContaining({
           gap_auto_fill_scheduler_runs_per_day: 0,
@@ -971,7 +971,7 @@ describe('telemetry task state', () => {
         gap_auto_fill_scheduler_processed_gaps_total_per_day: 6,
         gap_auto_fill_scheduler_results_by_status_per_day: { success: 7, error: 8 },
       };
-      const result = v7.up(state);
+      const result = v9.up(state);
       expect(result).toEqual(expect.objectContaining(state));
     });
   });
