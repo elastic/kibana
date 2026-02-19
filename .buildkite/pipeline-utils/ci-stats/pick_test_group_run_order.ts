@@ -73,14 +73,14 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
     ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 40;
+    : 35;
   if (Number.isNaN(JEST_MAX_MINUTES)) {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
+    : 30;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
@@ -276,6 +276,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 3,
         names: jestUnitConfigs,
       },
       {
@@ -283,6 +284,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 1,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -370,7 +372,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 120,
+            timeout_in_minutes: 50,
             key: 'jest',
             agents: expandAgentQueue('n2-4-spot', 110),
             depends_on: JEST_CONFIGS_DEPS,
@@ -390,7 +392,7 @@ export async function pickTestGroupRunOrder() {
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
             // TODO: Reduce once we have identified the cause of random long-running tests
-            timeout_in_minutes: 75,
+            timeout_in_minutes: 50,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
             depends_on: JEST_CONFIGS_DEPS,
@@ -426,7 +428,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 120,
+                  timeout_in_minutes: 50,
                   agents: expandAgentQueue(queue, 105),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,

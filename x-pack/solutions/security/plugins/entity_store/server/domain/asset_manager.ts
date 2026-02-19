@@ -8,6 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import type {
@@ -16,13 +18,20 @@ import type {
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import type {
-  EngineDescriptor,
-  EngineDescriptorClient,
-  LogExtractionState,
+import {
+  EngineDescriptorTypeName,
+  type EngineDescriptor,
+  type EngineDescriptorClient,
+  type LogExtractionState,
 } from './definitions/saved_objects';
 import type { LogExtractionBodyParams } from '../routes/constants';
-import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
+import {
+  ENGINE_STATUS,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_STATUS,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+} from './constants';
 import type {
   EntityStoreStatus,
   EngineComponentStatus,
@@ -48,6 +57,7 @@ interface AssetManagerDependencies {
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
+  security: SecurityPluginStart;
 }
 
 export class AssetManager {
@@ -58,6 +68,7 @@ export class AssetManager {
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
+  private readonly security: SecurityPluginStart;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -67,15 +78,19 @@ export class AssetManager {
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
+    this.security = deps.security;
   }
 
   public async initEntity(
     request: KibanaRequest,
     type: EntityType,
     logExtractionParams?: LogExtractionBodyParams
-  ) {
-    await this.install(type, logExtractionParams); // TODO: async
-    await this.start(request, type);
+  ): Promise<boolean> {
+    const installed = await this.install(type, logExtractionParams);
+    if (installed) {
+      await this.start(request, type);
+    }
+    return installed;
   }
 
   public async start(request: KibanaRequest, type: EntityType) {
@@ -84,6 +99,8 @@ export class AssetManager {
       const {
         logExtractionState: { frequency },
       } = await this.engineDescriptorClient.findOrThrow(type);
+
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
       await scheduleExtractEntityTask({
         logger: this.logger,
@@ -95,6 +112,7 @@ export class AssetManager {
       });
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
     }
   }
@@ -107,8 +125,10 @@ export class AssetManager {
         type,
         namespace: this.namespace,
       });
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STOPPED });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
     }
   }
@@ -116,13 +136,16 @@ export class AssetManager {
   public async install(
     type: EntityType,
     logExtractionParams?: LogExtractionBodyParams
-  ): Promise<ManagedEntityDefinition> {
-    // TODO: return early if already installed
+  ): Promise<boolean> {
     try {
+      const { engines } = await this.getStatus();
+      if (engines.some((e) => e.type === type)) {
+        return false;
+      }
+
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
       const definition = getEntityDefinition(type, this.namespace);
       const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
-
       await Promise.all([
         this.engineDescriptorClient.init(type, initialState),
         installElasticsearchAssets({
@@ -132,20 +155,22 @@ export class AssetManager {
           namespace: this.namespace,
         }),
       ]);
-
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
-
       this.logger.debug(`Installed definition: ${type}`);
 
-      return definition;
+      return true;
     } catch (error) {
       this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
   }
 
-  public async uninstall(type: EntityType) {
+  public async uninstall(type: EntityType): Promise<boolean> {
     try {
+      const { engines } = await this.getStatus();
+      if (!engines.some((e) => e.type === type)) {
+        return false;
+      }
       const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
@@ -158,8 +183,9 @@ export class AssetManager {
           namespace: this.namespace,
         }),
       ]);
-
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
+
+      return true;
     } catch (error) {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
       throw error;
@@ -183,6 +209,38 @@ export class AssetManager {
       this.logger.error('Error getting status', { error });
       throw error;
     }
+  }
+
+  public async getPrivileges(
+    request: KibanaRequest,
+    additionalIndexPatterns: string[] = []
+  ): Promise<CheckPrivilegesResponse> {
+    const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+
+    const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
+      additionalIndexPatterns
+    );
+
+    const kibanaPrivileges = this.security.authz.actions.savedObject.get(
+      EngineDescriptorTypeName,
+      'create'
+    );
+
+    const sourceIndexPrivileges = Object.fromEntries(
+      sourceIndexPatterns.map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
+    );
+
+    const targetIndexPrivileges = {
+      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+    };
+
+    return checkPrivileges({
+      kibana: [kibanaPrivileges],
+      elasticsearch: {
+        cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+        index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
+      },
+    });
   }
 
   private async getEngineWithComponents(
@@ -322,6 +380,7 @@ export class AssetManager {
    * Runs an async operation. Returns true if the promise resolves (no failure),
    * or false if it throws.
    */
+
   private async tryAsBoolean(promise: Promise<unknown>): Promise<boolean> {
     try {
       await promise;

@@ -22,7 +22,7 @@ You will receive **Features**—structured facts about the environment extracted
 ### Feature Structure
 
 Each feature includes:
-- `type`: Identifies the kind of feature (e.g., `entity`, `infrastructure`, `technology`, `dependency`, `dataset_analysis`)
+- `type`: Identifies the kind of feature (e.g., `entity`, `infrastructure`, `technology`, `dependency`, `schema`, `dataset_analysis`)
 - `subtype`: Optional sub-classification within the type
 - `title`: Short display name
 - `description`: Summary of what the feature represents
@@ -45,7 +45,7 @@ The `dataset_analysis` input may be provided directly or as a computed feature:
 
 ### Inferred Feature Types
 
-Inferred Features fall into four categories. Each type contributes differently to query generation:
+Inferred Features fall into five categories. Each type contributes differently to query generation:
 
 #### Technology (`type: "technology"`)
 Technologies describe **languages, frameworks, libraries, and tools** detected in the logs. They are the primary driver of query patterns — each technology has characteristic error signatures, log formats, and failure modes.
@@ -77,6 +77,9 @@ Dependencies describe **explicit relationships between components** — service-
 *   **Database connections** → Connection pool exhaustion, authentication failures, or query timeouts targeting the specific database
 *   **External API integrations** → Monitor for failures in calls to external services or third-party APIs
 
+#### Schema (`type: "schema"`)
+Schema features indicate the **log schema family** (ecs, otel, or custom) detected in the data. Use them for field-name and query hints: e.g. prefer `body.text` vs `message`, or ECS field names like `service.name` and `log.level`, or OTel-style `resource.attributes.*` and `severity_text`, depending on the reported schema.
+
 ### Using Features to Generate Queries
 
 **Leverage features to create targeted queries beyond what's visible in the log samples:**
@@ -84,7 +87,8 @@ Dependencies describe **explicit relationships between components** — service-
 1.  **Start with entities** to understand the system's components. Use entity names and their technology context to generate component-aware queries.
 2.  **Use technology and infrastructure features** to determine the specific error patterns, log formats, and failure modes relevant to the stack.
 3.  **Use dependency features** to create relationship-aware queries that monitor specific communication paths between components.
-4.  **Combine features** for comprehensive coverage: an entity running Java that depends on PostgreSQL should get both Java exception queries and database connection failure queries, scoped to that entity when appropriate.
+4.  **Use schema features** (when present) to choose appropriate field names: e.g. ECS (`service.name`, `log.level`, `body.text`) vs OTel (`resource.attributes.*`, `severity_text`, `body.text`).
+5.  **Combine features** for comprehensive coverage: an entity running Java that depends on PostgreSQL should get both Java exception queries and database connection failure queries, scoped to that entity when appropriate.
 
 **Guidelines:**
 - Focus on features with confidence ≥ 70

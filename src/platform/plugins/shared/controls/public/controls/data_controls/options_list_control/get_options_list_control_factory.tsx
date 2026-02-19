@@ -28,7 +28,7 @@ import {
 } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';

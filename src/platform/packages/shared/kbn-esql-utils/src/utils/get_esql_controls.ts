@@ -11,8 +11,12 @@ import type { Serializable } from '@kbn/utility-types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiHasSerializableState, apiHasType, apiHasUniqueId } from '@kbn/presentation-publishing';
+import {
+  type PresentationContainer,
+  apiHasSerializableState,
+  apiHasType,
+  apiHasUniqueId,
+} from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
