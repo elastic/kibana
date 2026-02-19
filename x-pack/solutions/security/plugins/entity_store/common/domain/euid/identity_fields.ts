@@ -27,7 +27,7 @@ export interface IdentitySourceFields {
  * @param entityType - The entity type (e.g. 'host', 'user', 'service')
  * @returns requiresOneOf and identitySourceFields from the entity definition
  */
-export function getIdentitySourceFields(entityType: EntityType): IdentitySourceFields {
+export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
   const {
     identityField: { requiresOneOfFields, euidFields },
   } = getEntityDefinitionWithoutId(entityType);

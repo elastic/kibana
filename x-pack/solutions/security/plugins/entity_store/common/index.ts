@@ -30,7 +30,7 @@ export const euid = {
   getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
-  getIdentitySourceFields: euidModule.getIdentitySourceFields,
+  getEuidSourceFields: euidModule.getEuidSourceFields,
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';

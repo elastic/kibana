@@ -6,11 +6,11 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
-import { getIdentitySourceFields } from './identity_fields';
+import { getEuidSourceFields } from './identity_fields';
 
-describe('getIdentitySourceFields', () => {
+describe('getEuidSourceFields', () => {
   it('returns expected host identity invariants deduplicated', () => {
-    const result = getIdentitySourceFields(EntityType.Values.host);
+    const result = getEuidSourceFields(EntityType.Values.host);
 
     expect(result.requiresOneOf).toEqual(
       expect.arrayContaining(['host.entity.id', 'host.id', 'host.name', 'host.hostname'])
