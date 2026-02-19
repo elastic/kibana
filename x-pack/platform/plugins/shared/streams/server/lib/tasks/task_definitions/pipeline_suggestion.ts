@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { suggestProcessingPipeline } from '@kbn/streams-ai';
 import { Streams } from '@kbn/streams-schema';
@@ -23,6 +25,7 @@ import {
   extractDissectPattern,
   groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -31,6 +34,9 @@ import { simulateProcessing } from '../../../routes/internal/streams/processing/
 import { handleProcessingGrokSuggestions } from '../../../routes/internal/streams/processing/grok_suggestions_handler';
 import { handleProcessingDissectSuggestions } from '../../../routes/internal/streams/processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../../../routes/internal/streams/processing/no_llm_suggestions_error';
+import type { StreamsClient } from '../../streams/client';
+
+type GrokPatternNode = { pattern: string } | { id: string; component: string; values: string[] };
 
 export interface PipelineSuggestionTaskParams {
   connectorId: string;
@@ -282,12 +288,12 @@ async function processGrokPatterns({
   streamName: string;
   connectorId: string;
   documents: FlattenRecord[];
-  inferenceClient: any;
-  scopedClusterClient: any;
-  streamsClient: any;
-  fieldsMetadataClient: any;
+  inferenceClient: InferenceClient;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
@@ -307,7 +313,7 @@ async function processGrokPatterns({
           body: {
             connector_id: connectorId,
             sample_messages: group.messages,
-            review_fields: getGrokReviewFields(group.nodes as any, 10),
+            review_fields: getGrokReviewFields(group.nodes as GrokPatternNode[], 10),
           },
         },
         inferenceClient,
@@ -410,12 +416,12 @@ async function processDissectPattern({
   streamName: string;
   connectorId: string;
   documents: FlattenRecord[];
-  inferenceClient: any;
-  scopedClusterClient: any;
-  streamsClient: any;
-  fieldsMetadataClient: any;
+  inferenceClient: InferenceClient;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 
