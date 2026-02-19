@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
-
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
     'dashboard',
