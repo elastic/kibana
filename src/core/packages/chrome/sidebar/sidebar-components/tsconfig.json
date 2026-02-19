@@ -19,5 +19,7 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-sidebar",
     "@kbn/core-chrome-sidebar-context",
+    "@kbn/zod",
+    "@kbn/core-chrome-sidebar-internal",
   ]
 }

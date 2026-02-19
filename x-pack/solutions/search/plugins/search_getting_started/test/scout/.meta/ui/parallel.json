@@ -1,19 +1,21 @@
 {
-  "lastModified": "2026-01-30T09:08:50.255Z",
-  "sha1": "e4fe96f8fd743965c372963e14c0dc20f5937499",
+  "lastModified": "2026-02-04T19:00:17.940Z",
+  "sha1": "528585286818b11947d9b812de02e3c479f67634",
   "tests": [
     {
       "id": "ace16ea93cb8904-1f34fdab863ed0b",
       "title": "Getting Started - Admin verifies page elements are rendered correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -21,13 +23,15 @@
       "title": "Getting Started - Admin Add data button navigates to correct pages",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 90,
+        "column": 9
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "Getting Started - Admin Skip and go to Home button navigates to home page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 105,
-        "column": 7
+        "line": 109,
+        "column": 9
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "Getting Started - Admin Elasticsearch endpoint copy button shows feedback",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 114,
+        "column": 9
       }
     },
     {
@@ -63,13 +71,15 @@
       "title": "Getting Started - Admin Connection details flyout works correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 119,
-        "column": 7
+        "line": 123,
+        "column": 9
       }
     },
     {
@@ -77,13 +87,15 @@
       "title": "Getting Started - Admin Tutorial cards open embedded console",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 135,
-        "column": 7
+        "line": 139,
+        "column": 9
       }
     },
     {
@@ -91,13 +103,15 @@
       "title": "Getting Started - Admin Language selector shows correct code examples",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 157,
-        "column": 7
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -105,13 +119,15 @@
       "title": "Getting Started - Viewer verifies viewer has limited access to API keys functionality",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 21,
+        "column": 9
       }
     }
   ]

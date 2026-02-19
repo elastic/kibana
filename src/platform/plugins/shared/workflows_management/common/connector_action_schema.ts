@@ -10,6 +10,7 @@
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -469,7 +470,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
@@ -485,12 +485,13 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
+      fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
     outputSchema: z.any(),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
