@@ -1082,12 +1082,6 @@ function getQueryPosition(
     }
   }
 
-  // Prefer argument-start context after grouping/label resolution.
-  // This avoids selector fallthrough in constructs like `sum by (...) (|)`.
-  if (lastChar === '(' || lastChar === '=') {
-    return { type: 'after_open_paren', signatureTypes: getSignatureTypes() };
-  }
-
   // Selector context: also triggers when cursor is on metric identifier inside selector
   // Also handles cursor after a selector in binary RHS (e.g., "a * bytes |")
   let selectorNode: PromQLSelector | undefined;
