@@ -134,6 +134,30 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
 
+  /**
+   * Returns change history (versions) for a workflow. Used for version history list and restore.
+   */
+  public async getWorkflowHistory(
+    workflowId: string,
+    spaceId: string,
+    opts?: { from?: number; size?: number }
+  ): Promise<{ startDate?: string; total: number; items: Array<Record<string, unknown>> }> {
+    const client = this.getChangeHistoryClient();
+    if (!client?.isInitialized()) {
+      return { total: 0, items: [] };
+    }
+    const result = await client.getHistory('workflow', workflowId, {
+      additionalFilters: [{ term: { 'kibana.space_id': spaceId } }],
+      from: opts?.from,
+      size: opts?.size ?? 100,
+    });
+    return {
+      startDate: result.startDate?.toISOString(),
+      total: result.total,
+      items: result.items as unknown as Array<Record<string, unknown>>,
+    };
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,

@@ -20,6 +20,7 @@ import { registerGetWorkflowByIdRoute } from './get_workflow_by_id';
 import { registerGetWorkflowExecutionByIdRoute } from './get_workflow_execution_by_id';
 import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_logs';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
+import { registerGetWorkflowHistoryRoute } from './get_workflow_history';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
 import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
@@ -47,6 +48,7 @@ export function defineRoutes(
   registerGetWorkflowStatsRoute(deps);
   registerGetWorkflowAggsRoute(deps);
   registerGetWorkflowByIdRoute(deps);
+  registerGetWorkflowHistoryRoute(deps);
   registerGetConnectorsRoute(deps);
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
