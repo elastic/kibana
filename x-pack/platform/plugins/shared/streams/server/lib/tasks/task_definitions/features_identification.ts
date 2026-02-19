@@ -106,10 +106,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   ...computedFeatures,
                 ];
 
-                const now = Date.now();
                 const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
-                const features = [];
-                for (const feature of identifiedFeatures) {
+                const now = Date.now();
+                const features = identifiedFeatures.map((feature) => {
                   const existing = featureClient.findDuplicateFeature({
                     existingFeatures,
                     feature,
@@ -123,7 +122,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                       )}\nNew feature: ${JSON.stringify(feature)}`
                     );
                   }
-                  features.push({
+                  return {
                     ...feature,
                     status: 'active' as const,
                     last_seen: new Date(now).toISOString(),
@@ -131,8 +130,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     uuid: isComputedFeature(feature)
                       ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
                       : existing?.uuid ?? uuid(),
-                  });
-                }
+                  };
+                });
 
                 await featureClient.bulk(
                   stream.name,
