@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - data_views
     - console
     - dashboard
     - discover_enhanced
