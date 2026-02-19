@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from './constants';
 import type { WorkflowExecutionDataStreamClient } from './data_stream';
 
 export class WorkflowExecutionRepository {
-  constructor(private readonly dataStreamClient: WorkflowExecutionDataStreamClient) {}
+  constructor(
+    private readonly dataStreamClient: WorkflowExecutionDataStreamClient,
+    private readonly esClient: ElasticsearchClient
+  ) {}
 
   /**
    * Retrieves a workflow execution by its ID from the data stream.
@@ -56,5 +61,25 @@ export class WorkflowExecutionRepository {
     await this.dataStreamClient.create({
       documents: [workflowExecution as Record<string, unknown>],
     });
+  }
+
+  public async reindexFrom(sourceIndex: string, workflowExecutionId: string): Promise<void> {
+    try {
+      const response = await this.esClient.reindex({
+        source: {
+          index: sourceIndex,
+          query: {
+            bool: {
+              filter: [{ term: { id: workflowExecutionId } }, { term: { type: 'workflow' } }],
+            },
+          },
+        },
+        dest: { index: WORKFLOWS_EXECUTIONS_DATA_STREAM, op_type: 'create' },
+        // wait_for_completion: false,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

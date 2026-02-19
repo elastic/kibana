@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionDataStreamClient } from './data_stream';
+import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './data_stream';
 
 export class StepExecutionRepository {
-  constructor(private readonly dataStreamClient: StepExecutionDataStreamClient) {}
+  constructor(
+    private readonly dataStreamClient: StepExecutionDataStreamClient,
+    private readonly esClient: ElasticsearchClient
+  ) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -41,5 +46,28 @@ export class StepExecutionRepository {
     await this.dataStreamClient.create({
       documents: stepExecutions as Array<Record<string, unknown>>,
     });
+  }
+
+  public async reindexFrom(sourceIndex: string, workflowExecutionId: string): Promise<void> {
+    try {
+      const response = await this.esClient.reindex({
+        source: {
+          index: sourceIndex,
+          query: {
+            bool: {
+              filter: [
+                { term: { workflowRunId: workflowExecutionId } },
+                { term: { type: 'step' } },
+              ],
+            },
+          },
+        },
+        dest: { index: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM, op_type: 'create' },
+        // wait_for_completion: false,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

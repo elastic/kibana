@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { StepExecutionRepository } from '.';
 import { initializeDataStreamClient } from './data_stream';
 
 export async function createStepExecutionRepository(
-  coreDataStreams: DataStreamsStart
+  coreDataStreams: DataStreamsStart,
+  esClient: ElasticsearchClient
 ): Promise<StepExecutionRepository> {
   const dataStream = await initializeDataStreamClient(coreDataStreams);
-  return new StepExecutionRepository(dataStream);
+  return new StepExecutionRepository(dataStream, esClient);
 }
