@@ -34,10 +34,10 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
   });
 }
 
-async function transformPanel(panelIn: DashboardPanel, references?: Reference[]) {
-  const type = await transformType(panelIn.type);
+async function transformPanel(legacyPanel: DashboardPanel, references?: Reference[]) {
+  const type = await transformType(legacyPanel.type);
   const panel = {
-    ...panelIn,
+    ...legacyPanel,
     type
   };
   const transformOut = await embeddableService.getLegacyURLTransform(type);
