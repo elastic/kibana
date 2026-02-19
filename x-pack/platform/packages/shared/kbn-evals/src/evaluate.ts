@@ -6,12 +6,17 @@
  */
 
 import type {
+  BoundChatCompleteAPI,
   BoundInferenceClient,
+  BoundPromptAPI,
   ChatCompleteMetadata,
   ConnectorTelemetryMetadata,
   InferenceConnectorType,
   InferenceConnector,
   Model,
+  Prompt,
+  UnboundChatCompleteOptions,
+  UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -78,7 +83,8 @@ function getEisProductUseCase(): string | undefined {
   const suffix = rawSuffix ? normalizeProductUseCasePart(rawSuffix) : undefined;
 
   if (!prefix) return undefined;
-  return suffix ? `${prefix}_${suffix}` : prefix;
+  if (!suffix || suffix === prefix) return prefix;
+  return `${prefix}_${suffix}`;
 }
 
 function withConnectorTelemetry(
@@ -97,18 +103,22 @@ function withConnectorTelemetry(
   return {
     ...client,
     bindTo: (options) => withConnectorTelemetry(client.bindTo(options), connectorTelemetry),
-    chatComplete: (options: Parameters<BoundInferenceClient['chatComplete']>[0]) => {
+    chatComplete: (<TChatCompleteOptions extends UnboundChatCompleteOptions>(
+      options: TChatCompleteOptions
+    ) => {
       return client.chatComplete({
         ...options,
         metadata: withMetadata(options.metadata),
       });
-    },
-    prompt: (options: Parameters<BoundInferenceClient['prompt']>[0]) => {
+    }) as BoundChatCompleteAPI,
+    prompt: (<TPrompt extends Prompt, TPromptOptions extends UnboundPromptOptions<TPrompt>>(
+      options: { prompt: TPrompt } & TPromptOptions
+    ) => {
       return client.prompt({
         ...options,
         metadata: withMetadata(options.metadata),
       });
-    },
+    }) as BoundPromptAPI,
   };
 }
 

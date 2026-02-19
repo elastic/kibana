@@ -197,8 +197,10 @@ This value is sent via `metadata.connectorTelemetry.pluginId` on inference API c
 
 Configuration is done via environment variables:
 
-- **prefix**: `KBN_EVALS_TELEMETRY_PREFIX` (defaults to `EVAL_SUITE_ID`)
-- **suffix**: `KBN_EVALS_TELEMETRY_SUFFIX`
+- **prefix**: `KBN_EVALS_TELEMETRY_PREFIX` (CI sets `eval_suite`; otherwise falls back to `EVAL_SUITE_ID`)
+- **suffix**: `KBN_EVALS_TELEMETRY_SUFFIX` (optional; CI defaults to `EVAL_SUITE_ID`)
+
+If the prefix is not set (and `EVAL_SUITE_ID` is not set), the header is not sent.
 
 Example:
 
