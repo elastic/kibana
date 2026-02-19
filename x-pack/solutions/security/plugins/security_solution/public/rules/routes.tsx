@@ -60,7 +60,7 @@ const getRulesSubRoutes = (
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
-          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
           main: RuleDetailsPage,
           exact: true,
         },
@@ -156,7 +156,7 @@ const RulesContainerComponent: React.FC = () => {
             <Redirect
               to={{
                 ...location,
-                pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+                pathname: `/rules/id/${detailName}/${RuleDetailTabs.overview}`,
                 search: location.search,
               }}
             />
