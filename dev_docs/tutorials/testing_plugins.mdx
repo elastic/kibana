@@ -3,7 +3,7 @@ id: kibDevTutorialTestingPlugins
 slug: /kibana-dev-docs/tutorials/testing-plugins
 title: Testing Kibana Plugins
 description: Learn how to test different aspects of Kibana plugins
-date: 2021-07-05
+date: 2026-02-06
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'testing']
 ---
 
@@ -204,6 +204,29 @@ Main subjects for tests should be:
 ##### Functional Test Runner
 If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
 FTR bootstraps an elasticsearch and a Kibana instance and runs the test suite against it.
+
+**FTR development workflow:**
+
+```bash
+# Start servers once, keep them running
+yarn test:ftr:server --config path/to/config.ts
+
+# In another terminal, run tests against the running servers
+yarn test:ftr:runner --config path/to/config.ts
+```
+
+**Useful FTR flags:**
+
+```bash
+# Run a specific test by name
+yarn test:ftr:runner --config path/to/config.ts --grep "test name"
+
+# Debug with browser open, stop on first failure
+yarn test:ftr --config path/to/config.ts --debug --bail
+
+# Run against serverless ES
+yarn test:ftr --config path/to/config.ts --esFrom serverless
+```
 
 Pros:
 - runs the whole Elastic stack
