@@ -54,7 +54,7 @@ export function QuickSearchVisor({
   onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, data, core } = kibana.services;
+  const { kql, data } = kibana.services;
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
@@ -122,8 +122,6 @@ export function QuickSearchVisor({
     getESQLAdHocDataview({
       dataViewsService: data.dataViews,
       query: `FROM ${sourcesKey}`,
-      options: { skipFetchFields: true },
-      http: core.http,
     }).then((dataView) => {
       if (!cancelled) {
         setAdHocDataView(dataView);
@@ -132,7 +130,7 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [sourcesKey, data.dataViews, core.http]);
+  }, [sourcesKey, data.dataViews]);
 
   useEffect(() => {
     if (isVisible && kqlInputRef.current) {
