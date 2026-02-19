@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -13,6 +14,8 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export * from '../common/types';
 
@@ -45,4 +48,20 @@ export interface InferenceUsageResponse {
   error_message: string;
   indexes: string[];
   pipelines: string[];
+}
+
+export enum GroupByOptions {
+  None = 'none',
+  Model = 'model_id',
+}
+
+export interface FilterOptions {
+  provider: ServiceProviderKeys[];
+  type: InferenceTaskType[];
+}
+
+export interface GroupedInferenceEndpointsData {
+  groupId: string;
+  groupLabel: string;
+  endpoints: InferenceAPIConfigResponse[];
 }
