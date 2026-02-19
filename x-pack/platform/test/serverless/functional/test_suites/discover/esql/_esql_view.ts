@@ -402,7 +402,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItems = await esql.getHistoryItems();
         await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
       });
@@ -419,7 +419,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItems = await esql.getHistoryItems();
         await esql.isQueryPresentInTable(
           'from logstash-* | limit 100 | drop @timestamp',
@@ -433,7 +433,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         // click a history item
         await esql.clickHistoryItem(1);
 
@@ -456,7 +456,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         await testSubjects.click('ESQLEditor-history-starred-queries-run-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');

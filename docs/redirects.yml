@@ -1,5 +1,6 @@
 redirects:
   'extend/development-documentation.md': 'docs-content://extend/contribute/index.md'
   'extend/saved-objects-service.md': 'extend/saved-objects.md'
+  'extend/sharing-saved-objects.md': 'extend/saved-objects/share.md'
   'reference/osquery-exported-fields.md': 'integration-docs://reference/osquery-intro.md'
   'reference/osquery-manager-prebuilt-packs.md': 'docs-content://solutions/security/investigate/osquery.md'
