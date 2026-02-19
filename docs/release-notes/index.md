@@ -73,7 +73,7 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 **Search**:
 * Fixes homepage throwing errors when license level is below Enterprise [#251484]({{kib-pull}}251484).
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
-* Fixes links being visible on Search Homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
+* Fixes links being visible on Search homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
 * Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
 * Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
 * Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
