@@ -140,6 +140,9 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=ll
 
 ```
 
+> **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
+
+
 ### External Phoenix dataset evaluations
 
 If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
