@@ -297,6 +297,21 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlMutuallyExclusiveParams':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+          defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
+          values: { param1: out.param1, param2: out.param2 },
+        }),
+        type: 'error',
+      };
+    case 'promqlInvalidBucketsParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidBucketsParam', {
+          defaultMessage: '[PROMQL] Invalid buckets value. Must be a positive integer',
+        }),
+        type: 'error',
+      };
     case 'promqlMissingQuery':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
