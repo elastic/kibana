@@ -22,4 +22,11 @@ tags:
   - package
   - dev
   - group-undefined
+fileGroups:
+  src:
+    - javascript.js
+    - jest.js
+    - react.js
+    - restricted_globals.js
+    - typescript.js
 tasks: {}
