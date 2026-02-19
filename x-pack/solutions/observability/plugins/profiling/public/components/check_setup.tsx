@@ -76,7 +76,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled &&
-      data?.profiling_enabled === true &&
+      data?.type !== 'serverless' &&
       data?.has_setup !== true &&
       data?.pre_8_9_1_data === false) ||
     !!error;
@@ -143,14 +143,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const isProfilingNavPath = ['/stacktraces', '/flamegraphs', '/functions'].some((pathPrefix) =>
-    history.location.pathname.startsWith(pathPrefix)
-  );
-
   if (
     status === AsyncStatus.Settled &&
+    data?.type === 'serverless' &&
     data?.profiling_enabled === false &&
-    isProfilingNavPath &&
     history.location.pathname !== '/profiling-not-enabled'
   ) {
     router.push('/profiling-not-enabled', {
