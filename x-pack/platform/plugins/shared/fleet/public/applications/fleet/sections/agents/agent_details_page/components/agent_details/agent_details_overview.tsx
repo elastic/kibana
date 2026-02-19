@@ -57,6 +57,164 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   const latestAgentVersion = useAgentVersion();
   const [effectiveConfigFlyoutOpen, setEffectiveConfigFlyoutOpen] = React.useState(false);
 
+  const platformField = {
+    title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+      defaultMessage: 'Platform',
+    }),
+    description:
+      typeof agent.local_metadata?.os?.platform === 'string'
+        ? agent.local_metadata.os.platform
+        : '-',
+  };
+  const tagsField = {
+    title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
+      defaultMessage: 'Tags',
+    }),
+    description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+  };
+
+  const capabilitiesField = Array.isArray(agent.capabilities)
+    ? [
+        {
+          title: i18n.translate('xpack.fleet.agentDetails.capabilitiesLabel', {
+            defaultMessage: 'Collector capabilities',
+          }),
+          description: (
+            <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
+              {agent.capabilities.sort().map((capability) => (
+                <FlexItemWithMinWidth grow={false} key={capability}>
+                  <EuiDescriptionListDescription
+                    css={`
+                      ${euiTextBreakWord()};
+                    `}
+                  >
+                    {capability}
+                  </EuiDescriptionListDescription>
+                </FlexItemWithMinWidth>
+              ))}
+            </EuiFlexGroup>
+          ),
+        },
+      ]
+    : [];
+
+  const opAMPFields = [platformField, tagsField, ...capabilitiesField];
+
+  const agentFields = [
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
+        defaultMessage: 'Output for integrations',
+      }),
+      description: outputs ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
+    },
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
+        defaultMessage: 'Output for monitoring',
+      }),
+      description: outputs ? (
+        <AgentPolicyOutputsSummary outputs={outputs} isMonitoring={true} />
+      ) : (
+        '-'
+      ),
+    },
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
+        defaultMessage: 'Logging level',
+      }),
+      description:
+        typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
+          ? agent.local_metadata.elastic.agent.log_level
+          : '-',
+    },
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
+        defaultMessage: 'Privilege mode',
+      }),
+      description:
+        agent.local_metadata.elastic.agent.unprivileged === true ? (
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+            defaultMessage="Running as non-root"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+            defaultMessage="Running as root"
+          />
+        ),
+    },
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
+        defaultMessage: 'Agent release',
+      }),
+      description:
+        typeof agent.local_metadata?.elastic?.agent?.snapshot === 'boolean'
+          ? agent.local_metadata.elastic.agent.snapshot === true
+            ? 'snapshot'
+            : 'stable'
+          : '-',
+    },
+    platformField,
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
+        defaultMessage: 'Monitor logs',
+      }),
+      description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+        agentPolicy?.monitoring_enabled?.includes('logs') ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.monitorLogsEnabledText"
+            defaultMessage="Enabled"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.monitorLogsDisabledText"
+            defaultMessage="Disabled"
+          />
+        )
+      ) : (
+        <EuiSkeletonText lines={1} />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
+        defaultMessage: 'Monitor metrics',
+      }),
+      description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+        agentPolicy?.monitoring_enabled?.includes('metrics') ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.monitorMetricsEnabledText"
+            defaultMessage="Enabled"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.monitorMetricsDisabledText"
+            defaultMessage="Disabled"
+          />
+        )
+      ) : (
+        <EuiSkeletonText lines={1} />
+      ),
+    },
+    tagsField,
+    {
+      title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+        defaultMessage: 'FIPS mode',
+      }),
+      description:
+        agent.local_metadata.elastic.agent.fips === true ? (
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.fipsModeCompliantText"
+            defaultMessage="Enabled"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+            defaultMessage="Not enabled"
+          />
+        ),
+    },
+  ];
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>
@@ -240,6 +398,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   ? agent.local_metadata.host.id
                   : '-',
             },
+            ...(agent.type !== 'OPAMP' ? agentFields : opAMPFields),
           ].map(({ title, description }) => {
             const tooltip =
               typeof description === 'string' && description.length > 20 ? description : '';
@@ -258,182 +417,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               </EuiFlexGroup>
             );
           })}
-          <EuiFlexGroup>
-            <FlexItemWithMinWidth grow={2}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                {[
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
-                      defaultMessage: 'Output for integrations',
-                    }),
-                    description: outputs ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
-                      defaultMessage: 'Output for monitoring',
-                    }),
-                    description: outputs ? (
-                      <AgentPolicyOutputsSummary outputs={outputs} isMonitoring={true} />
-                    ) : (
-                      '-'
-                    ),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
-                      defaultMessage: 'Logging level',
-                    }),
-                    description:
-                      typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
-                        ? agent.local_metadata.elastic.agent.log_level
-                        : '-',
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
-                      defaultMessage: 'Privilege mode',
-                    }),
-                    description:
-                      agent.local_metadata.elastic.agent.unprivileged === true ? (
-                        <FormattedMessage
-                          id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
-                          defaultMessage="Running as non-root"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
-                          defaultMessage="Running as root"
-                        />
-                      ),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
-                      defaultMessage: 'Agent release',
-                    }),
-                    description:
-                      typeof agent.local_metadata?.elastic?.agent?.snapshot === 'boolean'
-                        ? agent.local_metadata.elastic.agent.snapshot === true
-                          ? 'snapshot'
-                          : 'stable'
-                        : '-',
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
-                      defaultMessage: 'Platform',
-                    }),
-                    description:
-                      typeof agent.local_metadata?.os?.platform === 'string'
-                        ? agent.local_metadata.os.platform
-                        : '-',
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
-                      defaultMessage: 'Monitor logs',
-                    }),
-                    description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
-                      agentPolicy?.monitoring_enabled?.includes('logs') ? (
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.monitorLogsEnabledText"
-                          defaultMessage="Enabled"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.monitorLogsDisabledText"
-                          defaultMessage="Disabled"
-                        />
-                      )
-                    ) : (
-                      <EuiSkeletonText lines={1} />
-                    ),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
-                      defaultMessage: 'Monitor metrics',
-                    }),
-                    description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
-                      agentPolicy?.monitoring_enabled?.includes('metrics') ? (
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.monitorMetricsEnabledText"
-                          defaultMessage="Enabled"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.monitorMetricsDisabledText"
-                          defaultMessage="Disabled"
-                        />
-                      )
-                    ) : (
-                      <EuiSkeletonText lines={1} />
-                    ),
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
-                      defaultMessage: 'Tags',
-                    }),
-                    description:
-                      (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
-                  },
-                  {
-                    title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
-                      defaultMessage: 'FIPS mode',
-                    }),
-                    description:
-                      agent.local_metadata.elastic.agent.fips === true ? (
-                        <FormattedMessage
-                          id="xpack.fleet.agentDetails.fipsModeCompliantText"
-                          defaultMessage="Enabled"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
-                          defaultMessage="Not enabled"
-                        />
-                      ),
-                  },
-                ].map(({ title, description }) => {
-                  const tooltip =
-                    typeof description === 'string' && description.length > 20 ? description : '';
-                  return (
-                    <EuiFlexGroup>
-                      <FlexItemWithMinWidth grow={3}>
-                        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                      </FlexItemWithMinWidth>
-                      <FlexItemWithMinWidth grow={7}>
-                        <EuiToolTip position="top" content={tooltip}>
-                          <EuiDescriptionListDescription className="eui-textTruncate">
-                            {description}
-                          </EuiDescriptionListDescription>
-                        </EuiToolTip>
-                      </FlexItemWithMinWidth>
-                    </EuiFlexGroup>
-                  );
-                })}
-              </EuiFlexGroup>
-            </FlexItemWithMinWidth>
-            {agent.capabilities && (
-              <FlexItemWithMinWidth grow={1} key="agent-capabilities">
-                <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
-                  <FlexItemWithMinWidth grow={false}>
-                    <EuiDescriptionListTitle>
-                      <FormattedMessage
-                        id="xpack.fleet.agentDetails.collectorCapabilitiesLabel"
-                        defaultMessage="Collector Capabilities"
-                      />
-                    </EuiDescriptionListTitle>
-                  </FlexItemWithMinWidth>
-                  {agent.capabilities.sort().map((capability) => (
-                    <FlexItemWithMinWidth grow={false} key={capability}>
-                      <EuiDescriptionListDescription
-                        css={`
-                          ${euiTextBreakWord()};
-                        `}
-                      >
-                        {capability}
-                      </EuiDescriptionListDescription>
-                    </FlexItemWithMinWidth>
-                  ))}
-                </EuiFlexGroup>
-              </FlexItemWithMinWidth>
-            )}
-          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiDescriptionList>
       {effectiveConfigFlyoutOpen && (
