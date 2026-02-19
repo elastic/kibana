@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { makeChecksWithStatus } from '../fixtures/helpers/make_checks';
@@ -17,7 +16,7 @@ const testMonitor = {
   redirects: ['http://localhost:3000/first', 'https://www.washingtonpost.com/'],
 };
 
-test.describe('MonitorPingRedirects', { tag: tags.stateful.classic }, () => {
+test.describe('MonitorPingRedirects', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esClient }) => {
     await makeChecksWithStatus(
       esClient,

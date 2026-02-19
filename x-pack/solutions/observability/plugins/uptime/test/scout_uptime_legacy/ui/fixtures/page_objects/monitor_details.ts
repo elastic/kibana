@@ -138,6 +138,6 @@ export class MonitorDetailsPage {
   }
 
   async waitForPingListItem(pingId: string): Promise<void> {
-    await this.page.testSubj.locator(`"xpack.synthetics.pingList.ping-${pingId}"`).waitFor();
+    await this.page.testSubj.locator(`xpack.synthetics.pingList.ping-${pingId}`).waitFor();
   }
 }

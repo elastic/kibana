@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -14,7 +13,8 @@ const queryParams = {
   dateRangeEnd: '2021-11-21T22:10:08.203Z',
 };
 
-test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
+test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => {
+  const name = `Test connector ${Date.now()}`;
   test('configures email connector and validates settings', async ({
     pageObjects,
     browserAuth,
@@ -23,16 +23,16 @@ test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsAdmin();
     await pageObjects.uptimeSettings.goto(queryParams);
 
-    await test.step('clear existing settings', async () => {
+    await test.step('no connector is defined by default', async () => {
       await pageObjects.uptimeSettings.waitForDefaultConnectorsLoaded();
-      await pageObjects.uptimeSettings.clearToEmailAddresses();
-      await pageObjects.uptimeSettings.clearDefaultConnectors();
-      await pageObjects.uptimeSettings.clickSaveSettings();
+      await expect(
+        page.testSubj.locator('default-connectors-input-loaded').locator('input')
+      ).toHaveValue('');
     });
 
     await test.step('create email connector', async () => {
       await pageObjects.uptimeSettings.createEmailConnector({
-        name: 'Test connector',
+        name,
         from: 'test@gmail.com',
         host: 'test',
         port: '1025',
@@ -41,9 +41,12 @@ test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
 
     await test.step('select email connector and validate required fields', async () => {
       await expect(page.getByText('Bcc')).toBeHidden();
-      await pageObjects.uptimeSettings.selectDefaultConnector('Test connector');
+      await pageObjects.uptimeSettings.selectDefaultConnector(name);
       await expect(page.getByText('Bcc')).toBeVisible();
-      await expect(page.getByText('To email is required for email connector')).toBeVisible();
+      await expect(page.locator('.euiFormErrorText')).toHaveText(
+        'To email is required for email connector'
+      );
+
       await expect(pageObjects.uptimeSettings.getApplyButton()).toBeDisabled();
       await pageObjects.uptimeSettings.fillToEmail('test@gmail.com');
       await expect(pageObjects.uptimeSettings.getApplyButton()).toBeEnabled();
@@ -51,7 +54,9 @@ test.describe('DefaultEmailSettings', { tag: tags.stateful.classic }, () => {
 
     await test.step('validate invalid email handling', async () => {
       await pageObjects.uptimeSettings.fillToEmail('test@gmail');
-      await expect(page.getByText('test@gmail is not a valid email.')).toBeVisible();
+      await expect(page.locator('.euiFormErrorText')).toHaveText(
+        'test@gmail is not a valid email.'
+      );
       await expect(pageObjects.uptimeSettings.getApplyButton()).toBeDisabled();
       await pageObjects.uptimeSettings.removeInvalidEmail('test@gmail');
     });

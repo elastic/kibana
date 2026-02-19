@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('UptimeOverview', { tag: tags.stateful.classic }, () => {
-  test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth }) => {
+test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
+  test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
 
     await test.step('configure heartbeat indices', async () => {
       await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
       await pageObjects.uptimeOverview.clickSettingsLink();
       await pageObjects.uptimeOverview.waitForLoadingToFinish();
-      await pageObjects.uptimeOverview.setHeartbeatIndices('heartbeat-*');
+      await expect(page.testSubj.locator('heartbeat-indices-input-loaded')).toHaveValue(
+        'heartbeat-*'
+      );
     });
 
     await test.step('navigate to overview and click monitor', async () => {

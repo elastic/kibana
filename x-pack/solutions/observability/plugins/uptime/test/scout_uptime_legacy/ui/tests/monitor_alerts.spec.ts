@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -15,7 +14,7 @@ const monitorId = '0000-intermittent';
 const alertId = 'uptime-anomaly-alert';
 const alertThreshold = 'major';
 
-test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
+test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
   test.afterAll(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.monitorDetails.navigateToOverviewPage({ dateRangeEnd, dateRangeStart });

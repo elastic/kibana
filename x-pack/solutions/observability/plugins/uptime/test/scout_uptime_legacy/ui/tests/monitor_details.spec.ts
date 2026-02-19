@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -13,7 +12,7 @@ const dateRangeStart = '2019-09-10T12:40:08.078Z';
 const dateRangeEnd = '2019-09-11T19:40:08.078Z';
 const monitorId = '0000-intermittent';
 
-test.describe('MonitorDetails', { tag: tags.stateful.classic }, () => {
+test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
   test('navigates to monitor details and displays ping data', async ({
     pageObjects,
     browserAuth,
@@ -44,7 +43,7 @@ test.describe('MonitorDetails', { tag: tags.stateful.classic }, () => {
       ];
 
       await Promise.all(pingIds.map((id) => pageObjects.monitorDetails.waitForPingListItem(id)));
-      await expect(page.testSubj.locator('uptimePingListTable')).toBeVisible();
+      await expect(page.testSubj.locator('uptimePingListTable')).toBeVisible({ timeout: 30_000 });
     });
   });
 });

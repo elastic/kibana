@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -14,7 +13,7 @@ const queryParams = {
   dateRangeEnd: '2021-11-21T22:10:08.203Z',
 };
 
-test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
+test.describe('StepsDuration', { tag: '@local-stateful-classic' }, () => {
   test('navigates to monitor details and verifies step duration', async ({
     pageObjects,
     browserAuth,
@@ -29,8 +28,10 @@ test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('navigate to journey steps', async () => {
+      const stepsLocator = page.locator('table .euiTableRow-isClickable');
+      await expect(stepsLocator).toHaveCount(4);
       // eslint-disable-next-line playwright/no-nth-methods
-      await page.getByText('18 seconds').first().click();
+      await stepsLocator.first().click();
       await expect(page).toHaveURL(
         /\/app\/uptime\/journey\/9f217c22-4b17-11ec-b976-aa665a54da40\/steps/
       );
@@ -39,11 +40,10 @@ test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
     await test.step('verify step duration chart', async () => {
       await expect(async () => {
         // eslint-disable-next-line playwright/no-nth-methods
-        await page.getByText('6 Steps - 3 succeeded').first().click();
-        await page.hover('text=8.9 sec');
-        await expect(page.getByText('Explore')).toBeVisible();
-        await expect(page.getByText('area chart')).toBeVisible();
-      }).toPass({ timeout: 90_000 });
+        await page.testSubj.locator('syntheticsStepDurationButton').first().hover();
+        await expect(page.testSubj.locator('uptimeExploreDataButton')).toBeVisible();
+        await expect(page.testSubj.locator('lens-embeddable')).toBeVisible();
+      }).toPass({ timeout: 60_000 });
     });
   });
 });

@@ -19,7 +19,7 @@ export class UptimeSettingsPage {
   }
 
   async waitForDefaultConnectorsLoaded(): Promise<void> {
-    await this.page.testSubj.locator('"default-connectors-input-loaded"').waitFor();
+    await this.page.testSubj.locator('default-connectors-input-loaded').waitFor();
   }
 
   async clearDefaultConnectors(): Promise<void> {
@@ -41,10 +41,8 @@ export class UptimeSettingsPage {
   }
 
   async fillToEmail(text: string): Promise<void> {
-    await this.page
-      .locator('[data-test-subj=toEmailAddressInput] >> [data-test-subj=comboBoxSearchInput]')
-      .fill(text);
-    await this.page.testSubj.click('uptimeSettingsPage');
+    await this.page.testSubj.locator('toEmailAddressInput').locator('input').fill(text);
+    await this.page.testSubj.locator('toEmailAddressInput').locator('input').press('Enter');
   }
 
   async clickSaveSettings(): Promise<void> {
@@ -69,18 +67,21 @@ export class UptimeSettingsPage {
     port: string;
   }): Promise<void> {
     await this.page.testSubj.click('createConnectorButton');
-    await this.page.testSubj.click('".email-card"');
+    await this.page.testSubj.locator('createConnectorsModalSearch').waitFor();
+    await this.page.testSubj.click('.email-card');
+    await this.page.testSubj.waitForSelector('.email-card', { state: 'hidden' });
     await this.page.testSubj.locator('nameInput').fill(config.name);
     await this.page.testSubj.locator('emailFromInput').fill(config.from);
     await this.page.testSubj.locator('emailServiceSelectInput').selectOption('other');
     await this.page.testSubj.locator('emailHostInput').fill(config.host);
     await this.page.testSubj.locator('emailPortInput').fill(config.port);
-    await this.page.click('text=Require authentication for this server');
+    await this.page.testSubj.click('input');
     await this.page.testSubj.click('create-connector-flyout-save-btn');
+    await this.page.testSubj.waitForSelector('nameInput', { state: 'hidden' });
   }
 
   async selectDefaultConnector(name: string): Promise<void> {
     await this.page.testSubj.click('default-connectors-input-loaded');
-    await this.page.testSubj.click(`"${name}"`);
+    await this.page.testSubj.click(`${name}`);
   }
 }

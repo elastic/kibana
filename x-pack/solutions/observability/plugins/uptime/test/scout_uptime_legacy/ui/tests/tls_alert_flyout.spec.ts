@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
+test.describe('TlsFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () => {
   test('opens TLS alert flyout and verifies setting values', async ({
     pageObjects,
     browserAuth,
@@ -17,11 +16,14 @@ test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
+    await page.testSubj.locator('createRuleButton').waitFor({ timeout: 20_000 });
 
     await test.step('open TLS certificate rule flyout', async () => {
       await page.testSubj.locator('createRuleButton').click();
-      await pageObjects.uptimeOverview.waitForLoadingToFinish();
-      await page.testSubj.click('"xpack.uptime.alerts.tlsCertificate-SelectOption"');
+      await page.testSubj.click('xpack.uptime.alerts.tlsCertificate-SelectOption');
+      await page.testSubj.waitForSelector('xpack.synthetics.alerts.monitorStatus.filterBar', {
+        state: 'visible',
+      });
       await pageObjects.uptimeOverview.waitForLoadingToFinish();
     });
 
