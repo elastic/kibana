@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
@@ -94,8 +95,16 @@ function generateTriggerUsage(
   const lines: string[] = [];
 
   if (eventProperties.length > 0) {
-    lines.push('**Event properties:**\n');
-    lines.push(`Access the event properties with event.*`);
+    lines.push(
+      i18n.translate('workflows.triggerHover.eventPropertiesHeading', {
+        defaultMessage: '**Event properties:**\n',
+      })
+    );
+    lines.push(
+      i18n.translate('workflows.triggerHover.eventPropertiesAccess', {
+        defaultMessage: 'Access the event properties with event.*',
+      })
+    );
     lines.push('');
     for (const prop of eventProperties) {
       const typeInfo = prop.type ? ` _(${prop.type})_` : '';
@@ -111,10 +120,20 @@ function generateTriggerUsage(
   const hasConditionExamples = conditionExamples && conditionExamples.length > 0;
   if (hasConditionExamples && conditionExamples) {
     lines.push(
-      '**Configuration:**',
-      '- In the `with` block, add a condition (KQL) to filter when this workflow runs using the event schema.'
+      i18n.translate('workflows.triggerHover.configurationHeading', {
+        defaultMessage: '**Configuration:**',
+      }),
+      i18n.translate('workflows.triggerHover.configurationDescription', {
+        defaultMessage:
+          '- In the `with` block, add a condition (KQL) to filter when this workflow runs using the event schema.',
+      })
     );
-    lines.push('', 'Examples:');
+    lines.push(
+      '',
+      i18n.translate('workflows.triggerHover.examplesHeading', {
+        defaultMessage: 'Examples:',
+      })
+    );
     for (const example of conditionExamples) {
       const yamlSnippet = [
         `# ${example.title}`,
@@ -140,9 +159,19 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
-  lines.push(`**Workflow Trigger**: \`${definition.title ?? triggerType}\``);
+  lines.push(
+    i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
+      defaultMessage: '**Workflow Trigger**: `{title}`',
+      values: { title: definition.title ?? triggerType },
+    })
+  );
   lines.push('');
-  lines.push(`**Trigger**: \`${definition.id}\``);
+  lines.push(
+    i18n.translate('workflows.triggerHover.triggerLabel', {
+      defaultMessage: '**Trigger**: `{id}`',
+      values: { id: definition.id },
+    })
+  );
   lines.push('');
   lines.push(definition.description);
   lines.push('');

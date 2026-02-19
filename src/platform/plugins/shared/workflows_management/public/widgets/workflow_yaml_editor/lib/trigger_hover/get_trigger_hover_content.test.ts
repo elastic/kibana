@@ -46,13 +46,12 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('Case updated');
     expect(result!.value).toContain('**Trigger**:');
     expect(result!.value).toContain('Fired when a case is created or updated');
-    expect(result!.value).toContain('Usage in steps');
     expect(result!.value).toContain('Event properties');
+    expect(result!.value).toContain('Access the event properties with event.*');
     expect(result!.value).toContain('caseId');
     expect(result!.value).toContain('The case identifier');
     expect(result!.value).toContain('action');
     expect(result!.value).toContain('The action that triggered');
-    expect(result!.value).toContain('{{ event.');
   });
 
   it('returns content for custom trigger with condition examples', () => {
@@ -80,7 +79,7 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('Configuration');
     expect(result!.value).toContain('Exact severity');
     expect(result!.value).toContain('Multiple severities');
-    expect(result!.value).toContain('add a condition to filter when this workflow runs');
+    expect(result!.value).toContain('add a condition (KQL) to filter when this workflow runs');
     // Each example is title + YAML code block
     expect(result!.value).toContain('triggers:');
     expect(result!.value).toContain('type: alerts.severity_high');
@@ -113,18 +112,15 @@ describe('getTriggerTypeAtPath', () => {
     expect(getTriggerTypeAtPath(['triggers', 0, 'with'], getValueAtPath)).toBe('scheduled');
   });
 
-  it('returns null when path is not trigger type path', () => {
+  it('returns null when path is not under triggers', () => {
     const getValueAtPath = () => 'manual';
     expect(getTriggerTypeAtPath(['steps', 0, 'type'], getValueAtPath)).toBeNull();
-    expect(getTriggerTypeAtPath(['triggers', 0], getValueAtPath)).toBeNull();
-    expect(getTriggerTypeAtPath(['triggers', 0, 'with'], getValueAtPath)).toBeNull();
   });
 
-  it('returns null when path length < 3', () => {
+  it('returns null when path length < 2 (no trigger index)', () => {
     const getValueAtPath = () => 'manual';
     expect(getTriggerTypeAtPath([], getValueAtPath)).toBeNull();
     expect(getTriggerTypeAtPath(['triggers'], getValueAtPath)).toBeNull();
-    expect(getTriggerTypeAtPath(['triggers', 0], getValueAtPath)).toBeNull();
   });
 
   it('returns null when value at path is not a string', () => {
