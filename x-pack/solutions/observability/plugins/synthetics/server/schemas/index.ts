@@ -8,16 +8,14 @@
 export {
   monitorOptionSchema,
   monitorFiltersSchema,
-  legacyMonitorFiltersSchema,
   type MonitorOption,
   type MonitorFilters,
-  type LegacyMonitorFilters,
 } from './common_schemas';
 
 export {
-  syntheticsStatsOverviewEmbeddableSchema,
-  statsOverviewCustomStateSchema,
-  type SyntheticsStatsOverviewEmbeddableState,
+  getStatsOverviewEmbeddableSchema,
+  type OverviewStatsEmbeddableState,
+  type OverviewStatsEmbeddableCustomState,
 } from './synthetics_stats_overview_embeddable_schema';
 
 export {

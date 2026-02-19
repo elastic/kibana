@@ -9,6 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { monitorFiltersSchema } from './common_schemas';
+import { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import { SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../common/embeddables/stats_overview/constants';
 
 /**
  * Schema for the custom state of the stats overview embeddable
@@ -19,17 +21,21 @@ export const statsOverviewCustomStateSchema = schema.object({
 
 /**
  * Complete schema for the Synthetics Stats Overview embeddable
- * Combines serialized titles and custom state
  */
-export const syntheticsStatsOverviewEmbeddableSchema = schema.allOf(
-  [statsOverviewCustomStateSchema, serializedTitlesSchema],
-  {
-    meta: {
-      description: 'Synthetics stats overview embeddable schema',
-    },
-  }
-);
+export function getStatsOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
+  return schema.allOf(
+    [
+      serializedTitlesSchema,
+      getDrilldownsSchema(SYNTHETICS_STATS_SUPPORTED_TRIGGERS),
+      statsOverviewCustomStateSchema
+    ],
+    {
+      meta: {
+        description: 'Synthetics stats overview embeddable schema',
+      },
+    }
+  );
+}
 
-export type SyntheticsStatsOverviewEmbeddableState = TypeOf<
-  typeof syntheticsStatsOverviewEmbeddableSchema
->;
+export type OverviewStatsEmbeddableState = TypeOf<ReturnType<typeof getStatsOverviewEmbeddableSchema>>;
+export type OverviewStatsEmbeddableCustomState = TypeOf<typeof statsOverviewCustomStateSchema>;

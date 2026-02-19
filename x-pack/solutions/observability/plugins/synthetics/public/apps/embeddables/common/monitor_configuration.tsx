@@ -26,7 +26,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { MonitorFiltersForm } from './monitor_filters_form';
 import type { OverviewView } from '../../synthetics/state';
 import { DEFAULT_OVERVIEW_VIEW } from '../../synthetics/state';
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 const MonitorConfigurationContext = React.createContext<{
   overviewView: OverviewView;
