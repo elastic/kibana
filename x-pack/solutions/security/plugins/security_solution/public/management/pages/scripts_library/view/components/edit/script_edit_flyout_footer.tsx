@@ -19,7 +19,7 @@ import { SCRIPT_LIBRARY_LABELS as flyoutHeaderLabels } from '../../../translatio
 interface EndpointScriptEditFlyoutFooterProps {
   isDisabled?: boolean;
   isLoading: boolean;
-  show: ScriptsLibraryUrlParams['show'];
+  show: Extract<ScriptsLibraryUrlParams['show'], 'create' | 'edit'>;
   onClose: () => void;
   onSubmit: ({
     type,
@@ -31,11 +31,10 @@ interface EndpointScriptEditFlyoutFooterProps {
 export const EndpointScriptEditFlyoutFooter = memo<EndpointScriptEditFlyoutFooterProps>(
   ({ isDisabled = false, isLoading, show, onClose, onSubmit, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isEditFlow = show === 'edit';
 
     const onClickSubmit = useCallback(() => {
-      onSubmit({ type: isEditFlow ? 'edit' : 'create' });
-    }, [isEditFlow, onSubmit]);
+      onSubmit({ type: show });
+    }, [show, onSubmit]);
 
     return (
       <EuiFlyoutFooter className="eui-textRight" data-test-subj={getTestId()}>
@@ -57,7 +56,7 @@ export const EndpointScriptEditFlyoutFooter = memo<EndpointScriptEditFlyoutFoote
               onClick={onClickSubmit}
               isLoading={isLoading}
             >
-              {isEditFlow
+              {show === 'edit'
                 ? flyoutHeaderLabels.flyout.footer.edit.saveButtonLabel
                 : flyoutHeaderLabels.flyout.footer.upload.uploadButtonLabel}
             </EuiButton>
