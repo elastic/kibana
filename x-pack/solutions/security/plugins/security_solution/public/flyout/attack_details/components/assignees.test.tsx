@@ -78,6 +78,11 @@ const mockInvalidateFindAttackDiscoveries = jest.fn();
 const defaultContext = {
   attackId: 'attack-123',
   refetch: mockRefetch,
+  indexName: 'test-index',
+  searchHit: { _index: 'test-index' },
+  browserFields: {},
+  getFieldsData: jest.fn(),
+  dataFormattedForFieldBrowser: [],
 } as ReturnType<typeof useAttackDetailsContext>;
 
 const defaultHeaderData = {
