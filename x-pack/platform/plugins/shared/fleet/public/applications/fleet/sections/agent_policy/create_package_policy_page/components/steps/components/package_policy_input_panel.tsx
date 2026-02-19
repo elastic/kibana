@@ -173,9 +173,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const isDeprecatedInput = !!deprecationInfo;
     const deprecatedInputTooltip = deprecationInfo
       ? deprecationInfo.replaced_by
-        ? `${deprecationInfo.description} Replaced by: ${Object.values(
-            deprecationInfo.replaced_by
-          ).join(', ')}`
+        ? i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputReplacedByTooltip',
+            {
+              defaultMessage: '{description} Replaced by: {replacedBy}',
+              values: {
+                description: deprecationInfo.description,
+                replacedBy: Object.values(deprecationInfo.replaced_by).join(', '),
+              },
+            }
+          )
         : deprecationInfo.description
       : i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputTooltip', {
           defaultMessage: 'This input is deprecated.',

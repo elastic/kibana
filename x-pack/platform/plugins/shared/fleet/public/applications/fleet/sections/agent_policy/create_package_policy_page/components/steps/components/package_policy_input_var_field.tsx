@@ -165,9 +165,16 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const isDeprecated = !!varDef.deprecated;
     const deprecationTooltip = varDef.deprecated
       ? varDef.deprecated.replaced_by
-        ? `${varDef.deprecated.description} Replaced by: ${Object.values(
-            varDef.deprecated.replaced_by
-          ).join(', ')}`
+        ? i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedVarReplacedByTooltip',
+            {
+              defaultMessage: '{description} Replaced by: {replacedBy}',
+              values: {
+                description: varDef.deprecated.description,
+                replacedBy: Object.values(varDef.deprecated.replaced_by).join(', '),
+              },
+            }
+          )
         : varDef.deprecated.description
       : undefined;
 

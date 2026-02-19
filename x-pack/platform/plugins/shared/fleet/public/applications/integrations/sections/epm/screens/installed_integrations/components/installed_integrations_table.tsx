@@ -28,7 +28,7 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   hasPreviousVersion,
@@ -146,8 +146,11 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
               const isDeprecated = !!item?.deprecated;
+
               const hasDeprecatedPolicyTemplates =
-                !isDeprecated && (item.policy_templates || []).some((pt) => !!pt.deprecated);
+                doesPackageHaveIntegrations(item) &&
+                !isDeprecated &&
+                (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
               return (
                 <EuiLink href={url}>
