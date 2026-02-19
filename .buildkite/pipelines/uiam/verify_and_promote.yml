@@ -33,17 +33,22 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
-    label: 'Scout UIAM Tests'
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
+    label: 'Scout Test Run Builder'
     agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 105
-    key: scout-uiam-tests
+      diskSizeGb: 115
+    key: build_scout_tests
     timeout_in_minutes: 30
     depends_on:
       - build
     env:
       UIAM_DOCKER_IMAGE: $UIAM_IMAGE
+      SERVERLESS_TESTS_ONLY: 'true'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'

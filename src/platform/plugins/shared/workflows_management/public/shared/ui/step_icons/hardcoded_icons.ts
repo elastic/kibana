@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
 import console from './icons/console.svg';
@@ -36,5 +37,6 @@ export const HardcodedIcons: Record<string, string> = {
   alert: warning,
   scheduled: clock,
   manual: user,
+  trigger: bolt,
   default: plugs,
 };
