@@ -11,7 +11,6 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../../common/es_fields/apm';
-import type { ServiceMapEdge } from '../../../../../common/service_map';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -19,6 +18,8 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { isEdge } from './utils';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -27,12 +28,7 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-export function EdgeContents({
-  selection: { data: edgeSelectionData },
-  environment,
-  start,
-  end,
-}: ContentsProps<ServiceMapEdge>) {
+export function EdgeContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
@@ -40,9 +36,14 @@ export function EdgeContents({
   );
   const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
 
+  const isEdgeSelection = isEdge(selection);
+  const { indexSettings, indexSettingsStatus } = useApmIndexSettingsContext();
+  const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
+
   const sourceData = edgeSelectionData?.sourceData;
   const targetData = edgeSelectionData?.targetData;
   const dependencies = edgeSelectionData?.resources;
+
   const sourceServiceName =
     sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
   const dependencyName =
@@ -81,6 +82,10 @@ export function EdgeContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
+  if (!isEdgeSelection) {
+    return null;
+  }
+
   return (
     <>
       <EuiFlexItem>
@@ -96,6 +101,8 @@ export function EdgeContents({
               indexType="traces"
               rangeFrom={discoverQueryParams.rangeFrom}
               rangeTo={discoverQueryParams.rangeTo}
+              indexSettings={indexSettings}
+              indexSettingsStatus={indexSettingsStatus}
               queryParams={{
                 serviceName: discoverQueryParams.serviceName,
                 dependencyName: discoverQueryParams.dependencyName,

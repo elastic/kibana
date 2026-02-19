@@ -34,8 +34,8 @@ export { isEdge } from './utils';
  * Props for the popover content subcomponents (service, dependency, edge, etc.)
  * They receive the raw React Flow node or edge.
  */
-export interface ContentsProps<TSelection extends ServiceMapSelection = ServiceMapSelection> {
-  selection: TSelection;
+export interface ContentsProps {
+  selection: ServiceMapSelection;
   environment: Environment;
   kuery: string;
   start: string;
@@ -55,7 +55,7 @@ export function getContentsComponent(
   isDiagnosticModeEnabled: boolean
 ): ComponentType<ContentsProps> | null {
   if (isEdge(selection)) {
-    return EdgeContents as ComponentType<ContentsProps>;
+    return EdgeContents;
   }
   const data = selection.data;
   if (isGroupedNodeData(data)) {

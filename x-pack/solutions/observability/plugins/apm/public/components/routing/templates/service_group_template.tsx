@@ -9,12 +9,15 @@ import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import type { ApmPluginStartDeps } from '../../../plugin';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -32,6 +35,9 @@ export function ServiceGroupTemplate({
   environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
+  const {
+    services: { apmSourcesAccess },
+  } = useKibana<ApmPluginStartDeps>();
   const router = useApmRouter();
   const {
     query,
@@ -48,6 +54,11 @@ export function ServiceGroupTemplate({
     },
     [serviceGroupId]
   );
+  const { data: indexSettingsData = { apmIndexSettings: [] }, status: indexSettingsStatus } =
+    useFetcher(
+      (_callApmApi, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+      [apmSourcesAccess]
+    );
 
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
@@ -121,37 +132,44 @@ export function ServiceGroupTemplate({
   );
 
   return (
-    <ApmMainTemplate
-      pageTitle={serviceGroupsPageTitle}
-      pageHeader={{
-        tabs,
-        breadcrumbs: !isAllServices
-          ? [
-              {
-                text: (
-                  <>
-                    <EuiIcon size="s" type="arrowLeft" />{' '}
-                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                      defaultMessage: 'Return to service groups',
-                    })}
-                  </>
-                ),
-                color: 'primary',
-                'aria-current': false,
-                href: serviceGroupsLink,
-              },
-            ]
-          : undefined,
-        ...pageHeader,
+    <ApmIndexSettingsContextProvider
+      value={{
+        indexSettings: indexSettingsData.apmIndexSettings,
+        indexSettingsStatus,
       }}
-      environmentFilter={environmentFilter}
-      showServiceGroupSaveButton={!isAllServices}
-      showServiceGroupsNav={isAllServices}
-      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
-      {...pageTemplateProps}
     >
-      {children}
-    </ApmMainTemplate>
+      <ApmMainTemplate
+        pageTitle={serviceGroupsPageTitle}
+        pageHeader={{
+          tabs,
+          breadcrumbs: !isAllServices
+            ? [
+                {
+                  text: (
+                    <>
+                      <EuiIcon size="s" type="arrowLeft" aria-hidden={true} />{' '}
+                      {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
+                        defaultMessage: 'Return to service groups',
+                      })}
+                    </>
+                  ),
+                  color: 'primary',
+                  'aria-current': false,
+                  href: serviceGroupsLink,
+                },
+              ]
+            : undefined,
+          ...pageHeader,
+        }}
+        environmentFilter={environmentFilter}
+        showServiceGroupSaveButton={!isAllServices}
+        showServiceGroupsNav={isAllServices}
+        selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
+        {...pageTemplateProps}
+      >
+        {children}
+      </ApmMainTemplate>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
