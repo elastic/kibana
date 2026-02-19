@@ -11,7 +11,6 @@ import { mockContext, getMockCallbacks } from '../../../__tests__/commands/conte
 import { suggest } from '../../../__tests__/commands/autocomplete';
 import { autocomplete } from './autocomplete';
 import {
-  promqlByAfterArgsCompleteItem,
   assignCompletionItem,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
@@ -501,45 +500,6 @@ describe('aggregation functions (by clause)', () => {
     });
   });
 
-  test.each([
-    ['pre-grouping started', 'PROMQL sum by ('],
-    ['labels before expression paren', 'PROMQL sum by (keywordField) '],
-    ['complete pre-grouping form', 'PROMQL sum by (keywordField) (rate(doubleField[5m])) '],
-  ])('does not suggest by when %s', async (_label, query) => {
-    await expectPromqlSuggestions(query, {
-      textsNotContain: [promqlByCompleteItem.text],
-    });
-  });
-
-  test('suggests aggregation function name without auto-parentheses', async () => {
-    const query = 'PROMQL index=metrics step=5m start=?_tstart end=?_tend ';
-    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
-    const sumSuggestion = results.find((suggestion) => suggestion.label === 'sum');
-
-    expect(sumSuggestion?.text).toBe('sum ');
-  });
-
-  test('suggests labels with plain insertion and autosuggest in pre-grouping clause', async () => {
-    const results = await suggest(
-      'PROMQL sum by (',
-      mockContext,
-      'promql',
-      getMockCallbacks(),
-      autocomplete
-    );
-    const labelNames = new Set(getFieldNamesByType(ESQL_STRING_TYPES, true));
-    const labels = results.map((result) => result.label);
-    const labelSuggestion = results.find((result) => labelNames.has(result.label));
-
-    for (const name of labelNames) {
-      expect(labels).toContain(name);
-    }
-    expect(labels).not.toContain('sum');
-    expect(labels).not.toContain('rate');
-    expect(labelSuggestion?.text).toBe(labelSuggestion?.label);
-    expect(labelSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
-  });
-
   test('suggests expression items in second paren of pre-grouping form', async () => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
 
@@ -551,7 +511,7 @@ describe('aggregation functions (by clause)', () => {
 
   test('suggests by and pipe when cursor is at end of aggregation without space', async () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests_total[5m]))', {
-      textsContain: [promqlByAfterArgsCompleteItem.text, pipeCompleteItem.text],
+      textsContain: [promqlByCompleteItem.text, pipeCompleteItem.text],
     });
   });
 
@@ -560,7 +520,7 @@ describe('aggregation functions (by clause)', () => {
       'PROMQL index=kibana_sample_data_logstsdb step=5m start="2026-01-06T15:30:00.000Z" end="2026-01-23T15:30:00.000Z" col= (sum(rate(bytes_counter[5m]))';
 
     await expectPromqlSuggestions(query, {
-      textsContain: [promqlByAfterArgsCompleteItem.text],
+      textsContain: [promqlByCompleteItem.text],
     });
   });
 
@@ -648,7 +608,7 @@ describe('aggregation functions (by clause)', () => {
 
   test('does not suggest by after aggregation that already has grouping', async () => {
     await expectPromqlSuggestions('PROMQL sum(rate(http_requests[5m])) by (job) ', {
-      textsNotContain: [promqlByAfterArgsCompleteItem.text],
+      textsNotContain: [promqlByCompleteItem.text],
       textsContain: [pipeCompleteItem.text],
     });
   });
@@ -661,7 +621,7 @@ describe('aggregation functions (by clause)', () => {
 
     await expectPromqlSuggestions(
       query,
-      { textsContain: [promqlByAfterArgsCompleteItem.text] },
+      { textsContain: [promqlByCompleteItem.text] },
       mockCallbacks,
       undefined,
       cursorPosition
@@ -675,7 +635,7 @@ describe('aggregation functions (by clause)', () => {
 
     await expectPromqlSuggestions(
       query,
-      { textsContain: [promqlByAfterArgsCompleteItem.text] },
+      { textsContain: [promqlByCompleteItem.text] },
       mockCallbacks,
       undefined,
       cursorPosition
@@ -1063,32 +1023,6 @@ describe('label selector suggestions', () => {
 
     expect(labels).toContain(promqlRangeSelectorItem.label);
     expect(labels).not.toContain(promqlLabelSelectorItem.label);
-  });
-
-  test('uses trailing-space insertion for labels and suggests operators after label name', async () => {
-    const results = await suggest(
-      'PROMQL step = "5m" rate(doubleField {',
-      mockContext,
-      'promql',
-      getMockCallbacks(),
-      autocomplete
-    );
-    const stringFields = new Set(getFieldNamesByType(ESQL_STRING_TYPES, true));
-    const labelSuggestion = results.find((result) => stringFields.has(result.label));
-
-    expect(labelSuggestion).toBeDefined();
-    expect(labelSuggestion?.text).toBe(`${labelSuggestion?.label} `);
-
-    const operatorQuery = 'PROMQL step = "5m" rate(doubleField {keywordField } )';
-    const cursorPosition = operatorQuery.indexOf('}');
-
-    await expectPromqlSuggestions(
-      operatorQuery,
-      { labelsContain: ['=', '!=', '=~', '!~'] },
-      mockCallbacks,
-      undefined,
-      cursorPosition
-    );
   });
 
   test('suggests range selector in nested function after label selector', async () => {

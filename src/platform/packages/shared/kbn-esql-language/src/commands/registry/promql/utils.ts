@@ -18,6 +18,7 @@ import type {
   PromQLBinaryExpression,
   PromQLAstQueryExpression,
   PromQLFunction,
+  PromQLGrouping,
   PromQLLabel,
   PromQLSelector,
 } from '../../../embedded_languages/promql/types';
@@ -74,6 +75,13 @@ const PROMQL_BINARY_OPS_PATTERN = promqlOperatorDefinitions
   .join('|');
 
 const PROMQL_TRAILING_BINARY_OP_REGEX = new RegExp(`(${PROMQL_BINARY_OPS_PATTERN})\\s*$`, 'i');
+
+// Pre-grouped aggregation detection (e.g. "sum by (labels) ")
+const PROMQL_GROUPING_KEYWORDS: PromQLGrouping['name'][] = ['by', 'without'];
+const PRE_GROUPED_AGG_REGEX = new RegExp(
+  `\\b(${IDENTIFIER_PATTERN})\\s+(?:${PROMQL_GROUPING_KEYWORDS.join('|')})\\s*\\([^)]*\\)\\s*$`,
+  'i'
+);
 
 // Param zone detection
 const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
@@ -1608,6 +1616,13 @@ export function isAtValidColumnSuggestionPosition(
 // ============================================================================
 // Column Assignment Helpers
 // ============================================================================
+
+export function getPreGroupedAggregationName(commandText: string): string | undefined {
+  const match = commandText.trimEnd().match(PRE_GROUPED_AGG_REGEX);
+  if (!match) return undefined;
+
+  return isPromqlAcrossSeriesFunction(match[1]) ? match[1] : undefined;
+}
 
 /** Detects when the cursor is after a custom query assignment like "col0 =". */
 export function isAfterCustomColumnAssignment(commandText: string): boolean {

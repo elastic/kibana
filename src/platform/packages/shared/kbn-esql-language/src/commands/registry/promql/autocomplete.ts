@@ -17,15 +17,15 @@ import {
   getPromqlLabelMatcherSuggestions,
   getPromqlOperatorSuggestions,
   getMetricTypesForSignature,
+  getPromqlParamTypesForFunction,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
+import { ESQL_STRING_TYPES, type PromQLFunctionParamType } from '../../definitions/types';
 import {
   assignCompletionItem,
   buildAddValuePlaceholder,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-  promqlByAfterArgsCompleteItem,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
   promqlByCompleteItem,
@@ -39,6 +39,7 @@ import {
   getPromqlParam,
   getUsedPromqlParamNames,
   isAfterCustomColumnAssignment,
+  getPreGroupedAggregationName,
   PromqlParamValueType,
   getPosition,
   getIndexAssignmentContext,
@@ -74,7 +75,8 @@ export async function autocomplete(
   const pipeIndex = findPipeOutsideQuotes(query, commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
-  const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
+  const preGroupedAgg = getPreGroupedAggregationName(innerCommandText);
+  const shouldWrap = isAfterCustomColumnAssignment(innerCommandText) || !!preGroupedAgg;
 
   switch (position.type) {
     case 'after_command': {
@@ -96,10 +98,7 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
-        ...(canSuggestColumn
-          ? buildFieldSuggestions(context, ESQL_NUMBER_TYPES, needsWrappedQuery ? 'wrap' : 'plain')
-          : []),
-        ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
+        ...(canSuggestColumn ? buildVectorSuggestions(context, [], shouldWrap) : []),
       ];
 
       const indexSuggestions = suggestForIndexAssignment(
@@ -125,7 +124,7 @@ export async function autocomplete(
     case 'inside_grouping':
       return position.isCompleteLabel
         ? [getCommaWithAutoSuggest()]
-        : buildGroupingLabelSuggestions(context);
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
 
     case 'after_label_brace':
       return position.isCompleteLabel
@@ -138,13 +137,10 @@ export async function autocomplete(
 
     case 'after_operator': {
       const signatureTypes = position.signatureTypes ?? [];
-      const metricTypes = getMetricTypesForSignature(signatureTypes);
       const canSuggestScalar = signatureTypes.length === 0 || signatureTypes.includes('scalar');
-      const functionSuggestions = getPromqlFunctionSuggestions(signatureTypes);
 
       return [
-        ...buildFieldSuggestions(context, metricTypes, needsWrappedQuery ? 'wrap' : 'plain'),
-        ...wrapFunctionSuggestions(needsWrappedQuery, functionSuggestions),
+        ...buildVectorSuggestions(context, signatureTypes, shouldWrap),
         ...(canSuggestScalar ? [buildAddValuePlaceholder('number')] : []),
       ];
     }
@@ -184,10 +180,18 @@ export async function autocomplete(
         return [promqlByCompleteItem, promqlOpenParensCompleteItem];
       }
 
+      if (preGroupedAgg) {
+        return buildVectorSuggestions(
+          context,
+          getPromqlParamTypesForFunction(preGroupedAgg, 0),
+          shouldWrap
+        );
+      }
+
       const insideQuerySuggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions()];
 
       if (position.canAddGrouping) {
-        insideQuerySuggestions.push(promqlByAfterArgsCompleteItem);
+        insideQuerySuggestions.push(promqlByCompleteItem);
       }
 
       return insideQuerySuggestions;
@@ -211,22 +215,16 @@ export async function autocomplete(
       if (position.canSuggestCommaInFunctionArgs) {
         return [getCommaWithAutoSuggest()];
       }
-      const signatureTypes = position.signatureTypes ?? [];
-      const types = getMetricTypesForSignature(signatureTypes);
 
+      const signatureTypes = position.signatureTypes ?? [];
       const expectsOnlyScalar =
         signatureTypes.length > 0 && signatureTypes.every((type) => type === 'scalar');
-      const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
 
-      const metrics = expectsOnlyScalar
-        ? []
-        : buildFieldSuggestions(context, types, needsWrappedQuery ? 'wrap' : 'plain');
+      if (expectsOnlyScalar) {
+        return [buildAddValuePlaceholder('number')];
+      }
 
-      const functions = expectsOnlyScalar
-        ? []
-        : wrapFunctionSuggestions(needsWrappedQuery, getPromqlFunctionSuggestions(signatureTypes));
-
-      return [...scalarValues, ...metrics, ...functions];
+      return buildVectorSuggestions(context, signatureTypes, shouldWrap);
     }
 
     case 'after_query': {
@@ -234,10 +232,18 @@ export async function autocomplete(
         return [promqlByCompleteItem, promqlOpenParensCompleteItem];
       }
 
+      if (preGroupedAgg) {
+        return buildVectorSuggestions(
+          context,
+          getPromqlParamTypesForFunction(preGroupedAgg, 0),
+          shouldWrap
+        );
+      }
+
       const suggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions(), pipeCompleteItem];
 
       if (position.canAddGrouping) {
-        suggestions.unshift(promqlByAfterArgsCompleteItem);
+        suggestions.unshift(promqlByCompleteItem);
       }
 
       return suggestions;
@@ -388,6 +394,20 @@ function suggestParamValues(
 // Field Suggestions
 // ============================================================================
 
+function buildVectorSuggestions(
+  context: ICommandContext | undefined,
+  signatureTypes: PromQLFunctionParamType[],
+  wrap: boolean
+): ISuggestionItem[] {
+  const metricTypes = getMetricTypesForSignature(signatureTypes);
+  const functionSuggestions = getPromqlFunctionSuggestions(signatureTypes);
+
+  return [
+    ...buildFieldSuggestions(context, metricTypes, wrap ? 'wrap' : 'plain'),
+    ...wrapFunctionSuggestions(wrap, functionSuggestions),
+  ];
+}
+
 /* Wraps function suggestions in parentheses when needed for column assignment syntax. */
 function wrapFunctionSuggestions(
   wrap: boolean,
@@ -425,24 +445,4 @@ function buildFieldSuggestions(
         category: SuggestionCategory.FIELD,
       });
     });
-}
-
-function buildGroupingLabelSuggestions(context: ICommandContext | undefined): ISuggestionItem[] {
-  if (!context?.columns) {
-    return [];
-  }
-
-  const stringTypes = new Set<string>(ESQL_STRING_TYPES);
-
-  return Array.from(context.columns.values())
-    .filter((column) => !column.userDefined && stringTypes.has(column.type))
-    .map((column) =>
-      withAutoSuggest({
-        label: column.name,
-        text: column.name,
-        kind: 'Field',
-        detail: column.type,
-        category: SuggestionCategory.FIELD,
-      })
-    );
 }

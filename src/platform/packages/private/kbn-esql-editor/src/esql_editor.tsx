@@ -106,7 +106,6 @@ import {
   registerCustomCommands,
   addEditorKeyBindings,
   addTabKeybindingRules,
-  addPromqlBySnippetCommand,
 } from './custom_editor_commands';
 import { useEsqlCallbacks } from './use_esql_callbacks';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
@@ -1259,7 +1258,6 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   // Add Tab keybinding rules for inline suggestions
                   addTabKeybindingRules();
-                  addPromqlBySnippetCommand(editor);
 
                   editor.onMouseDown(() => {
                     if (datePickerOpenStatusRef.current) {
