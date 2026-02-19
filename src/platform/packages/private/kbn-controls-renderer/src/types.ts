@@ -49,7 +49,3 @@ export type ControlsRendererParentApi = Pick<
 export interface PublishesFocusedPanelId {
   focusedPanelId$: BehaviorSubject<string | undefined>;
 }
-
-export interface PublishesLabel {
-  label$: PublishingSubject<string | undefined>;
-}

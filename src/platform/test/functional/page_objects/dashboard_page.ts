@@ -754,6 +754,8 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getPanelIdByTitle(title: string) {
+    debugger;
+
     const panelHoverActionsWrapper = await this.testSubjects.find(
       `embeddablePanelHoverActions-${title}`
     );

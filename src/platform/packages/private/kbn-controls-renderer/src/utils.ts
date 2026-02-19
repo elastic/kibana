@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesFocusedPanelId, PublishesLabel } from './types';
+import type { PublishesFocusedPanelId } from './types';
 
 export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId =>
   Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
-
-export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
-  Boolean((api as PublishesLabel).label$);

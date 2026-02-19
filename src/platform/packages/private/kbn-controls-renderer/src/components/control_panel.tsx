@@ -26,10 +26,13 @@ import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-s
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  apiPublishesTitle,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { ControlsRendererParentApi } from '../types';
-import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -65,9 +68,9 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-    if (apiPublishesLabel(api)) {
+    if (apiPublishesTitle(api)) {
       subscriptions.add(
-        api.label$.subscribe((result) => {
+        api.title$.subscribe((result) => {
           setPanelLabel(result);
         })
       );

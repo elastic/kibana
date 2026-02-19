@@ -21,7 +21,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
-import type { ControlLabelStateManager } from '../control_labels';
+import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
@@ -40,7 +40,7 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
   PublishesDataLoading &
   AppliesFilters &
   HasPanelCapabilities &
-  ControlLabelStateManager['api'] & {
+  ReturnType<typeof initializeLabelManager>['api'] & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

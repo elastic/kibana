@@ -184,7 +184,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       },
       controlType,
       controlId,
-      initialDefaultPanelTitle: labelManager.api.defaultLabel$.getValue(),
+      initialDefaultPanelTitle: labelManager.api.defaultTitle$.getValue(),
       parentApi,
       onUpdate: (newState) => {
         labelManager.reinitializeState(newState);

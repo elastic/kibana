@@ -16,9 +16,7 @@ import {
   type SerializedTitles,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import type { SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
-
-import type { ControlLabelStateManager } from './types';
+import type { SubjectsOf, StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
 /**
  * Controls handle their own label rendering, so we cannot rely on the normal titles manager because
@@ -33,42 +31,51 @@ type PickStringsOnly<T> = {
   [K in keyof T as T[K] extends string ? K : never]: T[K];
 };
 
-export const initializeLabelManager = <
-  StateType extends Pick<SerializedTitles, 'title'> = Pick<SerializedTitles, 'title'>
->(
+type ControlTitleState = Pick<SerializedTitles, 'title'>;
+
+export const initializeLabelManager = <StateType extends ControlTitleState = ControlTitleState>(
   state: StateType,
   api: SubjectsOf<Omit<StateType, 'title'>>,
   defaultLabelKey: keyof Required<Omit<PickStringsOnly<StateType>, 'title'>> // only strings can be used as the default label
-): ControlLabelStateManager => {
-  const label$ = new BehaviorSubject<string | undefined>(state.title);
-  const defaultLabel$ = api[
+): StateManager<ControlTitleState> & {
+  api: StateManager<ControlTitleState>['api'] & {
+    defaultTitle$: PublishingSubject<string | undefined>;
+    hideTitle$: PublishingSubject<boolean | undefined>;
+    label$: PublishingSubject<string>;
+  };
+  cleanup: () => void;
+} => {
+  const title$ = new BehaviorSubject<string | undefined>(state.title);
+  const defaultTitle$ = api[
     `${defaultLabelKey as string}$` as keyof SubjectsOf<Omit<StateType, 'title'>>
   ] as PublishingSubject<string>; // guaranteed to be a string by TypeScript due to type of `defaultLabelKey`
 
-  const visibleLabel$ = new BehaviorSubject<string>(state.title || defaultLabel$.getValue());
-  const visibleLabelSubscription = combineLatest([label$, defaultLabel$])
+  const label$ = new BehaviorSubject<string>(state.title || defaultTitle$.getValue());
+  const labelSubscription = combineLatest([title$, defaultTitle$])
     .pipe(skip(1))
     .subscribe(([title, defaultLabel]) => {
-      visibleLabel$.next(title || defaultLabel);
+      label$.next(title || defaultLabel);
     });
 
   return {
     api: {
-      label$: visibleLabel$,
-      defaultLabel$,
-      setLabel: (newLabel: string | undefined) => {
-        label$.next(newLabel);
+      title$,
+      hideTitle$: new BehaviorSubject<boolean | undefined>(true), // controls handle their own title rendering
+      defaultTitle$: defaultTitle$ as PublishingSubject<string | undefined>, // aligns with expected type of defaultTitle$
+      setTitle: (newTitle: string | undefined) => {
+        title$.next(newTitle);
       },
+      label$,
     },
     anyStateChange$: label$.pipe(map(() => undefined)),
     getLatestState: () => ({
-      title: label$.getValue(),
+      title: title$.getValue(),
     }),
     reinitializeState: (newState) => {
-      label$.next(newState?.title);
+      title$.next(newState?.title);
     },
     cleanup: () => {
-      visibleLabelSubscription.unsubscribe();
+      labelSubscription.unsubscribe();
     },
   };
 };
