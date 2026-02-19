@@ -8,7 +8,7 @@
 import { esql } from '@kbn/esql-language';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
@@ -104,12 +104,6 @@ export function generateEsqlQuery(
 ): EsqlQueryResult {
   // esql mode variables
   const partialRows = true;
-
-  const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
-  const utcOffset = moment.tz(timeZone).utcOffset() / 60;
-  if (utcOffset !== 0) {
-    return getEsqlQueryFailedResult('non_utc_timezone');
-  }
 
   // Check for unsupported column features in layer.columns
   for (const col of Object.values(layer.columns)) {

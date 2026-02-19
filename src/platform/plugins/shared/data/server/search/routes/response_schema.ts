@@ -15,6 +15,12 @@ const searchSessionRequestInfoSchema = schema.object({
   status: schema.maybe(schema.string()),
   startedAt: schema.maybe(schema.string()),
   completedAt: schema.maybe(schema.string()),
+  error: schema.maybe(
+    schema.object({
+      code: schema.number(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 const serializeableSchema = schema.mapOf(schema.string(), schema.any());
@@ -50,7 +56,7 @@ const status = schema.object({
     schema.literal('cancelled'),
     schema.literal('expired'),
   ]),
-  errors: schema.maybe(schema.arrayOf(schema.string())),
+  errors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
 });
 
 export const searchSessionStatusSchema = status;
@@ -61,12 +67,13 @@ export const searchSessionStatusesSchema = schema.object({
 
 export const searchSessionsFindSchema = schema.object({
   total: schema.number(),
-  saved_objects: schema.arrayOf(searchSessionSchema),
+  saved_objects: schema.arrayOf(searchSessionSchema, { maxSize: 10000 }),
   statuses: schema.recordOf(schema.string(), searchSessionStatusSchema),
 });
 
 const referencesSchema = schema.arrayOf(
-  schema.object({ id: schema.string(), type: schema.string(), name: schema.string() })
+  schema.object({ id: schema.string(), type: schema.string(), name: schema.string() }),
+  { maxSize: 10 }
 );
 
 export const searchSessionsUpdateSchema = schema.object({
@@ -75,7 +82,8 @@ export const searchSessionsUpdateSchema = schema.object({
   updated_at: schema.maybe(schema.string()),
   updated_by: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  // The search-sessions saved object definition specifies that the namespaces are 'single', that means only one space is allowed.
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   references: schema.maybe(referencesSchema),
   attributes: schema.object({
     name: schema.maybe(schema.string()),
