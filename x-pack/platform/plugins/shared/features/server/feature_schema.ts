@@ -400,10 +400,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       }
     };
 
-    validateAlertingPrivilege(entry?.rule?.all);
-    validateAlertingPrivilege(entry?.rule?.read);
-    validateAlertingPrivilege(entry?.alert?.all);
-    validateAlertingPrivilege(entry?.alert?.read);
+    Object.values(entry?.rule ?? {}).forEach(validateAlertingPrivilege)
+    Object.values(entry?.alert ?? {}).forEach(validateAlertingPrivilege)
 
     seenRuleTypeIds.forEach((ruleTypeId: string) => unseenAlertingRyleTypeIds.delete(ruleTypeId));
     seenConsumers.forEach((consumer: string) => unseenAlertingConsumers.delete(consumer));
