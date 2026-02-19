@@ -86,7 +86,6 @@ dependsOn:
   - '@kbn/observability-alert-details'
   - '@kbn/custom-integrations-plugin'
   - '@kbn/dashboard-plugin'
-  - '@kbn/controls-plugin'
   - '@kbn/core-http-server'
   - '@kbn/profiling-plugin'
   - '@kbn/logs-shared-plugin'
@@ -138,7 +137,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/apm-sources-access-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/object-utils'
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
@@ -150,9 +148,13 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
-  - '@kbn/zod'
+  - '@kbn/control-group-renderer'
   - '@kbn/agent-builder-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/kql'
+  - '@kbn/slo-plugin'
+  - '@kbn/slo-schema'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

@@ -12,6 +12,8 @@
         "label": "SearchHomepageAppInfo",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "appRoute",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -34,6 +38,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,6 +51,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -63,6 +71,8 @@
       "label": "SearchHomepagePluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -85,6 +95,8 @@
             }
           ],
           "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -100,6 +112,8 @@
       "label": "SearchHomepagePluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -122,6 +136,8 @@
             }
           ],
           "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -138,6 +154,8 @@
             "React.FunctionComponent<{}>"
           ],
           "path": "x-pack/solutions/search/plugins/search_homepage/public/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -153,6 +171,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -167,6 +187,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -192,6 +214,8 @@
       "label": "SearchHomepagePluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_homepage/server/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -206,6 +230,8 @@
       "label": "SearchHomepagePluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_homepage/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -232,6 +258,8 @@
           "\"searchHomepage:homepageEnabled\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -247,6 +275,8 @@
           "\"searchHomepage\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -262,6 +292,8 @@
           "\"searchHomepage\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -277,6 +309,8 @@
           "\"searchHomepage:searchHomepageV2Enabled\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -294,6 +328,8 @@
           "\"workflows:ui:enabled\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

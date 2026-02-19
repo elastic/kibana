@@ -5,33 +5,34 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
+import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/queries';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
+import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
-import type { QueryLink } from '../../../common/queries';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },
+  params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { name, from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query } = params;
 
-  const queryLinks = await (query
-    ? queryClient.findQueries(name, query)
-    : queryClient.getQueryLinks([name]).then(({ [name]: links }) => links));
+  const queryLinks = query
+    ? await queryClient.findQueries(streamNames, query)
+    : await queryClient.getQueryLinks(streamNames);
+
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
@@ -122,10 +123,10 @@ export async function readSignificantEventsFromAlertsIndices(
       },
     })
     .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      const { type, message } = parseError(err);
+      if (type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          `Cannot read significant events, insufficient privileges: ${message}`,
           { cause: err }
         );
       }
@@ -136,12 +137,14 @@ export async function readSignificantEventsFromAlertsIndices(
     return {
       significant_events: queryLinks.map((queryLink) => ({
         ...toStreamQueryKql(queryLink),
+        stream_name: queryLink.stream_name,
         occurrences: [],
         change_points: {
           type: {
             stationary: { p_value: 0, change_point: 0 },
           },
         },
+        rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
       })),
       aggregated_occurrences: [],
     };
@@ -160,12 +163,14 @@ export async function readSignificantEventsFromAlertsIndices(
 
     return {
       ...toStreamQueryKql(queryLink),
+      stream_name: queryLink.stream_name,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
             count: occurrence.doc_count,
           }))
         : [],
+      rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
       change_points: changePoints,
     };
   });
@@ -175,12 +180,14 @@ export async function readSignificantEventsFromAlertsIndices(
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
       ...toStreamQueryKql(queryLink),
+      stream_name: queryLink.stream_name,
       occurrences: [],
       change_points: {
         type: {
           stationary: { p_value: 0, change_point: 0 },
         },
       },
+      rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
     }));
 
   return {

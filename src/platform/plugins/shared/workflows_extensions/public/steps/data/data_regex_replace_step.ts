@@ -36,8 +36,7 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 **Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
     }),
     examples: [
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example1', {
-        defaultMessage: `## Simple text replacement
+      `## Simple text replacement
 \`\`\`yaml
 - name: sanitize-message
   type: ${DataRegexReplaceStepTypeId}
@@ -50,9 +49,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 # Input: "My password is secret"
 # Output: "My *** is ***"
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example2', {
-        defaultMessage: `## Replacement with backreferences
+
+      `## Replacement with backreferences
 \`\`\`yaml
 - name: format-phone
   type: ${DataRegexReplaceStepTypeId}
@@ -64,9 +62,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 # Input: "5551234567"
 # Output: "(555) 123-4567"
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example3', {
-        defaultMessage: `## Process array of strings
+
+      `## Process array of strings
 \`\`\`yaml
 - name: clean-emails
   type: ${DataRegexReplaceStepTypeId}
@@ -78,9 +75,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 # Input: ["user1@old.domain.com", "user2@old.domain.com"]
 # Output: ["user1@new.domain.com", "user2@new.domain.com"]
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example4', {
-        defaultMessage: `## Global vs single replacement
+
+      `## Global vs single replacement
 \`\`\`yaml
 # Replace all occurrences
 - name: replace-all
@@ -99,9 +95,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
     pattern: "foo"
     replacement: "bar"
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example5', {
-        defaultMessage: `## Detailed output for observability
+
+      `## Detailed output for observability
 \`\`\`yaml
 - name: track-replacements
   type: ${DataRegexReplaceStepTypeId}
@@ -122,9 +117,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 # Note: matchCount is only accurate when the global flag (g) is set.
 # Without the global flag, matchCount will be 1 if there's a match, 0 otherwise.
 \`\`\``,
-      }),
-      i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example6', {
-        defaultMessage: `## Named group replacement
+
+      `## Named group replacement
 \`\`\`yaml
 - name: format-date
   type: ${DataRegexReplaceStepTypeId}
@@ -136,7 +130,6 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 # Input: "2024-01-15"
 # Output: "01/15/2024"
 \`\`\``,
-      }),
     ],
   },
 };

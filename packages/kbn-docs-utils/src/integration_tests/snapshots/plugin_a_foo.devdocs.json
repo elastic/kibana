@@ -14,6 +14,8 @@
           "() => void"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -35,6 +37,8 @@
           "() => \"foo\""
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -69,6 +73,8 @@
           "\"COMMON VAR!\""
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/foo/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

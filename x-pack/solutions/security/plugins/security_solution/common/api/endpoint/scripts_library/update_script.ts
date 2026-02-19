@@ -15,11 +15,12 @@ import {
   ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
+  ScriptTagsSchema,
 } from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
 
-export const PatchUpdateRequestSchema = {
+export const PatchUpdateScriptRequestSchema = {
   body: schema.object(
     {
       name: schema.maybe(ScriptNameSchema),
@@ -30,6 +31,7 @@ export const PatchUpdateRequestSchema = {
       instructions: schema.maybe(ScriptInstructionsSchema),
       example: schema.maybe(ScriptExampleSchema),
       pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+      tags: schema.maybe(ScriptTagsSchema),
       version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
     },
     {
@@ -45,5 +47,9 @@ export const PatchUpdateRequestSchema = {
   }),
 };
 
-export type PatchUpdateRequestParams = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.params>>;
-export type PatchUpdateRequestBody = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.body>>;
+export type PatchUpdateRequestParams = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.params>
+>;
+export type PatchUpdateRequestBody = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.body>
+>;

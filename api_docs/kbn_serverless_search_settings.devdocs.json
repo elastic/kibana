@@ -33,6 +33,8 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/search_project/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

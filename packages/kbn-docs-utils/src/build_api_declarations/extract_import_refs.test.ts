@@ -154,3 +154,17 @@ it('test single link', () => {
   expect(results.length).toBe(1);
   expect((results[0] as Reference).text).toBe('FooFoo');
 });
+
+it('defaults to COMMON scope for paths outside standard plugin scopes', () => {
+  const testPlugin = getKibanaPlatformPlugin('pluginA');
+  // Path is in plugin directory but not under public/, server/, or common/.
+  const path = `${testPlugin.directory}/other/path.ts`;
+
+  const results = extractImportReferences(`import("${path}").SomeType`, [testPlugin], log);
+
+  expect(results.length).toBe(1);
+  const ref = results[0] as Reference;
+  expect(ref.text).toBe('SomeType');
+  // Paths outside standard scopes should default to COMMON.
+  expect(ref.scope).toBe(ApiScope.COMMON);
+});

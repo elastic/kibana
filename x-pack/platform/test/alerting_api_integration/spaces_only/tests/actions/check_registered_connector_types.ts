@@ -40,6 +40,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.email',
           '.index',
           '.inference',
+          '.mcp',
           '.pagerduty',
           '.swimlane',
           '.server-log',

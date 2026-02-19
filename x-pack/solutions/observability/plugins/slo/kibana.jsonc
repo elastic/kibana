@@ -43,14 +43,12 @@
       "cases",
       "cloud",
       "discover",
-      "embeddableEnhanced",
       "observabilityAIAssistant",
       "security",
       "serverless",
       "spaces"
     ],
     "requiredBundles": [
-      "controls",
       "embeddable",
       "ingestPipelines",
       "kibanaReact",

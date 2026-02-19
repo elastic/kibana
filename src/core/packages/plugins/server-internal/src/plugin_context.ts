@@ -32,6 +32,7 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
 /** @internal */
 export interface InstanceInfo {
   uuid: string;
+  airgapped: boolean;
 }
 
 /**
@@ -75,6 +76,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: instanceInfo.airgapped,
     },
 
     /**
@@ -296,6 +298,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
     },
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
       registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
@@ -406,6 +411,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    userActivity: {
+      trackUserAction: deps.userActivity.trackUserAction,
+    },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },

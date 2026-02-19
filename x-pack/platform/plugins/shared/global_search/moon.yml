@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -37,6 +38,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:

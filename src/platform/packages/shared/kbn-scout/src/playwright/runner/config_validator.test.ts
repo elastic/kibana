@@ -96,4 +96,60 @@ describe('validatePlaywrightConfig', () => {
       `Path to a valid TypeScript config file is required: --config <relative path to .ts file>`
     );
   });
+
+  it('should throw an error if runGlobalSetup is true but global.setup.ts does not exist', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock
+      .mockReturnValueOnce(true) // config file exists
+      .mockReturnValueOnce(false); // global.setup.ts does not exist
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).rejects.toThrow(
+      `The config file at "${configPath}" has 'runGlobalSetup: true' but no global.setup.ts file found.`
+    );
+  });
+
+  it('should pass validation if runGlobalSetup is true and global.setup.ts exists', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true); // both config and global.setup.ts exist
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+
+  it('should pass validation if runGlobalSetup is false', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true, runGlobalSetup: false },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
+
+  it('should pass validation if runGlobalSetup is undefined', async () => {
+    const configPath = '/path/to/plugin/playwright.config.ts';
+    existsSyncMock.mockReturnValue(true);
+    loadConfigModuleMock.mockResolvedValue({
+      default: {
+        use: { [VALID_CONFIG_MARKER]: true },
+        testDir: './tests',
+      },
+    });
+
+    await expect(validatePlaywrightConfig(configPath)).resolves.not.toThrow();
+  });
 });

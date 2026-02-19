@@ -24,6 +24,8 @@
           "<T>"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/server/lib/ready_signal.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -41,6 +43,8 @@
           "(millis: number) => string"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +59,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
+            "lineNumber": 8,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +80,8 @@
           "(nanos: string | number) => number"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,6 +96,8 @@
               "string | number"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
+            "lineNumber": 10,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +116,8 @@
         "label": "AggregateEventsBySavedObjectResult",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+        "lineNumber": 115,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,6 +133,8 @@
               "<unknown> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,6 +151,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -151,6 +167,8 @@
         "label": "IEventLogClient",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +193,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -189,6 +209,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,6 +226,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 66,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,6 +245,8 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -236,6 +262,8 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 68,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -272,6 +300,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -286,6 +316,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,6 +333,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -322,6 +356,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -337,6 +373,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 74,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -354,6 +392,8 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -382,6 +422,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -396,6 +438,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 78,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -411,6 +455,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -428,6 +474,8 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -443,6 +491,8 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -479,6 +529,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -493,6 +545,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -514,6 +568,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -531,6 +587,8 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -546,6 +604,8 @@
                   "(string | undefined)[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -561,6 +621,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 88,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -587,6 +649,8 @@
               ", \"data\">>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -601,6 +665,8 @@
                   "{ _id: string; _index: string; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 91,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -623,6 +689,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -637,6 +705,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -652,6 +722,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 95,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -669,6 +741,8 @@
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 96,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -684,6 +758,8 @@
                   "string[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 97,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -702,6 +778,8 @@
               "(pitId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -716,6 +794,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 99,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -734,6 +814,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -750,6 +832,8 @@
         "label": "IEventLogger",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -766,6 +850,8 @@
               ", id?: string | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -780,6 +866,8 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 104,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -795,6 +883,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 104,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -815,6 +905,8 @@
               ", startTime?: Date | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -829,6 +921,8 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 105,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -844,6 +938,8 @@
                   "Date | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 105,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -864,6 +960,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -878,6 +976,8 @@
                   "IEvent"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 106,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -908,6 +1008,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -932,6 +1034,8 @@
                   "; }[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+                "lineNumber": 108,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -950,6 +1054,8 @@
         "label": "InternalFields",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -961,6 +1067,8 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -972,6 +1080,8 @@
             "label": "_index",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,6 +1093,8 @@
             "label": "_seq_no",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -994,6 +1106,8 @@
             "label": "_primary_term",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1008,6 +1122,8 @@
         "label": "QueryEventsBySavedObjectResult",
         "description": [],
         "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1019,6 +1135,8 @@
             "label": "page",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1030,6 +1148,8 @@
             "label": "per_page",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1041,6 +1161,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1055,6 +1177,8 @@
               "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1075,6 +1199,8 @@
           "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1090,6 +1216,8 @@
           "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1105,6 +1233,8 @@
           "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; version?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; type_id?: string | undefined; } & {}> | undefined; version?: string | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; updated_at?: string | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; deleted?: boolean | undefined; failed_auto_fill_attempts?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ status?: string | undefined; uuid?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ active?: string | number | undefined; new?: string | number | undefined; recovered?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; frozen_indices_queried_count?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; update_alerts_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; deletion?: Readonly<{ num_deleted?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ status?: string | undefined; outcome?: string | undefined; summary?: Readonly<{ new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; gap_auto_fill?: Readonly<{ execution?: Readonly<{ start?: string | undefined; end?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; rule_id?: string | undefined; processed_gaps?: string | number | undefined; } & {}>[] | undefined; duration_ms?: string | number | undefined; rule_ids?: string[] | undefined; task_params?: Readonly<{ name?: string | undefined; interval?: string | undefined; num_retries?: string | number | undefined; gap_fill_range?: string | undefined; max_backfills?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; original?: string | undefined; code?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; kind?: string | undefined; hash?: string | undefined; ingested?: string | undefined; module?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; } & {}> & { _id: string; _index: string; _seq_no: number; _primary_term: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1120,6 +1250,8 @@
           "\"primary\""
         ],
         "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1134,6 +1266,8 @@
       "label": "IEventLogService",
       "description": [],
       "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+      "lineNumber": 47,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1148,6 +1282,8 @@
             "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1164,6 +1300,8 @@
             "() => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 49,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1180,6 +1318,8 @@
             "(provider: string, actions: string[]) => void"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 50,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1194,6 +1334,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 50,
+              "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1209,6 +1351,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 50,
+              "columnNumber": 45,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1227,6 +1371,8 @@
             "(provider: string, action: string) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1241,6 +1387,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 51,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1256,6 +1404,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 51,
+              "columnNumber": 48,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1274,6 +1424,8 @@
             "() => Map<string, Set<string>>"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 52,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1292,6 +1444,8 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1306,6 +1460,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 53,
+              "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1321,6 +1477,8 @@
                 "SavedObjectProvider"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 53,
+              "columnNumber": 45,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1348,6 +1506,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 54,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1362,6 +1522,8 @@
                 "IEvent"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 54,
+              "columnNumber": 13,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1380,6 +1542,8 @@
             "() => string"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 55,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1396,6 +1560,8 @@
             "() => Promise<boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 56,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1413,6 +1579,8 @@
       "label": "IEventLogClientService",
       "description": [],
       "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+      "lineNumber": 59,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1436,6 +1604,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+          "lineNumber": 60,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1451,6 +1621,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+              "lineNumber": 60,
+              "columnNumber": 13,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1477,6 +1649,8 @@
           "(millis: number) => string"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1491,6 +1665,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
+            "lineNumber": 8,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1510,6 +1686,8 @@
           "(nanos: string | number) => number"
         ],
         "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1524,6 +1702,8 @@
               "string | number"
             ],
             "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
+            "lineNumber": 10,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1547,6 +1727,8 @@
           "\"/internal/event_log\""
         ],
         "path": "x-pack/platform/plugins/shared/event_log/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

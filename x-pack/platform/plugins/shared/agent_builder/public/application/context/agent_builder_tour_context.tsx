@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { storageKeys } from '../storage_keys';
 import { useConversationContext } from './conversation/conversation_context';
+import { useKibana } from '../hooks/use_kibana';
 
 export enum TourStep {
   AgentSelector = 'agent-selector',
@@ -62,15 +63,16 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.agentSelector.content', {
       defaultMessage:
-        'I’m here to help with your questions. Pick a different agent or customize a new one anytime.',
+        "An agent's behavior is defined by its custom instructions and available tools. Switch agents when you need different capabilities for your tasks.",
     }),
   },
   llmSelector: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.title', {
-      defaultMessage: 'You’re using this model 🧠',
+      defaultMessage: 'Select your LLM 🧠',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
-      defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
+      defaultMessage:
+        'Your agent uses this model to generate responses. Switch LLMs to prioritize faster responses, lower costs, or more complex reasoning.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
@@ -84,19 +86,19 @@ const labels = {
   // },
   conversationsHistory: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.title', {
-      defaultMessage: 'Your conversations 💬',
+      defaultMessage: 'Browse your conversations 💬',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.content', {
-      defaultMessage: 'Come back to earlier chats or jump between them from here.',
+      defaultMessage: 'Find all your previous conversations here.',
     }),
   },
   conversationActions: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.title', {
-      defaultMessage: 'Additional actions ⚙️',
+      defaultMessage: 'Jump to key actions ⚙️',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'Access conversation actions, agent controls, and management settings from here.',
+        'This menu is your hub for key management actions. You can quickly access important pages from here.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {
@@ -119,6 +121,8 @@ interface TourStepConfig {
 
 export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const { isEmbeddedContext } = useConversationContext();
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications.tours.isEnabled();
 
   const [currentStep, setCurrentStep] = useState(DEFAULT_STEP);
 
@@ -128,7 +132,7 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
     const hasSeenTour = localStorage.getItem(storageKeys.hasSeenAgentBuilderTour);
     let timer: NodeJS.Timeout | undefined;
 
-    if (!isEmbeddedContext && !hasSeenTour) {
+    if (!isEmbeddedContext && !hasSeenTour && isTourEnabled) {
       // We use a delay to ensure the tour is not triggered immediately when the page loads to ensure correct anchor positioning.
       timer = setTimeout(() => {
         setIsTourActive(true);
@@ -140,7 +144,7 @@ export const AgentBuilderTourProvider: React.FC<PropsWithChildren<{}>> = ({ chil
         clearTimeout(timer);
       }
     };
-  }, [isEmbeddedContext]);
+  }, [isEmbeddedContext, isTourEnabled]);
 
   const handleMoveToNextStep = () => {
     setCurrentStep((prev) => prev + 1);

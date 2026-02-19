@@ -33,6 +33,7 @@ import {
   INDEX_STATS_EVENT,
   INDEX_TEMPLATES_EVENT,
 } from '../ebt/events';
+import { createMockTelemetryConfigProvider } from '../__mocks__';
 
 jest.mock('./receiver');
 jest.mock('./sender');
@@ -48,7 +49,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   let receiver: jest.Mocked<MetadataReceiver>;
   let sender: jest.Mocked<MetadataSender>;
   let subscription: jest.Mocked<Subscription>;
-
+  const telemetryConfigProvider = createMockTelemetryConfigProvider();
   const mockConfiguration: IndicesMetadataConfiguration = {
     indices_threshold: 100,
     datastreams_threshold: 50,
@@ -201,7 +202,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     });
 
     it('should initialize receiver and sender', () => {
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient, false);
       expect(MetadataSender).toHaveBeenCalledWith(expect.any(Object), analytics);
@@ -213,14 +214,14 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       expect(configurationService.getIndicesMetadataConfiguration$).toHaveBeenCalled();
       expect(mockSubscribe).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('should schedule indices metadata task', async () => {
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -239,7 +240,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       const error = new Error('Failed to schedule task');
       taskManagerStart.ensureScheduled.mockRejectedValue(error);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -254,7 +255,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       const configurationCallback = mockSubscribe.mock.calls[0][0];
       configurationCallback(mockConfiguration);
@@ -271,7 +272,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: jest.fn().mockReturnValue(subscription),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
       service.stop();
 
       expect(subscription.unsubscribe).toHaveBeenCalled();
@@ -292,7 +293,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       receiver.getIndices.mockResolvedValue(mockIndexSettings);
       receiver.getDataStreams.mockResolvedValue(mockDataStreams);
@@ -454,16 +455,27 @@ describe('Indices Metadata - IndicesMetadataService', () => {
           return subscription;
         }),
       } as any);
-
-      service.start(taskManagerStart, analytics, esClient, false);
     });
 
     it('should run publishIndicesMetadata and return state', async () => {
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
       jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
 
       const result = await taskRunner.run();
 
       expect(service['publishIndicesMetadata']).toHaveBeenCalled(); // eslint-disable-line dot-notation
+      expect(result).toEqual({ state: taskInstance.state });
+    });
+
+    it('should skip publishIndicesMetadata when telemetry is opted out', async () => {
+      const optedOutProvider = createMockTelemetryConfigProvider(false);
+      service.start(taskManagerStart, analytics, esClient, false, optedOutProvider);
+      jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
+
+      const result = await taskRunner.run();
+
+      expect(service['publishIndicesMetadata']).not.toHaveBeenCalled(); // eslint-disable-line dot-notation
+      expect(logger.debug).toHaveBeenCalledWith('Telemetry opted out, skipping task run');
       expect(result).toEqual({ state: taskInstance.state });
     });
 
@@ -485,7 +497,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
     });
 
     describe('publishDatastreamsStats', () => {
@@ -745,7 +757,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient, false);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
     });
 
     it('should handle receiver errors during publishIndicesMetadata', async () => {

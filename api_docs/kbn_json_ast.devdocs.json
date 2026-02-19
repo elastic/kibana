@@ -30,6 +30,8 @@
           "(source: string, refsToAdd: string[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 18,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,6 +63,8 @@
               "string[]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 18,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,6 +84,8 @@
           "(source: string, name: string) => (babel.types.ObjectProperty & { key: babel.types.StringLiteral; }) | undefined"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -92,6 +100,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 93,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +117,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 93,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,6 +138,8 @@
           "(source: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,6 +154,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 60,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -159,6 +175,8 @@
           "(source: string, name: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -173,6 +191,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 81,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +208,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 81,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -209,6 +231,8 @@
           "(source: string, key: string, opts: { node?: babel.types.ObjectExpression | undefined; } | undefined) => string"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,6 +247,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -238,6 +264,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,6 +278,8 @@
             "label": "opts",
             "description": [],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 39,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -264,6 +294,8 @@
                   "babel.types.ObjectExpression | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -284,6 +316,8 @@
           "(source: string, refs: string[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,6 +332,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 69,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -313,6 +349,8 @@
               "string[]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 69,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -332,6 +370,8 @@
           "(source: string, replacements: [path: string, pkgId: string][]) => string"
         ],
         "path": "packages/kbn-json-ast/src/references.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -346,6 +386,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,6 +403,8 @@
               "[path: string, pkgId: string][]"
             ],
             "path": "packages/kbn-json-ast/src/references.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -380,6 +424,8 @@
           "(source: string, name: string, value: any) => string"
         ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,6 +440,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 31,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -409,6 +457,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 31,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -424,6 +474,8 @@
               "any"
             ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
+            "lineNumber": 31,
+            "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -443,6 +495,8 @@
           "(jsonc: string, value: string) => string"
         ],
         "path": "packages/kbn-json-ast/src/extends.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -457,6 +511,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/extends.ts",
+            "lineNumber": 12,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -472,6 +528,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/extends.ts",
+            "lineNumber": 12,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -491,6 +549,8 @@
           "(source: string, key: string, value: any, opts: { insertAtTop?: boolean | undefined; insertAfter?: babel.types.ObjectProperty | undefined; node?: babel.types.ObjectExpression | undefined; spaces?: string | undefined; } | undefined) => string"
         ],
         "path": "packages/kbn-json-ast/src/props.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -505,6 +565,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -520,6 +582,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -535,6 +599,8 @@
               "any"
             ],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -547,6 +613,8 @@
             "label": "opts",
             "description": [],
             "path": "packages/kbn-json-ast/src/props.ts",
+            "lineNumber": 60,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -563,6 +631,8 @@
                   "boolean | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -579,6 +649,8 @@
                   "babel.types.ObjectProperty | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 63,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -595,6 +667,8 @@
                   "babel.types.ObjectExpression | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 65,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -611,6 +685,8 @@
                   "string | undefined"
                 ],
                 "path": "packages/kbn-json-ast/src/props.ts",
+                "lineNumber": 67,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -633,6 +709,8 @@
           "(source: string, snips: Snip[]) => string"
         ],
         "path": "packages/kbn-json-ast/src/snip.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -647,6 +725,8 @@
               "string"
             ],
             "path": "packages/kbn-json-ast/src/snip.ts",
+            "lineNumber": 15,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -662,6 +742,8 @@
               "Snip[]"
             ],
             "path": "packages/kbn-json-ast/src/snip.ts",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
@@ -55,7 +54,10 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
       await agentBuilder.saveTool();
 
-      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = agentBuilder.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
 
     it('should create an index search tool', async () => {
@@ -74,7 +76,10 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
 
       await agentBuilder.saveTool();
 
-      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
+      // Search for the tool to handle pagination
+      const search = agentBuilder.toolsSearch();
+      await search.type(toolId);
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
   });
 }

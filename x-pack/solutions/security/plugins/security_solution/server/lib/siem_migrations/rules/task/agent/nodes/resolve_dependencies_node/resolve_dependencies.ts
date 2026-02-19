@@ -29,6 +29,13 @@ export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): G
 
     const response = await modelWithTools.invoke([...resolveMessage, ...(state.messages ?? [])]);
 
+    const hasToolCall =
+      'tool_calls' in response && response?.tool_calls && response?.tool_calls?.length > 0;
+
+    if (hasToolCall) {
+      // we don't generate comments for tool calls but only the final response
+      return { messages: [response], comments: [] };
+    }
     const comments = [generateAssistantComment(cleanMarkdown(response.text))];
 
     return { messages: [response], nl_query: response.text, comments };

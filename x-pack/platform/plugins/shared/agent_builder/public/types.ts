@@ -11,12 +11,14 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  EventsServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -28,14 +30,14 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { OpenConversationSidebarOptions } from './sidebar/types';
 
-export interface ConversationFlyoutRef {
+export interface ConversationSidebarRef {
   close(): void;
 }
 
-export interface OpenConversationFlyoutReturn {
-  flyoutRef: ConversationFlyoutRef;
+export interface OpenConversationSidebarReturn {
+  flyoutRef: ConversationSidebarRef;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -57,6 +59,7 @@ export interface AgentBuilderStartDependencies {
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
@@ -84,29 +87,35 @@ export interface AgentBuilderPluginStart {
    */
   tools: ToolServiceStartContract;
   /**
-   * Opens a conversation flyout.
+   * Events service contract, can be used to listen to chat events.
+   */
+  events: EventsServiceStartContract;
+  /**
+   * Opens the conversation sidebar.
    *
-   * @param options - Configuration options for the flyout
-   * @returns An object containing the flyout reference
+   * @param options - Configuration options for the sidebar
+   * @returns An object containing the sidebar reference
    *
    * @example
    * ```tsx
    * // Open a new conversation with close handler
    * const { flyoutRef } = plugins.agentBuilder.openConversationFlyout({
-   *   onClose: () => console.log('Flyout closed')
+   *   onClose: () => console.log('Sidebar closed')
    * });
    *
-   * // Programmatically close the flyout
+   * // Programmatically close the sidebar
    * flyoutRef.close();
    * ```
    */
-  openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  openConversationFlyout: (
+    options?: OpenConversationSidebarOptions
+  ) => OpenConversationSidebarReturn;
   /**
-   * Toggles the conversation flyout.
+   * Toggles the conversation sidebar.
    *
-   * If the flyout is open, it will be closed. Otherwise, it will be opened.
+   * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
-  toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => void;
+  toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
 }

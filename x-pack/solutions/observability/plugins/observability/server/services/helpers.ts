@@ -8,7 +8,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { LENS_CONTENT_TYPE } from '@kbn/lens-plugin/common/constants';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 const SUGGESTED_DASHBOARDS_VALID_RULE_TYPE_IDS = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID] as const;
 

@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act, screen, waitFor, within } from '@testing-library/react';
 
 import { getRouter } from '../../../public/application/services';
 import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
 
 import { PROXY_MODE } from '../../../common/constants';
 
-import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
+import { EuiPaginationTestHarness, EuiTableTestHarness } from '@kbn/test-eui-helpers';
+import { getRandomString } from '@kbn/test-jest-helpers';
 
-import { setup } from './remote_clusters_list.helpers';
+import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderRemoteClustersRoute } from '../helpers/render';
 
 jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {
@@ -33,54 +36,38 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 describe('<RemoteClusterList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
-  describe('on component mount', () => {
-    let exists;
-
-    beforeEach(async () => {
-      ({ exists } = await setup(httpSetup));
+  const renderList = (overrides) =>
+    renderRemoteClustersRoute(RemoteClusterList, {
+      httpSetup,
+      contextOverrides: overrides,
+      routePath: '/list',
+      initialEntries: ['/list'],
     });
 
-    test('should show a "loading remote clusters" indicator', () => {
-      expect(exists('remoteClustersTableLoading')).toBe(true);
+  describe('on component mount', () => {
+    test('should show a "loading remote clusters" indicator', async () => {
+      renderList();
+      expect(screen.getByTestId('remoteClustersTableLoading')).toBeInTheDocument();
+      // Wait for the initial async load to settle to avoid act warnings.
+      expect(await screen.findByTestId('remoteClusterListEmptyPrompt')).toBeInTheDocument();
     });
   });
 
   describe('when there are no remote clusters', () => {
-    let exists;
-    let component;
-
-    beforeEach(async () => {
-      await act(async () => {
-        ({ exists, component } = await setup(httpSetup));
-      });
-
-      component.update();
-    });
-
     test('should display an empty prompt', async () => {
-      expect(exists('remoteClusterListEmptyPrompt')).toBe(true);
+      renderList();
+      expect(await screen.findByTestId('remoteClusterListEmptyPrompt')).toBeInTheDocument();
     });
 
     test('should have a button to create a remote cluster', async () => {
-      expect(exists('remoteClusterEmptyPromptCreateButton')).toBe(true);
+      renderList();
+      expect(await screen.findByTestId('remoteClusterEmptyPromptCreateButton')).toBeInTheDocument();
     });
   });
 
   describe('can search', () => {
-    let table;
-    let component;
-    let form;
-
     const remoteClusters = [
       {
         name: 'simple_remote_cluster',
@@ -95,38 +82,41 @@ describe('<RemoteClusterList />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+    });
 
-      await act(async () => {
-        ({ table, component, form } = await setup(httpSetup));
+    test('without any search params it should show all clusters', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+      expect(table.getCellValues().length).toBe(2);
+    });
+
+    test('search by seed works', async () => {
+      const { user } = renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+
+      await user.type(screen.getByTestId('remoteClusterSearch'), 'simple');
+
+      await waitFor(() => {
+        expect(table.getCellValues().length).toBe(1);
       });
-
-      component.update();
     });
 
-    test('without any search params it should show all clusters', () => {
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
-      expect(tableCellsValues.length).toBe(2);
-    });
+    test('search by proxyAddress works', async () => {
+      const { user } = renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
 
-    test('search by seed works', () => {
-      form.setInputValue('remoteClusterSearch', 'simple');
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
-      expect(tableCellsValues.length).toBe(1);
-    });
+      await user.type(screen.getByTestId('remoteClusterSearch'), 'proxy');
 
-    test('search by proxyAddress works', () => {
-      form.setInputValue('remoteClusterSearch', 'proxy');
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
-      expect(tableCellsValues.length).toBe(1);
+      await waitFor(() => {
+        expect(table.getCellValues().length).toBe(1);
+      });
     });
   });
 
   describe('when there are multiple pages of remote clusters', () => {
-    let table;
-    let actions;
-    let component;
-    let form;
-
     const remoteClusters = [
       {
         name: 'unique',
@@ -151,39 +141,37 @@ describe('<RemoteClusterList />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-      await act(async () => {
-        ({ table, actions, component, form } = await setup(httpSetup));
-      });
-
-      component.update();
     });
 
-    test('pagination works', () => {
-      actions.clickPaginationNextButton();
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+    test('pagination works', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+      const pagination = new EuiPaginationTestHarness();
+
+      pagination.click('next');
 
       // Pagination defaults to 20 remote clusters per page. We loaded 30 remote clusters,
       // so the second page should have 10.
-      expect(tableCellsValues.length).toBe(10);
+      await waitFor(() => {
+        expect(table.getCellValues().length).toBe(10);
+      });
     });
 
-    test('search works', () => {
-      form.setInputValue('remoteClusterSearch', 'unique');
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
-      expect(tableCellsValues.length).toBe(1);
+    test('search works', async () => {
+      const { user } = renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+
+      await user.type(screen.getByTestId('remoteClusterSearch'), 'unique');
+
+      await waitFor(() => {
+        expect(table.getCellValues().length).toBe(1);
+      });
     });
   });
 
   describe('when there are remote clusters', () => {
-    let find;
-    let exists;
-    let component;
-    let table;
-    let actions;
-    let tableCellsValues;
-    let rows;
-
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
     // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
@@ -215,30 +203,30 @@ describe('<RemoteClusterList />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-      await act(async () => {
-        ({ component, find, exists, table, actions } = await setup(httpSetup));
-      });
-
-      component.update();
-
-      // Read the remote clusters list table
-      ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
     });
 
-    test('should not display the empty prompt', () => {
-      expect(exists('remoteClusterListEmptyPrompt')).toBe(false);
+    test('should not display the empty prompt', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      expect(screen.queryByTestId('remoteClusterListEmptyPrompt')).not.toBeInTheDocument();
     });
 
-    test('should have a button to create a remote cluster', () => {
-      expect(exists('remoteClusterCreateButton')).toBe(true);
+    test('should have a button to create a remote cluster', async () => {
+      renderList();
+      expect(await screen.findByTestId('remoteClusterCreateButton')).toBeInTheDocument();
     });
 
-    test('should have link to documentation', () => {
-      expect(exists('documentationLink')).toBe(true);
+    test('should have link to documentation', async () => {
+      renderList();
+      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
     });
 
-    test('should list the remote clusters in the table', () => {
+    test('should list the remote clusters in the table', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+
+      const tableCellsValues = table.getCellValues();
       expect(tableCellsValues.length).toEqual(remoteClusters.length);
       expect(tableCellsValues).toEqual([
         [
@@ -274,187 +262,298 @@ describe('<RemoteClusterList />', () => {
       ]);
     });
 
-    test('should have a tooltip to indicate that the cluster has been defined in elasticsearch.yml', () => {
-      const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
+    test('should have a tooltip to indicate that the cluster has been defined in elasticsearch.yml', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+      const secondRow = table.getRowByCellText(remoteCluster2.name);
       expect(
-        findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length
-      ).toBe(1);
+        within(secondRow).getByTestId('remoteClustersTableListClusterDefinedByNodeTooltip')
+      ).toBeInTheDocument();
     });
 
-    test('should have a tooltip to indicate that the cluster has a deprecated setting', () => {
-      const thirdRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
+    test('should have a tooltip to indicate that the cluster has a deprecated setting', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+      const thirdRow = table.getRowByCellText(remoteCluster3.name);
       expect(
-        findTestSubject(thirdRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
-          .length
-      ).toBe(1);
+        within(thirdRow).getByTestId('remoteClustersTableListClusterWithDeprecatedSettingTooltip')
+      ).toBeInTheDocument();
     });
 
-    test('should have a tooltip to indicate that the cluster is using an old security model', () => {
-      const secondRow = rows[1].reactWrapper;
-      expect(findTestSubject(secondRow, 'authenticationTypeWarning').length).toBe(1);
+    test('should have a tooltip to indicate that the cluster is using an old security model', async () => {
+      renderList();
+      await screen.findByTestId('remoteClusterListTable');
+      const table = new EuiTableTestHarness('remoteClusterListTable');
+      const secondRow = table.getRowByCellText(remoteCluster2.name);
+      expect(within(secondRow).getByTestId('authenticationTypeWarning')).toBeInTheDocument();
     });
 
     describe('bulk delete button', () => {
-      test('should be visible when a remote cluster is selected', () => {
-        expect(exists('remoteClusterBulkDeleteButton')).toBe(false);
+      test('should be visible when a remote cluster is selected', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        actions.selectRemoteClusterAt(0);
+        expect(screen.queryByTestId('remoteClusterBulkDeleteButton')).not.toBeInTheDocument();
 
-        expect(exists('remoteClusterBulkDeleteButton')).toBe(true);
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByRole('checkbox'));
+
+        expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toBeInTheDocument();
       });
 
-      test('should update the button label if more than 1 remote cluster is selected', () => {
-        actions.selectRemoteClusterAt(0);
+      test('should update the button label if more than 1 remote cluster is selected', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const button = find('remoteClusterBulkDeleteButton');
-        expect(button.text()).toEqual('Remove remote cluster');
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByRole('checkbox'));
 
-        actions.selectRemoteClusterAt(1);
-        expect(button.text()).toEqual('Remove 2 remote clusters');
+        expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toHaveTextContent(
+          'Remove remote cluster'
+        );
+
+        // The second cluster is not selectable (defined by node). Select the third one instead.
+        const thirdRow = table.getRowByCellText(remoteCluster3.name);
+        await user.click(within(thirdRow).getByRole('checkbox'));
+
+        expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toHaveTextContent(
+          'Remove 2 remote clusters'
+        );
       });
 
-      test('should open a confirmation modal when clicking on it', () => {
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
+      test('should open a confirmation modal when clicking on it', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        actions.selectRemoteClusterAt(0);
-        actions.clickBulkDeleteButton();
+        expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
 
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByRole('checkbox'));
+        await user.click(screen.getByTestId('remoteClusterBulkDeleteButton'));
+
+        expect(screen.getByTestId('remoteClustersDeleteConfirmModal')).toBeInTheDocument();
       });
     });
 
     describe('table row actions', () => {
-      test('should have a "delete" and an "edit" action button on each row', () => {
-        const indexLastColumn = rows[0].columns.length - 1;
-        const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
+      test('should have a "delete" and an "edit" action button on each row', async () => {
+        renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
 
-        const deleteButton = findTestSubject(tableCellActions, 'remoteClusterTableRowRemoveButton');
-        const editButton = findTestSubject(tableCellActions, 'remoteClusterTableRowEditButton');
-
-        expect(deleteButton.length).toBe(1);
-        expect(editButton.length).toBe(1);
+        expect(
+          within(firstRow).getByTestId('remoteClusterTableRowRemoveButton')
+        ).toBeInTheDocument();
+        expect(within(firstRow).getByTestId('remoteClusterTableRowEditButton')).toBeInTheDocument();
       });
 
       test('should open a confirmation modal when clicking on "delete" button', async () => {
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        actions.clickRowActionButtonAt(0, 'delete');
+        expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
 
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClusterTableRowRemoveButton'));
+
+        expect(screen.getByTestId('remoteClustersDeleteConfirmModal')).toBeInTheDocument();
       });
     });
 
     describe('confirmation modal (delete remote cluster)', () => {
       test('should remove the remote cluster from the table after delete is successful', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+
         // Mock HTTP DELETE request
         httpRequestsMockHelpers.setDeleteRemoteClusterResponse(remoteCluster1.name, {
           itemsDeleted: [remoteCluster1.name],
           errors: [],
         });
 
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+
         // Make sure that we have our 3 remote clusters in the table
-        expect(rows.length).toBe(3);
+        expect(table.getCellValues().length).toBe(3);
 
-        actions.selectRemoteClusterAt(0);
-        actions.clickBulkDeleteButton();
-        actions.clickConfirmModalDeleteRemoteCluster();
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByRole('checkbox'));
+        await user.click(screen.getByTestId('remoteClusterBulkDeleteButton'));
 
-        await act(async () => {
-          jest.advanceTimersByTime(600); // there is a 500ms timeout in the api action
+        const modal = screen.getByTestId('remoteClustersDeleteConfirmModal');
+        await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() => {
+          expect(table.getCellValues().length).toBe(2);
         });
 
-        component.update();
-
-        ({ rows } = table.getMetaData('remoteClusterListTable'));
-
-        expect(rows.length).toBe(2);
-        expect(rows[0].columns[1].value).toContain(remoteCluster2.name);
+        expect(screen.getByText(remoteCluster2.name)).toBeInTheDocument();
       });
     });
 
     describe('detail panel', () => {
-      test('should open a detail panel when clicking on a remote cluster', () => {
-        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+      test('should open a detail panel when clicking on a remote cluster', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        actions.clickRemoteClusterAt(0);
+        expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
 
-        expect(exists('remoteClusterDetailFlyout')).toBe(true);
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+
+        expect(await screen.findByTestId('remoteClusterDetailFlyout')).toBeInTheDocument();
       });
 
-      test('should set the title to the remote cluster selected', () => {
-        actions.clickRemoteClusterAt(0); // Select remote cluster and open the detail panel
-        expect(find('remoteClusterDetailsFlyoutTitle').text()).toEqual(remoteCluster1.name);
+      test('should set the title to the remote cluster selected', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+
+        expect(await screen.findByTestId('remoteClusterDetailsFlyoutTitle')).toHaveTextContent(
+          remoteCluster1.name
+        );
       });
 
-      test('should have a "Status" section', () => {
-        actions.clickRemoteClusterAt(0);
-        expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
-        expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
+      test('should have a "Status" section', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+
+        const section = await screen.findByTestId('remoteClusterDetailPanelStatusSection');
+        expect(within(section).getByRole('heading', { level: 3 })).toHaveTextContent('Status');
+        expect(screen.getByTestId('remoteClusterDetailPanelStatusValues')).toBeInTheDocument();
       });
 
-      test('should set the correct remote cluster status values', () => {
-        actions.clickRemoteClusterAt(0);
+      test('should set the correct remote cluster status values', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        expect(find('remoteClusterDetailIsConnected').text()).toEqual('Connected');
-        expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual(
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+
+        expect(await screen.findByTestId('remoteClusterDetailIsConnected')).toHaveTextContent(
+          'Connected'
+        );
+        expect(screen.getByTestId('remoteClusterDetailConnectedNodesCount')).toHaveTextContent(
           remoteCluster1.connectedNodesCount.toString()
         );
-        expect(find('remoteClusterDetailSeeds').text()).toEqual(remoteCluster1.seeds.join(' '));
-        expect(find('remoteClusterDetailSkipUnavailable').text()).toEqual('No');
-        expect(find('remoteClusterDetailMaxConnections').text()).toEqual(
+        expect(screen.getByTestId('remoteClusterDetailSeeds')).toHaveTextContent(
+          remoteCluster1.seeds.join(' ')
+        );
+        expect(screen.getByTestId('remoteClusterDetailSkipUnavailable')).toHaveTextContent('No');
+        expect(screen.getByTestId('remoteClusterDetailMaxConnections')).toHaveTextContent(
           remoteCluster1.maxConnectionsPerCluster.toString()
         );
-        expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual(
+        expect(screen.getByTestId('remoteClusterDetailInitialConnectTimeout')).toHaveTextContent(
           remoteCluster1.initialConnectTimeout
         );
       });
 
-      test('should have a "close", "delete" and "edit" button in the footer', () => {
-        actions.clickRemoteClusterAt(0);
-        expect(exists('remoteClusterDetailsPanelCloseButton')).toBe(true);
-        expect(exists('remoteClusterDetailPanelRemoveButton')).toBe(true);
-        expect(exists('remoteClusterDetailPanelEditButton')).toBe(true);
+      test('should have a "close", "delete" and "edit" button in the footer', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+
+        expect(
+          await screen.findByTestId('remoteClusterDetailsPanelCloseButton')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('remoteClusterDetailPanelRemoveButton')).toBeInTheDocument();
+        expect(screen.getByTestId('remoteClusterDetailPanelEditButton')).toBeInTheDocument();
       });
 
-      test('should close the detail panel when clicking the "close" button', () => {
-        actions.clickRemoteClusterAt(0); // open the detail panel
-        expect(exists('remoteClusterDetailFlyout')).toBe(true);
+      test('should close the detail panel when clicking the "close" button', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        find('remoteClusterDetailsPanelCloseButton').simulate('click');
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
-        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+        expect(await screen.findByTestId('remoteClusterDetailFlyout')).toBeInTheDocument();
+
+        await user.click(screen.getByTestId('remoteClusterDetailsPanelCloseButton'));
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
+        });
       });
 
-      test('should open a confirmation modal when clicking the "delete" button', () => {
-        actions.clickRemoteClusterAt(0);
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
+      test('should open a confirmation modal when clicking the "delete" button', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        find('remoteClusterDetailPanelRemoveButton').simulate('click');
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
-        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+        expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
+
+        await user.click(screen.getByTestId('remoteClusterDetailPanelRemoveButton'));
+
+        expect(screen.getByTestId('remoteClustersDeleteConfirmModal')).toBeInTheDocument();
       });
 
       test('should display a "Remote cluster not found" when providing a wrong cluster name', async () => {
-        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+        renderList();
+        expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
 
-        getRouter().history.replace({ search: `?cluster=wrong-cluster` });
-        component.update();
+        act(() => {
+          getRouter().history.replace({ search: `?cluster=wrong-cluster` });
+        });
 
-        expect(exists('remoteClusterDetailFlyout')).toBe(true);
-        expect(exists('remoteClusterDetailClusterNotFound')).toBe(true);
+        expect(await screen.findByTestId('remoteClusterDetailFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('remoteClusterDetailClusterNotFound')).toBeInTheDocument();
       });
 
-      test('should display a warning when the cluster is configured by node', () => {
-        actions.clickRemoteClusterAt(0); // the remoteCluster1 has *not* been configured by node
-        expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(false);
+      test('should display a warning when the cluster is configured by node', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        actions.clickRemoteClusterAt(1); // the remoteCluster2 has been configured by node
-        expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(true);
+        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
+        expect(
+          screen.queryByTestId('remoteClusterConfiguredByNodeWarning')
+        ).not.toBeInTheDocument();
+
+        await user.click(screen.getByTestId('remoteClusterDetailsPanelCloseButton'));
+        await waitFor(() => {
+          expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
+        });
+
+        const secondRow = table.getRowByCellText(remoteCluster2.name);
+        await user.click(within(secondRow).getByTestId('remoteClustersTableListClusterLink'));
+        expect(
+          await screen.findByTestId('remoteClusterConfiguredByNodeWarning')
+        ).toBeInTheDocument();
       });
 
-      test('Should display authentication type', () => {
-        actions.clickRemoteClusterAt(2);
-        expect(exists('remoteClusterDetailAuthType')).toBe(true);
+      test('Should display authentication type', async () => {
+        const { user } = renderList();
+        await screen.findByTestId('remoteClusterListTable');
+        const table = new EuiTableTestHarness('remoteClusterListTable');
+
+        const thirdRow = table.getRowByCellText(remoteCluster3.name);
+        await user.click(within(thirdRow).getByTestId('remoteClustersTableListClusterLink'));
+        expect(await screen.findByTestId('remoteClusterDetailAuthType')).toBeInTheDocument();
       });
     });
   });

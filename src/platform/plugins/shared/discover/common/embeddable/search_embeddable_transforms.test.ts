@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
 import { extract, inject } from './search_inject_extract';
 import type {
@@ -15,6 +15,7 @@ import type {
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
   SearchEmbeddableByReferenceState,
+  SearchEmbeddableState,
 } from './types';
 
 jest.mock('./search_inject_extract', () => {
@@ -24,12 +25,13 @@ jest.mock('./search_inject_extract', () => {
   };
 });
 
-const { transformEnhancementsIn, transformEnhancementsOut } = createEmbeddableSetupMock();
-transformEnhancementsIn.mockImplementation((state) => ({
-  enhancementsState: state,
-  enhancementsReferences: [],
-}));
-transformEnhancementsOut.mockImplementation((state) => state);
+const mockDrilldownTransforms = {
+  transformIn: jest.fn().mockImplementation((state: SearchEmbeddableState) => ({
+    state,
+    references: [],
+  })),
+  transformOut: jest.fn().mockImplementation((state: StoredSearchEmbeddableState) => state),
+} as unknown as DrilldownTransforms;
 
 describe('searchEmbeddableTransforms', () => {
   beforeEach(() => {
@@ -41,10 +43,7 @@ describe('searchEmbeddableTransforms', () => {
         title: 'Test Title',
         description: 'Test Description',
       };
-      const result = getSearchEmbeddableTransforms(
-        transformEnhancementsIn,
-        transformEnhancementsOut
-      ).transformOut?.(state);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(state);
       expect(result).toEqual(state);
     });
 
@@ -79,10 +78,10 @@ describe('searchEmbeddableTransforms', () => {
           },
         ],
       };
-      const result = getSearchEmbeddableTransforms(
-        transformEnhancementsIn,
-        transformEnhancementsOut
-      ).transformOut?.(state, references);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
+        state,
+        references
+      );
       expect(inject).toHaveBeenCalledWith(
         { type: 'search', ...{ ...state, attributes: expectedAttributes } },
         references
@@ -108,34 +107,24 @@ describe('searchEmbeddableTransforms', () => {
           },
         ],
       };
-      const result = getSearchEmbeddableTransforms(
-        transformEnhancementsIn,
-        transformEnhancementsOut
-      ).transformOut?.(state);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(state);
       expect(result).toEqual({
         ...state,
         attributes: expectedAttributes,
       });
     });
-    it('transforms enhancements during transformOut', () => {
+    it('transforms drilldowns during transformOut', () => {
       const state: StoredSearchEmbeddableState = {
         title: 'Test Title',
         description: 'Test Description',
-        enhancements: {
-          dynamicActions: { events: [] },
-        },
+        drilldowns: [],
       };
       const mockReferences = [{ name: 'enhRef', type: 'dynamicAction', id: 'foo' }];
-      const result = getSearchEmbeddableTransforms(
-        transformEnhancementsIn,
-        transformEnhancementsOut
-      ).transformOut?.(state, mockReferences);
-      expect(transformEnhancementsOut).toHaveBeenCalledWith(
-        {
-          dynamicActions: { events: [] },
-        },
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
+        state,
         mockReferences
       );
+      expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, mockReferences);
       expect(result).toEqual({
         ...state,
       });
@@ -148,24 +137,20 @@ describe('searchEmbeddableTransforms', () => {
           savedObjectId: 'test-saved-object-id',
           title: 'Test Search',
           description: 'Test Description',
-          enhancements: {
-            dynamicActions: { events: [] },
-          },
+          drilldowns: [],
           columns: ['field1', 'field2'],
           sort: [['timestamp', 'desc']],
         };
 
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
 
         expect(result.state).toEqual({
           title: 'Test Search',
           description: 'Test Description',
           columns: ['field1', 'field2'],
           sort: [['timestamp', 'desc']],
-          enhancements: expect.any(Object),
+          drilldowns: [],
         });
 
         expect(result.references).toEqual([
@@ -176,9 +161,7 @@ describe('searchEmbeddableTransforms', () => {
           },
         ]);
 
-        expect(transformEnhancementsIn).toHaveBeenCalledWith({
-          dynamicActions: { events: [] },
-        });
+        expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(serializedState);
       });
 
       it('handles by-reference state without enhancements', () => {
@@ -188,10 +171,8 @@ describe('searchEmbeddableTransforms', () => {
           columns: ['field1'],
         };
 
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
 
         expect(result.state).toEqual({
           title: 'Test Search',
@@ -205,8 +186,6 @@ describe('searchEmbeddableTransforms', () => {
             id: 'test-saved-object-id',
           },
         ]);
-
-        expect(transformEnhancementsIn).not.toHaveBeenCalled();
       });
     });
 
@@ -230,10 +209,8 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Panel Title',
         };
 
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
 
         expect(extract).toHaveBeenCalledWith({
           type: 'search',
@@ -241,7 +218,6 @@ describe('searchEmbeddableTransforms', () => {
         });
         expect(result.state as StoredSearchEmbeddableByValueState).toEqual(serializedState);
         expect(result.references).toEqual([]);
-        expect(transformEnhancementsIn).not.toHaveBeenCalled();
       });
 
       it('handles by-value state with enhancements', () => {
@@ -260,20 +236,14 @@ describe('searchEmbeddableTransforms', () => {
             tabs: [],
             references: [],
           },
-          enhancements: {
-            dynamicActions: { events: [] },
-          },
+          drilldowns: [],
         };
 
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
 
         expect(result.references).toEqual([]);
-        expect(transformEnhancementsIn).toHaveBeenCalledWith({
-          dynamicActions: { events: [] },
-        });
+        expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(serializedState);
         expect(extract).toHaveBeenCalledWith({
           type: 'search',
           attributes: serializedState.attributes,

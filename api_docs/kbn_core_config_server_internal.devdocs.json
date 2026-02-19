@@ -30,6 +30,8 @@
           "[]"
         ],
         "path": "src/core/packages/config/server-internal/src/deprecation/core_deprecations.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

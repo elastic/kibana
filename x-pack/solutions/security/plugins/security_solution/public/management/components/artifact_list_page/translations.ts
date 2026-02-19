@@ -23,6 +23,30 @@ export const artifactListPageLabels = Object.freeze({
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.artifactListPage.addButtonTitle', {
     defaultMessage: 'Add artifact',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importButtonTitle',
+    {
+      defaultMessage: 'Import artifact list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportButtonTitle',
+    {
+      defaultMessage: 'Export artifact list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Artifact list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.artifactListPage.exportErrorToastTitle',
+    {
+      defaultMessage: 'Artifact list export failed',
+    }
+  ),
 
   // ------------------------------
   // EMPTY state labels
@@ -108,6 +132,10 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageTitle'
   | 'pageAboutInfo'
   | 'pageAddButtonTitle'
+  | 'pageImportButtonTitle'
+  | 'pageExportButtonTitle'
+  | 'pageExportSuccessToastTitle'
+  | 'pageExportErrorToastTitle'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'

@@ -37,7 +37,7 @@ export function getCreateBreadcrumbs({
 }) {
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue ? getLandingBreadcrumbs() : []),
+    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -82,7 +82,7 @@ export function getEditBreadcrumbs(
 ) {
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue ? getLandingBreadcrumbs() : []),
+    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
     {
       text: title,
     },

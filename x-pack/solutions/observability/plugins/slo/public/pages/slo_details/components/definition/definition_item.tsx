@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 
 export interface Props {
-  title: string;
+  title: ReactNode;
   subtitle: ReactNode;
 }
 
 export function DefinitionItem({ title, subtitle }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{title}</strong>
-        </EuiText>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
       <EuiFlexItem grow={false}>{subtitle}</EuiFlexItem>
     </EuiFlexGroup>
   );

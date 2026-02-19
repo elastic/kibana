@@ -30,7 +30,7 @@ export const createGenerateConfigPrompt = ({
 
 Schema for ${chartType}:
 <schema type="${chartType}">
-${JSON.stringify(schema, null, 2)}
+${JSON.stringify(schema)}
 </schema>
 
 ${
@@ -42,8 +42,6 @@ ${
   `
     : ''
 }
-
-${existingConfig ? `Existing configuration to modify: ${existingConfig}` : ''}
 
 ${additionalInstructions}
 

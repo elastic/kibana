@@ -32,6 +32,8 @@
           "(num: number | undefined, dp: number) => string | number"
         ],
         "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
+            "lineNumber": 16,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -65,6 +69,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
+            "lineNumber": 16,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

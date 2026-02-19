@@ -32,7 +32,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
 }: {
   messageId: K;
   values: ErrorValues<K>;
-}): { message: string; type?: 'error' | 'warning' } {
+}): { message: string; type?: 'error' | 'warning'; underlinedWarning?: boolean } {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
@@ -44,11 +44,34 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'unmappedColumnWarning':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unmappedColumnWarning', {
+          defaultMessage: `"{name}" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
+          values: { name: out.name },
+        }),
+        type: 'warning',
+        underlinedWarning: true,
+      };
     case 'unknownIndex':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index "{name}"',
           values: { name: out.name },
+        }),
+      };
+    case 'unknownCastingType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownCastingType', {
+          defaultMessage: 'Unknown inline cast type "::{castType}"',
+          values: { castType: out.castType },
+        }),
+      };
+    case 'invalidInlineCast':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidInlineCast', {
+          defaultMessage: 'Cannot cast value of type "{valueType}" to type "{castType}"',
+          values: { castType: out.castType, valueType: out.valueType },
         }),
       };
     case 'unknownFunction':
@@ -242,6 +265,61 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlInvalidParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+          defaultMessage: '[PROMQL] {reason}',
+          values: { reason: out.reason },
+        }),
+        type: 'error',
+      };
+    case 'promqlMutuallyExclusiveParams':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+          defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
+          values: { param1: out.param1, param2: out.param2 },
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingQuery':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
+          defaultMessage: '[PROMQL] Missing query',
+        }),
+        type: 'error',
+      };
+    case 'promqlUnknownFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+          defaultMessage: '[PROMQL] Unknown function "{fn}"',
+          values: { fn: out.fn },
+        }),
+        type: 'error',
+      };
+    case 'promqlWrongNumberArgs':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+          defaultMessage:
+            '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
+          values: { fn: out.fn, expected: out.expected, actual: out.actual },
+        }),
+        type: 'error',
+      };
+    case 'promqlGroupingNotAllowed':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+          defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
+        }),
+        type: 'error',
+      };
+    case 'promqlNoMatchingSignature':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+          defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
+          values: { fn: out.fn, required: out.required },
+        }),
+        type: 'error',
+      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(
@@ -369,6 +447,38 @@ Expected one of:
         ),
         type: 'error',
       };
+    case 'invalidSettingValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
+          defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
+          values: {
+            value: out.value,
+            setting: out.setting,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unknownMapParameterName':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
+          defaultMessage: 'Unknown parameter "{paramName}".',
+          values: { paramName: out.paramName },
+        }),
+        type: 'error',
+      };
+    case 'invalidMapParameterValueType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
+          defaultMessage:
+            'Invalid type for parameter "{paramName}". Expected type: {expectedType}. Received: {actualType}.',
+          values: {
+            paramName: out.paramName,
+            expectedType: out.expectedType,
+            actualType: out.actualType,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -381,21 +491,23 @@ export function getMessageFromId<K extends ErrorTypes>({
   values: ErrorValues<K>;
   locations: ESQLLocation;
 }): ESQLMessage {
-  const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations, payload.messageId);
+  const { message, type = 'error', underlinedWarning } = getMessageAndTypeFromId(payload);
+  return createMessage(type, message, locations, payload.messageId, underlinedWarning);
 }
 
 export function createMessage(
   type: 'error' | 'warning',
   message: string,
   location: ESQLLocation,
-  messageId: string
+  messageId: string,
+  underlinedWarning?: boolean
 ): ESQLMessage {
   return {
     type,
     text: message,
     location,
     code: messageId,
+    underlinedWarning,
   };
 }
 
@@ -464,6 +576,12 @@ export const errors = {
       'getColumnsFor'
     ),
 
+  unmappedColumnWarning: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unmappedColumnWarning', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
+
   unknownIndex: (source: ESQLSource): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownIndex', source.location, { name: source.name }),
@@ -472,6 +590,12 @@ export const errors = {
 
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
+
+  unknownCastingType: (castType: string, location: ESQLLocation): ESQLMessage =>
+    errors.byId('unknownCastingType', location, { castType }),
+
+  invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation): ESQLMessage =>
+    errors.byId('invalidInlineCast', location, { castType, valueType }),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),

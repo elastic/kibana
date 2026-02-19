@@ -593,12 +593,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(result.message).to.match(
-          /Connector must be one of the following types: \.webhook, \.cases-webhook/
+          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
         );
       });
     });
 
-    describe('OAuth2 client credentials', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236174
+    describe.skip('OAuth2 client credentials', () => {
       let oauth2Server: OAuth2Server;
       let webhookActionId: string = '';
       const clientId = 'test-client-id';

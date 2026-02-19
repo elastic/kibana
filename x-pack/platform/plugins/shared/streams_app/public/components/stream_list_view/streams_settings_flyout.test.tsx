@@ -37,12 +37,14 @@ describe('StreamsSettingsFlyout', () => {
   const mockRefreshStreams = jest.fn();
   const mockAddError = jest.fn();
   const mockTrackWiredStreamsStatusChanged = jest.fn();
+  const mockGetClassicStatus = jest.fn();
 
   const defaultKibanaMock = {
     dependencies: {
       start: {
         streams: {
           getWiredStatus: mockGetWiredStatus,
+          getClassicStatus: mockGetClassicStatus,
           enableWiredMode: mockEnableWiredMode,
           disableWiredMode: mockDisableWiredMode,
         },
@@ -75,8 +77,10 @@ describe('StreamsSettingsFlyout', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       ui: { manage: true },
       features: {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseKibana.mockReturnValue(defaultKibanaMock as any);
   });
 
@@ -379,6 +383,7 @@ describe('StreamsSettingsFlyout', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         ui: { manage: false },
         features: {},
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       mockGetWiredStatus.mockResolvedValue({

@@ -23,6 +23,8 @@
         "label": "executionContextServiceMock",
         "description": [],
         "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -57,6 +61,8 @@
               ">"
             ],
             "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -75,6 +81,8 @@
               ">"
             ],
             "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -93,6 +101,8 @@
               ">"
             ],
             "path": "src/core/packages/execution-context/server-mocks/src/execution_context_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

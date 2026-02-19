@@ -9,7 +9,6 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
-import undici from 'undici';
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -17,6 +16,21 @@ jest.mock('timers/promises', () => ({
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+
+// Mock undici
+jest.mock('undici', () => {
+  const actualUndici = jest.requireActual('undici');
+  return {
+    ...actualUndici,
+    fetch: jest.fn(),
+    Agent: jest.fn(),
+  };
+});
+
+// Import undici after mocking to get the mocked exports
+import * as undici from 'undici';
+const mockUndiciFetch = jest.mocked(undici.fetch);
+const mockUndiciAgent = jest.mocked(undici.Agent);
 
 jest.mock('../paths', () => ({
   SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
@@ -80,7 +94,7 @@ describe(`#runUiamContainer()`, () => {
             "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
             "--name",
             "uiam-cosmosdb",
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251205",
+            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251223",
             "--protocol",
             "https",
             "--port",
@@ -179,11 +193,15 @@ describe(`#runUiamContainer()`, () => {
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",
             "uiam.tokens.jwt.signing.secret=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.verify.clock.skew=PT2S",
+            "--env",
+            "uiam.tokens.refresh.grace_period=PT3S",
             "--health-cmd",
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
             "uiam",
-            "docker.elastic.co/cloud-ci/uiam:git-f56eb1a3b9a8",
+            "docker.elastic.co/kibana-ci/uiam:latest-verified",
           ],
         ],
         Array [
@@ -308,7 +326,7 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(30);
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
 
     execa.mockClear();
 
@@ -322,41 +340,39 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(30);
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
   });
 });
 
 describe('#initializeUiamContainers', () => {
-  const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
+  const AGENT_MOCK = {
+    name: "I'm the danger. I'm the one who knocks.",
+    dispatch: jest.fn(),
+  };
 
-  let agentSpy: jest.SpyInstance;
-  let fetchSpy: jest.SpyInstance;
   beforeEach(() => {
-    agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
-    fetchSpy = jest.spyOn(global, 'fetch');
-  });
-
-  afterEach(() => {
-    agentSpy.mockRestore();
-    fetchSpy.mockRestore();
+    mockUndiciAgent.mockImplementation(() => AGENT_MOCK as any);
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database does not exist', async () => {
-    fetchSpy.mockResolvedValue({ ok: true, status: 201 });
+    mockUndiciFetch.mockResolvedValue({ ok: true, status: 201 } as any);
 
-    await initializeUiamContainers(new ToolingLog());
+    const promise = initializeUiamContainers(new ToolingLog());
+    await jest.runAllTimersAsync();
+    await promise;
 
-    expect(agentSpy).toHaveBeenCalledTimes(1);
-    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+    expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
+    expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(4);
-    expect(fetchSpy.mock.calls).toMatchInlineSnapshot(`
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "https://127.0.0.1:8081/dbs",
+          "https://localhost:8081/dbs",
           Object {
             "body": "{\\"id\\":\\"uiam-db\\"}",
             "dispatcher": Object {
+              "dispatch": [MockFunction],
               "name": "I'm the danger. I'm the one who knocks.",
             },
             "headers": Object {
@@ -369,10 +385,11 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"users\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {
+              "dispatch": [MockFunction],
               "name": "I'm the danger. I'm the one who knocks.",
             },
             "headers": Object {
@@ -385,10 +402,11 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"api-keys\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {
+              "dispatch": [MockFunction],
               "name": "I'm the danger. I'm the one who knocks.",
             },
             "headers": Object {
@@ -401,10 +419,11 @@ describe('#initializeUiamContainers', () => {
           },
         ],
         Array [
-          "https://127.0.0.1:8081/dbs/uiam-db/colls",
+          "https://localhost:8081/dbs/uiam-db/colls",
           Object {
             "body": "{\\"id\\":\\"token-invalidation\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
             "dispatcher": Object {
+              "dispatch": [MockFunction],
               "name": "I'm the danger. I'm the one who knocks.",
             },
             "headers": Object {
@@ -421,47 +440,47 @@ describe('#initializeUiamContainers', () => {
   });
 
   test('should be able to initialize UIAM containers if Cosmos DB database and collections exist', async () => {
-    fetchSpy.mockResolvedValue({ ok: false, status: 409 });
+    mockUndiciFetch.mockResolvedValue({ ok: false, status: 409 } as any);
 
     await initializeUiamContainers(new ToolingLog());
 
-    expect(agentSpy).toHaveBeenCalledTimes(1);
-    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+    expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
+    expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(4);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(4);
   });
 
   test('fails if cannot create database', async () => {
-    fetchSpy.mockResolvedValue({
+    mockUndiciFetch.mockResolvedValue({
       ok: false,
       status: 500,
       text: () => Promise.resolve('Some server error'),
-    });
+    } as any);
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
       `[Error: Failed to create database (uiam-db): 500 Some server error]`
     );
 
-    expect(agentSpy).toHaveBeenCalledTimes(1);
-    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+    expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
+    expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
   });
 
   test('fails if cannot create collection', async () => {
-    fetchSpy.mockResolvedValueOnce({ ok: true, status: 201 }).mockResolvedValueOnce({
+    mockUndiciFetch.mockResolvedValueOnce({ ok: true, status: 201 } as any).mockResolvedValueOnce({
       ok: false,
       status: 500,
       text: () => Promise.resolve('Some server error'),
-    });
+    } as any);
 
     await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
       `[Error: Failed to create collection (users): 500 Some server error]`
     );
 
-    expect(agentSpy).toHaveBeenCalledTimes(1);
-    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+    expect(mockUndiciAgent).toHaveBeenCalledTimes(1);
+    expect(mockUndiciAgent).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(2);
   });
 });

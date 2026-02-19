@@ -17,26 +17,26 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
+  type InlineCastingType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
+import { inlineCastsMapping } from '../generated/inline_casts_mapping';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
+import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/autocomplete_utils';
+import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
 import type { ESQLAstItem, ESQLFunction } from '../../../types';
-import { removeFinalUnknownIdentiferArg } from './shared';
+import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../../ast/is';
-import { SuggestionCategory } from '../../../shared/sorting/types';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
@@ -292,7 +292,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     category = SuggestionCategory.FUNCTION_SCALAR;
   }
 
-  return withAutoSuggest({
+  return {
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -318,7 +318,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
       id: 'editor.action.triggerParameterHints',
       title: '',
     },
-  });
+  };
 }
 
 export function checkFunctionInvocationComplete(
@@ -436,12 +436,20 @@ export const buildColumnSuggestions = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
     supportsMultiValue?: boolean;
+    isFieldsBrowserEnabled?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
   const fieldsSuggestions = columns.map((column) => {
     const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
-    const titleCaseType = `${column.name} (${fieldType})`;
+    const unmmapedSuffix = column.isUnmappedField
+      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+          defaultMessage: ' - Unmapped Field',
+        })
+      : '';
+
+    const titleCaseType = `${column.name} (${fieldType})${unmmapedSuffix}`;
+
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
     // that are registered wrongly, won't be shown as suggestions.
@@ -484,5 +492,22 @@ export const buildColumnSuggestions = (
     : [];
   suggestions.push(...controlSuggestions);
 
+  if (options?.isFieldsBrowserEnabled) {
+    const commandArgs = buildFieldsBrowserCommandArgs({
+      fields: columns.map((col) => ({ name: col.name, type: col.type })),
+    });
+    suggestions.unshift(createFieldsBrowserSuggestion(commandArgs));
+  }
+
   return [...suggestions];
 };
+
+/**
+ * Given an inline cast data type, return the corresponding function that performs the cast.
+ * E.g., for 'integer' or 'int', it returns 'to_integer'.
+ *
+ * It returns undefined if the inline cast data type is not supported.
+ */
+export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
+  return inlineCastsMapping[castingType];
+}

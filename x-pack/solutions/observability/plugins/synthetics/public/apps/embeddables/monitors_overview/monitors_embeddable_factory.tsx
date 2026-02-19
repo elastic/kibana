@@ -20,7 +20,7 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { StatusGridComponent } from './monitors_grid_component';
@@ -64,19 +64,17 @@ export const getMonitorsEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
-      const view$ = new BehaviorSubject(initialState.rawState.view);
+      const filters$ = new BehaviorSubject(initialState.filters);
+      const view$ = new BehaviorSubject(initialState.view);
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            view: view$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          view: view$.getValue(),
         };
       }
 
@@ -96,9 +94,9 @@ export const getMonitorsEmbeddableFactory = (
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
-          if (lastSaved?.rawState) view$.next(lastSaved?.rawState.view);
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+          if (lastSaved) view$.next(lastSaved?.view);
         },
       });
 

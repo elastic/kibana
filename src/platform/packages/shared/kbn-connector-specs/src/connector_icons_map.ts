@@ -44,4 +44,46 @@ export const ConnectorIconsMap: Map<
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
+  [
+    '.jina',
+    lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
+  ],
+  [
+    '.sharepoint-online',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
+        )
+    ),
+  ],
+  [
+    '.abuseipdb',
+    lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
+  ],
+  [
+    '.greynoise',
+    lazy(() => import(/* webpackChunkName: "connectorIconGreynoise" */ './specs/greynoise/icon')),
+  ],
+  [
+    '.shodan',
+    lazy(() => import(/* webpackChunkName: "connectorIconShodan" */ './specs/shodan/icon')),
+  ],
+  [
+    '.urlvoid',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
+  ],
+  [
+    '.jira-cloud',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
+    ),
+  ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
+  ],
 ]);

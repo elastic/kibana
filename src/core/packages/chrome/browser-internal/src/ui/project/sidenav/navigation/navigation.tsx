@@ -15,7 +15,6 @@ import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
-  ChromeRecentlyAccessedHistoryItem,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
@@ -25,7 +24,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
-import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -35,46 +33,37 @@ export interface ChromeNavigationProps {
   // kibana deps
   basePath: BasePath;
   application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-  reportEvent: (eventType: string, eventData: object) => void;
 
   // nav state
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
-  // other state that might be needed later
-  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  isFeedbackBtnVisible$: Observable<boolean>;
-  loadingCount$: Observable<number>;
-  dataTestSubj$?: Observable<string | undefined>;
+  // collapse toggle callback
+  onToggleCollapsed: (isCollapsed: boolean) => void;
 
-  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
+  // other
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
-  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, logoItem, activeItemId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
         logo={logoItem}
-        sidePanelFooter={
-          <NavigationFeedbackSnippet
-            solutionId={solutionId}
-            feedbackUrlParams={feedbackUrlParams}
-          />
-        }
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
+        onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -15,6 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiButtonProps, UseEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { defer } from 'lodash';
@@ -36,6 +38,19 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   background-color: ${euiTheme.colors.backgroundBasePlain};
   border-block-end: none;
 `;
+
+const TECH_PREVIEW_LABEL = i18n.translate(
+  'xpack.agentBuilder.tools.bulkImportMcp.techPreviewBadgeLabel',
+  { defaultMessage: 'Technical preview' }
+);
+
+const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.agentBuilder.tools.bulkImportMcp.techPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
 
 const bottomBarStyles = ({ euiTheme }: UseEuiTheme) => css`
   z-index: ${euiTheme.levels.header};
@@ -151,7 +166,18 @@ export const BulkImportMcpTools: React.FC = () => {
     <FormProvider {...form}>
       <KibanaPageTemplate data-test-subj="agentBuilderBulkImportMcpToolsPage">
         <KibanaPageTemplate.Header
-          pageTitle={labels.tools.bulkImportMcp.title}
+          pageTitle={
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>{labels.tools.bulkImportMcp.title}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={TECH_PREVIEW_LABEL}
+                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                  size="m"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
           description={labels.tools.bulkImportMcp.description}
           rightSideItems={[
             renderImportToolsButton({ size: 'm', testSubj: 'bulkImportMcpToolsImportButton' }),

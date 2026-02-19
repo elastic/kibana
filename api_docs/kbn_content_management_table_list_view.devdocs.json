@@ -30,6 +30,8 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view/src/table_list_view.tsx",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view/src/table_list_view.tsx",
+            "lineNumber": 54,
+            "columnNumber": 66,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +86,8 @@
           "<T>, \"id\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"initialPageSize\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"getOnClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\" | \"createdByEnabled\" | \"recentlyAccessed\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view/src/table_list_view.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

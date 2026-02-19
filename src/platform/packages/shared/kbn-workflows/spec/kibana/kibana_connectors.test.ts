@@ -63,11 +63,11 @@ describe('Generated Kibana Connectors', () => {
 
   // Test samples based on currently available connectors
   const TEST_SAMPLES = [
-    // Case management endpoints
-    'kibana.createCaseDefaultSpace',
-    'kibana.updateCaseDefaultSpace',
-    'kibana.getCaseDefaultSpace',
-    'kibana.addCaseCommentDefaultSpace',
+    // Case management endpoints (using new clean type names)
+    'kibana.createCase',
+    'kibana.updateCase',
+    'kibana.getCase',
+    'kibana.addCaseComment',
     // Alert management endpoints
     'kibana.SetAlertsStatus',
     'kibana.SetAlertTags',
@@ -191,11 +191,11 @@ describe('Generated Kibana Connectors', () => {
             const normalizedParam = param.replace(/['"]/g, '');
             const hasField = schemaKeys.includes(param) || schemaKeys.includes(normalizedParam);
 
-            // Special case for createCaseDefaultSpace: the generator incorrectly lists nested fields
+            // Special case for createCase: the generator incorrectly lists nested fields
             // like 'key', 'type', 'value' which are actually nested within 'customFields'
             // The actual schema is correct, so we'll be more lenient for this specific case
             if (
-              connector.type === 'kibana.createCaseDefaultSpace' &&
+              connector.type === 'kibana.createCase' &&
               ['key', 'type', 'value'].includes(param)
             ) {
               // These are nested fields within customFields, not top-level fields
@@ -299,18 +299,18 @@ describe('Generated Kibana Connectors', () => {
 
     it('should handle sample data validation for test connectors', () => {
       const testData = {
-        'kibana.createCaseDefaultSpace': {
+        'kibana.createCase': {
           'kbn-xsrf': 'true',
           title: 'Test Case',
           description: 'Test case description',
         },
-        'kibana.updateCaseDefaultSpace': {
+        'kibana.updateCase': {
           'case-id': 'test-case-id',
           'kbn-xsrf': 'true',
           title: 'Updated Test Case',
         },
-        'kibana.getCaseDefaultSpace': { 'case-id': 'test-case-id' },
-        'kibana.addCaseCommentDefaultSpace': {
+        'kibana.getCase': { 'case-id': 'test-case-id' },
+        'kibana.addCaseComment': {
           'case-id': 'test-case-id',
           'kbn-xsrf': 'true',
           comment: 'Test comment',
@@ -343,10 +343,8 @@ describe('Generated Kibana Connectors', () => {
   });
 
   describe('Nested Schema Issue Detection', () => {
-    it('should detect the createCaseDefaultSpace nested schema issue', () => {
-      const connector = GENERATED_KIBANA_CONNECTORS.find(
-        (c) => c.type === 'kibana.createCaseDefaultSpace'
-      )!;
+    it('should detect the createCase nested schema issue', () => {
+      const connector = GENERATED_KIBANA_CONNECTORS.find((c) => c.type === 'kibana.createCase')!;
       expect(connector).toBeDefined();
 
       // This test specifically checks for the issue mentioned in the user query
@@ -374,10 +372,8 @@ describe('Generated Kibana Connectors', () => {
       }).not.toThrow();
     });
 
-    it('should have clean syntax without body wrapper for createCaseDefaultSpace', () => {
-      const connector = GENERATED_KIBANA_CONNECTORS.find(
-        (c) => c.type === 'kibana.createCaseDefaultSpace'
-      )!;
+    it('should have clean syntax without body wrapper for createCase', () => {
+      const connector = GENERATED_KIBANA_CONNECTORS.find((c) => c.type === 'kibana.createCase')!;
       expect(connector).toBeDefined();
 
       // Should have proper bodyParams (actual schema fields, not 'body' wrapper)

@@ -34,6 +34,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor: 'traditional',
       },
+      airgapped: false,
     },
   });
 }

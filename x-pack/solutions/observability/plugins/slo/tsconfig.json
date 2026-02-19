@@ -29,7 +29,6 @@
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
@@ -52,7 +51,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/std",
     "@kbn/core-lifecycle-browser",
-    "@kbn/controls-plugin",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-view-editor-plugin",
@@ -87,7 +85,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/datemath",
-    "@kbn/presentation-containers",
     "@kbn/dashboard-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
@@ -114,8 +111,10 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
-    "@kbn/deeplinks-management",
+    "@kbn/control-group-renderer",
     "@kbn/react-query",
+    "@kbn/deeplinks-management",
     "@kbn/deeplinks-observability",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ]
 }

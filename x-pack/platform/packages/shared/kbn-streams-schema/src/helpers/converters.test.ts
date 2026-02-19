@@ -54,22 +54,24 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
 
-    it('converts group streams', () => {
-      const request: Streams.GroupStream.UpsertRequest = {
+    it('converts query streams', () => {
+      const request: Streams.QueryStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
           description: '',
-          group: {
-            metadata: {},
-            tags: [],
-            members: [],
+          query: {
+            view: '$.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
           },
         },
       };
 
-      const definition = convertUpsertRequestIntoDefinition('group-stream', request);
+      const definition = convertUpsertRequestIntoDefinition('my-query-stream', request);
 
-      expect(Streams.GroupStream.Definition.is(definition)).toEqual(true);
+      expect(Streams.QueryStream.Definition.is(definition)).toEqual(true);
+      expect((definition as Streams.QueryStream.Definition).query.view).toEqual(
+        '$.my-query-stream'
+      );
     });
   });
 
@@ -159,24 +161,27 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
     });
 
-    it('converts group streams', () => {
-      const getResponse: Streams.GroupStream.GetResponse = {
+    it('converts query streams', () => {
+      const getResponse: Streams.QueryStream.GetResponse = {
         stream: {
-          name: 'group-stream',
+          name: 'my-query-stream',
           description: '',
           updated_at: new Date().toISOString(),
-          group: {
-            metadata: {},
-            tags: [],
-            members: [],
+          query: {
+            view: '$.my-query-stream',
+            esql: 'FROM logs | WHERE service.name == "test"',
           },
         },
+        inherited_fields: {},
         ...emptyAssets,
       };
 
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
-      expect(Streams.GroupStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect(Streams.QueryStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect((upsertRequest as Streams.QueryStream.UpsertRequest).stream.query.view).toEqual(
+        '$.my-query-stream'
+      );
     });
   });
 });

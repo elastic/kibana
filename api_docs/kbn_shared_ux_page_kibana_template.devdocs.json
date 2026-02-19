@@ -34,6 +34,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/page_template.tsx",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -49,6 +51,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,6 +67,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -82,6 +88,8 @@
           "({ children, ...dependencies }: React.PropsWithChildren<KibanaDependencies>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,6 +104,8 @@
               "React.PropsWithChildren<KibanaDependencies>"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+            "lineNumber": 38,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,6 +135,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,6 +159,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/kibana_template/impl/src/services.tsx",
+            "lineNumber": 26,
+            "columnNumber": 95,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -170,6 +184,8 @@
           "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -218,6 +234,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,6 +257,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -260,6 +280,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

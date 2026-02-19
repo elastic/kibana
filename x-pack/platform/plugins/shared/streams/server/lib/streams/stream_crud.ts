@@ -25,8 +25,11 @@ import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+
 import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { parseError } from './errors/parse_error';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -45,7 +48,20 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
-    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
+    return {
+      dsl: {
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
+      },
+    };
   }
 
   if (dataStream.next_generation_managed_by === 'Unmanaged') {
@@ -154,7 +170,8 @@ async function fetchComponentTemplate(
       }
     );
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return { name, component_template: undefined };
     }
     throw e;
@@ -272,7 +289,8 @@ export async function getDataStream({
     const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
     dataStream = response.data_streams[0];
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       // fall through and throw not found
     } else {
       throw e;
@@ -304,7 +322,8 @@ export async function getClusterDefaultFailureStoreRetentionValue({
       defaultRetention = persistentDSRetention ?? defaultsDSRetention;
     }
   } catch (e) {
-    if (e.meta?.statusCode === 403) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 403) {
       // if user doesn't have permissions to read cluster settings, we just return undefined
     } else {
       throw e;
@@ -389,7 +408,8 @@ export async function getFailureStoreSize({
       total_size_in_bytes: docsStats?.total_size_in_bytes || 0,
     };
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;
@@ -417,7 +437,8 @@ export async function getFailureStoreMeteringSize({
       total_size_in_bytes: response._total?.size_in_bytes || 0,
     };
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;
@@ -446,7 +467,8 @@ export async function getFailureStoreCreationDate({
     }
     return age || undefined;
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;
