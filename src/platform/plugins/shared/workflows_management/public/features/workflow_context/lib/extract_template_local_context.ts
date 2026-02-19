@@ -43,32 +43,30 @@ export interface TemplateLocalContext {
   forLoopScopes: ForLoopScope[];
 }
 
-const EMPTY_CONTEXT: TemplateLocalContext = {
+const EMPTY_CONTEXT: TemplateLocalContext = Object.freeze({
   assignVars: [],
   captureNames: [],
   forLoopScopes: [],
-};
+});
 
 // ---------------------------------------------------------------------------
 // Tag-type narrowing helpers
 // ---------------------------------------------------------------------------
 
 function isTag(tpl: unknown): tpl is Tag {
-  return (
-    tpl != null && typeof tpl === 'object' && 'name' in tpl && typeof (tpl as Tag).name === 'string'
-  );
+  return tpl != null && typeof tpl === 'object' && 'name' in tpl && typeof tpl.name === 'string';
 }
 
 function isAssignTagType(tpl: unknown): tpl is AssignTag {
-  return isTag(tpl) && (tpl as AssignTag).name === 'assign';
+  return isTag(tpl) && tpl.name === 'assign';
 }
 
 function isCaptureTagType(tpl: unknown): tpl is CaptureTag {
-  return isTag(tpl) && 'identifier' in tpl && 'variable' in tpl && 'templates' in tpl;
+  return isTag(tpl) && tpl.name === 'capture';
 }
 
 function isForTagType(tpl: unknown): tpl is ForTag {
-  return isTag(tpl) && (tpl as ForTag).name === 'for';
+  return isTag(tpl) && tpl.name === 'for';
 }
 
 // ---------------------------------------------------------------------------
@@ -143,49 +141,47 @@ function resolveChildren(tpl: Template): Template[] {
 // AST walk
 // ---------------------------------------------------------------------------
 
-function walkTemplates(
-  templates: Template[],
-  beforeOffset: number,
-  assignVars: AssignVariable[],
-  captureNames: Set<string>,
-  forLoopScopes: ForLoopScope[]
-): void {
+interface WalkAccumulator {
+  assignVars: AssignVariable[];
+  captureNames: Set<string>;
+  forLoopScopes: ForLoopScope[];
+}
+
+function walkTemplates(templates: Template[], beforeOffset: number, acc: WalkAccumulator): void {
   for (const tpl of templates) {
     const { token } = tpl;
+    const children = tpl.children ? resolveChildren(tpl) : [];
+
     if (token && typeof token.begin === 'number' && typeof token.end === 'number') {
       if (isAssignTagType(tpl)) {
-        const args = tpl.token.args ?? '';
-        const varName = parseAssignVariableName(args);
-        const rhs = parseAssignRhs(args);
+        const varName = parseAssignVariableName(tpl.token.args);
+        const rhs = parseAssignRhs(tpl.token.args);
         if (varName && token.end <= beforeOffset) {
-          assignVars.push({ name: varName, rhs: rhs ?? '' });
+          acc.assignVars.push({ name: varName, rhs: rhs ?? '' });
         }
       } else if (isCaptureTagType(tpl)) {
-        const capture = tpl;
-        const captureBodyEnd = getMaxTokenEnd(capture.templates);
+        const captureBodyEnd = getMaxTokenEnd(tpl.templates);
         if (captureBodyEnd <= beforeOffset) {
-          captureNames.add(capture.variable);
+          acc.captureNames.add(tpl.variable);
         }
       } else if (isForTagType(tpl)) {
-        const forTag = tpl;
-        const { variable: variableName, collection, templates: bodyTemplates } = forTag;
+        const { variable: variableName, collection, templates: bodyTemplates } = tpl;
         const collectionPath = collection.getText();
         const bodyStart = token.end;
         const bodyEnd = getMaxTokenEnd(bodyTemplates);
         if (variableName && bodyEnd >= bodyStart) {
-          forLoopScopes.push({
+          acc.forLoopScopes.push({
             variableName,
             bodyStart,
             bodyEnd,
-            collectionPath: collectionPath || undefined,
+            collectionPath: collectionPath !== '' ? collectionPath : undefined,
           });
         }
       }
     }
 
-    const children = resolveChildren(tpl);
     if (children.length > 0) {
-      walkTemplates(children, beforeOffset, assignVars, captureNames, forLoopScopes);
+      walkTemplates(children, beforeOffset, acc);
     }
   }
 }
@@ -202,6 +198,13 @@ function walkTemplates(
  * On parse error returns empty context so the editor stays usable
  * (e.g. when the user is mid-edit).
  *
+ * Known limitations:
+ * - `{% increment %}` and `{% decrement %}` tags are not extracted. Variables
+ *   introduced by these tags will still be reported as unknown.
+ * - Assigns inside conditional branches (`{% if %}`/`{% else %}`) are treated
+ *   as unconditionally available once their tag offset is before the cursor,
+ *   even though the branch might not execute at runtime.
+ *
  * @param templateString - Full content of the scalar (e.g. a step's message field)
  * @param offsetInTemplate - Character offset inside the template (cursor position)
  */
@@ -214,16 +217,18 @@ export function getTemplateLocalContext(
   }
   try {
     const templates = parseTemplateString(templateString);
-    const assignVars: AssignVariable[] = [];
-    const captureNames = new Set<string>();
-    const forLoopScopes: ForLoopScope[] = [];
+    const acc: WalkAccumulator = {
+      assignVars: [],
+      captureNames: new Set<string>(),
+      forLoopScopes: [],
+    };
 
-    walkTemplates(templates, offsetInTemplate, assignVars, captureNames, forLoopScopes);
+    walkTemplates(templates, offsetInTemplate, acc);
 
     return {
-      assignVars,
-      captureNames: Array.from(captureNames),
-      forLoopScopes,
+      assignVars: acc.assignVars,
+      captureNames: Array.from(acc.captureNames),
+      forLoopScopes: acc.forLoopScopes,
     };
   } catch {
     return EMPTY_CONTEXT;
