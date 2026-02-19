@@ -11,12 +11,12 @@ import { test } from '../../../fixtures';
 import { RULE_NAMES } from '../../../fixtures/generators';
 import { getRuleIdByName } from '../../../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/249094
-test.describe.skip(
+test.describe(
   'Rule Details Page - Admin',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let ruleId: string;
+    let testDashboardId: string | undefined;
 
     test.beforeAll(async ({ apiServices }) => {
       // Get the rule ID for the custom threshold rule
@@ -29,6 +29,17 @@ test.describe.skip(
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      if (!testDashboardId) {
+        return;
+      }
+
+      await kbnClient.savedObjects.delete({
+        type: 'dashboard',
+        id: testDashboardId,
+      });
     });
 
     test('should navigate from rules table to rule details and display page correctly', async ({
@@ -88,7 +99,7 @@ test.describe.skip(
       // Verify navigation to alerts tab with correct URL parameters
       const url = page.url();
       expect(url).toContain('tabId=alerts');
-      expect(url).toContain('selectedOptions:!(active)');
+      expect(url).toContain('selected_options:!(active)');
       expect(url).toContain('rangeFrom:now-30d');
       expect(url).toContain('rangeTo:now');
     });
@@ -107,7 +118,7 @@ test.describe.skip(
       const url = page.url();
       expect(url).toContain('tabId=alerts');
       // All statuses = empty selectedOptions array
-      expect(url).toContain('selectedOptions:!()');
+      expect(url).toContain('selected_options:!()');
       expect(url).toContain('rangeFrom:now-30d');
       expect(url).toContain('rangeTo:now');
     });
@@ -167,31 +178,21 @@ test.describe.skip(
           },
         },
       });
-      const testDashboardId = dashboard.id;
+      testDashboardId = dashboard.id;
 
-      try {
-        // Navigate to rule details
-        await pageObjects.ruleDetailsPage.gotoById(ruleId);
-        await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
+      // Navigate to rule details
+      await pageObjects.ruleDetailsPage.gotoById(ruleId);
+      await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
 
-        // Open rule edit form
-        await pageObjects.ruleDetailsPage.openRuleEditForm();
+      // Open rule edit form
+      await pageObjects.ruleDetailsPage.openRuleEditForm();
 
-        // Verify dashboard selector is visible
-        await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
+      // Verify dashboard selector is visible
+      await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
 
-        // Get all dashboard options from the dropdown
-        const optionsText = await pageObjects.ruleDetailsPage.getDashboardsOptionsList();
-
-        // Verify options list is not empty
-        expect(optionsText.length).toBeGreaterThan(0);
-      } finally {
-        // Clean up: delete the test dashboard
-        await kbnClient.savedObjects.delete({
-          type: 'dashboard',
-          id: testDashboardId,
-        });
-      }
+      // Poll until at least one dashboard option is available
+      const optionsLocator = await pageObjects.ruleDetailsPage.getDashboardsOptionsLocator();
+      await expect.poll(async () => optionsLocator.count(), { timeout: 10000 }).toBeGreaterThan(0);
     });
   }
 );
