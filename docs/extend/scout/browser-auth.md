@@ -8,13 +8,15 @@ Use the `browserAuth` fixture to authenticate **UI tests**. Scout uses **SAML** 
 
 ## Log in with `browserAuth` [scout-browser-auth-login]
 
-Common helpers:
+Available methods:
 
-- `loginAsViewer()`
-- `loginAsPrivilegedUser()`
-- `loginAsAdmin()` (avoid unless required)
-- `loginAs(role)`
-- `loginWithCustomRole(roleDescriptor)`
+| Method                                | Description                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| `loginAsViewer()`                     | Read-only flows using the built-in `viewer` role                            |
+| `loginAsPrivilegedUser()`             | Resolves to `editor`, or `developer` for Elasticsearch serverless projects  |
+| `loginAsAdmin()`                      | Admin-only behavior (full access); avoid unless required                    |
+| `loginAs(role)`                       | Log in with a specific built-in role by name (must exist in the deployment) |
+| `loginWithCustomRole(roleDescriptor)` | Log in with a specific set of Kibana and Elasticsearch privileges           |
 
 ```ts
 test.beforeEach(async ({ browserAuth, pageObjects }) => {

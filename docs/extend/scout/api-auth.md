@@ -22,6 +22,16 @@ Both return headers you can spread into `apiClient` requests (`apiKeyHeader` or 
 
 Generate credentials once (often in `beforeAll`) and reuse them:
 
+Available methods on `requestAuth`:
+
+| Method                                   | Description                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `getApiKeyForViewer()`                   | Shorthand for `getApiKey('viewer')`                                                              |
+| `getApiKeyForPrivilegedUser()`           | Elevated non-admin role; uses `editor` (most) or `developer` (Elasticsearch serverless projects) |
+| `getApiKeyForAdmin()`                    | Shorthand for `getApiKey('admin')` (full access); avoid unless required                          |
+| `getApiKey(role)`                        | Create an API key for a predefined role by name (the role must exist in the deployment)          |
+| `getApiKeyForCustomRole(roleDescriptor)` | Create an API key scoped to a custom Kibana/Elasticsearch role descriptor                        |
+
 ```ts
 let viewerApiKey: RoleApiCredentials;
 
@@ -41,6 +51,12 @@ apiTest('calls a public API', async ({ apiClient }) => {
 ## Cookie-based auth [cookie-auth]
 
 Use an interactive session to simulate how the Kibana UI calls internal endpoints:
+
+Available methods on `samlAuth`:
+
+| Method | Description |
+| --- | --- |
+| `asInteractiveUser(role)` | Get a `cookieHeader` for a built-in role name (for example `viewer`) or a custom role descriptor |
 
 ```ts
 apiTest('calls an internal endpoint', async ({ apiClient, samlAuth }) => {
