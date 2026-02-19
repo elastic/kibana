@@ -12,7 +12,9 @@ export {
   transpile as transpileEsql,
   conditionToESQL,
   conditionToESQLAst,
+  generatePrelude,
 } from './src/transpilers/esql';
+export type { PreludeField, PreludeFieldType } from './src/transpilers/esql';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';

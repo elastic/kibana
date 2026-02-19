@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiPanel,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { AddRoutingRuleControls } from './control_bars';
 import { RoutingConditionEditor } from './routing_condition_editor';
 import {
+  selectCreateAsDraft,
   selectCurrentRule,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
@@ -22,8 +30,11 @@ export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
-  const { changeRule, changeRuleDebounced } = useStreamRoutingEvents();
+  const { changeRule, changeRuleDebounced, setCreateAsDraft } = useStreamRoutingEvents();
   const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
+  const createAsDraft = useStreamsRoutingSelector((snapshot) =>
+    selectCreateAsDraft(snapshot.context)
+  );
 
   useEffect(() => {
     if (panelRef.current) {
@@ -68,6 +79,24 @@ export function NewRoutingStreamEntry() {
                 defaultMessage: 'Tip: You can add a condition directly from a table cell.',
               })}
             </EuiText>
+          </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiToolTip
+              content={i18n.translate('xpack.streams.newRoutingStreamEntry.draftToggleTooltip', {
+                defaultMessage:
+                  'Draft streams are not materialized in Elasticsearch. Data is previewed using ES|QL queries. Materialize the stream later to start ingesting data.',
+              })}
+            >
+              <EuiSwitch
+                label={i18n.translate('xpack.streams.newRoutingStreamEntry.draftToggleLabel', {
+                  defaultMessage: 'Create as draft',
+                })}
+                checked={createAsDraft}
+                onChange={(e) => setCreateAsDraft(e.target.checked)}
+                data-test-subj="streamsAppNewRoutingStreamDraftToggle"
+                compressed
+              />
+            </EuiToolTip>
           </EuiFlexGroup>
           <AddRoutingRuleControls isStreamNameValid={isStreamNameValid} />
         </EuiFlexGroup>
