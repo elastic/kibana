@@ -12,6 +12,7 @@ import {
   getSelectedOption,
   getCloudConnectorOption,
   getCloudConnectorVars,
+  getAllCloudConnectorVarNames,
   getIacTemplateUrlFromVarGroupSelection,
   detectTargetCsp,
   type VarGroupSelection,
@@ -188,6 +189,71 @@ describe('var_group_helpers (cloud connector)', () => {
       const selections: VarGroupSelection = { auth_method: 'nonexistent' };
       const result = getCloudConnectorVars(varGroups, selections);
       expect(result).toEqual(new Set());
+    });
+  });
+
+  describe('getAllCloudConnectorVarNames', () => {
+    it('should return empty set when varGroups is undefined', () => {
+      const result = getAllCloudConnectorVarNames(undefined);
+      expect(result).toEqual(new Set());
+    });
+
+    it('should return empty set when varGroups is empty', () => {
+      const result = getAllCloudConnectorVarNames([]);
+      expect(result).toEqual(new Set());
+    });
+
+    it('should return empty set when no options have a cloud connector', () => {
+      const varGroups: RegistryVarGroup[] = [
+        {
+          name: 'auth_method',
+          title: 'Authentication Method',
+          selector_title: 'Select authentication method',
+          options: [{ name: 'manual', title: 'Manual', vars: ['access_key', 'secret_key'] }],
+        },
+      ];
+      const result = getAllCloudConnectorVarNames(varGroups);
+      expect(result).toEqual(new Set());
+    });
+
+    it('should return vars from all options with a provider field', () => {
+      const varGroups = createMockVarGroups();
+      const result = getAllCloudConnectorVarNames(varGroups);
+      expect(result).toEqual(new Set(['role_arn', 'external_id']));
+    });
+
+    it('should aggregate vars from multiple cloud connector options across var_groups', () => {
+      const varGroups: RegistryVarGroup[] = [
+        {
+          name: 'auth_method',
+          title: 'Authentication Method',
+          selector_title: 'Select authentication method',
+          options: [
+            {
+              name: 'aws_cloud_connector',
+              title: 'AWS Cloud Connector',
+              vars: ['role_arn', 'external_id'],
+              provider: 'aws',
+            },
+            {
+              name: 'azure_cloud_connector',
+              title: 'Azure Cloud Connector',
+              vars: ['tenant_id', 'client_id'],
+              provider: 'azure',
+            },
+            { name: 'manual', title: 'Manual', vars: ['access_key'] },
+          ],
+        },
+      ];
+      const result = getAllCloudConnectorVarNames(varGroups);
+      expect(result).toEqual(new Set(['role_arn', 'external_id', 'tenant_id', 'client_id']));
+    });
+
+    it('should not include vars from non-provider options', () => {
+      const varGroups = createMockVarGroups();
+      const result = getAllCloudConnectorVarNames(varGroups);
+      expect(result.has('access_key')).toBe(false);
+      expect(result.has('secret_key')).toBe(false);
     });
   });
 

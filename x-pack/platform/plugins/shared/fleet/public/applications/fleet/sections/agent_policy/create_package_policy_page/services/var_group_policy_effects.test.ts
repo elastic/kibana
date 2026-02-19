@@ -38,7 +38,7 @@ describe('var_group_policy_effects', () => {
         {
           name: 'cloud_connector',
           title: 'Cloud Connector',
-          vars: ['role_arn'],
+          vars: ['role_arn', 'external_id'],
           provider: 'aws',
         },
         {
@@ -150,12 +150,12 @@ describe('var_group_policy_effects', () => {
         expect(result?.supports_cloud_connector).toBe(true);
       });
 
-      it('should set supports_cloud_connectors var to false when deselecting cloud connector', () => {
+      it('should set supports_cloud_connectors var to false and clear secret vars when deselecting', () => {
         const packagePolicy = createMockPackagePolicy({
           supports_cloud_connector: true,
           vars: {
             role_arn: { value: 'some-arn' },
-            external_id: { value: 'some-id' },
+            external_id: { value: { isSecretRef: true, id: 'secret-1' }, type: 'password' },
             supports_cloud_connectors: { value: true, type: 'bool' },
           },
         });
@@ -165,16 +165,19 @@ describe('var_group_policy_effects', () => {
         const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false, type: 'bool' });
+        expect(result?.vars?.external_id).toEqual({ value: '', type: 'password' });
+        expect(result?.vars?.role_arn).toEqual({ value: 'some-arn' });
         expect(result?.supports_cloud_connector).toBe(false);
       });
 
-      it('should preserve other vars when updating supports_cloud_connectors', () => {
+      it('should preserve plain-text cloud connector vars and non-cloud-connector vars when deselecting', () => {
         const packagePolicy = createMockPackagePolicy({
           supports_cloud_connector: true,
           vars: {
             role_arn: { value: 'some-arn' },
-            external_id: { value: 'some-id' },
+            external_id: { value: 'plain-text-id' },
             supports_cloud_connectors: { value: true },
+            unrelated_var: { value: 'keep-this' },
           },
         });
         const varGroups = createMockVarGroups();
@@ -183,8 +186,9 @@ describe('var_group_policy_effects', () => {
         const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.role_arn).toEqual({ value: 'some-arn' });
-        expect(result?.vars?.external_id).toEqual({ value: 'some-id' });
+        expect(result?.vars?.external_id).toEqual({ value: 'plain-text-id' });
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
+        expect(result?.vars?.unrelated_var).toEqual({ value: 'keep-this' });
       });
 
       it('should not include vars update when supports_cloud_connectors var does not exist', () => {
@@ -235,6 +239,87 @@ describe('var_group_policy_effects', () => {
         const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
+      });
+
+      it('should only clear secret-ref vars, not plain-text cloud connector vars', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456:role/MyRole' },
+            external_id: { value: { isSecretRef: true, id: 'secret-abc' }, type: 'password' },
+            supports_cloud_connectors: { value: true, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.role_arn).toEqual({ value: 'arn:aws:iam::123456:role/MyRole' });
+        expect(result?.vars?.external_id).toEqual({ value: '', type: 'password' });
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false, type: 'bool' });
+      });
+
+      it('should clear secret-ref vars in input stream vars when deselecting', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          inputs: [
+            {
+              type: 'aws-test',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'test' },
+                  vars: {
+                    role_arn: { value: 'arn:aws:iam::123456:role/MyRole' },
+                    external_id: {
+                      value: { isSecretRef: true, id: 'secret-xyz' },
+                      type: 'password',
+                    },
+                    some_other_var: { value: 'keep' },
+                  },
+                },
+              ],
+            },
+          ],
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        const streamVars = result?.inputs?.[0]?.streams[0]?.vars;
+        expect(streamVars?.role_arn).toEqual({ value: 'arn:aws:iam::123456:role/MyRole' });
+        expect(streamVars?.external_id).toEqual({ value: '', type: 'password' });
+        expect(streamVars?.some_other_var).toEqual({ value: 'keep' });
+      });
+
+      it('should not return inputs when no cloud connector vars exist in streams', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          inputs: [
+            {
+              type: 'aws-test',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'test' },
+                  vars: {
+                    unrelated_var: { value: 'keep' },
+                  },
+                },
+              ],
+            },
+          ],
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result).not.toHaveProperty('inputs');
       });
 
       it('should update stale var without clearing cloud_connector_id', () => {

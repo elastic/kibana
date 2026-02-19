@@ -120,6 +120,32 @@ export const getIacTemplateUrlFromVarGroupSelection = (
 };
 
 /**
+ * Returns all variable names that belong to any cloud connector option across all var_groups.
+ * Unlike getCloudConnectorVars (which only returns vars for the currently selected option),
+ * this returns vars from ALL options with a `provider` field, regardless of selection state.
+ *
+ * Used to identify vars that need to be cleared when switching away from cloud connector.
+ */
+export const getAllCloudConnectorVarNames = (
+  varGroups: RegistryVarGroup[] | undefined
+): Set<string> => {
+  const varNames = new Set<string>();
+  if (!varGroups) return varNames;
+
+  for (const varGroup of varGroups) {
+    if (!varGroup.options) continue;
+    for (const option of varGroup.options) {
+      if (option.provider && option.vars) {
+        for (const varName of option.vars) {
+          varNames.add(varName);
+        }
+      }
+    }
+  }
+  return varNames;
+};
+
+/**
  * Detects the target cloud provider from either:
  * 1. var_group selections (new approach - provider field in selected option)
  * 2. Input type matching (legacy approach - input.type contains aws|azure|gcp)
