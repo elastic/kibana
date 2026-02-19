@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { FormValues } from '../types';
-import { getGroupByColumnsFromQuery } from './use_default_group_by';
+import { useDefaultGroupBy } from './use_default_group_by';
 
 interface UseFormDefaultsProps {
   /** The ES|QL query to derive defaults from */
@@ -24,11 +24,10 @@ interface UseFormDefaultsProps {
  * based on the available date fields from the query.
  */
 export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => {
-  return useMemo(() => {
-    // Extract grouping columns from STATS ... BY clause
-    const groupingKey = getGroupByColumnsFromQuery(query);
+  const { defaultGroupBy } = useDefaultGroupBy({ query });
 
-    return {
+  return useMemo(
+    () => ({
       kind: 'alert',
       metadata: {
         name: '',
@@ -45,11 +44,12 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
           base: query,
         },
       },
-      grouping: groupingKey.length
+      grouping: defaultGroupBy.length
         ? {
-            fields: groupingKey,
+            fields: defaultGroupBy,
           }
         : undefined,
-    };
-  }, [query]);
+    }),
+    [query, defaultGroupBy]
+  );
 };
