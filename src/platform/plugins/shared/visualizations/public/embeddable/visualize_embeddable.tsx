@@ -183,7 +183,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        getDynamicActionsState: drilldownsManager.getLatestState,
+        drilldowns: drilldownsManager.getLatestState(),
         ...timeRangeManager.getLatestState(),
       });
     };
