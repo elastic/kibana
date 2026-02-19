@@ -119,6 +119,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
+    agentId,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
@@ -136,6 +137,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
+  // First add static tools
   await Promise.all([
     toolManager.addTools({
       type: ToolManagerToolType.executable,
@@ -146,17 +148,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-      },
-      {
-        dynamic: true,
-      }
-    ),
   ]);
+
+  // Then add dynamic tools
+  await toolManager.addTools(
+    {
+      type: ToolManagerToolType.executable,
+      tools: dynamicTools,
+      logger,
+    },
+    {
+      dynamic: true,
+    }
+  );
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
