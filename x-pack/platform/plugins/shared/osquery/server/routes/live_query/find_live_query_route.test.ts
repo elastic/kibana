@@ -146,7 +146,7 @@ describe('findLiveQueryRoute', () => {
 
     await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
-    expect(getResultCountsForActions).toHaveBeenCalledWith(mockEsClient, ['query-1']);
+    expect(getResultCountsForActions).toHaveBeenCalledWith(mockEsClient, ['query-1'], 'default');
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
       data: { items: Array<{ _source: Record<string, unknown> }> };
@@ -217,6 +217,94 @@ describe('findLiveQueryRoute', () => {
           error_agents: 0,
         },
       })
+    );
+  });
+
+  it('returns items without enrichment when result counts aggregation fails', async () => {
+    const edges = [
+      {
+        _source: {
+          action_id: 'action-1',
+          queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+        },
+        fields: { action_id: ['action-1'] },
+      },
+    ];
+
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        edges,
+        rawResponse: { hits: { total: 1 } },
+        total: 1,
+      })
+    );
+
+    (getResultCountsForActions as jest.Mock).mockRejectedValue(
+      new Error('index_not_found_exception')
+    );
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          data: expect.objectContaining({
+            items: edges,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('passes custom spaceId to getResultCountsForActions', async () => {
+    (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
+      id: 'custom-space',
+    });
+
+    const edges = [
+      {
+        _source: {
+          action_id: 'action-1',
+          queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+        },
+        fields: { action_id: ['action-1'] },
+      },
+    ];
+
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        edges,
+        rawResponse: { hits: { total: 1 } },
+        total: 1,
+      })
+    );
+
+    (getResultCountsForActions as jest.Mock).mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
+    );
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+    expect(getResultCountsForActions).toHaveBeenCalledWith(
+      mockEsClient,
+      ['query-1'],
+      'custom-space'
     );
   });
 
