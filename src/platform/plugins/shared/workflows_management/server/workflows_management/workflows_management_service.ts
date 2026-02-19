@@ -306,6 +306,26 @@ export class WorkflowsService {
 
     await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
 
+    const changeHistoryClient = this.getChangeHistoryClient();
+    if (changeHistoryClient?.isInitialized()) {
+      try {
+        await changeHistoryClient.log(
+          {
+            objectType: 'workflow',
+            objectId: id,
+            after: JSON.parse(JSON.stringify(workflowData)),
+          },
+          {
+            action: 'workflow-create',
+            userId: authenticatedUser,
+            spaceId,
+          }
+        );
+      } catch (err) {
+        this.logger.warn(`Failed to log workflow create to change history: ${err}`);
+      }
+    }
+
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
