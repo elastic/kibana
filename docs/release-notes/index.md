@@ -36,7 +36,6 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Adds a dynamic default connector to GenAI settings [#252861]({{kib-pull}}252861).
 * Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
 
-**Management**:
 
 
 ### Fixes [kibana-9.3.1-fixes]
