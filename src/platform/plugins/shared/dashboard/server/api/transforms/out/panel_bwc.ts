@@ -8,26 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import {
-  ON_APPLY_FILTER,
-  ON_CLICK_IMAGE,
-  ON_CLICK_ROW,
-  ON_CLICK_VALUE,
-  ON_OPEN_PANEL_MENU,
-  ON_SELECT_RANGE,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { DrilldownState } from '@kbn/embeddable-plugin/server';
 import type { SavedDashboardPanel } from '../../../dashboard_saved_object';
-
-// Drilldowns used different Trigger Ids before 9.4.0
-const TRIGGER_ID_MIGRATIONS: { [key: string]: string } = {
-  VALUE_CLICK_TRIGGER: ON_CLICK_VALUE,
-  IMAGE_CLICK_TRIGGER: ON_CLICK_IMAGE,
-  ROW_CLICK_TRIGGER: ON_CLICK_ROW,
-  SELECT_RANGE_TRIGGER: ON_SELECT_RANGE,
-  FILTER_TRIGGER: ON_APPLY_FILTER,
-  CONTEXT_MENU_TRIGGER: ON_OPEN_PANEL_MENU,
-};
 
 export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjectReference[]) {
   const { id, panelRefName, title, type, ...rest } = panel;
@@ -53,16 +34,6 @@ export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjec
         ...panel.embeddableConfig,
         // <8.19 title stored as siblings to embeddableConfig
         ...(title !== undefined && { title }),
-        ...(Array.isArray(panel.embeddableConfig.drilldowns)
-          ? {
-              drilldowns: (panel.embeddableConfig.drilldowns as DrilldownState[]).map(
-                ({ trigger, ...drilldown }) => ({
-                  ...drilldown,
-                  trigger: TRIGGER_ID_MIGRATIONS[trigger] ?? trigger,
-                })
-              ),
-            }
-          : {}),
       },
       type: getPanelType(),
     },
