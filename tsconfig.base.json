@@ -1112,6 +1112,8 @@
       "@kbn/esql-validation-example-plugin/*": ["examples/esql_validation_example/*"],
       "@kbn/eui-provider-dev-warning": ["src/platform/test/plugin_functional/plugins/eui_provider_dev_warning"],
       "@kbn/eui-provider-dev-warning/*": ["src/platform/test/plugin_functional/plugins/eui_provider_dev_warning/*"],
+      "@kbn/eval-kql": ["src/platform/packages/shared/kbn-eval-kql"],
+      "@kbn/eval-kql/*": ["src/platform/packages/shared/kbn-eval-kql/*"],
       "@kbn/evals": ["x-pack/platform/packages/shared/kbn-evals"],
       "@kbn/evals/*": ["x-pack/platform/packages/shared/kbn-evals/*"],
       "@kbn/evals-suite-agent-builder": ["x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder"],
