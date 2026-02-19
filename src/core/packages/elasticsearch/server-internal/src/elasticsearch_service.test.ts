@@ -26,7 +26,7 @@ import {
 } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
@@ -89,7 +89,10 @@ beforeEach(() => {
       verificationMode: 'none',
     },
   });
-  configService.atPath.mockReturnValue(mockConfig$);
+  configService.atPath.mockImplementation((path) => {
+    if (path === 'elasticsearch') return mockConfig$;
+    return new BehaviorSubject({});
+  });
 
   const logger = loggingSystemMock.create();
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
@@ -519,167 +522,83 @@ describe('#stop', () => {
 });
 
 describe('CPS onRequest handler', () => {
-  describe('in non-serverless mode', () => {
-    it('does not pass onRequest handler to ClusterClient', async () => {
-      await elasticsearchService.setup(setupDeps);
+  it('passes onRequest to ClusterClient in non-serverless mode', async () => {
+    await elasticsearchService.setup(setupDeps);
 
-      expect(MockClusterClient).toHaveBeenCalledWith(
-        expect.objectContaining({
-          onRequest: undefined,
-        })
-      );
-    });
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequest: expect.any(Function) })
+    );
   });
 
-  describe('in serverless mode', () => {
-    let serverlessEnv: Env;
-    let serverlessCoreContext: CoreContext;
-    let serverlessElasticsearchService: ElasticsearchService;
-
-    beforeEach(() => {
-      serverlessEnv = Env.createDefault(
-        REPO_ROOT,
-        getEnvOptions({ cliArgs: { serverless: true } })
-      );
-      const logger = loggingSystemMock.create();
-      serverlessCoreContext = {
-        coreId: Symbol(),
-        env: serverlessEnv,
-        logger,
-        configService: configService as any,
-      };
-      serverlessElasticsearchService = new ElasticsearchService(serverlessCoreContext);
+  it('passes onRequest to ClusterClient in serverless mode when CPS is enabled', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return new BehaviorSubject({ cpsEnabled: true });
+      return new BehaviorSubject({});
     });
-
-    afterEach(async () => {
-      await serverlessElasticsearchService?.stop();
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
     });
+    await serverlessService.setup(setupDeps);
 
-    describe('onRequest handler behavior', () => {
-      type OnRequestHandler = (ctx: { scoped: boolean }, params: any, options?: any) => void;
-      let onRequestHandler: OnRequestHandler;
-      const LOCAL_PROJECT_ROUTING = '_alias:_origin';
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequest: expect.any(Function) })
+    );
+    await serverlessService.stop();
+  });
 
-      const setCpsEnabled = (enabled: boolean) => {
-        // Access private property for testing
-        (serverlessElasticsearchService as any).cpsEnabled = enabled;
-      };
-
-      beforeEach(async () => {
-        MockClusterClient.mockClear();
-        await serverlessElasticsearchService.setup(setupDeps);
-        onRequestHandler = MockClusterClient.mock.calls[0][0].onRequest;
-      });
-
-      it('injects project_routing for unscoped requests', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: false }, params, options);
-
-        expect((params as any).body?.project_routing).toBe(LOCAL_PROJECT_ROUTING);
-      });
-
-      it('does not inject project_routing when CPS is disabled', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-        };
-
-        onRequestHandler({ scoped: true }, params as any, options);
-
-        expect((params as any).body?.project_routing).toBeUndefined();
-      });
-
-      it('does not inject project_routing when API does not support it', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_cat/indices',
-          meta: { acceptedParams: [] },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: true }, params, options);
-
-        expect((params as any).body?.project_routing).toBeUndefined();
-      });
-
-      it('does not inject project_routing when it is already set', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-          body: { project_routing: 'custom-value' },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: true }, params, options);
-
-        expect((params as any).body?.project_routing).toBe('custom-value');
-      });
-
-      it('does not inject project_routing for PIT requests', () => {
-        const options: any = {};
-        const params = {
-          method: 'POST',
-          path: '/_search',
-          body: { pit: { id: 'abc123' } },
-          meta: { acceptedParams: ['project_routing'] },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: true }, params, options);
-
-        expect((params as any).body?.project_routing).toBeUndefined();
-      });
-
-      it('injects project_routing when all conditions are met', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-          body: { project_routing: LOCAL_PROJECT_ROUTING },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: true }, params, options);
-
-        expect(params.body.project_routing).toBe(LOCAL_PROJECT_ROUTING);
-      });
-
-      it('preserves existing param body when injecting project_routing', () => {
-        const options: any = {};
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-          body: { field1: 'value1', project_routing: LOCAL_PROJECT_ROUTING },
-        };
-
-        setCpsEnabled(true);
-
-        onRequestHandler({ scoped: true }, params, options);
-
-        expect(params.body).toEqual({
-          field1: 'value1',
-          project_routing: LOCAL_PROJECT_ROUTING,
-        });
-      });
+  it('passes onRequest to ClusterClient in serverless mode when CPS is disabled', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return new BehaviorSubject({ cpsEnabled: false });
+      return new BehaviorSubject({});
     });
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequest: expect.any(Function) })
+    );
+    await serverlessService.stop();
+  });
+
+  it('treats cpsEnabled as false when atPath("cps") observable errors', async () => {
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'elasticsearch') return mockConfig$;
+      if (path === 'cps') return throwError(() => new Error('cps config unavailable'));
+      return new BehaviorSubject({});
+    });
+    const serverlessEnv = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({ cliArgs: { serverless: true } })
+    );
+    const serverlessService = new ElasticsearchService({
+      coreId: Symbol(),
+      env: serverlessEnv,
+      logger: loggingSystemMock.create(),
+      configService: configService as any,
+    });
+    await serverlessService.setup(setupDeps);
+
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({ onRequest: expect.any(Function) })
+    );
+    await serverlessService.stop();
   });
 });

@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableFactory,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -24,7 +28,6 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
@@ -48,7 +51,7 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export const getStatsOverviewEmbeddableFactory = (
@@ -56,7 +59,13 @@ export const getStatsOverviewEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       // Client code uses REST API shape (snake_case) directly
@@ -69,19 +78,13 @@ export const getStatsOverviewEmbeddableFactory = (
         ...(initialState?.filters || {}),
       });
 
-      const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       function serializeState(): OverviewStatsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
-          ...(dynamicActionsManager?.getLatestState() ?? {}),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
@@ -92,18 +95,18 @@ export const getStatsOverviewEmbeddableFactory = (
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$,
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
+          drilldownsManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           titleManager.reinitializeState(lastSaved);
           filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
@@ -111,7 +114,7 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...(dynamicActionsManager?.api ?? {}),
+        ...drilldownsManager.api,
         ...unsavedChangesApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
@@ -155,8 +158,8 @@ export const getStatsOverviewEmbeddableFactory = (
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           return (
