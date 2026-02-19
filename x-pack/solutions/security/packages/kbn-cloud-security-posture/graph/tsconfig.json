@@ -20,7 +20,6 @@
     "@kbn/data-plugin",
     "@kbn/core-application-browser-mocks",
     "@kbn/core",
-    "@kbn/discover-utils",
     "@kbn/cloud-security-posture",
     "@kbn/react-kibana-context-theme",
     "@kbn/expandable-flyout",
