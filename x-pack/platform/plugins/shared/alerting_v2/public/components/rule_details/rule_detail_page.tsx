@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
-  EuiFlexItem,
   EuiPageHeader,
   EuiPanel,
   EuiSpacer,
@@ -19,7 +18,7 @@ import {
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
@@ -27,47 +26,13 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { RulesDeleteModalConfirmation } from '../common/rules_delete_modal_confirmation';
 import { RuleHeaderDescription } from './rule_header_description';
+import { ItemValueRuleSummary } from './item_value_rule_summary';
 
 export interface RuleDetailPageProps {
   rule: RuleApiResponse;
 }
 
 const EMPTY_VALUE = '-';
-
-const formatEvery = (duration: string | undefined) => {
-  if (!duration) {
-    return EMPTY_VALUE;
-  }
-
-  return i18n.translate('xpack.alertingV2.ruleDetails.every', {
-    defaultMessage: '{duration}',
-    values: { duration: formatDuration(duration) },
-  });
-};
-
-const formatMaybeDuration = (duration: string | undefined) => {
-  if (!duration) {
-    return EMPTY_VALUE;
-  }
-
-  return formatDuration(duration);
-};
-
-const formatMaybeString = (value: string | undefined | null) => {
-  if (!value) {
-    return EMPTY_VALUE;
-  }
-
-  return value;
-};
-
-const formatMaybeList = (value: string[] | undefined) => {
-  if (!value || value.length === 0) {
-    return EMPTY_VALUE;
-  }
-
-  return value.join(', ');
-};
 
 export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
@@ -87,55 +52,52 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     });
   };
 
-  const configurationListItems = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.alertingV2.ruleDetails.runsEvery', {
-          defaultMessage: 'Runs every',
-        }),
-        description: (
-          <ItemValueRuleSummary
-            data-test-subj="alertingV2RuleDetailsSchedule"
-            itemValue={formatEvery(rule.schedule.every)}
-          />
-        ),
-      },
-      {
-        title: i18n.translate('xpack.alertingV2.ruleDetails.lookback', {
-          defaultMessage: 'Lookback',
-        }),
-        description: (
-          <ItemValueRuleSummary
-            data-test-subj="alertingV2RuleDetailsLookback"
-            itemValue={formatMaybeDuration(rule.schedule.lookback)}
-          />
-        ),
-      },
-      {
-        title: i18n.translate('xpack.alertingV2.ruleDetails.timeField', {
-          defaultMessage: 'Time field',
-        }),
-        description: (
-          <ItemValueRuleSummary
-            data-test-subj="alertingV2RuleDetailsTimeField"
-            itemValue={formatMaybeString(rule.time_field)}
-          />
-        ),
-      },
-      {
-        title: i18n.translate('xpack.alertingV2.ruleDetails.groupBy', {
-          defaultMessage: 'Group by',
-        }),
-        description: (
-          <ItemValueRuleSummary
-            data-test-subj="alertingV2RuleDetailsGroupBy"
-            itemValue={formatMaybeList(rule.grouping?.fields)}
-          />
-        ),
-      },
-    ],
-    [rule.schedule, rule.time_field, rule.grouping?.fields]
-  );
+  const configurationListItems = [
+    {
+      title: i18n.translate('xpack.alertingV2.ruleDetails.runsEvery', {
+        defaultMessage: 'Runs every',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="alertingV2RuleDetailsSchedule"
+          itemValue={formatDuration(rule.schedule.every)}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.alertingV2.ruleDetails.lookback', {
+        defaultMessage: 'Lookback',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="alertingV2RuleDetailsLookback"
+          itemValue={rule.schedule.lookback ?? EMPTY_VALUE}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.alertingV2.ruleDetails.timeField', {
+        defaultMessage: 'Time field',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="alertingV2RuleDetailsTimeField"
+          itemValue={rule.time_field ?? EMPTY_VALUE}
+        />
+      ),
+    },
+    {
+      title: i18n.translate('xpack.alertingV2.ruleDetails.groupBy', {
+        defaultMessage: 'Group by',
+      }),
+      description: (
+        <ItemValueRuleSummary
+          data-test-subj="alertingV2RuleDetailsGroupBy"
+          itemValue={rule.grouping?.fields?.length ? rule.grouping?.fields.join(', ') : EMPTY_VALUE}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
@@ -151,7 +113,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
         pageTitle={
           <span data-test-subj="ruleName">
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
+              id="xpack.alertingV2.sections.ruleDetails.ruleDetailsTitle"
               defaultMessage="{ruleName}"
               values={{ ruleName: rule.metadata.name }}
             />
@@ -166,7 +128,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
           />,
           <EuiButtonEmpty
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
+              'xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel',
               { defaultMessage: 'Edit' }
             )}
             data-test-subj="openEditRuleFlyoutButton"
@@ -177,7 +139,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             }}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+              id="xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel"
               defaultMessage="Edit"
             />
           </EuiButtonEmpty>,
@@ -189,7 +151,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
         <EuiTitle size="s">
           <EuiText>
-            {i18n.translate('xpack.triggersActionsUI.ruleDetails.definition', {
+            {i18n.translate('xpack.alertingV2.sections.ruleDetails.definition', {
               defaultMessage: 'Configuration',
             })}
           </EuiText>
@@ -207,7 +169,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
         <EuiTitle size="s">
           <EuiText>
-            {i18n.translate('xpack.triggersActionsUI.ruleDetails.query', {
+            {i18n.translate('xpack.alertingV2.sections.ruleDetails.query', {
               defaultMessage: 'ES|QL Query',
             })}
           </EuiText>
@@ -231,20 +193,3 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     </>
   );
 };
-
-export interface ItemValueRuleSummaryProps {
-  itemValue: string;
-  extraSpace?: boolean;
-}
-
-function ItemValueRuleSummary({
-  itemValue,
-  extraSpace = true,
-  ...otherProps
-}: ItemValueRuleSummaryProps) {
-  return (
-    <EuiFlexItem grow={extraSpace ? 3 : 1} {...otherProps}>
-      <EuiText size="s">{itemValue}</EuiText>
-    </EuiFlexItem>
-  );
-}

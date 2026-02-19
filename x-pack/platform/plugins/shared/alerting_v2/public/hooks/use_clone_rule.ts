@@ -14,8 +14,9 @@ export function useCloneRule() {
   const notifications = useService(CoreStart('notifications'));
 
   const cloneRule = async (rule: RuleApiResponse) => {
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = rule;
     const clonedRule = {
-      ...rule,
+      ...rest,
       metadata: {
         ...rule.metadata,
         name: `${rule.metadata.name} (Clone)`,
@@ -30,7 +31,7 @@ export function useCloneRule() {
         }),
       });
     } catch (err) {
-      notifications?.toasts.addError(err, {
+      notifications?.toasts.addError(err as Error, {
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneError', {
           defaultMessage: 'Unable to clone rule',
         }),

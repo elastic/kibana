@@ -40,15 +40,12 @@ const CANCEL_BUTTON_TEXT = i18n.translate('xpack.alertingV2.ruleDetails.cancelDe
 });
 
 const DELETE_RULE_MODAL_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleDetails.DELETE_RULE_MODAL_TITLE',
+  'xpack.alertingV2.ruleDetails.deleteRuleModalTitle',
   {
     defaultMessage: 'Delete',
   }
 );
 
-const DELETE_RULE_MODAL_TEXT = i18n.translate(
-  'xpack.alertingV2.ruleDetails.DELETE_RULE_MODAL_TEXT',
-  {
-    defaultMessage: 'Are you sure you want to delete this rule?',
-  }
-);
+const DELETE_RULE_MODAL_TEXT = i18n.translate('xpack.alertingV2.ruleDetails.deleteRuleModalText', {
+  defaultMessage: 'Are you sure you want to delete this rule?',
+});

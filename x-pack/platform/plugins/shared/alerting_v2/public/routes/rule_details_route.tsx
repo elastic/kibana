@@ -7,7 +7,6 @@
 
 import React, { lazy, Suspense } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useExistingRule } from '../hooks/use_existing_rule';
 import { Skeleton } from '../components/rule_details/skeleton';
 
@@ -30,7 +29,7 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
   }
 
   return (
-    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+    <Suspense fallback={<Skeleton />}>
       <LazyRuleDetailPage rule={rule} />
     </Suspense>
   );
