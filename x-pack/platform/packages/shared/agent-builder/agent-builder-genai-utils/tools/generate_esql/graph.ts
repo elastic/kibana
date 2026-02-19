@@ -11,10 +11,9 @@ import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
-import { validateQuery } from '@kbn/esql-language';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
-import { extractEsqlQueries, executeEsql } from '../utils/esql';
+import { extractEsqlQueries, executeEsql, validateEsqlQuery } from '../utils/esql';
 import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -208,19 +207,10 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
-    const validationResult = await validateQuery(query);
-    const hasErrors = validationResult.errors.length > 0;
-
-    const errorMessage = hasErrors
-      ? validationResult.errors
-          .map((err) => ('text' in err ? err.text : (err as { message?: string }).message ?? ''))
-          .filter(Boolean)
-          .join('\n')
-      : undefined;
-
+    const errorMessage = await validateEsqlQuery(query);
     const action: ValidateQueryAction = {
       type: 'validate_query',
-      success: !hasErrors,
+      success: !errorMessage,
       query,
       error: errorMessage,
     };
@@ -242,9 +232,9 @@ export const createNlToEsqlGraph = ({
     }
   };
 
-  // execute query step - execute the query and get the results
+  // execute query step - validate first (ANTLR), then execute only if valid
   const executeQuery = async (state: StateType) => {
-    let query;
+    let query: string;
     const lastAction = state.actions[state.actions.length - 1];
     if (isGenerateQueryAction(lastAction) && lastAction.query) {
       query = lastAction.query;
@@ -252,6 +242,20 @@ export const createNlToEsqlGraph = ({
       query = lastAction.output;
     } else {
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
+    }
+
+    const validationError = await validateEsqlQuery(query);
+    if (validationError) {
+      return {
+        actions: [
+          {
+            type: 'execute_query',
+            success: false,
+            query,
+            error: validationError,
+          },
+        ],
+      };
     }
 
     let action: ExecuteQueryAction;
