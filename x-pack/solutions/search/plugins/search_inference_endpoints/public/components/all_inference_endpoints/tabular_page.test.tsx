@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -299,5 +298,51 @@ describe('When the tabular page is loaded', () => {
     expect(rows[9]).not.toHaveTextContent(techPreview);
     expect(rows[10]).not.toHaveTextContent(techPreview);
     expect(rows[11]).not.toHaveTextContent(techPreview);
+  });
+
+  it('should show the correct task type badge for each endpoint', () => {
+    renderTabularPageWithProviders();
+
+    const expectedTaskTypes: Record<string, string> = {
+      '.elser-2-elastic': 'sparse_embedding',
+      '.elser-2-elasticsearch': 'sparse_embedding',
+      '.multilingual-e5-small-elasticsearch': 'text_embedding',
+      '.multilingual-embed-v1-elastic': 'text_embedding',
+      '.rerank-v1-elastic': 'rerank',
+      '.sparkles': 'chat_completion',
+      'custom-inference-id': 'sparse_embedding',
+      'elastic-rerank': 'rerank',
+      'local-model': 'sparse_embedding',
+      'my-elser-model-05': 'sparse_embedding',
+      'third-party-model': 'sparse_embedding',
+    };
+
+    const endpointCells = screen.getAllByTestId('endpointCell');
+    expect(endpointCells).toHaveLength(Object.keys(expectedTaskTypes).length);
+
+    for (const [endpointId, taskType] of Object.entries(expectedTaskTypes)) {
+      const cell = endpointCells.find((c) => c.textContent?.includes(endpointId));
+      expect(cell).toBeDefined();
+      expect(within(cell!).getByTestId(`table-column-task-type-${taskType}`)).toBeInTheDocument();
+    }
+  });
+
+  it('should display endpoint stats with correct counts', () => {
+    renderTabularPageWithProviders();
+
+    const stats = screen.getByTestId('endpointStats');
+    expect(stats).toBeInTheDocument();
+
+    // 3 unique services: elasticsearch, openai, elastic
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
+
+    // 8 unique models
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
+
+    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
+
+    // 11 endpoints total
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
   });
 });

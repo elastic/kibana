@@ -14,7 +14,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { MetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
-import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
+import { getLensMetricFormat } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 interface ChartLayersFromEsqlProps {
@@ -73,10 +73,7 @@ export const useChartLayersFromEsql = ({
 
     const yAxis: LensBaseLayer[] = columns
       .filter(
-        (col) =>
-          col.name !== DIMENSIONS_COLUMN &&
-          col.meta.type !== 'date' &&
-          !queryInfo.dimensions.some((dim) => dim === col.name)
+        (col) => col.meta.type !== 'date' && !queryInfo.dimensions.some((dim) => dim === col.name)
       )
       .map((col) => ({
         label: col.name,
@@ -93,11 +90,7 @@ export const useChartLayersFromEsql = ({
         seriesType,
         xAxis,
         yAxis,
-        breakdown: hasDimensions
-          ? queryInfo.dimensions.length === 1
-            ? queryInfo.dimensions[0]
-            : DIMENSIONS_COLUMN
-          : undefined,
+        breakdown: hasDimensions ? queryInfo.dimensions[0] : undefined,
       },
     ];
   }, [columns, queryInfo.dimensions, seriesType, color, unit]);

@@ -384,7 +384,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/252152
+  describe.skip('Search source Alert', function () {
     // Failing in Observability projects: https://github.com/elastic/kibana/issues/203045
     // Failing in MKI Search projects: https://github.com/elastic/kibana/issues/207865
     // Failing in MKI Security projects: https://github.com/elastic/kibana/issues/252028

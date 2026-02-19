@@ -13,14 +13,14 @@ import {
   apiCanAccessViewMode,
 } from '@kbn/presentation-publishing';
 import type { ChartActionContext } from '@kbn/embeddable-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
+  IMAGE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

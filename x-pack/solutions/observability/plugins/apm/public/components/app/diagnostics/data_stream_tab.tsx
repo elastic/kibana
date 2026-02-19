@@ -9,6 +9,7 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
@@ -55,7 +56,16 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
     },
   ];
 
-  return <EuiBasicTable items={data?.dataStreams ?? []} rowHeader="firstName" columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={data?.dataStreams ?? []}
+      rowHeader="firstName"
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.diagnostics.dataStreamTab.dataStreams', {
+        defaultMessage: 'Diagnostics data streams',
+      })}
+    />
+  );
 }
 
 export function getIndexTemplateState(diagnosticsBundle: DiagnosticsBundle, templateName: string) {

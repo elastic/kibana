@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type WorkflowExecutionListDto } from '@kbn/workflows';
@@ -55,6 +55,18 @@ export const WorkflowExecutionList = ({
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
+
+  // Extract unique executedBy values from executions
+  const availableExecutedByOptions = useMemo(() => {
+    if (!executions?.results) return [];
+    const uniqueUsers = new Set<string>();
+    executions.results.forEach((execution) => {
+      if (execution.executedBy) {
+        uniqueUsers.add(execution.executedBy);
+      }
+    });
+    return Array.from(uniqueUsers).sort();
+  }, [executions]);
 
   // Reset scroll position when filters change
   useEffect(() => {
@@ -136,6 +148,8 @@ export const WorkflowExecutionList = ({
                   isTestRun={execution.isTestRun}
                   startedAt={new Date(execution.startedAt)}
                   duration={execution.duration}
+                  executedBy={execution.executedBy}
+                  triggeredBy={execution.triggeredBy}
                   selected={execution.id === selectedId}
                   onClick={() => onExecutionClick(execution.id)}
                 />
@@ -169,6 +183,7 @@ export const WorkflowExecutionList = ({
       gutterSize="s"
       justifyContent="flexStart"
       css={styles.container}
+      data-test-subj="workflowExecutionList"
     >
       <header>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -183,7 +198,11 @@ export const WorkflowExecutionList = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ExecutionListFilters filters={filters} onFiltersChange={onFiltersChange} />
+            <ExecutionListFilters
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              availableExecutedByOptions={availableExecutedByOptions}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>

@@ -38,11 +38,7 @@ export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAc
   const { storage, localStorageKey, title } = action;
 
   if (storage && localStorageKey && title) {
-    const localStorage = (storage.get(localStorageKey.toLowerCase()) ?? {}) as Record<
-      string,
-      boolean
-    >;
-
+    const localStorage = storage.get(localStorageKey);
     storage.set(localStorageKey, {
       ...localStorage,
       [title]: state !== OPEN,

@@ -958,3 +958,18 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
                 - id: '.server-log'
                   max: 5
     ```
+
+`xpack.alerting.rules.apiKeyType` {applies_to}`serverless:` {applies_to}`stack: unavailable`
+:   The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use UIAM API keys instead.
+    :::{note}
+    :applies_to: serverless:
+    In Serverless, you can't edit this setting.
+    :::
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.alerting.rules.apiKeyType: uiam
+    ```

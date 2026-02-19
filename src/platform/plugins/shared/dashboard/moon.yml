@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/logging'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-panel-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
@@ -115,7 +114,7 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
-  - '@kbn/image-embeddable-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -130,6 +129,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
     - '!target/**/*'
 tasks:
   jest:

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { and, assign, forwardTo, sendTo, setup } from 'xstate5';
+import type { ActorRefFrom, SnapshotFrom } from 'xstate';
+import { and, assign, forwardTo, sendTo, setup } from 'xstate';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,

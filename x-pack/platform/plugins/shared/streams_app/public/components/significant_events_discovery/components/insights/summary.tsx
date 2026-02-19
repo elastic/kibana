@@ -49,7 +49,7 @@ export function Summary({ count }: { count: number }) {
      */
     await scheduleInsightsDiscoveryTask();
     await getTaskStatus();
-  });
+  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
   useEffect(() => {
     getTaskStatus();
