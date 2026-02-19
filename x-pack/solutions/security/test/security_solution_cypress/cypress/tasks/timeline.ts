@@ -111,6 +111,7 @@ export const addNameToTimelineAndSave = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+  cy.get('errorToastBtn').should('not.exist');
 };
 
 export const addNameToTimelineAndSaveAsNew = (name: string) => {

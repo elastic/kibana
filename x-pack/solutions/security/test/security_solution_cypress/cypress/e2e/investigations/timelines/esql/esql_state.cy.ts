@@ -54,8 +54,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Flaky: https://github.com/elastic/kibana/issues/180755
-describe.skip(
+describe(
   'Timeline Discover ESQL State',
   {
     tags: ['@ess'],
@@ -76,7 +75,7 @@ describe.skip(
     it('should not allow the dataview to be changed', () => {
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
     });
-    it.skip('should remember esql query when navigating away and back to discover ', () => {
+    it('should remember esql query when navigating away and back to discover ', () => {
       submitDiscoverSearchBar();
       addNameToTimelineAndSave(mockTimeline.title);
       cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
