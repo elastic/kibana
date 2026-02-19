@@ -77757,6 +77757,57 @@ components:
                 - action
                 - from
                 - to
+            - allOf:
+                - type: object
+                  properties:
+                    action:
+                      enum:
+                        - network_direction
+                      type: string
+                    customIdentifier:
+                      description: Custom identifier to correlate this processor across outputs
+                      minLength: 1
+                      type: string
+                    description:
+                      description: Human-readable notes about this processor step
+                      type: string
+                    destination_ip:
+                      minLength: 1
+                      type: string
+                    ignore_failure:
+                      description: Continue pipeline execution if this processor fails
+                      type: boolean
+                    ignore_missing:
+                      type: boolean
+                    source_ip:
+                      minLength: 1
+                      type: string
+                    target_field:
+                      minLength: 1
+                      type: string
+                    where:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                      description: Conditional expression controlling whether this processor runs
+                  required:
+                    - action
+                    - source_ip
+                    - destination_ip
+                - anyOf:
+                    - type: object
+                      properties:
+                        internal_networks:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                        - internal_networks
+                    - type: object
+                      properties:
+                        internal_networks_field:
+                          minLength: 1
+                          type: string
+                      required:
+                        - internal_networks_field
             - description: Manual ingest pipeline wrapper around native Elasticsearch processors
               type: object
               properties:
