@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
