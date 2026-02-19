@@ -53,7 +53,7 @@ describe('validateEsqlQuery', () => {
   });
 
   it('returns explicit error messages for multiple invalid queries', async () => {
-    const invalidQueries = ['row', 'FROM index | STATS'];
+    const invalidQueries = ['FROM ', 'FROM index | LIMIT abc'];
     for (const q of invalidQueries) {
       const error = await validateEsqlQuery(q);
       expect(error).toBeDefined();
