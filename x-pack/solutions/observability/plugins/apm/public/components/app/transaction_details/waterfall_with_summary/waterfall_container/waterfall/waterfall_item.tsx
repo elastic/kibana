@@ -311,11 +311,11 @@ export function WaterfallItem({
       aria-label={
         onClick
           ? i18n.translate('xpack.apm.waterfall.openDetailsButton', {
-            defaultMessage: 'View details for {name}',
-            values: {
-              name: itemName,
-            },
-          })
+              defaultMessage: 'View details for {name}',
+              values: {
+                name: itemName,
+              },
+            })
           : undefined
       }
       onClick={(e: React.MouseEvent) => {
