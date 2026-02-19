@@ -171,22 +171,12 @@ export function registerDataProviders({
     async ({ request, traceIds, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
 
-      const spans = await fetchExitSpanSamplesFromTraceIds({
+      return fetchExitSpanSamplesFromTraceIds({
         apmEventClient,
         traceIds,
         start,
         end,
       });
-
-      return spans.map((s) => ({
-        serviceName: s.serviceName,
-        spanDestinationServiceResource: s.spanDestinationServiceResource,
-        spanType: s.spanType,
-        spanSubtype: s.spanSubtype,
-        destinationService: s.destinationService
-          ? { serviceName: s.destinationService.serviceName }
-          : undefined,
-      }));
     }
   );
 
