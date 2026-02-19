@@ -71,6 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
+      await discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
@@ -79,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL in Discover', () => {
       it('should render esql view correctly', async function () {
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
@@ -99,6 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
@@ -125,6 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not render the histogram for indices with no @timestamp field', async function () {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = `from kibana_sample_data_flights | limit 10`;
@@ -140,6 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the histogram for indices with no @timestamp field when the ?_tstart, ?_tend params are in the query', async function () {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
@@ -203,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
@@ -227,11 +232,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should work without a FROM statement', async function () {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `ROW a = 1, b = "two", c = null`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.dragFieldToTable('a');
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -240,6 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should allow brushing time series', async () => {
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -256,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const renderingCount = await elasticChart.getVisualizationRenderingCount();
         await discover.brushHistogram();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         // no filter pill created for time brush
         expect(await filterBar.getFilterCount()).to.be(0);
         // chart and time picker updated
@@ -270,6 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const brokenQueries = [
           'from logstash-* | limit 10*',
           'from logstash-* | limit A',
@@ -297,7 +305,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('switch modal', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should show switch modal when switching to a data view', async () => {
@@ -327,7 +337,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await discover.saveSearch('esql_test');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
+        await discover.waitUntilTabIsLoaded();
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
@@ -368,6 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('inspector', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
       });
@@ -402,6 +415,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ensureCurrentUrl: false,
           });
           await discover.selectTextBaseLang();
+          await discover.waitUntilTabIsLoaded();
           const testQuery = `from logstash-* | limit 10`;
           await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -409,7 +423,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             window.ELASTIC_ESQL_DELAY_SECONDS = 5;
           });
           await testSubjects.click('querySubmitButton');
-          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           // for some reason the chart query is taking a very long time to return (3x the delay)
           // so wait for the chart to be loaded
           await discover.waitForChartLoadingComplete(1);
@@ -431,7 +445,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('query history', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should see my current query in the history', async () => {
@@ -497,7 +513,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('sorting', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should sort correctly', async () => {
@@ -528,7 +546,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickDocSortDesc('bytes', 'Sort High-Low');
 
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -579,7 +597,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickDocSortDesc('bytes', 'Sort Low-High');
 
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -627,6 +645,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await discover.saveSearch(savedSearchName);
+        await discover.waitUntilTabIsLoaded();
 
         await common.navigateToApp('dashboard');
         await dashboard.clickNewDashboard();
@@ -682,7 +701,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickDocSortDesc('var0', 'Sort High-Low');
 
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -733,7 +752,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickDocSortDesc('var0', 'Sort Low-High');
 
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -750,11 +769,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('filtering by clicking on the table in Discover', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should append a where clause by clicking the table', async () => {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -784,6 +806,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should append an end in existing where clause by clicking the table', async () => {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0`;
         await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -803,6 +826,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should append a where clause by clicking the table without changing the chart type', async () => {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -837,6 +861,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -889,12 +914,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('filtering by clicking on the table in Dashboards', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should append a filter badge by clicking the table', async () => {
         const savedSearchName = 'esql filter from table';
         await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -941,6 +969,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('histogram breakdown', () => {
       before(async () => {
         await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
       });
@@ -955,7 +984,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await discover.chooseBreakdownField('extension');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
@@ -977,6 +1006,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await discover.saveSearch('esql view with breakdown');
+        await discover.waitUntilTabIsLoaded();
 
         await discover.clickNewSearchButton();
         await header.waitUntilLoadingHasFinished();
@@ -984,7 +1014,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
@@ -999,7 +1029,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await unifiedFieldList.clickFieldListAddBreakdownField('extension');
-        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
