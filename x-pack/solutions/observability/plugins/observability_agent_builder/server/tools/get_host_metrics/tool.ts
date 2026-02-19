@@ -21,14 +21,14 @@ import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getToolHandler } from './handler';
 
-export const OBSERVABILITY_GET_HOSTS_TOOL_ID = 'observability.get_hosts';
+export const OBSERVABILITY_GET_HOST_METRICS_TOOL_ID = 'observability.get_host_metrics';
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
   end: 'now',
 };
 
-export type GetHostsToolResult = OtherResult<{
+export type GetHostMetricsToolResult = OtherResult<{
   total: number;
   hosts: Array<{
     name: string;
@@ -37,7 +37,7 @@ export type GetHostsToolResult = OtherResult<{
   }>;
 }>;
 
-const getHostsSchema = z.object({
+const getHostMetricsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   limit: z.number().int().min(1).max(100).default(20).describe(`Maximum number of hosts to return`),
   kqlFilter: z
@@ -48,7 +48,7 @@ const getHostsSchema = z.object({
     ),
 });
 
-export function createGetHostsTool({
+export function createGetHostMetricsTool({
   core,
   logger,
   dataRegistry,
@@ -56,9 +56,9 @@ export function createGetHostsTool({
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
-}): StaticToolRegistration<typeof getHostsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getHostsSchema> = {
-    id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+}): StaticToolRegistration<typeof getHostMetricsSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getHostMetricsSchema> = {
+    id: OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
     type: ToolType.builtin,
     description: `Retrieves a list of hosts with their infrastructure metrics (CPU, memory, disk, network). Use this tool to get an overview of host health and resource utilization.
 
@@ -69,7 +69,7 @@ When to use:
 - Answering questions like "which hosts are under heavy load?" or "what's the memory usage of my servers?"
 
 Returns host names, metrics (CPU percentage, memory usage, disk space, network rx/tx), and metadata (OS name, cloud provider, IP address).`,
-    schema: getHostsSchema,
+    schema: getHostMetricsSchema,
     tags: ['observability', 'infrastructure', 'hosts', 'metrics'],
     availability: {
       cacheMode: 'space',
@@ -80,7 +80,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
     handler: async (
       toolParams,
       { request }
-    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+    ): Promise<ToolHandlerReturn<GetHostMetricsToolResult | ErrorResult>> => {
       const { start, end, limit, kqlFilter } = toolParams;
 
       try {

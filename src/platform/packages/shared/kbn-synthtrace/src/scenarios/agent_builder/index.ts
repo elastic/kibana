@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './tools/get_hosts/hosts';
+export * from './tools/get_host_metrics/hosts';
 export * from './tools/get_services/services';
 export * from './tools/get_log_groups/log_groups';
 export * from './tools/get_correlated_logs/correlated_logs';

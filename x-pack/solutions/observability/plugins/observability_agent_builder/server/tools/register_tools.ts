@@ -30,7 +30,10 @@ import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
 } from './get_correlated_logs/tool';
-import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
+import {
+  OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
+  createGetHostMetricsTool,
+} from './get_host_metrics/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
   createDownstreamDependenciesTool,
@@ -74,7 +77,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-  OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_HOST_METRICS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
   OBSERVABILITY_GET_TRACES_TOOL_ID,
   OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
@@ -105,7 +108,7 @@ export async function registerTools({
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
-    createGetHostsTool({ core, logger, dataRegistry }),
+    createGetHostMetricsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetTracesTool({ core, plugins, logger }),
     createGetRuntimeMetricsTool({ core, plugins, logger }),
