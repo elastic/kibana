@@ -1290,7 +1290,6 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
-              write: [],
             },
             alert: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
