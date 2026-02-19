@@ -47,6 +47,19 @@ describe('VALUE_CLICK_TRIGGER', () => {
   });
 
   describe('handles undefined, null or missing values', () => {
+    test('falls back to column name when meta.field is missing', () => {
+      const point = createPoint({ field: 'original_field', value: 'value0' });
+      point.table.columns[0].meta.field = undefined as unknown as string;
+      point.table.columns[0].name = 'esql_column_name';
+
+      const eventScope = getEventScopeValues({
+        data: { data: [point] },
+      }) as ValueClickTriggerEventScope;
+
+      expect(eventScope.key).toBe('esql_column_name');
+      expect(eventScope.value).toBe('value0');
+    });
+
     test('undefined or missing values are removed from the result scope', () => {
       const point = createPoint({ field: undefined } as unknown as {
         field: string;
