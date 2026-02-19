@@ -30,7 +30,7 @@ evaluate.describe(
           description:
             'Evaluates AI-generated detection rules against known examples from elastic/detection-rules',
           examples: sampleRules.map((rule) => ({
-            input: { prompt: `Generate a detection rule that ${rule.description.toLowerCase()}` },
+            input: { prompt: rule.prompt },
             output: rule,
             metadata: { category: rule.category, difficulty: 'medium', expectedName: rule.name },
           })),

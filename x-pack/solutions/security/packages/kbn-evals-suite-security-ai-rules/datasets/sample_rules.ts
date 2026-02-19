@@ -13,6 +13,7 @@ export interface RuleThreat {
 
 export interface ReferenceRule {
   name: string;
+  prompt: string;
   description: string;
   query: string;
   threat: RuleThreat[];
@@ -36,6 +37,7 @@ export interface ReferenceRule {
 export const sampleRules: ReferenceRule[] = [
   {
     name: 'Encrypting Files with WinRar or 7z',
+    prompt: 'Alert when an archiving tool is used to create password-protected archives on Windows',
     description:
       'Identifies the use of WinRAR or 7-Zip to create encrypted archives. Adversaries often compress and encrypt data in preparation for exfiltration.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -83,6 +85,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Suspicious LSASS Access via MalSecLogon',
+    prompt: 'Detect suspicious access to Windows credential storage processes',
     description:
       'Identifies suspicious access to LSASS handle via the MalSecLogon attack technique. This may indicate an attempt to dump credentials.',
     query: `process where host.os.type == "windows" and event.code == "10" and
@@ -110,6 +113,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Windows Defender Disabled via PowerShell',
+    prompt: 'Alert when endpoint protection is disabled through a scripting engine',
     description:
       'Identifies use of PowerShell to disable Windows Defender. Adversaries may attempt to disable endpoint protection to evade detection.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -136,6 +140,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Remote File Copy via PowerShell',
+    prompt: 'Detect when PowerShell is used to download files from the internet',
     description:
       'Identifies the use of PowerShell to download files from remote locations. Adversaries may use PowerShell to download malicious payloads.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -164,6 +169,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Mimikatz PowerShell Module Activity',
+    prompt: 'Alert on known credential dumping tools running via PowerShell',
     description:
       'Identifies use of Mimikatz PowerShell module. Mimikatz is a credential dumping tool used by adversaries to obtain credentials.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -190,6 +196,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Clearing Windows Event Logs',
+    prompt: 'Detect when Windows audit logs are cleared or modified',
     description:
       'Identifies attempts to clear Windows event logs. Adversaries may clear event logs to cover their tracks.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -219,6 +226,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Suspicious Execution via Windows Utility',
+    prompt: 'Alert when built-in Windows utilities execute scripts or remote content',
     description:
       'Identifies execution of a suspicious command via a Windows built-in utility. Adversaries may abuse trusted binaries to execute malicious code.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -248,6 +256,7 @@ export const sampleRules: ReferenceRule[] = [
   },
   {
     name: 'Suspicious Network Connection from Windows Binary',
+    prompt: 'Detect outbound network connections initiated by Windows system binaries',
     description:
       'Identifies network connections from Windows system binaries. This may indicate abuse of trusted binaries for command and control.',
     query: `network where host.os.type == "windows" and event.type == "start" and
