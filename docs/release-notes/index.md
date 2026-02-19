@@ -43,7 +43,7 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.3.1-fixes]
 
 **Alerting and cases**:
-* Fixes a bug with PagerDuty where setting the Custom details field causes rules to fail [#253683]({{kib-pull}}253683).
+* Fixes a bug with PagerDuty where setting the **Custom details** field causes rules to fail [#253683]({{kib-pull}}253683).
 * Adds external references to checks [#253107]({{kib-pull}}253107).
 * Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 * Improves handling of 204 responses [#251090]({{kib-pull}}251090).
