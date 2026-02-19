@@ -50,7 +50,7 @@ describe('transformEnhancementsOut', () => {
     `);
   });
 
-  test('should convert dashboard drilldown event with ON_CLICK_VALUE', () => {
+  test('should convert dashboard drilldown event with VALUE_CLICK_TRIGGER', () => {
     const state = {
       enhancements: {
         dynamicActions: {
@@ -66,7 +66,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'Go to Dashboard',
               },
               eventId: '8aeddba7-a7ed-42e2-988e-794c8435028d',
-              triggers: [ON_CLICK_VALUE],
+              triggers: ['VALUE_CLICK_TRIGGER'],
             },
           ],
         },
