@@ -43,7 +43,11 @@ test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
       ];
 
       await Promise.all(pingIds.map((id) => pageObjects.monitorDetails.waitForPingListItem(id)));
-      await expect(page.testSubj.locator('uptimePingListTable')).toBeVisible({ timeout: 30_000 });
+      await expect(
+        page.testSubj.locator('uptimeWithResponsiveWrapper--panel').locator('.echChart')
+      ).toBeVisible({
+        timeout: 20_000,
+      });
     });
   });
 });
