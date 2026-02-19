@@ -33,6 +33,8 @@ export interface AlertingUsage {
     warning: number;
   };
   count_rules_with_tags: number;
+  count_rules_with_elasticagent_tag: number;
+  count_rules_with_elasticagent_tag_by_type: Record<string, number>;
   count_rules_by_notify_when: {
     on_action_group_change: number;
     on_active_alert: number;
@@ -47,6 +49,7 @@ export interface AlertingUsage {
   count_mw_with_repeat_toggle_on: number;
   count_mw_with_filter_alert_toggle_on: number;
   count_rules_with_muted_alerts: number;
+  count_rules_with_api_key_created_by_user: number;
   count_rules_by_execution_status_per_day: Record<string, number>;
   percentile_num_generated_actions_per_day: {
     p50: number;

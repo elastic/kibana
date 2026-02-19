@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { set } from '@kbn/safer-lodash-set';
 import { map, takeUntil, firstValueFrom, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
@@ -24,8 +25,14 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  ClusterClient,
+  AgentManager,
+  type OnRequestHandler,
+} from '@kbn/core-elasticsearch-client-server-internal';
 
+import { isPlainObject } from 'lodash';
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -47,6 +54,7 @@ export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  security: InternalSecurityServiceSetup;
 }
 
 /** @internal */
@@ -55,6 +63,7 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
+  private readonly isServerless: boolean;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -64,12 +73,13 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
-  // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
+  private security?: InternalSecurityServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
+    this.isServerless = coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
@@ -100,12 +110,14 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.security = deps.security;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckFailureInterval: config.healthCheckFailureInterval?.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       healthCheckRetry: config.healthCheckRetry,
       log: this.log,
@@ -234,10 +246,12 @@ export class ElasticsearchService
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
       authHeaders: this.authHeaders,
+      security: this.security,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      onRequest: this.getOnRequestHandler(),
     });
   }
 
@@ -248,5 +262,26 @@ export class ElasticsearchService
       });
     }
     return this.agentManager;
+  }
+
+  private getOnRequestHandler(): OnRequestHandler | undefined {
+    if (!this.isServerless) return undefined;
+
+    return (ctx, params, options) => {
+      // Note: this.cpsEnabled may be set at a later point in time
+      if (!this.cpsEnabled) return;
+      const body = params.body;
+      if (
+        isPlainObject(body) &&
+        ((body as Record<string, unknown>).project_routing != null ||
+          (body as Record<string, unknown>).pit != null)
+      )
+        return;
+
+      const acceptedParams = params.meta?.acceptedParams;
+      const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
+      if (!apiSupportsProjectRouting) return;
+      set(params, 'body.project_routing', '_alias:_origin');
+    };
   }
 }

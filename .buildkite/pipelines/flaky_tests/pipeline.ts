@@ -150,7 +150,7 @@ steps.push({
 
 if (hasScoutSuites) {
   steps.push({
-    command: '.buildkite/scripts/steps/test/scout_discover_playwright_configs.sh',
+    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
     label: 'Discover Scout Playwright configs',
     agents: expandAgentQueue('n2-4-spot'),
     key: 'scout_playwright_configs',
@@ -194,7 +194,7 @@ for (const testSuite of testSuites) {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_REPORTER_ENABLED: 'true',

@@ -8,6 +8,7 @@ spec:
   type: url
   targets:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/cloud-security-posture/cspm-agentless-scout.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/evals/kibana-evals.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-agent-builder-smoke-tests-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-api-docs.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-apis-capacity-testing-daily.yml
@@ -44,6 +45,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-pr.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployments.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-renovate-helper.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-emergency-release.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates-emergency.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates.yml

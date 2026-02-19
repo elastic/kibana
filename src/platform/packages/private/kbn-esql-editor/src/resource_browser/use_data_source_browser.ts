@@ -21,21 +21,23 @@ import {
   computeRemovalRange,
   getLocatedSourceItemsFromQuery,
   getSourceCommandContextFromQuery,
+  getRangeFromOffsets,
 } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import type { BrowserPopoverPosition } from './types';
+import { IndicesBrowserOpenMode } from './types';
+import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
+import {
+  ResourceBrowserType,
+  ResourceBrowserOpenedFrom,
+  type ESQLEditorTelemetryService,
+} from '../telemetry/telemetry_service';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
+  telemetryService: ESQLEditorTelemetryService;
 }
-
-interface BrowserPopoverPosition {
-  top?: number;
-  left?: number;
-}
-
-const BROWSER_POPOVER_VERTICAL_OFFSET = 20; // 20px to account for the line height
 
 const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
   return (
@@ -48,25 +50,11 @@ const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSour
   );
 };
 
-const getRangeFromOffsets = (
-  model: monaco.editor.ITextModel,
-  startOffset: number,
-  endOffset: number
-): monaco.IRange => {
-  const start = model.getPositionAt(startOffset);
-  const end = model.getPositionAt(endOffset);
-  return {
-    startLineNumber: start.lineNumber,
-    startColumn: start.column,
-    endLineNumber: end.lineNumber,
-    endColumn: end.column,
-  };
-};
-
 export function useDataSourceBrowser({
   editorRef,
   editorModel,
   esqlCallbacks,
+  telemetryService,
 }: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
@@ -184,6 +172,14 @@ export function useDataSourceBrowser({
           (!isTSCommandRef.current && preloadedSources?.length)
       );
 
+      telemetryService.trackResourceBrowserOpened({
+        browserType: ResourceBrowserType.DATA_SOURCES,
+        openedFrom:
+          openModeRef.current === IndicesBrowserOpenMode.Badge
+            ? ResourceBrowserOpenedFrom.BADGE
+            : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+      });
+
       if (shouldUsePreloaded) {
         const normalized =
           isTSCommandRef.current && preloadedTimeSeriesSources
@@ -209,7 +205,7 @@ export function useDataSourceBrowser({
 
       setIsDataSourceBrowserOpen(true);
     },
-    [editorModel, editorRef, updatePopoverPosition, fetchSources]
+    [editorModel, editorRef, updatePopoverPosition, fetchSources, telemetryService]
   );
 
   const handleDataSourceBrowserSelect = useCallback(
@@ -225,15 +221,31 @@ export function useDataSourceBrowser({
       // The browser UI emits single-item changes (select/deselect). Reflect that in our local
       // selection ref first
       const previous = selectedSourcesRef.current;
+      const wasSelected = previous.includes(sourceName);
       const newSelectedSources =
         change === DataSourceSelectionChange.Add
-          ? previous.includes(sourceName)
+          ? wasSelected
             ? previous
             : [...previous, sourceName]
           : previous.filter((s) => s !== sourceName);
 
       // Keep selection state in sync with the browser UI even if we can't edit the query.
       selectedSourcesRef.current = newSelectedSources;
+
+      // Only track telemetry for new items, not repeated ones
+      const shouldTrackToggle =
+        (change === DataSourceSelectionChange.Add && !wasSelected) ||
+        (change === DataSourceSelectionChange.Remove && wasSelected);
+      if (shouldTrackToggle) {
+        telemetryService.trackResourceBrowserItemToggled({
+          browserType: ResourceBrowserType.DATA_SOURCES,
+          openedFrom:
+            openModeRef.current === IndicesBrowserOpenMode.Badge
+              ? ResourceBrowserOpenedFrom.BADGE
+              : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
+          action: change,
+        });
+      }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
       // list so we preserve user formatting, spacing, and any unknown sources.
@@ -301,7 +313,7 @@ export function useDataSourceBrowser({
         applyInsert(insertAt, text);
       }
     },
-    [editorRef, editorModel]
+    [editorRef, editorModel, telemetryService]
   );
 
   return {
