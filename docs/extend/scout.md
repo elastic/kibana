@@ -18,7 +18,6 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
 - **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
-- **Deployment-agnostic**: write once and run across stateful and serverless ().
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
 - **Reporting**: we captures test events that power our dashboards (e.g., skipped test, flaky tests, and more).
