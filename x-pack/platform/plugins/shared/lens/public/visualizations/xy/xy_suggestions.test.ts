@@ -1553,11 +1553,11 @@ describe('xy_suggestions', () => {
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
     });
 
-    test('suggests bar_stacked when no query is passed (changeType initial with date)', () => {
+    test('suggests bar_stacked when no query is passed (changeType initial with string)', () => {
       const suggestions = getSuggestions({
         table: {
           isMultiRow: true,
-          columns: [numCol('col0'), dateCol('step')],
+          columns: [numCol('col0'), strCol('category')],
           layerId: 'first',
           changeType: 'initial',
         },
