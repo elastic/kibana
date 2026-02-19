@@ -253,7 +253,7 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
         create: {
           _index: '.kibana-evaluations',
-          _id: 'run-123-gpt-4-dataset-1-example-1-Correctness-0',
+          _id: 'run-123-dataset-1-example-1-Correctness-0',
         },
       });
     });
