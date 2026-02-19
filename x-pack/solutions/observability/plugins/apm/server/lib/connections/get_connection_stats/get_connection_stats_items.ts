@@ -8,6 +8,7 @@
 import objectHash from 'object-hash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -27,13 +28,12 @@ import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
 const MAX_ITEMS = 1500;
-export const getStats = async ({
+export const getConnectionStatsItems = async ({
   apmEventClient,
   start,
   end,
@@ -56,7 +56,7 @@ export const getStats = async ({
     offset,
   });
 
-  const response = await getConnectionStats({
+  const response = await getConnectionStatsAggregations({
     apmEventClient,
     startWithOffset,
     endWithOffset,
@@ -104,7 +104,7 @@ export const getStats = async ({
   );
 };
 
-async function getConnectionStats({
+async function getConnectionStatsAggregations({
   apmEventClient,
   startWithOffset,
   endWithOffset,
@@ -151,7 +151,7 @@ async function getConnectionStats({
       sources: [
         {
           documentType: ApmDocumentType.ServiceDestinationMetric,
-          rollupInterval: RollupInterval.OneMinute,
+          rollupInterval: RollupInterval.OneMinute, // TODO: use getRollupIntervalForTimeRange
         },
       ],
     },
@@ -172,20 +172,8 @@ async function getConnectionStats({
         composite: {
           size: MAX_ITEMS,
           sources: asMutableArray([
-            {
-              serviceName: {
-                terms: {
-                  field: SERVICE_NAME,
-                },
-              },
-            },
-            {
-              dependencyName: {
-                terms: {
-                  field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                },
-              },
-            },
+            { serviceName: { terms: { field: SERVICE_NAME } } },
+            { dependencyName: { terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE } } },
           ] as const),
         },
         aggs: {
@@ -193,18 +181,10 @@ async function getConnectionStats({
             top_metrics: {
               size: 1,
               metrics: asMutableArray([
-                {
-                  field: SERVICE_ENVIRONMENT,
-                },
-                {
-                  field: AGENT_NAME,
-                },
-                {
-                  field: SPAN_TYPE,
-                },
-                {
-                  field: SPAN_SUBTYPE,
-                },
+                { field: SERVICE_ENVIRONMENT },
+                { field: AGENT_NAME },
+                { field: SPAN_TYPE },
+                { field: SPAN_SUBTYPE },
               ] as const),
               sort: {
                 '@timestamp': 'desc',
