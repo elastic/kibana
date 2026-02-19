@@ -33,10 +33,15 @@ const DEFAULT_NUM_THREADS = 1;
 const formDeserializer = (data: InferenceEndpoint) => {
   const { providerConfig, headers, taskTypeConfig, ...restConfig } = data.config || {};
 
-  if (providerConfig) {
-    const { adaptive_allocations, max_tokens, ...restProviderConfig } = providerConfig;
-    const maxAllocations = adaptive_allocations?.max_number_of_allocations;
+  const {
+    'adaptive_allocations.max_number_of_allocations': maxAllocations,
+    'adaptive_allocations.enabled': adaptiveAllocationsEnabled,
+    'adaptive_allocations.min_number_of_allocations': minAllocations,
+    max_tokens,
+    ...restProviderConfig
+  } = providerConfig || {};
 
+  if (restProviderConfig) {
     return {
       ...data,
       config: {

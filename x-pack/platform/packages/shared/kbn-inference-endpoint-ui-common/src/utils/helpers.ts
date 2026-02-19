@@ -148,8 +148,6 @@ export const mapProviderFields = (
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
         location: newProvider.configurations[k].location ?? SERVICE_SETTINGS,
-      })
-    );
       };
     });
 };
