@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluate_dataset';
 import { sampleRules } from '../datasets/sample_rules';
+import { hardCases } from '../datasets/hard_cases';
 
 evaluate.describe(
   'AI Rule Generation',
@@ -51,41 +52,11 @@ evaluate.describe(
         dataset: {
           name: 'security-ai-rules: edge-cases',
           description: 'Tests AI rule generation with edge cases and challenging prompts',
-          examples: [
-            {
-              input: { prompt: 'Detect suspicious activity' },
-              output: {
-                name: 'Generic Suspicious Activity',
-                description: 'Detects suspicious activity',
-                query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
-                threat: [],
-                severity: 'low',
-                tags: [],
-                riskScore: 21,
-                from: 'now-5m',
-                category: 'unknown',
-              },
-              metadata: { testType: 'vague-prompt', difficulty: 'hard' },
-            },
-            {
-              input: {
-                prompt:
-                  'Create a rule for detecting advanced persistent threat actors using zero-day exploits with polymorphic malware and anti-forensics techniques',
-              },
-              output: {
-                name: 'Complex APT Detection',
-                description: 'Detects advanced persistent threats',
-                query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
-                threat: [],
-                severity: 'critical',
-                tags: [],
-                riskScore: 99,
-                from: 'now-5m',
-                category: 'execution',
-              },
-              metadata: { testType: 'complex-prompt', difficulty: 'very-hard' },
-            },
-          ],
+          examples: hardCases.map((c) => ({
+            input: { prompt: c.prompt },
+            output: c.output,
+            metadata: c.metadata,
+          })),
         },
       });
       log.info('Edge case evaluation complete');
