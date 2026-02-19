@@ -12,6 +12,7 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './constants';
+import { BASIC_MAPPINGS } from '../../../common/mappings';
 
 export const initializeStepExecutionDataStream = (coreDataStreams: DataStreamsSetup) => {
   return coreDataStreams.registerDataStream({
@@ -26,12 +27,8 @@ export const initializeStepExecutionDataStream = (coreDataStreams: DataStreamsSe
 const stepExecutionMappings = {
   dynamic: false,
   properties: {
-    spaceId: mappings.keyword(),
-    id: mappings.keyword(),
+    ...BASIC_MAPPINGS,
     stepId: mappings.keyword(),
-    workflowRunId: mappings.keyword(),
-    workflowId: mappings.keyword(),
-    status: mappings.keyword(),
     startedAt: mappings.date(),
     finishedAt: mappings.date(),
     duration: mappings.long(),
@@ -49,3 +46,5 @@ export const initializeDataStreamClient = (
 ): Promise<StepExecutionDataStreamClient> => {
   return coreDataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM);
 };
+
+export { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM };

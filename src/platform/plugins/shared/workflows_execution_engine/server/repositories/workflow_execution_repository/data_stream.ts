@@ -12,6 +12,7 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from './constants';
+import { BASIC_MAPPINGS } from '../../../common/mappings';
 
 export const initializeWorkflowExecutionDataStream = (coreDataStreams: DataStreamsSetup) => {
   return coreDataStreams.registerDataStream({
@@ -26,10 +27,7 @@ export const initializeWorkflowExecutionDataStream = (coreDataStreams: DataStrea
 const workflowExecutionMappings = {
   dynamic: false,
   properties: {
-    spaceId: mappings.keyword(),
-    id: mappings.keyword(),
-    workflowId: mappings.keyword(),
-    status: mappings.keyword(),
+    ...BASIC_MAPPINGS,
     workflowDefinition: mappings.object({
       dynamic: false,
       properties: {},
@@ -42,8 +40,6 @@ const workflowExecutionMappings = {
     finishedAt: mappings.date(),
     duration: mappings.long(),
     triggeredBy: mappings.keyword(),
-    concurrencyGroupKey: mappings.keyword(),
-    type: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
