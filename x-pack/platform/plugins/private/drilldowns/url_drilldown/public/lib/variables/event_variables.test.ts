@@ -73,9 +73,7 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
 describe('ROW_CLICK_TRIGGER', () => {
   test('getEventVariableList() returns correct list of runtime variables', () => {
-    const vars = getEventVariableList({
-      triggers: [ROW_CLICK_TRIGGER],
-    });
+    const vars = getEventVariableList(ROW_CLICK_TRIGGER);
     expect(vars.map(({ label }) => label)).toEqual([
       'event.values',
       'event.keys',
