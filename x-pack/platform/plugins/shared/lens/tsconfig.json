@@ -141,7 +141,6 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
     "@kbn/scout",
-    "@kbn/ui-actions-enhanced-plugin"
   ],
   "exclude": ["target/**/*"]
 }
