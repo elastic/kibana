@@ -86,7 +86,7 @@ export const alertAnalysisSampleSkill = defineSkillType({
 | LIMIT 100`,
     },
   ],
-  getAllowedTools: () => [
+  getRegistryTools: () => [
     `security.alerts`,
     `security.security_labs_search`,
     `platform.core.cases`,
