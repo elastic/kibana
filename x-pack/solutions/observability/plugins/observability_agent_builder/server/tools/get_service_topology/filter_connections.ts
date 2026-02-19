@@ -40,7 +40,7 @@ export function filterDownstreamConnections(
   ];
 
   while (queue.length > 0) {
-    const { serviceName: currentService, depth: currentDepth } = queue.pop()!;
+    const { serviceName: currentService, depth: currentDepth } = queue.shift()!;
 
     // Skip already-visited nodes to avoid cycles
     if (!visitedServices.has(currentService)) {
@@ -122,7 +122,7 @@ export function filterUpstreamConnections(
   ];
 
   while (queue.length > 0) {
-    const { serviceName: currentService, depth: currentDepth } = queue.pop()!;
+    const { serviceName: currentService, depth: currentDepth } = queue.shift()!;
 
     if (!visitedServices.has(currentService)) {
       visitedServices.add(currentService);
