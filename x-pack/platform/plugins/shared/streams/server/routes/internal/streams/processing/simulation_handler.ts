@@ -377,7 +377,7 @@ export const executePipelineSimulation = async (
     return {
       status: 'failure',
       error: {
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
         type: 'generic_simulation_failure',
       },
     };
@@ -487,7 +487,7 @@ const executeIngestSimulation = async (
     return {
       status: 'failure',
       error: {
-        message: error.message,
+        message: error instanceof Error ? error.message : String(error),
         type: 'generic_simulation_failure',
       },
     };

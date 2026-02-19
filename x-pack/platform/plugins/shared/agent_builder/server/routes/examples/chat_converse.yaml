@@ -34,3 +34,21 @@ responses:
                     message: "Could not figure out which index to use"
               response:
                 message: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease."
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/converse" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "input": "What is Elasticsearch?",
+        "agent_id": "elastic-ai-agent"}'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/converse
+    {
+      "input": "What is Elasticsearch?",
+      "agent_id": "elastic-ai-agent"
+    }
