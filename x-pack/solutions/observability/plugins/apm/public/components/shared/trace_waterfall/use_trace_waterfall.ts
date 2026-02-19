@@ -297,6 +297,12 @@ function reparentOrphansToRoot(
 
 type RawTraceWaterfallItem = Omit<TraceWaterfallItem, 'color'>;
 
+interface TraversalFrame {
+  item: TraceItem;
+  depth: number;
+  parent?: RawTraceWaterfallItem;
+}
+
 export function getTraceWaterfall({
   rootItem,
   parentChildMap,
@@ -312,11 +318,16 @@ export function getTraceWaterfall({
 
   reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
-  function getTraceWaterfallItem(
-    item: TraceItem,
-    depth: number,
-    parent?: RawTraceWaterfallItem
-  ): RawTraceWaterfallItem[] {
+  const flattenedTraceWaterfall: RawTraceWaterfallItem[] = [];
+  const stack: TraversalFrame[] = [{ item: rootItem, depth: 0 }];
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) {
+      continue;
+    }
+
+    const { item, depth, parent } = frame;
     const startMicroseconds = item.timestampUs;
     const traceWaterfallItem: RawTraceWaterfallItem = {
       ...item,
@@ -325,10 +336,15 @@ export function getTraceWaterfall({
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
     };
 
-    const sortedChildren =
-      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
+    flattenedTraceWaterfall.push(traceWaterfallItem);
 
-    const flattenedChildren = sortedChildren.flatMap((child) => {
+    const sortedChildren =
+      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) ?? [];
+
+    // Push children in reverse so pop order matches recursive ascending traversal.
+    for (let i = sortedChildren.length - 1; i >= 0; i--) {
+      const child = sortedChildren[i];
+
       // Check if we have encountered the trace item before.
       // If we have visited the trace item before, then the child waterfall items are already
       // present in the flattened list, so we throw an error to alert the user of duplicated
@@ -339,13 +355,11 @@ export function getTraceWaterfall({
 
       // If we haven't visited it before, then we can process the waterfall item.
       visitor.add(child.id);
-      return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
-    });
-
-    return [traceWaterfallItem, ...flattenedChildren];
+      stack.push({ item: child, depth: depth + 1, parent: traceWaterfallItem });
+    }
   }
 
-  return getTraceWaterfallItem(rootItem, 0);
+  return flattenedTraceWaterfall;
 }
 
 export function getClockSkew({

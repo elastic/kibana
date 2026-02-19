@@ -23,7 +23,8 @@ import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import type { TransactionTab } from './transaction_tabs';
 import { TransactionTabs } from './transaction_tabs';
 import type { Environment } from '../../../../../common/environment_rt';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
@@ -87,15 +88,12 @@ export function WaterfallWithSummary<TSample extends {}>({
     ? unifiedWaterfallFetchResult.status
     : waterfallFetchStatus;
 
-  const isLoading =
-    activeWaterfallStatus === FETCH_STATUS.LOADING ||
-    traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  const isLoading = isPending(activeWaterfallStatus) || isPending(traceSamplesFetchStatus);
 
   // When traceId is not present, call to waterfallFetchResult will not be initiated
   const isSucceeded =
-    (activeWaterfallStatus === FETCH_STATUS.SUCCESS ||
-      activeWaterfallStatus === FETCH_STATUS.NOT_INITIATED) &&
-    traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
+    (isSuccess(activeWaterfallStatus) || isNotInitiated(activeWaterfallStatus)) &&
+    isSuccess(traceSamplesFetchStatus);
 
   useEffect(() => {
     if (!isControlled) {

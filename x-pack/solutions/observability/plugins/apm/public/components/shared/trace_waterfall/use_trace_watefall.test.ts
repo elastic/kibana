@@ -162,6 +162,108 @@ describe('getFlattenedTraceWaterfall', () => {
     expect(result[1].depth).toBe(1);
   });
 
+  it('keeps stable preorder output for deeper trees', () => {
+    const deepRootTimestamp = new Date('2024-01-01T00:00:00.000Z').getTime() * 1000;
+
+    const deepRoot: TraceItem = {
+      id: 'root-deep',
+      timestampUs: deepRootTimestamp,
+      name: 'root-deep',
+      traceId: 'trace-deep',
+      duration: 5000000,
+      serviceName: 'svcRoot',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'transaction',
+    };
+
+    const deepChildren: TraceItem[] = Array.from({ length: 12 }, (_, index) => {
+      const id = `deep-${index + 1}`;
+      return {
+        id,
+        parentId: index === 0 ? deepRoot.id : `deep-${index}`,
+        timestampUs: deepRootTimestamp + (index + 1) * 1000,
+        name: id,
+        traceId: 'trace-deep',
+        duration: 1000 - index,
+        serviceName: `svc-${index + 1}`,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      };
+    });
+
+    const siblingEarly: TraceItem = {
+      id: 'sibling-early',
+      parentId: deepRoot.id,
+      timestampUs: deepRootTimestamp + 500,
+      name: 'sibling-early',
+      traceId: 'trace-deep',
+      duration: 20,
+      serviceName: 'svcSiblingEarly',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
+    };
+
+    const siblingLate: TraceItem = {
+      id: 'sibling-late',
+      parentId: deepRoot.id,
+      timestampUs: deepRootTimestamp + 2000,
+      name: 'sibling-late',
+      traceId: 'trace-deep',
+      duration: 30,
+      serviceName: 'svcSiblingLate',
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
+    };
+
+    const deepMap = getTraceParentChildrenMap([deepRoot, ...deepChildren, siblingEarly, siblingLate], false);
+
+    const result = getTraceWaterfall({
+      rootItem: deepRoot,
+      parentChildMap: deepMap,
+      orphans: [],
+    });
+
+    expect(result.map((item) => item.id)).toEqual([
+      'root-deep',
+      'sibling-early',
+      'deep-1',
+      'deep-2',
+      'deep-3',
+      'deep-4',
+      'deep-5',
+      'deep-6',
+      'deep-7',
+      'deep-8',
+      'deep-9',
+      'deep-10',
+      'deep-11',
+      'deep-12',
+      'sibling-late',
+    ]);
+
+    expect(result.map((item) => item.depth)).toEqual([
+      0, // root-deep
+      1, // sibling-early
+      1, // deep-1
+      2, // deep-2
+      3, // deep-3
+      4, // deep-4
+      5, // deep-5
+      6, // deep-6
+      7, // deep-7
+      8, // deep-8
+      9, // deep-9
+      10, // deep-10
+      11, // deep-11
+      12, // deep-12
+      1, // sibling-late
+    ]);
+  });
+
   it('errors when it encounters invalid trace documents', () => {
     // We have a duplicate span id, that is both a root span and a child span
     // This indicates an instrumentation error. We should never be hitting this

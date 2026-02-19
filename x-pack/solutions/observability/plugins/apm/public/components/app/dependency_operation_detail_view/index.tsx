@@ -13,7 +13,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_dependency_detail_operations_breadcrumb';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
@@ -131,13 +131,11 @@ export function DependencyOperationDetailView() {
   }, [samples, spanId, history, queryRef, router, spanFetch.status]);
 
   const isWaterfallLoading =
-    spanFetch.status === FETCH_STATUS.NOT_INITIATED ||
-    (spanFetch.status === FETCH_STATUS.LOADING && samples.length === 0) ||
+    (isPending(spanFetch.status) && samples.length === 0) ||
     (waterfallFetch.useUnified
-      ? unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
+      ? isPending(unifiedWaterfallFetchResult.status) &&
         !unifiedWaterfallFetchResult.entryTransaction
-      : waterfallFetch.status === FETCH_STATUS.LOADING &&
-        !waterfallFetch.waterfall.entryWaterfallTransaction);
+      : isPending(waterfallFetch.status) && !waterfallFetch.waterfall.entryWaterfallTransaction);
 
   const onSampleClick = useCallback(
     (sample: any) => {
