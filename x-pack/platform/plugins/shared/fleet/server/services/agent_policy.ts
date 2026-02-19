@@ -1701,11 +1701,12 @@ class AgentPolicyService {
           })
           .then((response) => {
             if (!response) {
-              const message = `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`;
-              logger.debug(message);
-              if (options?.throwOnAnyError) {
-                throw new Error(message);
-              }
+              // Do not throw here even when throwOnAnyError is set — a null full policy
+              // indicates a data inconsistency (e.g. missing package) that retrying
+              // setup will not resolve. The policy is skipped silently.
+              logger.debug(
+                `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`
+              );
             }
 
             return response;
