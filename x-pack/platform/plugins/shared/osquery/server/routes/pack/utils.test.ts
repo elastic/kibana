@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { convertSOQueriesToPack, convertSOQueriesToPackConfig } from './utils';
+import {
+  convertSOQueriesToPack,
+  convertSOQueriesToPackConfig,
+  convertPackQueriesToSO,
+} from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
   [packName]: {
@@ -98,6 +102,82 @@ describe('Pack utils', () => {
         getTestQueries({ snapshot: false, removed: false })
       );
       expect(convertedQueries).toStrictEqual(getOneLiner({ removed: false, snapshot: false }));
+    });
+
+    test('includes schedule_id and start_date when present', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(
+        getTestQueries({ schedule_id: 'abc-123', start_date: '2025-01-01T00:00:00.000Z' })
+      );
+      expect(convertedQueries).toStrictEqual(
+        getOneLiner({ schedule_id: 'abc-123', start_date: '2025-01-01T00:00:00.000Z' })
+      );
+    });
+
+    test('omits schedule_id and start_date when absent', () => {
+      const convertedQueries = convertSOQueriesToPackConfig(getTestQueries());
+      const result = convertedQueries.default;
+      expect(result).not.toHaveProperty('schedule_id');
+      expect(result).not.toHaveProperty('start_date');
+    });
+  });
+
+  describe('convertPackQueriesToSO', () => {
+    test('preserves schedule_id and start_date when present', () => {
+      const queries = {
+        query1: {
+          name: 'Test Query',
+          query: 'SELECT 1',
+          interval: 60,
+          schedule_id: 'uuid-1',
+          start_date: '2025-01-01T00:00:00.000Z',
+        },
+      };
+      const result = convertPackQueriesToSO(queries);
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'query1',
+          schedule_id: 'uuid-1',
+          start_date: '2025-01-01T00:00:00.000Z',
+        }),
+      ]);
+    });
+
+    test('omits schedule_id and start_date when absent', () => {
+      const queries = {
+        query1: {
+          name: 'Test Query',
+          query: 'SELECT 1',
+          interval: 60,
+        },
+      };
+      const result = convertPackQueriesToSO(queries);
+      expect(result[0]).not.toHaveProperty('schedule_id');
+      expect(result[0]).not.toHaveProperty('start_date');
+    });
+
+    test('handles mixed queries with and without schedule_id', () => {
+      const queries = {
+        query1: {
+          name: 'With schedule',
+          query: 'SELECT 1',
+          interval: 60,
+          schedule_id: 'uuid-1',
+          start_date: '2025-01-01T00:00:00.000Z',
+        },
+        query2: {
+          name: 'Without schedule',
+          query: 'SELECT 2',
+          interval: 120,
+        },
+      };
+      const result = convertPackQueriesToSO(queries);
+      expect(result).toHaveLength(2);
+      const withSchedule = result.find((q) => q.id === 'query1');
+      const withoutSchedule = result.find((q) => q.id === 'query2');
+      expect(withSchedule?.schedule_id).toBe('uuid-1');
+      expect(withSchedule?.start_date).toBe('2025-01-01T00:00:00.000Z');
+      expect(withoutSchedule).not.toHaveProperty('schedule_id');
+      expect(withoutSchedule).not.toHaveProperty('start_date');
     });
   });
 });

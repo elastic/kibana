@@ -89,6 +89,17 @@ export const actionResponsesMapping: MappingTypeMapping = {
         },
       },
     },
+    schedule_execution_count: {
+      type: 'long',
+    },
+    response_id: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    schedule_id: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
     started_at: {
       type: 'date',
     },

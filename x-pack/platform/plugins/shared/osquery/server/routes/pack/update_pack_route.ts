@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty } from 'lodash';
+import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty, keyBy } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -88,12 +89,43 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
+        const {
+          name,
+          description,
+          queries: rawQueries,
+          enabled,
+          policy_ids,
+          shards = {},
+        } = request.body;
 
-        const currentPackSO = await spaceScopedClient.get<{ name: string; enabled: boolean }>(
+        const currentPackSO = await spaceScopedClient.get<PackSavedObject>(
           packSavedObjectType,
           request.params.id
         );
+
+        const existingScheduleIds = keyBy(
+          (currentPackSO.attributes.queries ?? []).filter(
+            (q: { id: string; schedule_id?: string }) => q.schedule_id
+          ),
+          'id'
+        );
+        const now = moment().toISOString();
+        const queries = rawQueries
+          ? Object.fromEntries(
+              Object.entries(rawQueries).map(([queryId, queryData]) => {
+                const existing = existingScheduleIds[queryId];
+
+                return [
+                  queryId,
+                  {
+                    ...queryData,
+                    schedule_id: existing?.schedule_id ?? uuidv4(),
+                    start_date: existing?.start_date ?? now,
+                  },
+                ];
+              })
+            )
+          : undefined;
 
         if (name) {
           const conflictingEntries = await spaceScopedClient.find<PackSavedObject>({
@@ -220,7 +252,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         draft,
                         `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                         {
-                          queries: updatedPackSO.attributes.queries,
+                          shard: policyShards[agentPolicyId] ?? 100,
+                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                         }
                       );
 

@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { has, unset, some, mapKeys } from 'lodash';
+import { has, unset, some, mapKeys, mapValues } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -82,7 +83,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
+        const {
+          name,
+          description,
+          queries: rawQueries,
+          enabled,
+          policy_ids,
+          shards = {},
+        } = request.body;
+
+        const now = moment().toISOString();
+        const queries = mapValues(rawQueries, (queryData) => ({
+          ...queryData,
+          schedule_id: uuidv4(),
+          start_date: now,
+        }));
+
         const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
