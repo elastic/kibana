@@ -52,6 +52,10 @@ export function BurnRateRuleEditor(props: Props) {
     });
   }, [initialSlo]);
 
+  const setHasInteractedField = () => {
+    setHasInteracted(true);
+  };
+
   const onSelectedSlo = (slo: SLODefinitionResponse | undefined) => {
     setSelectedSlo(slo);
     setWindowDefs(() => {
@@ -82,7 +86,7 @@ export function BurnRateRuleEditor(props: Props) {
         initialSlo={selectedSlo}
         onSelected={onSelectedSlo}
         errors={hasInteracted ? errors.sloId : undefined}
-        setHasInteracted={setHasInteracted}
+        onBlur={setHasInteractedField}
       />
     );
   };
