@@ -40,6 +40,9 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
   FAAS_COLDSTART,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
@@ -170,6 +173,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -227,6 +231,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -275,6 +280,7 @@ describe('getUnifiedTraceItems', () => {
             timestampUs: 1672531200000000,
             traceId: 'test-trace-id',
             duration: 1000,
+            result: undefined,
             status: undefined,
             errors: [{ errorDocId: 'error-1' }],
             parentId: undefined,
@@ -390,11 +396,14 @@ describe('getUnifiedTraceItems', () => {
         hits: {
           hits: [
             {
+              _source: {},
               fields: {
                 ...defaultSearchFields,
                 [TRANSACTION_ID]: ['transaction-1'],
                 [TRANSACTION_NAME]: ['Test Transaction'],
                 [TRANSACTION_DURATION]: [2000],
+                [TRANSACTION_RESULT]: ['HTTP 2xx'],
+                [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
                 [PARENT_ID]: ['parent-1'],
                 [EVENT_OUTCOME]: ['success'],
               },
@@ -411,12 +420,109 @@ describe('getUnifiedTraceItems', () => {
         id: 'transaction-1',
         name: 'Test Transaction',
         duration: 2000,
+        result: 'HTTP 2xx',
         parentId: 'parent-1',
         status: {
           fieldName: 'event.outcome',
           value: 'success',
         },
       });
+    });
+
+    it('should set result from otel http scheme and status code when both are present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_SCHEME]: ['https'],
+                [ATTRIBUTE_HTTP_STATUS_CODE]: [200],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBe('HTTPS 200');
+    });
+
+    it('should set result from otel http scheme when only scheme is present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_SCHEME]: ['http'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBe('http');
+    });
+
+    it('should set result from otel http status code when only status code is present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+                [ATTRIBUTE_HTTP_STATUS_CODE]: [404],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBe('404');
+    });
+
+    it('should leave result undefined when no transaction or otel http result fields are present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['OTEL Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].result).toBeUndefined();
     });
 
     it('should handle span type, subtype, and kind fields', async () => {

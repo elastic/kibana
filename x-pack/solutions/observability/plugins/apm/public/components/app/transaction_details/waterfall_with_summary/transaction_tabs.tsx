@@ -167,28 +167,28 @@ function TimelineTabContent({
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
 }) {
-  if (!useUnified) {
+  if (useUnified) {
     return (
-      <WaterfallContainer
+      <UnifiedWaterfallContainer
+        traceItems={unifiedWaterfallFetchResult.traceItems}
+        errors={unifiedWaterfallFetchResult.errors}
+        agentMarks={unifiedWaterfallFetchResult.agentMarks}
         waterfallItemId={waterfallItemId}
         serviceName={serviceName}
-        waterfall={waterfall}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
       />
     );
   }
 
   return (
-    <UnifiedWaterfallContainer
-      traceItems={unifiedWaterfallFetchResult.traceItems}
-      errors={unifiedWaterfallFetchResult.errors}
-      agentMarks={unifiedWaterfallFetchResult.agentMarks}
+    <WaterfallContainer
       waterfallItemId={waterfallItemId}
       serviceName={serviceName}
+      waterfall={waterfall}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
-      entryTransactionId={entryTransactionId}
     />
   );
 }

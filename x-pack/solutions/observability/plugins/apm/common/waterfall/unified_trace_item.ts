@@ -25,6 +25,7 @@ export interface TraceItem {
   name: string;
   traceId: string;
   duration: number;
+  result?: string;
   errors: Array<{ errorDocId: string; errorDocIndex?: string }>;
   status?: {
     fieldName: (typeof STATUS_FIELD_NAME)[number];

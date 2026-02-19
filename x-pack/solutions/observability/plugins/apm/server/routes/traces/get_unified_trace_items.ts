@@ -41,6 +41,9 @@ import {
   TRANSACTION_ID,
   TRANSACTION_MARKS_AGENT,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type {
@@ -66,6 +69,7 @@ const optionalFields = asMutableArray([
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
@@ -84,6 +88,8 @@ const optionalFields = asMutableArray([
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SERVICE_ENVIRONMENT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -215,7 +221,8 @@ export async function getUnifiedTraceItems({
   const agentMarks: Record<string, number> = {};
   const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
-    if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
+    const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
+    if (isTransactionDocument) {
       const source = hit._source as {
         transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
       };
@@ -239,6 +246,9 @@ export async function getUnifiedTraceItems({
       timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
       traceId: event[TRACE_ID],
       duration: resolveDuration(apmDuration, event[DURATION]),
+      result: isTransactionDocument
+        ? event[TRANSACTION_RESULT]
+        : resolveOtelResult(event[ATTRIBUTE_HTTP_SCHEME], event[ATTRIBUTE_HTTP_STATUS_CODE]),
       status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
       errors: errorsByDocId[id] ?? [],
       parentId: event[PARENT_ID],
@@ -256,6 +266,7 @@ export async function getUnifiedTraceItems({
         spanType: event[SPAN_TYPE],
         agentName: event[AGENT_NAME],
         processorEvent: event[PROCESSOR_EVENT],
+        kind: event[KIND],
       }),
       coldstart: event[FAAS_COLDSTART],
       composite: resolveComposite(
@@ -278,16 +289,18 @@ export function getTraceItemIcon({
   spanType,
   agentName,
   processorEvent,
+  kind,
 }: {
   spanType?: string;
   agentName?: string;
   processorEvent?: ProcessorEvent;
+  kind?: string;
 }) {
   if (spanType?.startsWith('db')) {
     return 'database';
   }
 
-  if (processorEvent !== ProcessorEvent.transaction) {
+  if (processorEvent !== ProcessorEvent.transaction && kind !== 'Server') {
     return undefined;
   }
 
@@ -301,6 +314,15 @@ const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string)
   apmDuration ?? parseOtelDuration(otelDuration);
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
+
+const resolveOtelResult = (
+  attributesHttpScheme?: string,
+  attributesHttpStatusCode?: string
+): string | undefined => {
+  return attributesHttpScheme && attributesHttpStatusCode
+    ? `${attributesHttpScheme.toUpperCase()} ${attributesHttpStatusCode}`
+    : undefined;
+};
 
 type EventStatus =
   | { fieldName: 'event.outcome'; value: EventOutcome }
