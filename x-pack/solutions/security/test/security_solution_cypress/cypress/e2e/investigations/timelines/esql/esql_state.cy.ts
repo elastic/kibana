@@ -27,7 +27,6 @@ import {
   openActiveTimeline,
   addNameAndDescriptionToTimeline,
   addNameToTimelineAndSave,
-  createTimelineFromBottomBar,
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { getTimeline } from '../../../../objects/timeline';
@@ -64,7 +63,10 @@ describe(
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
-      createTimelineFromBottomBar();
+      openActiveTimeline();
+      cy.window().then((win) => {
+        win.onbeforeunload = null;
+      });
       goToEsqlTab();
       addDiscoverEsqlQuery(esqlQuery);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
