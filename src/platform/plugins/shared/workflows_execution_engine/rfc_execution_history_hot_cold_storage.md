@@ -44,6 +44,8 @@ The hot/cold architecture gives the execution engine what it needs from each tie
 
 ## Design
 
+This architecture follows the **CQRS (Command Query Responsibility Segregation)** pattern combined with **hot/cold tiered storage** -- both well-established patterns in distributed systems. Hot storage serves as the "command" side (fast mutable state for the execution engine), while cold storage serves as the "query" side (optimized for historical search, reporting, and auditing). Automated migration connects the two tiers, and queries transparently span both when needed.
+
 ### Tiered Storage Model
 
 ```
