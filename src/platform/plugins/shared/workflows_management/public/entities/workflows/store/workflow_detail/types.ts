@@ -35,6 +35,8 @@ export interface WorkflowDetailState {
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
   activeTab?: ActiveTab;
+  /** The last known cursor position in the YAML editor (1-based line and column) */
+  cursorPosition?: LineColumnPosition;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
   /** The step id that is highlighted in the workflow yaml editor */

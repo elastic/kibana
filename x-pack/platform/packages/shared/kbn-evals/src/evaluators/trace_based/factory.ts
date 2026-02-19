@@ -19,7 +19,9 @@ interface EsqlResponse {
 export interface TraceBasedEvaluatorConfig {
   name: string;
   buildQuery: (traceId: string) => string;
-  extractResult: (response: EsqlResponse) => number;
+  extractResult: (response: EsqlResponse) => number | null;
+  // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
+  isResultValid?: (result: number | null) => boolean;
 }
 
 export function createTraceBasedEvaluator({
@@ -31,7 +33,7 @@ export function createTraceBasedEvaluator({
   log: ToolingLog;
   config: TraceBasedEvaluatorConfig;
 }): Evaluator {
-  const { name, buildQuery, extractResult } = config;
+  const { name, buildQuery, extractResult, isResultValid } = config;
 
   return {
     evaluate: async ({ output }) => {
@@ -57,6 +59,8 @@ export function createTraceBasedEvaluator({
         };
       }
 
+      let lastResult: number | null | undefined;
+
       async function fetchStats(): Promise<number> {
         const query = buildQuery(traceId);
         const response = (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
@@ -67,14 +71,25 @@ export function createTraceBasedEvaluator({
           throw new Error(`No data found for trace`);
         }
 
-        return extractResult(response);
+        const result = extractResult(response);
+        lastResult = result;
+
+        const valid = isResultValid ? isResultValid(result) : result !== null;
+        if (!valid) {
+          throw new Error(`${name} result looks incomplete (value: ${result}), retrying`);
+        }
+
+        return result as number;
       }
 
       try {
         const score = await pRetry(fetchStats, {
-          retries: 3,
+          retries: 5,
+          factor: 2,
+          minTimeout: 2000,
+          maxTimeout: 60000,
           onFailedAttempt: (error) => {
-            const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+            const isLastAttempt = error.retriesLeft === 0;
 
             if (isLastAttempt) {
               log.error(
@@ -95,6 +110,19 @@ export function createTraceBasedEvaluator({
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (lastResult !== undefined) {
+          log.warning(
+            `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult}`
+          );
+          return {
+            score: lastResult,
+            label: 'potentially_incomplete',
+            explanation: `${name} may be based on incomplete trace data`,
+            metadata: { incomplete: true },
+          };
+        }
+
         log.error(`Failed to evaluate ${name} for trace ${traceId}: ${errorMessage}`);
         return {
           label: 'error',
