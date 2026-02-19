@@ -164,6 +164,7 @@ export class CiStatsClient {
           jobName: string;
         }
     >;
+    durationPercentile?: number;
     groups: Array<{
       type: string;
       queue?: string;
@@ -171,6 +172,7 @@ export class CiStatsClient {
       maxMin: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
+      concurrency?: number;
       names: string[];
     }>;
   }) => {

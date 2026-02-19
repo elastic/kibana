@@ -9,10 +9,9 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type {
   PublishesDisabledActionIds,
   PublishesUnifiedSearch,
