@@ -38,7 +38,7 @@ export function ServiceHeaderBadges({
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
 
-  const { data: alertsData } = useFetcher(
+  const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
       if (!(isAlertingAvailable && canReadAlerts)) {
         return;
@@ -55,7 +55,11 @@ export function ServiceHeaderBadges({
 
   const alertsCount = alertsData?.alertsCount ?? 0;
 
-  const showAlertsBadge = isAlertingAvailable && canReadAlerts && alertsCount > 0;
+  const showAlertsBadge =
+    isAlertingAvailable &&
+    canReadAlerts &&
+    alertsStatus === FETCH_STATUS.SUCCESS &&
+    alertsCount > 0;
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   if (!showAlertsBadge && !showSloBadge) {
