@@ -9,7 +9,7 @@
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
-import type { DashboardFilter } from '../server';
+import type { DashboardFilter } from '../../server';
 
 const removeUndefinedProperty = (obj: Record<string, any>, key: string): void => {
   if (obj[key] === undefined) {

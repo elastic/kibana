@@ -19,6 +19,7 @@ import { topNavStrings } from '../../_dashboard_app_strings';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
+import { logger } from '../../../services/logger';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 
@@ -45,7 +46,7 @@ export function buildDashboardShareOptions({
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...restUnsavedDashboardState,
-    filters: toStoredFilters(asCodeFilters),
+    filters: toStoredFilters(asCodeFilters, logger),
   };
 
   const locatorParams: DashboardLocatorParams = {

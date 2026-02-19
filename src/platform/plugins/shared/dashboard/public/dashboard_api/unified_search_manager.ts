@@ -38,7 +38,7 @@ import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
-import { cleanFiltersForSerialize } from '../../common';
+import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
 
