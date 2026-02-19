@@ -897,15 +897,14 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderEsqlMenuPopover() {
-      if (!Boolean(isQueryLangSelected)) {
-        return null;
-      }
-
       return (
         <EuiFlexItem
           grow={false}
           css={css`
             margin-left: auto;
+            @media (min-width: ${euiTheme.breakpoint.xl}px) {
+              order: 1;
+            }
           `}
         >
           <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
@@ -1047,7 +1046,14 @@ export const QueryBarTopRow = React.memo(
                 {renderDatePickerWithUpdateBtn()}
                 {/* Optional wrapper for the ES|QL controls elements */}
                 {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      @media (max-width: ${euiTheme.breakpoint.xl}px) {
+                        order: 1;
+                      }
+                    `}
+                  >
                     {props.esqlVariablesConfig?.controlsWrapper}
                   </EuiFlexItem>
                 )}
