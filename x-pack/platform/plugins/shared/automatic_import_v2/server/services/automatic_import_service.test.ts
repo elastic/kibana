@@ -431,6 +431,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -440,10 +441,16 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
+      expect(mockUpdateStatus).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        'deleting'
+      );
       expect(mockRemoveTask).toHaveBeenCalledWith({
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
@@ -464,6 +471,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
       const options = { force: true };
 
       (service as any).samplesIndexService = {
@@ -474,6 +482,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
@@ -497,6 +506,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -506,6 +516,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -520,6 +531,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -529,6 +541,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -544,6 +557,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest
         .fn()
         .mockRejectedValue(new Error('Saved object deletion failed'));
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -553,6 +567,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -572,6 +587,9 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
         executionOrder.push('deleteSavedObject');
       });
+      const mockUpdateStatus = jest.fn().mockImplementation(async () => {
+        executionOrder.push('updateStatus');
+      });
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -581,11 +599,17 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
-      expect(executionOrder).toEqual(['removeTask', 'deleteSamples', 'deleteSavedObject']);
+      expect(executionOrder).toEqual([
+        'updateStatus',
+        'removeTask',
+        'deleteSamples',
+        'deleteSavedObject',
+      ]);
     });
   });
 

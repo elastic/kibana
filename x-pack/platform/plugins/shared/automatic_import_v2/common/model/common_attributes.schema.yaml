@@ -112,6 +112,7 @@ components:
         - approved
         - failed
         - cancelled
+        - deleting
     DataStreamResponse:
       description: The data stream response object with its settings.
       allOf:
