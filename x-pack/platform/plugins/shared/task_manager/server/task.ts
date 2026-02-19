@@ -254,7 +254,7 @@ export enum TaskLifecycleResult {
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
 
-export type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface TaskUserScope {
   apiKeyId: string;
