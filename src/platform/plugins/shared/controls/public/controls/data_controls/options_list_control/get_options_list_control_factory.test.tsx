@@ -79,8 +79,8 @@ describe('Options List Control Api', () => {
         await factory.buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
           initialState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
           },
           finalizeApi,
           uuid,
@@ -102,9 +102,9 @@ describe('Options List Control Api', () => {
         await factory.buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
           initialState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            selectedOptions: ['cool', 'test'],
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+            selected_options: ['cool', 'test'],
           },
           finalizeApi,
           uuid,
@@ -134,8 +134,8 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -148,9 +148,9 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['cool', 'test'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['cool', 'test'],
         },
         finalizeApi,
         uuid,
@@ -190,9 +190,9 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -218,9 +218,9 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
           exclude: true,
         },
         finalizeApi,
@@ -263,9 +263,9 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -293,9 +293,9 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -323,9 +323,9 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -358,9 +358,9 @@ describe('Options List Control Api', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -402,10 +402,10 @@ describe('Options List Control Api', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          singleSelect: true,
-          selectedOptions: ['woof'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          single_select: true,
+          selected_options: ['woof'],
         },
         finalizeApi,
         uuid,

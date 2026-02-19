@@ -99,8 +99,8 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -113,8 +113,8 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -152,8 +152,8 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'notGonnaFindMeDataView',
-          fieldName: 'myFieldName',
+          data_view_id: 'notGonnaFindMeDataView',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -175,8 +175,8 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -195,8 +195,8 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -217,8 +217,8 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -232,8 +232,8 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           step: 1024,
         },
         finalizeApi,

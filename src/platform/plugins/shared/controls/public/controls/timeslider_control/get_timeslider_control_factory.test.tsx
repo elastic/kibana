@@ -70,8 +70,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -91,8 +91,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -120,8 +120,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -147,8 +147,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -175,8 +175,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -202,8 +202,8 @@ describe('TimeSliderControlApi', () => {
     const { api } = await factory.buildEmbeddable({
       initializeDrilldownsManager: jest.fn(),
       initialState: {
-        timesliceStartAsPercentageOfTimeRange: 0.25,
-        timesliceEndAsPercentageOfTimeRange: 0.5,
+        start_percentage_of_time_range: 0.25,
+        end_percentage_of_time_range: 0.5,
       },
       finalizeApi,
       uuid,
@@ -229,8 +229,8 @@ describe('TimeSliderControlApi', () => {
 
   test('Resetting state should reset timeslice', async () => {
     const controlState = {
-      timesliceStartAsPercentageOfTimeRange: 0.25,
-      timesliceEndAsPercentageOfTimeRange: 0.5,
+      start_percentage_of_time_range: 0.25,
+      end_percentage_of_time_range: 0.5,
     };
     dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
     const { api } = await factory.buildEmbeddable({
