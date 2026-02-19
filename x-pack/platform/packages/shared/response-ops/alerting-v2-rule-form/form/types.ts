@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-/**
- * Rule kind - determines the behavior of the rule.
- * - 'alert': Creates alerts with state transitions (pending → active → recovering → inactive)
- * - 'signal': Creates signals without state management
- */
-export type RuleKind = 'alert' | 'signal';
+// Import and re-export RuleKind from schema
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
 /**
  * Rule metadata containing identification and categorization info.

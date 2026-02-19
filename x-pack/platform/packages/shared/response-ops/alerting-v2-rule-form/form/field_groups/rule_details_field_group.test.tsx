@@ -168,7 +168,7 @@ describe('RuleDetailsFieldGroup', () => {
     );
 
     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Pre-filled Rule');
-    // Monitor should be selected (signal maps to monitor)
+    // Monitor should be selected (signal kind displays as "Monitor")
     expect(screen.getByText('Monitor').closest('button')).toHaveClass(
       'euiButtonGroupButton-isSelected'
     );
