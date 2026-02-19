@@ -127,8 +127,10 @@ export const HeaderHelpMenu = ({
 
   const helpExtensionContent = helpExtension?.content;
   const helpExtensionMount = useCallback(
-    (domNode: HTMLDivElement) =>
-      helpExtensionContent?.(domNode, { hideHelpMenu: closeMenu }),
+    (domNode: HTMLDivElement) => {
+      const unmount = helpExtensionContent?.(domNode, { hideHelpMenu: closeMenu });
+      return unmount ?? (() => {});
+    },
     [helpExtensionContent, closeMenu]
   );
 
