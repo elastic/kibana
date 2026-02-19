@@ -97,111 +97,96 @@ describe('ServiceHeaderBadges', () => {
     jest.clearAllMocks();
   });
 
-  describe('alerts badge', () => {
-    it('shows alerts badge when there are active alerts', () => {
-      setupMocks({ alertsCount: 5 });
-      renderBadges();
+  it('shows alerts badge when there are active alerts', () => {
+    setupMocks({ alertsCount: 5 });
+    renderBadges();
 
-      const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('5');
-    });
-
-    it('shows alerts badge with correct href', () => {
-      setupMocks({ alertsCount: 3 });
-      renderBadges();
-
-      const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-      expect(badge).toHaveAttribute('href', '/services/test-service/alerts');
-    });
-
-    it('hides alerts badge when alertsCount is 0', () => {
-      setupMocks({ alertsCount: 0, mostCriticalSloStatus: { status: 'healthy', count: 1 } });
-      renderBadges();
-
-      expect(screen.queryByTestId('serviceHeaderAlertsBadge')).not.toBeInTheDocument();
-    });
-
-    it('hides alerts badge when alerting is unavailable', () => {
-      setupMocks({ isAlertingAvailable: false, alertsCount: 5 });
-      renderBadges();
-
-      expect(screen.queryByTestId('serviceHeaderAlertsBadge')).not.toBeInTheDocument();
-    });
+    const badge = screen.getByTestId('serviceHeaderAlertsBadge');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent('5');
   });
 
-  describe('SLO badge', () => {
-    it('shows SLO badge when SLO data is loaded', () => {
-      setupMocks({
-        mostCriticalSloStatus: { status: 'violated', count: 2 },
-      });
-      renderBadges();
+  it('shows alerts badge with correct href', () => {
+    setupMocks({ alertsCount: 3 });
+    renderBadges();
 
-      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
-    });
-
-    it('shows healthy SLO badge', () => {
-      setupMocks({
-        mostCriticalSloStatus: { status: 'healthy', count: 3 },
-      });
-      renderBadges();
-
-      expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
-    });
-
-    it('shows degrading SLO badge', () => {
-      setupMocks({
-        mostCriticalSloStatus: { status: 'degrading', count: 1 },
-      });
-      renderBadges();
-
-      expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
-    });
-
-    it('hides SLO badge when SLO data is still loading', () => {
-      setupMocks({
-        alertsCount: 1,
-        sloFetchStatus: FETCH_STATUS.LOADING,
-      });
-      renderBadges();
-
-      expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
-    });
-
-    it('hides SLO badge when user cannot read SLOs', () => {
-      setupMocks({
-        canReadSlos: false,
-        alertsCount: 1,
-        mostCriticalSloStatus: { status: 'violated', count: 2 },
-      });
-      renderBadges();
-
-      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
-    });
+    const badge = screen.getByTestId('serviceHeaderAlertsBadge');
+    expect(badge).toHaveAttribute('href', '/services/test-service/alerts');
   });
 
-  describe('visibility logic', () => {
-    it('returns null when no badges should be shown', () => {
-      setupMocks({
-        alertsCount: 0,
-        mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
-        sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
-      });
-      const { container } = renderBadges();
+  it('hides alerts badge when alertsCount is 0', () => {
+    setupMocks({ alertsCount: 0, mostCriticalSloStatus: { status: 'healthy', count: 1 } });
+    renderBadges();
 
-      expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId('serviceHeaderAlertsBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides alerts badge when alerting is unavailable', () => {
+    setupMocks({ isAlertingAvailable: false, alertsCount: 5 });
+    renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAlertsBadge')).not.toBeInTheDocument();
+  });
+
+  it('shows violated SLO badge when SLOs are violated', () => {
+    setupMocks({ mostCriticalSloStatus: { status: 'violated', count: 2 } });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+  });
+
+  it('shows healthy SLO badge', () => {
+    setupMocks({ mostCriticalSloStatus: { status: 'healthy', count: 3 } });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+  });
+
+  it('shows degrading SLO badge', () => {
+    setupMocks({ mostCriticalSloStatus: { status: 'degrading', count: 1 } });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+  });
+
+  it('hides SLO badge when SLO data is still loading', () => {
+    setupMocks({ alertsCount: 1, sloFetchStatus: FETCH_STATUS.LOADING });
+    renderBadges();
+
+    expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides SLO badge when user cannot read SLOs', () => {
+    setupMocks({
+      canReadSlos: false,
+      alertsCount: 1,
+      mostCriticalSloStatus: { status: 'violated', count: 2 },
     });
+    renderBadges();
 
-    it('shows both badges when alerts and SLO data exist', () => {
-      setupMocks({
-        alertsCount: 3,
-        mostCriticalSloStatus: { status: 'violated', count: 1 },
-      });
-      renderBadges();
+    expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
+  });
 
-      expect(screen.getByTestId('serviceHeaderAlertsBadge')).toBeInTheDocument();
-      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+  it('returns null when no badges should be shown', () => {
+    setupMocks({
+      alertsCount: 0,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
     });
+    const { container } = renderBadges();
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('shows both badges when alerts and SLO data exist', () => {
+    setupMocks({
+      alertsCount: 3,
+      mostCriticalSloStatus: { status: 'violated', count: 1 },
+    });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceHeaderAlertsBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
   });
 });

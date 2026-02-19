@@ -55,149 +55,137 @@ function renderMenu(
 }
 
 describe('ActionsContextMenu', () => {
-  describe('popover behavior', () => {
-    it('renders the trigger button', () => {
-      renderMenu();
-      expect(screen.getByTestId('triggerButton')).toBeInTheDocument();
-    });
+  it('renders the trigger button', () => {
+    renderMenu();
+    expect(screen.getByTestId('triggerButton')).toBeInTheDocument();
+  });
 
-    it('opens popover when trigger button is clicked', () => {
-      renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
-      expect(screen.getByTestId('testMenuGroup-alerts')).toBeInTheDocument();
-    });
+  it('opens popover when trigger button is clicked', () => {
+    renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
+    expect(screen.getByTestId('testMenuGroup-alerts')).toBeInTheDocument();
+  });
 
-    it('closes popover when an action with onClick is clicked', async () => {
-      renderMenu();
+  it('closes popover when an action with onClick is clicked', async () => {
+    renderMenu();
 
-      fireEvent.click(screen.getByTestId('triggerButton'));
-      expect(screen.getByTestId('testMenuItem-anomalyRule')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('triggerButton'));
+    expect(screen.getByTestId('testMenuItem-anomalyRule')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('testMenuItem-anomalyRule'));
-      await waitFor(() => {
-        expect(screen.queryByTestId('testMenuItem-anomalyRule')).not.toBeInTheDocument();
-      });
+    fireEvent.click(screen.getByTestId('testMenuItem-anomalyRule'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('testMenuItem-anomalyRule')).not.toBeInTheDocument();
     });
   });
 
-  describe('group headers', () => {
-    it('renders group labels', () => {
-      renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
+  it('renders group labels', () => {
+    renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
 
-      expect(screen.getByTestId('testMenuGroup-alerts')).toHaveTextContent('Alerts');
-      expect(screen.getByTestId('testMenuGroup-slos')).toHaveTextContent('SLOs');
-    });
+    expect(screen.getByTestId('testMenuGroup-alerts')).toHaveTextContent('Alerts');
+    expect(screen.getByTestId('testMenuGroup-slos')).toHaveTextContent('SLOs');
+  });
 
-    it('does not render group label when groupLabel is undefined', () => {
-      const actions: ActionGroups = [
-        {
-          id: 'noLabel',
-          actions: [{ id: 'action1', name: 'Action 1' }],
-        },
-      ];
+  it('does not render group label when groupLabel is undefined', () => {
+    const actions: ActionGroups = [
+      {
+        id: 'noLabel',
+        actions: [{ id: 'action1', name: 'Action 1' }],
+      },
+    ];
 
-      render(
-        <ActionsContextMenu
-          actions={actions}
-          button={<button data-test-subj="triggerButton">Open</button>}
-          dataTestSubjPrefix="testMenu"
-        />
-      );
+    render(
+      <ActionsContextMenu
+        actions={actions}
+        button={<button data-test-subj="triggerButton">Open</button>}
+        dataTestSubjPrefix="testMenu"
+      />
+    );
 
-      fireEvent.click(screen.getByTestId('triggerButton'));
-      expect(screen.queryByTestId('testMenuGroup-noLabel')).not.toBeInTheDocument();
-      expect(screen.getByTestId('testMenuItem-action1')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('triggerButton'));
+    expect(screen.queryByTestId('testMenuGroup-noLabel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('testMenuItem-action1')).toBeInTheDocument();
+  });
+
+  it('renders all action items in the main panel', () => {
+    renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
+
+    expect(screen.getByTestId('testMenuItem-thresholdRule')).toBeInTheDocument();
+    expect(screen.getByTestId('testMenuItem-anomalyRule')).toBeInTheDocument();
+    expect(screen.getByTestId('testMenuItem-createSlo')).toBeInTheDocument();
+    expect(screen.getByTestId('testMenuItem-manageSlos')).toBeInTheDocument();
+  });
+
+  it('calls onClick and closes popover when an action is clicked', async () => {
+    const { onClickMock } = renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
+
+    fireEvent.click(screen.getByTestId('testMenuItem-anomalyRule'));
+
+    expect(onClickMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.queryByTestId('testMenuItem-anomalyRule')).not.toBeInTheDocument();
     });
   });
 
-  describe('action items', () => {
-    it('renders all action items in the main panel', () => {
-      renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
+  it('renders href actions as links', () => {
+    renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
 
-      expect(screen.getByTestId('testMenuItem-thresholdRule')).toBeInTheDocument();
-      expect(screen.getByTestId('testMenuItem-anomalyRule')).toBeInTheDocument();
-      expect(screen.getByTestId('testMenuItem-createSlo')).toBeInTheDocument();
-      expect(screen.getByTestId('testMenuItem-manageSlos')).toBeInTheDocument();
-    });
+    const manageSlosItem = screen.getByTestId('testMenuItem-manageSlos');
+    expect(manageSlosItem.closest('a')).toHaveAttribute('href', '/app/slos');
+  });
 
-    it('calls onClick and closes popover when an action is clicked', async () => {
-      const { onClickMock } = renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
+  it('opens sub-panel when action with items is clicked', async () => {
+    renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
 
-      fireEvent.click(screen.getByTestId('testMenuItem-anomalyRule'));
+    fireEvent.click(screen.getByTestId('testMenuItem-thresholdRule'));
 
-      expect(onClickMock).toHaveBeenCalledTimes(1);
-      await waitFor(() => {
-        expect(screen.queryByTestId('testMenuItem-anomalyRule')).not.toBeInTheDocument();
-      });
-    });
-
-    it('renders href actions as links', () => {
-      renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
-
-      const manageSlosItem = screen.getByTestId('testMenuItem-manageSlos');
-      expect(manageSlosItem.closest('a')).toHaveAttribute('href', '/app/slos');
+    await waitFor(() => {
+      expect(screen.getByTestId('testMenuItem-latency')).toBeInTheDocument();
+      expect(screen.getByTestId('testMenuItem-errorRate')).toBeInTheDocument();
     });
   });
 
-  describe('sub-panels', () => {
-    it('opens sub-panel when action with items is clicked', async () => {
-      renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
+  it('calls onClick and closes popover when sub-item is clicked', async () => {
+    const { onClickMock } = renderMenu();
+    fireEvent.click(screen.getByTestId('triggerButton'));
 
-      fireEvent.click(screen.getByTestId('testMenuItem-thresholdRule'));
+    fireEvent.click(screen.getByTestId('testMenuItem-thresholdRule'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('testMenuItem-latency')).toBeInTheDocument();
-        expect(screen.getByTestId('testMenuItem-errorRate')).toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(screen.getByTestId('testMenuItem-latency')).toBeInTheDocument();
     });
 
-    it('calls onClick and closes popover when sub-item is clicked', async () => {
-      const { onClickMock } = renderMenu();
-      fireEvent.click(screen.getByTestId('triggerButton'));
+    fireEvent.click(screen.getByTestId('testMenuItem-latency'));
 
-      fireEvent.click(screen.getByTestId('testMenuItem-thresholdRule'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('testMenuItem-latency')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('testMenuItem-latency'));
-
-      expect(onClickMock).toHaveBeenCalledTimes(1);
-    });
+    expect(onClickMock).toHaveBeenCalledTimes(1);
   });
 
-  describe('custom dataTestSubjPrefix', () => {
-    it('uses default prefix when not specified', () => {
-      const actions: ActionGroups = [
-        { id: 'g', groupLabel: 'Group', actions: [{ id: 'a', name: 'A' }] },
-      ];
-      render(
-        <ActionsContextMenu actions={actions} button={<button data-test-subj="btn">Open</button>} />
-      );
+  it('uses default prefix when dataTestSubjPrefix is not specified', () => {
+    const actions: ActionGroups = [
+      { id: 'g', groupLabel: 'Group', actions: [{ id: 'a', name: 'A' }] },
+    ];
+    render(
+      <ActionsContextMenu actions={actions} button={<button data-test-subj="btn">Open</button>} />
+    );
 
-      fireEvent.click(screen.getByTestId('btn'));
-      expect(screen.getByTestId('actionsContextMenuGroup-g')).toBeInTheDocument();
-      expect(screen.getByTestId('actionsContextMenuItem-a')).toBeInTheDocument();
-    });
+    fireEvent.click(screen.getByTestId('btn'));
+    expect(screen.getByTestId('actionsContextMenuGroup-g')).toBeInTheDocument();
+    expect(screen.getByTestId('actionsContextMenuItem-a')).toBeInTheDocument();
   });
 
-  describe('empty actions', () => {
-    it('renders empty context menu when no actions are provided', () => {
-      render(
-        <ActionsContextMenu
-          actions={[]}
-          button={<button data-test-subj="triggerButton">Open</button>}
-        />
-      );
+  it('renders empty context menu when no actions are provided', () => {
+    render(
+      <ActionsContextMenu
+        actions={[]}
+        button={<button data-test-subj="triggerButton">Open</button>}
+      />
+    );
 
-      fireEvent.click(screen.getByTestId('triggerButton'));
-      expect(screen.queryByTestId('testMenuGroup-alerts')).not.toBeInTheDocument();
-    });
+    fireEvent.click(screen.getByTestId('triggerButton'));
+    expect(screen.queryByTestId('testMenuGroup-alerts')).not.toBeInTheDocument();
   });
 });
