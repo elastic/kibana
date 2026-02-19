@@ -54,11 +54,12 @@ export type ContentListProviderProps = ContentListConfig & {
 
 /**
  * Main provider component for content list functionality, including data fetching
- * (via React Query) and sorting.
+ * (via React Query), sorting, and search.
  *
  * Props like `dataSource` and `features` should be stable references to avoid
- * unnecessary re-renders. Configuration from `features.sorting` is read once at
- * mount; use a `key` prop to remount if you need to change initial sort dynamically.
+ * unnecessary re-renders. Configuration from `features.sorting` and `features.search`
+ * is read once at mount; use a `key` prop to remount if you need to change initial
+ * state dynamically.
  */
 export const ContentListProvider = ({
   children,
@@ -79,8 +80,9 @@ export const ContentListProvider = ({
     () => ({
       sorting: features.sorting !== false,
       pagination: features.pagination !== false,
+      search: features.search !== false,
     }),
-    [features.sorting, features.pagination]
+    [features.sorting, features.pagination, features.search]
   );
 
   // Create context value.
