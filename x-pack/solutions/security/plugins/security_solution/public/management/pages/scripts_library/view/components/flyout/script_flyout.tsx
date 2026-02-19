@@ -225,7 +225,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
             onClose={onCloseFlyoutHandler}
             onSubmit={onSubmit}
             scriptItem={formState.scriptItem as EndpointScript}
-            show={show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>}
+            show={show}
             data-test-subj={getTestId()}
           />
         )}
