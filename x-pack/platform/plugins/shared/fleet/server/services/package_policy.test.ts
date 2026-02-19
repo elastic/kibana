@@ -9378,9 +9378,8 @@ describe('_getAssetForTemplatePath()', () => {
 });
 
 describe('compilePackagePolicyForVersions()', () => {
-  const mockRecompileInputsWithAgentVersion = recompileInputsWithAgentVersion as jest.MockedFunction<
-    typeof recompileInputsWithAgentVersion
-  >;
+  const mockRecompileInputsWithAgentVersion =
+    recompileInputsWithAgentVersion as jest.MockedFunction<typeof recompileInputsWithAgentVersion>;
   const mockGetAgentVersionsForVersionSpecificPolicies =
     getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
       typeof getAgentVersionsForVersionSpecificPolicies
