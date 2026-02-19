@@ -102,15 +102,13 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: true,
       });
 
-      expect(command).toContain(
-        "collectors.daemon.config.processors.resource\\/wired_streams"
-      );
+      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
       expect(command).toContain('elasticsearch.index');
       expect(command).toContain(
-        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+        'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
       );
       expect(command).toContain(
-        "collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams"
+        'collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams'
       );
     });
 
@@ -125,15 +123,13 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: true,
       });
 
-      expect(command).toContain(
-        "collectors.daemon.config.processors.resource\\/wired_streams"
-      );
+      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
       expect(command).toContain('elasticsearch.index');
       expect(command).toContain(
-        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+        'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
       );
       expect(command).toContain(
-        "collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams"
+        'collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams'
       );
     });
 
@@ -149,7 +145,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       });
 
       expect(command).toContain(
-        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+        'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
       );
       expect(command).not.toContain('logs\\/apm');
     });
