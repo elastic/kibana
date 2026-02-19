@@ -7,7 +7,7 @@
 
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import type { Config } from '@kbn/connector-schemas/mcp';
-import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp/constants';
 import { isEmpty } from 'lodash';
 import { type HeaderField, HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 import { toHeaderFields, toHeadersRecord } from './transform';

@@ -29,7 +29,7 @@ import {
 import React, { useEffect } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import useToggle from 'react-use/lib/useToggle';
-import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp/constants';
 import { HeaderFields } from '../../common/auth/header_fields';
 import { mcpErrorStrings, mcpFieldStrings } from './translations';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
