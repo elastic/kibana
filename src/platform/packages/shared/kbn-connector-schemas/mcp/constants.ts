@@ -28,6 +28,18 @@ export const MAX_RETRIES = 2; // Three total attempts (1 initial + 2 retries)
 export const API_KEY_URL_PLACEHOLDER = '{{apiKey}}';
 
 /**
+ * Authentication types supported by the MCP connector.
+ */
+export const MCPAuthType = {
+  None: 'none',
+  Bearer: 'bearer',
+  ApiKey: 'apiKey',
+  Basic: 'basic',
+  /** Credential is provided in the URL (e.g. via {{apiKey}} placeholder); no auth headers. */
+  ApiKeyInUrl: 'apiKeyInUrl',
+} as const;
+
+/**
  * Sub-actions supported by the MCP connector.
  * Values must match the registered sub-action names in the backend.
  */

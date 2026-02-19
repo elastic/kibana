@@ -8,18 +8,9 @@
  */
 
 import { z } from '@kbn/zod';
+import { MCPAuthType } from '../constants';
 
-/**
- * Authentication types supported by the MCP connector.
- */
-export const MCPAuthType = {
-  None: 'none',
-  Bearer: 'bearer',
-  ApiKey: 'apiKey',
-  Basic: 'basic',
-  /** Credential is provided in the URL (e.g. via {{apiKey}} placeholder); no auth headers. */
-  ApiKeyInUrl: 'apiKeyInUrl',
-} as const;
+export { MCPAuthType };
 
 /**
  * Schema for MCP connector configuration.

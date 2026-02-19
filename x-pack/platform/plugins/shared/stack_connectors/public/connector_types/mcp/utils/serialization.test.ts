@@ -7,7 +7,7 @@
 
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import type { Config } from '@kbn/connector-schemas/mcp';
-import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp/constants';
 import { formDeserializer, formSerializer } from './serialization';
 import { HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 
