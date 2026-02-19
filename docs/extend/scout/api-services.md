@@ -6,7 +6,7 @@ navigation_title: API services
 
 API services are higher-level helpers for Kibana APIs used for **setup**, **teardown**, and **side-effect verification**. They’re accessed via the `apiServices` fixture (your editor should autocomplete `apiServices.<service>`).
 
-::::::{warning}
+::::::{tip}
 API services should focus on **server-side interactions** (HTTP requests). UI interactions belong in [page objects](./page-objects.md).
 ::::::
 
