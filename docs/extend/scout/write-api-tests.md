@@ -6,7 +6,7 @@ navigation_title: Write API tests
 
 Scout API tests validate HTTP endpoints with realistic scoped credentials.
 
-:::::{note}
+:::::{important}
 [Set up your plugin or package](./setup-plugin.md) first.
 :::::
 
@@ -28,6 +28,7 @@ API tests live under `<plugin-root>/test/scout/api/tests` and must end with `.sp
 ## Next steps [api-tests-next]
 
 - [API authentication](./api-auth.md)
+- [Best practices](./best-practices.md)
 - [Fixtures](./fixtures.md)
 - [Run tests](./run-tests.md) and [Debugging](./debugging.md)
 - [Parallelism notes](./parallelism.md#api-tests-and-parallelism)

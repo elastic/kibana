@@ -8,7 +8,9 @@ This guide covers best practices for writing Scout UI and API tests that are rel
 
 Scout is built on Playwright, so the official [Playwright Best Practices](https://playwright.dev/docs/best-practices) apply.
 
-**New to Scout?** Start with [Scout](../scout.md).
+:::::{tip}
+**New to Scout?** Start with our [Scout introduction page](../scout.md).
+:::::
 
 ## Quick reference [quick-reference]
 

@@ -6,7 +6,7 @@ navigation_title: Write UI tests
 
 Scout UI tests are Playwright tests that use Scout fixtures and page objects for readable, maintainable flows.
 
-:::::{note}
+:::::{important}
 [Set up your plugin or package](./setup-plugin.md) first.
 :::::
 
@@ -28,6 +28,7 @@ Spec files must end with `.spec.ts`.
 ## Next steps [scout-write-ui-tests-next]
 
 - [Browser authentication](./browser-auth.md)
+- [Best practices](./best-practices.md)
 - [Page objects](./page-objects.md)
 - [Fixtures](./fixtures.md)
 - [Run tests](./run-tests.md) and [Debugging](./debugging.md)
