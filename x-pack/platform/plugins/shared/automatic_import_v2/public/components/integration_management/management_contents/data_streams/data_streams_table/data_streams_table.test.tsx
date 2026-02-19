@@ -35,9 +35,28 @@ const mockDeleteDataStreamMutation = {
   variables: undefined as { dataStreamId: string } | undefined,
 };
 
+const mockReanalyzeMutate = jest.fn();
+const mockReanalyzeDataStreamMutation = {
+  mutate: mockReanalyzeMutate,
+  isLoading: false,
+  variables: undefined as
+    | { dataStreamId: string; integrationId: string; connectorId: string }
+    | undefined,
+};
+
 jest.mock('../../../../../common', () => ({
   useDeleteDataStream: () => ({
     deleteDataStreamMutation: mockDeleteDataStreamMutation,
+  }),
+  useReanalyzeDataStream: () => ({
+    reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
+  }),
+}));
+
+// Mock useIntegrationForm hook
+jest.mock('../../../forms/integration_form', () => ({
+  useIntegrationForm: () => ({
+    formData: { connectorId: 'test-connector-id' },
   }),
 }));
 
@@ -80,6 +99,8 @@ describe('DataStreamsTable', () => {
     jest.clearAllMocks();
     mockDeleteDataStreamMutation.isLoading = false;
     mockDeleteDataStreamMutation.variables = undefined;
+    mockReanalyzeDataStreamMutation.isLoading = false;
+    mockReanalyzeDataStreamMutation.variables = undefined;
   });
 
   describe('rendering', () => {
@@ -192,23 +213,59 @@ describe('DataStreamsTable', () => {
       });
     });
 
-    it('should pass isDeleting to Status when deletion in progress', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should show deleting status when item status is deleting (set via optimistic update)', () => {
+      // With optimistic updates, the useDeleteDataStream hook updates the cache
+      // to set status='deleting' before the API call completes. The table component
+      // now simply checks item.status === 'deleting' rather than tracking isLoading.
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       expect(screen.getByText('Deleting...')).toBeInTheDocument();
     });
 
-    it('should disable delete button while deleting that item', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should disable delete button when item status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       expect(deleteButton).toBeDisabled();
+    });
+
+    it('should pass isDeleting to Status when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      expect(screen.getByText('Deleting...')).toBeInTheDocument();
+    });
+
+    it('should disable delete button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      expect(deleteButton).toBeDisabled();
+    });
+
+    it('should disable refresh button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should disable expand button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const expandButton = screen.getByTestId('expandDataStreamButton');
+      expect(expandButton).toBeDisabled();
     });
   });
 
