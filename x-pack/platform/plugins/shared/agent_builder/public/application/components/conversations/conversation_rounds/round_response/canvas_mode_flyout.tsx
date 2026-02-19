@@ -47,7 +47,7 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
       ownFocus={false}
       outsideClickCloses={true}
       css={flyoutStyles}
-      type="push"
+      type={isSidebar ? 'overlay' : 'push'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
