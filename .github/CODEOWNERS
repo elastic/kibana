@@ -44,6 +44,7 @@ examples/state_containers_examples @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
+examples/user_activity_example @elastic/kibana-core
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
@@ -326,6 +327,9 @@ src/core/packages/usage-data/base-server-internal @elastic/kibana-core
 src/core/packages/usage-data/server @elastic/kibana-core
 src/core/packages/usage-data/server-internal @elastic/kibana-core
 src/core/packages/usage-data/server-mocks @elastic/kibana-core
+src/core/packages/user-activity/server @elastic/kibana-core
+src/core/packages/user-activity/server-internal @elastic/kibana-core
+src/core/packages/user-activity/server-mocks @elastic/kibana-core
 src/core/packages/user-profile/browser @elastic/kibana-core
 src/core/packages/user-profile/browser-internal @elastic/kibana-core
 src/core/packages/user-profile/browser-mocks @elastic/kibana-core
@@ -1812,7 +1816,8 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
-# obs-exploration-team
+# obs-exploration-team 
+/x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -3026,6 +3031,7 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/automatic_troubleshooting @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics

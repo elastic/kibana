@@ -6301,6 +6301,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-activity-server-internal@link:src/core/packages/user-activity/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-activity-server-mocks@link:src/core/packages/user-activity/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-activity-server@link:src/core/packages/user-activity/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-profile-browser-internal@link:src/core/packages/user-profile/browser-internal":
   version "0.0.0"
   uid ""
@@ -9614,6 +9626,10 @@
   uid ""
 
 "@kbn/use-tracked-promise@link:src/platform/packages/shared/kbn-use-tracked-promise":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-activity-example-plugin@link:examples/user_activity_example":
   version "0.0.0"
   uid ""
 

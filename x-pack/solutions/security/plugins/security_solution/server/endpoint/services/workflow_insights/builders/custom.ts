@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 
 import type { BuildWorkflowInsightParams } from '.';
@@ -18,11 +19,20 @@ import {
 
 const groupSeparator = ':::';
 
-export async function buildPolicyResponseFailureWorkflowInsights({
+function getMessage(insightType: DefendInsightType): string {
+  switch (insightType) {
+    case DefendInsightType.Enum.policy_response_failure:
+      return 'Policy response failure detected';
+    default:
+      return 'Potential issue detected';
+  }
+}
+
+export async function buildCustomWorkflowInsights({
   defendInsights,
-  request,
+  options,
 }: BuildWorkflowInsightParams): Promise<SecurityWorkflowInsight[]> {
-  const { insightType, endpointIds, apiConfig } = request.body;
+  const { insightType, endpointIds, connectorId, model } = options;
   const currentTime = moment();
 
   return defendInsights
@@ -31,12 +41,12 @@ export async function buildPolicyResponseFailureWorkflowInsights({
       const displayName = insight.group.split(groupSeparator)[1];
       const workflowInsight: SecurityWorkflowInsight = {
         '@timestamp': currentTime,
-        message: 'Policy response failure detected',
+        message: getMessage(insightType),
         category: Category.Endpoint,
         type: insightType,
         source: {
           type: SourceType.LlmConnector,
-          id: apiConfig.connectorId,
+          id: connectorId ?? '',
           data_range_start: currentTime,
           data_range_end: currentTime,
         },
@@ -51,7 +61,7 @@ export async function buildPolicyResponseFailureWorkflowInsights({
         value: insight.group,
         metadata: {
           notes: {
-            llm_model: apiConfig.model ?? '',
+            llm_model: model ?? '',
           },
           display_name: displayName,
         },
