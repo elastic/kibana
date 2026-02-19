@@ -38,7 +38,7 @@ function orderObjectKeys(obj: unknown): unknown {
     return Object.keys(obj)
       .sort()
       .reduce((acc, key) => {
-        acc[key] = orderObjectKeys((obj as any)[key]);
+        acc[key] = orderObjectKeys((obj as Record<string, unknown>)[key]);
         return acc;
       }, {} as Record<string, unknown>);
   }
