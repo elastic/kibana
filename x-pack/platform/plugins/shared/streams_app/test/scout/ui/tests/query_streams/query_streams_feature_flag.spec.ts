@@ -34,7 +34,7 @@ test.describe(
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
       await page.reload();
-      await expect(pageObjects.streams.createQueryStreamButton).not.toBeVisible();
+      await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
     });
 
     test('should properly gate query streams when feature flag is on', async ({
@@ -47,7 +47,7 @@ test.describe(
       });
       await page.reload();
 
-      await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
+      await expect(pageObjects.streams.createQueryStreamButton).not.toBeHidden();
     });
   }
 );
