@@ -76,7 +76,7 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[]; id?: string[] }
+    filters?: { type?: string[]; id?: string[]; minConfidence?: number; limit?: number }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),
@@ -101,14 +101,25 @@ export class FeatureClient {
       });
     }
 
+    if (typeof filters?.minConfidence === 'number') {
+      filterClauses.push({
+        range: {
+          [FEATURE_CONFIDENCE]: {
+            gte: filters.minConfidence,
+          },
+        },
+      });
+    }
+
     const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
+      size: filters?.limit ?? 10_000,
       track_total_hits: true,
       query: {
         bool: {
           filter: filterClauses,
         },
       },
+      sort: [{ [FEATURE_CONFIDENCE]: { order: 'desc' } }],
     });
 
     return {

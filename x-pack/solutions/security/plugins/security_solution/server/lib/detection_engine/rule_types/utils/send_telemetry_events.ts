@@ -78,6 +78,6 @@ export function sendAlertTelemetryEvents(
     );
     eventsTelemetry.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, filtered);
   } catch (exc) {
-    ruleExecutionLogger.error(`Queuing telemetry events failed: ${exc}`);
+    ruleExecutionLogger.debug(`Error queuing telemetry events\nError: ${exc}`);
   }
 }
