@@ -31,15 +31,12 @@ export const AlertsCell: React.FunctionComponent<{ package: PackageListItem }> =
 
     const fetchRulesCount = async () => {
       try {
-        const res = await http.get<{ total: number }>(
-          '/api/alerting/rules/_find',
-          {
-            query: {
-              filter: `alert.attributes.tags:"${title}"`,
-              per_page: 0,
-            },
-          }
-        );
+        const res = await http.get<{ total: number }>('/api/alerting/rules/_find', {
+          query: {
+            filter: `alert.attributes.tags:"${title}"`,
+            per_page: 0,
+          },
+        });
         if (!cancelled) {
           setAlertsCount(res.total);
         }
