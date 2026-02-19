@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { buildEsqlQuery, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
+import { type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -138,15 +138,7 @@ export function AddSignificantEventFlyout({
           .map((nextQuery) => ({
             id: v4(),
             kql: { query: nextQuery.kql },
-            esql: {
-              query:
-                // This is a fallback for legacy queries that don't have an esql.query property. This can happen when a task was completed but not acknowledged before the esql.query property was added.
-                nextQuery.esql?.query ||
-                buildEsqlQuery([definition.stream.name, `${definition.stream.name}.*`], {
-                  kql: { query: nextQuery.kql },
-                  feature: nextQuery.feature,
-                }),
-            },
+            esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,

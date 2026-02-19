@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  buildEsqlQuery,
   systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
@@ -27,6 +28,34 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
+
+/**
+ * Back-fills `esql.query` on task results for legacy tasks that were completed
+ * before the `esql.query` property was introduced. Without this, the client
+ * would receive queries without the required `esql.query` field.
+ */
+const ensureEsqlQuery = (
+  result: SignificantEventsQueriesGenerationTaskResult,
+  streamName: string
+): SignificantEventsQueriesGenerationTaskResult => {
+  if (!('queries' in result)) {
+    return result;
+  }
+
+  const indices = [streamName, `${streamName}.*`];
+  return {
+    ...result,
+    queries: result.queries.map((query) => ({
+      ...query,
+      esql: query.esql ?? {
+        query: buildEsqlQuery(indices, {
+          kql: { query: query.kql },
+          feature: query.feature,
+        }),
+      },
+    })),
+  };
+};
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
@@ -59,10 +88,12 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
 
     const { name } = params.path;
 
-    return taskClient.getStatus<
+    const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
+
+    return ensureEsqlQuery(result, name);
   },
 });
 
@@ -144,7 +175,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<
+    const result = await handleTaskAction<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >({
@@ -152,6 +183,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       taskId,
       ...actionParams,
     });
+
+    return ensureEsqlQuery(result, name);
   },
 });
 
