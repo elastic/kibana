@@ -98,7 +98,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Cloud connector state from var_group selections (gated by feature flag)
     const {
-      isCloudConnector,
+      isSelected,
       cloudProvider,
       iacTemplateUrl,
       cloudConnectorVars,
@@ -298,13 +298,13 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={handleVarGroupSelectionChange}
                   isAgentlessEnabled={isAgentlessSelected}
-                  disabled={isEditPage && isCloudConnector}
+                  disabled={isEditPage && isSelected}
                 />
               </EuiFlexItem>
             ))}
 
             {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
-            {isCloudConnector && cloudProvider && (
+            {isSelected && cloudProvider && (
               <EuiFlexItem>
                 <CloudConnectorSetup
                   newPolicy={packagePolicy}

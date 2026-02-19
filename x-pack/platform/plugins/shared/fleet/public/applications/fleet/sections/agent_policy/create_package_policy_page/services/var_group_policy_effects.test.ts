@@ -9,9 +9,9 @@ import type { NewPackagePolicy } from '../../../../../../../common';
 import type { RegistryVarGroup } from '../../../../types';
 
 import {
-  cloudConnectorPolicyEffect,
-  computeVarGroupPolicyEffects,
-  registerPolicyEffectHandler,
+  updateCloudConnectorPolicy,
+  buildVarGroupPolicyUpdates,
+  registerPolicyUpdateHandler,
 } from './var_group_policy_effects';
 import type { VarGroupSelection } from './var_group_helpers';
 
@@ -50,13 +50,13 @@ describe('var_group_policy_effects', () => {
     },
   ];
 
-  describe('cloudConnectorPolicyEffect', () => {
+  describe('updateCloudConnectorPolicy', () => {
     it('should return supports_cloud_connector: true when cloud connector option is selected', () => {
       const packagePolicy = createMockPackagePolicy();
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toEqual({
         supports_cloud_connector: true,
@@ -69,7 +69,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'manual' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toEqual({
         supports_cloud_connector: false,
@@ -85,7 +85,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toBeNull();
     });
@@ -98,7 +98,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toBeNull();
     });
@@ -114,7 +114,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toBeNull();
     });
@@ -127,7 +127,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'manual' };
 
-      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+      const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
       expect(result).toBeNull();
     });
@@ -144,7 +144,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: true, type: 'bool' });
         expect(result?.supports_cloud_connector).toBe(true);
@@ -162,7 +162,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'manual' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false, type: 'bool' });
         expect(result?.supports_cloud_connector).toBe(false);
@@ -180,7 +180,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'manual' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.role_arn).toEqual({ value: 'some-arn' });
         expect(result?.vars?.external_id).toEqual({ value: 'some-id' });
@@ -196,7 +196,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result).toEqual({
           supports_cloud_connector: true,
@@ -216,7 +216,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result).toBeNull();
       });
@@ -232,7 +232,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'manual' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
       });
@@ -248,7 +248,7 @@ describe('var_group_policy_effects', () => {
         const varGroups = createMockVarGroups();
         const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
 
         expect(result).toEqual({
           supports_cloud_connector: true,
@@ -261,12 +261,12 @@ describe('var_group_policy_effects', () => {
     });
   });
 
-  describe('computeVarGroupPolicyEffects', () => {
+  describe('buildVarGroupPolicyUpdates', () => {
     it('should return null when varGroups is undefined', () => {
       const packagePolicy = createMockPackagePolicy();
       const selections: VarGroupSelection = {};
 
-      const result = computeVarGroupPolicyEffects(packagePolicy, selections, undefined);
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, undefined);
 
       expect(result).toBeNull();
     });
@@ -275,7 +275,7 @@ describe('var_group_policy_effects', () => {
       const packagePolicy = createMockPackagePolicy();
       const selections: VarGroupSelection = {};
 
-      const result = computeVarGroupPolicyEffects(packagePolicy, selections, []);
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, []);
 
       expect(result).toBeNull();
     });
@@ -285,7 +285,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = computeVarGroupPolicyEffects(packagePolicy, selections, varGroups);
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
 
       expect(result).toEqual({
         supports_cloud_connector: true,
@@ -294,17 +294,17 @@ describe('var_group_policy_effects', () => {
     });
   });
 
-  describe('registerPolicyEffectHandler', () => {
+  describe('registerPolicyUpdateHandler', () => {
     it('should allow registering custom handlers', () => {
       const customHandler = jest.fn().mockReturnValue({ custom_field: 'test' });
 
-      registerPolicyEffectHandler(customHandler);
+      registerPolicyUpdateHandler(customHandler);
 
       const packagePolicy = createMockPackagePolicy();
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'manual' };
 
-      const result = computeVarGroupPolicyEffects(packagePolicy, selections, varGroups);
+      const result = buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups);
 
       expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups);
       expect(result).toMatchObject({ custom_field: 'test' });

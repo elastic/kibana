@@ -530,37 +530,37 @@ describe('VarGroupSelector', () => {
       ],
     };
 
-    it('should return isCloudConnector: true with provider when cloud connector is selected', () => {
+    it('should return isSelected: true with provider when cloud connector is selected', () => {
       const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'aws_connector' });
-      expect(result.isCloudConnector).toBe(true);
+      expect(result.isSelected).toBe(true);
       expect(result.provider).toBe('aws');
     });
 
     it('should return azure provider when azure connector is selected', () => {
       const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'azure_connector' });
-      expect(result.isCloudConnector).toBe(true);
+      expect(result.isSelected).toBe(true);
       expect(result.provider).toBe('azure');
     });
 
-    it('should return isCloudConnector: false when non-cloud-connector option is selected', () => {
+    it('should return isSelected: false when non-cloud-connector option is selected', () => {
       const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'manual' });
-      expect(result.isCloudConnector).toBe(false);
+      expect(result.isSelected).toBe(false);
       expect(result.provider).toBeUndefined();
     });
 
-    it('should return isCloudConnector: false when varGroups is undefined', () => {
+    it('should return isSelected: false when varGroups is undefined', () => {
       const result = getCloudConnectorOption(undefined, { auth: 'aws_connector' });
-      expect(result.isCloudConnector).toBe(false);
+      expect(result.isSelected).toBe(false);
     });
 
-    it('should return isCloudConnector: false when varGroups is empty', () => {
+    it('should return isSelected: false when varGroups is empty', () => {
       const result = getCloudConnectorOption([], { auth: 'aws_connector' });
-      expect(result.isCloudConnector).toBe(false);
+      expect(result.isSelected).toBe(false);
     });
 
-    it('should return isCloudConnector: false when no selection matches', () => {
+    it('should return isSelected: false when no selection matches', () => {
       const result = getCloudConnectorOption([varGroupWithProvider], { other_group: 'value' });
-      expect(result.isCloudConnector).toBe(false);
+      expect(result.isSelected).toBe(false);
     });
   });
 

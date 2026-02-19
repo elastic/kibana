@@ -40,7 +40,7 @@ describe('useVarGroupCloudConnector hook', () => {
     jest.clearAllMocks();
   });
 
-  it('should return isCloudConnector: false when varGroups is undefined', () => {
+  it('should return isSelected: false when varGroups is undefined', () => {
     const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
     const { result } = renderHook(() =>
@@ -51,13 +51,13 @@ describe('useVarGroupCloudConnector hook', () => {
       })
     );
 
-    expect(result.current.isCloudConnector).toBe(false);
+    expect(result.current.isSelected).toBe(false);
     expect(result.current.cloudProvider).toBeUndefined();
     expect(result.current.iacTemplateUrl).toBeUndefined();
     expect(result.current.cloudConnectorVars.size).toBe(0);
   });
 
-  it('should return isCloudConnector: false when non-cloud-connector option is selected', () => {
+  it('should return isSelected: false when non-cloud-connector option is selected', () => {
     const varGroups = createMockVarGroups();
     const selections: VarGroupSelection = { auth_method: 'manual' };
 
@@ -69,7 +69,7 @@ describe('useVarGroupCloudConnector hook', () => {
       })
     );
 
-    expect(result.current.isCloudConnector).toBe(false);
+    expect(result.current.isSelected).toBe(false);
     expect(result.current.cloudProvider).toBeUndefined();
     expect(result.current.cloudConnectorVars.size).toBe(0);
   });
@@ -86,7 +86,7 @@ describe('useVarGroupCloudConnector hook', () => {
       })
     );
 
-    expect(result.current.isCloudConnector).toBe(true);
+    expect(result.current.isSelected).toBe(true);
     expect(result.current.cloudProvider).toBe('aws');
     expect(result.current.iacTemplateUrl).toBe('https://example.com/cloudformation.yaml');
     expect(result.current.cloudConnectorVars).toEqual(new Set(['role_arn', 'external_id']));
@@ -124,13 +124,13 @@ describe('useVarGroupCloudConnector hook', () => {
       })
     );
 
-    expect(result.current.isCloudConnector).toBe(false);
+    expect(result.current.isSelected).toBe(false);
 
     // Change selection to cloud connector
     selections = { auth_method: 'cloud_connector' };
     rerender();
 
-    expect(result.current.isCloudConnector).toBe(true);
+    expect(result.current.isSelected).toBe(true);
     expect(result.current.cloudProvider).toBe('aws');
   });
 

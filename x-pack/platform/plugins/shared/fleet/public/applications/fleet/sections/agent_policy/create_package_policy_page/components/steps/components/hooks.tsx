@@ -18,7 +18,7 @@ import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../../../services/var_group_helpers';
-import { computeVarGroupPolicyEffects } from '../../../services/var_group_policy_effects';
+import { buildVarGroupPolicyUpdates } from '../../../services/var_group_policy_effects';
 
 export function useDataStreamId() {
   const history = useHistory();
@@ -120,7 +120,7 @@ export function useVarGroupSelections({
       // Compute policy effects (e.g., supports_cloud_connector) if packagePolicy is provided
       const policyEffects =
         packagePolicy && varGroups
-          ? computeVarGroupPolicyEffects(packagePolicy, newSelections, varGroups)
+          ? buildVarGroupPolicyUpdates(packagePolicy, newSelections, varGroups)
           : null;
 
       // Apply selections and any policy effects together

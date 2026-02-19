@@ -19,7 +19,7 @@ export { getSelectedOption, type VarGroupSelection } from '../var_group_helpers'
  */
 export interface CloudConnectorOptionResult {
   /** Whether a cloud connector option is currently selected */
-  isCloudConnector: boolean;
+  isSelected: boolean;
   /** The cloud provider (e.g., 'aws', 'azure') if cloud connector is selected */
   provider?: CloudProvider;
 }
@@ -37,7 +37,7 @@ export const getCloudConnectorOption = (
   varGroupSelections: VarGroupSelection
 ): CloudConnectorOptionResult => {
   if (!varGroups || varGroups.length === 0) {
-    return { isCloudConnector: false };
+    return { isSelected: false };
   }
 
   for (const varGroup of varGroups) {
@@ -49,12 +49,12 @@ export const getCloudConnectorOption = (
     const selectedOption = getSelectedOption(varGroup, selectedName);
     if (selectedOption && isCloudProvider(selectedOption.provider)) {
       return {
-        isCloudConnector: true,
+        isSelected: true,
         provider: selectedOption.provider,
       };
     }
   }
-  return { isCloudConnector: false };
+  return { isSelected: false };
 };
 
 /**
@@ -138,7 +138,7 @@ export const detectTargetCsp = (
       varGroups,
       packagePolicy.var_group_selections
     );
-    if (cloudConnectorOption.isCloudConnector && cloudConnectorOption.provider) {
+    if (cloudConnectorOption.isSelected && cloudConnectorOption.provider) {
       return cloudConnectorOption.provider;
     }
   }

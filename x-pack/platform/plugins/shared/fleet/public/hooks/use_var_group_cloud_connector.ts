@@ -21,7 +21,7 @@ export type { VarGroupSelection };
 
 export interface CloudConnectorInfo {
   /** Whether a cloud connector option is currently selected */
-  isCloudConnector: boolean;
+  isSelected: boolean;
   /** The cloud provider (e.g., 'aws', 'azure') if cloud connector is selected */
   cloudProvider?: CloudProvider;
   /** IaC template URL from the selected var_group option */
@@ -87,7 +87,7 @@ export const useVarGroupCloudConnector = ({
   );
 
   return {
-    isCloudConnector: cloudConnectorOption.isCloudConnector,
+    isSelected: cloudConnectorOption.isSelected,
     cloudProvider: cloudConnectorOption.provider,
     iacTemplateUrl,
     cloudConnectorVars,

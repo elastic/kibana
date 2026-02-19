@@ -100,40 +100,40 @@ describe('var_group_helpers (cloud connector)', () => {
   });
 
   describe('getCloudConnectorOption', () => {
-    it('should return isCloudConnector: false when varGroups is undefined', () => {
+    it('should return isSelected: false when varGroups is undefined', () => {
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
       const result = getCloudConnectorOption(undefined, selections);
-      expect(result).toEqual({ isCloudConnector: false });
+      expect(result).toEqual({ isSelected: false });
     });
 
-    it('should return isCloudConnector: false when varGroups is empty', () => {
+    it('should return isSelected: false when varGroups is empty', () => {
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
       const result = getCloudConnectorOption([], selections);
-      expect(result).toEqual({ isCloudConnector: false });
+      expect(result).toEqual({ isSelected: false });
     });
 
-    it('should return isCloudConnector: false when no selection is made', () => {
+    it('should return isSelected: false when no selection is made', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = {};
       const result = getCloudConnectorOption(varGroups, selections);
-      expect(result).toEqual({ isCloudConnector: false });
+      expect(result).toEqual({ isSelected: false });
     });
 
-    it('should return isCloudConnector: true with provider when cloud connector is selected', () => {
+    it('should return isSelected: true with provider when cloud connector is selected', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
       const result = getCloudConnectorOption(varGroups, selections);
       expect(result).toEqual({
-        isCloudConnector: true,
+        isSelected: true,
         provider: 'aws',
       });
     });
 
-    it('should return isCloudConnector: false when non-cloud-connector option is selected', () => {
+    it('should return isSelected: false when non-cloud-connector option is selected', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'manual' };
       const result = getCloudConnectorOption(varGroups, selections);
-      expect(result).toEqual({ isCloudConnector: false });
+      expect(result).toEqual({ isSelected: false });
     });
   });
 

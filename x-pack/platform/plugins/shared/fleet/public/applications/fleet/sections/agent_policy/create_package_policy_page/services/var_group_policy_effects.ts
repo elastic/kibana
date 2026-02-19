@@ -17,14 +17,14 @@ import type { RegistryVarGroup } from '../../../../types';
  * Handler function type for computing policy effects based on var_group selections.
  * Returns partial policy updates or null if no updates needed.
  */
-export type PolicyEffectHandler = (
+export type PolicyUpdateHandler = (
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
   varGroups: RegistryVarGroup[]
 ) => Partial<NewPackagePolicy> | null;
 
 // Registry of effect handlers for extensibility
-const policyEffectHandlers: PolicyEffectHandler[] = [];
+const policyUpdateHandlers: PolicyUpdateHandler[] = [];
 
 /**
  * Builds a vars update that sets the supports_cloud_connectors package-level var.
@@ -59,7 +59,7 @@ function buildSupportsCloudConnectorsVarsUpdate(
  * cloud connector credential exchange. It must always be explicitly false when cloud
  * connector is not selected.
  */
-export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
+export const updateCloudConnectorPolicy: PolicyUpdateHandler = (
   packagePolicy,
   varGroupSelections,
   varGroups
@@ -67,7 +67,7 @@ export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
   const cloudConnectorOption = getCloudConnectorOption(varGroups, varGroupSelections);
   const currentVarValue = packagePolicy.vars?.[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]?.value;
 
-  if (cloudConnectorOption.isCloudConnector) {
+  if (cloudConnectorOption.isSelected) {
     // Only update if supports_cloud_connector flag or the var need to change.
     // cloud_connector_id is intentionally NOT checked here — once set by
     // CloudConnectorSetup it must be preserved across unrelated var_group changes.
@@ -104,14 +104,14 @@ export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
 };
 
 // Register the built-in cloud connector handler
-policyEffectHandlers.push(cloudConnectorPolicyEffect);
+policyUpdateHandlers.push(updateCloudConnectorPolicy);
 
 /**
  * Register a custom policy effect handler.
  * Handlers are called in order of registration.
  */
-export function registerPolicyEffectHandler(handler: PolicyEffectHandler): void {
-  policyEffectHandlers.push(handler);
+export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void {
+  policyUpdateHandlers.push(handler);
 }
 
 /**
@@ -119,7 +119,7 @@ export function registerPolicyEffectHandler(handler: PolicyEffectHandler): void 
  * Aggregates results from all registered handlers (e.g., setting
  * supports_cloud_connector and supports_cloud_connectors var).
  */
-export function computeVarGroupPolicyEffects(
+export function buildVarGroupPolicyUpdates(
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
   varGroups: RegistryVarGroup[] | undefined
@@ -131,7 +131,7 @@ export function computeVarGroupPolicyEffects(
   let combinedEffects: Partial<NewPackagePolicy> = {};
   let hasEffects = false;
 
-  for (const handler of policyEffectHandlers) {
+  for (const handler of policyUpdateHandlers) {
     const effects = handler(packagePolicy, varGroupSelections, varGroups);
     if (effects) {
       combinedEffects = { ...combinedEffects, ...effects };
