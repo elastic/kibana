@@ -9,7 +9,7 @@
 export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout, RULE_FORM_ID } from './flyout';
 
 // Form components (lazy loaded) - for embedding in custom forms
-export { RuleFields, DynamicRuleForm, StandaloneRuleForm } from './form';
+export { DynamicRuleForm, StandaloneRuleForm } from './form';
 
 // Types
 export type {

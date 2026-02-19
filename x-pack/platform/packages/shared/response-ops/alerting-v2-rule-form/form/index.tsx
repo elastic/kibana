@@ -7,17 +7,10 @@
 
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { RuleFieldsProps } from './rule_fields';
 import type { DynamicRuleFormProps } from './dynamic_rule_form';
 import type { StandaloneRuleFormProps } from './standalone_rule_form';
 
 // Lazy load form components
-const LazyRuleFields = React.lazy(() =>
-  import('./rule_fields').then((module) => ({
-    default: module.RuleFields,
-  }))
-);
-
 const LazyDynamicRuleForm = React.lazy(() =>
   import('./dynamic_rule_form').then((module) => ({
     default: module.DynamicRuleForm,
@@ -28,12 +21,6 @@ const LazyStandaloneRuleForm = React.lazy(() =>
   import('./standalone_rule_form').then((module) => ({
     default: module.StandaloneRuleForm,
   }))
-);
-
-export const RuleFields: React.FC<RuleFieldsProps> = (props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <LazyRuleFields {...props} />
-  </Suspense>
 );
 
 export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = (props) => (

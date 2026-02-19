@@ -53,7 +53,6 @@ The package uses a composable architecture with multiple layers:
 | `StandaloneRuleFormFlyout` | Complete flyout with static initialization (plugins) |
 | `RuleFormFlyout` + `DynamicRuleForm` | Composable pattern for custom flyout behavior |
 | `RuleFormFlyout` + `StandaloneRuleForm` | Composable pattern for custom flyout behavior |
-| `RuleFields` | Low-level fields for fully custom form implementations |
 
 ## Composable Pattern
 
@@ -123,52 +122,6 @@ function PluginRuleFlyout({ services, initialQuery, onClose }) {
 ```
 
 The `StandaloneRuleForm` uses react-hook-form's `defaultValues` for static initialization - prop changes after mount are ignored.
-
-## Custom Form Implementation
-
-For advanced use cases where you need complete control over form handling, use `RuleFields` directly:
-
-```tsx
-import { useForm, FormProvider } from 'react-hook-form';
-import { RuleFields, type FormValues } from '@kbn/alerting-v2-rule-form';
-
-function MyCustomForm({ services, query }) {
-  const methods = useForm<FormValues>({
-    defaultValues: {
-      kind: 'alert',
-      name: '',
-      description: '',
-      tags: [],
-      schedule: { custom: '5m' },
-      enabled: true,
-      query: query,
-      timeField: '@timestamp',
-      lookbackWindow: '5m',
-      groupingKey: [],
-    },
-  });
-
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
-  };
-
-  return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <RuleFields
-          services={{
-            http: services.http,
-            data: services.data,
-            dataViews: services.dataViews,
-          }}
-          query={methods.watch('query')}
-        />
-        <button type="submit">Save Rule</button>
-      </form>
-    </FormProvider>
-  );
-}
-```
 
 ## FormValues Type
 
