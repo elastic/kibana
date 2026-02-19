@@ -11,7 +11,6 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
-import { createIsNarrowSchema } from '../shared/type_guards';
 
 interface StreamQueryBase {
   id: string;
@@ -50,7 +49,7 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export const streamQueryKqlSchema: z.Schema<StreamQuery> = z.intersection(
+export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     feature: z
@@ -79,8 +78,6 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
   z.record(z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema]))
 );
 
-export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
-
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   feature: z
@@ -103,5 +100,3 @@ export const upsertStreamQueryRequestSchema = z.object({
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
 });
-
-export const isStreamQuery = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);

@@ -10,6 +10,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { buildEsqlWhereCondition } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
   QUERY_ESQL_WHERE,
@@ -48,20 +49,29 @@ export class QueryService {
           // Compute esql.where on-read if missing (for legacy documents)
           if (!source[QUERY_ESQL_WHERE]) {
             const featureFilterJson = source[QUERY_FEATURE_FILTER];
-            const featureFilter =
-              featureFilterJson && typeof featureFilterJson === 'string' && featureFilterJson !== ''
-                ? JSON.parse(featureFilterJson)
-                : undefined;
+            let featureFilter: Condition | undefined;
+            if (
+              featureFilterJson &&
+              typeof featureFilterJson === 'string' &&
+              featureFilterJson !== ''
+            ) {
+              try {
+                featureFilter = JSON.parse(featureFilterJson) as Condition;
+              } catch {
+                featureFilter = undefined;
+              }
+            }
 
             const esqlWhere = buildEsqlWhereCondition({
               kql: { query: source[QUERY_KQL_BODY] as string },
-              feature: source[QUERY_FEATURE_NAME]
-                ? {
-                    name: source[QUERY_FEATURE_NAME] as string,
-                    filter: featureFilter,
-                    type: 'system',
-                  }
-                : undefined,
+              feature:
+                source[QUERY_FEATURE_NAME] && featureFilter
+                  ? {
+                      name: source[QUERY_FEATURE_NAME] as string,
+                      filter: featureFilter,
+                      type: 'system',
+                    }
+                  : undefined,
             });
 
             return { ...source, [QUERY_ESQL_WHERE]: esqlWhere } as StoredQueryLink;
