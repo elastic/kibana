@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createConditionExamplesSchema } from './condition_examples_schema';
+import {
+  conditionExamplesSchema,
+  validateConditionExamples,
+} from './condition_examples_schema';
 import type { PublicTriggerDefinition } from './types';
 
 /**
@@ -19,7 +22,7 @@ export class PublicTriggerRegistry {
 
   /**
    * Register a trigger definition.
-   * Validates conditionExamples with createConditionExamplesSchema (valid KQL, only event schema properties).
+   * Validates conditionExamples shape and KQL (valid KQL, only event schema properties).
    * @param definition - The public trigger definition to register
    * @throws Error if a trigger with the same ID is already registered, or if any conditionExample.condition is invalid
    */
@@ -31,13 +34,20 @@ export class PublicTriggerRegistry {
       );
     }
     if (definition.conditionExamples && definition.conditionExamples.length > 0) {
-      const result = createConditionExamplesSchema(definition.eventSchema).safeParse(
-        definition.conditionExamples
-      );
-      if (!result.success) {
-        const message = result.error.issues.map((e) => e.message).join('; ');
+      const parseResult = conditionExamplesSchema.safeParse(definition.conditionExamples);
+      if (!parseResult.success) {
+        const message = parseResult.error.issues.map((e) => e.message).join('; ');
         throw new Error(
           `Trigger "${id}" has invalid conditionExamples: ${message}. The trigger was not registered.`
+        );
+      }
+      const validation = validateConditionExamples(
+        definition.conditionExamples,
+        definition.eventSchema
+      );
+      if (!validation.valid) {
+        throw new Error(
+          `Trigger "${id}" has invalid conditionExamples: ${validation.error}. The trigger was not registered.`
         );
       }
     }

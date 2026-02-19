@@ -69,7 +69,7 @@ describe('PublicTriggerRegistry', () => {
         ...defaultDefinition,
         conditionExamples: [{ title: 'Bad', condition: 'event.unknown: "x"' }],
       };
-      expect(() => registry.register(definition)).toThrow();
+      expect(() => registry.register(definition)).toThrow(/event\.unknown.*not part of.*event/);
     });
   });
 

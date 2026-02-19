@@ -123,7 +123,6 @@ export function useYamlValidation(
         ...validateStepNameUniqueness(yamlDocument),
         ...validateLiquidTemplate(model.getValue()),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        ...validateTriggerConditions(workflowDefinition, yamlDocument),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
       ];
 
@@ -131,6 +130,7 @@ export function useYamlValidation(
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
+          ...validateTriggerConditions(workflowDefinition, yamlDocument),
           ...validateVariablesInternal(
             variableItems,
             workflowGraph,

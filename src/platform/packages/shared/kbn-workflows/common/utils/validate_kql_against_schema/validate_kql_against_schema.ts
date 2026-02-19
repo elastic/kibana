@@ -13,10 +13,7 @@ import { isZod } from '@kbn/zod';
 import type { z } from '@kbn/zod/v4';
 import { extractSchemaPropertyPaths } from '../extract_schema_property_paths/extract_schema_property_paths';
 
-export interface ValidateKqlAgainstSchemaResult {
-  valid: boolean;
-  error?: string;
-}
+export type ValidateKqlAgainstSchemaResult = { valid: true } | { valid: false; error: string };
 
 export interface ValidateKqlAgainstSchemaOptions {
   /**
@@ -34,17 +31,17 @@ export interface ValidateKqlAgainstSchemaOptions {
  *
  * @param kql - The KQL string to validate (e.g. a trigger condition like `event.severity == "high"`).
  * @param schema - A Zod schema describing allowed properties (e.g. event payload schema).
- * @param options - Optional settings; use fieldPrefix when KQL uses a root like "event" (e.g. "event.severity").
+ * @param options - Optional settings; use fieldPrefix when KQL uses a root (e.g. "event." for "event.severity").
  * @returns { valid: true } or { valid: false, error: string }.
  *
  * @example
  * ```ts
  * const eventSchema = z.object({ severity: z.string(), message: z.string() });
- * validateKqlAgainstSchema('event.severity: "high"', eventSchema, { fieldPrefix: 'event' });
+ * validateKqlAgainstSchema('event.severity: "high"', eventSchema, { fieldPrefix: 'event.' });
  * // { valid: true }
  *
- * validateKqlAgainstSchema('event.unknown: "x"', eventSchema, { fieldPrefix: 'event' });
- * // { valid: false, error: "KQL references field 'event.unknown' which is not part of event properties." }
+ * validateKqlAgainstSchema('event.unknown: "x"', eventSchema, { fieldPrefix: 'event.' });
+ * // { valid: false, error: "KQL references field 'event.unknown' which is not part of event.* properties." }
  *
  * validateKqlAgainstSchema('invalid (', eventSchema);
  * // { valid: false, error: "<parse error message>" }

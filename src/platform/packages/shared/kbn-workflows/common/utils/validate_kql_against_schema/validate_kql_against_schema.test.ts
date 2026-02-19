@@ -30,11 +30,11 @@ describe('validateKqlAgainstSchema', () => {
         fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
+      if (!result.valid) expect(result.error).toBeDefined();
     });
   });
 
-  describe('fields allowed by schema (with fieldPrefix: "event")', () => {
+  describe('fields allowed by schema (with fieldPrefix: "event.")', () => {
     it('returns valid: true when KQL uses only schema properties', () => {
       expect(
         validateKqlAgainstSchema('event.severity: "high"', eventSchema, {
@@ -70,7 +70,7 @@ describe('validateKqlAgainstSchema', () => {
         { fieldPrefix: EVENT_FIELD_PREFIX }
       );
       expect(result2.valid).toBe(false);
-      expect(result2.error).toContain('event.foo.bar');
+      if (!result2.valid) expect(result2.error).toContain('event.foo.bar');
     });
 
     it('allows optional schema properties', () => {
@@ -79,6 +79,14 @@ describe('validateKqlAgainstSchema', () => {
           fieldPrefix: EVENT_FIELD_PREFIX,
         })
       ).toEqual({ valid: true });
+    });
+
+    it('treats separator as given: fieldPrefix without trailing dot produces wrong paths', () => {
+      const result = validateKqlAgainstSchema('event.severity: "high"', eventSchema, {
+        fieldPrefix: 'event',
+      });
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.error).toContain('event.severity');
     });
   });
 
@@ -129,12 +137,12 @@ describe('validateKqlAgainstSchema', () => {
         fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('event.user.email');
+      if (!result.valid) expect(result.error).toContain('event.user.email');
     });
   });
 
   describe('wildcard field', () => {
-    it('allows event.* when fieldPrefix is "event" and schema has properties', () => {
+    it('allows event.* when fieldPrefix is "event." and schema has properties', () => {
       expect(
         validateKqlAgainstSchema('event.*: *', eventSchema, {
           fieldPrefix: EVENT_FIELD_PREFIX,
@@ -147,7 +155,7 @@ describe('validateKqlAgainstSchema', () => {
         fieldPrefix: EVENT_FIELD_PREFIX,
       });
       expect(result.valid).toBe(false);
-      expect(result.error).toContain('other.*');
+      if (!result.valid) expect(result.error).toContain('other.*');
     });
   });
 });
