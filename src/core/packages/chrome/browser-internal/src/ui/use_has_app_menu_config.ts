@@ -18,9 +18,8 @@ export function useHasAppMenuConfig(
 ): boolean {
   const hasConfig$ = useMemo(
     () =>
-      appMenu$?.pipe(
-        map((config) => !!config && !!config.items && config.items.length > 0)
-      ) ?? EMPTY,
+      appMenu$?.pipe(map((config) => !!config && !!config.items && config.items.length > 0)) ??
+      EMPTY,
     [appMenu$]
   );
   return useObservable(hasConfig$, false);
