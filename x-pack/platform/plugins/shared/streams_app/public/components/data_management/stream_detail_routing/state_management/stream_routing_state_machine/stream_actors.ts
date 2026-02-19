@@ -56,6 +56,7 @@ export interface ForkStreamInput {
   where: Condition;
   status: RoutingStatus;
   destination: string;
+  draft?: boolean;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
@@ -66,11 +67,14 @@ export function createForkStreamActor({
   telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
-    const body = buildRoutingForkRequestPayload({
-      where: input.where,
-      status: input.status,
-      destination: input.destination,
-    });
+    const body = buildRoutingForkRequestPayload(
+      {
+        where: input.where,
+        status: input.status,
+        destination: input.destination,
+      },
+      { draft: input.draft }
+    );
 
     const response = await streamsRepositoryClient.fetch(
       'POST /api/streams/{name}/_fork 2023-10-31',
