@@ -725,4 +725,4 @@ export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
 
 export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG =
   'securitySolution:preinstalledWorkflowsEnabled' as const;
-export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT = true as const;
+export const PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT = false as const;
