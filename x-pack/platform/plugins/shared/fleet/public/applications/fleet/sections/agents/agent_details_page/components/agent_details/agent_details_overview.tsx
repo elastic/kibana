@@ -398,7 +398,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   ? agent.local_metadata.host.id
                   : '-',
             },
-            ...(agent.type !== 'OPAMP' ? agentFields : opAMPFields),
+            ...(agent.type === 'OPAMP' ? opAMPFields : agentFields),
           ].map(({ title, description }) => {
             const tooltip =
               typeof description === 'string' && description.length > 20 ? description : '';
