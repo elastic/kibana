@@ -120,10 +120,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
-      await testResizeColumn('_source');
+
+      expect(await dataGrid.resetColumnWidthExists('_source')).to.be(false);
+
+      const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);
+      expect(newWidth).to.be(originalWidth - 100);
+      expect(await dataGrid.resetColumnWidthExists('_source')).to.be(true);
+
+      await dataGrid.clickResetColumnWidth('_source');
+
+      expect(await dataGrid.resetColumnWidthExists('_source')).to.be(false);
     });
 
-    it('should use custom column width on Dashboard when specified', async () => {
+    it('should use custom column width on Dashboard when specified and reset after reload', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickAddFromLibrary();
@@ -135,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
       const initialWidth = (await (await dataGrid.getHeaderElement('_source')).getSize()).width;
-      expect(initialWidth).to.be(newWidth);
+      expect(initialWidth).to.be(originalWidth);
     });
   });
 }
