@@ -10,6 +10,9 @@ import { evaluate } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluate_dataset';
 import { sampleRules } from '../datasets/sample_rules';
 import { hardCases } from '../datasets/hard_cases';
+import { standardPairs } from '../datasets/standard_pairs';
+import { complexPairs } from '../datasets/complex_pairs';
+import { negativePairs } from '../datasets/negative_pairs';
 
 evaluate.describe(
   'AI Rule Generation',
@@ -23,13 +26,14 @@ evaluate.describe(
     }) => {
       const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
 
-      log.info(`Running AI rule generation evaluation with ${sampleRules.length} examples`);
+      const allRules = [...sampleRules, ...standardPairs, ...complexPairs];
+      log.info(`Running AI rule generation evaluation with ${allRules.length} examples`);
       await evaluateDataset({
         dataset: {
           name: 'security-ai-rules: rule-generation-basic',
           description:
             'Evaluates AI-generated detection rules against known examples from elastic/detection-rules',
-          examples: sampleRules.map((rule) => ({
+          examples: allRules.map((rule) => ({
             id: rule.id,
             input: { prompt: rule.prompt },
             output: rule,
@@ -62,6 +66,43 @@ evaluate.describe(
         },
       });
       log.info('Edge case evaluation complete');
+    });
+
+    evaluate('rejects impossible detection requests', async ({
+      executorClient,
+      evaluators,
+      chatClient,
+      log,
+    }) => {
+      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+
+      log.info(`Running negative case evaluation with ${negativePairs.length} examples`);
+      await evaluateDataset({
+        dataset: {
+          name: 'security-ai-rules: negative-cases',
+          description:
+            'Prompts that should NOT produce a valid rule given the stated available data',
+          examples: negativePairs.map((pair) => ({
+            id: pair.id,
+            input: { prompt: `${pair.prompt}\n\nAvailable data: ${pair.availableData}` },
+            output: {
+              id: pair.id,
+              name: '',
+              description: '',
+              query: '',
+              threat: [],
+              severity: 'low' as const,
+              tags: [],
+              riskScore: 0,
+              from: 'now-5m',
+              category: 'negative',
+              prompt: pair.prompt,
+            },
+            metadata: pair.metadata,
+          })),
+        },
+      });
+      log.info('Negative case evaluation complete');
     });
   }
 );
