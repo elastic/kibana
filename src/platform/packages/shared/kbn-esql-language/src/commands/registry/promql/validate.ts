@@ -51,9 +51,9 @@ import {
 // ISO 8601 with Z, optional milliseconds (e.g. 2024-01-15T10:00:00Z or ...00.000Z).
 const FORMAT_DATE_LITERAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 // Prometheus duration format (one or more number+unit segments).
-const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
-// Catches split step values like "step= 1 m" which the parser drops from params.
-const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
+const FORMAT_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
+// Catches split duration param values like "step= 1 m" which the parser drops from params.
+const DURATION_PARAM_WITH_SPACES_REGEX = /\b(step|scrape_interval)\s*=\s*\d+\s+[a-z]+/i;
 // Extracts "param = value" from the query field when the last param is mis-parsed.
 const PROMQL_QUERY_PARAM_VALUE_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(\\S*)`);
 
@@ -72,11 +72,14 @@ export const validate = (
     usedParams.add(param);
   }
 
-  if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has(PromqlParamName.Step)) {
+  const durationSpaceMatch = command.text.match(DURATION_PARAM_WITH_SPACES_REGEX);
+
+  if (durationSpaceMatch && !paramValues.has(durationSpaceMatch[1].toLowerCase())) {
+    const param = durationSpaceMatch[1].toLowerCase();
     messages.push(
       getMessageFromId({
-        messageId: 'promqlInvalidStepParam',
-        values: {},
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Invalid ${param} value` },
         locations: command.location,
       })
     );
@@ -99,10 +102,11 @@ export const validate = (
   const hasEnd = usedParams.has(PromqlParamName.End);
 
   if (hasStart !== hasEnd) {
+    const param = hasStart ? PromqlParamName.End : PromqlParamName.Start;
     messages.push({
       ...getMessageFromId({
-        messageId: 'promqlMissingParam',
-        values: { param: hasStart ? PromqlParamName.End : PromqlParamName.Start },
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Missing required param "${param}"` },
         locations: command.location,
       }),
     });
@@ -118,8 +122,8 @@ export const validate = (
     if (value === '') {
       messages.push({
         ...getMessageFromId({
-          messageId: 'promqlMissingParamValue',
-          values: { param },
+          messageId: 'promqlInvalidParam',
+          values: { reason: `Missing value for "${param}"` },
           locations: entryLocation ?? location,
         }),
       });
@@ -133,22 +137,24 @@ export const validate = (
       if (!isPlaceholder && !FORMAT_DATE_LITERAL_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidDateParam',
-            values: { param },
+            messageId: 'promqlInvalidParam',
+            values: {
+              reason: `Invalid ${param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend`,
+            },
             locations: location,
           }),
         });
       }
     }
 
-    if (param === PromqlParamName.Step) {
+    if (param === PromqlParamName.Step || param === PromqlParamName.ScrapeInterval) {
       const normalized = stripQuotes(value);
 
-      if (!FORMAT_STEP_DURATION_REGEX.test(normalized)) {
+      if (!FORMAT_DURATION_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidStepParam',
-            values: {},
+            messageId: 'promqlInvalidParam',
+            values: { reason: `Invalid ${param} value` },
             locations: keyLocation ?? location,
           }),
         });
@@ -157,11 +163,12 @@ export const validate = (
 
     if (param === PromqlParamName.Buckets) {
       const num = Number(value);
+
       if (!Number.isInteger(num) || num <= 0) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidBucketsParam',
-            values: {},
+            messageId: 'promqlInvalidParam',
+            values: { reason: 'Invalid buckets value. Must be a positive integer' },
             locations: keyLocation ?? location,
           }),
         });
