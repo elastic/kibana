@@ -22,54 +22,45 @@ describe('validateSkillTypeDefinition', () => {
     await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 
-  it('throws error if tool count exceeds 7', async () => {
-    const skill = createMockSkill({
-      getAllowedTools: () => ['tool1', 'tool2', 'tool3', 'tool4'] as any,
-      getInlineTools: async () => ['tool5', 'tool6', 'tool7', 'tool8'] as any,
-    });
-
-    await expect(validateSkillDefinition(skill)).rejects.toThrow(
-      expect.objectContaining({
-        message: expect.stringContaining('Max tool limit exceeded'),
-      })
-    );
-  });
-
-  it('allows exactly 7 tools', async () => {
-    const skill = createMockSkill({
-      getAllowedTools: () => ['tool1', 'tool2', 'tool3', 'tool4'] as any,
-      getInlineTools: async () => ['tool5', 'tool6', 'tool7'] as any,
-    });
-
-    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
-  });
-
-  it('handles only allowed tools', async () => {
-    const skill = createMockSkill({
-      getAllowedTools: () => Array(8).fill('tool') as any,
-    });
-
-    await expect(validateSkillDefinition(skill)).rejects.toThrow(
-      expect.objectContaining({
-        message: expect.stringContaining('Max tool limit exceeded'),
-      })
-    );
-  });
-
-  it('handles only inline tools', async () => {
+  it('throws error if inline tool count exceeds 7', async () => {
     const skill = createMockSkill({
       getInlineTools: async () => Array(8).fill('tool') as any,
     });
 
     await expect(validateSkillDefinition(skill)).rejects.toThrow(
       expect.objectContaining({
-        message: expect.stringContaining('Max tool limit exceeded'),
+        message: expect.stringContaining('Max inline tool limit exceeded'),
       })
     );
   });
 
+  it('allows exactly 7 inline tools', async () => {
+    const skill = createMockSkill({
+      getInlineTools: async () => Array(7).fill('tool') as any,
+    });
+
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
+  });
+
+  it('does not count registry tools toward the inline tool limit', async () => {
+    const skill = createMockSkill({
+      getRegistryTools: () => Array(20).fill('registry-tool'),
+      getInlineTools: async () => Array(7).fill('tool') as any,
+    });
+
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
+  });
+
   it('handles no tools', async () => {
     const skill = createMockSkill();
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
+  });
+
+  it('allows async getRegistryTools', async () => {
+    const skill = createMockSkill({
+      getRegistryTools: async () => ['tool-1', 'tool-2'],
+    });
+
     await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 
