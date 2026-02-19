@@ -15,7 +15,7 @@ import {
   type EsWorkflowExecution,
   type EsWorkflowStepExecution,
 } from '@kbn/workflows';
-import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();

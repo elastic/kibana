@@ -13,7 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
 /**
  * Checks if there's an existing non-terminal scheduled execution for a workflow.

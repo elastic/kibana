@@ -9,7 +9,7 @@
 
 import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../common';
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;

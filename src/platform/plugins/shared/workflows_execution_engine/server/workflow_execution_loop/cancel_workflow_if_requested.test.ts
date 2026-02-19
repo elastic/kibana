@@ -11,7 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository/workflow_execution_repository';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 

@@ -19,7 +19,7 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {

@@ -8,8 +8,8 @@
  */
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { ExecutionStateRepository } from '../repositories/execution_state/execution_state_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository/step_execution_repository';
 import type { GetStepExecutions } from '../types';
 
 export function getStepExecutionsFn(

@@ -12,7 +12,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository/workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
 jest.mock('../repositories/workflow_execution_repository');

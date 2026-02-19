@@ -36,10 +36,10 @@ import { searchWorkflowExecutionsFn } from './execution_functions/search_workflo
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
-import { ExecutionStateRepository } from './repositories/execution_state/execution_state_repository';
+import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { StepExecutionRepository } from './repositories/step_execution_repository/step_execution_repository';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
