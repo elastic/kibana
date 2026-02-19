@@ -82,6 +82,10 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   timeRange: TimeRange;
   /** Resolved time window buttons config, or `false` when disabled. */
   timeWindowButtonsConfig: TimeWindowButtonsConfig | false;
+  /** Called when the user wants to save the current input time range as a preset. */
+  onPresetSave?: (option: TimeRangeBoundsOption) => void;
+  /** Called when the user wants to delete a saved preset. */
+  onPresetDelete?: (option: TimeRangeBoundsOption) => void;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -113,6 +117,8 @@ export function DateRangePickerProvider({
   showTimeWindowButtons = false,
   presets = DEFAULT_PRESETS,
   recent = [],
+  onPresetSave,
+  onPresetDelete,
 }: PropsWithChildren<DateRangePickerProps>) {
   const { euiTheme } = useEuiTheme();
   const maxWidth = euiTheme.components.forms.maxWidth;
@@ -213,6 +219,8 @@ export function DateRangePickerProvider({
       timeWindowButtonsConfig,
       presets,
       recent,
+      onPresetSave,
+      onPresetDelete,
     }),
     [
       text,
@@ -230,6 +238,8 @@ export function DateRangePickerProvider({
       timeWindowButtonsConfig,
       presets,
       recent,
+      onPresetSave,
+      onPresetDelete,
     ]
   );
 

@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButton, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiTab, EuiTabs, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
 import {
@@ -35,7 +35,7 @@ interface OptionsListProps {
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
 const OptionsList = ({ options, showShorthand }: OptionsListProps) => {
-  const { applyRange } = useDateRangePickerContext();
+  const { applyRange, onPresetDelete } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
 
@@ -53,6 +53,17 @@ const OptionsList = ({ options, showShorthand }: OptionsListProps) => {
           key={`${option.start}-${option.end}-${index}`}
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
+          extraActions={
+            onPresetDelete ? (
+              <EuiButtonIcon
+                aria-label={mainPanelTexts.deletePresetAriaLabel}
+                iconType="trash"
+                color="danger"
+                size="xs"
+                onClick={() => onPresetDelete(option)}
+              />
+            ) : undefined
+          }
         >
           {getOptionDisplayLabel(option)}
         </PanelListItem>
@@ -101,10 +112,10 @@ const SubPanelMenu = () => {
   return (
     <ul css={styles.list}>
       <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
-        Calendar
+        {mainPanelTexts.calendarPanelTitle}
       </PanelNavItem>
       <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
-        Custom time range
+        {mainPanelTexts.customTimeRangePanelTitle}
       </PanelNavItem>
       {panelDescriptors.map(({ id, title, icon }) => (
         <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
@@ -116,7 +127,15 @@ const SubPanelMenu = () => {
 };
 
 export function MainPanel() {
-  const { navigateTo } = useDateRangePickerPanelNavigation();
+  const { onPresetSave, timeRange } = useDateRangePickerContext();
+
+  const handlePresetSave = useCallback(() => {
+    if (timeRange.isInvalid || !onPresetSave) return;
+    onPresetSave({ start: timeRange.start, end: timeRange.end, label: timeRange.value });
+  }, [onPresetSave, timeRange]);
+
+  // dev-only flag, will remove as we make progress
+  const _showFooter = typeof onPresetSave === 'function';
 
   return (
     <PanelContainer>
@@ -128,11 +147,30 @@ export function MainPanel() {
           <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>
-      <PanelFooter>
-        <EuiButton size="s" fullWidth onClick={() => navigateTo('example-panel')}>
-          Example panel
-        </EuiButton>
-      </PanelFooter>
+      {_showFooter && (
+        <PanelFooter
+          primaryAction={
+            // @ts-ignore onPresetSave is optional at the consumer level (_showFooter is temporary)
+            onPresetSave ? (
+              <EuiToolTip content={mainPanelTexts.savePresetTooltip} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={mainPanelTexts.savePresetTooltip}
+                  iconType="save"
+                  display="base"
+                  color="text"
+                  size="s"
+                  disabled={timeRange.isInvalid}
+                  onClick={handlePresetSave}
+                />
+              </EuiToolTip>
+            ) : undefined
+          }
+        >
+          <EuiText size="xs" component="p">
+            Time zone information goes here.
+          </EuiText>
+        </PanelFooter>
+      )}
     </PanelContainer>
   );
 }

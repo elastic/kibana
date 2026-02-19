@@ -70,4 +70,20 @@ export const mainPanelTexts = {
   recentTab: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.recentTab', {
     defaultMessage: 'Recent',
   }),
+  calendarPanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.calendarPanelTitle',
+    { defaultMessage: 'Calendar' }
+  ),
+  customTimeRangePanelTitle: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
+    { defaultMessage: 'Custom time range' }
+  ),
+  savePresetTooltip: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',
+    { defaultMessage: 'Save input time range as preset' }
+  ),
+  deletePresetAriaLabel: i18n.translate(
+    'sharedUXPackages.dateRangePicker.mainPanel.deletePresetAriaLabel',
+    { defaultMessage: 'Delete preset' }
+  ),
 };

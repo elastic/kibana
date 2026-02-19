@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
@@ -50,10 +50,25 @@ export const Playground: Story = {
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
+export const Presets: Story = {
+  args: {
+    defaultValue: 'last 20 minutes',
+    presets: [
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+    ],
+    onPresetSave: action('onPresetSave'),
+    onPresetDelete: action('onPresetDelete'),
+  },
+  render: (args) => <StatefulDateRangePicker {...args} />,
+};
+
 function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
-  const { onChange, ...rest } = props;
+  const [presets, setPresets] = useState<TimeRangeBoundsOption[]>(props.presets ?? []);
+  const { onChange, onPresetSave, onPresetDelete, ...rest } = props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
     setInvalid(args.isInvalid);
@@ -69,7 +84,38 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
     onChange?.(args);
   };
 
+  const handlePresetSave = useCallback(
+    (option: TimeRangeBoundsOption) => {
+      onPresetSave?.(option);
+      setPresets((prev) => {
+        const key = `${option.start}|${option.end}`;
+        const deduped = prev.filter((p) => `${p.start}|${p.end}` !== key);
+        return [...deduped, option];
+      });
+    },
+    [onPresetSave]
+  );
+
+  const handlePresetDelete = useCallback(
+    (option: TimeRangeBoundsOption) => {
+      onPresetDelete?.(option);
+      setPresets((prev) => {
+        const key = `${option.start}|${option.end}`;
+        return prev.filter((p) => `${p.start}|${p.end}` !== key);
+      });
+    },
+    [onPresetDelete]
+  );
+
   return (
-    <DateRangePicker isInvalid={invalid} recent={recents} {...rest} onChange={handleOnChange} />
+    <DateRangePicker
+      isInvalid={invalid}
+      recent={recents}
+      {...rest}
+      presets={presets}
+      onChange={handleOnChange}
+      onPresetSave={onPresetSave ? handlePresetSave : undefined}
+      onPresetDelete={onPresetDelete ? handlePresetDelete : undefined}
+    />
   );
 }
