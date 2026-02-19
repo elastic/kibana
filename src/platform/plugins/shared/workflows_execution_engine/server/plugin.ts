@@ -248,6 +248,40 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
     plugins.taskManager.registerTaskDefinitions({
+      'workflow:migrate-executions': {
+        title: 'Migrate Workflow Executions to History',
+        description:
+          'Copies terminal workflow and step executions older than 1 day from hot storage (execution state) to cold storage (history data streams)',
+        timeout: '10m',
+        maxAttempts: 3,
+        createTaskRunner: () => {
+          return {
+            run: async () => {
+              // TODO: implement migration logic
+              logger.info('workflow:migrate-executions task triggered (not yet implemented)');
+            },
+          };
+        },
+      },
+    });
+    plugins.taskManager.registerTaskDefinitions({
+      'workflow:cleanup-executions': {
+        title: 'Cleanup Stale Executions from Hot Storage',
+        description:
+          'Deletes terminal workflow and step executions older than 3 days from hot storage (execution state)',
+        timeout: '10m',
+        maxAttempts: 3,
+        createTaskRunner: () => {
+          return {
+            run: async () => {
+              // TODO: implement cleanup logic
+              logger.info('workflow:cleanup-executions task triggered (not yet implemented)');
+            },
+          };
+        },
+      },
+    });
+    plugins.taskManager.registerTaskDefinitions({
       'workflow:scheduled': {
         title: 'Scheduled Workflow Execution',
         description: 'Executes workflows on a scheduled basis',
@@ -316,9 +350,6 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = await createWorkflowExecutionRepository(
-                coreStart.dataStreams
-              );
               const executionStateRepository = new ExecutionStateRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
@@ -418,7 +449,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              await executionStateRepository.bulkUpsert(workflowExecution);
+              await executionStateRepository.bulkUpsert([workflowExecution]);
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -469,11 +500,42 @@ export class WorkflowsExecutionEnginePlugin
     const executionStateRepository = new ExecutionStateRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
     const workflowExecutionRepositoryPromise = createWorkflowExecutionRepository(
-      coreStart.dataStreams
+      coreStart.dataStreams,
+      internalEsClient
     );
-    const stepExecutionRepositoryPromise = createStepExecutionRepository(coreStart.dataStreams);
+    const stepExecutionRepositoryPromise = createStepExecutionRepository(
+      coreStart.dataStreams,
+      internalEsClient
+    );
     this.concurrencyManager = new ConcurrencyManager(workflowTaskManager, executionStateRepository);
+
+    plugins.taskManager
+      .ensureScheduled({
+        id: 'workflow:migrate-executions',
+        taskType: 'workflow:migrate-executions',
+        schedule: { interval: '1d' },
+        params: {},
+        state: {},
+        scope: ['workflows'],
+      })
+      .catch((err: Error) => {
+        this.logger.error(`Failed to schedule execution migration task: ${err.message}`);
+      });
+
+    plugins.taskManager
+      .ensureScheduled({
+        id: 'workflow:cleanup-executions',
+        taskType: 'workflow:cleanup-executions',
+        schedule: { interval: '7d' },
+        params: {},
+        state: {},
+        scope: ['workflows'],
+      })
+      .catch((err: Error) => {
+        this.logger.error(`Failed to schedule execution cleanup task: ${err.message}`);
+      });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
