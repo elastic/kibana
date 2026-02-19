@@ -124,7 +124,7 @@ describe('useExposePublicApi', () => {
       unsubscribe();
     });
 
-    it('should be compatible with the useSyncExternalStore hook', () => {
+    it('should be compatible with the useSyncExternalStore hook', async () => {
       const mockRefObject: React.RefObject<DataCascadeImplRef<GroupNode, LeafNode>> = {
         current: null,
       };
@@ -161,6 +161,30 @@ describe('useExposePublicApi', () => {
         expanded: {},
         rowSelection: {},
         scrollRect: { width: 0, height: 0 },
+      });
+
+      act(() => {
+        result.current.collectVirtualizerStateChanges({
+          range: { startIndex: 0, endIndex: 10 },
+          scrollOffset: 100,
+          isScrolling: false,
+          scrollRect: { width: 0, height: 0 },
+          getTotalSize: () => 0,
+        } as unknown as UseVirtualizerReturnType);
+      });
+
+      await waitFor(() => {
+        expect(externalSyncResult.current).toEqual({
+          scrollOffset: 100,
+          range: { startIndex: 0, endIndex: 10 },
+          isScrolling: false,
+          activeStickyIndex: null,
+          totalRowCount: 0,
+          totalSize: 0,
+          expanded: {},
+          rowSelection: {},
+          scrollRect: { width: 0, height: 0 },
+        });
       });
     });
   });

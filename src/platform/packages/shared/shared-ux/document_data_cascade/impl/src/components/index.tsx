@@ -45,7 +45,14 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     initialTableState,
     initialScrollOffset,
     initialRect,
-    ...restProps
+    onCascadeGroupingChange,
+    size,
+    enableStickyGroupHeader,
+    allowMultipleRowToggle,
+    children,
+    enableRowSelection,
+    data,
+    overscan,
   }: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> & DataCascadeProviderProps,
   ref: ForwardedRef<DataCascadeImplRef<G, L>>
 ) {
@@ -54,15 +61,37 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
   const initialScrollOffsetRef = useRef(initialScrollOffset);
   const initialRectRef = useRef(initialRect);
 
-  const cascadeImplProps = useMemo<DataCascadeImplProps<G, L>>(
-    () =>
-      customTableHeader
-        ? { ...restProps, customTableHeader, cascadeRef: ref }
-        : { ...restProps, tableTitleSlot: tableTitleSlot!, cascadeRef: ref },
-    [customTableHeader, restProps, tableTitleSlot, ref]
-  );
+  const cascadeImplProps = useMemo<DataCascadeImplProps<G, L>>(() => {
+    const props = {
+      onCascadeGroupingChange,
+      size,
+      enableStickyGroupHeader,
+      allowMultipleRowToggle,
+      enableRowSelection,
+      data,
+      overscan,
+      children,
+      cascadeRef: ref,
+    };
 
-  return React.useMemo(
+    return customTableHeader
+      ? { ...props, customTableHeader }
+      : { ...props, tableTitleSlot: tableTitleSlot! };
+  }, [
+    allowMultipleRowToggle,
+    children,
+    customTableHeader,
+    data,
+    enableRowSelection,
+    overscan,
+    onCascadeGroupingChange,
+    size,
+    enableStickyGroupHeader,
+    tableTitleSlot,
+    ref,
+  ]);
+
+  return useMemo(
     () => (
       <DataCascadeProvider<G, L>
         cascadeGroups={cascadeGroups}

@@ -160,11 +160,13 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       debounce(() => {
         const opts = optionsRef.current;
         const { expanded: exp, rowSelection: sel } = latestStateRef.current;
-        const snap = storeRef.current.snapshot;
 
-        snap.totalRowCount = opts.rows.length;
-        snap.expanded = exp;
-        snap.rowSelection = sel;
+        storeRef.current.snapshot = {
+          ...storeRef.current.snapshot,
+          totalRowCount: opts.rows.length,
+          expanded: exp,
+          rowSelection: sel,
+        };
 
         storeRef.current.listeners.forEach((listener) => listener());
       }, 100),
@@ -175,7 +177,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   const collectVirtualizerStateChanges = useCallback(
     (instance: UseVirtualizerReturnType | undefined) => {
       const opts = optionsRef.current;
-      const snap = storeRef.current.snapshot;
+
       // if the virtualizer instance is not null, update the store snapshot
       if (instance != null) {
         const range =
@@ -187,12 +189,16 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
           range?.startIndex ?? 0,
           opts.enableStickyGroupHeader
         );
-        snap.scrollOffset = instance.scrollOffset ?? 0;
-        snap.range = range;
-        snap.isScrolling = instance.isScrolling ?? false;
-        snap.activeStickyIndex = activeStickyIndex;
-        snap.scrollRect = instance.scrollRect ?? { width: 0, height: 0 };
-        snap.totalSize = instance.getTotalSize ? instance.getTotalSize() : 0;
+
+        storeRef.current.snapshot = {
+          ...storeRef.current.snapshot,
+          scrollOffset: instance.scrollOffset ?? 0,
+          range,
+          isScrolling: instance.isScrolling ?? false,
+          activeStickyIndex,
+          scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
+          totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
+        };
 
         notifyListeners();
       }
@@ -217,7 +223,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
     getUISnapshotStore: getStateStore,
   };
 
-  // Magic happens here, the ref is populated after mount and consumers can use it to access the public API
+  // Populate the forwarded ref with the stable handle after mount
   useImperativeHandle(ref, () => handleRef.current, []);
 
   return { collectVirtualizerStateChanges };

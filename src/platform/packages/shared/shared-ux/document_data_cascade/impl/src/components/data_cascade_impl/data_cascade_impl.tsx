@@ -172,7 +172,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     enableStickyGroupHeader
   );
 
-  // register handlers for accessibility
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
     tableWrapperElement: cascadeWrapperRef.current!,
