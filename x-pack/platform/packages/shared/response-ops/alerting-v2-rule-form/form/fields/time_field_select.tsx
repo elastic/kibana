@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
@@ -26,25 +26,21 @@ interface TimeFieldSelectProps {
 }
 
 export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) => {
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
 
-  const handleFieldsSuccess = useCallback(
+  const handleAutoSelect = useCallback(
     (fields: DataViewFieldMap) => {
-      const newTimeFieldOptions = getTimeFieldOptions(fields);
-      setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
+      const options = getTimeFieldOptions(fields);
 
       // Auto-select a time field when options load
       const currentValue = getValues('timeField');
-      const isCurrentValueValid = newTimeFieldOptions.some((opt) => opt.value === currentValue);
+      const isCurrentValueValid = options.some((opt) => opt.value === currentValue);
 
       // Only auto-select if current value is empty or invalid
       if (!currentValue || !isCurrentValueValid) {
-        const preferredField = newTimeFieldOptions.find(
-          (opt) => opt.value === PREFERRED_TIME_FIELD
-        );
-        const selectedField = preferredField?.value || newTimeFieldOptions[0]?.value || '';
+        const preferredField = options.find((opt) => opt.value === PREFERRED_TIME_FIELD);
+        const selectedField = preferredField?.value || options[0]?.value || '';
 
         if (selectedField) {
           setValue('timeField', selectedField);
@@ -54,12 +50,17 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
     [getValues, setValue]
   );
 
-  const { isLoading } = useDataFields({
+  const { data, isLoading } = useDataFields({
     query,
     http: services.http,
     dataViews: services.dataViews,
-    onSuccess: handleFieldsSuccess,
+    onSuccess: handleAutoSelect,
   });
+
+  const timeFieldOptions = useMemo(
+    () => [firstFieldOption, ...getTimeFieldOptions(data ?? {})],
+    [data]
+  );
 
   return (
     <Controller
