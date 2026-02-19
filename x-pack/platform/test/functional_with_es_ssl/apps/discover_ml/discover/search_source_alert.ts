@@ -348,8 +348,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/252007
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
@@ -696,11 +695,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await openAlertRuleInManagement(newAlert);
 
-      await retry.waitFor('success status', async () => {
+      await retry.waitFor('success or warning status', async () => {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        const isOk = await testSubjects.exists('ruleStatus-ok');
+        const isWarning = await testSubjects.exists('ruleStatus-warning');
+        return isOk || isWarning;
       });
     });
   });

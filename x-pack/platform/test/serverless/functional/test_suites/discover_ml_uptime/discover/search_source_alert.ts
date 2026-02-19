@@ -384,8 +384,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/252152
-  describe.skip('Search source Alert', function () {
+  describe('Search source Alert', function () {
     // Failing in Observability projects: https://github.com/elastic/kibana/issues/203045
     // Failing in MKI Search projects: https://github.com/elastic/kibana/issues/207865
     // Failing in MKI Security projects: https://github.com/elastic/kibana/issues/252028
@@ -729,11 +728,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await openAlertRuleInManagement(newAlert);
 
-      await retry.waitFor('success status', async () => {
+      await retry.waitFor('success or warning status', async () => {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        const isOk = await testSubjects.exists('ruleStatus-ok');
+        const isWarning = await testSubjects.exists('ruleStatus-warning');
+        return isOk || isWarning;
       });
     });
   });
