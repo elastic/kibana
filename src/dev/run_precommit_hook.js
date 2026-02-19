@@ -17,12 +17,13 @@ import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { readFileSync } from 'fs';
 import { extname, join } from 'path';
+import minimatch from 'minimatch';
 
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { getExpectedCasing } from './precommit_hook/casing_check_config';
+import { getExpectedCasing, IGNORE_PATTERNS } from './precommit_hook/casing_check_config';
 
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
@@ -89,7 +90,11 @@ class FileCasingCheck extends PrecommitCheck {
       Object.keys(teamObject)
     );
 
-    await checkFileCasing(log, files, getExpectedCasing, {
+    const filesWithoutIgnore = files.filter(
+      (file) => !IGNORE_PATTERNS.some((pattern) => minimatch(file.getRelativePath(), pattern))
+    );
+
+    await checkFileCasing(log, filesWithoutIgnore, getExpectedCasing, {
       packageRootDirs,
       exceptions,
     });

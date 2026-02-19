@@ -95,6 +95,7 @@ function runEslintWithBreakOnFix(passalongArgs) {
   const postRunDiff = spawnSync('git', diffArgs, { encoding: 'utf-8' }).stdout;
   const hadFixes = preRunDiff !== postRunDiff;
 
+  let eslintOutputErrors = false;
   let hadFailures = false;
   try {
     const results = JSON.parse(stdout || '[]');
@@ -114,9 +115,13 @@ function runEslintWithBreakOnFix(passalongArgs) {
     }
   } catch (_) {
     // if JSON parse fails, rely on child exit code only
+    eslintOutputErrors = true;
   }
 
-  if (hadFixes && !hadFailures) {
+  if (eslintOutputErrors) {
+    console.error('ESLint: Failed to parse output, please check the output for errors.');
+    process.exit(1);
+  } else if (hadFixes && !hadFailures) {
     console.warn('ESLint: Fixed some files, breaking the process to prevent unwanted caching.');
     process.exit(1);
   } else if (hadFailures) {

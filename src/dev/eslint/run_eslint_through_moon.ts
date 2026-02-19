@@ -18,9 +18,8 @@ const IS_CI = !!process.env.CI;
 const options = {
   description: 'Run ESLint on all Moon projects in the repository.',
   flags: {
-    boolean: ['bail', 'update-cache', 'fix'],
+    boolean: ['update-cache', 'fix'],
     default: {
-      bail: false,
       updateCache: false,
     },
     help: `

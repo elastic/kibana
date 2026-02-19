@@ -213,7 +213,7 @@ export async function pickTestGroupRunOrder() {
   const jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 
   const JEST_INTEGRATION_CONFIG_GLOB =
-    process.env.JEST_CONFIG_GLOB || '**/jest.integration.config.*js';
+    process.env.JEST_INTEGRATION_CONFIG_GLOB || '**/jest.integration.config.*js';
   const jestIntegrationConfigsRaw = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs([JEST_INTEGRATION_CONFIG_GLOB, '!**/__fixtures__/**']), {
         cwd: process.cwd(),

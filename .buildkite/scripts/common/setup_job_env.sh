@@ -290,14 +290,15 @@ EOF
   fi
 }
 
-# Inject moon remote-cache credentials on CI
 if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+  # Inject moon remote-cache credentials on CI
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
   export MOON_REMOTE_CACHE_TOKEN
+
+  # Set moon's remote targeting for affected calculations
+  MOON_BASE=${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}
+  export MOON_BASE
 fi
-# Set moon's remote targeting for affected calculations
-MOON_BASE=${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-main}
-export MOON_BASE
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

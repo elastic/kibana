@@ -47,25 +47,6 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function parseGithubPrLabels(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (Array.isArray(parsed)) {
-      return parsed
-        .map(String)
-        .map((label) => label.trim())
-        .filter(Boolean);
-    }
-  } catch {
-    // fall through
-  }
-
-  return raw
-    .split(/[\n,]+/g)
-    .map((label) => label.trim())
-    .filter(Boolean);
-}
-
 function buildEvalsYaml({
   selectedSuites,
   modelGroups,
