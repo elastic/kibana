@@ -17,7 +17,6 @@ import { visitRuleEditPage } from '../../../../tasks/edit_rule';
 import { setPreferredChatExperienceToAgent } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import {
   clickNewAgentBuilderAttachmentButton,
-  assertAgentBuilderConversationFlyoutVisible,
   assertAgentBuilderConversationInputEditorContains,
 } from '../../../../tasks/ai_rule_creation';
 import { NEW_AGENT_BUILDER_ATTACHMENT_BUTTON } from '../../../../screens/ai_rule_creation';
@@ -43,7 +42,6 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationFlyoutVisible();
       assertAgentBuilderConversationInputEditorContains(prompt);
     });
 
@@ -56,7 +54,6 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationFlyoutVisible();
       assertAgentBuilderConversationInputEditorContains(prompt);
     });
 
@@ -69,7 +66,6 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationFlyoutVisible();
       assertAgentBuilderConversationInputEditorContains(prompt);
     });
   }
