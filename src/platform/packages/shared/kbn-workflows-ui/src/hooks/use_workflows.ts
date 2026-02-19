@@ -10,6 +10,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { searchWorkflows } from '../services/search_workflows';
 
 export function useWorkflows(params: WorkflowsSearchParams) {
   const { http } = useKibana().services;
@@ -21,9 +22,7 @@ export function useWorkflows(params: WorkflowsSearchParams) {
       if (!http) {
         return Promise.reject(new Error('Http service is not available'));
       }
-      return http.post<WorkflowListDto>('/api/workflows/search', {
-        body: JSON.stringify(params),
-      });
+      return searchWorkflows(http, params);
     },
     keepPreviousData: true,
   });

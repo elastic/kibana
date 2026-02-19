@@ -8,7 +8,8 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import type { LegacyWorkflowInput, WorkflowListDto } from '@kbn/workflows';
+import type { LegacyWorkflowInput } from '@kbn/workflows';
+import { searchWorkflows } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
@@ -123,11 +124,9 @@ export const loadWorkflowsThunk = createAsyncThunk<
 >('detail/loadWorkflowsThunk', async (_, { dispatch, rejectWithValue, extra: { services } }) => {
   const { http, notifications } = services;
   try {
-    const response = await http.post<WorkflowListDto>('/api/workflows/search', {
-      body: JSON.stringify({
-        size: MAX_WORKFLOWS_LOOKUP_SIZE,
-        page: 1,
-      }),
+    const response = await searchWorkflows(http, {
+      size: MAX_WORKFLOWS_LOOKUP_SIZE,
+      page: 1,
     });
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};

@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/hooks';
-export * from './src/services';
-export * from './src/components';
+import type { HttpSetup } from '@kbn/core/public';
+import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
+
+export function searchWorkflows(
+  http: HttpSetup,
+  params: WorkflowsSearchParams
+): Promise<WorkflowListDto> {
+  return http.post<WorkflowListDto>('/api/workflows/search', {
+    body: JSON.stringify(params),
+  });
+}

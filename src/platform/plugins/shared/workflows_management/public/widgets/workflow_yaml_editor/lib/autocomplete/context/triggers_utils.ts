@@ -42,7 +42,8 @@ export function isInWorkflowInputsPath(path: (string | number)[]): boolean {
  * Position-based fallback for detecting `with.inputs` context.
  * Used when `getPathAtOffset` returns an empty path (e.g. cursor is on a blank
  * line right after `inputs:` with no value). Checks whether the focused step
- * has a `with.inputs` prop and the cursor is positioned after that key.
+ * has a `with.inputs` prop and the cursor is positioned after that key but
+ * before the next sibling property (to avoid false positives on `await:` etc.).
  */
 export function isInWorkflowInputsByPosition(
   focusedStepInfo: StepInfo | null,
@@ -51,7 +52,48 @@ export function isInWorkflowInputsByPosition(
   if (!focusedStepInfo) return false;
   const inputsProp = focusedStepInfo.propInfos['with.inputs'];
   if (!inputsProp?.keyNode?.range) return false;
-  return absoluteOffset > inputsProp.keyNode.range[2];
+
+  const inputsKeyEnd = inputsProp.keyNode.range[2];
+  if (absoluteOffset <= inputsKeyEnd) return false;
+
+  const upperBound = getInputsUpperBound(focusedStepInfo);
+  return upperBound === undefined || absoluteOffset < upperBound;
+}
+
+/**
+ * Finds the upper bound offset for the `inputs` region inside a step's `with` map.
+ * Returns the start of the next sibling key after `inputs`, or the end of the
+ * `with` map value, or undefined if no bound can be determined.
+ */
+function getInputsUpperBound(focusedStepInfo: StepInfo): number | undefined {
+  const stepNode = focusedStepInfo.stepYamlNode;
+  if (!isMap(stepNode)) return undefined;
+
+  const withPair = stepNode.items.find(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+  );
+  if (!withPair || !isPair(withPair) || !isMap(withPair.value)) return undefined;
+
+  const withMap = withPair.value;
+  const inputsIndex = withMap.items.findIndex(
+    (item) => isPair(item) && isScalar(item.key) && item.key.value === 'inputs'
+  );
+  if (inputsIndex === -1) return undefined;
+
+  // Use the next sibling key in `with` as the bound
+  if (inputsIndex < withMap.items.length - 1) {
+    const nextItem = withMap.items[inputsIndex + 1];
+    if (isPair(nextItem) && isScalar(nextItem.key) && nextItem.key?.range) {
+      return nextItem.key.range[0];
+    }
+  }
+
+  // No next sibling in `with` — use the end of the `with` map value
+  if (withMap.range) {
+    return withMap.range[2];
+  }
+
+  return undefined;
 }
 
 /**
