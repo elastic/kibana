@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { FormattedFieldValue } from '../../lib/create_field_formatter_react';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -88,10 +88,9 @@ class TableVis extends Component {
       rowDisplay = pivotIds
         .map((item, index) => {
           const value = [row.key ?? null].flat()[index];
-          const formatted = fieldValuesFormatter(item, value, 'html');
+          const formatted = fieldValuesFormatter(item, value);
 
-          // eslint-disable-next-line react/no-danger
-          return <span dangerouslySetInnerHTML={{ __html: formatted ?? value }} />;
+          return <span key={item}>{formatted ?? value}</span>;
         })
         .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
     }
@@ -118,16 +117,20 @@ class TableVis extends Component {
         const hasColorRules = column.color_rules?.some(
           ({ value, operator, text }) => value || operator || text
         );
-        const formatter =
-          column.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(
-                getMetricsField(column.metrics),
-                fieldFormatMap,
-                'html',
-                hasColorRules
-              )
-            : createTickFormatter(column.formatter, column.value_template, getConfig);
-        const value = formatter(item.last);
+        const isDefaultFormatter = column.formatter === DATA_FORMATTERS.DEFAULT;
+        const tickFormatter = isDefaultFormatter
+          ? null
+          : createTickFormatter(column.formatter, column.value_template, getConfig);
+        const formattedValue = isDefaultFormatter ? (
+          <FormattedFieldValue
+            value={item.last}
+            fieldName={getMetricsField(column.metrics)}
+            fieldFormatMap={fieldFormatMap}
+            hasColorRules={hasColorRules}
+          />
+        ) : (
+          tickFormatter(item.last)
+        );
         let trend;
         if (column.trend_arrows) {
           const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
@@ -145,8 +148,7 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: value }} />
+            <span>{formattedValue}</span>
             {trend}
           </td>
         );

@@ -78,6 +78,19 @@ export const getMultiFieldLabel = (fieldForTerms: string[], fields?: SanitizedFi
   return firstFieldLabel ?? '';
 };
 
+/**
+ * Creates a cached field value formatter that returns text-formatted values.
+ *
+ * Note: This function only supports text rendering. For rich formatting (colors, links),
+ * use React components with the FormattedValue component from @kbn/field-formats-plugin.
+ *
+ * @param dataView - The data view for field format lookup
+ * @param fields - Field definitions for type-based formatting
+ * @param fieldFormatService - Field format service for default formatters
+ * @param options - Formatting options (e.g., timezone)
+ * @param excludedFieldFormatsIds - Field format IDs to exclude from custom formatting
+ * @returns A function that formats field values as text strings
+ */
 export const createCachedFieldValueFormatter = (
   dataView?: DataView | null,
   fields?: SanitizedFieldType[],
@@ -87,11 +100,11 @@ export const createCachedFieldValueFormatter = (
 ) => {
   const cache = new Map<string, FieldFormat>();
 
-  return (fieldName: string, value: string, contentType: 'text' | 'html' = 'text') => {
+  return (fieldName: string, value: string) => {
     const cachedFormatter = cache.get(fieldName);
 
     const convert = (fieldFormat: FieldFormat) =>
-      fieldFormat.convert(value, contentType, options ? { timezone: options.timezone } : undefined);
+      fieldFormat.convert(value, 'text', options ? { timezone: options.timezone } : undefined);
 
     if (cachedFormatter) {
       return convert(cachedFormatter);

@@ -10,14 +10,24 @@
 import { isNumber } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatMap, DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { getFieldFormats } from '../../../services';
 
+/**
+ * Creates a text-based field formatter function.
+ *
+ * Note: This function only supports text rendering. For rich formatting (colors, links),
+ * use the FormattedFieldValue React component from './create_field_formatter_react'.
+ *
+ * @param fieldName - The name of the field to format
+ * @param fieldFormatMap - Map of field names to field format configurations
+ * @param hasColorRules - Whether color rules are already applied (skips color formatting)
+ * @param dataView - The data view for field type detection
+ * @returns A function that formats values as text strings
+ */
 export const createFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
-  contextType?: FieldFormatsContentType,
   hasColorRules: boolean = false,
   dataView?: DataView
 ) => {
@@ -47,7 +57,7 @@ export const createFieldFormatter = (
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convert(value, contextType)
+      ? fieldFormat.convert(value, 'text')
       : value;
   };
 };

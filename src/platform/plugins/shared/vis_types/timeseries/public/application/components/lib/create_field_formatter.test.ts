@@ -19,7 +19,7 @@ const mockUiSettings = {
   [FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
 } as unknown as CoreSetup['uiSettings'];
 
-describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColorRules)', () => {
+describe('createFieldFormatter(fieldName, fieldFormatMap?, hasColorRules)', () => {
   setFieldFormats(
     getFieldFormatsRegistry({
       uiSettings: mockUiSettings,
@@ -72,32 +72,28 @@ describe('createFieldFormatter(fieldName, fieldFormatMap?, contextType?, hasColo
     expect(formatter(value)).toBe('×møç®ü÷');
   });
 
-  it('should return color formatted value for colorField', () => {
-    const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html');
+  it('should return text formatted value for colorField (text mode)', () => {
+    const formatter = createFieldFormatter('colorField', fieldFormatMap);
 
-    expect(formatter(value)).toBe(
-      '<span style="color:#D36086;background-color:#ffffff;display:inline-block;padding:0 8px;border-radius:3px">1234567890</span>'
-    );
+    expect(formatter(value)).toBe('1234567890');
   });
 
-  it('should return number formatted value wrapped in span for colorField when color rules are applied', () => {
-    const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html', true);
+  it('should return number formatted value for colorField when color rules are applied', () => {
+    const formatter = createFieldFormatter('colorField', fieldFormatMap, true);
 
     expect(formatter(value)).toBe('1,234,567,890');
   });
 
   it('should return not formatted string value for colorField when color rules are applied', () => {
-    const formatter = createFieldFormatter('colorField', fieldFormatMap, 'html', true);
+    const formatter = createFieldFormatter('colorField', fieldFormatMap, true);
 
     expect(formatter(stringValue)).toBe(stringValue);
   });
 
-  it('should return url formatted value for urlField', () => {
-    const formatter = createFieldFormatter('urlField', fieldFormatMap, 'html');
+  it('should return text formatted value for urlField (text mode)', () => {
+    const formatter = createFieldFormatter('urlField', fieldFormatMap);
 
-    expect(formatter(value)).toBe(
-      '<a href="https://1234567890" target="_blank" rel="noopener noreferrer">1234567890</a>'
-    );
+    expect(formatter(value)).toBe('1234567890');
   });
 
   it('should return "-" for null value when field has format', () => {
