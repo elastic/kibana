@@ -911,6 +911,24 @@ describe('telemetry task state', () => {
     });
   });
 
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+    it('should work on empty object when running the up migration', () => {
+      const result = v6.up({});
+      expect(result).toHaveProperty('count_backfill_executions', 0);
+      expect(result).toHaveProperty('count_backfills_by_execution_status_per_day', {});
+      expect(result).toHaveProperty('count_gaps', 0);
+      expect(result).toHaveProperty('total_unfilled_gap_duration_ms', 0);
+      expect(result).toHaveProperty('total_filled_gap_duration_ms', 0);
+    });
+
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v6.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
   describe('v7', () => {
     const v7 = stateSchemaByVersion[7];
     it('should work on empty object when running the up migration', () => {
@@ -1016,6 +1034,39 @@ describe('telemetry task state', () => {
     it('should drop unknown properties when running the up migration', () => {
       const state = { foo: true };
       const result = v7.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
+  describe('v8', () => {
+    const v8 = stateSchemaByVersion[8];
+    it('should work on empty object when running the up migration', () => {
+      const result = v8.up({});
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag', 0);
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag_by_type', {});
+    });
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        count_rules_with_elasticagent_tag: 5,
+        count_rules_with_elasticagent_tag_by_type: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          metrics__alert__threshold: 2,
+        },
+      };
+      const result = v8.up(cloneDeep(state));
+      expect(result.count_rules_with_elasticagent_tag).toEqual(5);
+      expect(result.count_rules_with_elasticagent_tag_by_type).toEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        logs__alert__document__count: 3,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        metrics__alert__threshold: 2,
+      });
+    });
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v8.up(state);
       expect(result).not.toHaveProperty('foo');
     });
   });

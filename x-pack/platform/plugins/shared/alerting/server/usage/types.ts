@@ -33,6 +33,8 @@ export interface AlertingUsage {
     warning: number;
   };
   count_rules_with_tags: number;
+  count_rules_with_elasticagent_tag: number;
+  count_rules_with_elasticagent_tag_by_type: Record<string, number>;
   count_rules_by_notify_when: {
     on_action_group_change: number;
     on_active_alert: number;

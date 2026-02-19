@@ -107,11 +107,6 @@ export const allowedExperimentalValues = Object.freeze({
   storeGapsInEventLogEnabled: true,
 
   /**
-   * Enables scheduling gap fills for rules
-   */
-  bulkFillRuleGapsEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: true,
@@ -225,6 +220,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Rule Health UI
    */
   ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
