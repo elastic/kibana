@@ -5,97 +5,50 @@
  * 2.0.
  */
 
-import type { EuiTableSortingType } from '@elastic/eui';
-import type { Pagination } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
-import type { FilterOptions, QueryParams } from '../components/all_inference_endpoints/types';
-import {
-  INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-  SortOrder,
-} from '../components/all_inference_endpoints/types';
+import type { FilterOptions } from '../components/all_inference_endpoints/types';
 import { getModelId } from '../utils/get_model_id';
 
-interface UseTableDataReturn {
-  tableData: InferenceInferenceEndpointInfo[];
-  sortedTableData: InferenceInferenceEndpointInfo[];
-  paginatedSortedTableData: InferenceInferenceEndpointInfo[];
-  pagination: Pagination;
-  sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
-}
-
+/**
+ * Hook that filters inference endpoints based on provider, type, and search criteria.
+ * Sorting and pagination are handled by EuiInMemoryTable.
+ */
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  queryParams: QueryParams,
   filterOptions: FilterOptions,
   searchKey: string
-): UseTableDataReturn => {
-  const tableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
+): InferenceInferenceEndpointInfo[] => {
+  return useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
 
+    // Filter by provider
     if (filterOptions.provider.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
         filterOptions.provider.includes(ServiceProviderKeys[endpoint.service])
       );
     }
 
+    // Filter by task type
     if (filterOptions.type.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
         filterOptions.type.includes(endpoint.task_type)
       );
     }
 
-    return filteredEndpoints.filter((endpoint) => {
+    // Filter by search key (matches inference_id or model_id)
+    if (searchKey) {
       const lowerSearchKey = searchKey.toLowerCase();
-      const inferenceIdMatch = endpoint.inference_id.toLowerCase().includes(lowerSearchKey);
-      const modelId = getModelId(endpoint);
-      const modelIdMatch = modelId ? modelId.toLowerCase().includes(lowerSearchKey) : false;
-      return inferenceIdMatch || modelIdMatch;
-    });
+      filteredEndpoints = filteredEndpoints.filter((endpoint) => {
+        const inferenceIdMatch = endpoint.inference_id.toLowerCase().includes(lowerSearchKey);
+        const modelId = getModelId(endpoint);
+        const modelIdMatch = modelId ? modelId.toLowerCase().includes(lowerSearchKey) : false;
+        return inferenceIdMatch || modelIdMatch;
+      });
+    }
+
+    return filteredEndpoints;
   }, [inferenceEndpoints, searchKey, filterOptions]);
-
-  const sortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
-    return [...tableData].sort((a, b) => {
-      const aValue = a[queryParams.sortField];
-      const bValue = b[queryParams.sortField];
-
-      if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.localeCompare(bValue);
-      } else {
-        return bValue.localeCompare(aValue);
-      }
-    });
-  }, [tableData, queryParams]);
-
-  const pagination: Pagination = useMemo(
-    () => ({
-      pageIndex: queryParams.page - 1,
-      pageSize: queryParams.perPage,
-      pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-      totalItemCount: tableData.length ?? 0,
-    }),
-    [tableData, queryParams]
-  );
-
-  const paginatedSortedTableData: InferenceInferenceEndpointInfo[] = useMemo(() => {
-    const pageSize = pagination.pageSize || DEFAULT_TABLE_LIMIT;
-    const startIndex = pagination.pageIndex * pageSize;
-    const endIndex = startIndex + pageSize;
-    return sortedTableData.slice(startIndex, endIndex);
-  }, [sortedTableData, pagination]);
-
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        direction: queryParams.sortOrder,
-        field: queryParams.sortField,
-      },
-    }),
-    [queryParams.sortField, queryParams.sortOrder]
-  );
-
-  return { tableData, sortedTableData, paginatedSortedTableData, pagination, sorting };
 };
