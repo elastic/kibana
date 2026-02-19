@@ -91,7 +91,7 @@ export const StepTabsRow = ({
         defaultMessage: 'Add downsampling step',
       })}
       size="xs"
-      color="primary"
+      color="text"
       data-test-subj={`${dataTestSubj}AddTabButton`}
       onClick={onAddStep}
       disabled={isAddDisabled}

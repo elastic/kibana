@@ -106,7 +106,7 @@ export const PhaseTabsRow = ({
                   defaultMessage: 'Add data phase',
                 })}
                 size="xs"
-                color="primary"
+                color="text"
                 data-test-subj={`${dataTestSubj}AddTabButton`}
               />
             );
