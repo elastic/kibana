@@ -5,48 +5,70 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { AttachmentHeader } from './attachment_header';
+import { useCanvasContext } from './canvas_context';
 
 interface CanvasModeFlyoutProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  isSidebar?: boolean;
-  actionButtons?: ActionButton[];
+  attachmentsService: AttachmentsService;
 }
 
 /**
  * Flyout component for displaying attachments in canvas mode (expanded view).
- * In full-screen context, renders at 50% screen width. In sidebar context, uses default flyout width.
+ * Consumes canvas state from context. In full-screen context, renders at 50% screen width.
+ * In sidebar context, uses default flyout width.
  */
-export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-  isSidebar,
-  actionButtons = [],
-}) => {
+export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  // Only apply custom width in full-screen context (not sidebar)
+  const { canvasState, closeCanvas } = useCanvasContext();
+
+  const updateOrigin = useCallback(async (originId: string) => {
+    // TODO: Implement updateOrigin
+  }, []);
+
+  const uiDefinition = canvasState
+    ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
+    : null;
+
+  const canvasHeaderActionButtons = useMemo(() => {
+    if (!canvasState || !uiDefinition?.getActionButtons) {
+      return [];
+    }
+    return (
+      uiDefinition.getActionButtons({
+        attachment: canvasState.attachment,
+        isSidebar: canvasState.isSidebar,
+        updateOrigin,
+        isCanvas: true,
+      }) ?? []
+    );
+  }, [canvasState, uiDefinition, updateOrigin]);
+
+  if (!canvasState || !uiDefinition?.renderCanvasContent) {
+    return null;
+  }
+
+  const { attachment, isSidebar } = canvasState;
+  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+
   const flyoutStyles = !isSidebar
     ? css`
         width: 50vw;
       `
     : undefined;
 
-  if (!isOpen) {
-    return null;
-  }
+  const flyoutBodyStyles = css`
+    &.euiFlyoutBody {
+      padding-top: ${euiTheme.size.m};
+    }
+  `;
 
   return (
     <EuiFlyout
-      onClose={onClose}
+      onClose={closeCanvas}
       aria-labelledby="canvasModeFlyoutTitle"
       ownFocus={false}
       outsideClickCloses={true}
@@ -57,18 +79,12 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
     >
       <AttachmentHeader
         title={title}
-        actionButtons={actionButtons}
-        onClose={onClose}
+        actionButtons={canvasHeaderActionButtons}
+        onClose={closeCanvas}
         showPreviewBadge
       />
-      <EuiFlyoutBody
-        css={css`
-          &.euiFlyoutBody {
-            padding-top: ${euiTheme.size.m};
-          }
-        `}
-      >
-        {children}
+      <EuiFlyoutBody css={flyoutBodyStyles}>
+        {uiDefinition.renderCanvasContent({ attachment, isSidebar })}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

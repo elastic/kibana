@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
-import { CanvasModeFlyout } from './canvas_mode_flyout';
 import { AttachmentHeader } from './attachment_header';
 import { InlineAttachmentContent } from './inline_attachment_content';
+import { useCanvasContext } from './canvas_context';
 
 interface AttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -29,15 +29,11 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   isSidebar,
   conversationId,
 }) => {
-  const [isCanvasFlyoutOpen, setIsCanvasFlyoutOpen] = useState(false);
+  const { openCanvas: openCanvasContext } = useCanvasContext();
 
   const openCanvas = useCallback(() => {
-    setIsCanvasFlyoutOpen(true);
-  }, []);
-
-  const closeCanvas = useCallback(() => {
-    setIsCanvasFlyoutOpen(false);
-  }, []);
+    openCanvasContext(attachment, isSidebar);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(async (originId: string) => {
     // TODO: Implement updateOrigin
@@ -58,18 +54,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
     [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
   );
 
-  const canvasHeaderActionButtons = useMemo(
-    () =>
-      uiDefinition?.getActionButtons?.({
-        attachment,
-        isSidebar,
-        updateOrigin,
-        openCanvas,
-        isCanvas: true,
-      }),
-    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
-  );
-
   if (!uiDefinition) {
     return null;
   }
@@ -77,24 +61,11 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
 
   return (
-    <>
-      <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
-        <AttachmentHeader title={title} actionButtons={inlineActionButtons} />
-        <InlineAttachmentContent>
-          {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
-        </InlineAttachmentContent>
-      </EuiSplitPanel.Outer>
-      {isCanvasFlyoutOpen && uiDefinition?.renderCanvasContent && (
-        <CanvasModeFlyout
-          isOpen={isCanvasFlyoutOpen}
-          onClose={closeCanvas}
-          title={title}
-          isSidebar={isSidebar}
-          actionButtons={canvasHeaderActionButtons}
-        >
-          {uiDefinition.renderCanvasContent({ attachment, isSidebar })}
-        </CanvasModeFlyout>
-      )}
-    </>
+    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+      <AttachmentHeader title={title} actionButtons={inlineActionButtons} />
+      <InlineAttachmentContent>
+        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+      </InlineAttachmentContent>
+    </EuiSplitPanel.Outer>
   );
 };
