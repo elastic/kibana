@@ -10,7 +10,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SuggestionStatusColumn } from './suggestion_status_column';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import {
+  useStreamsAppRouter,
+  type StatefulStreamsAppRouter,
+} from '../../hooks/use_streams_app_router';
 
 jest.mock('../../hooks/use_streams_app_router');
 
@@ -24,7 +27,7 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('SuggestionStatusColumn', () => {
-  const mockRouterLink = jest.fn((path: string, params: any) => {
+  const mockRouterLink = jest.fn((path: string, params: { path: { key: string; tab: string } }) => {
     const { key, tab } = params.path;
     return `/app/streams/${key}/management/${tab}`;
   });
@@ -34,7 +37,7 @@ describe('SuggestionStatusColumn', () => {
 
     mockUseStreamsAppRouter.mockReturnValue({
       link: mockRouterLink,
-    } as any);
+    } as unknown as StatefulStreamsAppRouter);
   });
 
   describe('Loading State', () => {

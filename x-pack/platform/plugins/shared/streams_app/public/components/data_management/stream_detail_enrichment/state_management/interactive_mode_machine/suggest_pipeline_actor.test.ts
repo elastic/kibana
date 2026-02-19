@@ -9,6 +9,7 @@ import { createActor, fromPromise, type AnyActorRef } from 'xstate';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import type { SimulationActorRef } from '../simulation_state_machine';
 import type { InteractiveModeParentRef } from './types';
 import { interactiveModeMachine } from './interactive_mode_machine';
 import type {
@@ -49,7 +50,8 @@ const createParentRef = (): InteractiveModeParentRef => {
     getSnapshot: () => ({
       context: {
         // Not used by the pipeline suggestion tests, but required by the machine.
-        simulatorRef: { getSnapshot: () => ({ context: {} }) } as any,
+        // Use a minimal mock cast via unknown to satisfy the type without pulling in full xstate deps
+        simulatorRef: { getSnapshot: () => ({ context: {} }) } as unknown as SimulationActorRef,
         dataSourcesRefs: [],
         schemaErrors: [],
         validationErrors: new Map(),
