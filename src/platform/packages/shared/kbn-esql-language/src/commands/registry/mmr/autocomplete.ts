@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap } from '../../../ast/is';
-import type { ESQLAstAllCommands, ESQLAstMmrCommand } from '../../../types';
+import { isMap, isOptionNode } from '../../../ast/is';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstMmrCommand,
+  ESQLCommandOption,
+  ESQLSingleAstItem,
+} from '../../../types';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
@@ -106,16 +111,21 @@ const lambdaMapSuggestion: ISuggestionItem = {
   sortText: '1',
 };
 
-function getPosition(
-  innerText: string,
-  command: ESQLAstMmrCommand,
-  cursorPosition: number
-): MmrPosition {
-  const commandText = innerText.substring(command.location.min, cursorPosition).toLowerCase();
+function getPosition(command: ESQLAstMmrCommand): MmrPosition {
+  const onOption = command.args.find(
+    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'on'
+  ) as ESQLCommandOption;
+  const limitOption = command.args.find(
+    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'limit'
+  ) as ESQLCommandOption;
+  const withOption = command.args.find(
+    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'with'
+  ) as ESQLCommandOption;
 
-  const map = isMap(command.namedParameters) ? command.namedParameters : undefined;
-  if (map) {
-    if (map.incomplete && !map.text) {
+  if (withOption) {
+    const map = isMap(withOption.args[0]) ? withOption.args[0] : undefined;
+
+    if (!map || (map.incomplete && !map.text)) {
       return MmrPosition.AFTER_WITH_KEYWORD;
     }
 
@@ -126,31 +136,26 @@ function getPosition(
     return MmrPosition.AFTER_COMMAND;
   }
 
-  if (/\bwith\s*$/i.test(commandText)) {
-    return MmrPosition.AFTER_WITH_KEYWORD;
-  }
-
-  if (/\bwith\s*\{[^}]*$/i.test(commandText)) {
-    return MmrPosition.WITHIN_OPTIONS;
-  }
-
-  if (command.limit?.incomplete || /\blimit\s*$/i.test(commandText)) {
-    return MmrPosition.AFTER_LIMIT_KEYWORD;
-  }
-
-  if (command.limit && !command.limit.incomplete) {
+  if (limitOption) {
+    const limitValue = limitOption.args[0];
+    if (!limitValue || (limitValue as ESQLSingleAstItem).incomplete) {
+      return MmrPosition.AFTER_LIMIT_KEYWORD;
+    }
     return MmrPosition.AFTER_LIMIT_VALUE;
   }
 
-  if (/\bon\s*$/i.test(commandText) || command.diversifyField?.incomplete) {
-    return MmrPosition.AFTER_ON_KEYWORD;
-  }
-
-  if (command.diversifyField && !command.diversifyField.incomplete) {
+  if (onOption) {
+    const onField = onOption.args[0];
+    if (!onField || (onField as ESQLSingleAstItem).incomplete) {
+      return MmrPosition.AFTER_ON_KEYWORD;
+    }
     return MmrPosition.AFTER_FIELD;
   }
 
-  if (command.queryVector && !command.queryVector.incomplete) {
+  if (command.queryVector) {
+    if ((command.queryVector as ESQLSingleAstItem).incomplete) {
+      return MmrPosition.AFTER_MMR_KEYWORD;
+    }
     return MmrPosition.AFTER_QUERY_VECTOR;
   }
 
@@ -166,7 +171,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const mmrCommand = command as ESQLAstMmrCommand;
-  const position = getPosition(innerText, mmrCommand, cursorPosition);
+  const position = getPosition(mmrCommand);
 
   switch (position) {
     case MmrPosition.AFTER_MMR_KEYWORD:
