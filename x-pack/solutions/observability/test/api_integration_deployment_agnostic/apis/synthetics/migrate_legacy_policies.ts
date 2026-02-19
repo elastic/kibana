@@ -298,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await monitorTestService.deleteMonitor(editorUser, monitorId);
       });
 
-      it('should keep one legacy policy if new format does not exist', async () => {
+      it('should migrate legacy policies to new format when cleanup runs', async () => {
         const monitorId = uuidv4();
 
         await createMonitor(monitorId, 'test-monitor');
@@ -314,6 +314,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .send({ packagePolicyIds: [newFormatPolicyId], force: true })
           .expect(200);
 
+        await waitForSyncTaskIdle();
+
         const legacyPolicy1 = await createLegacyPackagePolicy(monitorId, 'default');
         const legacyPolicy2 = await createLegacyPackagePolicy(monitorId, 'space-2');
 
@@ -327,10 +329,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await retry.try(async () => {
           policies = await getPackagePolicies();
-          const legacyPoliciesRemaining = [legacyPolicy1, legacyPolicy2].filter((id) =>
-            policies.some((p) => p.id === id)
-          );
-          expect(legacyPoliciesRemaining.length).to.eql(1);
+          expect(policies.some((p) => p.id === newFormatPolicyId)).to.be(true);
+          expect(policies.some((p) => p.id === legacyPolicy1)).to.be(false);
+          expect(policies.some((p) => p.id === legacyPolicy2)).to.be(false);
         });
 
         await monitorTestService.deleteMonitor(editorUser, monitorId);
