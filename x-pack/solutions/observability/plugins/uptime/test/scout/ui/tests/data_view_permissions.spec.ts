@@ -16,14 +16,10 @@ const queryParams = new URLSearchParams({
 
 test.describe('DataViewPermissions', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
-    try {
-      await kbnClient.savedObjects.delete({
-        type: 'index-pattern',
-        id: 'synthetics_static_index_pattern_id_heartbeat_',
-      });
-    } catch (e) {
-      console.error('Failed to delete data view', e);
-    }
+    await kbnClient.savedObjects.delete({
+      type: 'index-pattern',
+      id: 'synthetics_static_index_pattern_id_heartbeat_',
+    });
   });
 
   test('renders exploratory view for viewer user', async ({ pageObjects, browserAuth, page }) => {
