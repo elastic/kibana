@@ -51,7 +51,7 @@ export const createDataControlPanelAction = (): ActionDefinition<
 
     openDataControlEditor({
       initialState: {
-        dataViewId: parentDataViewId,
+        data_view_id: parentDataViewId,
       },
       parentApi: embeddable,
       isPinned,
@@ -77,7 +77,7 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
 ) => {
   if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
-  const { dataViewId, fieldName } = state;
+  const { data_view_id: dataViewId, field_name: fieldName } = state;
   if (!dataViewId || !fieldName) {
     // this shouldn't happen due to constraints in the editor UI - however, if it does, throw an error
     throw new Error(

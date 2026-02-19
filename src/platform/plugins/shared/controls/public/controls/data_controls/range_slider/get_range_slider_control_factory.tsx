@@ -187,7 +187,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           if (!dataView) return;
 
           const newFilter = buildFilter(dataView, uuid, {
-            fieldName,
+            field_name: fieldName,
             value,
             sectionId,
           });
