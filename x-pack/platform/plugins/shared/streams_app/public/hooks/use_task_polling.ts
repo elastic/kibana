@@ -78,8 +78,8 @@ export function useTaskPolling({
             if (isMounted) {
               scheduleNextPoll();
             }
-            return;
           }
+          return;
         }
 
         scheduleNextPoll();
