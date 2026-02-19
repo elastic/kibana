@@ -74,7 +74,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
       variant: _variant,
       iconOnly: _iconOnly,
       children,
-      css: buttonEmptyCss,
+      css: userCss,
       iconType,
       ...rest
     } = props;
@@ -86,7 +86,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
           {...rest}
           iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
           iconType={iconType ? resolvedIconType(iconType) : undefined}
-          css={[buttonCss, iconGradientCss, buttonEmptyCss]}
+          css={[buttonCss, iconGradientCss, userCss]}
         >
           <span css={labelCss}>{children}</span>
         </EuiButtonEmpty>
@@ -99,7 +99,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
     variant: _variant,
     iconOnly: _iconOnly,
     children,
-    css: buttonUserCss,
+    css: userCss,
     iconType,
     ...rest
   } = props as EuiButtonBranchProps;
@@ -111,7 +111,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
         {...rest}
         iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
         iconType={iconType ? resolvedIconType(iconType) : undefined}
-        css={[buttonCss, iconGradientCss, buttonUserCss]}
+        css={[buttonCss, iconGradientCss, userCss]}
         fill={variant === 'accent'}
       >
         <span css={labelCss}>{children}</span>
