@@ -16,7 +16,7 @@ export type IncompatibleAgentVersionResult =
   | { status: 'NONE' }
   | { status: 'SOME' | 'ALL'; versionCondition: string };
 
-export const useHasIncompatibleAgentVersion = (
+export const useIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined
 ): IncompatibleAgentVersionResult => {

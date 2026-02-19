@@ -71,7 +71,7 @@ import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
-import { useHasIncompatibleAgentVersion } from '../../../hooks/use_has_incompatible_agent_version';
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -218,7 +218,7 @@ export const EditPackagePolicyForm = memo<{
       agentPolicies.find((policy) => policy.id === existingPolicy.id)
     );
   }, [agentPolicies, existingAgentPolicies]);
-  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
     selectedExistingPolicies
   );

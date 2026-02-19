@@ -24,7 +24,7 @@ import { Error } from '../../../../../components';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
-import { useHasIncompatibleAgentVersion } from '../../../../../hooks/use_has_incompatible_agent_version';
+import { useIncompatibleAgentVersionStatus } from '../../../../../hooks/use_incompatible_agent_version_status';
 import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
@@ -172,7 +172,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     (policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id)
   );
 
-  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
     newlySelectedAgentPolicies
   );

@@ -52,7 +52,7 @@ import {
   useAuthz,
   useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
-import { useHasIncompatibleAgentVersion } from '../../../../hooks/use_has_incompatible_agent_version';
+import { useIncompatibleAgentVersionStatus } from '../../../../hooks/use_incompatible_agent_version_status';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
@@ -323,7 +323,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
 
-  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
     agentPolicyData?.items
   );

@@ -8,7 +8,7 @@
 import type { AgentPolicy } from '../types';
 import type { PackageInfo } from '../../../../common/types';
 
-import { getIncompatibleAgentVersionStatus } from './use_has_incompatible_agent_version';
+import { getIncompatibleAgentVersionStatus } from './use_incompatible_agent_version_status';
 
 const createAgentPolicy = (
   versions: Array<{ version: string; count: number }> | undefined
