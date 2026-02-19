@@ -14,16 +14,23 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { resetIndexUrlParams } from './reset_index_url_params';
 import type { IndexDetailsTabId } from '../../../../../../common/constants';
-import { IndexDetailsSection, Section } from '../../../../../../common/constants';
+import {
+  IndexDetailsSection,
+  PLATFORM_INDEX_MGMT_V2,
+  Section,
+} from '../../../../../../common/constants';
 import type { Index } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
+import { useAppContext } from '../../../../app_context';
 import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';
+import { DetailsPageContentV2 } from './details_page_content_v2';
 
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
 > = ({ location: { search }, history }) => {
+  const { settings } = useAppContext();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
   const tab: IndexDetailsTabId = queryParams.get('tab') ?? IndexDetailsSection.Overview;
@@ -31,6 +38,8 @@ export const DetailsPage: FunctionComponent<
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
+
+  const isNewDesignEnabled = settings.client.get<boolean>(PLATFORM_INDEX_MGMT_V2, false);
 
   const navigateToIndicesList = useCallback(() => {
     const paramsString = resetIndexUrlParams(search);
@@ -99,6 +108,18 @@ export const DetailsPage: FunctionComponent<
       <DetailsPageError
         indexName={indexName}
         resendRequest={fetchIndexDetails}
+        navigateToIndicesList={navigateToIndicesList}
+      />
+    );
+  }
+  if (isNewDesignEnabled) {
+    return (
+      <DetailsPageContentV2
+        index={index}
+        tab={tab}
+        fetchIndexDetails={fetchIndexDetails}
+        history={history}
+        search={search}
         navigateToIndicesList={navigateToIndicesList}
       />
     );
