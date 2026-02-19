@@ -959,6 +959,9 @@ Object {
         "contextWindowLength": Object {
           "type": "number",
         },
+        "defaultModel": Object {
+          "type": "string",
+        },
         "headers": Object {
           "additionalProperties": Object {
             "type": "string",
@@ -1056,6 +1059,7 @@ Object {
           "type": "number",
         },
         "verificationMode": Object {
+          "default": "full",
           "enum": Array [
             "full",
             "certificate",

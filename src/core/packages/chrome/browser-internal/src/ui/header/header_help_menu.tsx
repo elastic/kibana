@@ -60,12 +60,6 @@ const buildDefaultContentLinks = ({
     href: helpSupportUrl,
   },
   {
-    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
-      defaultMessage: 'Give feedback',
-    }),
-    href: docLinks.links.kibana.feedback,
-  },
-  {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
       defaultMessage: 'Open an issue in GitHub',
     }),
@@ -156,7 +150,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="question" size="m" />
+        <EuiIcon type="question" size="m" aria-hidden={true} />
       </EuiHeaderSectionItemButton>
     );
 
@@ -274,12 +268,6 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
     const { navigateToUrl } = this.props;
     const { appName, links, content } = helpExtension;
 
-    const getFeedbackText = () =>
-      i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackOnApp', {
-        defaultMessage: 'Give feedback on {appName}',
-        values: { appName: helpExtension.appName },
-      });
-
     const customLinks =
       links &&
       links.map((link, index) => {
@@ -300,25 +288,6 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
                 ...rest,
               }
             );
-          }
-          case 'github': {
-            const { linkType, labels, title, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), addSpacer, {
-              iconType: 'logoGithub',
-              href: createGithubUrl(labels, title),
-              target: '_blank',
-              rel: 'noopener',
-              ...rest,
-            });
-          }
-          case 'discuss': {
-            const { linkType, ...rest } = link;
-            return createCustomLink(index, getFeedbackText(), addSpacer, {
-              iconType: 'editorComment',
-              target: '_blank',
-              rel: 'noopener',
-              ...rest,
-            });
           }
           case 'custom': {
             const { linkType, content: text, href, external, ...rest } = link;
@@ -373,20 +342,6 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
     };
   }
 }
-
-const createGithubUrl = (labels: string[], title?: string) => {
-  const url = new URL('https://github.com/elastic/kibana/issues/new?');
-
-  if (labels.length) {
-    url.searchParams.set('labels', labels.join(','));
-  }
-
-  if (title) {
-    url.searchParams.set('title', title);
-  }
-
-  return url.toString();
-};
 
 const createCustomLink = (
   index: number,

@@ -24,6 +24,7 @@ export const ConfigSchema = z.discriminatedUnion(
       .object({
         apiProvider: z.enum([OpenAiProviderType.AzureAi]),
         apiUrl: z.string(),
+        defaultModel: z.string().optional(),
         headers: z.record(z.string(), z.string()).optional(),
         contextWindowLength: z.coerce.number().optional(),
         temperature: z.coerce.number().optional(),
@@ -46,7 +47,7 @@ export const ConfigSchema = z.discriminatedUnion(
         apiProvider: z.enum([OpenAiProviderType.Other]),
         apiUrl: z.string(),
         defaultModel: z.string(),
-        verificationMode: z.enum(['full', 'certificate', 'none']).optional(),
+        verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
         headers: z.record(z.string(), z.string()).optional(),
         contextWindowLength: z.coerce.number().optional(),
         temperature: z.coerce.number().optional(),

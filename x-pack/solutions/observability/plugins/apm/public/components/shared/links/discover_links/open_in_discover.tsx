@@ -33,6 +33,7 @@ interface OpenInDiscoverProps {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
+  label?: string;
 }
 
 export function OpenInDiscover({
@@ -42,6 +43,7 @@ export function OpenInDiscover({
   rangeFrom,
   rangeTo,
   queryParams,
+  label = OPEN_IN_DISCOVER_LABEL,
 }: OpenInDiscoverProps) {
   const { share } = useApmPluginContext();
   const { indexSettings, indexSettingsStatus } = useApmServiceContext();
@@ -68,13 +70,13 @@ export function OpenInDiscover({
     return (
       <EuiButtonEmpty
         data-test-subj={dataTestSubj}
-        aria-label={OPEN_IN_DISCOVER_LABEL}
+        aria-label={label}
         isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
         isDisabled={isDisabled}
         iconType="discoverApp"
         href={discoverHref}
       >
-        {OPEN_IN_DISCOVER_LABEL}
+        {label}
       </EuiButtonEmpty>
     );
   }
@@ -85,7 +87,7 @@ export function OpenInDiscover({
       css={linkStyle}
       {...(isDisabled ? { disabled: true, color: 'subdued' } : { href: discoverHref })}
     >
-      {OPEN_IN_DISCOVER_LABEL}
+      {label}
     </EuiLink>
   );
 }

@@ -51,7 +51,8 @@ export async function determineOtelFieldNameUsage(
  */
 export async function callInferenceWithPrompt<
   TPrompt extends Prompt<
-    { sample_messages: string[]; review_fields: string },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
     Array<Omit<PromptVersion, 'toolChoice'> & { toolChoice: CustomToolChoice }>
   >
 >(

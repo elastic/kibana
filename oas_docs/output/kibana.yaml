@@ -1222,6 +1222,15 @@ paths:
       summary: Get A2A agent card
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/a2a/{agentId}.json" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/a2a/{agentId}.json
       x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1279,6 +1288,15 @@ paths:
       summary: List agents
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/agents" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1357,6 +1375,12 @@ paths:
                         required:
                           - tool_ids
                       type: array
+                    workflow_ids:
+                      items:
+                        description: Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.
+                        type: string
+                      maxItems: 100
+                      type: array
                   required:
                     - tools
                 description:
@@ -1408,6 +1432,59 @@ paths:
       summary: Create an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/agents" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "new-agent-id",
+                "name": "Search Index Helper",
+                "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+                "labels": ["custom-indices", "department-search"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [
+                    {
+                      "tool_ids": [
+                        "platform.core.search",
+                        "platform.core.list_indices",
+                        "platform.core.get_index_mapping",
+                        "platform.core.get_document_by_id"
+                      ]
+                    }
+                  ]
+                }
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/agents
+            {
+              "id": "new-agent-id",
+              "name": "Search Index Helper",
+              "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+              "labels": ["custom-indices", "department-search"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [
+                  {
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }
+                ]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1450,6 +1527,16 @@ paths:
       summary: Delete an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1500,6 +1587,15 @@ paths:
       summary: Get an agent by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents/{id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1585,6 +1681,12 @@ paths:
                         required:
                           - tool_ids
                       type: array
+                    workflow_ids:
+                      items:
+                        description: Updated list of workflow IDs. When set, these workflows run every agent execution, in order.
+                        type: string
+                      maxItems: 100
+                      type: array
                 description:
                   description: Updated description of what the agent does.
                   type: string
@@ -1627,6 +1729,53 @@ paths:
       summary: Update an agent
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Search Index Helper",
+                "description": "Updated description - Search for anything in \"content-*\" indices!",
+                "labels": ["custom-indices", "department-search", "elastic-employees"],
+                "avatar_color": "#BFDBFF",
+                "avatar_symbol": "SI",
+                "configuration": {
+                  "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                  "tools": [{
+                    "tool_ids": [
+                      "platform.core.search",
+                      "platform.core.list_indices",
+                      "platform.core.get_index_mapping",
+                      "platform.core.get_document_by_id"
+                    ]
+                  }]
+                }
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/agents/{id}
+            {
+              "name": "Search Index Helper",
+              "description": "Updated description - Search for anything in \"content-*\" indices!",
+              "labels": ["custom-indices", "department-search", "elastic-employees"],
+              "avatar_color": "#BFDBFF",
+              "avatar_symbol": "SI",
+              "configuration": {
+                "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+                "tools": [{
+                  "tool_ids": [
+                    "platform.core.search",
+                    "platform.core.list_indices",
+                    "platform.core.get_index_mapping",
+                    "platform.core.get_document_by_id"
+                  ]
+                }]
+              }
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1669,6 +1818,15 @@ paths:
       summary: List conversations
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1711,6 +1869,16 @@ paths:
       summary: Delete conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -1761,6 +1929,15 @@ paths:
       summary: Get conversation by ID
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations/{conversation_id}
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2390,6 +2567,24 @@ paths:
       summary: Send chat message
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"}'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse
+            {
+              "input": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -2754,6 +2949,27 @@ paths:
       summary: Send chat message (streaming)
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/converse/async" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "input": "Hello again let us have an async chat",
+                "agent_id": "elastic-ai-agent",
+                "conversation_id": "<CONVERSATION_ID>"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/converse/async
+            {
+              "input": "Hello again let's have an async chat",
+              "agent_id": "elastic-ai-agent",
+              "conversation_id": "<CONVERSATION_ID>"
+            }
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
@@ -3453,6 +3669,13 @@ paths:
           required: true
           schema:
             type: string
+        - description: If true, removes the tool from agents that use it and then deletes it. If false and any agent uses the tool, the request returns 409 Conflict with the list of agents.
+          in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -12320,7 +12543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete cases
       tags:
@@ -12377,7 +12600,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update cases
       tags:
@@ -12420,7 +12643,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Create a case
       tags:
@@ -12488,7 +12711,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Search cases
       tags:
@@ -12526,7 +12749,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case information
       tags:
@@ -12563,7 +12786,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get all alerts for a case
       tags:
@@ -12593,7 +12816,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete all case comments and alerts
       tags:
@@ -12637,7 +12860,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update a case comment or alert
       tags:
@@ -12681,7 +12904,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add a case comment or alert
       tags:
@@ -12716,7 +12939,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case comments and alerts
       tags:
@@ -12746,7 +12969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete a case comment or alert
       tags:
@@ -12783,7 +13006,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get a case comment or alert
       tags:
@@ -12826,7 +13049,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Push a case to an external service
       tags:
@@ -12870,7 +13093,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Attach a file to a case
       tags:
@@ -12921,7 +13144,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case activity
       tags:
@@ -12967,7 +13190,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get cases for an alert
       tags:
@@ -13140,7 +13363,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case settings
       tags:
@@ -13317,7 +13540,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add case settings
       tags:
@@ -13496,7 +13719,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update case settings
       tags:
@@ -13555,7 +13778,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case connectors
       tags:
@@ -13607,7 +13830,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case creators
       tags:
@@ -13645,7 +13868,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
       tags:
@@ -32200,6 +32423,8 @@ paths:
                           properties:
                             id:
                               type: string
+                            type:
+                              type: string
                             version:
                               type: string
                           required:
@@ -32207,6 +32432,11 @@ paths:
                             - version
                         audit_unenrolled_reason:
                           type: string
+                        capabilities:
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
                         components:
                           items:
                             additionalProperties: false
@@ -32289,10 +32519,18 @@ paths:
                           type: array
                         default_api_key_id:
                           type: string
+                        effective_config: {}
                         enrolled_at:
                           type: string
+                        health:
+                          additionalProperties: {}
+                          type: object
                         id:
                           type: string
+                        identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         last_checkin:
                           type: string
                         last_checkin_message:
@@ -32335,6 +32573,10 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        non_identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         outputs:
                           additionalProperties:
                             additionalProperties: false
@@ -32369,6 +32611,8 @@ paths:
                         policy_revision:
                           nullable: true
                           type: number
+                        sequence_num:
+                          type: number
                         sort:
                           items: {}
                           maxItems: 10
@@ -32397,6 +32641,7 @@ paths:
                             - PERMANENT
                             - EPHEMERAL
                             - TEMPORARY
+                            - OPAMP
                           type: string
                         unenrolled_at:
                           type: string
@@ -32507,6 +32752,7 @@ paths:
                         - active
                         - enrolled_at
                         - local_metadata
+                        - effective_config
                     maxItems: 10000
                     type: array
                   nextSearchAfter:
@@ -32743,6 +32989,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -32750,6 +32998,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -32832,10 +33085,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -32878,6 +33139,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -32912,6 +33177,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -32940,6 +33207,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -33050,6 +33318,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -33142,6 +33411,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -33149,6 +33420,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -33231,10 +33507,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -33277,6 +33561,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -33311,6 +33599,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -33339,6 +33629,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -33449,6 +33740,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -33630,6 +33922,71 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agents/{agentId}/effective_config:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/effective_config</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agent's effective config by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+      operationId: get-fleet-agents-agentid-effective-config
+      parameters:
+        - description: The agent ID to get effective config of
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    effective_config: {}
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  effective_config: {}
+                required:
+                  - effective_config
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get an agent's effective config
+      tags:
+        - Elastic Agents
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -74336,18 +74693,6 @@ components:
             body:
               type: string
         - $ref: '#/components/schemas/APM_UI_base_source_map_object'
-    Cases_4xx_response:
-      properties:
-        error:
-          example: Unauthorized
-          type: string
-        message:
-          type: string
-        statusCode:
-          example: 401
-          type: integer
-      title: Unsuccessful cases API response
-      type: object
     Cases_actions:
       enum:
         - add
@@ -74858,7 +75203,6 @@ components:
       title: Case response properties for updated_by
       type: object
     Cases_case_severity:
-      default: low
       description: The severity of the case.
       enum:
         - critical
@@ -75569,6 +75913,18 @@ components:
               enum:
                 - user
               type: string
+    Cases_response_4xx:
+      properties:
+        error:
+          example: Unauthorized
+          type: string
+        message:
+          type: string
+        statusCode:
+          example: 401
+          type: integer
+      title: Unsuccessful cases API response
+      type: object
     Cases_rule:
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -96458,6 +96814,10 @@ components:
         apiUrl:
           type: string
           description: The Amazon Bedrock request URL.
+        region:
+          type: string
+          description: |
+            Optional AWS region for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-west-1`).
         defaultModel:
           type: string
           description: |

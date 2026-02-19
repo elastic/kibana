@@ -15,8 +15,6 @@ import type {
   StringWithoutSlash,
   StringWithoutSpace,
 } from './type_utils';
-import type { AgentBuilderBuiltinTool } from '../allow_lists';
-
 /**
  * Skill directory structure - explicit about how skills are organized.
  *
@@ -34,6 +32,7 @@ export type SkillsDirectoryStructure = Directory<{
         rules: FileDirectory;
       }>;
       entities: FileDirectory<{}>;
+      endpoint: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -89,14 +88,15 @@ export interface SkillDefinition<
    */
   referencedContent?: ReferencedContent[];
   /**
-   * should return the list of tools from the registry which should be exposed to the agent
+   * Returns the list of tool IDs from the registry which should be exposed to the agent
    * when this skill is used in the conversation.
    *
-   * Should be used to expose generic tools related to the skill.
+   * Accepts both statically-known builtin tool IDs and arbitrary tool IDs
+   * created at runtime (e.g. tools registered when a data source instance is connected).
    *
    * E.g. the "case_triage" skill type exposes the "platform.core.cases" tool that way.
    */
-  getAllowedTools?: () => AgentBuilderBuiltinTool[];
+  getRegistryTools?: () => MaybePromise<string[]>;
 
   /**
    * Can be used to expose tools which are specific to the skill.
@@ -186,12 +186,10 @@ export async function validateSkillDefinition<TName extends string, TPath extend
   definition: SkillDefinition<TName, TPath>
 ): Promise<SkillDefinition<TName, TPath>> {
   skillDefinitionSchema.parse(definition);
-  const allowedTools = definition.getAllowedTools?.();
   const inlineTools = await definition.getInlineTools?.();
-  const totalToolCount = (allowedTools?.length ?? 0) + (inlineTools?.length ?? 0);
-  if (totalToolCount > 7) {
+  if ((inlineTools?.length ?? 0) > 7) {
     throw new Error(
-      'Max tool limit exceeded: a skill may define up to 7 tools. ' +
+      'Max inline tool limit exceeded: a skill may define up to 7 inline tools. ' +
         'Split the skill into smaller ones or combine related operations into a single tool.'
     );
   }
