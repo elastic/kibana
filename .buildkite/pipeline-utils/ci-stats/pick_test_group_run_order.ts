@@ -417,6 +417,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
         names: jestUnitConfigs,
       },
       {
@@ -424,6 +425,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 2,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -433,6 +435,7 @@ export async function pickTestGroupRunOrder() {
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],
