@@ -51,6 +51,12 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   icon?: React.ComponentType;
 
   /**
+   * KQL condition pre-filled in the trigger's `with.condition` when the user adds this
+   * trigger from the UI (actions menu or YAML autocomplete).
+   */
+  defaultCondition?: string;
+
+  /**
    * Example conditions for the `with` block.
    * Each condition must be valid KQL and only reference properties from the event schema (see validateKqlAgainstSchema).
    * Shown in the YAML editor hover to help users filter when the workflow runs.

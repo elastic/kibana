@@ -19,6 +19,8 @@ interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
   withTriggersSection?: boolean;
+  /** Default KQL condition for custom triggers (used when inserting trigger from UI). */
+  defaultCondition?: string;
 }
 
 /**
@@ -32,7 +34,12 @@ interface GenerateTriggerSnippetOptions {
  */
 export function generateTriggerSnippet(
   triggerType: string,
-  { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
+  {
+    full,
+    monacoSuggestionFormat,
+    withTriggersSection,
+    defaultCondition,
+  }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -73,9 +80,9 @@ export function generateTriggerSnippet(
       break;
 
     default:
-      // Custom triggers: include with/condition so users can add a KQL filter
+      // Custom triggers: include with/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
-        with: { condition: '' },
+        with: { condition: defaultCondition ?? '' },
       };
       break;
   }

@@ -24,6 +24,7 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition = {
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
   ),
+  defaultCondition: 'event.source:ui and event.message:*important*',
   conditionExamples: [
     {
       title: i18n.translate(

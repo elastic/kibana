@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  conditionExamplesSchema,
-  validateConditionExamples,
-} from './condition_examples_schema';
+import { conditionExamplesSchema, validateKqlConditions } from './condition_examples_schema';
 import type { PublicTriggerDefinition } from './types';
 
 /**
@@ -22,9 +19,9 @@ export class PublicTriggerRegistry {
 
   /**
    * Register a trigger definition.
-   * Validates conditionExamples shape and KQL (valid KQL, only event schema properties).
+   * Validates conditionExamples shape and KQL, and defaultCondition if present (valid KQL, only event schema properties).
    * @param definition - The public trigger definition to register
-   * @throws Error if a trigger with the same ID is already registered, or if any conditionExample.condition is invalid
+   * @throws Error if a trigger with the same ID is already registered, or if any conditionExample.condition or defaultCondition is invalid
    */
   public register(definition: PublicTriggerDefinition): void {
     const id = String(definition.id);
@@ -41,13 +38,24 @@ export class PublicTriggerRegistry {
           `Trigger "${id}" has invalid conditionExamples: ${message}. The trigger was not registered.`
         );
       }
-      const validation = validateConditionExamples(
-        definition.conditionExamples,
+      const validation = validateKqlConditions(
+        parseResult.data.map((ex) => ex.condition),
         definition.eventSchema
       );
       if (!validation.valid) {
         throw new Error(
           `Trigger "${id}" has invalid conditionExamples: ${validation.error}. The trigger was not registered.`
+        );
+      }
+    }
+    if (definition.defaultCondition !== undefined && definition.defaultCondition !== '') {
+      const validation = validateKqlConditions(
+        [definition.defaultCondition],
+        definition.eventSchema
+      );
+      if (!validation.valid) {
+        throw new Error(
+          `Trigger "${id}" has invalid defaultCondition: ${validation.error}. The trigger was not registered.`
         );
       }
     }
