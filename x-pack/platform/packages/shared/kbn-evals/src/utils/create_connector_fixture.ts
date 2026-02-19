@@ -19,6 +19,18 @@ export function getConnectorIdAsUuid(connectorId: string) {
   return v5(connectorId, v5.DNS);
 }
 
+/**
+ * Returns the connector id to use at runtime.
+ * When `KBN_EVALS_SKIP_CONNECTOR_SETUP` is set, the original id is returned as-is
+ * (preconfigured connectors don't need UUID mapping).
+ * Otherwise, a deterministic UUID is generated.
+ */
+export function resolveConnectorId(connectorId: string): string {
+  return process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP
+    ? connectorId
+    : getConnectorIdAsUuid(connectorId);
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -30,6 +42,14 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: AvailableConnectorWithId) => Promise<void>;
 }) {
+  if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {
+    log.info(
+      `Skipping connector setup/teardown for: ${predefinedConnector.id} (KBN_EVALS_SKIP_CONNECTOR_SETUP is set)`
+    );
+    await use(predefinedConnector);
+    return;
+  }
+
   // When running locally, the connectors we read from kibana.yml
   // are not configured in the kibana instance, so we install the
   // one for this test run. only UUIDs are allowed for non-preconfigured

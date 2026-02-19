@@ -28,6 +28,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         additionalIndexPattern: {
           type: 'keyword',
         },
+        additionalIndexPatterns: {
+          type: 'keyword',
+        },
         fieldHistoryLength: {
           type: 'integer',
         },
@@ -48,6 +51,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         },
         paginationTimestamp: {
           type: 'date',
+        },
+        paginationId: {
+          type: 'keyword',
         },
         lastExecutionTimestamp: {
           type: 'date',
@@ -80,7 +86,20 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-const engineDescriptorAttributesSchema = {
+const logExtractionStateSchemaV1 = schema.object({
+  filter: schema.string(),
+  additionalIndexPattern: schema.string(),
+  fieldHistoryLength: schema.number(),
+  lookbackPeriod: schema.string(),
+  delay: schema.string(),
+  docsLimit: schema.number(),
+  timeout: schema.string(),
+  frequency: schema.string(),
+  paginationTimestamp: schema.maybe(schema.string()),
+  lastExecutionTimestamp: schema.maybe(schema.string()),
+});
+
+const engineDescriptorAttributesSchemaV1 = {
   type: schema.oneOf([
     schema.literal('user'),
     schema.literal('host'),
@@ -94,18 +113,7 @@ const engineDescriptorAttributesSchema = {
     schema.literal('updating'),
     schema.literal('error'),
   ]),
-  logExtractionState: schema.object({
-    filter: schema.string(),
-    additionalIndexPattern: schema.string(),
-    fieldHistoryLength: schema.number(),
-    lookbackPeriod: schema.string(),
-    delay: schema.string(),
-    docsLimit: schema.number(),
-    timeout: schema.string(),
-    frequency: schema.string(),
-    paginationTimestamp: schema.maybe(schema.string()),
-    lastExecutionTimestamp: schema.maybe(schema.string()),
-  }),
+  logExtractionState: logExtractionStateSchemaV1,
   error: schema.maybe(
     schema.object({
       message: schema.string(),
@@ -119,13 +127,70 @@ const engineDescriptorAttributesSchema = {
   }),
 };
 
+const engineDescriptorSchemaV1 = schema.object(engineDescriptorAttributesSchemaV1);
+
+const logExtractionStateSchemaV2 = schema.object({
+  filter: schema.string(),
+  additionalIndexPatterns: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+  fieldHistoryLength: schema.number(),
+  lookbackPeriod: schema.string(),
+  delay: schema.string(),
+  docsLimit: schema.number(),
+  timeout: schema.string(),
+  frequency: schema.string(),
+  paginationTimestamp: schema.maybe(schema.string()),
+  paginationId: schema.maybe(schema.string()),
+  lastExecutionTimestamp: schema.maybe(schema.string()),
+});
+
+const engineDescriptorSchemaV2 = engineDescriptorSchemaV1.extends({
+  logExtractionState: logExtractionStateSchemaV2,
+});
+
 const version1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
-    create: schema.object(engineDescriptorAttributesSchema),
-    forwardCompatibility: schema.object(engineDescriptorAttributesSchema, {
-      unknowns: 'ignore',
-    }),
+    create: engineDescriptorSchemaV1,
+    forwardCompatibility: engineDescriptorSchemaV1.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const version2: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition' as const,
+      addedMappings: {
+        logExtractionState: {
+          properties: {
+            additionalIndexPatterns: { type: 'keyword' as const },
+            paginationId: { type: 'keyword' as const },
+          },
+        },
+      },
+    },
+    {
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const { logExtractionState } = document.attributes;
+        const additionalIndexPatterns = Array.isArray(logExtractionState?.additionalIndexPatterns)
+          ? logExtractionState.additionalIndexPatterns
+          : [];
+        const paginationId = logExtractionState?.paginationId ?? '';
+
+        return {
+          attributes: {
+            logExtractionState: {
+              additionalIndexPatterns,
+              paginationId,
+            },
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV2,
+    forwardCompatibility: engineDescriptorSchemaV2.extends({}, { unknowns: 'ignore' }),
   },
 };
 
@@ -134,6 +199,6 @@ export const EngineDescriptorType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
   hiddenFromHttpApis: true,
 };
