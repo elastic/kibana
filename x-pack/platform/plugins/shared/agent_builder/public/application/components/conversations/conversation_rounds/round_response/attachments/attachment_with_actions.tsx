@@ -8,9 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { CanvasModeFlyout } from './canvas_mode_flyout';
 import { InlineAttachmentHeader } from './inline_attachment_header';
 import { InlineAttachmentContent } from './inline_attachment_content';
@@ -31,14 +29,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   isSidebar,
   conversationId,
 }) => {
-  const {
-    services: { settings },
-  } = useKibana();
-  const isExperimentalFeaturesEnabled = settings?.client.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
-
   const [isCanvasFlyoutOpen, setIsCanvasFlyoutOpen] = useState(false);
 
   const openCanvas = useCallback(() => {
@@ -66,10 +56,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
       }),
     [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
   );
-
-  if (isExperimentalFeaturesEnabled === false) {
-    return null;
-  }
 
   if (!uiDefinition) {
     return null;
