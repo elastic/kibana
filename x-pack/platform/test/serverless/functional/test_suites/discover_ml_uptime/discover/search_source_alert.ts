@@ -670,8 +670,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
+      try {
+        await deleteDataView(SOURCE_DATA_VIEW);
+      } catch {
+        // continue
+      }
+
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
       await PageObjects.common.navigateToApp('triggersActions');
@@ -728,13 +734,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await openAlertRuleInManagement(newAlert);
 
-      await retry.waitFor('success or warning status', async () => {
+      await retry.waitFor('success status', async () => {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const isOk = await testSubjects.exists('ruleStatus-ok');
-        const isWarning = await testSubjects.exists('ruleStatus-warning');
-        return isOk || isWarning;
+        return await testSubjects.exists('ruleStatus-ok');
       });
     });
   });
