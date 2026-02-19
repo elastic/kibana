@@ -383,6 +383,14 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  promqlMutuallyExclusiveParams: {
+    message: string;
+    type: { param1: string; param2: string };
+  };
+  promqlInvalidBucketsParam: {
+    message: string;
+    type: {};
+  };
   promqlMissingQuery: {
     message: string;
     type: {};

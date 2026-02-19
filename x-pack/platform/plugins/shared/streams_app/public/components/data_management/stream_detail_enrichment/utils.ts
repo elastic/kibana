@@ -376,6 +376,7 @@ export const getFormStateFromActionStep = (
     const { customIdentifier, parentId, ...restStep } = step;
     return configDrivenProcessors[
       step.action as ConfigDrivenProcessorType
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ].convertProcessorToFormState(restStep as any);
   }
 
@@ -679,6 +680,7 @@ export const convertFormStateToProcessor = (
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
           description,
         },
@@ -778,13 +780,9 @@ export const getValidSteps = (
         return false;
       }
 
-      // Valid but has no children (compilation of this step would be pointless)
-      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
-      if (!hasChildren) {
-        return false;
-      }
-
-      // Valid where block with children
+      // Valid where block.
+      // Note: even if it has no children, we still allow it to participate in simulation.
+      // The server injects a simulation-only noop processor for each condition so we can track match rates.
       validSteps.push(step);
       return true;
     } else {

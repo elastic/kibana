@@ -77,7 +77,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]settings[\/\\]components[\/\\]multi_row_input[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]settings[\/\\]components[\/\\]outputs_table[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]settings[\/\\]components[\/\\]outputs_table[\/\\]integration_sync_flyout.test.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]integrations[\/\\]sections[\/\\]epm[\/\\]components[\/\\]integration_preference.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]integrations[\/\\]sections[\/\\]epm[\/\\]components[\/\\]package_list_grid[\/\\]controls.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]integrations[\/\\]sections[\/\\]epm[\/\\]components[\/\\]package_list_grid[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]integrations[\/\\]sections[\/\\]epm[\/\\]components[\/\\]requirements.tsx/,
