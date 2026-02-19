@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
 import {
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,

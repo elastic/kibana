@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
