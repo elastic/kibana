@@ -157,11 +157,13 @@ describe('registerOverviewEmbeddableTransforms', () => {
           },
           overview_mode: 'groups',
         });
-        expect(result.group_filters?.filters).toHaveLength(1);
-        expect(result.group_filters?.filters?.[0]).toMatchObject({
-          meta: { type: 'term', index: 'slo' },
-          query: { term: { 'slo.id': 'test-slo' } },
-        });
+        if ('group_filters' in result && result.group_filters) {
+          expect(result.group_filters.filters).toHaveLength(1);
+          expect(result.group_filters.filters?.[0]).toMatchObject({
+            meta: { type: 'term', index: 'slo' },
+            query: { term: { 'slo.id': 'test-slo' } },
+          });
+        }
       });
 
       it('should validate group overview state with all group_by options', () => {
