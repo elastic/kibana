@@ -111,10 +111,10 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to mute an alert. |
 | `rule_alert_unmute` | `unknown` | User is unmuting an alert. |
 | | `failure` | User is not authorized to unmute an alert. |
-| `rule_alert_snooze` | `unknown` | User is snoozing an alert with conditions. |
-| | `failure` | User is not authorized to snooze an alert. |
-| `rule_alert_unsnooze` | `unknown` | User is unsnoozing an alert. |
-| | `failure` | User is not authorized to unsnooze an alert. |
+| `rule_alert_snooze` {applies_to}`stack: ga 9.4+` | `unknown` | User is snoozing an alert with conditions. |
+| | `failure` {applies_to}`stack: ga 9.4+`  | User is not authorized to snooze an alert. |
+| `rule_alert_unsnooze` {applies_to}`stack: ga 9.4+`  | `unknown` | User is unsnoozing an alert. |
+| | `failure` {applies_to}`stack: ga 9.4+`  | User is not authorized to unsnooze an alert. |
 | `space_update` | `unknown` | User is updating a space. |
 | | `failure` | User is not authorized to update a space. |
 | `alert_update` | `unknown` | User is updating an alert. |
