@@ -362,6 +362,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
