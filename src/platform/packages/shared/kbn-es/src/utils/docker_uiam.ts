@@ -8,6 +8,7 @@
  */
 
 import { writeFile, mkdir } from 'fs/promises';
+import { fetch } from 'undici';
 import { join } from 'path';
 import {
   generateCosmosDBApiRequestHeaders,
@@ -31,18 +32,14 @@ import type { ArrayElement } from '@kbn/utility-types';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
 
-const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
-const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/cosmosdb/linux/azure-cosmos-emulator`;
+const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
+const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
 
-// Check new version at https://github.com/Azure/azure-cosmos-db-emulator-docker/releases. DON'T use the rolling
-// `vnext-preview` image tag.
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251223';
-export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
+export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:latest-verified`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
-// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
@@ -260,7 +257,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
     method: 'POST',
     headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', ''),
     body: JSON.stringify({ id: MOCK_IDP_UIAM_COSMOS_DB_NAME }),
-    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
     dispatcher: fetchDispatcher,
   });
 
@@ -294,7 +290,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
-        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
         dispatcher: fetchDispatcher,
       }
     );

@@ -44,7 +44,8 @@ describe('useTemplatesActions', () => {
     templateId: 'template-1',
     name: 'Template 1',
     owner: 'securitySolution',
-    definition: 'fields:\n  - name: field1\n    type: keyword',
+    definition:
+      'name: Template 1\nfields:\n  - name: field1\n    control: INPUT_TEXT\n    type: keyword',
     templateVersion: 1,
     deletedAt: null,
     description: 'Description',
@@ -128,32 +129,59 @@ describe('useTemplatesActions', () => {
     });
   });
 
-  it('handleClone calls cloneTemplate mutation with template details', () => {
+  it('handleClone calls cloneTemplate mutation with cloned name in YAML definition', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
-
-    expect(typeof result.current.handleClone).toBe('function');
 
     act(() => {
       result.current.handleClone(mockTemplate);
     });
 
-    expect(cloneTemplateMock).toHaveBeenCalledWith(
-      {
-        template: {
-          owner: mockTemplate.owner,
-          definition: mockTemplate.definition,
-          description: mockTemplate.description,
-          fieldCount: mockTemplate.fieldCount,
-          fieldNames: mockTemplate.fieldNames,
-          tags: mockTemplate.tags,
-          author: mockTemplate.author,
-          isDefault: false,
-        },
-      },
-      {
-        onSuccess: expect.any(Function),
-      }
-    );
+    const callArgs = cloneTemplateMock.mock.calls[0][0];
+    expect(callArgs.template.owner).toBe(mockTemplate.owner);
+    expect(callArgs.template.description).toBe(mockTemplate.description);
+    expect(callArgs.template.tags).toEqual(mockTemplate.tags);
+    // The definition should be a YAML string with the cloned name
+    expect(typeof callArgs.template.definition).toBe('string');
+    expect(callArgs.template.definition).toContain('Cloned: Template 1');
+    expect(cloneTemplateMock).toHaveBeenCalledWith(expect.anything(), {
+      onSuccess: expect.any(Function),
+    });
+  });
+
+  it('handleClone does not pass author, fieldCount, fieldNames, or isDefault', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleClone(mockTemplate);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(template).not.toHaveProperty('author');
+    expect(template).not.toHaveProperty('fieldCount');
+    expect(template).not.toHaveProperty('fieldNames');
+    expect(template).not.toHaveProperty('isDefault');
+  });
+
+  it('handleClone handles definition that is already a parsed object', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    const templateWithParsedDef = {
+      ...mockTemplate,
+      // Simulate the parsed object that the list endpoint actually returns
+      definition: {
+        name: 'Template 1',
+        fields: [{ name: 'field1', control: 'INPUT_TEXT', type: 'keyword' }],
+      } as unknown as string,
+    };
+
+    act(() => {
+      result.current.handleClone(templateWithParsedDef);
+    });
+
+    const { template } = cloneTemplateMock.mock.calls[0][0];
+    expect(typeof template.definition).toBe('string');
+    expect(template.definition).toContain('Cloned: Template 1');
+    expect(template.definition).toContain('field1');
   });
 
   it('configures useCreateTemplate with disabled default toast for clone', () => {
