@@ -219,7 +219,7 @@ export const searchAfterAndBulkCreateFactory = async ({
         }
       } catch (exc: unknown) {
         ruleExecutionLogger.error(
-          `Error extracting/processing events or creating alerts\nError: ${JSON.stringify(exc)}.`
+          `Error extracting/processing events or creating alerts\nError: ${JSON.stringify(exc)}`
         );
         return mergeReturns([
           toReturn,
