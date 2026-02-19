@@ -6,17 +6,24 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { stableStringify } from '@kbn/std';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { buildRecoveryAlertEvents } from '../build_alert_events';
+import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
+import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { QueryServiceInternalToken } from '../../services/query_service/tokens';
+import {
+  QueryServiceInternalToken,
+  QueryServiceScopedToken,
+} from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../../director/queries';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { hasState, type StateWith } from '../type_guards';
+import type { RuleResponse } from '../../rules_client';
+import type { AlertEvent } from '../../../resources/alert_events';
 
 @injectable()
 export class CreateRecoveryEventsStep implements RuleExecutionStep {
@@ -24,7 +31,8 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
+    @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
+    @inject(QueryServiceScopedToken) private readonly scopedQueryService: QueryServiceContract
   ) {}
 
   private isStepReady(
@@ -63,18 +71,15 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       return { type: 'continue', data: { alertEvents } };
     }
 
-    const breachedGroupHashes = new Set(alertEvents.map((event) => event.group_hash));
+    const recoveryType = rule.recovery_policy?.type ?? 'no_breach';
 
-    const recoveryEvents = buildRecoveryAlertEvents({
-      ruleId: input.ruleId,
-      ruleVersion: 1,
-      activeGroupHashes,
-      breachedGroupHashes,
-      scheduledTimestamp: input.scheduledAt,
-    });
+    const recoveryEvents =
+      recoveryType === 'query'
+        ? await this.buildQueryRecovery({ rule, input, activeGroupHashes })
+        : this.buildNoBreachRecovery({ rule, input, alertEvents, activeGroupHashes });
 
     this.logger.debug({
-      message: `[${this.name}] Created ${recoveryEvents.length} recovery events for rule ${input.ruleId}`,
+      message: `[${this.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
     });
 
     return {
@@ -83,9 +88,76 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     };
   }
 
+  private buildNoBreachRecovery({
+    rule,
+    input,
+    alertEvents,
+    activeGroupHashes,
+  }: {
+    rule: RuleResponse;
+    input: RulePipelineState['input'];
+    alertEvents: AlertEvent[];
+    activeGroupHashes: ActiveAlertGroupHash[];
+  }): AlertEvent[] {
+    const breachedGroupHashes = new Set(alertEvents.map((event) => event.group_hash));
+
+    return buildRecoveryAlertEvents({
+      ruleId: rule.id,
+      ruleVersion: 1,
+      activeGroupHashes,
+      breachedGroupHashes,
+      scheduledTimestamp: input.scheduledAt,
+    });
+  }
+
+  private async buildQueryRecovery({
+    rule,
+    input,
+    activeGroupHashes,
+  }: {
+    rule: RuleResponse;
+    input: RulePipelineState['input'];
+    activeGroupHashes: ActiveAlertGroupHash[];
+  }): Promise<AlertEvent[]> {
+    const effectiveQuery = rule.recovery_policy!.query!.base!.trimEnd();
+    const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
+
+    const queryPayload = getQueryPayload({
+      query: effectiveQuery,
+      timeField: rule.time_field,
+      lookbackWindow,
+    });
+
+    this.logger.debug({
+      message: () =>
+        `[${this.name}] Executing recovery query for rule ${input.ruleId} - ${stableStringify({
+          query: effectiveQuery,
+          filter: queryPayload.filter,
+          params: queryPayload.params,
+        })}`,
+    });
+
+    const esqlResponse = await this.scopedQueryService.executeQuery({
+      query: effectiveQuery,
+      filter: queryPayload.filter,
+      params: queryPayload.params,
+      abortSignal: input.abortSignal,
+    });
+
+    return buildQueryRecoveryAlertEvents({
+      ruleId: rule.id,
+      ruleVersion: 1,
+      spaceId: input.spaceId,
+      ruleAttributes: rule,
+      activeGroupHashes,
+      esqlResponse,
+      scheduledTimestamp: input.scheduledAt,
+    });
+  }
+
   private async fetchActiveAlertGroupHashes(ruleId: string): Promise<ActiveAlertGroupHash[]> {
     const request = getActiveAlertGroupHashesQuery({ ruleId }).toRequest();
-    const response = await this.queryService.executeQuery({
+    const response = await this.internalQueryService.executeQuery({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,

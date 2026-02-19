@@ -48,7 +48,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 

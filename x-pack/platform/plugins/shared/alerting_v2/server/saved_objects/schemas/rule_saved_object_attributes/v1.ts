@@ -41,7 +41,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       query: schema.maybe(
         schema.object({
           base: schema.maybe(schema.string()),
-          condition: schema.maybe(schema.string()),
         })
       ),
     })

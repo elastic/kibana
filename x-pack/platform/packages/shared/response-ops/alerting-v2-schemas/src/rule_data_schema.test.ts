@@ -417,6 +417,53 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('recovery_policy', () => {
+    it('accepts recovery_policy with type "no_breach"', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: { type: 'no_breach' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts recovery_policy with type "query" when query.base is provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects recovery_policy with type "query" when query is missing', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: { type: 'query' },
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
+    });
+
+    it('rejects recovery_policy with type "query" when query.base is missing', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: { type: 'query', query: {} },
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
+    });
+
+    it('rejects recovery_policy with type "query" when query.base is empty', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: { type: 'query', query: { base: '' } },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('required fields', () => {
     it.each(['kind', 'metadata', 'schedule', 'evaluation'] as const)(
       'rejects when required field "%s" is missing',

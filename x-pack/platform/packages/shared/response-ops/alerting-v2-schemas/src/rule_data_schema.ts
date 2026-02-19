@@ -85,10 +85,7 @@ const recoveryPolicySchema = z
     type: z.enum(['query', 'no_breach']).describe('Recovery detection type.'),
     query: z
       .object({
-        base: esqlQuerySchema
-          .optional()
-          .describe('Base ES|QL query for recovery (or reference to evaluation.query.base).'),
-        condition: z.string().max(5000).optional().describe('Recovery condition (WHERE clause).'),
+        base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
       })
       .strict()
       .optional()
@@ -196,7 +193,16 @@ export const createRuleDataSchema = z
   .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
     message: 'evaluation.query.condition is required when no_data is configured.',
     path: ['evaluation', 'query', 'condition'],
-  });
+  })
+  .refine(
+    (data) =>
+      data.recovery_policy?.type !== 'query' ||
+      (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0),
+    {
+      message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
+      path: ['recovery_policy', 'query', 'base'],
+    }
+  );
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
