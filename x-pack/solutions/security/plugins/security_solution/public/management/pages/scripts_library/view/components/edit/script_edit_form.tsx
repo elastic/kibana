@@ -78,6 +78,15 @@ const buildDraft = (
   example: item?.example,
 });
 
+const buildInitialValidationState = (scriptItem?: EndpointScript & { file?: File }) => ({
+  hasFileError: !scriptItem?.fileName || !scriptItem?.fileSize,
+  hasNameError: !scriptItem?.name,
+  hasPlatformError: !scriptItem?.platform || !scriptItem?.platform.length,
+  hasEmptyDescription: !scriptItem?.description || scriptItem?.description.length === 0,
+  hasEmptyInstructions: !scriptItem?.instructions || scriptItem?.instructions.length === 0,
+  hasEmptyExample: !scriptItem?.example || scriptItem?.example.length === 0,
+});
+
 export interface EndpointScriptEditFormProps {
   error?:
     | ReturnType<typeof usePatchEndpointScript>['error']
@@ -110,24 +119,31 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     const [hasNameBeenChanged, setHasNameBeenChanged] = useState<boolean>(false);
     const [hasPlatformBeenChanged, setHasPlatformBeenChanged] = useState<boolean>(false);
 
-    // validation error states
-    const [hasFileError, toggleHasFileError] = useState<boolean>(
-      !scriptItem?.fileName || !scriptItem?.fileSize
+    // validation error states and help text states initialized together
+    const initialValidationState = useMemo(
+      () => buildInitialValidationState(scriptItem),
+      [scriptItem]
     );
-    const [hasNameError, toggleHasNameError] = useState<boolean>(!scriptItem?.name);
+
+    const [hasFileError, toggleHasFileError] = useState<boolean>(
+      initialValidationState.hasFileError
+    );
+    const [hasNameError, toggleHasNameError] = useState<boolean>(
+      initialValidationState.hasNameError
+    );
     const [hasPlatformError, toggleHasPlatformError] = useState<boolean>(
-      !scriptItem?.platform || !scriptItem?.platform.length
+      initialValidationState.hasPlatformError
     );
 
     // show help text for optional fields
     const [hasEmptyDescription, toggleHasEmptyDescription] = useState<boolean>(
-      !scriptItem?.description || scriptItem?.description.length === 0
+      initialValidationState.hasEmptyDescription
     );
     const [hasEmptyInstructions, toggleHasEmptyInstructions] = useState<boolean>(
-      !scriptItem?.instructions || scriptItem?.instructions.length === 0
+      initialValidationState.hasEmptyInstructions
     );
     const [hasEmptyExample, toggleHasEmptyExample] = useState<boolean>(
-      !scriptItem?.example || scriptItem?.example.length === 0
+      initialValidationState.hasEmptyExample
     );
 
     const hasValidFormData = useMemo(
