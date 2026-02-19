@@ -163,10 +163,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
-          areSimilar: (previous, fresh) => {
-            return areSimilarResults(fresh, previous);
-          },
-          onSuccessWhenSimilar: keepPreviousWorkflowOrder,
+          onRefresh,
         },
         {
           onError: (err: unknown) => {
@@ -178,7 +175,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         }
       );
     },
-    [notifications?.toasts, updateWorkflow]
+    [notifications?.toasts, updateWorkflow, onRefresh]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
