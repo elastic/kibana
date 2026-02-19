@@ -13,5 +13,7 @@ export const getFormatService = () =>
   ({
     deserialize: (target: any) => ({
       convert: (text: string, format: string) => text,
+      convertToReact: (value: unknown) => value,
+      hasReactSupport: () => true,
     }),
-  } as FieldFormatsStart);
+  } as unknown as FieldFormatsStart);

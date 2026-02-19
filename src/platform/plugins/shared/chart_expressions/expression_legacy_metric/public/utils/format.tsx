@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsContentType, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import React, { type ReactNode } from 'react';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { FormattedValue } from '@kbn/field-formats-plugin/common';
 
-export const formatValue = (
-  value: number | string,
-  fieldFormatter: IFieldFormat,
-  format: FieldFormatsContentType = 'text'
-) => {
+export const formatValue = (value: number | string, fieldFormatter: IFieldFormat): string => {
   if (typeof value === 'number' && isNaN(value)) {
     return '-';
   }
 
-  return fieldFormatter.convert(value, format);
+  return fieldFormatter.convert(value, 'text');
+};
+
+export const formatValueReact = (
+  value: number | string,
+  fieldFormatter: IFieldFormat
+): ReactNode => {
+  if (typeof value === 'number' && isNaN(value)) {
+    return '-';
+  }
+
+  return <FormattedValue fieldFormat={fieldFormatter} value={value} />;
 };
