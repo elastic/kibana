@@ -106,6 +106,49 @@ export function calculateSetMetrics<T>(
   return { precision, recall, f1 };
 }
 
+const VALID_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+type Severity = (typeof VALID_SEVERITIES)[number];
+
+/** Returns true if severity is one of the four valid enum values. */
+export function validateSeverity(severity: unknown): severity is Severity {
+  return VALID_SEVERITIES.includes(severity as Severity);
+}
+
+/** Returns true if riskScore is a number in the 0–100 range. */
+export function validateRiskScore(score: unknown): boolean {
+  return typeof score === 'number' && score >= 0 && score <= 100;
+}
+
+/** Returns true if interval is a valid Elasticsearch duration string, e.g. `5m`, `30s`, `1h`. */
+export function validateInterval(interval: unknown): boolean {
+  return typeof interval === 'string' && /^\d+[smhd]$/.test(interval);
+}
+
+/**
+ * Parses a `now-Xs/m/h/d` date-math expression into seconds.
+ * Returns null if the expression cannot be parsed.
+ */
+export function parseDateMathSeconds(expr: unknown): number | null {
+  if (typeof expr !== 'string') return null;
+  const m = expr.match(/^now-(\d+)([smhd])$/);
+  if (!m) return null;
+  const [, n, unit] = m;
+  const multipliers: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 };
+  return parseInt(n, 10) * multipliers[unit];
+}
+
+/**
+ * Checks that the FROM clause of an ES|QL query is not a bare wildcard (`FROM *`),
+ * which is disallowed in alerting rule contexts.
+ */
+export function validateFromClause(query: string): { valid: boolean; error?: string } {
+  const fromLine = query.trim().split(/\s*\|\s*/)[0];
+  if (/^FROM\s+\*\s*$/i.test(fromLine)) {
+    return { valid: false, error: 'FROM * is not allowed in alerting rules' };
+  }
+  return { valid: true };
+}
+
 /**
  * Check if a rule has all required fields
  */
@@ -114,7 +157,7 @@ export function hasRequiredFields(rule: Partial<ReferenceRule>): {
   coverage: number;
   missing: string[];
 } {
-  const requiredFields = ['name', 'description', 'query', 'severity', 'tags'];
+  const requiredFields = ['name', 'description', 'query', 'severity', 'tags', 'riskScore'];
   const missing: string[] = [];
   
   for (const field of requiredFields) {

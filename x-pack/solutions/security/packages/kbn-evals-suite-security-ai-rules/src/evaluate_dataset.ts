@@ -17,6 +17,11 @@ import type { ReferenceRule } from '../datasets/sample_rules';
 import type { SecurityRuleGenerationClient } from './chat_client';
 import {
   validateEsqlSyntax,
+  validateFromClause,
+  validateSeverity,
+  validateRiskScore,
+  validateInterval,
+  parseDateMathSeconds,
   extractMitreTechniques,
   calculateSetMetrics,
   hasRequiredFields,
@@ -42,10 +47,15 @@ function createQuerySyntaxValidityEvaluator(): Evaluator<RuleExample, RuleGenera
       if (!output?.generatedRule?.query) {
         return { score: 0, metadata: { error: 'No query generated' } };
       }
-      const validation = validateEsqlSyntax(output.generatedRule.query);
+      const { query } = output.generatedRule;
+      const syntaxValidation = validateEsqlSyntax(query);
+      if (!syntaxValidation.valid) {
+        return { score: 0, metadata: { valid: false, error: syntaxValidation.error } };
+      }
+      const fromValidation = validateFromClause(query);
       return {
-        score: validation.valid ? 1 : 0,
-        metadata: { valid: validation.valid, error: validation.error },
+        score: fromValidation.valid ? 1 : 0,
+        metadata: { valid: fromValidation.valid, error: fromValidation.error },
       };
     },
   };
@@ -98,6 +108,9 @@ function createMitreAccuracyEvaluator(): Evaluator<RuleExample, RuleGenerationTa
       const generatedTechniques = extractMitreTechniques(output.generatedRule);
       const expectedTechniques = extractMitreTechniques(expected ?? {});
       const metrics = calculateSetMetrics(generatedTechniques, expectedTechniques);
+      const invalidFormat = [...generatedTechniques].filter(
+        (t) => !/^T\d{4}(\.\d{3})?$/.test(t)
+      );
       return {
         score: metrics.f1,
         metadata: {
@@ -106,8 +119,97 @@ function createMitreAccuracyEvaluator(): Evaluator<RuleExample, RuleGenerationTa
           f1: metrics.f1,
           generated: Array.from(generatedTechniques),
           expected: Array.from(expectedTechniques),
+          invalidFormat,
         },
       };
+    },
+  };
+}
+
+function createSeverityValidityEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Severity Validity',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const severity = output?.generatedRule?.severity;
+      const valid = validateSeverity(severity);
+      return { score: valid ? 1 : 0, metadata: { severity, valid } };
+    },
+  };
+}
+
+function createRiskScoreValidityEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Risk Score Validity',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const riskScore = output?.generatedRule?.riskScore;
+      const valid = validateRiskScore(riskScore);
+      return { score: valid ? 1 : 0, metadata: { riskScore, valid } };
+    },
+  };
+}
+
+function createIntervalFormatEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Interval Format',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const interval = output?.generatedRule?.interval;
+      if (!interval) return { score: 0, metadata: { error: 'No interval set' } };
+      const valid = validateInterval(interval);
+      return { score: valid ? 1 : 0, metadata: { interval, valid } };
+    },
+  };
+}
+
+function createLookbackGapEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Lookback Gap',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const { from, interval } = output?.generatedRule ?? {};
+      const fromSec = parseDateMathSeconds(from);
+      const intervalSec = interval ? parseDateMathSeconds(`now-${interval}`) : null;
+      if (fromSec === null || intervalSec === null) {
+        return { score: 0, metadata: { error: 'Cannot parse from/interval', from, interval } };
+      }
+      const hasGap = fromSec < intervalSec;
+      return { score: hasGap ? 0 : 1, metadata: { from, interval, fromSec, intervalSec, hasGap } };
+    },
+  };
+}
+
+function createSeverityMatchEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Severity Match',
+    kind: 'CODE',
+    evaluate: async ({ output, expected }) => {
+      const generated = output?.generatedRule?.severity;
+      const expectedSeverity = expected?.severity;
+      const match = generated === expectedSeverity;
+      return { score: match ? 1 : 0, metadata: { generated, expected: expectedSeverity } };
+    },
+  };
+}
+
+function createRiskScoreMatchEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Risk Score Match',
+    kind: 'CODE',
+    evaluate: async ({ output, expected }) => {
+      const generated = output?.generatedRule?.riskScore;
+      const expectedScore = expected?.riskScore;
+      if (generated == null || expectedScore == null) {
+        return {
+          score: 0,
+          metadata: { error: 'Missing riskScore', generated, expected: expectedScore },
+        };
+      }
+      const diff = Math.abs(generated - expectedScore);
+      // Partial credit: 1.0 for exact match, 0.5 for ≤10 off, 0 otherwise
+      const score = diff === 0 ? 1 : diff <= 10 ? 0.5 : 0;
+      return { score, metadata: { generated, expected: expectedScore, diff } };
     },
   };
 }
@@ -216,10 +318,16 @@ export function createEvaluateDataset({
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    createQuerySyntaxValidityEvaluator(),
-    createFieldCoverageEvaluator(),
+    createQuerySyntaxValidityEvaluator(),      // syntax + FROM wildcard check (G)
+    createFieldCoverageEvaluator(),            // required fields incl. riskScore (B partial)
     createRuleTypeLanguageEvaluator(),
-    createMitreAccuracyEvaluator(),
+    createMitreAccuracyEvaluator(),            // F1 score + invalidFormat metadata (H-A)
+    createSeverityValidityEvaluator(),         // enum check (A)
+    createRiskScoreValidityEvaluator(),        // 0–100 range check (B)
+    createIntervalFormatEvaluator(),           // duration string format (C)
+    createLookbackGapEvaluator(),              // from >= interval coverage (D)
+    createSeverityMatchEvaluator(),            // vs expected severity (E)
+    createRiskScoreMatchEvaluator(),           // vs expected riskScore with tolerance (F)
     // LLM — functional/semantic equivalence via built-in @kbn/evals criteria evaluator
     createEsqlFunctionalEquivalenceEvaluator(evaluators),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.

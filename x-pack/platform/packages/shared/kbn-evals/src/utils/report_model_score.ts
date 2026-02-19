@@ -63,6 +63,7 @@ export async function mapToEvaluationScoreDocuments({
         task: {
           trace_id: taskRun.traceId ?? null,
           repetition_index: taskRun.repetition,
+          output: taskRun.output ?? null,
           model: taskModel,
         },
         evaluator: {

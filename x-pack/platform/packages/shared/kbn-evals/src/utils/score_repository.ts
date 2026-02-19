@@ -27,6 +27,7 @@ export interface EvaluationScoreDocument {
     trace_id: string | null;
     repetition_index: number;
     model: Model;
+    output: unknown;
   };
 
   evaluator: {
@@ -141,6 +142,7 @@ export class EvaluationScoreRepository {
               properties: {
                 trace_id: { type: 'keyword' },
                 repetition_index: { type: 'integer' },
+                output: { type: 'flattened' },
                 model: {
                   type: 'object',
                   properties: {

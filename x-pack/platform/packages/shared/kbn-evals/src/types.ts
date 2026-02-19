@@ -36,6 +36,8 @@ export interface Example<
   TExpected = any,
   TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
 > {
+  /** Stable cross-run identifier for this example. When provided, stored as `example.id` in ES. */
+  id?: string;
   input: TInput;
   /**
    * Expected output/ground truth for the example.
