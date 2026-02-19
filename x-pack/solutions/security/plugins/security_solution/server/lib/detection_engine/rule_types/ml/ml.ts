@@ -114,6 +114,7 @@ export const mlExecutor = async ({
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      result.totalEventsFound = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);
