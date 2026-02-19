@@ -37,13 +37,6 @@ groups:
         #   Only specify a version for the "stack" key; multiple values are accepted for this key, for example "stack: preview 9.4, ga 9.5, removed 9.8"
         #
         #   applies_to:
-        #     stack: ga 9.2
-        #     ess: ga
-        #     self: ga
-        #
-        #   Or an inline list form:
-        #
-        #   applies_to:
         #     - "stack: ga 9.2"
         #     - "ess: ga"
         #     - "self: ga"
