@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/std'
   - '@kbn/some-dev-log'
+  - '@kbn/dev-proc-runner'
 tags:
   - shared-common
   - package
