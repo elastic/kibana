@@ -32,7 +32,9 @@ groups:
           REQUIRED
           Multiline string. Can include tables, lists, code examples, etc.
         # applies_to: MANDATORY applicability metadata
-        #   Supports docs-builder applies_to syntax. You can use either a mapping form:
+        #   Supports docs-builder applies_to syntax.
+        #   Replace "ga" with the correct availability information: "preview", "beta", "ga", "deprecated", "removed", "unavailable" are accepted values
+        #   Only specify a version for the "stack" key; multiple values are accepted for this key, for example "stack: preview 9.4, ga 9.5, removed 9.8"
         #
         #   applies_to:
         #     stack: ga 9.2
