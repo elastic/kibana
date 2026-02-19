@@ -23,21 +23,25 @@ jest.mock('@elastic/eui', () => ({
 const createParentRef = () => {
   const send = jest.fn();
 
+  const mockSimulatorRef = {
+    getSnapshot: () => ({
+      context: {
+        samples: [],
+        previewDocsFilter: undefined,
+        simulation: undefined,
+        selectedConditionId: undefined,
+      },
+    }),
+  };
+
   const parentRef: InteractiveModeParentRef = {
     send,
     getSnapshot: () => ({
       context: {
         // Only required for some actions (e.g. default processor creation); keep minimal for this test.
-        simulatorRef: {
-          getSnapshot: () => ({
-            context: {
-              samples: [],
-              previewDocsFilter: undefined,
-              simulation: undefined,
-              selectedConditionId: undefined,
-            },
-          }),
-        } as any,
+        simulatorRef: mockSimulatorRef as unknown as ReturnType<
+          InteractiveModeParentRef['getSnapshot']
+        >['context']['simulatorRef'],
         dataSourcesRefs: [],
         schemaErrors: [],
         validationErrors: new Map(),
@@ -111,13 +115,10 @@ describe('interactiveModeMachine condition focus behavior', () => {
     });
 
     // Find the processor stepRef
-    const processorStepRef = actor
-      .getSnapshot()
-      .context.stepRefs.find(
-        (ref) =>
-          (ref.getSnapshot().context.step as any).action === 'set' &&
-          ref.getSnapshot().context.step.parentId === conditionId
-      );
+    const processorStepRef = actor.getSnapshot().context.stepRefs.find((ref) => {
+      const { step } = ref.getSnapshot().context;
+      return 'action' in step && step.action === 'set' && step.parentId === conditionId;
+    });
 
     expect(processorStepRef).toBeDefined();
     const processorId = processorStepRef!.id;
