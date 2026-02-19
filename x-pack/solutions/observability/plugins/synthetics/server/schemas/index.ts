@@ -20,5 +20,5 @@ export {
 
 export {
   syntheticsMonitorsEmbeddableSchema,
-  type SyntheticsMonitorsEmbeddableState,
+  type OverviewMonitorsEmbeddableState,
 } from './synthetics_monitors_embeddable_schema';

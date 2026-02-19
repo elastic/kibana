@@ -16,5 +16,5 @@ export type {
   MonitorFilters,
   OverviewStatsEmbeddableState,
   OverviewStatsEmbeddableCustomState,
-  SyntheticsMonitorsEmbeddableState,
+  OverviewMonitorsEmbeddableState
 } from '../../server/schemas';

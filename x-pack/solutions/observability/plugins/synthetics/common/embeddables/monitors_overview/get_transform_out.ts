@@ -8,8 +8,8 @@
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
-import type { OverviewMonitorsEmbeddableState } from './types';
 import { transformFiltersOut } from '../bwc/transform_filters_out';
+import { OverviewMonitorsEmbeddableState } from '../../types';
 
 export function getTransformOut() {
   function transformOut(
