@@ -454,7 +454,7 @@ ${buildEnrichedEntityFieldsEsql()}
       isOriginAlert,
       pinned
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
-| SORT pinnedSort ASC, action DESC, isOrigin
+| SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT 1000
 | DROP pinnedSort`;
 
