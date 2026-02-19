@@ -222,7 +222,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       <EuiFlexItem grow={false}>
         <EuiEmptyPrompt
           data-test-subj="discoverEmbeddableDeletedTabCallout"
-          icon={<EuiIcon color="warning" size="xxl" type="warning" />}
+          icon={<EuiIcon aria-hidden={true} color="warning" size="xxl" type="warning" />}
           title={deletedTabTitle}
           body={body}
         />
