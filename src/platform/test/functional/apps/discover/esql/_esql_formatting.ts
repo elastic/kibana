@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Create a computed column that doesn't exist in the data view
         const testQuery =
-          'from logstash-* | sort @timestamp | limit 10 | keep bytes | eval bytes2 = bytes * 2';
+          'from logstash-* | sort @timestamp | limit 10 | eval custom_bytes = bytes * 2';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
@@ -148,14 +148,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const expectedBytesValue2 = '3,246';
 
         // 1. Verify bytes column shows the expected value in data grid
-        const bytesCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-        expect(await bytesCell.getVisibleText()).to.be(expectedBytesValue);
+        const bytesCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        expect(await bytesCell.getVisibleText()).to.contain(expectedBytesValue);
 
-        // 2. Add bytes_kb as a separate column and verify
-        await unifiedFieldList.clickFieldListItemAdd('bytes2');
+        // 2. Add custom_bytes as a separate column and verify
+        await unifiedFieldList.clickFieldListItemAdd('custom_bytes');
         await discover.waitUntilTabIsLoaded();
-        const bytesKbColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await bytesKbColumnCell.getVisibleText()).to.be(expectedBytesValue2);
+        const bytes2ColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+        expect(await bytes2ColumnCell.getVisibleText()).to.be(expectedBytesValue2);
 
         // 3. Verify both values in doc viewer flyout
         await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const bytesFlyoutValue = await testSubjects.getVisibleText('tableDocViewRow-bytes-value');
         expect(bytesFlyoutValue).to.be(expectedBytesValue);
         const bytes2FlyoutValue = await testSubjects.getVisibleText(
-          'tableDocViewRow-bytes2-value'
+          'tableDocViewRow-custom_bytes-value'
         );
         expect(bytes2FlyoutValue).to.be(expectedBytesValue2);
         await dataGrid.closeFlyout();
