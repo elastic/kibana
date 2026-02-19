@@ -30,13 +30,20 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo } = useStartServices();
+  const { automaticImportVTwo, application } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
 
-  const useGetAllIntegrationsHook =
-    automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations;
+  const automaticImportCapabilities = (
+    application.capabilities as Record<string, { view?: boolean } | undefined>
+  ).automatic_import;
+  const canReadAutomaticImportIntegrations =
+    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+
+  const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
+    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    : useEmptyAllIntegrations;
   const {
     integrations,
     isLoading: isLoadingCreatedIntegrations,
@@ -45,8 +52,8 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const hasCreatedIntegrations = integrations.length > 0;
   const isManageIntegrationsView = useMemo(() => {
     const params = new URLSearchParams(search);
-    return params.get('view') === 'manage';
-  }, [search]);
+    return canReadAutomaticImportIntegrations && params.get('view') === 'manage';
+  }, [canReadAutomaticImportIntegrations, search]);
 
   const manageIntegrationsHref = useMemo(() => {
     const params = new URLSearchParams(search);
@@ -112,7 +119,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         selectedCategory={selectedCategory}
         onCategoryChange={onCategoryChange}
         CreateIntegrationCardButton={
-          automaticImportVTwo?.components.CreateIntegrationSideCardButton
+          canReadAutomaticImportIntegrations
+            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
+            : undefined
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
         onManageIntegrationsClick={onManageIntegrationsClick}
