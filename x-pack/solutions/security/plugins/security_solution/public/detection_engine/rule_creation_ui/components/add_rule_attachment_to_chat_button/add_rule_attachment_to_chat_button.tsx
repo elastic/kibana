@@ -82,7 +82,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         )
       : rule;
     const attachmentLabel = formattedRule?.name;
-    const attachmentData = `${JSON.stringify(formattedRule)}`;
+    const attachmentData = JSON.stringify(formattedRule);
 
     return {
       attachmentType: SecurityAgentBuilderAttachments.rule,

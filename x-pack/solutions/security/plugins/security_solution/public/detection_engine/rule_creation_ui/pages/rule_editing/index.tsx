@@ -545,16 +545,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
                         addToChatButton={
-                          rule != null ? (
-                            <AddRuleAttachmentToChatButton
-                              defineStepData={defineStepData}
-                              aboutStepData={aboutStepData}
-                              scheduleStepData={scheduleStepData}
-                              actionsStepData={actionsStepData}
-                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-                              pathway="rule_editing"
-                            />
-                          ) : undefined
+                          <AddRuleAttachmentToChatButton
+                            defineStepData={defineStepData}
+                            aboutStepData={aboutStepData}
+                            scheduleStepData={scheduleStepData}
+                            actionsStepData={actionsStepData}
+                            actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+                            pathway="rule_editing"
+                          />
                         }
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
