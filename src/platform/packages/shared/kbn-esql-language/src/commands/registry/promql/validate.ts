@@ -75,10 +75,11 @@ export const validate = (
   const durationSpaceMatch = command.text.match(DURATION_PARAM_WITH_SPACES_REGEX);
 
   if (durationSpaceMatch && !paramValues.has(durationSpaceMatch[1].toLowerCase())) {
+    const param = durationSpaceMatch[1].toLowerCase();
     messages.push(
       getMessageFromId({
-        messageId: 'promqlInvalidDurationParam',
-        values: { param: durationSpaceMatch[1].toLowerCase() },
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Invalid ${param} value` },
         locations: command.location,
       })
     );
@@ -101,10 +102,11 @@ export const validate = (
   const hasEnd = usedParams.has(PromqlParamName.End);
 
   if (hasStart !== hasEnd) {
+    const param = hasStart ? PromqlParamName.End : PromqlParamName.Start;
     messages.push({
       ...getMessageFromId({
-        messageId: 'promqlMissingParam',
-        values: { param: hasStart ? PromqlParamName.End : PromqlParamName.Start },
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Missing required param "${param}"` },
         locations: command.location,
       }),
     });
@@ -120,8 +122,8 @@ export const validate = (
     if (value === '') {
       messages.push({
         ...getMessageFromId({
-          messageId: 'promqlMissingParamValue',
-          values: { param },
+          messageId: 'promqlInvalidParam',
+          values: { reason: `Missing value for "${param}"` },
           locations: entryLocation ?? location,
         }),
       });
@@ -135,8 +137,10 @@ export const validate = (
       if (!isPlaceholder && !FORMAT_DATE_LITERAL_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidDateParam',
-            values: { param },
+            messageId: 'promqlInvalidParam',
+            values: {
+              reason: `Invalid ${param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend`,
+            },
             locations: location,
           }),
         });
@@ -149,8 +153,8 @@ export const validate = (
       if (!FORMAT_DURATION_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidDurationParam',
-            values: { param },
+            messageId: 'promqlInvalidParam',
+            values: { reason: `Invalid ${param} value` },
             locations: keyLocation ?? location,
           }),
         });
@@ -163,8 +167,8 @@ export const validate = (
       if (!Number.isInteger(num) || num <= 0) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidBucketsParam',
-            values: {},
+            messageId: 'promqlInvalidParam',
+            values: { reason: 'Invalid buckets value. Must be a positive integer' },
             locations: keyLocation ?? location,
           }),
         });

@@ -349,13 +349,22 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  if (param === PromqlParamName.Step || param === PromqlParamName.ScrapeInterval) {
+  const durationPlaceholder = {
+    ...valuePlaceholderConstant,
+    label: 'Insert duration',
+    text: '"${0:5m}"',
+    detail: 'Use units like s, m, h, d',
+  };
+
+  if (param === PromqlParamName.Step) {
+    return [durationPlaceholder];
+  }
+
+  if (param === PromqlParamName.ScrapeInterval) {
     return [
       {
-        ...valuePlaceholderConstant,
-        label: 'Insert duration',
+        ...durationPlaceholder,
         text: '"${0:1m}"',
-        detail: 'Use units like s, m, h, d',
       },
     ];
   }
