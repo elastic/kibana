@@ -9,7 +9,7 @@ import React from 'react';
 import { EmbeddableConversationInternal } from './embeddable_conversation';
 import type {
   EmbeddableConversationDependencies,
-  EmbeddableConversationFlyoutProps,
+  EmbeddableConversationSidebarProps,
   EmbeddableConversationProps,
 } from './types';
 
@@ -25,9 +25,9 @@ export const createEmbeddableConversation = ({
   services,
   coreStart,
 }: EmbeddableConversationDependencies): React.FC<
-  EmbeddableConversationProps & EmbeddableConversationFlyoutProps
+  EmbeddableConversationProps & EmbeddableConversationSidebarProps
 > => {
-  return (props: EmbeddableConversationProps & EmbeddableConversationFlyoutProps) => (
+  return (props: EmbeddableConversationProps & EmbeddableConversationSidebarProps) => (
     <EmbeddableConversationInternal {...props} coreStart={coreStart} services={services} />
   );
 };
