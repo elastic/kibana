@@ -46,7 +46,7 @@
     "@kbn/server-route-repository-client",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
-    "@kbn/observability-utils-server"
+    "@kbn/observability-utils-server",
   ],
   "exclude": ["target/**/*"]
 }
