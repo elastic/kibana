@@ -6,23 +6,17 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getField } from '../../shared/utils';
-import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
 } from './test_ids';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const ALERT_REASON_BANNER = {
   title: i18n.translate(
@@ -35,32 +29,32 @@ export const ALERT_REASON_BANNER = {
   textColor: 'warning',
 };
 
-/**
- * Displays the information provided by the rowRenderer. Supports multiple types of documents.
- */
-export const Reason: FC = () => {
-  const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
-    useDocumentDetailsContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const alertReason = getField(getFieldsData(ALERT_REASON));
+export interface ReasonProps {
+  /**
+   * Alert/event document
+   */
+  hit: DataTableRecord;
+  /**
+   * Callback to show the full reason preview panel when the "Show full reason" button is clicked.
+   * If not provided, the button won't be rendered.
+   */
+  onShowFullReason?: () => void;
+  /**
+   * Optional override to disable the full reason preview button.
+   */
+  fullReasonDisabled?: boolean;
+}
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openRulePreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);
+/**
+ * Displays the alert reason. Supports multiple types of documents.
+ */
+export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason, fullReasonDisabled }) => {
+  const isAlert = useMemo(
+    () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
+    [hit]
+  );
+  const alertReason = useMemo(() => getFieldValue(hit, ALERT_REASON) as string, [hit]);
+  const isShowFullReasonButtonDisabled = fullReasonDisabled ?? !alertReason;
 
   const viewPreview = useMemo(
     () => (
@@ -68,7 +62,7 @@ export const Reason: FC = () => {
         <EuiButtonEmpty
           size="s"
           iconType="expand"
-          onClick={openRulePreview}
+          onClick={onShowFullReason}
           iconSide="right"
           data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
           aria-label={i18n.translate(
@@ -77,7 +71,7 @@ export const Reason: FC = () => {
               defaultMessage: 'Show full reason',
             }
           )}
-          disabled={!alertReason}
+          disabled={isShowFullReasonButtonDisabled}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
@@ -86,7 +80,7 @@ export const Reason: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [alertReason, openRulePreview]
+    [onShowFullReason, isShowFullReasonButtonDisabled]
   );
 
   const alertReasonText = alertReason ? (
@@ -118,7 +112,7 @@ export const Reason: FC = () => {
                     />
                   </h5>
                 </EuiFlexItem>
-                {viewPreview}
+                {onShowFullReason && viewPreview}
               </EuiFlexGroup>
             ) : (
               <p>

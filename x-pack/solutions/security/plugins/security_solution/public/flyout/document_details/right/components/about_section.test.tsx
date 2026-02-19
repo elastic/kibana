@@ -14,9 +14,9 @@ import {
   EVENT_KIND_DESCRIPTION_TEST_ID,
   EVENT_RENDERER_TEST_ID,
   MITRE_ATTACK_TITLE_TEST_ID,
-  REASON_TITLE_TEST_ID,
   WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
+import { REASON_TITLE_TEST_ID } from '../../../../flyout_v2/document_details/components/test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
 import { DocumentDetailsContext } from '../../shared/context';

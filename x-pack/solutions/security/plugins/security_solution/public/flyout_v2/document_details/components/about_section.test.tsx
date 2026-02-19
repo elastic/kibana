@@ -15,6 +15,9 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 jest.mock('./alert_description', () => ({
   AlertDescription: () => <div>{'AlertDescription'}</div>,
 }));
+jest.mock('./reason', () => ({
+  Reason: () => <div>{'Reason'}</div>,
+}));
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -44,7 +47,7 @@ describe('AboutSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <AboutSection hit={alertHit} dataView={undefined as never} />
+        <AboutSection hit={alertHit} />
       </IntlProvider>
     );
 
@@ -56,7 +59,7 @@ describe('AboutSection', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <AboutSection hit={alertHit} dataView={undefined as never} />
+        <AboutSection hit={alertHit} />
       </IntlProvider>
     );
 
@@ -70,13 +73,14 @@ describe('AboutSection', () => {
 
     const { getByTestId, getByText } = render(
       <IntlProvider locale="en">
-        <AboutSection hit={alertHit} dataView={undefined as never} />
+        <AboutSection hit={alertHit} />
       </IntlProvider>
     );
 
     await act(async () => {
       expect(getByTestId(`${ABOUT_SECTION_TEST_ID}Content`)).toBeVisible();
       expect(getByText('AlertDescription')).toBeInTheDocument();
+      expect(getByText('Reason')).toBeInTheDocument();
     });
   });
 });
