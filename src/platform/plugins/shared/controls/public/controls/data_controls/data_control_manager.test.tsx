@@ -50,7 +50,7 @@ describe('initializeDataControlManager', () => {
           typeDisplayName: 'My Control Type',
         }).then((controlManager) => {
           dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+          dataControlManager.api.label$!.pipe(skip(1), first()).subscribe(() => {
             done();
           });
         });
@@ -63,10 +63,10 @@ describe('initializeDataControlManager', () => {
         expect(dataViews![0].id).toBe('myDataViewId');
       });
 
-      test('should set default panel title', () => {
-        const defaultPanelTitle = dataControlManager!.api.defaultTitle$!.value;
-        expect(defaultPanelTitle).not.toBeUndefined();
-        expect(defaultPanelTitle).toBe('My field name');
+      test('should set label to the field display name', () => {
+        const label = dataControlManager!.api.label$!.value;
+        expect(label).not.toBeUndefined();
+        expect(label).toBe('My field name');
       });
     });
 
@@ -85,7 +85,7 @@ describe('initializeDataControlManager', () => {
           typeDisplayName: 'My Control Type',
         }).then((controlManager) => {
           dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+          dataControlManager.api.label$!.pipe(first()).subscribe(() => {
             done();
           });
         });
@@ -124,7 +124,7 @@ describe('initializeDataControlManager', () => {
           typeDisplayName: 'My Control Type',
         }).then((controlManager) => {
           dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
+          dataControlManager.api.label$!.pipe(first()).subscribe(() => {
             done();
           });
         });
@@ -137,8 +137,8 @@ describe('initializeDataControlManager', () => {
       });
 
       test('should clear blocking error when valid field name provided', (done) => {
-        dataControlManager!.api.defaultTitle$!.pipe(skip(1), first()).subscribe((defaultTitle) => {
-          expect(defaultTitle).toBe('My field name');
+        dataControlManager!.api.label$!.pipe(skip(1), first()).subscribe((label) => {
+          expect(label).toBe('My field name');
           expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
           done();
         });

@@ -92,7 +92,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataViewReady = reject;
   });
 
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.field_name);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
