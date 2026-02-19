@@ -57,7 +57,7 @@ export class AssistantPage {
   // ── Derived locators ───────────────────────────────────────────────────
 
   /** Returns the locator for the conversation title heading */
-  get titleHeading(): Locator {
+  public get titleHeading(): Locator {
     return this.conversationTitle.locator('h2');
   }
 
@@ -67,14 +67,14 @@ export class AssistantPage {
   }
 
   /** Returns the locator for the error comment message element */
-  get errorComment(): Locator {
+  public get errorComment(): Locator {
     return this.page
       .locator('[data-test-subj="errorComment"]')
       .locator('[data-test-subj="messageText"]');
   }
 
   /** Returns the "Investigate in timeline" button inside a rendered code block */
-  get investigateInTimelineButton(): Locator {
+  public get investigateInTimelineButton(): Locator {
     return this.page.locator('button[aria-label="Investigate in timeline"]');
   }
 

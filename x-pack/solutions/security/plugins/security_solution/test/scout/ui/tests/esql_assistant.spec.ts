@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { test, expect, tags } from '../fixtures';
-import {
-  createAzureConnector,
-  deleteConnectors,
-  deleteConversations,
-} from '../common/api_helpers';
+import { expect } from '@kbn/scout-security/ui';
+import { test, tags } from '../fixtures';
+import { createAzureConnector, deleteConnectors, deleteConversations } from '../common/api_helpers';
 import {
   getAvailableLLMConnectors,
   createLLMConnector,

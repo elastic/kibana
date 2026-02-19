@@ -56,7 +56,12 @@ function getConnectorsFromKibanaDevYml(): Record<string, Omit<LLMConnector, 'id'
     const parsed = (load(Fs.readFileSync(configPath, 'utf8')) || {}) as Record<string, unknown>;
     const preconfigured = (parsed['xpack.actions.preconfigured'] || {}) as Record<
       string,
-      { name: string; actionTypeId: string; config: Record<string, unknown>; secrets?: Record<string, unknown> }
+      {
+        name: string;
+        actionTypeId: string;
+        config: Record<string, unknown>;
+        secrets?: Record<string, unknown>;
+      }
     >;
 
     const result: Record<string, Omit<LLMConnector, 'id'>> = {};
