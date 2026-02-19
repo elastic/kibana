@@ -14,7 +14,6 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
@@ -54,24 +53,15 @@ export const LockedItem = ({ item }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiIconTip type="lock" color="subdued" content={tooltipContent} position="left" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiSwitch
             compressed
-            label={i18n.translate(
-              'core.ui.chrome.sideNavigation.customizeNavigation.lockedItemAriaLabel',
-              {
-                defaultMessage: '{itemTitle} cannot be reordered or hidden',
-                values: { itemTitle: item.title },
-              }
-            )}
-            showLabel={false}
+            label={item.title}
+            showLabel={true}
             checked={!item.hidden}
             onChange={() => {}}
             disabled
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">{item.title}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

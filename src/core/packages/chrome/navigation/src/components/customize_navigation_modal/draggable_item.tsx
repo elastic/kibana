@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
@@ -58,23 +57,14 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
               <EuiIcon type="grab" color="subdued" aria-hidden={true} />
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiSwitch
               compressed
-              label={i18n.translate(
-                'core.ui.chrome.sideNavigation.customizeNavigation.draggableItemAriaLabel',
-                {
-                  defaultMessage: 'Show {itemTitle}',
-                  values: { itemTitle: item.title },
-                }
-              )}
-              showLabel={false}
+              label={item.title}
+              showLabel={true}
               checked={!item.hidden}
               onChange={() => toggleItemVisibility(item.id)}
             />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">{item.title}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
