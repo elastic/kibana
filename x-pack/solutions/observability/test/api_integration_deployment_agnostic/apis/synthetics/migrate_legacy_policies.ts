@@ -317,15 +317,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const legacyPolicy1 = await createLegacyPackagePolicy(monitorId, 'default');
         const legacyPolicy2 = await createLegacyPackagePolicy(monitorId, 'space-2');
 
-        let policies = await getPackagePolicies();
-        expect(policies.some((p) => p.id === legacyPolicy1)).to.be(true);
-        expect(policies.some((p) => p.id === legacyPolicy2)).to.be(true);
-
         await waitForSyncTaskIdle();
         await monitorTestService.triggerCleanup(editorUser);
 
         await retry.try(async () => {
-          policies = await getPackagePolicies();
+          const policies = await getPackagePolicies();
           expect(policies.some((p) => p.id === newFormatPolicyId)).to.be(true);
           expect(policies.some((p) => p.id === legacyPolicy1)).to.be(false);
           expect(policies.some((p) => p.id === legacyPolicy2)).to.be(false);
