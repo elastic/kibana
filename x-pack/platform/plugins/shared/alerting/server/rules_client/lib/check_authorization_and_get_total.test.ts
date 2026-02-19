@@ -10,7 +10,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ReadOperations, WriteOperations } from '../../authorization';
+import { WriteOperations } from '../../authorization';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { MAX_RULES_NUMBER_FOR_BULK_OPERATION } from '../common/constants';
 import type { KueryNode } from '@kbn/es-query';
