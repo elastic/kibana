@@ -228,7 +228,14 @@ export const getAxiosInstanceWithAuth = ({
       });
 
       // add a response interceptor to clean up saved tokens if necessary
-      if (connectorTokenClient) {
+      // Skip for per-user OAuth auth types (oauth_authorization_code, ears): they use a
+      // dedicated 401 refresh interceptor, and deleting tokens on any 4xx would (a) wipe
+      // tokens on unrelated errors like 403/404 and (b) race with the 401 refresh path.
+      if (
+        connectorTokenClient &&
+        authTypeId !== 'oauth_authorization_code' &&
+        authTypeId !== 'ears'
+      ) {
         const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
           connectorTokenClient,
           connectorId,
@@ -286,7 +293,6 @@ export const getAxiosInstanceWithAuth = ({
               configurationUtilities,
               tokenUrl: opts.tokenUrl,
               connectorTokenClient,
-              scope: opts.scope,
             });
           }
 

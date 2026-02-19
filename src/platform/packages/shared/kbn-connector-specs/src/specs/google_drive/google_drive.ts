@@ -63,7 +63,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://localhost:8052/google/oauth/authorize',
           tokenUrl: 'https://localhost:8052/google/oauth/token',
-          scope: 'profile,email',
+          scope: 'profile,email,https://www.googleapis.com/auth/drive.readonly',
         },
       },
     ],

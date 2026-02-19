@@ -23,56 +23,59 @@ import { requestEarsToken } from '../lib/request_ears_token';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
-const querySchema = schema.object({
-  code: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.codeParamDescription', {
-          defaultMessage: 'The authorization code returned by the OAuth provider.',
-        }),
-      },
-    })
-  ),
-  state: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.stateParamDescription', {
-          defaultMessage: 'The state parameter for CSRF protection.',
-        }),
-      },
-    })
-  ),
-  error: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.errorParamDescription', {
-          defaultMessage: 'Error code if the authorization failed.',
-        }),
-      },
-    })
-  ),
-  error_description: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate(
-          'xpack.actions.oauthCallback.errorDescriptionParamDescription',
-          {
-            defaultMessage: 'Human-readable error description.',
-          }
-        ),
-      },
-    })
-  ),
-  session_state: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.sessionStateParamDescription', {
-          defaultMessage: 'Session state from the OAuth provider (e.g., Microsoft).',
-        }),
-      },
-    })
-  ),
-});
+const querySchema = schema.object(
+  {
+    code: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.codeParamDescription', {
+            defaultMessage: 'The authorization code returned by the OAuth provider.',
+          }),
+        },
+      })
+    ),
+    state: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.stateParamDescription', {
+            defaultMessage: 'The state parameter for CSRF protection.',
+          }),
+        },
+      })
+    ),
+    error: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.errorParamDescription', {
+            defaultMessage: 'Error code if the authorization failed.',
+          }),
+        },
+      })
+    ),
+    error_description: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate(
+            'xpack.actions.oauthCallback.errorDescriptionParamDescription',
+            {
+              defaultMessage: 'Human-readable error description.',
+            }
+          ),
+        },
+      })
+    ),
+    session_state: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.sessionStateParamDescription', {
+            defaultMessage: 'Session state from the OAuth provider (e.g., Microsoft).',
+          }),
+        },
+      })
+    ),
+  },
+  { unknowns: 'allow' }
+);
 
 interface OAuthConnectorSecrets {
   authType?: string;
@@ -238,7 +241,7 @@ export const oauthCallbackRoute = (
             'Handles the OAuth 2.0 authorization code callback from external providers. Exchanges the authorization code for access and refresh tokens.',
         }),
         tags: ['oas-tag:connectors'],
-        // authRequired: true is the default - user must have valid session
+        // authRequired: true is the default - user must have a valid session
         // The OAuth redirect happens in their browser, so they will have their session cookie
       },
       validate: {
