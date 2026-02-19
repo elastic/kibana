@@ -1670,7 +1670,11 @@ class AgentPolicyService {
     const defaultOutputId = await outputService.getDefaultDataOutputId();
 
     if (!defaultOutputId) {
-      logger.debug(`Deployment canceled!! Default output ID is not defined.`);
+      const message = 'Deployment canceled!! Default output ID is not defined.';
+      logger.debug(message);
+      if (options?.throwOnAnyError) {
+        throw new Error(message);
+      }
       return;
     }
 
@@ -1697,9 +1701,11 @@ class AgentPolicyService {
           })
           .then((response) => {
             if (!response) {
-              logger.debug(
-                `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`
-              );
+              const message = `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`;
+              logger.debug(message);
+              if (options?.throwOnAnyError) {
+                throw new Error(message);
+              }
             }
 
             return response;
