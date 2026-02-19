@@ -16,12 +16,15 @@ fi
 
 # Tag EIS traffic with `X-Elastic-Product-Use-Case` so it can be attributed in logs/metrics.
 # The value is derived from:
-# - prefix:  KBN_EVALS_TELEMETRY_PREFIX (or EVAL_SUITE_ID)
-# - suffix:  KBN_EVALS_TELEMETRY_SUFFIX
+# - prefix:  KBN_EVALS_TELEMETRY_PREFIX (defaults to "eval_suite" in CI)
+# - suffix:  KBN_EVALS_TELEMETRY_SUFFIX (defaults to EVAL_SUITE_ID in CI)
 #
-# e.g. EVAL_SUITE_ID=agent-builder + KBN_EVALS_TELEMETRY_SUFFIX=eval_suite -> agent_builder_eval_suite
+# e.g. EVAL_SUITE_ID=agent-builder -> eval_suite_agent_builder
+if [[ -z "${KBN_EVALS_TELEMETRY_PREFIX:-}" ]]; then
+  export KBN_EVALS_TELEMETRY_PREFIX="eval_suite"
+fi
 if [[ -z "${KBN_EVALS_TELEMETRY_SUFFIX:-}" ]]; then
-  export KBN_EVALS_TELEMETRY_SUFFIX="eval_suite"
+  export KBN_EVALS_TELEMETRY_SUFFIX="${EVAL_SUITE_ID}"
 fi
 
 # Ensure a stable run id across steps/jobs in the same Buildkite build.

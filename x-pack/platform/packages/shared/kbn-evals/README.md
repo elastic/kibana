@@ -203,8 +203,8 @@ Configuration is done via environment variables:
 Example:
 
 ```bash
-EVAL_SUITE_ID=agent-builder KBN_EVALS_TELEMETRY_SUFFIX=eval_suite ...
-# -> X-Elastic-Product-Use-Case: agent_builder_eval_suite
+EVAL_SUITE_ID=agent-builder ...
+# -> X-Elastic-Product-Use-Case: eval_suite_agent_builder
 ```
 
 ### CI ops: sharing a Vault update command
