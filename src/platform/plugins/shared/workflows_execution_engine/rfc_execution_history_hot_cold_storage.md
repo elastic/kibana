@@ -86,7 +86,12 @@ This unified storage reflects the fact that workflow and step executions are fun
 
 A unified type model (`EsBaseExecution`) captures this by defining the shared fields, with `EsWorkflowExecution` and `EsWorkflowStepExecution` extending it with their specific additions.
 
-Storing both types in the same index also enables a key performance optimization: **loading full execution state in a single `mget` call**. Since workflow executions track the IDs of all their child step executions (via `stepExecutionIds`), the execution engine can fetch a workflow and all its steps in one O(1) multi-get request using known document IDs. This avoids costly search queries during the execution loop, which is critical because execution state is loaded and flushed frequently as workflows progress through steps. A single-index design makes this possible without cross-index joins.
+Storing both types in the same index also enables a key performance optimization: **all execution state reads use `mget` exclusively**. All execution and step IDs are deterministic (generated upfront), and the workflow execution document maintains an ordered list of all its child step execution IDs (`stepExecutionIds`). This means:
+
+- **During execution resume**: When the execution engine resumes a workflow (e.g., after a pause or task recovery), it restores the full execution state by loading the workflow and all its steps in a single O(1) `mget` call using known IDs. No search queries are needed, and `mget` is not subject to the index refresh interval -- it always returns the latest written version.
+- **UI polling**: When the UI starts a workflow and polls for its status, it fetches the workflow execution by its known ID via `mget`, then uses the `stepExecutionIds` list from that document to `mget` all step executions in a single follow-up call. The entire execution tree (workflow + all steps) is loaded in at most two `mget` calls, regardless of how many steps exist.
+
+A single-index design makes this possible without cross-index joins, and the deterministic ID scheme means no component ever needs to search for execution documents -- they always know exactly which IDs to fetch.
 
 This repository handles:
 - Creating and updating workflow/step executions during the execution loop
