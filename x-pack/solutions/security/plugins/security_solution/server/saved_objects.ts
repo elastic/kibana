@@ -38,10 +38,7 @@ import {
 const typesTiedToFeatureFlags: Array<{
   feature: keyof ExperimentalFeatures;
   soType: SavedObjectsType;
-}> = [
-  { feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType },
-  { feature: 'entityAnalyticsWatchlistEnabled', soType: watchlistConfigType },
-];
+}> = [{ feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType }];
 
 const types = [
   noteType,
@@ -55,6 +52,7 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   privilegeMonitoringType,
+  watchlistConfigType,
   PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
   protectionUpdatesNoteType,
