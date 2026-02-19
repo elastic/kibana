@@ -11,7 +11,6 @@ import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getRandomSamplerSeed } from '../../lib/helpers/get_random_sampler';
 import type { MinimalApmPluginRequestHandlerContext } from '../../routes/typings';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
