@@ -14,6 +14,7 @@ export { useValidateIndex } from './hooks/use_validate_index';
 export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
+export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
 
 export {
   INDEX_VALIDATION_FAILED,
