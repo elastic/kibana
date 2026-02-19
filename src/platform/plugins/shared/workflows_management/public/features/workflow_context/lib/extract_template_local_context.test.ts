@@ -71,13 +71,16 @@ describe('getTemplateLocalContext', () => {
       expect(ctx.forLoopScopes[0].bodyEnd).toBeGreaterThan(ctx.forLoopScopes[0].bodyStart);
     });
 
-    it('detects nested for-loop scopes', () => {
+    it('detects nested for-loop scopes with correct spatial containment', () => {
       const template =
         '{% for outer in list %} {% for inner in outer.items %} {{ inner }} {% endfor %} {% endfor %}';
       const ctx = getTemplateLocalContext(template, template.length);
-      const names = ctx.forLoopScopes.map((s) => s.variableName);
-      expect(names).toContain('outer');
-      expect(names).toContain('inner');
+      const outerScope = ctx.forLoopScopes.find((s) => s.variableName === 'outer');
+      const innerScope = ctx.forLoopScopes.find((s) => s.variableName === 'inner');
+      expect(outerScope).toBeDefined();
+      expect(innerScope).toBeDefined();
+      expect(innerScope!.bodyStart).toBeGreaterThan(outerScope!.bodyStart);
+      expect(innerScope!.bodyEnd).toBeLessThan(outerScope!.bodyEnd);
     });
 
     it('does not include the built-in forloop object in forLoopScopes', () => {
