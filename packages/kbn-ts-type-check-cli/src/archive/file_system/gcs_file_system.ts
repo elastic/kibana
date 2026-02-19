@@ -129,9 +129,9 @@ export class GcsFileSystem extends AbstractFileSystem {
           : '';
 
       this.log.info(
-        `Restored TypeScript build artifacts (${formatBytes(totalSize)}) in ${(
+        `Restored TypeScript build artifacts (${formatBytes(totalSize)})${speedLabel} in ${(
           elapsed / 1000
-        ).toFixed(1)}s${speedLabel}`
+        ).toFixed(1)}`
       );
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);

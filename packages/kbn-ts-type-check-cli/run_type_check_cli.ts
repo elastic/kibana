@@ -27,6 +27,8 @@ import { getChangedFiles, getAffectedProjectRefs } from './root_refs_config';
 
 run(
   async ({ log, flagsReader, procRunner }) => {
+    const scriptStart = Date.now();
+
     // Lazy-load so --help can run before TS project metadata is available.
     const { TS_PROJECTS } = await import('@kbn/ts-projects');
 
@@ -166,6 +168,9 @@ run(
         await Fsp.unlink(path);
       });
     }
+
+    const elapsed = ((Date.now() - scriptStart) / 1000).toFixed(1);
+    log.info(`Total elapsed time: ${elapsed}s`);
 
     if (didTypeCheckFail) {
       throw createFailError('Unable to build TS project refs');
