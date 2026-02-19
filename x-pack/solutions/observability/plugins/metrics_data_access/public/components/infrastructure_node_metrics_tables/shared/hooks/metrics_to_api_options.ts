@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,

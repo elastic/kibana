@@ -9,21 +9,30 @@ import type { CoreStart } from '@kbn/core/public';
 import React, { lazy, Suspense } from 'react';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
-
 const LazyIntegratedContainerMetricsTable = lazy(
   () => import('./integrated_container_metrics_table')
 );
 
 export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
-  return ({ timerange, filterClauseDsl, sourceId }: NodeMetricsTableProps) => {
+  return ({
+    timerange,
+    filterClauseDsl,
+    sourceId,
+    isOtel,
+    isK8sContainer,
+  }: NodeMetricsTableProps & {
+    isK8sContainer?: boolean;
+  }) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
           core={core}
           metricsClient={metricsClient}
           sourceId={sourceId || 'default'}
-          timerange={timerange}
+          timerange={timerange} 
           filterClauseDsl={filterClauseDsl}
+          isOtel={isOtel}
+          isK8sContainer={isK8sContainer}
         />
       </Suspense>
     );
