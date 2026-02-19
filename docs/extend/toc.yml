@@ -53,6 +53,32 @@ toc:
       - file: kibana-issue-reporting.md
       - file: pr-review.md
       - file: kibana-linting.md
+  - file: scout.md
+    children:
+      - file: scout/getting-started.md
+        children:
+          - file: scout/setup-plugin.md
+          - file: scout/run-tests.md
+          - file: scout/debugging.md
+          - file: scout/best-practices.md
+      - file: scout/core-concepts.md
+        children:
+          - file: scout/fixtures.md
+          - file: scout/page-objects.md
+          - file: scout/api-services.md
+          - file: scout/parallelism.md
+          - file: scout/global-setup-hook.md
+          - file: scout/deployment-tags.md
+          - file: scout/skip-tests.md
+      - file: scout/ui-testing.md
+        children:
+          - file: scout/write-ui-tests.md
+          - file: scout/browser-auth.md
+          - file: scout/a11y-checks.md
+      - file: scout/api-testing.md
+        children:
+          - file: scout/write-api-tests.md
+          - file: scout/api-auth.md
   - file: external-plugin-development.md
     children:
       - file: plugin-tooling.md
@@ -70,8 +96,6 @@ toc:
       - file: kibana-dashboard-plugin.md
       - file: kibana-expressions-plugin.md
       - file: uiactions-plugin.md
-      - file: dashboard-enhanced-plugin.md
-      - file: enhanced-embeddables-plugin.md
       - file: translations-plugin.md
   - file: dependencies-versions.md
   - file: development-telemetry.md

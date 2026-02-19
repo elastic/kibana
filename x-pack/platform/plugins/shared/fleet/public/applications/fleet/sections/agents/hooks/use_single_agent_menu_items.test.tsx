@@ -480,4 +480,16 @@ describe('useSingleAgentMenuItems', () => {
       expect(viewJsonItem?.onClick).toBeDefined();
     });
   });
+
+  it('should return only one menu item (view-json) for OPAMP agent', () => {
+    const { result } = renderer.renderHook(() =>
+      useSingleAgentMenuItems({
+        agent: createMockAgent({ type: 'OPAMP' }),
+        agentPolicy: createMockAgentPolicy(),
+        callbacks: mockCallbacks,
+      })
+    );
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].id).toBe('view-json');
+  });
 });
