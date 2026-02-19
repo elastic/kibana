@@ -7,6 +7,6 @@
 
 import type { EmbeddableConversationProps } from '../embeddable/types';
 
-export interface OpenConversationFlyoutOptions extends EmbeddableConversationProps {
+export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
 }
