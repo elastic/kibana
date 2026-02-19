@@ -19,6 +19,15 @@ import type { Field } from './types';
 import { type AutoCompleteEntitiesApiResponse } from './types';
 import { isRecord } from '../../../common/utils/record_utils';
 
+type FieldMappingLike = Record<string, unknown> & {
+  enabled?: unknown;
+  path?: unknown;
+  properties?: unknown;
+  type?: unknown;
+  index_name?: unknown;
+  fields?: unknown;
+};
+
 function getFieldNamesFromProperties(properties: Record<string, unknown> = {}): Field[] {
   const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
@@ -35,12 +44,14 @@ function getFieldNamesFromFieldMapping(fieldName: string, fieldMapping: unknown)
     return [];
   }
 
-  if (fieldMapping.enabled === false) {
+  const mapping = fieldMapping as FieldMappingLike;
+
+  if (mapping.enabled === false) {
     return [];
   }
   let nestedFields: Field[];
 
-  const pathType = typeof fieldMapping.path === 'string' ? fieldMapping.path : 'full';
+  const pathType = typeof mapping.path === 'string' ? mapping.path : 'full';
 
   function applyPathSettings(nestedFieldNames: Field[]): Field[] {
     if (pathType === 'full') {
@@ -52,23 +63,23 @@ function getFieldNamesFromFieldMapping(fieldName: string, fieldMapping: unknown)
     return nestedFieldNames;
   }
 
-  if (isRecord(fieldMapping.properties)) {
+  if (isRecord(mapping.properties)) {
     // derived object type
-    nestedFields = getFieldNamesFromProperties(fieldMapping.properties);
+    nestedFields = getFieldNamesFromProperties(mapping.properties);
     return applyPathSettings(nestedFields);
   }
 
-  const fieldType = typeof fieldMapping.type === 'string' ? fieldMapping.type : undefined;
+  const fieldType = typeof mapping.type === 'string' ? mapping.type : undefined;
 
   const ret = { name: fieldName, type: fieldType };
 
-  if (typeof fieldMapping.index_name === 'string') {
-    ret.name = fieldMapping.index_name;
+  if (typeof mapping.index_name === 'string') {
+    ret.name = mapping.index_name;
   }
 
-  if (isRecord(fieldMapping.fields)) {
-    nestedFields = Object.entries(fieldMapping.fields).flatMap(([name, mapping]) =>
-      getFieldNamesFromFieldMapping(name, mapping)
+  if (isRecord(mapping.fields)) {
+    nestedFields = Object.entries(mapping.fields).flatMap(([name, childMapping]) =>
+      getFieldNamesFromFieldMapping(name, childMapping)
     );
     nestedFields = applyPathSettings(nestedFields);
     return [ret, ...nestedFields];

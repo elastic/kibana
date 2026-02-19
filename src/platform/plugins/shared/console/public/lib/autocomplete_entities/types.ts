@@ -21,15 +21,6 @@ export interface Field {
   type: string | undefined;
 }
 
-export interface FieldMapping {
-  enabled?: boolean;
-  path?: string;
-  properties?: Record<string, FieldMapping>;
-  type?: string;
-  index_name?: string;
-  fields?: Record<string, FieldMapping>;
-}
-
 export interface AutoCompleteEntitiesApiResponse {
   mappings: IndicesGetMappingResponse;
   aliases: IndicesGetAliasResponse;
