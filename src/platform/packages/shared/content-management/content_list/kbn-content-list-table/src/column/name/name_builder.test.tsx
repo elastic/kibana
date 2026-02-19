@@ -20,7 +20,7 @@ const defaultContext: ColumnBuilderContext = {
   itemConfig: undefined,
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true },
+  supports: { sorting: true, pagination: true, search: false },
 };
 
 describe('name column builder', () => {
@@ -65,7 +65,7 @@ describe('name column builder', () => {
     it('forces sortable false when sorting is unsupported', () => {
       const context: ColumnBuilderContext = {
         ...defaultContext,
-        supports: { sorting: false, pagination: true },
+        supports: { sorting: false, pagination: true, search: false },
       };
 
       const result = buildNameColumn({}, context);
