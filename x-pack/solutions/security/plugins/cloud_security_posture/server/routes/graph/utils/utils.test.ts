@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { transformEntityTypeToIconAndShape, checkIfEntitiesIndexLookupMode } from './utils';
+import { transformEntityTypeToIconAndShape } from './utils';
+import { checkIfEntitiesIndexLookupMode } from './enrichment.utils';
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
