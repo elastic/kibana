@@ -70,6 +70,7 @@ import {
   TableDimensionEditorAdditionalSection,
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
+import { detectColorConfigMismatch } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -674,6 +675,85 @@ export const getDatatableVisualization = ({
     };
   },
 
+  getPersistableState(state, datasource, datasourceState, activeData) {
+    const datasourceLayer = datasource?.getPublicAPI({
+      state: datasourceState?.state,
+      layerId: state.layerId,
+      indexPatterns: {},
+    });
+
+    // If no datasource, return state as-is
+    if (!datasourceLayer) {
+      return { state, references: [] };
+    }
+
+    const currentData = activeData?.[state.layerId];
+    const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+
+    // Fix color config mismatches before saving by applying correct defaults
+    const normalizedColumns = state.columns.map((column) => {
+      const { colorMapping, palette, colorMode } = column;
+
+      // Skip columns without coloring enabled
+      if (!colorMode || colorMode === 'none') {
+        return column;
+      }
+
+      // Use activeData column meta for accurate type detection
+      const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
+      const { isCategory: isBucketable } = getAccessorType(
+        datasourceLayer,
+        column.columnId,
+        columnMeta?.type
+      );
+      const colorByTerms = isBucketable;
+
+      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+        colorByTerms,
+        palette,
+        colorMapping,
+      });
+
+      if (hasValuePaletteOnBucket) {
+        return {
+          ...column,
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          palette: undefined,
+        };
+      }
+
+      if (hasColorMappingOnNumeric) {
+        const columnsToCheck = hasTransposedColumn
+          ? currentData?.columns
+              .filter(({ id }) => getOriginalId(id) === column.columnId)
+              .map(({ id }) => id) ?? []
+          : [column.columnId];
+        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+        const dataBounds = minMaxByColumnId.get(column.columnId) ?? getFallbackDataBounds();
+        const { palette: defaultPalette } = getColorByValuePalette(paletteService, dataBounds);
+
+        return {
+          ...column,
+          palette: defaultPalette,
+          colorMapping: undefined,
+        };
+      }
+
+      return column;
+    });
+
+    const hasChanges = normalizedColumns.some(
+      (col, i) =>
+        col.colorMapping !== state.columns[i].colorMapping ||
+        col.palette !== state.columns[i].palette
+    );
+
+    return {
+      state: hasChanges ? { ...state, columns: normalizedColumns } : state,
+      references: [],
+    };
+  },
+
   getTelemetryEventsOnSave(state, prevState) {
     const colorMappingEvents = state.columns.flatMap((col) => {
       const prevColumn = prevState?.columns?.find((prevCol) => prevCol.columnId === col.columnId);
@@ -849,11 +929,12 @@ export const getDatatableVisualization = ({
         columnMeta?.type
       );
       const colorByTerms = isBucketable;
-      const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
 
-      // Detect mismatches
-      const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
-      const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette;
+      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+        colorByTerms,
+        palette,
+        colorMapping,
+      });
 
       if (hasColorMappingOnNumeric || hasValuePaletteOnBucket) {
         // Get column info for user-friendly message
@@ -890,7 +971,7 @@ export const getDatatableVisualization = ({
               />
             ),
             fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }],
+            displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
           });
         } else if (hasValuePaletteOnBucket) {
           warnings.push({
@@ -912,7 +993,7 @@ export const getDatatableVisualization = ({
               />
             ),
             fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }],
+            displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
           });
         }
       }

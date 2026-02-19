@@ -74,7 +74,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, detectColorConfigMismatch } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -405,11 +405,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
 
-      // A color by value palette has params.stops (numeric color stops), while legacy palettes for bucket columns don't
-      const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
-      // Validate color config matches actual data type
-      const hasColorConfigMismatch =
-        (!colorByTerms && colorMapping != null) || (colorByTerms && isValueBasedPalette);
+      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+        colorByTerms,
+        palette,
+        colorMapping,
+      });
+      const hasColorConfigMismatch = hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 
       let appliedPalette = hasColorConfigMismatch ? undefined : palette;
       let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;

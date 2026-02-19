@@ -5,10 +5,29 @@
  * 2.0.
  */
 
+import type { ColorMapping, ColorStop, PaletteOutput } from '@kbn/coloring';
+
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
   isNumeric = false
 ): 'left' | 'right' | 'center' {
   if (alignment) return alignment;
   return isNumeric ? 'right' : 'left';
+}
+
+export function detectColorConfigMismatch({
+  colorByTerms,
+  palette,
+  colorMapping,
+}: {
+  colorByTerms: boolean;
+  palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>;
+  colorMapping?: ColorMapping.Config | string;
+}) {
+  const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
+
+  return {
+    hasColorMappingOnNumeric: !colorByTerms && colorMapping != null,
+    hasValuePaletteOnBucket: colorByTerms && isValueBasedPalette,
+  };
 }
