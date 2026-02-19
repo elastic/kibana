@@ -91,14 +91,4 @@ describe('<Reason />', () => {
 
     expect(queryByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
-
-  it('renders disabled preview button when fullReasonDisabled is true', () => {
-    const { getByTestId } = renderReason({
-      hit: alertHitWithReason,
-      onShowFullReason: jest.fn(),
-      fullReasonDisabled: true,
-    });
-
-    expect(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).toHaveAttribute('disabled');
-  });
 });

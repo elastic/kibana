@@ -39,22 +39,17 @@ export interface ReasonProps {
    * If not provided, the button won't be rendered.
    */
   onShowFullReason?: () => void;
-  /**
-   * Optional override to disable the full reason preview button.
-   */
-  fullReasonDisabled?: boolean;
 }
 
 /**
  * Displays the alert reason. Supports multiple types of documents.
  */
-export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason, fullReasonDisabled }) => {
+export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason }) => {
   const isAlert = useMemo(
     () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
     [hit]
   );
   const alertReason = useMemo(() => getFieldValue(hit, ALERT_REASON) as string, [hit]);
-  const isShowFullReasonButtonDisabled = fullReasonDisabled ?? !alertReason;
 
   const viewPreview = useMemo(
     () => (
@@ -71,7 +66,7 @@ export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason, fullReasonDisab
               defaultMessage: 'Show full reason',
             }
           )}
-          disabled={isShowFullReasonButtonDisabled}
+          disabled={!alertReason}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
@@ -80,7 +75,7 @@ export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason, fullReasonDisab
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [onShowFullReason, isShowFullReasonButtonDisabled]
+    [onShowFullReason, alertReason]
   );
 
   const alertReasonText = alertReason ? (
