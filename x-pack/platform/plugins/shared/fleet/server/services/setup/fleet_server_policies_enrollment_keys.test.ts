@@ -175,9 +175,12 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     // Fleet server policy must be deployed synchronously
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
-      'fleet-server-policy',
-    ]);
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+      expect.anything(),
+      ['fleet-server-policy'],
+      undefined,
+      { throwOnAnyError: true }
+    );
     // Regular policy1 is up to date so the async task should not be scheduled
     expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
   });
@@ -204,13 +207,35 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     // Fleet server policy deployed synchronously
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
-      'fleet-server-policy',
-    ]);
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+      expect.anything(),
+      ['fleet-server-policy'],
+      undefined,
+      { throwOnAnyError: true }
+    );
     // Regular outdated policy still goes through the async task
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy1', spaceId: undefined },
     ]);
+  });
+
+  it('should throw if fleet server policy deploy fails due to ES bulk error', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+
+    mockedAgentPolicyService.list.mockResolvedValue({
+      items: [{ id: 'fleet-server-policy', revision: 2, is_default_fleet_server: true }],
+    } as any);
+
+    mockedAgentPolicyService.getLatestFleetPolicy.mockResolvedValue({ revision_idx: 1 } as any);
+    mockedAgentPolicyService.deployPolicies.mockRejectedValue(
+      new Error('ES bulk operation failed')
+    );
+
+    await expect(
+      ensureAgentPoliciesFleetServerKeysAndPolicies({ logger, esClient, soClient })
+    ).rejects.toThrow('ES bulk operation failed');
   });
 
   it('should synchronously deploy fleet server policies identified by has_fleet_server flag', async () => {
@@ -230,9 +255,12 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), [
-      'custom-fs-policy',
-    ]);
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(
+      expect.anything(),
+      ['custom-fs-policy'],
+      undefined,
+      { throwOnAnyError: true }
+    );
     expect(scheduleDeployAgentPoliciesTask).not.toBeCalled();
   });
 });

@@ -1650,7 +1650,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[],
-    options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
+    options?: {
+      throwOnAgentlessError?: boolean;
+      throwOnAnyError?: boolean;
+      agentVersions?: string[];
+    }
   ) {
     const t = apm.startTransaction('deploy-policies', 'fleet');
     const logger = this.getLogger('deployPolicies');
@@ -1783,13 +1787,17 @@ class AgentPolicyService {
         return acc;
       }, [] as BulkResponseItem[]);
 
-      logger.warn(
-        `Failed to index documents with ids ${erroredDocuments
-          .map((doc) => doc._id)
-          .join(', ')} during policy deployment: ${erroredDocuments
-          .map((doc) => doc.error?.reason)
-          .join(', ')}`
-      );
+      const errorMessage = `Failed to index documents with ids ${erroredDocuments
+        .map((doc) => doc._id)
+        .join(', ')} during policy deployment: ${erroredDocuments
+        .map((doc) => doc.error?.reason)
+        .join(', ')}`;
+
+      logger.error(errorMessage);
+
+      if (options?.throwOnAnyError) {
+        throw new Error(errorMessage);
+      }
     }
 
     for (const agentPolicy of policies) {

@@ -94,7 +94,9 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
       );
       await agentPolicyService.deployPolicies(
         appContextService.getInternalUserSOClientForSpaceId(spaceId),
-        ids
+        ids,
+        undefined,
+        { throwOnAnyError: true }
       );
     }
   }
