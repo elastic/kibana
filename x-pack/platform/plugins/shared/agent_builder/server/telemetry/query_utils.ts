@@ -208,6 +208,7 @@ export class QueryUtils {
       const response = await this.esClient.search({
         index: conversationIndexName,
         size: 0,
+        track_total_hits: true,
         aggs: {
           rounds_distribution: {
             terms: {

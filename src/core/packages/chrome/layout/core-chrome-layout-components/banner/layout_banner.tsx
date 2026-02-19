@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_banner.styles';
 
@@ -28,6 +29,7 @@ export const LayoutBanner = ({ children }: LayoutBannerProps) => {
       css={styles.root}
       className="kbnChromeLayoutBanner"
       data-test-subj="kbnChromeLayoutBanner"
+      {...euiIncludeSelectorInFocusTrap.prop}
     >
       {children}
     </section>
