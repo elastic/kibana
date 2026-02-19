@@ -85,7 +85,7 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Propagates ES|QL execution errors [#250605]({{kib-pull}}250605).
 * Updates the AI Insight UI description [#250137]({{kib-pull}}250137).
 * Fixes query sync on save and adds debounce for the preview chart [#249833]({{kib-pull}}249833).
-* Fixes monitoring breadcrumbs for solution view [#249751]({{kib-pull}}249751).
+* Fixes Stack Monitoring breadcrumb when in solution view [#249751]({{kib-pull}}249751).
 * Disables editing of significant event queries [#249716]({{kib-pull}}249716).
 
 ## 9.3.0 [kibana-9.3.0-release-notes]
