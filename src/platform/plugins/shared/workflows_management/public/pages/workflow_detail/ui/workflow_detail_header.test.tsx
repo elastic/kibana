@@ -13,7 +13,8 @@ import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
-  _setComputedDataInternal,
+  _clearComputedData,
+  setHasYamlSchemaValidationErrors,
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -72,27 +73,33 @@ describe('WorkflowDetailHeader', () => {
 
   const renderWithProviders = (
     component: React.ReactElement,
-    { isValid = true, hasChanges = false }: { isValid?: boolean; hasChanges?: boolean } = {}
+    {
+      isValid = true,
+      hasChanges = false,
+      hasYamlSchemaValidationErrors = false,
+      serverValid = true,
+    }: {
+      isValid?: boolean;
+      hasChanges?: boolean;
+      hasYamlSchemaValidationErrors?: boolean;
+      serverValid?: boolean;
+    } = {}
   ) => {
     const store = createMockStore();
 
-    // Set up the workflow in the store
-    store.dispatch(setWorkflow(mockWorkflow));
+    // Set up the workflow in the store (with server-side valid flag)
+    store.dispatch(setWorkflow({ ...mockWorkflow, valid: serverValid }));
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
-    // Set computed data to control syntax validation
-    if (isValid) {
-      store.dispatch(
-        _setComputedDataInternal({
-          workflowDefinition: {
-            version: '1',
-            name: 'Test Workflow',
-            enabled: true,
-            triggers: [],
-            steps: [],
-          },
-        })
-      );
+    if (!isValid) {
+      // Clear the computed data that the middleware auto-generated from the yaml,
+      // so that selectIsYamlSyntaxValid returns false
+      store.dispatch(_clearComputedData());
+    }
+
+    // Simulate strict validation errors from Monaco
+    if (hasYamlSchemaValidationErrors) {
+      store.dispatch(setHasYamlSchemaValidationErrors(true));
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
@@ -158,13 +165,37 @@ describe('WorkflowDetailHeader', () => {
     expect(container).toBeTruthy();
   });
 
-  // We shouldn't rely on parseResult to determine if the yaml is valid now
-  // instead we should move validationErrors to the store and use it to determine it
-  it.skip('disables run workflow button when yaml is invalid', () => {
+  it('disables run workflow button when yaml has syntax errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: false,
     });
     expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('disables run workflow button when yaml has validation errors', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      hasYamlSchemaValidationErrors: true,
+    });
+    expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('disables enabled toggle when yaml has validation errors', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      hasYamlSchemaValidationErrors: true,
+    });
+    const toggle = result.getByRole('switch');
+    expect(toggle).toBeDisabled();
+  });
+
+  it('disables enabled toggle when server reports workflow as invalid (e.g. initial page load)', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      serverValid: false,
+    });
+    const toggle = result.getByRole('switch');
+    expect(toggle).toBeDisabled();
   });
 
   it('enables run workflow button when yaml is valid', () => {
