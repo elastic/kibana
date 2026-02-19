@@ -217,6 +217,7 @@ export const AgentResponseSchema = schema.object({
     schema.literal('PERMANENT'),
     schema.literal('EPHEMERAL'),
     schema.literal('TEMPORARY'),
+    schema.literal('OPAMP'),
   ]),
   active: schema.boolean(),
   enrolled_at: schema.string(),
@@ -301,6 +302,7 @@ export const AgentResponseSchema = schema.object({
       .object({
         id: schema.string(),
         version: schema.string(),
+        type: schema.maybe(schema.string()),
       })
       .extendsDeep({
         unknowns: 'allow',
@@ -331,6 +333,12 @@ export const AgentResponseSchema = schema.object({
       ),
     })
   ),
+  identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  non_identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  sequence_num: schema.maybe(schema.number()),
+  capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  effective_config: schema.maybe(schema.any()),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -351,6 +359,18 @@ export const GetOneAgentRequestSchema = {
     withMetrics: schema.boolean({ defaultValue: false }),
   }),
 };
+
+export const GetAgentEffectiveConfigRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      meta: { description: 'The agent ID to get effective config of' },
+    }),
+  }),
+};
+
+export const GetAgentEffectiveConfigResponseSchema = schema.object({
+  effective_config: schema.maybe(schema.any()),
+});
 
 export const PostNewAgentActionRequestSchema = {
   body: schema.object({
