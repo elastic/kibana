@@ -227,10 +227,6 @@ class StandaloneSpecDefinitionsService {
     }
 
     try {
-      // Register TypeScript loader
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@kbn/babel-register').install();
-
       // Load the JS spec loaders
       // Dynamic require is necessary here because the path is determined at runtime based on version directories
 
