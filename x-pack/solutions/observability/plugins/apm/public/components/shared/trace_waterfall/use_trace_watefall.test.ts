@@ -219,7 +219,10 @@ describe('getFlattenedTraceWaterfall', () => {
       docType: 'span',
     };
 
-    const deepMap = getTraceParentChildrenMap([deepRoot, ...deepChildren, siblingEarly, siblingLate], false);
+    const deepMap = getTraceParentChildrenMap(
+      [deepRoot, ...deepChildren, siblingEarly, siblingLate],
+      false
+    );
 
     const result = getTraceWaterfall({
       rootItem: deepRoot,
