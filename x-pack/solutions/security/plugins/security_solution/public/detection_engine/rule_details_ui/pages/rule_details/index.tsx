@@ -8,12 +8,14 @@
 /* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
+import type { EuiResizeObserverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiResizeObserver,
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
@@ -169,13 +171,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 /**
- * Sets min-height on tab container to minimize page hop when switching to tabs with less content
- */
-const StyledMinHeightTabContainer = styled.div`
-  min-height: 800px;
-`;
-
-/**
  * Wrapper for the About, Definition and Schedule sections.
  * - Allows for overflow wrapping of extremely long text, that might otherwise break the layout.
  */
@@ -209,6 +204,16 @@ const defaultGroupingOptions = [
     key: 'destination.address',
   },
 ];
+
+const DEFAULT_PANEL_HEADER_OPTIONS = {
+  border: true,
+  hideSubtitle: true,
+} as const;
+
+/**
+ * Cutoff at which the About and Definition sections stack vertically to prevent content squishing (600px for About and 400px for Definition)
+ */
+const ABOUT_CONTENT_STACK_WIDTH_THRESHOLD = 1000;
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearSelected: ({ id }: { id: string }) => dispatch(dataTableActions.clearSelected({ id })),
@@ -297,6 +302,7 @@ export const RuleDetailsPage = connector(
 
     const { pollForSignalIndex } = useSignalHelpers();
     const [rule, setRule] = useState<RuleResponse | null>(null);
+    const [shouldStackAboutContent, setShouldStackAboutContent] = useState(false);
     const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
 
     const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
@@ -568,6 +574,14 @@ export const RuleDetailsPage = connector(
       [alertMergedFilters, refreshRule]
     );
 
+    const onResize: EuiResizeObserverProps['onResize'] = useCallback(
+      (dimensions) => {
+        if (!dimensions) return;
+        setShouldStackAboutContent(dimensions.width < ABOUT_CONTENT_STACK_WIDTH_THRESHOLD);
+      },
+      [setShouldStackAboutContent]
+    );
+
     const {
       isBulkDuplicateConfirmationVisible,
       showBulkDuplicateConfirmation,
@@ -747,58 +761,88 @@ export const RuleDetailsPage = connector(
                   <TabNavigation navTabs={pageTabs} />
                   {ruleError}
                   <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
-                  <EuiSpacer />
                 </Display>
-                <StyledMinHeightTabContainer>
+                <div>
                   <Routes>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.overview})`}>
                       <RuleFieldsSectionWrapper>
-                        <EuiFlexGroup>
-                          <StyledEuiFlexItem
-                            data-test-subj="aboutRule"
-                            component="section"
-                            flexBasis={60}
-                          >
-                            {rule !== null && (
-                              <StepAboutRuleToggleDetails
-                                loading={isLoading}
-                                stepData={aboutRuleData}
-                                stepDataDetails={modifiedAboutRuleDetailsData}
-                                rule={rule}
-                              />
-                            )}
-                          </StyledEuiFlexItem>
-                          <StyledEuiFlexItem grow={1} component="section" flexBasis={40}>
-                            <EuiFlexGroup direction="column">
-                              <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                                <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                                  {rule !== null && !isStartingJobs && (
-                                    <RuleDefinitionSection
-                                      rule={rule}
-                                      isInteractive
-                                      dataTestSubj="definitionRule"
-                                    />
+                        <EuiResizeObserver onResize={onResize}>
+                          {(resizeRef) => (
+                            <EuiFlexGroup
+                              direction={shouldStackAboutContent ? 'column' : 'row'}
+                              ref={resizeRef}
+                            >
+                              <StyledEuiFlexItem
+                                data-test-subj="aboutRule"
+                                component="section"
+                                flexBasis={60}
+                              >
+                                {rule !== null && (
+                                  <StepAboutRuleToggleDetails
+                                    loading={isLoading}
+                                    stepData={aboutRuleData}
+                                    stepDataDetails={modifiedAboutRuleDetailsData}
+                                    rule={rule}
+                                  />
+                                )}
+                              </StyledEuiFlexItem>
+                              <StyledEuiFlexItem grow={1} component="section" flexBasis={40}>
+                                <EuiFlexGroup direction="column">
+                                  <EuiFlexItem
+                                    component="section"
+                                    grow={1}
+                                    data-test-subj="defineRule"
+                                  >
+                                    <StepPanel
+                                      loading={isLoading}
+                                      title={ruleI18n.DEFINITION}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                    >
+                                      {rule !== null && !isStartingJobs && (
+                                        <RuleDefinitionSection
+                                          rule={rule}
+                                          isInteractive
+                                          dataTestSubj="definitionRule"
+                                        />
+                                      )}
+                                    </StepPanel>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    data-test-subj="schedule"
+                                    component="section"
+                                    grow={1}
+                                  >
+                                    <StepPanel
+                                      loading={isLoading}
+                                      title={ruleI18n.SCHEDULE}
+                                      headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                    >
+                                      {rule != null && <RuleScheduleSection rule={rule} />}
+                                    </StepPanel>
+                                  </EuiFlexItem>
+                                  {hasActions && (
+                                    <EuiFlexItem
+                                      data-test-subj="actions"
+                                      component="section"
+                                      grow={1}
+                                    >
+                                      <StepPanel
+                                        loading={isLoading}
+                                        title={ruleI18n.ACTIONS}
+                                        headerProps={DEFAULT_PANEL_HEADER_OPTIONS}
+                                      >
+                                        <StepRuleActionsReadOnly
+                                          addPadding={false}
+                                          defaultValues={ruleActionsData}
+                                        />
+                                      </StepPanel>
+                                    </EuiFlexItem>
                                   )}
-                                </StepPanel>
-                              </EuiFlexItem>
-                              <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                                <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                                  {rule != null && <RuleScheduleSection rule={rule} />}
-                                </StepPanel>
-                              </EuiFlexItem>
-                              {hasActions && (
-                                <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-                                  <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
-                                    <StepRuleActionsReadOnly
-                                      addPadding={false}
-                                      defaultValues={ruleActionsData}
-                                    />
-                                  </StepPanel>
-                                </EuiFlexItem>
-                              )}
+                                </EuiFlexGroup>
+                              </StyledEuiFlexItem>
                             </EuiFlexGroup>
-                          </StyledEuiFlexItem>
-                        </EuiFlexGroup>
+                          )}
+                        </EuiResizeObserver>
                       </RuleFieldsSectionWrapper>
                     </Route>
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
@@ -895,7 +939,7 @@ export const RuleDetailsPage = connector(
                       <ExecutionEventsTable ruleId={ruleId} />
                     </Route>
                   </Routes>
-                </StyledMinHeightTabContainer>
+                </div>
               </SecuritySolutionPageWrapper>
             </RuleCustomizationsContextProvider>
           </RuleDetailsContextProvider>
