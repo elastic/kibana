@@ -29,7 +29,8 @@ test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('navigate to journey steps', async () => {
-      await page.getByText('18 seconds').click();
+      // eslint-disable-next-line playwright/no-nth-methods
+      await page.getByText('18 seconds').first().click();
       await expect(page).toHaveURL(
         /\/app\/uptime\/journey\/9f217c22-4b17-11ec-b976-aa665a54da40\/steps/
       );
@@ -37,7 +38,8 @@ test.describe('StepsDuration', { tag: tags.stateful.classic }, () => {
 
     await test.step('verify step duration chart', async () => {
       await expect(async () => {
-        await page.getByText('6 Steps - 3 succeeded').click();
+        // eslint-disable-next-line playwright/no-nth-methods
+        await page.getByText('6 Steps - 3 succeeded').first().click();
         await page.hover('text=8.9 sec');
         await expect(page.getByText('Explore')).toBeVisible();
         await expect(page.getByText('area chart')).toBeVisible();

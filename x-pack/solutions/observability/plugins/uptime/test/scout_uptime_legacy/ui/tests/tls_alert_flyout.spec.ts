@@ -19,7 +19,7 @@ test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
     await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
 
     await test.step('open TLS certificate rule flyout', async () => {
-      await page.getByText('Create rule').click();
+      await page.testSubj.locator('createRuleButton').click();
       await pageObjects.uptimeOverview.waitForLoadingToFinish();
       await page.testSubj.click('"xpack.uptime.alerts.tlsCertificate-SelectOption"');
       await pageObjects.uptimeOverview.waitForLoadingToFinish();

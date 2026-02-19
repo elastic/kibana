@@ -45,7 +45,7 @@ test.describe('Observer location', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(NO_LOCATION_MONITOR_ID);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
-    await expect(page.getByText('100.00 %')).toBeVisible();
+    await expect(page.testSubj.locator('uptimeOverallAvailability')).toHaveText('100.00 %');
   });
 
   test('displays less monitor availability', async ({ pageObjects, browserAuth, page }) => {
@@ -53,6 +53,6 @@ test.describe('Observer location', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(LESS_AVAIL_MONITOR_ID);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
-    await expect(page.getByText('50.00 %')).toBeVisible();
+    await expect(page.testSubj.locator('uptimeOverallAvailability')).toHaveText('50.00 %');
   });
 });
