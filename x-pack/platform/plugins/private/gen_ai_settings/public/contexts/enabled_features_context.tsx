@@ -70,7 +70,8 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const anonymizationCapabilities = capabilities.anonymization;
     const showAnonymizationProfilesSection =
       isAnonymizationCapabilities(anonymizationCapabilities) &&
-      anonymizationCapabilities.show === true;
+      anonymizationCapabilities.show === true &&
+      config.showAnonymizationProfileSettings;
 
     return {
       showSpacesIntegration: config.showSpacesIntegration,
