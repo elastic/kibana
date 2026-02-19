@@ -186,6 +186,27 @@ Create/update a specific judge override label:
   --judge litellm-llm-gateway-gpt-4o
 ```
 
+### CI telemetry: tagging EIS traffic
+
+When running evals against **EIS-backed models**, `@kbn/evals` can tag inference requests with:
+
+- **Header**: `X-Elastic-Product-Use-Case`
+- **Value**: `(<prefix>[_<suffix>])`
+
+This value is sent via `metadata.connectorTelemetry.pluginId` on inference API calls and is forwarded to the ES `_inference` request.
+
+Configuration is done via environment variables:
+
+- **prefix**: `KBN_EVALS_TELEMETRY_PREFIX` (defaults to `EVAL_SUITE_ID`)
+- **suffix**: `KBN_EVALS_TELEMETRY_SUFFIX`
+
+Example:
+
+```bash
+EVAL_SUITE_ID=agent-builder KBN_EVALS_TELEMETRY_SUFFIX=eval_suite ...
+# -> X-Elastic-Product-Use-Case: agent_builder_eval_suite
+```
+
 ### CI ops: sharing a Vault update command
 
 If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
