@@ -56,7 +56,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {isEventOrAlert && item.isAlert && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warningFilled" size="m" color="danger" />
+          <EuiIcon type="warningFilled" size="m" color="danger" aria-hidden={true} />
         </EuiFlexItem>
       )}
       {isEntity && item.icon && (
@@ -65,6 +65,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
             type={item.icon}
             size="m"
             color="primary"
+            aria-hidden={true}
             css={css`
               /* Icon is 1px mis-aligned vs link (entity name) */
               position: relative;
