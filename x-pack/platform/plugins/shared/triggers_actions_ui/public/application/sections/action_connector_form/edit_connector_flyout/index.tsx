@@ -42,11 +42,6 @@ import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
-import {
-  OAuthRedirectMode,
-  useConnectorOAuthConnect,
-} from '../../../hooks/oauth/use_connector_oauth_connect';
-import { useConnectorOAuthDisconnect } from '../../../hooks/oauth/use_connector_oauth_disconnect';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -83,7 +78,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     application: { capabilities },
-    notifications: { toasts },
   } = useKibana().services;
 
   const isMounted = useRef(false);
@@ -136,55 +130,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(true);
   const [isSaved, setIsSaved] = useState<boolean>(false);
-  const { connect, isConnecting, isAwaitingCallback } = useConnectorOAuthConnect({
-    connectorId: connector.id,
-    redirectMode: OAuthRedirectMode.NewTab,
-    onSuccess: () => {
-      toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationSuccessTitle',
-          { defaultMessage: 'Authorization successful' }
-        ),
-        text: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationSuccessMessage',
-          { defaultMessage: 'Your connector has been authorized successfully.' }
-        ),
-      });
-    },
-    onError: (error) => {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthAuthorizationErrorTitle',
-          { defaultMessage: 'Authorization failed' }
-        ),
-        text: error.message,
-      });
-    },
-  });
-  const { disconnect, isDisconnecting } = useConnectorOAuthDisconnect({
-    connectorId: connector.id,
-    onSuccess: () => {
-      toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectSuccessTitle',
-          { defaultMessage: 'Disconnected' }
-        ),
-        text: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectSuccessMessage',
-          { defaultMessage: 'Your connector has been disconnected from OAuth.' }
-        ),
-      });
-    },
-    onError: (error) => {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.editConnectorForm.oauthDisconnectErrorTitle',
-          { defaultMessage: 'Disconnect failed' }
-        ),
-        text: error.message,
-      });
-    },
-  });
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
@@ -292,11 +237,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     updateConnector,
     onFormModifiedChange,
   ]);
-
-  const handleAuthorize = useCallback(() => {
-    if (!connector) return;
-    connect();
-  }, [connector, connect]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -440,12 +380,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           disabled={disabled}
           showButtons={showButtons}
           onClickSave={onClickSave}
-          connector={connector}
-          onAuthorize={handleAuthorize}
-          isAuthorizing={isConnecting}
-          isAwaitingCallback={isAwaitingCallback}
-          onDisconnect={disconnect}
-          isDisconnecting={isDisconnecting}
         />
       </EuiFlyout>
       {showConfirmModal && (
