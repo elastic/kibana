@@ -2,8 +2,11 @@
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use it except in compliance with the Elastic License 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -12,16 +15,18 @@
  *
  * Usage:
  *   node scripts/generate_eis_preconfigured_connectors.js
- *   ES_URL=http://localhost:9200 ES_AUTH=elastic:changeme node scripts/generate_eis_preconfigured_connectors.js
+ *   ELASTICSEARCH_HOST=http://localhost:9200 ELASTICSEARCH_USERNAME=elastic ELASTICSEARCH_PASSWORD=changeme node scripts/generate_eis_preconfigured_connectors.js
  *
- * Defaults: ES_URL=http://localhost:9200, ES_AUTH=elastic:changeme
+ * Defaults: ELASTICSEARCH_HOST=http://localhost:9200, ELASTICSEARCH_USERNAME=elastic, ELASTICSEARCH_PASSWORD=changeme
  * Requires Elasticsearch with EIS/CCM connected so GET /_inference/chat_completion/_all returns endpoints.
  */
 
-const ES_URL = process.env.ES_URL || 'http://localhost:9200';
-const ES_AUTH = process.env.ES_AUTH || 'elastic:changeme';
+var ELASTICSEARCH_HOST =
+  process.env.ELASTICSEARCH_HOST || process.env.ES_URL || 'http://localhost:9200';
+var ELASTICSEARCH_USERNAME = process.env.ELASTICSEARCH_USERNAME || 'elastic';
+var ELASTICSEARCH_PASSWORD = process.env.ELASTICSEARCH_PASSWORD || 'changeme';
 
-/** @typedef {{ inference_id: string, task_type: string, service: string, service_settings?: { model_id?: string } }} Endpoint */
+/** @typedef {{ inference_id: string, task_type: string, service: string, service_settings?: { model_id?: string } }} EisInferenceEndpoint */
 
 /**
  * @param {string} modelId
@@ -40,71 +45,86 @@ function toConnectorId(modelId) {
  * @returns {string} Human-readable name for the connector
  */
 function toDisplayName(modelId) {
-  const withSpaces = modelId.replace(/[-._]/g, ' ');
-  return 'EIS ' + withSpaces.replace(/\b\w/g, (c) => c.toUpperCase());
+  var withSpaces = modelId.replace(/[-._]/g, ' ');
+  return (
+    'EIS ' +
+    withSpaces.replace(/\b\w/g, function (c) {
+      return c.toUpperCase();
+    })
+  );
 }
 
 /**
- * @param {Endpoint} ep
+ * @param {EisInferenceEndpoint} endpoint
  * @returns {string} YAML block for one preconfigured connector
  */
-function endpointToYaml(ep) {
-  const modelId =
-    ep.service_settings?.model_id ||
-    ep.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
-  const id = toConnectorId(modelId);
-  const name = toDisplayName(modelId);
-  return `  ${id}:
-    name: ${name}
-    actionTypeId: .inference
-    exposeConfig: true
-    config:
-      provider: "${ep.service}"
-      taskType: "${ep.task_type}"
-      inferenceId: "${ep.inference_id}"
-      providerConfig:
-        model_id: "${modelId}"`;
+function endpointToYaml(endpoint) {
+  var modelId =
+    endpoint.service_settings && endpoint.service_settings.model_id
+      ? endpoint.service_settings.model_id
+      : endpoint.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
+  var id = toConnectorId(modelId);
+  var name = toDisplayName(modelId);
+  return (
+    '  ' +
+    id +
+    ':\n    name: ' +
+    name +
+    '\n    actionTypeId: .inference\n    exposeConfig: true\n    config:\n      provider: "' +
+    endpoint.service +
+    '"\n      taskType: "' +
+    endpoint.task_type +
+    '"\n      inferenceId: "' +
+    endpoint.inference_id +
+    '"\n      providerConfig:\n        model_id: "' +
+    modelId +
+    '"'
+  );
 }
 
-async function main() {
-  const url = `${ES_URL.replace(/\/$/, '')}/_inference/chat_completion/_all`;
-  const auth = Buffer.from(ES_AUTH, 'utf8').toString('base64');
+function main() {
+  var url = ELASTICSEARCH_HOST.replace(/\/$/, '') + '/_inference/chat_completion/_all';
+  var auth = Buffer.from(ELASTICSEARCH_USERNAME + ':' + ELASTICSEARCH_PASSWORD, 'utf8').toString(
+    'base64'
+  );
 
-  let res;
-  try {
-    res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Basic ${auth}`,
-        'Content-Type': 'application/json',
-      },
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: 'Basic ' + auth,
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (text) {
+          console.error('Elasticsearch returned ' + res.status + ': ' + text);
+          process.exit(1);
+        });
+      }
+      return res.json();
+    })
+    .then(function (body) {
+      var endpoints = body.endpoints || [];
+      if (endpoints.length === 0) {
+        console.error('No chat_completion endpoints found.');
+        process.exit(1);
+      }
+      var lines = [
+        '# Paste these blocks under xpack.actions.preconfigured: in config/kibana.dev.yml',
+      ];
+      for (var i = 0; i < endpoints.length; i++) {
+        lines.push(endpointToYaml(endpoints[i]));
+      }
+      console.log(lines.join('\n'));
+    })
+    .catch(function (err) {
+      console.error('Failed to request Elasticsearch:', err.message);
+      console.error(
+        'Ensure ES is running and ELASTICSEARCH_HOST / ELASTICSEARCH_USERNAME / ELASTICSEARCH_PASSWORD are correct.'
+      );
+      process.exit(1);
     });
-  } catch (err) {
-    console.error('Failed to request Elasticsearch:', err.message);
-    console.error('Ensure ES is running and ES_URL/ES_AUTH are correct.');
-    process.exit(1);
-  }
-
-  if (!res.ok) {
-    const text = await res.text();
-    console.error(`Elasticsearch returned ${res.status}: ${text}`);
-    process.exit(1);
-  }
-
-  /** @type {{ endpoints?: Endpoint[] }} */
-  const body = await res.json();
-  const endpoints = body.endpoints || [];
-
-  if (endpoints.length === 0) {
-    console.error('No chat_completion endpoints found.');
-    process.exit(1);
-  }
-
-  const lines = [
-    '# Paste these blocks under xpack.actions.preconfigured: in config/kibana.dev.yml',
-    ...endpoints.map(endpointToYaml),
-  ];
-  console.log(lines.join('\n'));
 }
 
 main();
