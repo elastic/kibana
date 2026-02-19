@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+} from '@kbn/apm-types';
 import type { ExitSpanSample } from '../../data_registry/data_registry_types';
 import type { ConnectionWithKey } from './types';
 
@@ -15,18 +21,17 @@ export function buildConnectionsFromSpans(spans: ExitSpanSample[]): ConnectionWi
   const connectionMap = new Map<string, ConnectionWithKey>();
 
   for (const span of spans) {
-    const source = { 'service.name': span.serviceName };
+    const source = { [SERVICE_NAME]: span.serviceName };
 
     const target = span.destinationService
-      ? { 'service.name': span.destinationService.serviceName }
+      ? { [SERVICE_NAME]: span.destinationService.serviceName }
       : {
-          'span.destination.service.resource': span.spanDestinationServiceResource,
-          'span.type': span.spanType,
-          'span.subtype': span.spanSubtype,
+          [SPAN_DESTINATION_SERVICE_RESOURCE]: span.spanDestinationServiceResource,
+          [SPAN_TYPE]: span.spanType,
+          [SPAN_SUBTYPE]: span.spanSubtype,
         };
 
-    // Create a unique key for deduplication using source service + dependency resource
-    const sourceName = source['service.name'];
+    const sourceName = source[SERVICE_NAME];
     const dependencyName = span.spanDestinationServiceResource;
     const connectionKey = buildConnectionKey(sourceName, dependencyName);
 

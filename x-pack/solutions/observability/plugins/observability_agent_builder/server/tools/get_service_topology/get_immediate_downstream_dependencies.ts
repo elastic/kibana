@@ -6,21 +6,25 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { SERVICE_NAME } from '@kbn/apm-types';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+} from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { ServiceTopologyResponse, ExternalNode, ServiceTopologyNode } from './types';
+import type { ApmConnectionStatsEntry } from '../../data_registry/data_registry_types';
+import type { ServiceTopologyResponse, ServiceTopologyConnection } from './types';
 import { computeConnectionMetrics } from './get_connection_metrics';
 
 /**
- * Fast path for depth=1 downstream: queries pre-aggregated service_destination
- * metrics (1m rollups) instead of scanning raw span events. This is O(1)
- * aggregation cost regardless of trace volume — dramatically faster for
- * customers with billions of traces or traces with 20,000+ spans.
+ * Fast path for depth=1 downstream: uses getConnectionStats which queries
+ * pre-aggregated service_destination metrics (1m rollups) plus destination map
+ * for service.name resolution, with proper deduplication when multiple
+ * span.destination.service.resource values resolve to the same service.
  *
- * Trade-off: targets are identified by span.destination.service.resource
- * (e.g., "checkout-proxy:5050") rather than resolved service.name
- * (e.g., "checkout-service"). This is acceptable for LLM consumption since
- * the resource name + span.type/subtype clearly identifies the dependency.
+ * This is O(1) aggregation cost regardless of trace volume — dramatically
+ * faster for customers with billions of traces or traces with 20,000+ spans.
  */
 export async function getImmediateDownstreamDependencies({
   dataRegistry,
@@ -39,39 +43,34 @@ export async function getImmediateDownstreamDependencies({
 }): Promise<ServiceTopologyResponse> {
   logger.debug(`Using metrics-based fast path for immediate downstream of "${serviceName}"`);
 
-  const statsItems = await dataRegistry.getData('apmConnectionStats', {
+  const statsEntries = await dataRegistry.getData('apmConnectionStats', {
     request,
     start: startMs,
     end: endMs,
     filter: termQuery(SERVICE_NAME, serviceName),
-    numBuckets: 1,
-    withTimeseries: false,
   });
 
-  if (!statsItems) {
+  if (!statsEntries) {
     return { connections: [] };
   }
 
-  const connections = statsItems.map((item) => {
-    const { latency_count, latency_sum, error_count, success_count } = item.value;
-
-    return {
-      source: { 'service.name': item.from.serviceName } as ServiceTopologyNode,
-      target: {
-        'span.destination.service.resource': item.to.dependencyName,
-        'span.type': item.to.spanType,
-        'span.subtype': item.to.spanSubtype,
-      } as ExternalNode,
-      metrics: computeConnectionMetrics({
-        latencyCount: latency_count,
-        latencySum: latency_sum,
-        errorCount: error_count,
-        successCount: success_count,
-        start: startMs,
-        end: endMs,
-      }),
-    };
-  });
+  const connections: ServiceTopologyConnection[] = statsEntries.map((entry) => ({
+    source: { [SERVICE_NAME]: serviceName },
+    target: toTarget(entry),
+    metrics: computeConnectionMetrics(entry.metrics),
+  }));
 
   return { connections };
+}
+
+function toTarget(entry: ApmConnectionStatsEntry) {
+  if (entry.type === 'service') {
+    return { [SERVICE_NAME]: entry.serviceName };
+  }
+
+  return {
+    [SPAN_DESTINATION_SERVICE_RESOURCE]: entry.dependencyName,
+    [SPAN_TYPE]: entry.spanType,
+    [SPAN_SUBTYPE]: entry.spanSubtype,
+  };
 }

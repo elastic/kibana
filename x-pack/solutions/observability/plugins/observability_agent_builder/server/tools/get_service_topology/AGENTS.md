@@ -8,8 +8,6 @@ Surface upstream and downstream service dependencies for a given service, enabli
 
 Core logic: `x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_service_topology/get_service_topology.ts`
 
-Data providers (registered in APM plugin): `apmTraceSampleIds`, `apmExitSpanSamples`, `apmConnectionStats`
-
 ## Direction Semantics
 
 - **downstream**: Services and dependencies _called by_ the queried service (and its descendants).

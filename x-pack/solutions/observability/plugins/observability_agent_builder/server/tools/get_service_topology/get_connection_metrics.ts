@@ -10,6 +10,7 @@ import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query
 import type { KibanaRequest } from '@kbn/core/server';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { TraceMetrics } from '../../data_registry/data_registry_types';
 import { buildConnectionKey } from './build_connections_from_spans';
 import type { ConnectionMetrics, ConnectionWithKey, ServiceTopologyConnection } from './types';
 
@@ -17,7 +18,18 @@ interface MetricsMap {
   [key: string]: ConnectionMetrics;
 }
 
-export function computeConnectionMetrics({
+export function computeConnectionMetrics(params: TraceMetrics): ConnectionMetrics {
+  return {
+    latencyMs: params.latencyUs !== null ? params.latencyUs / 1000 : undefined,
+    throughputPerMin:
+      params.throughputPerMin !== null
+        ? Math.round(params.throughputPerMin * 1000) / 1000
+        : undefined,
+    errorRate: params.errorRate ?? undefined,
+  };
+}
+
+function rawCountsToMetrics({
   latencyCount,
   latencySum,
   errorCount,
@@ -31,16 +43,13 @@ export function computeConnectionMetrics({
   successCount: number;
   start: number;
   end: number;
-}): ConnectionMetrics {
+}): TraceMetrics {
   const totalCount = errorCount + successCount;
   return {
-    errorRate: totalCount > 0 ? errorCount / totalCount : undefined,
-    latencyMs: latencyCount > 0 ? latencySum / latencyCount / 1000 : undefined,
+    latencyUs: latencyCount > 0 ? latencySum / latencyCount : null,
     throughputPerMin:
-      latencyCount > 0
-        ? Math.round(calculateThroughputWithRange({ start, end, value: latencyCount }) * 1000) /
-          1000
-        : undefined,
+      latencyCount > 0 ? calculateThroughputWithRange({ start, end, value: latencyCount }) : null,
+    errorRate: totalCount > 0 ? errorCount / totalCount : null,
   };
 }
 
@@ -61,7 +70,7 @@ export async function getConnectionMetrics({
     return {};
   }
 
-  const statsItems = await dataRegistry.getData('apmConnectionStats', {
+  const statsItems = await dataRegistry.getData('apmConnectionStatsItems', {
     request,
     start,
     end,
@@ -69,8 +78,6 @@ export async function getConnectionMetrics({
       serviceNames.length > 1
         ? [{ terms: { [SERVICE_NAME]: serviceNames } }]
         : termQuery(SERVICE_NAME, serviceNames[0]),
-    numBuckets: 1,
-    withTimeseries: false,
   });
 
   if (!statsItems) {
@@ -90,14 +97,16 @@ export async function getConnectionMetrics({
     return [
       [
         key,
-        computeConnectionMetrics({
-          latencyCount: latency_count,
-          latencySum: latency_sum,
-          errorCount: error_count,
-          successCount: success_count,
-          start,
-          end,
-        }),
+        computeConnectionMetrics(
+          rawCountsToMetrics({
+            latencyCount: latency_count,
+            latencySum: latency_sum,
+            errorCount: error_count,
+            successCount: success_count,
+            start,
+            end,
+          })
+        ),
       ] as const,
     ];
   });

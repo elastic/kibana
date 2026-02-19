@@ -148,6 +148,22 @@ export interface ConnectionStatsItem {
   };
 }
 
+export interface TraceMetrics {
+  latencyUs: number | null;
+  throughputPerMin: number | null;
+  errorRate: number | null;
+}
+
+export type ApmConnectionStatsEntry =
+  | { type: 'service'; serviceName: string; metrics: TraceMetrics }
+  | {
+      type: 'dependency';
+      dependencyName: string;
+      spanType: string;
+      spanSubtype: string;
+      metrics: TraceMetrics;
+    };
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -218,12 +234,17 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: number;
   }) => Promise<ExitSpanSample[]>;
 
+  apmConnectionStatsItems: (params: {
+    request: KibanaRequest;
+    start: number;
+    end: number;
+    filter: QueryDslQueryContainer[];
+  }) => Promise<ConnectionStatsItem[]>;
+
   apmConnectionStats: (params: {
     request: KibanaRequest;
     start: number;
     end: number;
     filter: QueryDslQueryContainer[];
-    numBuckets: number;
-    withTimeseries: boolean;
-  }) => Promise<ConnectionStatsItem[]>;
+  }) => Promise<ApmConnectionStatsEntry[]>;
 }

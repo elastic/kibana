@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SERVICE_NAME } from '@kbn/apm-types';
 import type { ConnectionWithKey } from './types';
 
 /**
@@ -53,8 +54,8 @@ export function filterDownstreamConnections(
 
         // If target is a service (not external dependency), add to queue for further traversal
         const target = conn.target;
-        if ('service.name' in target) {
-          const targetServiceName = target['service.name'];
+        if (SERVICE_NAME in target) {
+          const targetServiceName = target[SERVICE_NAME];
           if (
             !visitedServices.has(targetServiceName) &&
             (maxDepth === undefined || currentDepth + 1 < maxDepth)
@@ -98,8 +99,8 @@ export function filterUpstreamConnections(
 
   for (const conn of connections) {
     // Add to service name map if the target is a resolved service
-    if ('service.name' in conn.target) {
-      const targetServiceName = conn.target['service.name'];
+    if (SERVICE_NAME in conn.target) {
+      const targetServiceName = conn.target[SERVICE_NAME];
       const existing = reverseAdjacencyByService.get(targetServiceName) ?? [];
       existing.push(conn);
       reverseAdjacencyByService.set(targetServiceName, existing);

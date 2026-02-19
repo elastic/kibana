@@ -151,11 +151,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('depth=1 fast path returns resource names instead of resolved service names', async () => {
-        // The depth=1 downstream fast path queries pre-aggregated
-        // service_destination metrics (1m rollups) for O(1) performance.
-        // These metrics only contain span.destination.service.resource — there
-        // is no parent.id join, so targets appear as resource names.
+      it('depth=1 fast path resolves service.name for instrumented services', async () => {
+        // The depth=1 downstream fast path queries pre-aggregated metrics
+        // plus the destination map, which resolves span.destination.service.resource
+        // to service.name for instrumented downstream services.
         const connections = await executeTopology({
           serviceName: FRONTEND_SERVICE.serviceName,
           direction: 'downstream',
@@ -163,7 +162,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const targets = connections.map(getTargetName).sort();
 
-        expect(targets).to.eql([CHECKOUT_SERVICE.resource, RECOMMENDATION_SERVICE.resource].sort());
+        expect(targets).to.eql(
+          [CHECKOUT_SERVICE.serviceName, RECOMMENDATION_SERVICE.serviceName].sort()
+        );
       });
 
       it('depth=1 fast path returns the same dependencies and metrics as trace-based', async () => {
@@ -181,19 +182,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
         );
 
-        expect(traceBasedImmediate.length).to.be(2);
-        expect(metricsBasedConnections.length).to.be(traceBasedImmediate.length);
-
-        // Both paths query the same underlying service_destination metrics (1m rollups),
-        // so the RED metrics must match despite different target naming.
-        expect(
-          getConnectionByTarget(metricsBasedConnections, CHECKOUT_SERVICE.resource)?.metrics
-        ).to.eql(getConnectionByTarget(traceBasedImmediate, CHECKOUT_SERVICE.serviceName)?.metrics);
-
-        expect(
-          getConnectionByTarget(metricsBasedConnections, RECOMMENDATION_SERVICE.resource)?.metrics
-        ).to.eql(
-          getConnectionByTarget(traceBasedImmediate, RECOMMENDATION_SERVICE.serviceName)?.metrics
+        expect(traceBasedImmediate).to.eql(metricsBasedConnections);
+        expect(metricsBasedConnections.map((c) => ({ source: c.source, target: c.target }))).to.eql(
+          [
+            {
+              source: { 'service.name': FRONTEND_SERVICE.serviceName },
+              target: { 'service.name': CHECKOUT_SERVICE.serviceName },
+            },
+            {
+              source: { 'service.name': FRONTEND_SERVICE.serviceName },
+              target: { 'service.name': RECOMMENDATION_SERVICE.serviceName },
+            },
+          ]
         );
       });
     });
@@ -293,10 +293,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const sources = connections.map(getSourceName);
         const targets = connections.map(getTargetName);
 
-        // Direct deps of frontend — depth=1 uses the metrics-based fast path which
-        // returns span.destination.service.resource instead of resolved service.name
-        expect(targets).to.contain(CHECKOUT_SERVICE.resource);
-        expect(targets).to.contain(RECOMMENDATION_SERVICE.resource);
+        // Direct deps of frontend — depth=1 uses the metrics-based fast path
+        // which resolves service.name via the destination map
+        expect(targets).to.contain(CHECKOUT_SERVICE.serviceName);
+        expect(targets).to.contain(RECOMMENDATION_SERVICE.serviceName);
 
         // All sources should be the root service only
         const uniqueSources = uniq(sources);

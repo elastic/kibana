@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TraceMetrics } from '@kbn/observability-agent-builder-plugin/server/data_registry/data_registry_types';
 import type { APMConfig } from '../..';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
@@ -14,6 +15,7 @@ import { getApmServiceSummary } from './get_apm_service_summary';
 import { getTraceSampleIds } from '../../routes/service_map/get_trace_sample_ids';
 import { fetchExitSpanSamplesFromTraceIds } from '../../routes/service_map/fetch_exit_span_samples';
 import { getConnectionStatsItems } from '../../lib/connections/get_connection_stats/get_connection_stats_items';
+import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -205,8 +207,8 @@ export function registerDataProviders({
   );
 
   observabilityAgentBuilder.registerDataProvider(
-    'apmConnectionStats',
-    async ({ request, start, end, filter, numBuckets, withTimeseries }) => {
+    'apmConnectionStatsItems',
+    async ({ request, start, end, filter }) => {
       const { apmEventClient } = await buildApmToolResources({
         core,
         plugins,
@@ -219,8 +221,8 @@ export function registerDataProviders({
         start,
         end,
         filter,
-        numBuckets,
-        withTimeseries,
+        numBuckets: 1, // not used when withTimeseries: false, but required param
+        withTimeseries: false,
       });
 
       return items.map((item) => ({
@@ -232,6 +234,50 @@ export function registerDataProviders({
         },
         value: item.value,
       }));
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmConnectionStats',
+    async ({ request, start, end, filter }) => {
+      const { apmEventClient, randomSampler } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
+
+      const { statsItems } = await getConnectionStats({
+        apmEventClient,
+        start,
+        end,
+        filter,
+        collapseBy: 'downstream',
+        randomSampler,
+        numBuckets: 1, // not used when withTimeseries: false, but required param
+        withTimeseries: false,
+      });
+
+      return statsItems.map((item) => {
+        const { location, stats } = item;
+        const metrics: TraceMetrics = {
+          latencyUs: stats.latency.value,
+          throughputPerMin: stats.throughput.value,
+          errorRate: stats.errorRate.value,
+        };
+
+        if ('serviceName' in location) {
+          return { type: 'service' as const, serviceName: location.serviceName, metrics };
+        }
+
+        return {
+          type: 'dependency' as const,
+          dependencyName: location.dependencyName,
+          spanType: location.spanType,
+          spanSubtype: location.spanSubtype,
+          metrics,
+        };
+      });
     }
   );
 }
