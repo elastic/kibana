@@ -74,5 +74,8 @@
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh"
   }
 ]

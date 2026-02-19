@@ -1,21 +1,31 @@
 {
-  "lastModified": "2025-12-11T11:36:49.485Z",
-  "sha1": "5d35ef3d45bf2d889286af743f81db1b1d7e4f62",
+  "lastModified": "2026-02-12T18:08:03.648Z",
+  "sha1": "70c42f1246d8497e10752a5ee0a70e60a2635557",
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
       "title": "Discover App - Performance Metrics & Bundle Analysis collects and validates JS Bundles loaded on page",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@svlOblt",
-        "@svlSearch",
-        "@ess",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 9
       }
     },
@@ -24,15 +34,25 @@
       "title": "Discover App - Performance Metrics & Bundle Analysis measures Performance Metrics before and after Discover load",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@svlOblt",
-        "@svlSearch",
-        "@ess",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
         "@perf"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 9
       }
     },
@@ -41,10 +61,20 @@
       "title": "Discover App - Lighthouse Performance Audit runs audit on Discover Page",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@svlOblt",
-        "@svlSearch",
-        "@ess",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
         "@perf"
       ],
       "location": {
@@ -58,14 +88,24 @@
       "title": "Discover app - saved search embeddable should allow removing the dashboard panel after the underlying saved search has been deleted",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@svlOblt",
-        "@svlSearch",
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 7
       }
     }

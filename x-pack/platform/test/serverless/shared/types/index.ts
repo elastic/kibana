@@ -42,4 +42,5 @@ export interface CreateTestConfigOptions<
   services?: TServices;
   pageObjects?: TPageObjects;
   apps?: Record<string, { pathname: string; hash?: string }>;
+  enableFleetDockerRegistry?: boolean;
 }

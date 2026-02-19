@@ -1,6 +1,7 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - data_views
     - console
     - discover_enhanced
     - index_management
@@ -12,6 +13,7 @@ plugins:
     - spaces
     - streams_app
     - transform
+    - dashboard
   disabled:
 
 packages:

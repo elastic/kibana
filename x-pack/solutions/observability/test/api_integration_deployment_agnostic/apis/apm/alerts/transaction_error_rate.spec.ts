@@ -236,7 +236,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('create rule with kql query', () => {
+    describe('create rule with kql query', function () {
+      this.tags('skipCloud');
+
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

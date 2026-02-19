@@ -159,11 +159,11 @@ while read -r config_path; do
     continue
   fi
 
-  # If SERVERLESS_TESTS_ONLY is set, filter out --stateful and keep only serverless modes
+  # If SERVERLESS_TESTS_ONLY is set, filter out stateful and keep only serverless modes
   if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
     echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
-    # Filter out --stateful and keep only serverless modes
-    config_run_modes=$(echo "$config_run_modes" | grep -E "^--serverless=" || true)
+    # Filter out stateful and keep only serverless modes
+    config_run_modes=$(echo "$config_run_modes" | grep -E -- "--arch serverless" || true)
   fi
 
   if [[ -z "$config_run_modes" ]]; then
@@ -206,7 +206,7 @@ while read -r config_path; do
 
     # prevent non-zero exit code from breaking the loop
     set +e;
-    node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+    node scripts/scout run-tests --location local $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
     EXIT_CODE=$?
     set -e;
 
