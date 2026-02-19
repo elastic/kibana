@@ -613,6 +613,19 @@ describe('aggregation functions (by clause)', () => {
     });
   });
 
+  test('does not suggest by after complete pre-grouped aggregation', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) (rate(doubleField[5m])) ', {
+      textsNotContain: [promqlByCompleteItem.text],
+      textsContain: [pipeCompleteItem.text],
+    });
+  });
+
+  test('wrapped aggregation functions keep cursor inside parens (pre-grouped form)', async () => {
+    await expectPromqlSuggestions('PROMQL sum by (keywordField) ', {
+      textsContain: ['(avg $0) '],
+    });
+  });
+
   test('suggests by inside outer aggregation after trailing spaces', async () => {
     // cursor is after spaces but before closing paren of outer sum()
     // Should suggest 'by' for the completed inner avg() aggregation

@@ -365,13 +365,22 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
+  const durationPlaceholder = {
+    ...valuePlaceholderConstant,
+    label: 'Insert duration',
+    text: '"${0:5m}"',
+    detail: 'Use units like s, m, h, d',
+  };
+
   if (param === PromqlParamName.Step) {
+    return [durationPlaceholder];
+  }
+
+  if (param === PromqlParamName.ScrapeInterval) {
     return [
       {
-        ...valuePlaceholderConstant,
-        label: 'Insert duration',
-        text: '"${0:5m}"',
-        detail: 'Use units like s, m, h, d',
+        ...durationPlaceholder,
+        text: '"${0:1m}"',
       },
     ];
   }
@@ -417,10 +426,14 @@ function wrapFunctionSuggestions(
     return suggestions;
   }
 
-  return suggestions.map((suggestion) => ({
-    ...suggestion,
-    text: `(${suggestion.text})`,
-  }));
+  return suggestions.map((suggestion) => {
+    const hasCursorPlaceholder = suggestion.text.includes('$0');
+    const text = hasCursorPlaceholder
+      ? `(${suggestion.text})`
+      : `(${suggestion.text.trimEnd()} $0) `;
+
+    return { ...suggestion, text };
+  });
 }
 
 function buildFieldSuggestions(

@@ -71,11 +71,20 @@ export async function pickTestGroupRunOrder() {
   const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
   const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
-    ? parseFloat(process.env.JEST_MAX_MINUTES)
+  const JEST_UNIT_MAX_MINUTES = process.env.JEST_UNIT_MAX_MINUTES
+    ? parseFloat(process.env.JEST_UNIT_MAX_MINUTES)
     : 35;
-  if (Number.isNaN(JEST_MAX_MINUTES)) {
-    throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
+  if (Number.isNaN(JEST_UNIT_MAX_MINUTES)) {
+    throw new Error(`invalid JEST_UNIT_MAX_MINUTES: ${process.env.JEST_UNIT_MAX_MINUTES}`);
+  }
+
+  const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
+    ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
+    : 35;
+  if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
+    throw new Error(
+      `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
+    );
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
@@ -222,6 +231,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -274,7 +284,7 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_UNIT_MAX_MINUTES,
         overheadMin: 0.2,
         concurrency: 3,
         names: jestUnitConfigs,
@@ -282,7 +292,7 @@ export async function pickTestGroupRunOrder() {
       {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_INTEGRATION_MAX_MINUTES,
         overheadMin: 0.2,
         concurrency: 1,
         names: jestIntegrationConfigs,
