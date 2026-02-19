@@ -311,6 +311,7 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
               responsive={false}
               wrap={false}
               gutterSize="l"
+              alignItems="flexStart"
             >
               <EuiFlexItem>{osConfigs[0]}</EuiFlexItem>
               <EuiFlexItem>{osConfigs[1]}</EuiFlexItem>
@@ -477,7 +478,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     return (
       <EuiFlexGroup
         key={platform}
-        gutterSize="s"
+        gutterSize="l"
         alignItems={showColumnLayout ? undefined : 'flexStart'}
         justifyContent="spaceBetween"
         data-test-subj={dataTestSubj}
@@ -510,7 +511,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             fullWidth
             helpText={
               // FIXME:PT implement way to view script definition details - use component from Ash's PR
-              scriptSelected ? 'TBD: Click here to view script definition details' : undefined
+              scriptSelected ? 'TBD: Click here to view script definition details' : <>&nbsp;</>
             }
           >
             <EndpointRunscriptScriptSelector
@@ -531,9 +532,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               ) : undefined
             }
             helpText={
-              !currentValidationState.arguments.errors && scriptSelected?.requiresInput
-                ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
-                : undefined
+              !currentValidationState.arguments.errors && scriptSelected?.requiresInput ? (
+                SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
+              ) : (
+                <>&nbsp;</>
+              )
             }
             isInvalid={!currentValidationState.arguments.isValid}
             error={currentValidationState.arguments.errors?.join('; ')}
@@ -554,9 +557,11 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             error={currentValidationState.timeout.errors?.join('; ')}
             fullWidth
             helpText={
-              currentValidationState.timeout.isValid && config.scriptId
-                ? SCRIPT_TIMEOUT_HELP
-                : undefined
+              currentValidationState.timeout.isValid && config.scriptId ? (
+                SCRIPT_TIMEOUT_HELP
+              ) : (
+                <>&nbsp;</>
+              )
             }
             label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
             labelAppend={
