@@ -13,6 +13,7 @@ import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 
 export interface InsightsDiscoveryTaskParams {
@@ -74,7 +75,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||

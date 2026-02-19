@@ -38,6 +38,12 @@ export class SkillServiceImpl implements SkillService {
       listSkills: () => {
         return this.skillTypeRegistry.list();
       },
+      registerSkill: (skill) => {
+        return this.skillTypeRegistry.register(skill);
+      },
+      unregisterSkill: (skillId) => {
+        return this.skillTypeRegistry.unregister(skillId);
+      },
     };
   }
 }
