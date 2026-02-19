@@ -195,14 +195,17 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     return options;
   }, [isSelectedTabDeleted, tabs]);
 
-  const deletedTabTitle = (
+  const deletedTabTitle = isEditMode ? (
     <h2>
       <FormattedMessage
-        id={
-          isEditMode
-            ? 'discover.embeddable.deletedTab.editModeWarningTitle'
-            : 'discover.embeddable.deletedTab.viewModeWarningTitle'
-        }
+        id="discover.embeddable.deletedTab.editModeWarningTitle"
+        defaultMessage="The Discover session tab saved with this panel no longer exists"
+      />
+    </h2>
+  ) : (
+    <h2>
+      <FormattedMessage
+        id="discover.embeddable.deletedTab.viewModeWarningTitle"
         defaultMessage="The Discover session tab saved with this panel no longer exists"
       />
     </h2>
