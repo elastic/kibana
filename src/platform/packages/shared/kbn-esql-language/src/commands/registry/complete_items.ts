@@ -651,6 +651,7 @@ export function createIndicesBrowserSuggestion(
         }
       : undefined,
     filterText: innerText,
+    insertText: innerText,
   });
 }
 

@@ -1397,6 +1397,7 @@ export enum PromqlParamName {
   Step = 'step',
   Start = 'start',
   End = 'end',
+  Buckets = 'buckets',
 }
 
 export interface PromqlParamDefinition {
@@ -1417,7 +1418,6 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
-    required: true,
   },
   {
     name: PromqlParamName.Start,
@@ -1428,6 +1428,11 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     name: PromqlParamName.End,
     description: 'Range query end time (requires start)',
     valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
+    name: PromqlParamName.Buckets,
+    description: 'Number of time buckets (alternative to step)',
+    valueType: PromqlParamValueType.Static,
   },
 ];
 

@@ -27,7 +27,8 @@ export async function getIndicesBrowserSuggestion({
   }
 
   const commandArgs = buildResourceBrowserCommandArgs({
-    sources: context?.sources,
+    // Do not show hidden sources in the resource browser
+    sources: context?.sources?.filter((source) => !source.hidden),
     timeSeriesSources: context?.timeSeriesSources,
   });
 

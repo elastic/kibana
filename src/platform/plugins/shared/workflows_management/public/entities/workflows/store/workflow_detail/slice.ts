@@ -13,6 +13,7 @@ import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState }
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import { triggerSchemas } from '../../../../trigger_schemas';
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -24,7 +25,7 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
-  schema: getWorkflowZodSchema({}),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,
