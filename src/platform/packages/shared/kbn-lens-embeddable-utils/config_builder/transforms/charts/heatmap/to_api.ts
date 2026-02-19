@@ -99,7 +99,6 @@ function reverseBuildVisualizationState(
       percentage_mode: visualization.percentageMode,
       show_tooltip: visualization.showTooltip,
       highlight_in_hover: visualization.highlightInHover,
-      aria_label: visualization.ariaLabel,
     }),
   } satisfies Partial<HeatmapState>;
 

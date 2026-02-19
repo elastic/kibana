@@ -22,7 +22,6 @@ export const simple: LensAttributes = {
       percentageMode: true,
       showTooltip: true,
       highlightInHover: false,
-      ariaLabel: 'Test heatmap',
       legend: {
         isVisible: true,
         position: 'right',

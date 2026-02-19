@@ -114,9 +114,6 @@ const heatmapSharedStateSchema = {
   highlight_in_hover: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to highlight cells on legend hover' } })
   ),
-  aria_label: schema.maybe(
-    schema.string({ meta: { description: 'Accessibility label for the chart' } })
-  ),
 };
 
 const heatmapAxesStateSchemaProps = {

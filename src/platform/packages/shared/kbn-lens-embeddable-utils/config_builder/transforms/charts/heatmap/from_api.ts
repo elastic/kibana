@@ -91,7 +91,6 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       percentageMode: layer.percentage_mode,
       showTooltip: layer.show_tooltip,
       highlightInHover: layer.highlight_in_hover,
-      ariaLabel: layer.aria_label,
     }),
     ...(basePalette && {
       palette: {

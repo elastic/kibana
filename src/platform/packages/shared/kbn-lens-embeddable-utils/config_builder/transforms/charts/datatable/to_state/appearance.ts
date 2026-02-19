@@ -87,6 +87,15 @@ function buildPagingState(config: DatatableState): Pick<DatatableVisualizationSt
   return { paging: { size: config.paging, enabled: true } };
 }
 
+function buildShowRowNumbers(
+  config: DatatableState
+): Pick<DatatableVisualizationState, 'showRowNumbers'> {
+  if (config.show_row_numbers == null) {
+    return {};
+  }
+  return { showRowNumbers: config.show_row_numbers };
+}
+
 export function buildAppearanceState(
   config: DatatableState
 ): Pick<
@@ -104,6 +113,6 @@ export function buildAppearanceState(
     ...buildDensityState(config),
     ...buildPagingState(config),
     ...buildSortingState(config),
-    ...(config.show_row_numbers != null ? { showRowNumbers: config.show_row_numbers } : {}),
+    ...buildShowRowNumbers(config),
   };
 }
