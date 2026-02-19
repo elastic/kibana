@@ -244,7 +244,7 @@ describe('bulkDelete', () => {
   });
 
   test('invalidates UIAM ApiKeys as well', async () => {
-    rulesClient = new RulesClient({ ...rulesClientParams, isUiamSupported: true });
+    rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -282,7 +282,7 @@ describe('bulkDelete', () => {
   });
 
   test('does not invalidate API keys created by user', async () => {
-    rulesClient = new RulesClient({ ...rulesClientParams, isUiamSupported: true });
+    rulesClient = new RulesClient({ ...rulesClientParams, shouldGrantUiam: true });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()

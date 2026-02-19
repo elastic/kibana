@@ -53,6 +53,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
@@ -203,6 +204,7 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -249,8 +251,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
-  private isUiamEnabled: boolean = false;
-  private isUiamSupported: boolean = false;
+  private cpsSetup?: CPSServerSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -278,6 +279,7 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+    this.cpsSetup = plugins.cps;
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -603,10 +605,7 @@ export class AlertingPlugin {
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
-    this.isUiamEnabled = core.security.authc.apiKeys.uiam !== null;
-    // Temporarily disabled until we get a flag from core.
-    // Then we will use: this.isUiamSupported = core.uiam.supported;
-    this.isUiamSupported = false;
+    const shouldGrantUiam = this.getShouldGrantUiam(core);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
@@ -661,8 +660,7 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
-      isUiamSupported: this.isUiamSupported,
-      isUiamEnabled: this.isUiamEnabled,
+      shouldGrantUiam,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -744,8 +742,7 @@ export class AlertingPlugin {
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
-      isUiamEnabled: this.isUiamEnabled,
-      isUiamSupported: this.isUiamSupported,
+      shouldGrantUiam,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
@@ -787,6 +784,20 @@ export class AlertingPlugin {
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };
+  }
+
+  private getShouldGrantUiam(core: CoreStart): boolean {
+    const cpsEnabled = this.cpsSetup?.getCpsEnabled() ?? false;
+    if (!cpsEnabled) {
+      return false;
+    }
+    if (!core.security.authc.apiKeys.uiam) {
+      this.logger.error(
+        'CPS is enabled but UIAM API key service is not available. UIAM API keys will not be granted.'
+      );
+      return false;
+    }
+    return true;
   }
 
   private createRouteHandlerContext = (

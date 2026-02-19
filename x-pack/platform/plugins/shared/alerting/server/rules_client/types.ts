@@ -87,8 +87,7 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
-  readonly isUiamSupported?: boolean;
-  readonly isUiamEnabled?: boolean;
+  readonly shouldGrantUiam?: boolean;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

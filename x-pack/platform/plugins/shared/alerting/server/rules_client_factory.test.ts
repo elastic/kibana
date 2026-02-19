@@ -106,8 +106,7 @@ describe('RulesClientFactory', () => {
       securityService: securityServiceMock.createStart(),
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
-      isUiamSupported: false,
-      isUiamEnabled: false,
+      shouldGrantUiam: false,
     };
 
     rulesClientFactoryParams.actions = actionsMock.createStart();
@@ -187,8 +186,7 @@ describe('RulesClientFactory', () => {
       alertsService: null,
       backfillClient,
       uiSettings: rulesClientFactoryParams.uiSettings,
-      isUiamSupported: false,
-      isUiamEnabled: false,
+      shouldGrantUiam: false,
     });
   });
 
@@ -246,8 +244,7 @@ describe('RulesClientFactory', () => {
       alertsService: null,
       backfillClient,
       uiSettings: rulesClientFactoryParams.uiSettings,
-      isUiamSupported: false,
-      isUiamEnabled: false,
+      shouldGrantUiam: false,
     });
   });
 
@@ -315,8 +312,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isUiamSupported: true,
-      isUiamEnabled: true,
+      shouldGrantUiam: true,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
@@ -350,8 +346,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isUiamSupported: true,
-      isUiamEnabled: true,
+      shouldGrantUiam: true,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
@@ -429,8 +424,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isUiamSupported: true,
-      isUiamEnabled: true,
+      shouldGrantUiam: true,
     });
     await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
@@ -578,7 +572,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isUiamSupported: false,
+      shouldGrantUiam: false,
     });
 
     const request = mockRouter.createKibanaRequest({
@@ -602,7 +596,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isUiamSupported: false,
+      shouldGrantUiam: false,
     });
 
     const request = mockRouter.createKibanaRequest({

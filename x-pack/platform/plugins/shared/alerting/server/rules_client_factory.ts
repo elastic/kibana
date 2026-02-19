@@ -62,8 +62,7 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
-  isUiamSupported: boolean;
-  isUiamEnabled: boolean;
+  shouldGrantUiam: boolean;
 }
 
 export class RulesClientFactory {
@@ -90,8 +89,7 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
-  private isUiamSupported: boolean = false;
-  private isUiamEnabled: boolean = false;
+  private shouldGrantUiam: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -120,8 +118,7 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
-    this.isUiamSupported = options.isUiamSupported;
-    this.isUiamEnabled = options.isUiamEnabled;
+    this.shouldGrantUiam = options.shouldGrantUiam;
   }
 
   /**
@@ -208,8 +205,7 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
-      isUiamSupported: this.isUiamSupported,
-      isUiamEnabled: this.isUiamEnabled,
+      shouldGrantUiam: this.shouldGrantUiam,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -223,7 +219,7 @@ export class RulesClientFactory {
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
         let createUiamApiKeyResult: GrantAPIKeyResult | null | undefined;
-        const shouldCreateUiamApiKey = this.isUiamSupported && this.isUiamEnabled;
+        const shouldCreateUiamApiKey = this.shouldGrantUiam;
 
         const invalidateUiamApiKey = async (id?: string) => {
           if (!id) return;
@@ -311,7 +307,7 @@ export class RulesClientFactory {
             );
           }
 
-          if (isUiamCredential(apiKey) && !this.isUiamSupported) {
+          if (isUiamCredential(apiKey) && !this.shouldGrantUiam) {
             throw new Error('UIAM API keys should only be used in serverless environments');
           }
 

@@ -291,7 +291,7 @@ describe('rule_loader', () => {
 
     test('returns UIAM API key when config is set to uiam', async () => {
       const fakeRequest = getFakeKibanaRequest(
-        { ...context, isUiamSupported: true, isUiamEnabled: true, apiKeyType: ApiKeyType.UIAM },
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
         'default',
         null,
         Buffer.from('456:essu_uiam_api_key').toString('base64')
