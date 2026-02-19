@@ -13,7 +13,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -24,6 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
+
+import { PackageIcon } from '../../../../../../../components/package_icon';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -106,15 +107,15 @@ export const ManageIntegrationsTable: React.FC<{
         ),
         render: (title: string, item: CreatedIntegrationRow) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {item.logo ? (
-              <EuiFlexItem grow={false}>
-                <img src={`data:image/svg+xml;base64,${item.logo}`} alt="" width={24} height={24} />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="package" size="m" aria-hidden={true} />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <PackageIcon
+                packageName={item.integrationId}
+                integrationName={item.title}
+                version={item.version ?? '0.0.0'}
+                size="m"
+                tryApi={true}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
                 onClick={() => {
