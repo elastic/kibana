@@ -97,10 +97,10 @@ export const searchAfterAndBulkCreateFactory = async ({
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
       try {
-        ruleExecutionLogger.debug(
-          `[${cycleNum}] Searching events${
-            sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-          } in index pattern "${inputIndexPattern}"`
+        ruleExecutionLogger.trace(
+          `${cycleNum}: Searching events\nSearching events after cursor ${JSON.stringify(
+            sortIds
+          )} in index pattern "${inputIndexPattern}".`
         );
 
         const searchAfterQuery = buildEventsSearchQuery({
@@ -152,17 +152,17 @@ export const searchAfterAndBulkCreateFactory = async ({
         );
 
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Found 0 events ${
-              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-            }`
+          ruleExecutionLogger.trace(
+            `${cycleNum}: No results found\nFound 0 events after cursor ${JSON.stringify(sortIds)}.`
           );
           break;
         } else {
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Found ${searchResult.hits.hits.length} of total ${totalHits} events${
-              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-            }, last cursor ${JSON.stringify(lastSortIds)}`
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Results found\nFound ${
+              searchResult.hits.hits.length
+            } of total ${totalHits} events after cursor ${JSON.stringify(
+              sortIds
+            )}. Last cursor: ${JSON.stringify(lastSortIds)}.`
           );
         }
 
@@ -187,8 +187,8 @@ export const searchAfterAndBulkCreateFactory = async ({
             toReturn,
           });
 
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Created ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events`
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Created alerts from enriched events\nCreated ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events.`
           );
 
           sendAlertTelemetryEvents(
@@ -212,13 +212,14 @@ export const searchAfterAndBulkCreateFactory = async ({
         if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
           sortIds = lastSortIds;
         } else {
-          ruleExecutionLogger.debug(`[${cycleNum}] Unable to fetch last event cursor`);
+          ruleExecutionLogger.trace(`${cycleNum}: Failed to fetch last event cursor`);
           break;
         }
       } catch (exc: unknown) {
         ruleExecutionLogger.error(
-          'Unable to extract/process events or create alerts',
-          JSON.stringify(exc)
+          `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
+            exc
+          )}`
         );
         return mergeReturns([
           toReturn,
@@ -229,7 +230,7 @@ export const searchAfterAndBulkCreateFactory = async ({
         ]);
       }
     }
-    ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);
+    ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);
 
     if (isLoggedRequestsEnabled) {
       toReturn.loggedRequests = loggedRequests;
