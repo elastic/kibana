@@ -103,6 +103,7 @@ describe('helpers', () => {
         cold: { name: 'cold', min_age: '7d' },
         frozen: { name: 'frozen', min_age: '30d' },
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -122,6 +123,7 @@ describe('helpers', () => {
         cold: { name: 'cold', min_age: '7d' },
         frozen: undefined,
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -139,6 +141,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: undefined,
         delete: undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -154,6 +157,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: undefined,
         delete: undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -168,6 +172,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: { name: 'frozen', min_age: '30d' },
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -180,8 +185,12 @@ describe('helpers', () => {
   });
 
   describe('getILMRatios', () => {
-    it('should return undefined if no phases', () => {
+    it('should return undefined if phases is undefined', () => {
       expect(getILMRatios(undefined)).toBeUndefined();
+    });
+
+    it('should return undefined if phases is an empty object', () => {
+      expect(getILMRatios({ phases: {} })).toBeUndefined();
     });
 
     it('should calculate grow ratios correctly for multiple phases', () => {

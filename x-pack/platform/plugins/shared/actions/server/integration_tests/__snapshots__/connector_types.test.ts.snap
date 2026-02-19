@@ -985,6 +985,9 @@ Object {
             "contextWindowLength": Object {
               "type": "number",
             },
+            "defaultModel": Object {
+              "type": "string",
+            },
             "headers": Object {
               "additionalProperties": Object {
                 "type": "string",

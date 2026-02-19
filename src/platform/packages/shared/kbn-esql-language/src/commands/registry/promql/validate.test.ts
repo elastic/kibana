@@ -15,13 +15,8 @@ const promqlExpectErrors = (query: string, expected: string[]) =>
   expectErrors(query, expected, mockContext, 'promql', validate);
 
 describe('PROMQL Validation', () => {
-  describe('required params', () => {
+  describe('paired params', () => {
     test.each([
-      [
-        'missing step param',
-        'PROMQL index=timeseries_index start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
-        '[PROMQL] Missing required param "step"',
-      ],
       [
         'missing start param',
         'PROMQL index=timeseries_index step=5m end=?_tend (rate(counterIntegerField[5m]))',
@@ -34,6 +29,15 @@ describe('PROMQL Validation', () => {
       ],
     ])('%s', (_title, query, error) => {
       promqlExpectErrors(query, [error]);
+    });
+  });
+
+  describe('mutually exclusive params', () => {
+    test('step and buckets cannot be used together', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index step=5m buckets=10 start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        ['[PROMQL] Parameters "step" and "buckets" are mutually exclusive']
+      );
     });
   });
 
@@ -58,6 +62,18 @@ describe('PROMQL Validation', () => {
       ],
     ])('%s', (_title, query, error) => {
       promqlExpectErrors(query, [error]);
+    });
+
+    test.each([
+      ['buckets=0', 'PROMQL buckets=0 start=?_tstart end=?_tend (avg(doubleField))'],
+      ['buckets=-1', 'PROMQL buckets=-1 start=?_tstart end=?_tend (avg(doubleField))'],
+      ['buckets=abc', 'PROMQL buckets=abc start=?_tstart end=?_tend (avg(doubleField))'],
+    ])('invalid buckets value: %s', (_title, query) => {
+      promqlExpectErrors(query, ['[PROMQL] Invalid buckets value. Must be a positive integer']);
+    });
+
+    test('valid buckets value', () => {
+      promqlExpectErrors('PROMQL buckets=6 start=?_tstart end=?_tend (avg(doubleField))', []);
     });
   });
 
@@ -165,6 +181,30 @@ describe('PROMQL Validation', () => {
 
     test('nested function return type is normalized for signature matching', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (quantile(0.5, vector(1)))', []);
+    });
+
+    test('type mismatch: binary operator with incompatible types', () => {
+      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend ("string" + "string")', [
+        '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+      ]);
+    });
+
+    test('type mismatch: range_vector arithmetic not supported', () => {
+      promqlExpectErrors(
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField[5m] + doubleField[5m])',
+        [
+          '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+        ]
+      );
+    });
+
+    test('type mismatch: instant_vector with range_vector operand', () => {
+      promqlExpectErrors(
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField + doubleField[5m])',
+        [
+          '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+        ]
+      );
     });
   });
 });

@@ -8,3 +8,13 @@ responses:
             description: "Example response showing that deletion of the agent has been successful"
             value: 
               success: true
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X DELETE "${KIBANA_URL}/api/agent_builder/agents/{id}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true"
+- lang: Console
+  source: |
+    DELETE kbn://api/agent_builder/agents/{id}

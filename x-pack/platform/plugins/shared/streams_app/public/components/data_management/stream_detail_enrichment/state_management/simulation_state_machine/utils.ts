@@ -23,7 +23,12 @@ import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 import { collectDescendantStepIds } from '../utils';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -416,4 +421,28 @@ export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefi
       Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),
     {}
   );
+}
+
+/**
+ * Safely retrieves the original sample document for a given document index.
+ *
+ * This function handles the edge case where the samples array might have been
+ * re-filtered (e.g., when switching preview tabs from "Processed" to "Dropped")
+ * while a document is still selected in the flyout. In such cases, the
+ * currentDocIndex might be out of bounds for the new samples array.
+ *
+ * @param originalSamples - Array of sample documents with UI attributes, or undefined
+ * @param currentDocIndex - The index of the currently selected document, or undefined
+ * @returns The document at the given index, or undefined if samples is empty,
+ *          index is undefined, or index is out of bounds
+ */
+export function getOriginalSampleDocument(
+  originalSamples: SampleDocumentWithUIAttributes[] | undefined,
+  currentDocIndex: number | undefined
+): SampleDocumentWithUIAttributes['document'] | undefined {
+  if (!originalSamples || currentDocIndex === undefined) {
+    return undefined;
+  }
+  // Safe array access - returns undefined if index is out of bounds
+  return originalSamples[currentDocIndex]?.document;
 }

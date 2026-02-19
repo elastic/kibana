@@ -432,9 +432,11 @@ export class PromQLCstToAstConverter {
     const left = leftCtx ? this.fromExpression(leftCtx) : undefined;
     const right = rightCtx ? this.fromExpression(rightCtx) : undefined;
 
-    if (!left || !right) {
+    if (!left) {
       return this.fromParserRuleToUnknown(ctx);
     }
+
+    const syntheticRight = right ?? PromQLBuilder.unknown(this.getParserFields(ctx));
 
     const operatorText = opToken?.text ?? '';
     const operator = this.toBinaryOperator(operatorText);
@@ -450,16 +452,20 @@ export class PromQLCstToAstConverter {
     const node = PromQLBuilder.expression.binary(
       operator,
       left,
-      right,
+      syntheticRight,
       { bool, modifier },
       this.getParserFields(ctx)
     );
+
+    if (!right) {
+      node.incomplete = true;
+    }
 
     if (left.incomplete) {
       node.incomplete = true;
     }
 
-    if (right.incomplete) {
+    if (syntheticRight.incomplete) {
       node.incomplete = true;
     }
 
