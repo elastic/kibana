@@ -6,4 +6,28 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/synthetics-forge').cli();
+const { spawnSync } = require('node:child_process');
+
+const childProcess = spawnSync(
+  process.execPath,
+  [
+    '-e',
+    "require('@kbn/setup-node-env'); Promise.resolve(require('@kbn/synthetics-forge').cli()).catch((error) => { console.error(error); process.exitCode = 1; });",
+    'synthetics_forge.js',
+    ...process.argv.slice(2),
+  ],
+  {
+    stdio: 'inherit',
+    env: process.env,
+  }
+);
+
+if (childProcess.error) {
+  throw childProcess.error;
+}
+
+if (childProcess.signal) {
+  process.kill(process.pid, childProcess.signal);
+} else {
+  process.exitCode = childProcess.status ?? 1;
+}
