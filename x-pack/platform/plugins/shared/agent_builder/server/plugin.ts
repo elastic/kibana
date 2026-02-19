@@ -169,7 +169,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, agents, skills, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -182,6 +182,10 @@ export class AgentBuilderPlugin
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      skills: {
+        register: skills.registerSkill.bind(skills),
+        unregister: skills.unregisterSkill.bind(skills),
       },
     };
   }

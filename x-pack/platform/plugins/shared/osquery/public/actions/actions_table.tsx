@@ -26,16 +26,23 @@ import { removeMultilines } from '../../common/utils/build_query/remove_multilin
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
+  isHistoryEnabled: boolean;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
-  const navProps = useRouterNavigate(`live_queries/${actionId}`);
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
+  actionId,
+  isHistoryEnabled,
+}) => {
+  const navProps = useRouterNavigate(
+    isHistoryEnabled ? `history/${actionId}` : `live_queries/${actionId}`
+  );
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -55,6 +62,7 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -117,16 +125,23 @@ const ActionsTableComponent = () => {
   );
 
   const renderActionsColumn = useCallback(
-    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
-    []
+    (item: any) => (
+      <ActionTableResultsButton
+        actionId={item.fields.action_id[0]}
+        isHistoryEnabled={isHistoryEnabled}
+      />
+    ),
+    [isHistoryEnabled]
   );
+
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
 
   const handlePlayClick = useCallback(
     (item: any) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
-        return push('/live_queries/new', {
+        return push(newQueryPath, {
           form: pickBy(
             {
               packId: item._source.pack_id,
@@ -142,7 +157,7 @@ const ActionsTableComponent = () => {
         });
       }
 
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: pickBy(
           {
             query: item._source.queries[0].query,
@@ -160,7 +175,7 @@ const ActionsTableComponent = () => {
         ),
       });
     },
-    [push]
+    [push, newQueryPath]
   );
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
@@ -238,6 +253,7 @@ const ActionsTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
+        ...(isHistoryEnabled ? { width: '120px' } : {}),
         actions: [
           {
             available: isPlayButtonAvailable,
@@ -250,6 +266,7 @@ const ActionsTableComponent = () => {
       },
     ],
     [
+      isHistoryEnabled,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
