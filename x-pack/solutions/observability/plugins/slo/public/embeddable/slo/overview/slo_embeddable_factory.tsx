@@ -31,11 +31,7 @@ import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overv
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
-import type {
-  SloOverviewApi,
-  SloOverviewEmbeddableState, // TODO import from schema in common
-  SloOverviewState,
-} from './types';
+import type { SloOverviewApi, SloOverviewEmbeddableState, SloOverviewState } from './types';
 import type { GroupOverviewCustomState } from '../../../../common/embeddables/overview/schema'; // TODO import from common schema
 import { openSloConfiguration } from './slo_overview_open_configuration';
 
