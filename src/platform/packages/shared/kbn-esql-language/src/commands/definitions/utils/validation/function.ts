@@ -18,7 +18,9 @@ import {
   isParamLiteral,
 } from '../../../../ast/is';
 import { getLocationInfo } from '../../../registry/location';
-import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
+import { isTimeseriesSourceCommand } from '../timeseries_check';
+import { Location } from '../../../registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
@@ -233,7 +235,23 @@ class FunctionValidator {
    * Checks if the function is available in the current context
    */
   private get allowedHere(): boolean {
-    return this.definition?.locationsAvailable.includes(this.location.id) ?? false;
+    const locationId = this.location.id;
+
+    if (this.definition?.locationsAvailable.includes(locationId)) {
+      return true;
+    }
+
+    // TIME_SERIES_AGG functions are also allowed at the top level of STATS
+    // (not just nested inside agg functions) when the source command is TS
+    if (
+      this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
+      locationId === Location.STATS &&
+      isTimeseriesSourceCommand(this.ast)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
