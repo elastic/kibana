@@ -69,8 +69,8 @@ export function UnifiedWaterfallFlyout({ waterfallItemId, traceItems, toggleFlyo
             linkedParents: currentItem.spanLinksCount.outgoing,
           }}
           flyoutDetailTab={flyoutDetailTab}
-          start={start}
-          end={end}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
         />
       );
     case 'transaction':
