@@ -14,8 +14,9 @@ import {
   apiPublishesViewMode,
   fetch$,
   useBatchedPublishingSubjects,
+  apiHasSections,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -186,7 +187,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           if (!dataView) return;
 
           const newFilter = buildFilter(dataView, uuid, {
-            fieldName,
+            field_name: fieldName,
             value,
             sectionId,
           });
