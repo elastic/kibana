@@ -16,8 +16,6 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
 import type {
   SyntheticsPluginsSetupDependencies,
@@ -39,7 +37,7 @@ import { getTransforms as getStatsTransforms } from '../common/embeddables/stats
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
-import { statsOverviewCustomStateSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
+import { getStatsOverviewEmbeddableSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -118,13 +116,7 @@ export class Plugin implements PluginType {
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
       getTransforms: getStatsTransforms,
-      getSchema: (getDrilldownsSchema) => {
-        const drilldownsSchema = getDrilldownsSchema(['CONTEXT_MENU_TRIGGER']);
-        return schema.allOf(
-          [statsOverviewCustomStateSchema, serializedTitlesSchema, drilldownsSchema],
-          { meta: { description: 'Synthetics stats overview embeddable schema' } }
-        );
-      },
+      getSchema: getStatsOverviewEmbeddableSchema,
     });
 
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE

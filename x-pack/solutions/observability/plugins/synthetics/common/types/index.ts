@@ -14,7 +14,7 @@ export type * from './overview';
 export type {
   MonitorOption,
   MonitorFilters,
-  LegacyMonitorFilters,
-  SyntheticsStatsOverviewEmbeddableState,
-  SyntheticsMonitorsEmbeddableState,
+  OverviewStatsEmbeddableState,
+  OverviewStatsEmbeddableCustomState,
+  OverviewMonitorsEmbeddableState
 } from '../../server/schemas';

@@ -8,8 +8,8 @@
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
-import type { OverviewMonitorsEmbeddableState } from './types';
-import type { LegacyMonitorFilters } from '../../types';
+import { transformFiltersOut } from '../bwc/transform_filters_out';
+import { OverviewMonitorsEmbeddableState } from '../../types';
 
 export function getTransformOut() {
   function transformOut(
@@ -19,29 +19,7 @@ export function getTransformOut() {
   ): OverviewMonitorsEmbeddableState {
     const transformsFlow = flow(
       transformTitlesOut<OverviewMonitorsEmbeddableState>,
-      (state: OverviewMonitorsEmbeddableState) => {
-        // Handle legacy stored shape: convert camelCase to snake_case (REST API shape)
-        if (state.filters) {
-          const filters = state.filters as unknown as LegacyMonitorFilters;
-          const hasLegacyKeys = 'monitorIds' in filters || 'monitorTypes' in filters;
-
-          if (hasLegacyKeys) {
-            // Convert legacy camelCase to REST API snake_case
-            return {
-              ...state,
-              filters: {
-                projects: filters.projects,
-                tags: filters.tags,
-                locations: filters.locations,
-                monitor_ids: filters.monitorIds || filters.monitor_ids || [],
-                monitor_types: filters.monitorTypes || filters.monitor_types || [],
-              },
-            };
-          }
-        }
-        // Already in REST API shape (snake_case)
-        return state;
-      }
+      transformFiltersOut<OverviewMonitorsEmbeddableState>,
     );
     return transformsFlow(storedState);
   }

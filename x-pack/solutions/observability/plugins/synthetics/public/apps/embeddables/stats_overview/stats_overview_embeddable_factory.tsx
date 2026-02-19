@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -29,11 +28,8 @@ import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import type {
-  MonitorFilters,
-  OverviewStatsEmbeddableState,
-} from '../../../../common/embeddables/stats_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../../../common/embeddables/stats_overview/constants';
+import { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -117,7 +113,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...titleManager.api,
         ...(dynamicActionsManager?.api ?? {}),
         ...unsavedChangesApi,
-        supportedTriggers: () => [CONTEXT_MENU_TRIGGER],
+        supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {

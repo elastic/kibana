@@ -15,7 +15,7 @@ import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { setOverviewPageStateAction } from '../../synthetics/state';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const StatsOverviewComponent = ({
   reload$,

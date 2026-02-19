@@ -26,7 +26,7 @@ import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../common/em
 import { selectOverviewState } from '../../../state';
 import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
-import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/embeddables/stats_overview/types';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/types';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 

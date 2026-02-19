@@ -37,4 +37,4 @@ export const syntheticsMonitorsEmbeddableSchema = schema.allOf(
   }
 );
 
-export type SyntheticsMonitorsEmbeddableState = TypeOf<typeof syntheticsMonitorsEmbeddableSchema>;
+export type OverviewMonitorsEmbeddableState = TypeOf<typeof syntheticsMonitorsEmbeddableSchema>;

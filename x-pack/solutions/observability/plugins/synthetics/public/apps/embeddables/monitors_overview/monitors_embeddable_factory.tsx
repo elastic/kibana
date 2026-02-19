@@ -28,7 +28,7 @@ import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/m
 import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 import type { OverviewView } from '../../synthetics/state';
-import type { MonitorFilters } from '../../../../common/embeddables/monitors_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
