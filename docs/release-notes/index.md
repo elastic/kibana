@@ -24,9 +24,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
-## 9.3.1 [kibana-9.3.1-release-notes]
-
 ### Features and enhancements [kibana-9.3.1-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Allow integration rollback if not all package policies are upgraded [#253646]({{kib-pull}}253646).
 
 **Elastic Security solution**:
 For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
@@ -42,12 +43,16 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.3.1-fixes]
 
 **Alerting and cases**:
+* Fixes a bug with PagerDuty where setting the Custom details field causes rules to fail [#253683]({{kib-pull}}253683).
 * Adds external references to checks [#253107]({{kib-pull}}253107).
 * Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 * Improves handling of 204 responses [#251090]({{kib-pull}}251090).
 
 **Dashboards and Visualizations**:
-* Fixes config panel scrolling in the Lens editor when content exceeds the available height [#253247]({{kib-pull}}253247).
+* Fixes layer editor scrolling in the full Lens editor [#253247]({{kib-pull}}253247).
+
+**Data ingestion and Fleet**:
+* Fixes an issue where an agent rolled back after an upgrade could not be upgraded again in Fleet UI [#253850]({{kib-pull}}253850).
 
 **Discover**:
 * Fixes handling of missing values [#251892]({{kib-pull}}251892).
@@ -72,7 +77,9 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 * Fixes links being visible on Search Homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
 * Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
-* Updates GenAI Settings description to reference "pre-configured AI connectors" instead of "Elastic Managed LLM connector" [#250649]({{kib-pull}}250649).
+* Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+* Fixes Beats tutorial authentication instructions for Serverless environments [#253164]({{kib-pull}}253164).
 * Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
 * Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
 * Handles empty results in ES|QL rule execution [#250759]({{kib-pull}}250759).
