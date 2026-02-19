@@ -79,7 +79,6 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
 * Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
 * Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
-* Fixes Beats tutorial authentication instructions for Serverless environments [#253164]({{kib-pull}}253164).
 * Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
 * Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
 * Handles empty results in ES|QL rule execution [#250759]({{kib-pull}}250759).
