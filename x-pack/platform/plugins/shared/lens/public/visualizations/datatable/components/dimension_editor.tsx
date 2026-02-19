@@ -16,7 +16,6 @@ import {
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
@@ -24,15 +23,11 @@ import type {
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
-import {
-  findMinMaxByColumnId,
-  getAccessorType,
-  getColorByValuePalette,
-} from '../../../shared_components';
+import { getAccessorType, getColorByValuePalette } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, getDataBoundsForAccessor } from '../utils';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
@@ -103,13 +98,8 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const hasDynamicColoring = currentColorMode !== 'none';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
-  const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
-  const columnsToCheck = hasTransposedColumn
-    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
-      []
-    : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
+  const currentMinMax =
+    getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
 
   let activePalette: PaletteOutput<CustomPaletteParams>;
   let displayStops: Array<{ color: string; stop: number }>;

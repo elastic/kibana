@@ -53,7 +53,6 @@ import {
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
 import {
-  findMinMaxByColumnId,
   getPaletteDisplayColors,
   getAccessorType,
   getColorByValuePalette,
@@ -70,7 +69,7 @@ import {
   TableDimensionEditorAdditionalSection,
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import { detectColorConfigMismatch } from './utils';
+import { detectColorConfigMismatch, getDataBoundsForAccessor, resolveColorDefaults } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -149,7 +148,6 @@ export const getDatatableVisualization = ({
         .map((p) => [p.id, p])
     );
 
-    const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
       const newColumn = { ...column };
       const accessor = newColumn.columnId;
@@ -161,18 +159,15 @@ export const getDatatableVisualization = ({
       if ((newColumn.palette || newColumn.colorMapping) && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
 
-        const columnsToCheck = hasTransposedColumn
-          ? currentData?.columns
-              .filter(({ id }) => getOriginalId(id) === accessor)
-              .map(({ id }) => id) || []
-          : [accessor];
-        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+        const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
 
         if (!showColorByTerms && newColumn.colorMapping) {
           // switched from terms to values
           delete newColumn.colorMapping;
-          const dataBounds = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
-          const { palette } = getColorByValuePalette(paletteService, dataBounds);
+          const { palette } = getColorByValuePalette(
+            paletteService,
+            dataBounds ?? getFallbackDataBounds()
+          );
           newColumn.palette = palette;
         }
 
@@ -185,7 +180,6 @@ export const getDatatableVisualization = ({
         // Handle palettes that don't support dynamic coloring (categorical-only palettes)
         // Replace them with default color-by-value palette
         const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
-        const dataBounds = minMaxByColumnId.get(accessor);
         if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring && dataBounds) {
           const { palette } = getColorByValuePalette(paletteService, dataBounds);
           return { ...newColumn, palette };
@@ -688,55 +682,39 @@ export const getDatatableVisualization = ({
     }
 
     const currentData = activeData?.[state.layerId];
-    const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
 
     // Fix color config mismatches before saving by applying correct defaults
     const normalizedColumns = state.columns.map((column) => {
       const { colorMapping, palette, colorMode } = column;
 
-      // Skip columns without coloring enabled
       if (!colorMode || colorMode === 'none') {
         return column;
       }
 
-      // Use activeData column meta for accurate type detection
       const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
       const { isCategory: isBucketable } = getAccessorType(
         datasourceLayer,
         column.columnId,
         columnMeta?.type
       );
-      const colorByTerms = isBucketable;
+      const dataBounds =
+        getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??
+        getFallbackDataBounds();
 
-      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
-        colorByTerms,
+      const {
+        palette: resolvedPalette,
+        colorMapping: resolvedColorMapping,
+        hasMismatch,
+      } = resolveColorDefaults({
+        colorByTerms: isBucketable,
         palette,
         colorMapping,
+        paletteService,
+        dataBounds,
       });
 
-      if (hasValuePaletteOnBucket) {
-        return {
-          ...column,
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
-          palette: undefined,
-        };
-      }
-
-      if (hasColorMappingOnNumeric) {
-        const columnsToCheck = hasTransposedColumn
-          ? currentData?.columns
-              .filter(({ id }) => getOriginalId(id) === column.columnId)
-              .map(({ id }) => id) ?? []
-          : [column.columnId];
-        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-        const dataBounds = minMaxByColumnId.get(column.columnId) ?? getFallbackDataBounds();
-        const { palette: defaultPalette } = getColorByValuePalette(paletteService, dataBounds);
-
-        return {
-          ...column,
-          palette: defaultPalette,
-          colorMapping: undefined,
-        };
+      if (hasMismatch) {
+        return { ...column, palette: resolvedPalette, colorMapping: resolvedColorMapping };
       }
 
       return column;
