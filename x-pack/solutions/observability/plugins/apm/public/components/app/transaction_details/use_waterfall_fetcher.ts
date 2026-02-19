@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { apmUseLegacyTraceWaterfall } from '@kbn/observability-plugin/common';
+import { apmUseUnifiedTraceWaterfall } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -39,7 +39,7 @@ export function useWaterfallFetcher({
   const {
     services: { uiSettings },
   } = useKibana();
-  const useLegacy = uiSettings.get<boolean>(apmUseLegacyTraceWaterfall);
+  const useUnified = uiSettings.get<boolean>(apmUseUnifiedTraceWaterfall);
 
   const {
     data = INITIAL_DATA,
@@ -47,10 +47,10 @@ export function useWaterfallFetcher({
     error,
   } = useFetcher(
     (callApmApi) => {
-      // When not using legacy, skip the API call.
+      // When using unified waterfall, skip the legacy API call.
       // The unified waterfall uses useUnifiedWaterfallFetcher instead.
       // This will be removed when we remove the legacy waterfall.
-      if (!useLegacy) {
+      if (useUnified) {
         return;
       }
       if (traceId && start && end && transactionId) {
@@ -66,10 +66,10 @@ export function useWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, transactionId, useLegacy]
+    [traceId, start, end, transactionId, useUnified]
   );
 
   const waterfall = useMemo(() => getWaterfall(traceId ? data : INITIAL_DATA), [data, traceId]);
 
-  return { waterfall, status, error, useLegacy };
+  return { waterfall, status, error, useUnified };
 }

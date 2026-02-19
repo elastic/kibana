@@ -6,7 +6,7 @@
  */
 
 import type { Error, Transaction } from '@kbn/apm-types';
-import { apmUseLegacyTraceWaterfall } from '@kbn/observability-plugin/common';
+import { apmUseUnifiedTraceWaterfall } from '@kbn/observability-plugin/common';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -43,14 +43,14 @@ export function useUnifiedWaterfallFetcher({
   const {
     services: { uiSettings },
   } = useKibana();
-  const useLegacy = uiSettings.get<boolean>(apmUseLegacyTraceWaterfall);
+  const useUnified = uiSettings.get<boolean>(apmUseUnifiedTraceWaterfall);
 
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      // When using legacy, skip the API call.
+      // When not using unified waterfall, skip the API call.
       // The legacy waterfall uses useWaterfallFetcher instead.
       // This will be removed when we remove the legacy waterfall.
-      if (useLegacy) {
+      if (!useUnified) {
         return;
       }
       if (traceId && start && end) {
@@ -62,7 +62,7 @@ export function useUnifiedWaterfallFetcher({
         });
       }
     },
-    [traceId, start, end, entryTransactionId, serviceName, useLegacy]
+    [traceId, start, end, entryTransactionId, serviceName, useUnified]
   );
 
   return {

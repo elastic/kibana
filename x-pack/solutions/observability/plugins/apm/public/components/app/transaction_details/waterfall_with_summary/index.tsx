@@ -15,7 +15,7 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
@@ -27,6 +27,10 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+} from '../../../shared/trace_waterfall/use_trace_waterfall';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -44,7 +48,7 @@ interface Props<TSample extends {}> {
   selectedSample?: TSample | null;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
-  useLegacy: boolean;
+  useUnified: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
   rangeFrom: string;
@@ -68,7 +72,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   selectedSample,
   logsTableConfig,
   onLogsTableConfigChange,
-  useLegacy,
+  useUnified,
   unifiedWaterfallFetchResult,
   entryTransactionId,
   rangeFrom,
@@ -79,9 +83,9 @@ export function WaterfallWithSummary<TSample extends {}>({
 
   const isControlled = selectedSample !== undefined;
 
-  const activeWaterfallStatus = useLegacy
-    ? waterfallFetchStatus
-    : unifiedWaterfallFetchResult.status;
+  const activeWaterfallStatus = useUnified
+    ? unifiedWaterfallFetchResult.status
+    : waterfallFetchStatus;
 
   const isLoading =
     activeWaterfallStatus === FETCH_STATUS.LOADING ||
@@ -113,9 +117,21 @@ export function WaterfallWithSummary<TSample extends {}>({
       : 0
     : sampleActivePage;
 
-  const entryTransaction = useLegacy
-    ? waterfallFetchResult.entryTransaction
-    : unifiedWaterfallFetchResult.entryTransaction;
+  const entryTransaction = useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction
+    : waterfallFetchResult.entryTransaction;
+
+  const unifiedRootTransactionDuration = useMemo(() => {
+    if (!useUnified || unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    const { rootItem } = getRootItemOrFallback(
+      parentChildMap,
+      unifiedWaterfallFetchResult.traceItems
+    );
+    return rootItem?.duration;
+  }, [useUnified, unifiedWaterfallFetchResult.traceItems]);
 
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
@@ -170,7 +186,7 @@ export function WaterfallWithSummary<TSample extends {}>({
                   transaction={entryTransaction}
                   waterfall={waterfallFetchResult}
                   environment={environment}
-                  useLegacy={useLegacy}
+                  useUnified={useUnified}
                   traceItems={unifiedWaterfallFetchResult.traceItems}
                 />
               </EuiFlexItem>
@@ -208,14 +224,14 @@ export function WaterfallWithSummary<TSample extends {}>({
         <EuiFlexItem grow={false}>
           <TransactionSummary
             errorCount={
-              useLegacy
-                ? waterfallFetchResult.totalErrorsCount
-                : unifiedWaterfallFetchResult.errors.length
+              useUnified
+                ? unifiedWaterfallFetchResult.errors.length
+                : waterfallFetchResult.totalErrorsCount
             }
             totalDuration={
-              useLegacy
-                ? waterfallFetchResult.rootWaterfallTransaction?.duration
-                : unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+              useUnified
+                ? unifiedRootTransactionDuration
+                : waterfallFetchResult.rootWaterfallTransaction?.duration
             }
             transaction={entryTransaction}
           />
@@ -235,7 +251,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
-          useLegacy={useLegacy}
+          useUnified={useUnified}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           entryTransactionId={entryTransactionId}
         />
