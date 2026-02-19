@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, KibanaUrl } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
+import type { ScoutPage } from '@kbn/scout-oblt';
 
 interface AlertType {
   id: string;
@@ -14,20 +13,14 @@ interface AlertType {
 }
 
 export class MonitorDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(private readonly page: ScoutPage) {}
 
-  async navigateToOverviewPage(options?: Record<string, string>): Promise<void> {
-    const queryString = options
-      ? '?' +
-        Object.entries(options)
-          .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-          .join('&')
-      : '';
-    await this.page.goto(this.kbnUrl.get(`/app/uptime${queryString}`));
+  async navigateToOverviewPage(params?: Record<string, string>): Promise<void> {
+    await this.page.gotoApp('uptime', params ? { params } : undefined);
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await expect(this.page.testSubj.locator('kbnLoadingMessage')).toBeHidden();
+    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
   }
 
   async navigateToMonitorDetails(monitorId: string): Promise<void> {
@@ -55,8 +48,8 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click('uptimeEnableAnomalyBtn');
   }
 
-  async getMonitorRedirects(): Promise<string | null> {
-    return this.page.testSubj.locator('uptimeMonitorRedirectInfo').textContent();
+  getMonitorRedirects() {
+    return this.page.testSubj.locator('uptimeMonitorRedirectInfo');
   }
 
   async expandPingDetails(): Promise<void> {
@@ -89,10 +82,24 @@ export class MonitorDetailsPage {
     }
   }
 
-  async waitAndRefresh(timeout?: number): Promise<void> {
-    await this.page.waitForTimeout(timeout ?? 1000);
+  async refreshAndWaitForLoading(): Promise<void> {
     await this.refreshFromES();
     await this.waitForLoadingToFinish();
+  }
+
+  async createMLJob(): Promise<void> {
+    await this.page.testSubj.click('uptimeMLCreateJobBtn');
+    await this.page.testSubj.locator('uptimeMLJobSuccessfullyCreated').waitFor({ timeout: 30_000 });
+    await this.page.testSubj.click('toastCloseButton');
+  }
+
+  async closeRuleFlyout(): Promise<void> {
+    await this.page.testSubj.click('ruleFlyoutFooterCancelButton');
+  }
+
+  async clickEnableAnomalyAlert(): Promise<void> {
+    await this.openAnomalyDetectionMenu();
+    await this.page.testSubj.click('uptimeEnableAnomalyAlertBtn');
   }
 
   async updateAlert({ id, threshold }: AlertType): Promise<void> {
@@ -108,9 +115,14 @@ export class MonitorDetailsPage {
     await this.page.click(`text=${threshold}`);
   }
 
+  async saveRule(): Promise<void> {
+    await this.page.testSubj.click('ruleFlyoutFooterSaveButton');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+  }
+
   async disableAnomalyDetection(): Promise<void> {
     await this.openAnomalyDetectionMenu();
-    await this.page.testSubj.locator('uptimeDeleteMLJobBtn').click({ timeout: 10000 });
+    await this.page.testSubj.locator('uptimeDeleteMLJobBtn').click({ timeout: 10_000 });
     await this.page.testSubj.click('confirmModalConfirmButton');
     await this.page.locator('text=Job deleted').waitFor();
     await this.closeAnomalyDetectionMenu();
@@ -118,15 +130,11 @@ export class MonitorDetailsPage {
 
   async disableAnomalyDetectionAlert(): Promise<void> {
     await this.openAnomalyDetectionMenu();
-    await this.page.testSubj.locator('uptimeManageAnomalyAlertBtn').click({ timeout: 10000 });
+    await this.page.testSubj.locator('uptimeManageAnomalyAlertBtn').click({ timeout: 10_000 });
     await this.page.testSubj.click('uptimeDisableAnomalyAlertBtn');
     await this.page.testSubj.click('confirmModalConfirmButton');
     await this.page.locator('text=Rule successfully disabled!').waitFor();
     await this.closeAnomalyDetectionMenu();
-  }
-
-  async assertText(text: string): Promise<void> {
-    await expect(this.page.locator(`text=${text}`)).toBeVisible();
   }
 
   async waitForPingListItem(pingId: string): Promise<void> {

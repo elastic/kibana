@@ -5,21 +5,39 @@
  * 2.0.
  */
 
-import type { ScoutPage, KibanaUrl } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
+import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class UptimeSettingsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(private readonly page: ScoutPage) {}
 
-  async goto(queryParams?: string): Promise<void> {
-    const url = queryParams
-      ? this.kbnUrl.get(`/app/uptime/settings?${queryParams}`)
-      : this.kbnUrl.get('/app/uptime/settings');
-    await this.page.goto(url);
+  async goto(params?: Record<string, string>): Promise<void> {
+    await this.page.gotoApp('uptime/settings', params ? { params } : undefined);
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await expect(this.page.testSubj.locator('kbnLoadingMessage')).toBeHidden();
+    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
+  }
+
+  async waitForDefaultConnectorsLoaded(): Promise<void> {
+    await this.page.testSubj.locator('"default-connectors-input-loaded"').waitFor();
+  }
+
+  async clearDefaultConnectors(): Promise<void> {
+    const clearConnectors = this.page.locator(
+      '[data-test-subj="default-connectors-input-loaded"] >> [data-test-subj="comboBoxClearButton"]'
+    );
+    if (await clearConnectors.isVisible()) {
+      await clearConnectors.click();
+    }
+  }
+
+  async clearToEmailAddresses(): Promise<void> {
+    const clearToEmail = this.page.locator(
+      '[data-test-subj=toEmailAddressInput] >> [data-test-subj=comboBoxClearButton]'
+    );
+    if (await clearToEmail.isVisible()) {
+      await clearToEmail.click();
+    }
   }
 
   async fillToEmail(text: string): Promise<void> {
@@ -29,23 +47,40 @@ export class UptimeSettingsPage {
     await this.page.testSubj.click('uptimeSettingsPage');
   }
 
-  async saveSettings(): Promise<void> {
+  async clickSaveSettings(): Promise<void> {
     await this.page.testSubj.click('apply-settings-button');
     await this.waitForLoadingToFinish();
-    await expect(this.page.locator('text=Settings saved!')).toBeVisible();
   }
 
-  async assertApplyEnabled(): Promise<void> {
-    await expect(this.page.testSubj.locator('apply-settings-button')).toBeEnabled();
-  }
-
-  async assertApplyDisabled(): Promise<void> {
-    await expect(this.page.testSubj.locator('apply-settings-button')).toBeDisabled();
+  getApplyButton() {
+    return this.page.testSubj.locator('apply-settings-button');
   }
 
   async removeInvalidEmail(invalidEmail: string): Promise<void> {
     await this.page
       .locator(`[title="Remove ${invalidEmail} from selection in this group"]`)
       .click();
+  }
+
+  async createEmailConnector(config: {
+    name: string;
+    from: string;
+    host: string;
+    port: string;
+  }): Promise<void> {
+    await this.page.testSubj.click('createConnectorButton');
+    await this.page.testSubj.click('".email-card"');
+    await this.page.testSubj.locator('nameInput').fill(config.name);
+    await this.page.testSubj.locator('emailFromInput').fill(config.from);
+    await this.page.testSubj.locator('emailServiceSelectInput').selectOption('other');
+    await this.page.testSubj.locator('emailHostInput').fill(config.host);
+    await this.page.testSubj.locator('emailPortInput').fill(config.port);
+    await this.page.click('text=Require authentication for this server');
+    await this.page.testSubj.click('create-connector-flyout-save-btn');
+  }
+
+  async selectDefaultConnector(name: string): Promise<void> {
+    await this.page.testSubj.click('default-connectors-input-loaded');
+    await this.page.testSubj.click(`"${name}"`);
   }
 }

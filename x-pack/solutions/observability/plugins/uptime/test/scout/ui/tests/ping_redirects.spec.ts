@@ -47,7 +47,7 @@ test.describe('MonitorPingRedirects', { tag: tags.stateful.classic }, () => {
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage({
       dateRangeEnd: testMonitor.end,
       dateRangeStart: testMonitor.start,
@@ -55,8 +55,9 @@ test.describe('MonitorPingRedirects', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.navigateToMonitorDetails(testMonitor.id);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
 
-    const redirectCount = await pageObjects.monitorDetails.getMonitorRedirects();
-    expect(redirectCount).toEqual(`${testMonitor.redirects.length}`);
+    await expect(pageObjects.monitorDetails.getMonitorRedirects()).toHaveText(
+      `${testMonitor.redirects.length}`
+    );
 
     await pageObjects.monitorDetails.expandPingDetails();
     await pageObjects.monitorDetails.waitForLoadingToFinish();

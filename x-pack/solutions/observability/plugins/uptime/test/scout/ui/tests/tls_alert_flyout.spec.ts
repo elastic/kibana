@@ -14,24 +14,25 @@ test.describe('TlsFlyoutInAlertingApp', { tag: tags.stateful.classic }, () => {
     pageObjects,
     browserAuth,
     page,
-    kbnUrl,
   }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(
-      kbnUrl.get('/app/management/insightsAndAlerting/triggersActions/rules')
-    );
+    await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
 
-    await page.click('text=Create rule');
-    await pageObjects.uptimeOverview.waitForLoadingToFinish();
-    await page.testSubj.click('"xpack.uptime.alerts.tlsCertificate-SelectOption"');
-    await pageObjects.uptimeOverview.waitForLoadingToFinish();
-    await expect(page.locator('text=has a certificate expiring within')).toBeVisible();
+    await test.step('open TLS certificate rule flyout', async () => {
+      await page.getByText('Create rule').click();
+      await pageObjects.uptimeOverview.waitForLoadingToFinish();
+      await page.testSubj.click('"xpack.uptime.alerts.tlsCertificate-SelectOption"');
+      await pageObjects.uptimeOverview.waitForLoadingToFinish();
+    });
 
-    await expect(page.testSubj.locator('tlsExpirationThreshold')).toHaveText(
-      'has a certificate expiring within days:  30'
-    );
-    await expect(page.testSubj.locator('tlsAgeExpirationThreshold')).toHaveText(
-      'or older than days:  730'
-    );
+    await test.step('verify TLS threshold values', async () => {
+      await expect(page.getByText('has a certificate expiring within')).toBeVisible();
+      await expect(page.testSubj.locator('tlsExpirationThreshold')).toHaveText(
+        'has a certificate expiring within days:  30'
+      );
+      await expect(page.testSubj.locator('tlsAgeExpirationThreshold')).toHaveText(
+        'or older than days:  730'
+      );
+    });
   });
 });

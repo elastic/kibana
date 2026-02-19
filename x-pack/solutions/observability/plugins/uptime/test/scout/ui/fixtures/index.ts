@@ -18,23 +18,12 @@ export interface UptimeTestFixtures {
 }
 
 export const test = baseTest.extend<UptimeTestFixtures, ObltWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: ObltTestFixtures['pageObjects'];
-      page: ObltTestFixtures['page'];
-      kbnUrl: ObltWorkerFixtures['kbnUrl'];
-    },
-    use: (pageObjects: UptimeTestFixtures['pageObjects']) => Promise<void>
-  ) => {
+  pageObjects: async ({ pageObjects, page }, use) => {
     const extendedPageObjects: UptimeTestFixtures['pageObjects'] = {
       ...pageObjects,
-      uptimeOverview: createLazyPageObject(UptimeOverviewPage, page, kbnUrl),
-      monitorDetails: createLazyPageObject(MonitorDetailsPage, page, kbnUrl),
-      uptimeSettings: createLazyPageObject(UptimeSettingsPage, page, kbnUrl),
+      uptimeOverview: createLazyPageObject(UptimeOverviewPage, page),
+      monitorDetails: createLazyPageObject(MonitorDetailsPage, page),
+      uptimeSettings: createLazyPageObject(UptimeSettingsPage, page),
     };
 
     await use(extendedPageObjects);

@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { makeChecksWithStatus } from '../fixtures/helpers/make_checks';
 
@@ -31,44 +32,27 @@ test.describe('Observer location', { tag: tags.stateful.classic }, () => {
       mogrifyNoLocation
     );
 
-    await makeChecksWithStatus(
-      esClient,
-      LESS_AVAIL_MONITOR_ID,
-      5,
-      2,
-      10000,
-      {},
-      'up'
-    );
-    await makeChecksWithStatus(
-      esClient,
-      LESS_AVAIL_MONITOR_ID,
-      5,
-      2,
-      10000,
-      {},
-      'down'
-    );
+    await makeChecksWithStatus(esClient, LESS_AVAIL_MONITOR_ID, 5, 2, 10000, {}, 'up');
+    await makeChecksWithStatus(esClient, LESS_AVAIL_MONITOR_ID, 5, 2, 10000, {}, 'down');
   });
 
   test('displays the overall availability for no location monitor', async ({
     pageObjects,
     browserAuth,
+    page,
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(NO_LOCATION_MONITOR_ID);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
-    await pageObjects.monitorDetails.assertText('100.00 %');
+    await expect(page.getByText('100.00 %')).toBeVisible();
   });
 
-  test('displays less monitor availability', async ({
-    pageObjects,
-    browserAuth,
-  }) => {
-    await browserAuth.loginAsAdmin();
+  test('displays less monitor availability', async ({ pageObjects, browserAuth, page }) => {
+    await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(LESS_AVAIL_MONITOR_ID);
-    await pageObjects.monitorDetails.assertText('50.00 %');
+    await pageObjects.monitorDetails.waitForLoadingToFinish();
+    await expect(page.getByText('50.00 %')).toBeVisible();
   });
 });

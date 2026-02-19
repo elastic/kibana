@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import type { ScoutPage, KibanaUrl } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
+import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class UptimeOverviewPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(private readonly page: ScoutPage) {}
 
-  async goto(queryParams?: string): Promise<void> {
-    const url = queryParams
-      ? this.kbnUrl.get(`/app/uptime?${queryParams}`)
-      : this.kbnUrl.get('/app/uptime');
-    await this.page.goto(url);
+  async goto(params?: Record<string, string>): Promise<void> {
+    await this.page.gotoApp('uptime', params ? { params } : undefined);
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await expect(this.page.testSubj.locator('kbnLoadingMessage')).toBeHidden();
+    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
   }
 
   async clickSettingsLink(): Promise<void> {
     await this.page.testSubj.click('settings-page-link');
   }
 
-  async getHeartbeatIndicesInput(): Promise<string> {
-    return this.page.testSubj.locator('heartbeat-indices-input-loaded').inputValue();
+  getHeartbeatIndicesInput() {
+    return this.page.testSubj.locator('heartbeat-indices-input-loaded');
   }
 
   async setHeartbeatIndices(value: string): Promise<void> {
@@ -37,6 +33,14 @@ export class UptimeOverviewPage {
 
   async clickOverviewPage(): Promise<void> {
     await this.page.testSubj.click('uptimeOverviewPage');
+  }
+
+  async waitForMonitorTable(): Promise<void> {
+    await this.page.testSubj.waitForSelector('uptimeOverviewPage', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('monitor-page-link-0001-up', {
+      state: 'visible',
+      timeout: 60_000,
+    });
   }
 
   async clickMonitorLink(monitorId: string): Promise<void> {

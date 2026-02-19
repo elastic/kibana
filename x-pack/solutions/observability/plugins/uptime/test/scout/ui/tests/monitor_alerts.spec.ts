@@ -16,6 +16,15 @@ const alertId = 'uptime-anomaly-alert';
 const alertThreshold = 'major';
 
 test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
+  test.afterAll(async ({ pageObjects, browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.monitorDetails.navigateToOverviewPage({ dateRangeEnd, dateRangeStart });
+    await pageObjects.monitorDetails.navigateToMonitorDetails(monitorId);
+    await pageObjects.monitorDetails.waitForLoadingToFinish();
+    await pageObjects.monitorDetails.disableAnomalyDetectionAlert().catch(() => {});
+    await pageObjects.monitorDetails.disableAnomalyDetection().catch(() => {});
+  });
+
   test('creates and manages anomaly detection alert', async ({
     pageObjects,
     browserAuth,
@@ -26,49 +35,42 @@ test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
     await pageObjects.monitorDetails.navigateToMonitorDetails(monitorId);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
 
-    // Clean previous data if available
-    await pageObjects.monitorDetails.disableAnomalyDetectionAlert().catch(() => {});
-    await pageObjects.monitorDetails.disableAnomalyDetection().catch(() => {});
+    await test.step('clean previous anomaly data', async () => {
+      await pageObjects.monitorDetails.disableAnomalyDetectionAlert().catch(() => {});
+      await pageObjects.monitorDetails.disableAnomalyDetection().catch(() => {});
+    });
 
-    // Open anomaly detection flyout
-    await pageObjects.monitorDetails.waitAndRefresh(5000);
-    await pageObjects.monitorDetails.enableAnomalyDetection();
-    await pageObjects.monitorDetails.ensureAnomalyDetectionFlyoutIsOpen();
+    await test.step('open anomaly detection flyout and verify', async () => {
+      await pageObjects.monitorDetails.refreshAndWaitForLoading();
+      await pageObjects.monitorDetails.enableAnomalyDetection();
+      await pageObjects.monitorDetails.ensureAnomalyDetectionFlyoutIsOpen();
 
-    // Verify can create job
-    const canCreateJob = await pageObjects.monitorDetails.canCreateJob();
-    const missingLicense = await page.testSubj
-      .locator('uptimeMLLicenseInfo')
-      .isVisible({ timeout: 10000 })
-      .catch(() => false);
-    expect(canCreateJob).toBeTruthy();
-    expect(missingLicense).toBeFalsy();
+      const canCreateJob = await pageObjects.monitorDetails.canCreateJob();
+      const missingLicense = await page.testSubj
+        .locator('uptimeMLLicenseInfo')
+        .isVisible({ timeout: 10_000 })
+        .catch(() => false);
+      expect(canCreateJob).toBeTruthy();
+      expect(missingLicense).toBeFalsy();
+    });
 
-    // Create ML job
-    await page.testSubj.click('uptimeMLCreateJobBtn');
-    await page.testSubj.locator('uptimeMLJobSuccessfullyCreated').waitFor({ timeout: 30000 });
-    await page.testSubj.click('toastCloseButton');
+    await test.step('create ML job', async () => {
+      await pageObjects.monitorDetails.createMLJob();
+      await pageObjects.monitorDetails.closeRuleFlyout();
+    });
 
-    // Close anomaly detection flyout
-    await page.testSubj.click('ruleFlyoutFooterCancelButton');
+    await test.step('create anomaly detection alert', async () => {
+      await pageObjects.monitorDetails.refreshAndWaitForLoading();
+      await pageObjects.monitorDetails.clickEnableAnomalyAlert();
+      await pageObjects.monitorDetails.updateAlert({ id: alertId, threshold: alertThreshold });
+      await pageObjects.monitorDetails.saveRule();
+      await expect(page.getByText(`Created rule "${alertId}"`)).toBeVisible({ timeout: 10_000 });
+    });
 
-    // Open anomaly detection alert
-    await pageObjects.monitorDetails.waitAndRefresh(3000);
-    await pageObjects.monitorDetails.openAnomalyDetectionMenu();
-    await page.testSubj.click('uptimeEnableAnomalyAlertBtn');
-
-    // Update anomaly detection alert
-    await pageObjects.monitorDetails.updateAlert({ id: alertId, threshold: alertThreshold });
-
-    // Save anomaly detection alert
-    await page.testSubj.click('ruleFlyoutFooterSaveButton');
-    await page.testSubj.click('confirmModalConfirmButton');
-    await page.locator(`text=Created rule "${alertId}"`).waitFor();
-
-    // Disable anomaly detection alert and ML job
-    await pageObjects.monitorDetails.waitAndRefresh(5000);
-    await pageObjects.monitorDetails.disableAnomalyDetectionAlert();
-    await page.waitForTimeout(1000);
-    await pageObjects.monitorDetails.disableAnomalyDetection();
+    await test.step('disable anomaly alert and ML job', async () => {
+      await pageObjects.monitorDetails.refreshAndWaitForLoading();
+      await pageObjects.monitorDetails.disableAnomalyDetectionAlert();
+      await pageObjects.monitorDetails.disableAnomalyDetection();
+    });
   });
 });
