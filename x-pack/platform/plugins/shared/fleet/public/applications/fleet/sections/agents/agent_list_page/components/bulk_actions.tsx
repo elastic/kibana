@@ -119,6 +119,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const generateReportingJobCSV = useExportCSV();
 
+  const exportMenuItem: MenuItem = useMemo(
+    () => ({
+      id: 'export',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{ agentCount }}
+        />
+      ),
+      icon: 'exportAction',
+      disabled: !authz.fleet.generateAgentReports || !reporting,
+      onClick: () => {
+        setIsExportCSVModalOpen(true);
+      },
+      'data-test-subj': 'bulkAgentExportBtn',
+    }),
+    [agentCount, authz.fleet.generateAgentReports, reporting]
+  );
+
   const maintainanceItems: MenuItem[] = useMemo(() => {
     return [
       {
@@ -153,34 +173,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         },
         'data-test-subj': 'agentBulkActionsRequestDiagnostics',
       },
-      {
-        id: 'export',
-        name: (
-          <FormattedMessage
-            id="xpack.fleet.agentBulkActions.exportAgents"
-            defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-            values={{ agentCount }}
-          />
-        ),
-        icon: 'exportAction',
-        disabled: !authz.fleet.generateAgentReports || !reporting,
-        onClick: () => {
-          setIsExportCSVModalOpen(true);
-        },
-        'data-test-subj': 'bulkAgentExportBtn',
-      },
+      exportMenuItem,
     ];
   }, [
     agentCount,
     authz.fleet.allAgents,
     authz.fleet.readAgents,
-    authz.fleet.generateAgentReports,
     doesLicenseAllowMigration,
-    reporting,
+    exportMenuItem,
   ]);
 
   // Build hierarchical menu items
   const menuItems: MenuItem[] = useMemo(() => {
+    const hasOpAMPAgents = Array.isArray(agents)
+      ? agents.some((agent) => agent.type === 'OPAMP')
+      : false;
+
+    if (hasOpAMPAgents) {
+      return [exportMenuItem];
+    }
+
     const items: MenuItem[] = [
       // Top-level items
       {
@@ -370,6 +382,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     maintainanceItems,
     agentPrivilegeLevelChangeEnabled,
     isTagAddVisible,
+    agents,
+    exportMenuItem,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(
