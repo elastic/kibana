@@ -546,6 +546,39 @@ describe('LogsExtractionClient', () => {
       });
     });
 
+    it('should filter out cross-cluster search (CCS) remote indices', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1']],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest
+          .fn()
+          .mockReturnValue('logs-*,remote_cluster:logs-*,other:filebeat-*,metrics-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.scannedIndices).toContain('logs-*');
+      expect(result.success && result.scannedIndices).toContain('metrics-*');
+      expect(result.success && result.scannedIndices).not.toContain('remote_cluster:logs-*');
+      expect(result.success && result.scannedIndices).not.toContain('other:filebeat-*');
+    });
+
     it('should fallback to logs-* when data view is not found', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
