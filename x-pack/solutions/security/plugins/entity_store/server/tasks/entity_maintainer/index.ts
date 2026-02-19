@@ -17,7 +17,7 @@ import type {
 import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
-import { entityMaintainersTasksClient } from './entity_maintainers_tasks_client';
+import { entityMaintainersRegistry } from './entity_maintainers_registry';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
@@ -40,7 +40,7 @@ export async function scheduleEntityMaintainerTasks({
 }): Promise<void> {
   try {
     logger.debug(`Scheduling entity maintainer tasks`);
-    const tasks = entityMaintainersTasksClient.getAll();
+    const tasks = entityMaintainersRegistry.getAll();
     for (const { id, interval } of tasks) {
       await taskManager.ensureScheduled(
         {
@@ -75,7 +75,7 @@ export function registerEntityMaintainerTask({
   const { run, interval, initialState, description, id, setup } = config;
   const type = getTaskType(id);
 
-  entityMaintainersTasksClient.update({ id, interval });
+  entityMaintainersRegistry.update({ id, interval });
 
   void core
     .getStartServices()

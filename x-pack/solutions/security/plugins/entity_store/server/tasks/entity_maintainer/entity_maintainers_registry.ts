@@ -7,7 +7,7 @@
 
 import type { EntityMaintainerConfig, EntityMaintainerTaskEntry } from './types';
 
-export class EntityMaintainersTasksClient {
+export class EntityMaintainersRegistry {
   private readonly tasks = new Map<string, EntityMaintainerConfig>();
 
   update({ id, interval }: EntityMaintainerTaskEntry): void {
@@ -22,4 +22,4 @@ export class EntityMaintainersTasksClient {
   }
 }
 
-export const entityMaintainersTasksClient = new EntityMaintainersTasksClient();
+export const entityMaintainersRegistry = new EntityMaintainersRegistry();

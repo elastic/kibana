@@ -9,15 +9,15 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { scheduleEntityMaintainerTasks, registerEntityMaintainerTask } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
-import { entityMaintainersTasksClient } from './entity_maintainers_tasks_client';
+import { entityMaintainersRegistry } from './entity_maintainers_registry';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
 const mockCreateInternalRepository = jest.fn();
 const mockGetStartServices = jest.fn();
 
-jest.mock('./entity_maintainers_tasks_client', () => ({
-  entityMaintainersTasksClient: {
+jest.mock('./entity_maintainers_registry', () => ({
+  entityMaintainersRegistry: {
     getAll: jest.fn(),
     update: jest.fn(),
   },
@@ -79,7 +79,7 @@ describe('entity_maintainer task', () => {
   describe('scheduleEntityMaintainerTasks', () => {
     it('should call getAll and ensureScheduled for each task with correct id, taskType, and schedule', async () => {
       const { logger, request, taskManagerStart } = createMockDeps();
-      jest.mocked(entityMaintainersTasksClient.getAll).mockReturnValue([
+      jest.mocked(entityMaintainersRegistry.getAll).mockReturnValue([
         { id: 'maintainer-a', interval: '1m' },
         { id: 'maintainer-b', interval: '5m' },
       ]);
@@ -91,7 +91,7 @@ describe('entity_maintainer task', () => {
         request,
       });
 
-      expect(entityMaintainersTasksClient.getAll).toHaveBeenCalledTimes(1);
+      expect(entityMaintainersRegistry.getAll).toHaveBeenCalledTimes(1);
       expect(mockEnsureScheduled).toHaveBeenCalledTimes(2);
       expect(mockEnsureScheduled).toHaveBeenNthCalledWith(
         1,
@@ -120,7 +120,7 @@ describe('entity_maintainer task', () => {
     it('should propagate and log error when getAll throws', async () => {
       const { logger, request, taskManagerStart } = createMockDeps();
       const err = new Error('getAll failed');
-      jest.mocked(entityMaintainersTasksClient.getAll).mockImplementation(() => {
+      jest.mocked(entityMaintainersRegistry.getAll).mockImplementation(() => {
         throw err;
       });
 
