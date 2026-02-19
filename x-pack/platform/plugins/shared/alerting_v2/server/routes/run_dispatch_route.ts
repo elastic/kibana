@@ -41,7 +41,8 @@ export class RunDispatchRoute implements RouteHandler {
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, RunDispatchBody>,
     @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
+    @inject(DispatcherServiceScopedToken)
+    private readonly dispatcherService: DispatcherServiceContract
   ) {}
 
   async handle() {

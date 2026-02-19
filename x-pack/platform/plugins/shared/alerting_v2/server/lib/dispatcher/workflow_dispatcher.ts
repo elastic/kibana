@@ -17,12 +17,12 @@ export async function dispatchWorkflow(
 ): Promise<void> {
   const spaceId = 'default';
 
-  const workflow = await workflowsManagement.getWorkflow(group.workflowId, 'default');
+  const workflow = await workflowsManagement.getWorkflow(group.workflowId, spaceId);
   if (!workflow) {
     return;
   }
 
-  await workflowsManagement.runWorkflow(
+  void workflowsManagement.runWorkflow(
     {
       id: workflow.id,
       name: workflow.name,

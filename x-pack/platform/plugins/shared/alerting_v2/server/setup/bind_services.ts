@@ -11,8 +11,14 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
+import {
+  DispatcherServiceInternalToken,
+  DispatcherServiceScopedToken,
+} from '../lib/dispatcher/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
@@ -32,25 +38,12 @@ import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { DirectorService } from '../lib/director/director';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
-import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { UserService } from '../lib/services/user_service/user_service';
-import { TransitionStrategyToken } from '../lib/director/strategies/types';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
 import type { AlertingServerSetupDependencies } from '../types';
-import {
-  DispatcherServiceInternalToken,
-  DispatcherServiceScopedToken,
-} from '../lib/dispatcher/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
