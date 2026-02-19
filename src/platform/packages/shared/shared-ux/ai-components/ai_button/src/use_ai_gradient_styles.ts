@@ -11,6 +11,7 @@ import { css, type SerializedStyles } from '@emotion/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { AiButtonVariant } from './types';
 
 // Keep constants local to this file so Storybook can be used to iterate independently.
 // Hard-coded values are used to avoid relying on EUI tokens that are not yet available.
@@ -85,7 +86,7 @@ export interface AiButtonGradientOptions {
    * When provided, variant-specific gradient behavior can be applied.
    * This is optional to keep backwards compatibility with existing `fill` callers.
    */
-  readonly variant?: 'accent' | 'base' | 'empty' | 'outlined';
+  readonly variant?: AiButtonVariant;
 }
 
 export interface AiButtonGradientStyles {
@@ -99,8 +100,6 @@ export interface AiGradientStopsDefinition {
   readonly startOffsetPercent: number;
   readonly endOffsetPercent: number;
 }
-
-type AiButtonVariant = NonNullable<AiButtonGradientOptions['variant']>;
 
 interface AiGradientColors {
   readonly startColor: string;
