@@ -947,7 +947,7 @@ describe('xy_suggestions', () => {
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
-  test('suggests line if changeType is initial and date column is involved', () => {
+  test('suggests line if changeType is initial and date column is involved for formBased datasource', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -973,6 +973,7 @@ describe('xy_suggestions', () => {
       },
       state: currentState,
       keptLayerIds: ['first'],
+      datasourceId: 'formBased',
     });
 
     expect(suggestions).toHaveLength(1);
@@ -980,6 +981,42 @@ describe('xy_suggestions', () => {
     expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state.preferredSeriesType).toEqual('line');
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
+  });
+
+  test('suggests bar_stacked if changeType is initial and date column is involved for textBased datasource', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          splitAccessors: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('bar_stacked');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('bar_stacked');
   });
 
   test('makes a visible seriesType suggestion for unchanged table without split', () => {

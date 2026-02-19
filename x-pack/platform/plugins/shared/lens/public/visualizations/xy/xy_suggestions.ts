@@ -134,6 +134,7 @@ function getSuggestionForColumns(
     requestedSeriesType: seriesType,
     mainPalette,
     allowMixed,
+    datasourceId,
     query,
   };
 
@@ -234,6 +235,7 @@ function getSuggestionsForLayer({
   requestedSeriesType,
   mainPalette,
   allowMixed,
+  datasourceId,
   query,
 }: {
   layerId: string;
@@ -247,6 +249,7 @@ function getSuggestionsForLayer({
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  datasourceId?: string;
   query?: SuggestionRequest['query'];
 }): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
@@ -272,7 +275,11 @@ function getSuggestionsForLayer({
     allowMixed,
   };
 
-  if (changeType === 'initial' && xValue?.operation.dataType === 'date') {
+  if (
+    changeType === 'initial' &&
+    xValue?.operation.dataType === 'date' &&
+    datasourceId === 'formBased'
+  ) {
     return buildSuggestion({ ...options, seriesType: 'line' });
   }
   // handles the simplest cases, acting as a chart switcher
