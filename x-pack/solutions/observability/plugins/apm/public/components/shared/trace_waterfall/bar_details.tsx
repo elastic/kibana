@@ -97,12 +97,13 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           </EuiText>
         </EuiFlexItem>
         {item.serviceName && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ minWidth: 0, maxWidth: '50%' }}>
             <EuiBadge
               color="hollow"
               iconType="dot"
               data-test-subj="apmBarDetailsServiceNameBadge"
               css={css`
+                max-width: 50%;
                 & .euiBadge__icon {
                   color: ${item.color};
                 }

@@ -211,6 +211,7 @@ function ServiceNameBadge({ item, color }: { item: IWaterfallSpanOrTransaction; 
       color="hollow"
       iconType="dot"
       css={css`
+        max-width: 50%;
         & .euiBadge__icon {
           color: ${color};
         }
