@@ -112,8 +112,7 @@ describe('DocViewerTable', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253440
-  describe.skip('search', () => {
+  describe('search', () => {
     beforeEach(() => {
       storage.clear();
     });
@@ -125,7 +124,8 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      await user.type(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), 'bytes');
+      await user.click(screen.getByTestId('unifiedDocViewerFieldsSearchInput'));
+      await user.paste('bytes');
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeInTheDocument();
@@ -139,10 +139,8 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      await user.type(
-        screen.getByTestId('unifiedDocViewerFieldsSearchInput'),
-        String(hit.flattened['extension.keyword'])
-      );
+      await user.click(screen.getByTestId('unifiedDocViewerFieldsSearchInput'));
+      await user.paste(String(hit.flattened['extension.keyword']));
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeNull();

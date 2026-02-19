@@ -164,6 +164,7 @@ export class CiStatsClient {
           jobName: string;
         }
     >;
+    durationPercentile?: number;
     groups: Array<{
       type: string;
       queue?: string;
