@@ -86,10 +86,8 @@ export const formatSyntheticsPolicy = (
   if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
     encodingVar.value = 'base64';
     const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
-    if (inlineScript) {
-      inlineScript.value = Buffer.from(config[ConfigKey.SOURCE_INLINE] as string).toString(
-        'base64'
-      );
+    if (inlineScript && typeof inlineScript.value === 'string') {
+      inlineScript.value = Buffer.from(inlineScript.value).toString('base64');
     }
   }
 
