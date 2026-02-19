@@ -46,21 +46,20 @@ export const parseEventRecords = (
     return {
       id: docId,
       isAlert,
-      docId,
       index: index ?? undefined,
       timestamp: timestamp ?? undefined,
       action: action ?? undefined,
       actor: actorId
         ? {
             id: actorId,
-            label: actorId,
+            name: actorId,
             ...(actorIcon ? { icon: actorIcon } : {}),
           }
         : undefined,
       target: targetId
         ? {
             id: targetId,
-            label: targetId,
+            name: targetId,
             ...(targetIcon ? { icon: targetIcon } : {}),
           }
         : undefined,

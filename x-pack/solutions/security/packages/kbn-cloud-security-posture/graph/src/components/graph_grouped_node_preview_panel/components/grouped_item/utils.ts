@@ -14,5 +14,5 @@ import type {
 export const displayEventName = ({ action, id }: Pick<EventItem | AlertItem, 'action' | 'id'>) =>
   action || id || '-';
 
-export const displayEntityName = ({ label, id }: Pick<EntityItem, 'label' | 'id'>) =>
-  label || id || '-';
+export const displayEntityName = ({ name, id }: Pick<EntityItem, 'name' | 'id'>) =>
+  name || id || '-';

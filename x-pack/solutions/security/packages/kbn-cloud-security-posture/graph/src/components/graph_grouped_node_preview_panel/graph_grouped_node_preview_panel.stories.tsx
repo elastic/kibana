@@ -67,7 +67,7 @@ const PanelContainer = ({ children }: PropsWithChildren) => {
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
   id: 'entity-1',
   type: 'host',
-  label: 'host-01.acme.com',
+  name: 'host-01.acme.com',
   icon: 'storage',
   risk: 75,
   timestamp: '2023-12-01T10:30:00Z',
@@ -85,8 +85,8 @@ const createEventItem = (
   timestamp: '2023-12-01T11:15:00Z',
   ips: ['192.168.1.100'],
   countryCodes: ['CA'],
-  actor: { id: 'user-123', label: 'admin_user', icon: 'user' },
-  target: { id: 'process-456', label: 'notepad.exe', icon: 'document' },
+  actor: { id: 'user-123', name: 'admin_user', icon: 'user' },
+  target: { id: 'process-456', name: 'notepad.exe', icon: 'document' },
   ...overrides,
 });
 
@@ -99,8 +99,8 @@ const createAlertItem = (
   timestamp: '2023-12-01T12:45:00Z',
   ips: ['172.16.0.50'],
   countryCodes: ['GB'],
-  actor: { id: 'system-789', label: 'antivirus_scanner', icon: 'shield' },
-  target: { id: 'file-101', label: 'suspicious.exe', icon: 'warning' },
+  actor: { id: 'system-789', name: 'antivirus_scanner', icon: 'shield' },
+  target: { id: 'file-101', name: 'suspicious.exe', icon: 'warning' },
   ...overrides,
 });
 
@@ -157,7 +157,7 @@ EntitiesGroup.args = {
   items: [
     createEntityItem({
       id: 'host-1',
-      label: 'web-server-01.prod',
+      name: 'web-server-01.prod',
       type: 'host',
       icon: 'storage',
       risk: 85,
@@ -166,7 +166,7 @@ EntitiesGroup.args = {
     }),
     createEntityItem({
       id: 'host-2',
-      label: 'db-server-02.prod',
+      name: 'db-server-02.prod',
       type: 'host',
       icon: 'storage',
       risk: 45,
@@ -175,7 +175,7 @@ EntitiesGroup.args = {
     }),
     createEntityItem({
       id: 'host-3',
-      label: 'api-server-03.staging',
+      name: 'api-server-03.staging',
       type: 'host',
       icon: 'storage',
       risk: 65,
@@ -198,20 +198,20 @@ EventsGroup.args = {
     createEventItem({
       id: 'event-1',
       action: 'file_access',
-      actor: { id: 'user-001', label: 'john.doe', icon: 'user' },
-      target: { id: 'file-001', label: '/etc/passwd', icon: 'document' },
+      actor: { id: 'user-001', name: 'john.doe', icon: 'user' },
+      target: { id: 'file-001', name: '/etc/passwd', icon: 'document' },
     }),
     createEventItem({
       id: 'event-2',
       action: 'network_connection',
-      actor: { id: 'process-002', label: 'chrome.exe', icon: 'globe' },
-      target: { id: 'endpoint-002', label: 'google.com:443', icon: 'network' },
+      actor: { id: 'process-002', name: 'chrome.exe', icon: 'globe' },
+      target: { id: 'endpoint-002', name: 'google.com:443', icon: 'network' },
     }),
     createEventItem({
       id: 'event-3',
       action: 'process_execution',
-      actor: { id: 'user-003', label: 'admin', icon: 'user' },
-      target: { id: 'process-003', label: 'powershell.exe', icon: 'console' },
+      actor: { id: 'user-003', name: 'admin', icon: 'user' },
+      target: { id: 'process-003', name: 'powershell.exe', icon: 'console' },
     }),
   ],
 };
@@ -230,20 +230,20 @@ AlertsGroup.args = {
     createAlertItem({
       id: 'alert-1',
       action: 'suspicious_login',
-      actor: { id: 'user-suspicious', label: 'unknown_user', icon: 'user' },
-      target: { id: 'system-login', label: 'ssh_service', icon: 'lock' },
+      actor: { id: 'user-suspicious', name: 'unknown_user', icon: 'user' },
+      target: { id: 'system-login', name: 'ssh_service', icon: 'lock' },
     }),
     createAlertItem({
       id: 'alert-2',
       action: 'malware_execution',
-      actor: { id: 'process-malware', label: 'trojan.exe', icon: 'warning' },
-      target: { id: 'system-memory', label: 'system_memory', icon: 'memory' },
+      actor: { id: 'process-malware', name: 'trojan.exe', icon: 'warning' },
+      target: { id: 'system-memory', name: 'system_memory', icon: 'memory' },
     }),
     createAlertItem({
       id: 'alert-3',
       action: 'data_exfiltration',
-      actor: { id: 'network-conn', label: 'unknown_endpoint', icon: 'globe' },
-      target: { id: 'sensitive-data', label: 'customer_db.sql', icon: 'database' },
+      actor: { id: 'network-conn', name: 'unknown_endpoint', icon: 'globe' },
+      target: { id: 'sensitive-data', name: 'customer_db.sql', icon: 'database' },
     }),
   ],
 };
@@ -262,26 +262,26 @@ EventsAndAlertsGroup.args = {
     createEventItem({
       id: 'event-mixed-1',
       action: 'user_login',
-      actor: { id: 'user-normal', label: 'jane.smith', icon: 'user' },
-      target: { id: 'workstation-01', label: 'WS-001', icon: 'desktop' },
+      actor: { id: 'user-normal', name: 'jane.smith', icon: 'user' },
+      target: { id: 'workstation-01', name: 'WS-001', icon: 'desktop' },
     }),
     createAlertItem({
       id: 'alert-mixed-1',
       action: 'privilege_escalation',
-      actor: { id: 'user-escalate', label: 'jane.smith', icon: 'user' },
-      target: { id: 'admin-group', label: 'administrators', icon: 'users' },
+      actor: { id: 'user-escalate', name: 'jane.smith', icon: 'user' },
+      target: { id: 'admin-group', name: 'administrators', icon: 'users' },
     }),
     createEventItem({
       id: 'event-mixed-2',
       action: 'file_modification',
-      actor: { id: 'process-editor', label: 'notepad.exe', icon: 'document' },
-      target: { id: 'config-file', label: 'app.config', icon: 'gear' },
+      actor: { id: 'process-editor', name: 'notepad.exe', icon: 'document' },
+      target: { id: 'config-file', name: 'app.config', icon: 'gear' },
     }),
     createAlertItem({
       id: 'alert-mixed-2',
       action: 'unauthorized_access',
-      actor: { id: 'external-ip', label: '203.0.113.42', icon: 'globe' },
-      target: { id: 'secure-folder', label: '/secure/documents', icon: 'folderClosed' },
+      actor: { id: 'external-ip', name: '203.0.113.42', icon: 'globe' },
+      target: { id: 'secure-folder', name: '/secure/documents', icon: 'folderClosed' },
     }),
   ],
 };
@@ -306,7 +306,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
         if (itemType === 'entity') {
           return createEntityItem({
             id: `entity-${index}`,
-            label: `host-${String(index).padStart(2, '0')}.domain.com`,
+            name: `host-${String(index).padStart(2, '0')}.domain.com`,
             risk: Math.floor(Math.random() * 100),
             ips: [`10.0.1.${100 + index}`],
             countryCodes: [['US', 'CA', 'GB', 'DE', 'FR'][index % 5]],
@@ -321,8 +321,8 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
           return createEventItem({
             id: `event-${index}`,
             action: actions[index % actions.length],
-            actor: { id: `actor-${index}`, label: `user_${index}`, icon: 'user' },
-            target: { id: `target-${index}`, label: `resource_${index}`, icon: 'document' },
+            actor: { id: `actor-${index}`, name: `user_${index}`, icon: 'user' },
+            target: { id: `target-${index}`, name: `resource_${index}`, icon: 'document' },
           });
         } else {
           const actions = [
@@ -336,10 +336,10 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
             action: actions[index % actions.length],
             actor: {
               id: `threat-${index}`,
-              label: `threat_actor_${index}`,
+              name: `threat_actor_${index}`,
               icon: 'warning',
             },
-            target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
+            target: { id: `victim-${index}`, name: `target_${index}`, icon: 'warning' },
           });
         }
       }) as Array<EntityItem | EventOrAlertItem>,

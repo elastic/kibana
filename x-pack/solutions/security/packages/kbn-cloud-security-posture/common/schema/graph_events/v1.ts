@@ -15,7 +15,7 @@ import { INDEX_PATTERN_REGEX, REACHED_NODES_LIMIT } from '../graph/v1';
 const actorOrTargetSchema = schema.object({
   id: schema.string(),
   icon: schema.maybe(schema.string()),
-  label: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
 });
 
 // ============================================
@@ -25,7 +25,6 @@ const actorOrTargetSchema = schema.object({
 export const eventOrAlertItemSchema = schema.object({
   id: schema.string(),
   isAlert: schema.boolean(),
-  docId: schema.maybe(schema.string()),
   index: schema.maybe(schema.string()),
   timestamp: schema.maybe(schema.string()),
   action: schema.maybe(schema.string()),

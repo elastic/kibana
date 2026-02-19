@@ -57,11 +57,10 @@ describe('GraphGroupedNodePreviewPanel', () => {
   const createEntityItem = (overrides?: Partial<EntityItem>): EntityItem => {
     entityIdCounter += 1;
     return {
-      itemType: 'entity',
       id: `entity-${entityIdCounter}`,
       type: 'host',
       icon: 'storage',
-      label: 'Test Host',
+      name: 'Test Host',
       availableInEntityStore: true,
       ...overrides,
     } as EntityItem;
@@ -70,9 +69,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
   const createEventItem = (overrides?: Partial<EventOrAlertItem>): EventOrAlertItem => {
     entityIdCounter += 1;
     return {
-      itemType: 'event',
       id: `event-${entityIdCounter}`,
-      docId: `docId-${entityIdCounter}`,
       index: 'test-index',
       timestamp: '2024-01-01T12:00:00.000Z',
       ...overrides,

@@ -40,7 +40,6 @@ export const parseEntityRecords = (
       return {
         id: entityId,
         name: record.entityName ?? undefined,
-        label: record.entityName ?? entityId,
         type: record.entityType ?? undefined,
         subType: record.entitySubType ?? undefined,
         ecsParentField: record.ecsParentField ?? undefined,
@@ -55,7 +54,7 @@ export const parseEntityRecords = (
 
       return {
         id: entityId,
-        label: entityId,
+        name: entityId,
         availableInEntityStore: false,
       };
     }

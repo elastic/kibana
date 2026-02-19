@@ -25,7 +25,7 @@ interface BaseStoryProps {
 
 // Entity-specific props (excluding type which is hardcoded)
 interface EntityStoryProps extends BaseStoryProps {
-  label?: string;
+  name?: string;
   risk?: number;
   icon?: string;
 }
@@ -33,8 +33,8 @@ interface EntityStoryProps extends BaseStoryProps {
 // Event/Alert-specific props (excluding type which is hardcoded)
 interface EventAlertStoryProps extends BaseStoryProps {
   action?: string;
-  actor?: { id: string; icon?: string; label?: string };
-  target?: { id: string; icon?: string; label?: string };
+  actor?: { id: string; icon?: string; name?: string };
+  target?: { id: string; icon?: string; name?: string };
 }
 
 const meta: Meta = {
@@ -58,7 +58,7 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
 EntityItem.args = {
   isLoading: false,
   id: 'host-02',
-  label: 'host-02.acme',
+  name: 'host-02.acme',
   risk: 55,
   ips: ['10.200.0.202'],
   countryCodes: ['US'],
@@ -88,8 +88,8 @@ EventItem.args = {
   id: 'event-id',
   action: 'process_start',
   timestamp: new Date().toISOString(),
-  actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  actor: { id: 'actorId', name: 'user1', icon: 'user' },
+  target: { id: 'targetId', name: 'proc.exe', icon: 'document' },
 };
 
 EventItem.argTypes = {
@@ -113,8 +113,8 @@ AlertItem.args = {
   id: 'alert-id',
   action: 'suspicious_activity',
   timestamp: new Date().toISOString(),
-  actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  actor: { id: 'actorId', name: 'user1', icon: 'user' },
+  target: { id: 'targetId', name: 'proc.exe', icon: 'document' },
 };
 
 AlertItem.argTypes = {

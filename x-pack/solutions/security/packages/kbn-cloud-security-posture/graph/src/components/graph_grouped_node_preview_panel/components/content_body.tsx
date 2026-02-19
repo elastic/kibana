@@ -48,9 +48,7 @@ export const ContentBody: FC<ContentBodyProps> = ({
       <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
       <List>
         {items.map((item) => (
-          // React key must be `docId` for fetched documents (events & alerts)
-          // Fallback to `id` for non-fetched entities
-          <li key={'docId' in item ? item.docId : item.id}>
+          <li key={item.id}>
             <GroupedItem item={item} />
           </li>
         ))}

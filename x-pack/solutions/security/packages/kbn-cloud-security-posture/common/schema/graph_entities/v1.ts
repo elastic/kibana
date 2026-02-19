@@ -16,7 +16,6 @@ export const entityItemSchema = schema.object({
   id: schema.string(),
   timestamp: schema.maybe(schema.string()),
   name: schema.maybe(schema.string()),
-  label: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   subType: schema.maybe(schema.string()),
   ecsParentField: schema.maybe(schema.string()),
