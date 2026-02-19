@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 
@@ -64,34 +65,34 @@ export const ManageIntegrationsTable: React.FC<{
   isError: boolean;
 }> = ({ integrations, isLoading, isError }) => {
   const { application, userProfile: userProfileService } = useStartServices();
-  const [userProfiles, setUserProfiles] = useState<Map<string, UserProfileWithAvatar>>(new Map());
 
-  useEffect(() => {
-    const profileUids = integrations
+  const uniqueProfileUids = useMemo(() => {
+    const uids = integrations
       .map((i) => i.createdByProfileUid)
       .filter((uid): uid is string => !!uid);
-    const uniqueUids = [...new Set(profileUids)];
+    return [...new Set(uids)];
+  }, [integrations]);
 
-    if (uniqueUids.length === 0) {
-      return;
-    }
-
-    userProfileService
-      .bulkGet<{ avatar: { initials?: string; color?: string; imageUrl?: string | null } }>({
-        uids: new Set(uniqueUids),
+  const { data: userProfiles = new Map<string, UserProfileWithAvatar>() } = useQuery(
+    ['manage-integrations-user-profiles', ...uniqueProfileUids],
+    async () => {
+      const profiles = await userProfileService.bulkGet<{
+        avatar: { initials?: string; color?: string; imageUrl?: string | null };
+      }>({
+        uids: new Set(uniqueProfileUids),
         dataPath: 'avatar',
-      })
-      .then((profiles) => {
-        const profileMap = new Map<string, UserProfileWithAvatar>();
-        for (const profile of profiles) {
-          profileMap.set(profile.uid, profile as UserProfileWithAvatar);
-        }
-        setUserProfiles(profileMap);
-      })
-      .catch(() => {
-        // Gracefully degrade — show username only if profile fetch fails
       });
-  }, [integrations, userProfileService]);
+      const profileMap = new Map<string, UserProfileWithAvatar>();
+      for (const profile of profiles) {
+        profileMap.set(profile.uid, profile as UserProfileWithAvatar);
+      }
+      return profileMap;
+    },
+    {
+      enabled: uniqueProfileUids.length > 0,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
