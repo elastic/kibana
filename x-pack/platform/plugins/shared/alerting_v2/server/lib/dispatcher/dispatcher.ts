@@ -22,8 +22,9 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
-import { getFakeNotificationPoliciesByIds, getFakeRulesByIds } from './faker_service';
+import { getFakeNotificationPoliciesByIds } from './faker_service';
 import {
   getAlertEpisodeSuppressionsQuery,
   getDispatchableAlertEventsQuery,
@@ -55,7 +56,8 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
-    private readonly workflowsManagement: WorkflowsManagementApi
+    private readonly workflowsManagement: WorkflowsManagementApi,
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
   ) {}
 
   public async run({
@@ -73,7 +75,7 @@ export class DispatcherService implements DispatcherServiceContract {
     const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
 
     const uniqueRuleIds = [...new Set(active.map((ep) => ep.rule_id))];
-    const rules = await getFakeRulesByIds(uniqueRuleIds);
+    const rules = await this.fetchRules(uniqueRuleIds);
 
     const uniquePolicyIds = [...new Set(rules.values().flatMap((r) => r.notificationPolicyIds))];
     const policies = await getFakeNotificationPoliciesByIds(uniquePolicyIds);
@@ -308,6 +310,27 @@ export class DispatcherService implements DispatcherServiceContract {
       source: 'internal',
       reason,
     };
+  }
+
+  private async fetchRules(ruleIds: RuleId[]): Promise<Map<RuleId, Rule>> {
+    const result = await this.rulesSavedObjectService.bulkGetByIds(ruleIds);
+    const rules = new Map<RuleId, Rule>();
+
+    for (const doc of result) {
+      if ('error' in doc) continue;
+
+      rules.set(doc.id, {
+        id: doc.id,
+        name: doc.attributes.metadata.name,
+        description: doc.attributes.metadata.owner ?? '',
+        notificationPolicyIds: doc.attributes.notification_policies?.map((p) => p.ref) ?? [],
+        enabled: doc.attributes.enabled,
+        createdAt: doc.attributes.createdAt,
+        updatedAt: doc.attributes.updatedAt,
+      });
+    }
+
+    return rules;
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {

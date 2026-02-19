@@ -149,6 +149,7 @@ export class NotificationPolicyClient {
       metadata: { managed: true },
     });
 
-    return result?.api_key ?? null;
+    if (!result) return null;
+    return Buffer.from(`${result.id}:${result.api_key}`).toString('base64');
   }
 }

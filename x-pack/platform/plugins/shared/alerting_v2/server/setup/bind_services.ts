@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginSetup } from '@kbn/core-di';
+import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -18,6 +19,7 @@ import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import {
   DispatcherServiceInternalToken,
   DispatcherServiceScopedToken,
+  RulesSavedObjectServiceInternalToken,
 } from '../lib/dispatcher/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { RulesClient } from '../lib/rules_client';
@@ -43,7 +45,8 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
-import type { AlertingServerSetupDependencies } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -79,6 +82,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   );
 
   bind(RulesSavedObjectService).toSelf().inRequestScope();
+  bind(RulesSavedObjectServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const internalClient = savedObjects.createInternalRepository([
+        RULE_SAVED_OBJECT_TYPE,
+      ]) as unknown as SavedObjectsClientContract;
+      return new RulesSavedObjectService(() => internalClient, spaces);
+    })
+    .inSingletonScope();
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
 
   bind(QueryServiceScopedToken)
@@ -121,12 +134,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const queryService = get(QueryServiceScopedToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
+      const rulesSoService = get(RulesSavedObjectServiceInternalToken);
 
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
-        workflowsManagement.management
+        workflowsManagement.management,
+        rulesSoService
       );
     })
     .inRequestScope();
@@ -139,11 +154,13 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const queryService = get(QueryServiceInternalToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
+      const rulesSoService = get(RulesSavedObjectServiceInternalToken);
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
-        workflowsManagement.management
+        workflowsManagement.management,
+        rulesSoService
       );
     })
     .inSingletonScope();

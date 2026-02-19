@@ -5,25 +5,7 @@
  * 2.0.
  */
 
-import type { NotificationPolicy, NotificationPolicyId, Rule, RuleId } from './types';
-
-export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, Rule>> {
-  const now = new Date().toISOString();
-  const rules = ruleIds.reduce((acc, ruleId) => {
-    acc[ruleId] = {
-      id: ruleId,
-      name: `Rule ${ruleId}`,
-      description: `Description for rule ${ruleId}`,
-      notificationPolicyIds: ['policy_123', 'policy_456'],
-      enabled: true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    return acc;
-  }, {} as Record<RuleId, Rule>);
-
-  return new Map(Object.entries(rules));
-}
+import type { NotificationPolicy, NotificationPolicyId } from './types';
 
 const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
   policy_123: {

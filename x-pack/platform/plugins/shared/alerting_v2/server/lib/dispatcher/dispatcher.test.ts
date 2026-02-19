@@ -10,9 +10,11 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
@@ -20,9 +22,44 @@ import { DispatcherService } from './dispatcher';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
+  createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+
+const createMockRuleSoAttributes = (
+  overrides: Partial<RuleSavedObjectAttributes> = {}
+): RuleSavedObjectAttributes => ({
+  kind: 'alert',
+  metadata: { name: 'Test rule' },
+  time_field: '@timestamp',
+  schedule: { every: '1m' },
+  evaluation: { query: { base: 'FROM logs-*' } },
+  notification_policies: [{ ref: 'policy_456' }],
+  enabled: true,
+  createdBy: null,
+  updatedBy: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+  ...overrides,
+});
+
+const createMockRulesSoService = (
+  ruleIds: string[],
+  overrides?: Partial<RuleSavedObjectAttributes>
+): RulesSavedObjectServiceContract => ({
+  bulkGetByIds: jest.fn().mockResolvedValue(
+    ruleIds.map((id) => ({
+      id,
+      attributes: createMockRuleSoAttributes(overrides),
+    }))
+  ),
+  create: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  find: jest.fn(),
+});
 
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
@@ -30,12 +67,20 @@ describe('DispatcherService', () => {
   let storageService: StorageServiceContract;
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let storageEsClient: jest.Mocked<ElasticsearchClient>;
+  let rulesSoService: RulesSavedObjectServiceContract;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
     ({ storageService, mockEsClient: storageEsClient } = createStorageService());
     const { loggerService } = createLoggerService();
-    dispatcherService = new DispatcherService(queryService, loggerService, storageService);
+    rulesSoService = createMockRulesSoService(['rule-1', 'rule-2']);
+    dispatcherService = new DispatcherService(
+      queryService,
+      loggerService,
+      storageService,
+      undefined as any,
+      rulesSoService
+    );
   });
 
   afterEach(() => {
@@ -78,7 +123,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
         items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
@@ -97,7 +143,7 @@ describe('DispatcherService', () => {
         .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(2);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
@@ -126,7 +172,11 @@ describe('DispatcherService', () => {
       expect(createOperations).toEqual(
         expect.arrayContaining([{ create: { _index: ALERT_ACTIONS_DATA_STREAM } }])
       );
-      expect(docs).toHaveLength(alertEpisodes.length);
+
+      const fireActions = docs.filter((d: any) => d.action_type === 'fire');
+      const notifiedActions = docs.filter((d: any) => d.action_type === 'notified');
+      expect(fireActions).toHaveLength(alertEpisodes.length);
+      expect(notifiedActions.length).toBeGreaterThan(0);
 
       expect(docs).toEqual(
         expect.arrayContaining([
@@ -185,7 +235,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
         items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
@@ -201,7 +252,11 @@ describe('DispatcherService', () => {
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const safeOperations = operations ?? [];
       const docs = safeOperations.filter((_, index) => index % 2 === 1);
-      expect(docs).toHaveLength(2);
+
+      const suppressDocs = docs.filter((d: any) => d.action_type === 'suppress');
+      const fireDocs = docs.filter((d: any) => d.action_type === 'fire');
+      expect(suppressDocs).toHaveLength(1);
+      expect(fireDocs).toHaveLength(1);
 
       expect(docs).toEqual(
         expect.arrayContaining([
@@ -238,6 +293,22 @@ describe('DispatcherService', () => {
     });
 
     it('dispatches correct fire/suppress actions across 5 rules with ack, unack, snooze, and deactivate suppressions', async () => {
+      rulesSoService = createMockRulesSoService([
+        'rule-001',
+        'rule-002',
+        'rule-003',
+        'rule-004',
+        'rule-005',
+      ]);
+      const { loggerService } = createLoggerService();
+      dispatcherService = new DispatcherService(
+        queryService,
+        loggerService,
+        storageService,
+        undefined as any,
+        rulesSoService
+      );
+
       // Dataset: 5 rules, 9 episodes total
       // rule-001: single series, ack then unack → fire
       // rule-002: single series, ack with no unack → suppress
@@ -359,7 +430,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions));
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
         items: Array.from({ length: 10 }, (_, i) => ({
@@ -373,17 +445,18 @@ describe('DispatcherService', () => {
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(2);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
 
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
-      expect(docs).toHaveLength(10);
 
       const fireActions = docs.filter((doc) => doc.action_type === 'fire');
       const suppressActions = docs.filter((doc) => doc.action_type === 'suppress');
+      const notifiedActions = docs.filter((doc) => doc.action_type === 'notified');
       expect(fireActions).toHaveLength(6);
       expect(suppressActions).toHaveLength(4);
+      expect(notifiedActions.length).toBeGreaterThan(0);
 
       // rule-001: fire (ack then unack cancels suppression)
       expect(docs).toEqual(
