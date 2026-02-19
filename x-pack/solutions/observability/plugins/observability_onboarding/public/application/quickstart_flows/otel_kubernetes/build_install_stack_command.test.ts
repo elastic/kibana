@@ -87,10 +87,11 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: false,
       });
 
-      expect(command).not.toContain('logs_index=logs');
+      expect(command).not.toContain('resource\\/wired_streams');
+      expect(command).not.toContain('elasticsearch.index');
     });
 
-    it('includes wired streams config when useWiredStreams is true', () => {
+    it('routes daemon logs to wired streams when useWiredStreams is true (direct ES)', () => {
       const command = buildInstallStackCommand({
         isMetricsOnboardingEnabled: true,
         isManagedOtlpServiceAvailable: false,
@@ -102,8 +103,70 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       });
 
       expect(command).toContain(
-        "--set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'"
+        "collectors.daemon.config.processors.resource\\/wired_streams"
       );
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain(
+        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+      );
+      expect(command).toContain(
+        "collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams"
+      );
+    });
+
+    it('routes daemon logs to wired streams when useWiredStreams is true (managed OTLP)', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: true,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      expect(command).toContain(
+        "collectors.daemon.config.processors.resource\\/wired_streams"
+      );
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain(
+        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+      );
+      expect(command).toContain(
+        "collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams"
+      );
+    });
+
+    it('does not inject logs/apm processor when metrics onboarding is disabled (logs-only mode)', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: false,
+        isManagedOtlpServiceAvailable: true,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      expect(command).toContain(
+        "collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams"
+      );
+      expect(command).not.toContain('logs\\/apm');
+    });
+
+    it('does not modify gateway config when useWiredStreams is true', () => {
+      const command = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: false,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('collectors.gateway.config');
+      expect(command).not.toContain('logs_index=logs');
     });
 
     it('appends wired streams config at the end of the helm command', () => {
@@ -117,28 +180,10 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: true,
       });
 
-      // Wired streams config should come after the version
       expect(command).toContain(
         `--version '${OTEL_KUBE_STACK_VERSION}' \\
-  --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`
+  --set 'collectors.daemon.config.processors.resource\\/wired_streams`
       );
-    });
-
-    it('injects resource/wired_streams processor when managed OTLP service is available', () => {
-      const command = buildInstallStackCommand({
-        isMetricsOnboardingEnabled: true,
-        isManagedOtlpServiceAvailable: true,
-        managedOtlpEndpointUrl: 'https://example.com/otlp',
-        elasticsearchUrl: 'https://example.com/elasticsearch',
-        apiKeyEncoded: 'encoded_api_key',
-        agentVersion: '9.1.0',
-        useWiredStreams: true,
-      });
-
-      expect(command).not.toContain('logs_index=logs');
-      expect(command).not.toContain('elasticsearch\\/otel');
-      expect(command).toContain('resource\\/wired_streams');
-      expect(command).toContain('elasticsearch.index');
     });
   });
 });
