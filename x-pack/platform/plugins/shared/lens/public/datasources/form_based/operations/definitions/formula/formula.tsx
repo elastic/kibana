@@ -146,9 +146,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as FormulaIndexPatternColumn;
       const params = currentColumn.params;
-      // TODO: improve this logic
-      const useDisplayLabel = currentColumn.label !== defaultLabel;
-      const label = useDisplayLabel ? currentColumn.label : params?.formula ?? defaultLabel;
+      const label = currentColumn.label || params?.formula || defaultLabel;
 
       return [
         {
@@ -156,7 +154,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           function: currentColumn.references.length ? 'mathColumn' : 'mapColumn',
           arguments: {
             id: [columnId],
-            name: [label || defaultLabel],
+            name: [label],
             ...(currentColumn.references.length
               ? {
                   castColumns: [currentColumn.references[0]],
@@ -190,7 +188,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       const isPreviousFormulaColumn = previousColumn?.operationType === 'formula';
 
       return {
-        label: previousFormula || defaultLabel,
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,

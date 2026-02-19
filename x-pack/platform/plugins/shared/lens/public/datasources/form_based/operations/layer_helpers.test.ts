@@ -20,13 +20,11 @@ import {
 } from './layer_helpers';
 import type {
   AvgIndexPatternColumn,
-  CounterRateIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
   GenericIndexPatternColumn,
   MathIndexPatternColumn,
-  MaxIndexPatternColumn,
   MovingAverageIndexPatternColumn,
   OperationType,
   TermsIndexPatternColumn,
@@ -232,14 +230,18 @@ describe('state_helpers', () => {
           formulaX2: math,
           copy: expect.objectContaining({ ...source, references: ['copyX2'] }),
           copyX0: expect.objectContaining({
-            ...sum,
+            operationType: 'sum',
+            sourceField: 'bytes',
+            label: 'Part of 5 + moving_average(sum(bytes), window=5)',
           }),
           copyX1: expect.objectContaining({
-            ...movingAvg,
+            operationType: 'moving_average',
+            label: 'Part of 5 + moving_average(sum(bytes), window=5)',
             references: ['copyX0'],
           }),
           copyX2: expect.objectContaining({
-            ...math,
+            operationType: 'math',
+            label: 'Part of 5 + moving_average(sum(bytes), window=5)',
             references: ['copyX1'],
             params: {
               tinymathAst: expect.objectContaining({
@@ -803,7 +805,9 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top 9 values of bytes',
+          operationType: 'terms',
+          sourceField: 'bytes',
+          label: '',
         })
       );
     });
@@ -1148,7 +1152,9 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top 9 values of source',
+            operationType: 'terms',
+            sourceField: 'source',
+            label: '',
           })
         );
       });
@@ -1217,7 +1223,9 @@ describe('state_helpers', () => {
             visualizationGroups: [],
             shouldResetLabel: true,
           }).columns.col1
-        ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
+        ).toEqual(
+          expect.objectContaining({ operationType: 'average', sourceField: 'bytes', label: '' })
+        );
       });
 
       it('should carry over a custom label when transitioning to a managed reference', () => {
@@ -1260,7 +1268,7 @@ describe('state_helpers', () => {
               columnOrder: ['col1', 'col2'],
               columns: {
                 col1: {
-                  label: 'Average of bytes',
+                  label: '',
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'average',
@@ -1275,7 +1283,13 @@ describe('state_helpers', () => {
             visualizationGroups: [],
             shouldResetLabel: undefined,
           }).columns.col1
-        ).toEqual(expect.objectContaining({ label: 'average(bytes)' }));
+        ).toEqual(
+          expect.objectContaining({
+            operationType: 'formula',
+            params: expect.objectContaining({ formula: 'average(bytes)' }),
+            label: '',
+          })
+        );
       });
 
       it('should carry over a custom label when transitioning from a managed reference', () => {
@@ -1359,45 +1373,8 @@ describe('state_helpers', () => {
             visualizationGroups: [],
             shouldResetLabel: undefined,
           }).columns.col1
-        ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
-      });
-
-      it('should update default label when referenced column gets a field change', () => {
-        expect(
-          replaceColumn({
-            layer: {
-              indexPatternId: '1',
-              columnOrder: ['col1'],
-              columns: {
-                col1: {
-                  label: 'MyDefaultLabel',
-                  dataType: 'number',
-                  operationType: 'counter_rate',
-                  isBucketed: false,
-                  references: ['col2'],
-                  timeScale: 's',
-                  timeShift: '',
-                  filter: undefined,
-                  params: undefined,
-                } as CounterRateIndexPatternColumn,
-                col2: {
-                  label: 'Max of bytes',
-                  dataType: 'number',
-                  operationType: 'max',
-                  sourceField: indexPattern.fields[2].displayName,
-                } as MaxIndexPatternColumn,
-              },
-            },
-            indexPattern,
-            columnId: 'col2',
-            op: 'max',
-            field: indexPattern.fields[3],
-            visualizationGroups: [],
-          }).columns.col1
         ).toEqual(
-          expect.objectContaining({
-            label: 'Counter rate of memory per second',
-          })
+          expect.objectContaining({ operationType: 'average', sourceField: 'bytes', label: '' })
         );
       });
     });
@@ -1447,7 +1424,7 @@ describe('state_helpers', () => {
           columns: {
             col1: termsColumn,
             col2: expect.objectContaining({
-              label: 'Average of bytes',
+              label: '',
               dataType: 'number',
               isBucketed: false,
               sourceField: 'bytes',
@@ -1628,7 +1605,7 @@ describe('state_helpers', () => {
         expect(result.columns).toEqual(
           expect.objectContaining({
             id1: expect.objectContaining({
-              label: 'Sum of bytes',
+              label: '',
               sourceField: 'bytes',
               operationType: 'sum' as const,
             }),
@@ -2126,7 +2103,7 @@ describe('state_helpers', () => {
           columns: {
             col1: expectedCol,
             col2: {
-              label: 'Test reference',
+              label: '',
               dataType: 'number',
               isBucketed: false,
 
@@ -2537,51 +2514,6 @@ describe('state_helpers', () => {
       };
       expect(deleteColumn({ layer, columnId: 'col2', indexPattern })).toEqual(
         expect.objectContaining({ columnOrder: [], columns: {} })
-      );
-    });
-
-    it('should update the labels when deleting columns', () => {
-      const layer: FormBasedLayer = {
-        indexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-
-            operationType: 'count',
-            sourceField: '___records___',
-          },
-          col2: {
-            label: 'Changed label',
-            dataType: 'number',
-            isBucketed: false,
-
-            operationType: 'testReference',
-            references: ['col1'],
-          },
-        },
-      };
-      deleteColumn({ layer, columnId: 'col1', indexPattern });
-      expect(operationDefinitionMap.testReference.getDefaultLabel).toHaveBeenCalledWith(
-        {
-          label: 'Changed label',
-          dataType: 'number',
-          isBucketed: false,
-          operationType: 'testReference',
-          references: ['col1'],
-        },
-        {
-          col2: {
-            label: 'Default label',
-            dataType: 'number',
-            isBucketed: false,
-            operationType: 'testReference',
-            references: ['col1'],
-          },
-        },
-        indexPattern
       );
     });
 

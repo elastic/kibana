@@ -98,14 +98,14 @@ export const mockDataViews = (): IndexPatternMap => {
 
 export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   count: {
-    label: 'Count of records',
+    label: '',
     dataType: 'number',
     isBucketed: false,
     sourceField: '___records___',
     operationType: 'count',
   },
   staticValue: {
-    label: 'Static value: 0.75',
+    label: '',
     dataType: 'number',
     operationType: 'static_value',
     isBucketed: false,
@@ -115,7 +115,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     references: [],
   } as StaticValueIndexPatternColumn,
   dateHistogram: {
-    label: 'Date histogram of timestamp',
+    label: '',
     customLabel: true,
     dataType: 'date',
     isBucketed: true,
@@ -128,7 +128,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     sourceField: 'timestamp',
   } as DateHistogramIndexPatternColumn,
   dateHistogramCopy: {
-    label: 'Date histogram of timestamp (1)',
+    label: '',
     customLabel: true,
     dataType: 'date',
     isBucketed: true,
@@ -141,7 +141,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     sourceField: 'timestamp',
   } as DateHistogramIndexPatternColumn,
   terms: {
-    label: 'Top 10 values of src',
+    label: '',
     dataType: 'string',
     isBucketed: true,
     // Private
@@ -154,7 +154,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     sourceField: 'src',
   } as TermsIndexPatternColumn,
   terms2: {
-    label: 'Top 10 values of dest',
+    label: '',
     dataType: 'string',
     isBucketed: true,
 
@@ -168,14 +168,14 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     sourceField: 'dest',
   } as TermsIndexPatternColumn,
   sum: {
-    label: 'Sum of bytes',
+    label: '',
     dataType: 'number',
     isBucketed: false,
     operationType: 'sum',
     sourceField: 'bytes',
   } as GenericIndexPatternColumn,
   median: {
-    label: 'Median of bytes',
+    label: '',
     dataType: 'number',
     isBucketed: false,
 
@@ -184,7 +184,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     sourceField: 'bytes',
   } as GenericIndexPatternColumn,
   uniqueCount: {
-    label: 'Unique count of bytes',
+    label: '',
     dataType: 'number',
     isBucketed: false,
     sourceField: 'bytes',

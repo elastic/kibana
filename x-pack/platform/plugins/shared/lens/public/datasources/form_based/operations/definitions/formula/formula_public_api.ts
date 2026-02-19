@@ -39,7 +39,6 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
         id,
         {
           label: label ?? formula,
-          customLabel: Boolean(label),
           operationType: 'formula',
           dataType: 'number',
           references: [],

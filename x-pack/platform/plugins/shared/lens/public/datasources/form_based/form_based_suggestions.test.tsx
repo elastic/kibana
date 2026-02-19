@@ -1327,7 +1327,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Count of records',
+                    label: '',
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -1421,7 +1421,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Count of records',
+                    label: '',
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -1747,7 +1747,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   'column-id-1': expect.objectContaining({
                     operationType: 'count',
                     sourceField: '___records___',
-                    label: 'Count of records',
+                    label: '',
                     params: expect.objectContaining({
                       format: {
                         id: 'bytes',
@@ -1920,7 +1920,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   }),
                   'column-id-3': expect.objectContaining({
                     operationType: 'filters',
-                    label: 'Filters',
+                    label: '',
                     params: expect.objectContaining({
                       filters: [
                         {
@@ -2335,7 +2335,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'timestampLabel',
+                  label: '',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -2430,7 +2430,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'timestampLabel',
+                  label: '',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -2546,7 +2546,7 @@ describe('IndexPattern Data Source suggestions', () => {
               {
                 columnId: 'id1',
                 operation: {
-                  label: 'timestampLabel',
+                  label: '',
                   dataType: 'date',
                   isBucketed: true,
                   scale: 'interval',
@@ -2687,7 +2687,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 operation: {
                   dataType: 'date',
                   isBucketed: true,
-                  label: 'timestampLabel',
+                  label: '',
                   scale: 'interval',
                   isStaticValue: false,
                   hasTimeShift: false,
@@ -3066,7 +3066,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ...initialState.layers.first,
             columns: {
               id1: {
-                label: 'Average of field1',
+                label: '',
                 dataType: 'number',
                 isBucketed: false,
 
@@ -3116,7 +3116,7 @@ describe('IndexPattern Data Source suggestions', () => {
           table: expect.objectContaining({
             columns: [
               expect.objectContaining({
-                operation: expect.objectContaining({ label: 'Median of field1' }),
+                operation: expect.objectContaining({ label: '' }),
               }),
             ],
           }),
@@ -3295,7 +3295,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'date',
                     isBucketed: true,
-                    label: 'timestampLabel',
+                    label: '',
                     scale: 'interval',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -3309,7 +3309,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of Records',
+                    label: '',
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,
@@ -3323,7 +3323,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
-                    label: 'Cumulative sum of (incomplete)',
+                    label: '',
                     scale: 'ratio',
                     isStaticValue: false,
                     hasTimeShift: false,

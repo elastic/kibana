@@ -1351,7 +1351,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 col1: testState.layers.first.columns.col1,
                 col2: {
                   isBucketed: true,
-                  label: 'Top 10 values of bytes',
+                  label: '',
                   operationType: 'terms',
                   sourceField: 'bytes',
                   dataType: 'number',
@@ -1449,7 +1449,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 col1: testState.layers.first.columns.col1,
                 col2: {
                   isBucketed: true,
-                  label: 'Top 10 values of bytes',
+                  label: '',
                   operationType: 'terms',
                   sourceField: 'bytes',
                   dataType: 'number',
@@ -1465,7 +1465,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 col3: testState.layers.first.columns.col3,
                 col4: {
                   isBucketed: false,
-                  label: 'Unique count of src',
+                  label: '',
                   filter: undefined,
                   operationType: 'unique_count',
                   sourceField: 'src',
@@ -1703,7 +1703,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col5: {
                     dataType: 'date',
                     isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                    label: '',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1746,7 +1746,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col5: {
                     dataType: 'date',
                     isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                    label: '',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1789,7 +1789,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   newCol: {
                     dataType: 'date',
                     isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                    label: '',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1827,7 +1827,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   newCol: {
                     dataType: 'date',
                     isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                    label: '',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1865,7 +1865,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col1: {
                     dataType: 'number',
                     isBucketed: true,
-                    label: 'bytes',
+                    label: '',
                     operationType: 'range',
                     params: {
                       includeEmptyRows: true,
@@ -1890,7 +1890,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col5: {
                     dataType: 'date',
                     isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                    label: '',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1946,7 +1946,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col4: {
                     dataType: 'string',
                     isBucketed: true,
-                    label: 'Top values of dest + 1 other',
+                    label: '',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -2009,7 +2009,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   col4: {
                     dataType: 'string',
                     isBucketed: true,
-                    label: 'Top values of dest + 1 other',
+                    label: '',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -2135,7 +2135,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     references: ['newColumnX0'],
                   },
                   newColumnX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,
@@ -2191,7 +2190,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     references: ['secondX0'],
                   },
                   secondX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,

@@ -88,7 +88,7 @@ describe('filters', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'filters',
+          label: '',
           dataType: 'document',
           operationType: 'filters',
           isBucketed: true,
@@ -106,7 +106,7 @@ describe('filters', () => {
           },
         } as FiltersIndexPatternColumn,
         col2: {
-          label: 'Count',
+          label: '',
           dataType: 'number',
           isBucketed: false,
           sourceField: '___records___',
@@ -212,7 +212,7 @@ describe('filters', () => {
           indexPattern: defaultProps.indexPattern,
         })
       ).toEqual({
-        label: 'Filters',
+        label: '',
         dataType: 'string',
         operationType: 'filters',
         isBucketed: true,
@@ -248,7 +248,7 @@ describe('filters', () => {
           indexPattern: defaultProps.indexPattern,
         })
       ).toEqual({
-        label: 'Filters',
+        label: '',
         dataType: 'string',
         operationType: 'filters',
         isBucketed: true,
@@ -286,7 +286,7 @@ describe('filters', () => {
           indexPattern: defaultProps.indexPattern,
         })
       ).toEqual({
-        label: 'Filters',
+        label: '',
         dataType: 'string',
         operationType: 'filters',
         isBucketed: true,

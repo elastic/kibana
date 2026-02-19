@@ -30,7 +30,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -41,7 +41,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -73,7 +73,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             params: { includeEmptyRows: true },
@@ -84,7 +84,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -110,7 +110,7 @@ describe('generateEsqlQuery', () => {
           '1',
           {
             operationType: 'formula',
-            label: 'Formula',
+            label: '',
             isBucketed: false,
             params: {},
             dataType: 'number',
@@ -138,7 +138,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -149,7 +149,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -181,7 +181,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -192,7 +192,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -228,7 +228,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -239,7 +239,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -272,7 +272,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -283,7 +283,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -319,7 +319,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -330,7 +330,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'sum',
             sourceField: 'price',
-            label: 'Sum of price',
+            label: '',
             dataType: 'number',
             isBucketed: false,
             params: {
@@ -380,7 +380,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -391,7 +391,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'average',
             sourceField: 'bytes',
-            label: 'Average bytes',
+            label: '',
             dataType: 'number',
             isBucketed: false,
             params: {
@@ -435,7 +435,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -446,7 +446,7 @@ describe('generateEsqlQuery', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
             filter: {

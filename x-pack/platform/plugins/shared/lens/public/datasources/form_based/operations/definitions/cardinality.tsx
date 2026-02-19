@@ -115,7 +115,7 @@ export const cardinalityOperation: OperationDefinition<
     ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
+      label: '',
       dataType: 'number',
       operationType: CARDINALITY_ID,
       sourceField: field.name,
@@ -204,7 +204,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: '',
       sourceField: field.name,
     };
   },

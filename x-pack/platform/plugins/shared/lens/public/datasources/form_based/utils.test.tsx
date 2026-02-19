@@ -217,7 +217,8 @@ describe('indexpattern_datasource utils', () => {
       await userEvent.click(screen.getByText('Rank by rarity'));
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
-      expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');
+      // Default labels are no longer stored — they're computed at render time
+      expect(newState.layers.id.columns.col1.label).toBeUndefined();
       expect(newState.layers.id.columns.col1.params.orderBy).toEqual({
         type: 'rare',
         maxDocCount: 1,

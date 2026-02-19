@@ -89,12 +89,11 @@ describe('createFormulaPublicApi', () => {
     expect(insertOrReplaceFormulaColumn).toHaveBeenCalledWith(
       'col',
       {
-        customLabel: false,
         dataType: 'number',
         isBucketed: false,
         label: 'count()',
         operationType: 'formula',
-        params: { formula: 'count()' },
+        params: { formula: 'count()', format: undefined },
         references: [],
       },
       {
@@ -132,7 +131,6 @@ describe('createFormulaPublicApi', () => {
     expect(insertOrReplaceFormulaColumn).toHaveBeenCalledWith(
       'col',
       {
-        customLabel: false,
         dataType: 'number',
         isBucketed: false,
         label: 'count()',

@@ -45,7 +45,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           {
             operationType: 'date_histogram',
             sourceField: 'order_date',
-            label: 'Date histogram',
+            label: '',
             dataType: 'date',
             isBucketed: true,
             interval: 'auto',
@@ -56,7 +56,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },
@@ -115,7 +115,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           {
             operationType: 'count',
             sourceField: 'records',
-            label: 'Count',
+            label: '',
             dataType: 'number',
             isBucketed: false,
           },

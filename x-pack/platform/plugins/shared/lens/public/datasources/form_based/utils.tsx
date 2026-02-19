@@ -51,12 +51,7 @@ import type {
 import { renewIDs } from '../../utils';
 
 import type { GenericOperationDefinition } from './operations';
-import {
-  operationDefinitionMap,
-  getReferenceRoot,
-  updateColumnParam,
-  updateDefaultLabels,
-} from './operations';
+import { operationDefinitionMap, getReferenceRoot, updateColumnParam } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
 import { hasField } from './pure_utils';
@@ -506,15 +501,12 @@ export function getPrecisionErrorWarningMessages(
                             mergeLayer({
                               state: prevState,
                               layerId,
-                              newLayer: updateDefaultLabels(
-                                updateColumnParam({
-                                  layer: currentLayer,
-                                  columnId: column.id,
-                                  paramName: 'accuracyMode',
-                                  value: true,
-                                }),
-                                indexPattern
-                              ),
+                              newLayer: updateColumnParam({
+                                layer: currentLayer,
+                                columnId: column.id,
+                                paramName: 'accuracyMode',
+                                value: true,
+                              }),
                             })
                           );
                         }
@@ -566,18 +558,15 @@ export function getPrecisionErrorWarningMessages(
                             mergeLayer({
                               state: prevState,
                               layerId,
-                              newLayer: updateDefaultLabels(
-                                updateColumnParam({
-                                  layer: currentLayer,
-                                  columnId: column.id,
-                                  paramName: 'orderBy',
-                                  value: {
-                                    type: 'rare',
-                                    maxDocCount: DEFAULT_MAX_DOC_COUNT,
-                                  },
-                                }),
-                                indexPattern
-                              ),
+                              newLayer: updateColumnParam({
+                                layer: currentLayer,
+                                columnId: column.id,
+                                paramName: 'orderBy',
+                                value: {
+                                  type: 'rare',
+                                  maxDocCount: DEFAULT_MAX_DOC_COUNT,
+                                },
+                              }),
                             })
                           );
                         }}
