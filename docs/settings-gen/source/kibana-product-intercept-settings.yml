@@ -1,0 +1,60 @@
+---
+# This file is used to generate "Product intercept settings in Kibana" page in the product docs
+
+product: Kibana
+collection: Product intercept settings in Kibana
+id: product-intercept-settings-kb
+page_description: |
+  Configure the product intercept settings in your `kibana.yml` configuration file.
+  A product intercept is a prompt for feedback about the Elastic product that appears periodically in the Kibana UI.
+
+groups:
+  - group: All settings
+    id: product-intercept-all-settings
+    settings:
+
+      - setting: xpack.product_intercept.enabled
+        description: |
+          Enable or disable Elastic product feedback prompts.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.1
+          ess: ga
+          self: ga
+          serverless: ga
+
+      - setting: xpack.product_intercept.interval
+        description: |
+          Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, `20m`, `24h`, `7d`.
+        datatype: string
+        default: 90d
+        applies_to:
+          stack: ga 9.1
+          ess: ga
+          self: ga
+          serverless: ga
+
+      # TODO: verify — not currently documented, found in config schema only
+      - setting: xpack.product_intercept.trialInterceptInterval
+        description: |
+          Set the time that elapses between trial product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, `20m`, `24h`, `7d`.
+        datatype: string
+        default: 7d
+        applies_to:
+          stack: ga 9.1
+          ess: ga
+          self: ga
+          serverless: ga
+
+      # TODO: verify — not currently documented, found in config schema only
+      - setting: xpack.product_intercept.upgradeInterceptInterval
+        description: |
+          Set the time that elapses between upgrade product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, `20m`, `24h`, `7d`.
+        datatype: string
+        default: 7d
+        applies_to:
+          stack: ga 9.1
+          ess: ga
+          self: ga
+          serverless: ga
