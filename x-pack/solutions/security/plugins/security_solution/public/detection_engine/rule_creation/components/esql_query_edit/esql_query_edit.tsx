@@ -8,11 +8,9 @@
 import React, { memo, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { DataViewBase } from '@kbn/es-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
 import { QueryBarField } from '../../../rule_creation_ui/components/query_bar_field';
 import { esqlQueryRequiredValidator } from './validators/esql_query_required_validator';
@@ -39,7 +37,6 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   disabled = false,
   onValidityChange,
 }: EsqlQueryEditProps): JSX.Element {
-  const kibanaServices = useKibana().services;
   const queryClient = useQueryClient();
   const componentProps = useMemo(
     () => ({
@@ -77,13 +74,11 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   );
 
   return (
-    <KibanaContextProvider services={{ core: kibanaServices }}>
-      <UseField
-        path={path}
-        component={QueryBarField}
-        componentProps={componentProps}
-        config={fieldConfig}
-      />
-    </KibanaContextProvider>
+    <UseField
+      path={path}
+      component={QueryBarField}
+      componentProps={componentProps}
+      config={fieldConfig}
+    />
   );
 });
