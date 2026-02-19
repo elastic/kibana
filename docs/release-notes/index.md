@@ -27,7 +27,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.3.1-features-enhancements]
 
 **Data ingestion and Fleet**:
-* Allow integration rollback if not all package policies are upgraded [#253646]({{kib-pull}}253646).
+* Allows integration rollback even if all package policies are not on an upgraded version [#253646]({{kib-pull}}253646).
 
 **Elastic Security solution**:
 For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
