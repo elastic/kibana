@@ -358,9 +358,7 @@ describe('StepConfigurePackage', () => {
     render();
 
     await waitFor(async () => {
-      expect(
-        renderResult.queryByText('Collect logs from Nginx instances')
-      ).not.toBeInTheDocument();
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
     });
   });
 
