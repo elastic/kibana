@@ -16,6 +16,7 @@ import {
   type DateRangePickerProps,
   type DateRangePickerOnChangeProps,
 } from './date_range_picker';
+import type { TimeRangeBoundsOption } from './types';
 
 const meta: Meta<DateRangePickerProps> = {
   title: 'Date Time/DateRangePicker',
@@ -34,18 +35,41 @@ type Story = StoryObj<DateRangePickerProps>;
 export const Playground: Story = {
   args: {
     defaultValue: 'last 20 minutes',
+    presets: [
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+      { start: 'now-30m', end: 'now', label: 'Last 30 minutes' },
+      { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
+      { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
+      { start: 'now-30d', end: 'now', label: 'Last 30 days' },
+      { start: 'now-3M', end: 'now', label: 'Last 3 months' },
+      { start: 'now-1y', end: 'now', label: 'Last 1 year' },
+    ],
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
 function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
+  const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
   const { onChange, ...rest } = props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
     setInvalid(args.isInvalid);
+
+    if (!args.isInvalid) {
+      setRecents((prev) => {
+        const key = `${args.start}|${args.end}`;
+        const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
+        return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
+      });
+    }
+
     onChange?.(args);
   };
 
-  return <DateRangePicker isInvalid={invalid} {...rest} onChange={handleOnChange} />;
+  return (
+    <DateRangePicker isInvalid={invalid} recent={recents} {...rest} onChange={handleOnChange} />
+  );
 }

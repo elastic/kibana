@@ -11,7 +11,7 @@ import React, { useMemo, type ComponentType } from 'react';
 
 import type { IconType } from '@elastic/eui';
 
-import type { TimeRangeBounds } from './types';
+import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerDialog } from './date_range_picker_dialog';
@@ -72,6 +72,19 @@ export interface DateRangePickerProps {
    * Each panel is navigatable via `useDateRangePickerPanelNavigation().navigateTo(id)`.
    */
   panels?: DateRangePickerPanelConfig[];
+
+  /**
+   * Predefined time range options shown in the Presets tab.
+   * @default [{ start: 'now/d', end: 'now/d', label: 'Today' }]
+   */
+  presets?: TimeRangeBoundsOption[];
+
+  /**
+   * Recently used time ranges shown in the Recent tab.
+   * When empty, the Recent tab is disabled.
+   * @default []
+   */
+  recent?: TimeRangeBoundsOption[];
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

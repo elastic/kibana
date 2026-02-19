@@ -20,7 +20,7 @@ import React, {
 
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRange, InitialFocus } from './types';
+import type { TimeRangeBounds, TimeRangeBoundsOption, TimeRange, InitialFocus } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -42,9 +42,10 @@ export interface DateRangePickerContextValue {
   /**
    * Apply the current text (or an explicit range) as the selected time range.
    * When called with a `TimeRangeBounds`, sets text to that range; otherwise applies current text.
+   * Pass an optional `textOverride` to control the input value instead of generating it from the bounds.
    * Calls parent `onChange` and exits editing mode.
    */
-  applyRange: (range?: TimeRangeBounds) => void;
+  applyRange: (range?: TimeRangeBounds, textOverride?: string) => void;
 }
 
 /** Internal context value used by sub-components. */
@@ -55,6 +56,10 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   setIsEditing: (value: boolean) => void;
   /** Whether to use EUI compressed form styling. */
   compressed: boolean;
+  /** Predefined time range options shown in the Presets tab. */
+  presets: TimeRangeBoundsOption[];
+  /** Recently used time ranges shown in the Recent tab. */
+  recent: TimeRangeBoundsOption[];
   /** Maximum width for the picker control, derived from EUI theme. */
   maxWidth: string;
   /** Human-readable display text for the current time range (shown when idle). */
@@ -93,6 +98,8 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
   return context;
 }
 
+const DEFAULT_PRESETS: TimeRangeBoundsOption[] = [{ start: 'now/d', end: 'now/d', label: 'Today' }];
+
 /**
  * Provider component that owns all DateRangePicker state.
  */
@@ -104,6 +111,8 @@ export function DateRangePickerProvider({
   isInvalid = false,
   compressed = true,
   showTimeWindowButtons = false,
+  presets = DEFAULT_PRESETS,
+  recent = [],
 }: PropsWithChildren<DateRangePickerProps>) {
   const { euiTheme } = useEuiTheme();
   const maxWidth = euiTheme.components.forms.maxWidth;
@@ -158,11 +167,12 @@ export function DateRangePickerProvider({
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
   const applyRange = useCallback(
-    (range?: TimeRangeBounds) => {
+    (range?: TimeRangeBounds, textOverride?: string) => {
       let rangeToApply: TimeRange;
 
       if (range) {
-        const rangeText = `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
+        const rangeText =
+          textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
         rangeToApply = textToTimeRange(rangeText);
         setText(rangeText);
       } else {
@@ -201,6 +211,8 @@ export function DateRangePickerProvider({
       panelId,
       timeRange,
       timeWindowButtonsConfig,
+      presets,
+      recent,
     }),
     [
       text,
@@ -216,6 +228,8 @@ export function DateRangePickerProvider({
       panelId,
       timeRange,
       timeWindowButtonsConfig,
+      presets,
+      recent,
     ]
   );
 

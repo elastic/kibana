@@ -62,3 +62,12 @@ export const timeWindowButtonsTexts = {
     { defaultMessage: 'Cannot zoom in any further' }
   ),
 };
+
+export const mainPanelTexts = {
+  presetsTab: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsTab', {
+    defaultMessage: 'Presets',
+  }),
+  recentTab: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.recentTab', {
+    defaultMessage: 'Recent',
+  }),
+};

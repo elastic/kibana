@@ -7,41 +7,99 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
+import type { TimeRangeBoundsOption } from '../types';
 import {
   PanelContainer,
-  PanelHeader,
   PanelBody,
   PanelBodySection,
-  PanelListItem,
   PanelFooter,
+  PanelListItem,
 } from '../date_range_picker_panel_ui';
+import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
+import { mainPanelStyles } from './main_panel.styles';
+import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
+import { mainPanelTexts } from '../translations';
+
+interface OptionsListProps {
+  /** Options to render as selectable list items. */
+  options: TimeRangeBoundsOption[];
+  /** When true, show an offset shorthand suffix on each item. */
+  showShorthand?: boolean;
+}
+
+/** Renders a list of time range options as selectable `PanelListItem` entries. */
+const OptionsList = ({ options, showShorthand }: OptionsListProps) => {
+  const { applyRange } = useDateRangePickerContext();
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+
+  const handleSelect = useCallback(
+    (option: TimeRangeBoundsOption) => {
+      applyRange({ start: option.start, end: option.end }, getOptionInputText(option));
+    },
+    [applyRange]
+  );
+
+  return (
+    <ul css={styles.list}>
+      {options.map((option, index) => (
+        <PanelListItem
+          key={`${option.start}-${option.end}-${index}`}
+          onClick={() => handleSelect(option)}
+          suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
+        >
+          {getOptionDisplayLabel(option)}
+        </PanelListItem>
+      ))}
+    </ul>
+  );
+};
+
+/** Tabbed view switching between presets and recently used ranges. */
+const PresetsRecentTabs = () => {
+  const { presets, recent } = useDateRangePickerContext();
+  const [selectedTabId, setSelectedTabId] = useState<'presets' | 'recent'>('presets');
+  const euiThemeContext = useEuiTheme();
+  const styles = mainPanelStyles(euiThemeContext);
+  const hasRecent = recent.length > 0;
+
+  return (
+    <>
+      <EuiTabs size="s" css={styles.tabs}>
+        <EuiTab
+          isSelected={selectedTabId === 'presets'}
+          onClick={() => setSelectedTabId('presets')}
+        >
+          {mainPanelTexts.presetsTab}
+        </EuiTab>
+        <EuiTab
+          isSelected={selectedTabId === 'recent'}
+          disabled={!hasRecent}
+          onClick={() => setSelectedTabId('recent')}
+        >
+          {mainPanelTexts.recentTab}
+        </EuiTab>
+      </EuiTabs>
+
+      {selectedTabId === 'presets' && <OptionsList options={presets} showShorthand />}
+      {selectedTabId === 'recent' && <OptionsList options={recent} />}
+    </>
+  );
+};
 
 export function MainPanel() {
   const { navigateTo } = useDateRangePickerPanelNavigation();
 
   return (
     <PanelContainer>
-      <PanelHeader spacingSide="both">
-        <h1>Main panel</h1>
-      </PanelHeader>
       <PanelBody>
         <PanelBodySection spacingSide="block">
-          <ul>
-            <PanelListItem
-              onClick={() => {}}
-              suffix={'-15m'}
-              extraActions={
-                <EuiButtonIcon aria-label="more" size="xs" color="danger" iconType="trash" />
-              }
-            >
-              Last 15 minutes
-            </PanelListItem>
-          </ul>
+          <PresetsRecentTabs />
         </PanelBodySection>
       </PanelBody>
       <PanelFooter>
