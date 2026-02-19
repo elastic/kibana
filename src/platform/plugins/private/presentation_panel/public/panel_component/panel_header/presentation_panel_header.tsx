@@ -86,7 +86,7 @@ export const PresentationPanelHeader = <
         }
       `,
     };
-  }, [euiTheme.colors.warning, euiTheme.size]);
+  }, [euiTheme.colors.warning, euiTheme.size, euiTheme.colors]);
 
   const showPanelBar =
     (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
