@@ -11,7 +11,8 @@ import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { useContentListItems, type ContentListItem } from '@kbn/content-list-provider';
-import { Column as BaseColumn, NameColumn } from './column';
+import { Column as BaseColumn, NameColumn, UpdatedAtColumn, ActionsColumn } from './column';
+import { Action as BaseAction, EditAction, DeleteAction } from './action';
 import { useColumns, useSorting } from './hooks';
 import { EmptyState } from './empty_state';
 
@@ -77,17 +78,16 @@ export const getRowId = (id: string): string => `content-list-table-row-${id}`;
  * </ContentListProvider>
  * ```
  *
- * @example Custom columns
+ * @example With actions column
  * ```tsx
- * const { Column } = ContentListTable;
+ * const { Column, Action } = ContentListTable;
  *
  * <ContentListTable title="My Dashboards">
  *   <Column.Name width="40%" />
- *   <Column
- *     id="status"
- *     name="Status"
- *     render={(item) => <Badge>{item.status}</Badge>}
- *   />
+ *   <Column.Actions>
+ *     <Action.Edit />
+ *     <Action.Delete />
+ *   </Column.Actions>
  * </ContentListTable>
  * ```
  */
@@ -133,8 +133,17 @@ const ContentListTableComponent = ({
 // Create Column namespace with sub-components.
 export const Column = Object.assign(BaseColumn, {
   Name: NameColumn,
+  UpdatedAt: UpdatedAtColumn,
+  Actions: ActionsColumn,
+});
+
+// Create Action namespace with sub-components.
+export const Action = Object.assign(BaseAction, {
+  Edit: EditAction,
+  Delete: DeleteAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {
   Column,
+  Action,
 });

@@ -12,10 +12,22 @@ import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+
+export type RulesSavedObjectsBulkGetResultItem =
+  | {
+      id: string;
+      attributes: RuleSavedObjectAttributes;
+      version?: string;
+    }
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
 
 export interface RulesSavedObjectServiceContract {
   create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
@@ -23,6 +35,7 @@ export interface RulesSavedObjectServiceContract {
     id: string,
     spaceId?: string
   ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+  bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
@@ -70,6 +83,27 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       namespace ? { namespace } : undefined
     );
     return { id: doc.id, attributes: doc.attributes, version: doc.version };
+  }
+
+  public async bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<RulesSavedObjectsBulkGetResultItem[]> {
+    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkGet<RuleSavedObjectAttributes>(
+      ids.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id }), namespace ? { namespace } : undefined)
+    );
+
+    return result.saved_objects.map((doc) => {
+      if ('error' in doc && doc.error) {
+        return { id: doc.id, error: doc.error };
+      }
+      return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    });
   }
 
   public async update({

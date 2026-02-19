@@ -367,21 +367,15 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
-  promqlMissingParam: {
+  promqlInvalidParam: {
     message: string;
-    type: { param: string };
+    type: {
+      reason: string;
+    };
   };
-  promqlMissingParamValue: {
+  promqlMutuallyExclusiveParams: {
     message: string;
-    type: { param: string };
-  };
-  promqlInvalidDateParam: {
-    message: string;
-    type: { param: string };
-  };
-  promqlInvalidStepParam: {
-    message: string;
-    type: {};
+    type: { param1: string; param2: string };
   };
   promqlMissingQuery: {
     message: string;

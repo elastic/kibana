@@ -126,7 +126,7 @@ describe('FeedbackContainer', () => {
     });
   });
 
-  it('should disable send button when email is invalid and email consent is checked', async () => {
+  it('should block submission and show email error when email is invalid and email consent is checked', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
     const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
@@ -140,10 +140,15 @@ describe('FeedbackContainer', () => {
     await userEvent.clear(emailInput);
     await userEvent.type(emailInput, 'invalid-email');
 
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+    expect(sendButton).not.toBeDisabled();
+
+    await userEvent.click(sendButton);
+
     await waitFor(() => {
-      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
-      expect(sendButton).toBeDisabled();
+      expect(screen.getByText('Enter a valid email address')).toBeInTheDocument();
     });
+    expect(mockProps.sendFeedback).not.toHaveBeenCalled();
   });
 
   it('should enable send button when email is valid and email consent is checked', async () => {
@@ -165,7 +170,8 @@ describe('FeedbackContainer', () => {
     });
   });
 
-  it('should disable send button when email is empty and email consent is checked', async () => {
+  it('should block submission and show email error when email is empty and email consent is checked', async () => {
+    mockProps.getCurrentUserEmail.mockResolvedValue(undefined);
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
     const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
@@ -176,10 +182,15 @@ describe('FeedbackContainer', () => {
 
     await screen.findByTestId('feedbackEmailInput');
 
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+    expect(sendButton).not.toBeDisabled();
+
+    await userEvent.click(sendButton);
+
     await waitFor(() => {
-      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
-      expect(sendButton).toBeDisabled();
+      expect(screen.getByText('Enter a valid email address')).toBeInTheDocument();
     });
+    expect(mockProps.sendFeedback).not.toHaveBeenCalled();
   });
 
   it('should enable send button when email consent is unchecked', async () => {

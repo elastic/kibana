@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
-import { createAlertEvent } from './fixtures';
+import { createAlertEvent, indexAlertEvents } from './fixtures';
 
 const BULK_ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts/action/_bulk';
 const ALERTS_EVENTS_INDEX = '.alerts-events';
@@ -20,66 +20,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   describe('Bulk Create Alert Action API', function () {
+    this.tags(['skipServerless']);
     let roleAuthc: RoleCredentials;
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-
-      // Create alert events for two different group hashes
-      const alertEvent1 = createAlertEvent({
-        group_hash: 'group-1',
-        episode: { id: 'episode-1', status: 'active' },
-      });
-      const alertEvent2 = createAlertEvent({
-        group_hash: 'group-2',
-        episode: { id: 'episode-2', status: 'active' },
-      });
-
-      await Promise.all([
-        esClient.index({
-          index: ALERTS_EVENTS_INDEX,
-          document: alertEvent1,
-          refresh: 'wait_for',
-        }),
-        esClient.index({
-          index: ALERTS_EVENTS_INDEX,
-          document: alertEvent2,
-          refresh: 'wait_for',
-        }),
-      ]);
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await Promise.all([
-        esClient.deleteByQuery({
-          index: ALERTS_EVENTS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-        }),
-        esClient.deleteByQuery({
-          index: ALERTS_ACTIONS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-        }),
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_EVENTS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_ACTIONS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
       ]);
     });
 
-    afterEach(async () => {
-      await esClient.deleteByQuery({
-        index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-        wait_for_completion: true,
-      });
-    });
-
-    async function getAllActions() {
+    async function getAllActions(ruleIds: string[]) {
+      await esClient.indices.refresh({ index: ALERTS_ACTIONS_INDEX });
       const result = await esClient.search({
         index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
+        query: {
+          bool: {
+            must_not: [{ terms: { action_type: ['fire', 'suppress'] } }],
+            filter: [{ terms: { rule_id: ruleIds } }],
+          },
+        },
         sort: [{ '@timestamp': 'asc' }],
         size: 100,
       });
@@ -97,100 +80,175 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should process single valid action and return counts', async () => {
+      const ruleId = 'bulk-single-rule';
+      const groupHash = 'bulk-single-group';
+      const episodeId = 'bulk-single-episode';
+      await indexAlertEvents(esClient, [
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          episode: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send([{ group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' }]);
+        .send([{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 1, total: 1 });
 
-      const actions = await getAllActions();
+      const actions = await getAllActions([ruleId]);
       expect(actions.length).to.be(1);
-      expect(actions[0].group_hash).to.be('group-1');
+      expect(actions[0].group_hash).to.be(groupHash);
       expect(actions[0].action_type).to.be('ack');
     });
 
     it('should process multiple valid actions and write all documents', async () => {
+      const ruleId = 'bulk-multi-rule';
+      const groupHash1 = 'bulk-multi-group-1';
+      const groupHash2 = 'bulk-multi-group-2';
+      const episodeId1 = 'bulk-multi-episode-1';
+      const episodeId2 = 'bulk-multi-episode-2';
+      await indexAlertEvents(esClient, [
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash1,
+          episode: { id: episodeId1, status: 'active' },
+        }),
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash2,
+          episode: { id: episodeId2, status: 'active' },
+        }),
+      ]);
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'group-2', action_type: 'snooze' },
+          { group_hash: groupHash1, action_type: 'ack', episode_id: episodeId1 },
+          { group_hash: groupHash2, action_type: 'snooze' },
         ]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 2, total: 2 });
 
-      const actions = await getAllActions();
+      const actions = await getAllActions([ruleId]);
       expect(actions.length).to.be(2);
 
-      const group1Action = actions.find((a) => a.group_hash === 'group-1');
-      const group2Action = actions.find((a) => a.group_hash === 'group-2');
+      const group1Action = actions.find((a) => a.group_hash === groupHash1);
+      const group2Action = actions.find((a) => a.group_hash === groupHash2);
 
       expect(group1Action!.action_type).to.be('ack');
       expect(group2Action!.action_type).to.be('snooze');
     });
 
     it('should handle mixed valid/invalid group hashes with partial success', async () => {
+      const ruleId = 'bulk-mixed-rule';
+      const groupHash1 = 'bulk-mixed-group-1';
+      const groupHash2 = 'bulk-mixed-group-2';
+      const episodeId1 = 'bulk-mixed-episode-1';
+      const episodeId2 = 'bulk-mixed-episode-2';
+      await indexAlertEvents(esClient, [
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash1,
+          episode: { id: episodeId1, status: 'active' },
+        }),
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash2,
+          episode: { id: episodeId2, status: 'active' },
+        }),
+      ]);
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'unknown-group', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'group-2', action_type: 'unack', episode_id: 'episode-2' },
+          { group_hash: groupHash1, action_type: 'ack', episode_id: episodeId1 },
+          {
+            group_hash: 'bulk-mixed-unknown-group',
+            action_type: 'ack',
+            episode_id: 'bulk-mixed-unknown-episode',
+          },
+          { group_hash: groupHash2, action_type: 'unack', episode_id: episodeId2 },
         ]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 2, total: 3 });
 
-      const actions = await getAllActions();
+      const actions = await getAllActions([ruleId]);
       expect(actions.length).to.be(2);
 
       const groupHashes = actions.map((a) => a.group_hash);
-      expect(groupHashes).to.contain('group-1');
-      expect(groupHashes).to.contain('group-2');
-      expect(groupHashes).not.to.contain('unknown-group');
+      expect(groupHashes).to.contain(groupHash1);
+      expect(groupHashes).to.contain(groupHash2);
+      expect(groupHashes).not.to.contain('bulk-mixed-unknown-group');
     });
 
     it('should return processed 0 when all group hashes are invalid', async () => {
+      const ruleId = 'bulk-invalid-rule';
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'unknown-1', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'unknown-2', action_type: 'snooze' },
+          {
+            group_hash: 'bulk-invalid-unknown-1',
+            action_type: 'ack',
+            episode_id: 'bulk-invalid-unknown-episode-1',
+          },
+          { group_hash: 'bulk-invalid-unknown-2', action_type: 'snooze' },
         ]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 0, total: 2 });
 
-      const actions = await getAllActions();
+      const actions = await getAllActions([ruleId]);
       expect(actions.length).to.be(0);
     });
 
     it('should handle different action types in bulk', async () => {
+      const ruleId = 'bulk-types-rule';
+      const groupHash1 = 'bulk-types-group-1';
+      const groupHash2 = 'bulk-types-group-2';
+      const episodeId1 = 'bulk-types-episode-1';
+      const episodeId2 = 'bulk-types-episode-2';
+      await indexAlertEvents(esClient, [
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash1,
+          episode: { id: episodeId1, status: 'active' },
+        }),
+        createAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash2,
+          episode: { id: episodeId2, status: 'active' },
+        }),
+      ]);
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'group-1', action_type: 'tag', tags: ['important', 'reviewed'] },
-          { group_hash: 'group-2', action_type: 'snooze' },
-          { group_hash: 'group-2', action_type: 'activate', reason: 'needs attention' },
+          { group_hash: groupHash1, action_type: 'ack', episode_id: episodeId1 },
+          { group_hash: groupHash1, action_type: 'tag', tags: ['important', 'reviewed'] },
+          { group_hash: groupHash2, action_type: 'snooze' },
+          { group_hash: groupHash2, action_type: 'activate', reason: 'needs attention' },
         ]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 4, total: 4 });
 
-      const actions = await getAllActions();
+      const actions = await getAllActions([ruleId]);
       expect(actions.length).to.be(4);
 
       const tagAction = actions.find((a) => a.action_type === 'tag');

@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
   - '@kbn/search-types'
+  - '@kbn/aiops-utils'
   - '@kbn/esql-resource-browser'
   - '@kbn/projects-solutions-groups'
 tags:

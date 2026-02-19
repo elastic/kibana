@@ -11,8 +11,8 @@ import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 
