@@ -8,11 +8,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from 'react-hook-form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createFormWrapper } from '../../test_utils';
 import { GroupFieldSelect } from './group_field_select';
-import type { FormValues } from '../types';
 import { useQueryColumns } from '../hooks/use_query_columns';
 
 jest.mock('../hooks/use_query_columns');
@@ -22,47 +20,6 @@ const mockUseQueryColumns = jest.mocked(useQueryColumns);
 const createMockServices = () => ({
   data: dataPluginMock.createStartContract(),
 });
-
-const createWrapper = (defaultValues: Partial<FormValues> = {}) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const form = useForm<FormValues>({
-      defaultValues: {
-        kind: 'alert',
-        metadata: {
-          name: '',
-          enabled: true,
-        },
-        timeField: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: {
-          query: {
-            base: 'FROM logs-* | STATS count() BY host.name',
-          },
-        },
-        ...defaultValues,
-      },
-    });
-
-    return (
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>{children}</FormProvider>
-      </QueryClientProvider>
-    );
-  };
-
-  return Wrapper;
-};
 
 describe('GroupFieldSelect', () => {
   beforeEach(() => {
@@ -79,8 +36,10 @@ describe('GroupFieldSelect', () => {
     } as any);
   });
 
+  const defaultQuery = 'FROM logs-* | STATS count() BY host.name';
+
   it('renders with label', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
     const services = createMockServices();
 
     render(
@@ -107,7 +66,7 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
     const services = createMockServices();
 
     render(
@@ -142,7 +101,10 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createWrapper({ grouping: { fields: ['host.name'] } });
+    const Wrapper = createFormWrapper({
+      evaluation: { query: { base: defaultQuery } },
+      grouping: { fields: ['host.name'] },
+    });
     const services = createMockServices();
 
     render(
@@ -156,7 +118,7 @@ describe('GroupFieldSelect', () => {
   });
 
   it('calls useQueryColumns with query from form', () => {
-    const Wrapper = createWrapper({
+    const Wrapper = createFormWrapper({
       evaluation: {
         query: {
           base: 'FROM metrics-* | STATS avg(value) BY region',
@@ -192,7 +154,7 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
     const services = createMockServices();
 
     render(
@@ -232,7 +194,7 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
     const services = createMockServices();
 
     render(

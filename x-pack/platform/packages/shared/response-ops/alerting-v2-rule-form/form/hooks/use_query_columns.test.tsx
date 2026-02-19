@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { createQueryClientWrapper } from '../../test_utils';
 import { useQueryColumns } from './use_query_columns';
 
 jest.mock('@kbn/esql-utils');
@@ -17,22 +16,6 @@ jest.mock('@kbn/esql-utils');
 const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
 
 const createMockSearch = () => dataPluginMock.createStartContract().search.search;
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useQueryColumns', () => {
   beforeEach(() => {
@@ -47,7 +30,7 @@ describe('useQueryColumns', () => {
           query: '',
           search,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     expect(result.current.data).toEqual([]);
@@ -71,7 +54,7 @@ describe('useQueryColumns', () => {
           query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
           search,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -104,7 +87,7 @@ describe('useQueryColumns', () => {
           query: 'INVALID QUERY',
           search,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {
@@ -153,7 +136,7 @@ describe('useQueryColumns', () => {
           query: 'FROM logs-* | LIMIT 10',
           search,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {

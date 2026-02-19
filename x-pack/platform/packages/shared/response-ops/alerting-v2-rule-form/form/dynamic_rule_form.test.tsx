@@ -8,10 +8,10 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
 
 // Mock the ES|QL utils to avoid complex setup
@@ -23,22 +23,6 @@ jest.mock('@kbn/esql-utils', () => ({
   }),
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([]),
 }));
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
@@ -60,7 +44,7 @@ describe('DynamicRuleForm', () => {
   });
 
   it('renders with initial query value', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
     render(
       <Wrapper>
         <DynamicRuleForm {...defaultProps} />
@@ -73,7 +57,7 @@ describe('DynamicRuleForm', () => {
   });
 
   it('updates form state when query prop changes', async () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
     const { rerender } = render(
       <Wrapper>
         <DynamicRuleForm {...defaultProps} query="FROM logs-* | LIMIT 10" />
@@ -96,7 +80,7 @@ describe('DynamicRuleForm', () => {
 
   it('preserves user-modified fields when query changes', async () => {
     const user = userEvent.setup();
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
 
     const { rerender } = render(
       <Wrapper>
@@ -132,7 +116,7 @@ describe('DynamicRuleForm', () => {
       { name: 'host.name', type: 'keyword' },
     ]);
 
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
     const { rerender } = render(
       <Wrapper>
         <DynamicRuleForm
@@ -166,7 +150,7 @@ describe('DynamicRuleForm', () => {
   it('renders without error when isQueryInvalid is true', () => {
     // The isQueryInvalid prop sets a form error on the query field,
     // but it only displays in ErrorCallOut after form submission
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
     render(
       <Wrapper>
         <DynamicRuleForm {...defaultProps} query="INVALID" isQueryInvalid={true} />
@@ -178,7 +162,7 @@ describe('DynamicRuleForm', () => {
   });
 
   it('handles isQueryInvalid prop changes', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
     const { rerender } = render(
       <Wrapper>
         <DynamicRuleForm {...defaultProps} query="INVALID" isQueryInvalid={true} />
@@ -199,7 +183,7 @@ describe('DynamicRuleForm', () => {
   it('calls onSubmit with form values when form is submitted', async () => {
     const user = userEvent.setup();
     const onSubmit = jest.fn();
-    const Wrapper = createWrapper();
+    const Wrapper = createQueryClientWrapper();
 
     render(
       <Wrapper>

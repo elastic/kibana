@@ -8,55 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from 'react-hook-form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { FormValues } from '../types';
+import { createFormWrapper } from '../../test_utils';
 import { RuleDetailsFieldGroup } from './rule_details_field_group';
-
-const createWrapper = (defaultValues: Partial<FormValues> = {}) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const form = useForm<FormValues>({
-      defaultValues: {
-        kind: 'alert',
-        metadata: {
-          name: '',
-          enabled: true,
-        },
-        timeField: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: {
-          query: {
-            base: '',
-          },
-        },
-        ...defaultValues,
-      },
-    });
-
-    return (
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>{children}</FormProvider>
-      </QueryClientProvider>
-    );
-  };
-
-  return Wrapper;
-};
 
 describe('RuleDetailsFieldGroup', () => {
   it('renders the field group with title', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -68,7 +25,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the name field', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -81,7 +38,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the labels field', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -93,7 +50,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the add description button initially', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -105,7 +62,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the description field when add description is clicked', async () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -119,7 +76,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the enabled field', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -132,7 +89,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders the kind field', () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -147,7 +104,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('allows entering a name', async () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -162,7 +119,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('allows toggling enabled state', async () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -179,7 +136,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('allows switching rule kind', async () => {
-    const Wrapper = createWrapper();
+    const Wrapper = createFormWrapper();
 
     render(
       <Wrapper>
@@ -196,7 +153,7 @@ describe('RuleDetailsFieldGroup', () => {
   });
 
   it('renders with pre-filled values', () => {
-    const Wrapper = createWrapper({
+    const Wrapper = createFormWrapper({
       metadata: {
         name: 'Pre-filled Rule',
         enabled: false,

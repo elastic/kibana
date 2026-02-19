@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { createQueryClientWrapper } from '../../test_utils';
 import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
@@ -80,7 +63,7 @@ describe('useCreateRule', () => {
           notifications,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
@@ -106,7 +89,7 @@ describe('useCreateRule', () => {
           notifications,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
@@ -134,7 +117,7 @@ describe('useCreateRule', () => {
           notifications,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
@@ -167,7 +150,7 @@ describe('useCreateRule', () => {
           notifications,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
@@ -197,7 +180,7 @@ describe('useCreateRule', () => {
           notifications,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     const formData: FormValues = {

@@ -5,34 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { createQueryClientWrapper } from '../../test_utils';
 import { useDataFields } from './use_data_fields';
 
 jest.mock('@kbn/esql-utils');
 jest.mock('../../flyout/utils');
 
 const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 describe('useDataFields', () => {
   beforeEach(() => {
@@ -63,7 +46,7 @@ describe('useDataFields', () => {
           http,
           dataViews,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -90,7 +73,7 @@ describe('useDataFields', () => {
           http,
           dataViews,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {
@@ -115,7 +98,7 @@ describe('useDataFields', () => {
           http,
           dataViews,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {

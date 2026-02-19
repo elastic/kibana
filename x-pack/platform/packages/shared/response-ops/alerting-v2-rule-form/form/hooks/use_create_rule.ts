@@ -13,7 +13,7 @@ import type { FormValues } from '../types';
 interface UseCreateRuleProps {
   http: HttpStart;
   notifications: NotificationsStart;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 /**
@@ -57,7 +57,7 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
     {
       onSuccess: (data: RuleResponse) => {
         notifications.toasts.addSuccess(`Rule '${data.metadata.name}' was created successfully`);
-        onSuccess();
+        onSuccess?.();
       },
       onError: (error: Error) => {
         notifications.toasts.addDanger(`Error creating rule: ${error.message}`);

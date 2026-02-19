@@ -53,7 +53,7 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   const { createRule, isLoading } = useCreateRule({
     http,
     notifications,
-    onSuccess: onClose ?? (() => {}),
+    onSuccess: onClose,
   });
 
   const handleSubmit = (values: FormValues) => {
