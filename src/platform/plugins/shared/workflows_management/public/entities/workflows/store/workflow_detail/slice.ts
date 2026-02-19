@@ -31,6 +31,7 @@ const initialState: WorkflowDetailState = {
   highlightedStepId: undefined,
   isTestModalOpen: false,
   loading: initialLoadingState,
+  hasYamlSchemaValidationErrors: false,
   connectorFlyout: {
     isOpen: false,
     connectorType: undefined,
@@ -87,6 +88,10 @@ const workflowDetailSlice = createSlice({
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
+    },
+
+    setHasYamlSchemaValidationErrors: (state, action: { payload: boolean }) => {
+      state.hasYamlSchemaValidationErrors = action.payload;
     },
 
     // Connector flyout actions
@@ -151,6 +156,7 @@ export const {
   setExecution,
   clearExecution,
   setActiveTab,
+  setHasYamlSchemaValidationErrors,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,
