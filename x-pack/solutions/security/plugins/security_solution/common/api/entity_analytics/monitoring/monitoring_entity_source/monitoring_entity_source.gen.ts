@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;

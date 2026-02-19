@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type MigrationCleanupResult = z.infer<typeof MigrationCleanupResult>;
 export const MigrationCleanupResult = z.object({

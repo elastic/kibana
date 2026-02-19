@@ -22,6 +22,5 @@ const CASES_ROOT = resolve(__dirname, '..');
     templateName: 'zod_operation_schema',
     skipLinting: true,
     schemaNameTransform: 'pascalCase',
-    experimentallyImportZodV4: true,
   });
 })();

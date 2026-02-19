@@ -58,7 +58,6 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
     schemas: {
       params: {
         type: 'zod',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         schema: CreateAttackDiscoveryAlertsParamsSchema as unknown as z.ZodObject<any>,
       },
     },

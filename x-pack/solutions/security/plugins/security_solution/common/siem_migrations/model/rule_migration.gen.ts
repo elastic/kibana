@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { Threat } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
