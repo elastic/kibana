@@ -47,8 +47,9 @@ export const useContentListSelection = (): UseContentListSelectionReturn => {
 
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  // Note: `selectedItems` only resolves against the currently loaded `items` array.
-  // If pagination is introduced, IDs from other pages will not appear here.
+  // Only resolves against the currently loaded `items` array. Selection is
+  // automatically cleared by the reducer when search, filters, sort, or
+  // pagination change, so stale cross-page IDs should not accumulate.
   const selectedItems = useMemo(
     () => items.filter((item) => selectedIdSet.has(item.id)),
     [items, selectedIdSet]

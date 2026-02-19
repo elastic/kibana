@@ -69,6 +69,20 @@ describe('state_reducer', () => {
 
       expect(newState.filters).toEqual({ search: 'test query' });
     });
+
+    it('clears selection when sort changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SORT,
+        payload: { field: 'title', direction: 'asc' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_PAGE_INDEX', () => {
@@ -110,6 +124,20 @@ describe('state_reducer', () => {
 
       expect(newState.filters).toEqual({ search: 'test query' });
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when page index changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_INDEX,
+        payload: { index: 2 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
     });
   });
 
@@ -257,6 +285,20 @@ describe('state_reducer', () => {
       expect(newState.search.queryText).toBe('');
       expect(newState.filters).toEqual({ search: undefined });
     });
+
+    it('clears selection when search changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('CLEAR_FILTERS', () => {
@@ -316,6 +358,21 @@ describe('state_reducer', () => {
       expect(newState.page.index).toBe(0);
       expect(newState.page.size).toBe(20);
     });
+
+    it('clears selection when filters are cleared', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test' },
+        search: { queryText: 'test' },
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_PAGE_SIZE', () => {
@@ -357,6 +414,20 @@ describe('state_reducer', () => {
 
       expect(newState.filters).toEqual({ search: 'test query' });
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when page size changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_PAGE_SIZE,
+        payload: { size: 50 },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
     });
   });
 

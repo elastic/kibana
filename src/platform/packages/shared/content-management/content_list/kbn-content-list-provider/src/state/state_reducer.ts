@@ -23,6 +23,9 @@ export const DEFAULT_SELECTION = {
  * Handles user-driven state mutations (search, filters, sort, pagination, selection).
  * Query data (items, loading, error) is managed by React Query directly.
  *
+ * Selection is cleared whenever search, filters, sort, or pagination change so that
+ * `selectedIds` never references items the user can no longer see.
+ *
  * @param state - Current client state.
  * @param action - Action to apply.
  * @returns New client state.
@@ -37,8 +40,8 @@ export const reducer = (
         ...state,
         search: { queryText: action.payload.queryText },
         filters: action.payload.filters,
-        // Reset to first page when search changes to avoid stale page offsets.
         page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
       };
 
     case CONTENT_LIST_ACTIONS.CLEAR_FILTERS:
@@ -46,8 +49,8 @@ export const reducer = (
         ...state,
         filters: { ...DEFAULT_FILTERS },
         search: { queryText: '' },
-        // Reset to first page when filters are cleared to avoid stale page offsets.
         page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
       };
 
     case CONTENT_LIST_ACTIONS.SET_SORT:
@@ -57,20 +60,22 @@ export const reducer = (
           field: action.payload.field,
           direction: action.payload.direction,
         },
-        // Reset to first page when sort changes to avoid stale page offsets.
         page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
       };
 
     case CONTENT_LIST_ACTIONS.SET_PAGE_INDEX:
       return {
         ...state,
         page: { ...state.page, index: action.payload.index },
+        selection: { ...DEFAULT_SELECTION },
       };
 
     case CONTENT_LIST_ACTIONS.SET_PAGE_SIZE:
       return {
         ...state,
         page: { index: 0, size: action.payload.size },
+        selection: { ...DEFAULT_SELECTION },
       };
 
     case CONTENT_LIST_ACTIONS.SET_SELECTION:
