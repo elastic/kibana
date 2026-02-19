@@ -33,6 +33,9 @@ export class StreamsApp {
   public readonly concatLiteralInput;
   public readonly createQueryStreamButton;
   public readonly childStreamTypeSelector;
+  public readonly queryStreamFlyout;
+  public readonly queryStreamFlyoutSaveButton;
+  public readonly queryStreamCreatedSuccessToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -70,6 +73,11 @@ export class StreamsApp {
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
     this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
+    this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
+    this.queryStreamFlyoutSaveButton = this.page.getByTestId(
+      'streamsAppQueryStreamFlyoutSaveButton'
+    );
+    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
   }
 
   async goto() {
@@ -1236,5 +1244,13 @@ export class StreamsApp {
 
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
+  }
+
+  async clickCreateQueryStreamButton() {
+    await this.createQueryStreamButton.click();
+  }
+
+  async clickQueryStreamFlyoutSaveButton() {
+    await this.queryStreamFlyoutSaveButton.click();
   }
 }
