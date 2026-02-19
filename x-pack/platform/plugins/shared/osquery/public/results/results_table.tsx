@@ -102,6 +102,7 @@ export interface ResultsTableComponentProps {
   error?: string;
   addToTimeline?: AddToTimelineHandler;
   isScheduled?: boolean;
+  responseId?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -114,6 +115,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   error,
   addToTimeline,
   isScheduled,
+  responseId,
 }) => {
   const [isLive, setIsLive] = useState(!isScheduled);
 
@@ -190,6 +192,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
+    responseId,
     sort: sortingColumns.map((sortedColumn) => ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,

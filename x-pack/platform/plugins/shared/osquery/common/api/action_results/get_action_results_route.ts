@@ -18,6 +18,7 @@ export const getActionResultsRequestQuerySchema = t.type({
   kuery: t.union([t.string, t.undefined]),
   agentIds: t.union([t.string, t.undefined]),
   totalAgents: t.union([toNumberRt, t.undefined]),
+  responseId: t.union([t.string, t.undefined]),
 });
 
 export type GetActionResultsRequestQuerySchema = t.OutputOf<

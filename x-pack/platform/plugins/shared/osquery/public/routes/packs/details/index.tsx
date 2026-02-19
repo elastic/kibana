@@ -172,7 +172,12 @@ const PackDetailsPageComponent = () => {
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       {data && (
-        <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={queriesArray} />
+        <PackQueriesStatusTable
+          agentIds={agentIds}
+          packName={data.name}
+          data={queriesArray}
+          packId={packId}
+        />
       )}
     </WithHeaderLayout>
   );

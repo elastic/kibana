@@ -329,6 +329,7 @@ export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActio
 
 interface ScheduledQueryExpandedContentProps {
   actionId: string;
+  packId?: string;
   agentIds?: string[];
   interval: number;
 }
@@ -574,12 +575,14 @@ interface PackQueriesStatusTableProps {
   agentIds?: string[];
   data: PackQueryFormData[];
   packName: string;
+  packId?: string;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
   agentIds,
   data,
   packName,
+  packId,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
@@ -607,6 +610,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMapValues[queryId] = (
           <ScheduledQueryExpandedContent
             actionId={getPackActionId(queryId, packName)}
+            packId={packId}
             agentIds={agentIds}
             interval={interval}
           />
@@ -615,7 +619,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [agentIds, itemIdToExpandedRowMap, packName]
+    [agentIds, itemIdToExpandedRowMap, packId, packName]
   );
 
   const renderLastResultsColumn = useCallback(

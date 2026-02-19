@@ -15,10 +15,13 @@ import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
+  UnifiedHistoryRequestOptions,
+  UnifiedHistoryStrategyResponse,
 } from '../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
+import { buildUnifiedHistoryScheduledQuery } from './factory/unified_history';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -59,6 +62,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('integrationNamespaces' in request
               ? { integrationNamespaces: request.integrationNamespaces }
               : {}),
+            ...('responseId' in request ? { responseId: request.responseId } : {}),
+            ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
+            ...('pageSize' in request ? { pageSize: request.pageSize } : {}),
+            ...('afterKey' in request ? { afterKey: request.afterKey } : {}),
+            ...('cursor' in request ? { cursor: request.cursor } : {}),
           } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({
@@ -87,6 +95,41 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           // logs-osquery_manager.action.responses-default, instead of the old index .logs-osquery_manager.action.responses-default
           // which was populated by a transform, we now need to check both places for results.
           // The new index was introduced in integration package 1.12, so users running earlier versions won't have it.
+
+          // For unified history, issue a second query for scheduled executions
+          // and pass both responses to the factory's parse method
+          if (request.factoryQueryType === OsqueryQueries.unifiedHistory) {
+            const scheduledDsl = buildUnifiedHistoryScheduledQuery(
+              strictRequest as unknown as UnifiedHistoryRequestOptions
+            );
+
+            const scheduledEs = data.search.searchAsInternalUser;
+
+            return searchLegacyIndex$.pipe(
+              mergeMap((actionsResponse) =>
+                from(
+                  scheduledEs.search(
+                    { params: scheduledDsl },
+                    options,
+                    deps
+                  )
+                ).pipe(
+                  map((scheduledResponse) => ({ actionsResponse, scheduledResponse }))
+                )
+              ),
+              map(({ actionsResponse, scheduledResponse }) => ({
+                actionsResponse: {
+                  ...actionsResponse,
+                  rawResponse: shimHitsTotal(actionsResponse.rawResponse, options),
+                  total: actionsResponse.rawResponse.hits.total as number,
+                },
+                scheduledResponse,
+              })),
+              mergeMap(({ actionsResponse, scheduledResponse }) =>
+                (queryFactory.parse as any)(request, actionsResponse, scheduledResponse)
+              )
+            );
+          }
 
           return searchLegacyIndex$.pipe(
             mergeMap((legacyIndexResponse) => {

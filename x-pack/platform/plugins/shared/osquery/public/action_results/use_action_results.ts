@@ -39,6 +39,7 @@ export interface UseActionResults {
   kuery?: string;
   isLive?: boolean;
   isScheduled?: boolean;
+  responseId?: string;
 }
 
 interface ActionResultsResponse {
@@ -68,6 +69,7 @@ export const useActionResults = ({
   startDate,
   isLive = false,
   isScheduled = false,
+  responseId,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -82,7 +84,7 @@ export const useActionResults = ({
   }, [agentIds, activePage, limit, isScheduled]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField, isScheduled }],
+    ['actionResults', { actionId, activePage, limit, direction, sortField, isScheduled, responseId }],
     () =>
       http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
@@ -97,6 +99,7 @@ export const useActionResults = ({
             agentIds: currentPageAgentIds.join(','),
           }),
           totalAgents: agentIds?.length ?? 0,
+          ...(responseId && { responseId }),
         },
       }),
     {

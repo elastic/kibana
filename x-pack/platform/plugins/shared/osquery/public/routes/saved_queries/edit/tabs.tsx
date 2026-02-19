@@ -30,6 +30,7 @@ interface ResultTabsProps {
   error?: string;
   addToTimeline?: AddToTimelineHandler;
   isScheduled?: boolean;
+  responseId?: string;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -43,6 +44,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   error,
   addToTimeline,
   isScheduled,
+  responseId,
 }) => {
   const tabs = useMemo(
     () => [
@@ -61,6 +63,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             error={error}
             addToTimeline={addToTimeline}
             isScheduled={isScheduled}
+            responseId={responseId}
           />
         ),
       },
@@ -76,6 +79,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             expirationDate={endDate}
             error={error}
             isScheduled={isScheduled}
+            responseId={responseId}
           />
         ),
         append: failedAgentsCount ? (
@@ -96,6 +100,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       failedAgentsCount,
       addToTimeline,
       isScheduled,
+      responseId,
     ]
   );
 

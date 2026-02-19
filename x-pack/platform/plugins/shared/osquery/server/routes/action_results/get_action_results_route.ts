@@ -103,6 +103,7 @@ export const getActionResultsRoute = (
                 agentIds,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,
+                responseId: request.query.responseId,
                 // Client already sliced agents for current page, so fetch all of them (no pagination)
                 pagination:
                   agentIds.length > 0

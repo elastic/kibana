@@ -27,6 +27,7 @@ interface ActionResultsSummaryProps {
   agentIds?: string[];
   error?: string;
   isScheduled?: boolean;
+  responseId?: string;
 }
 
 // Use Elasticsearch's native SearchHit type for result edges
@@ -94,6 +95,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   error,
   startDate,
   isScheduled,
+  responseId,
 }) => {
   const { http, application } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -115,6 +117,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     sortField: '@timestamp',
     isLive,
     isScheduled,
+    responseId,
   });
 
   // Extract agent IDs from current page edges

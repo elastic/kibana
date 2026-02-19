@@ -15,17 +15,23 @@ import type {
   ActionResultsRequestOptions,
 } from './actions';
 import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
+import type {
+  UnifiedHistoryStrategyResponse,
+  UnifiedHistoryRequestOptions,
+} from './unified_history';
 
 import type { SortField, PaginationInputPaginated } from '../common';
 
 export type * from './actions';
 export type * from './results';
+export type * from './unified_history';
 
 export enum OsqueryQueries {
   actions = 'actions',
   actionDetails = 'actionDetails',
   actionResults = 'actionResults',
   results = 'results',
+  unifiedHistory = 'unifiedHistory',
 }
 
 export type FactoryQueryTypes = OsqueryQueries;
@@ -53,6 +59,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends Osquer
   ? ActionResultsStrategyResponse
   : T extends OsqueryQueries.results
   ? ResultsStrategyResponse
+  : T extends OsqueryQueries.unifiedHistory
+  ? UnifiedHistoryStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
@@ -63,4 +71,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends Osquery
   ? ActionResultsRequestOptions
   : T extends OsqueryQueries.results
   ? ResultsRequestOptions
+  : T extends OsqueryQueries.unifiedHistory
+  ? UnifiedHistoryRequestOptions
   : never;

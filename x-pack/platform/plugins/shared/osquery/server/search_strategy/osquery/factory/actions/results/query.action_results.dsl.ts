@@ -23,6 +23,7 @@ export const buildActionResultsQuery = ({
   agentIds,
   kuery,
   startDate,
+  responseId,
   sort,
   pagination,
   componentTemplateExists,
@@ -69,6 +70,10 @@ export const buildActionResultsQuery = ({
     },
   };
 
+  const responseIdFilter: estypes.QueryDslQueryContainer[] = responseId
+    ? [{ term: { response_id: responseId } }]
+    : [];
+
   const kueryFilter: estypes.QueryDslQueryContainer[] = !isEmpty(kuery)
     ? [getQueryFilter({ filter: kuery })]
     : [];
@@ -77,6 +82,7 @@ export const buildActionResultsQuery = ({
     ...timeRangeFilter,
     ...agentIdsFilter,
     actionIdFilter,
+    ...responseIdFilter,
     ...kueryFilter,
   ];
 

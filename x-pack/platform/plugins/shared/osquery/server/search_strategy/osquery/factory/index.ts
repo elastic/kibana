@@ -10,6 +10,7 @@ import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 
 import { allActions, actionDetails, actionResults } from './actions';
 import { allResults } from './results';
+import { unifiedHistory } from './unified_history';
 
 import type { OsqueryFactory } from './types';
 
@@ -18,4 +19,5 @@ export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQue
   [OsqueryQueries.actionDetails]: actionDetails,
   [OsqueryQueries.actionResults]: actionResults,
   [OsqueryQueries.results]: allResults,
+  [OsqueryQueries.unifiedHistory]: unifiedHistory,
 };

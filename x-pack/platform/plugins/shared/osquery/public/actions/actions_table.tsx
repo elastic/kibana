@@ -18,6 +18,8 @@ import {
   EuiFlexGroup,
   EuiSkeletonText,
   EuiToolTip,
+  EuiNotificationBadge,
+  EuiText,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -25,12 +27,15 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT, OSQUERY_SCHEDULED_INPUT_TYPE } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
+import { useUnifiedHistory } from './use_unified_history';
 import type { SearchHit } from '../../common/search_strategy';
+import type { UnifiedHistoryRow } from '../../common/search_strategy/osquery/unified_history';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
 
 const EMPTY_ARRAY: SearchHit[] = [];
+const EMPTY_ROWS: UnifiedHistoryRow[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
@@ -61,7 +66,244 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
-const ActionsTableComponent = () => {
+// ----- Unified History Table (behind feature flag) -----
+
+const UnifiedHistoryTableComponent = () => {
+  const { push } = useHistory();
+
+  const {
+    data: historyData,
+    isLoading,
+    isFetching,
+    pagination,
+  } = useUnifiedHistory({ pageSize: 20 });
+
+  const renderQueryColumn = useCallback((_: any, row: UnifiedHistoryRow) => {
+    if (row.packName) {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="package" />
+          </EuiFlexItem>
+          <EuiFlexItem>{row.packName}</EuiFlexItem>
+          {row.queryCount && row.queryCount > 1 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.osquery.unifiedHistory.table.queryCountBadge', {
+                  defaultMessage: '{count} queries',
+                  values: { count: row.queryCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    }
+
+    if (row.rowType === 'scheduled') {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="package" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {row.queryCount && row.queryCount > 1
+              ? i18n.translate('xpack.osquery.unifiedHistory.table.multipleQueries', {
+                  defaultMessage: '{count} queries',
+                  values: { count: row.queryCount },
+                })
+              : row.scheduleId ?? '\u2014'}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    const singleLine = removeMultilines(row.queryText);
+    const content = singleLine.length > 90 ? `${singleLine.substring(0, 90)}...` : singleLine;
+
+    return (
+      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+        {content}
+      </EuiCodeBlock>
+    );
+  }, []);
+
+  const renderSourceColumn = useCallback((_: any, row: UnifiedHistoryRow) => {
+    const colorMap: Record<string, string> = {
+      Live: 'primary',
+      Scheduled: 'hollow',
+      Rule: 'accent',
+    };
+
+    return <EuiBadge color={colorMap[row.source] ?? 'hollow'}>{row.source}</EuiBadge>;
+  }, []);
+
+  const renderTimestampColumn = useCallback(
+    (_: any, row: UnifiedHistoryRow) => <>{formatDate(row.timestamp)}</>,
+    []
+  );
+
+  const renderAgentsColumn = useCallback((_: any, row: UnifiedHistoryRow) => {
+    if (!row.agentCount) {
+      return <>{'\u2014'}</>;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiNotificationBadge color="subdued">{row.agentCount}</EuiNotificationBadge>
+        </EuiFlexItem>
+        {row.errorCount > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiNotificationBadge color="accent">{row.errorCount}</EuiNotificationBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }, []);
+
+  const renderResultsColumn = useCallback((_: any, row: UnifiedHistoryRow) => {
+    if (row.rowType === 'scheduled') {
+      return (
+        <EuiNotificationBadge color="subdued">{row.totalRows}</EuiNotificationBadge>
+      );
+    }
+
+    return <>{'\u2014'}</>;
+  }, []);
+
+  const renderActionsColumn = useCallback(
+    (row: UnifiedHistoryRow) => (
+      <ActionTableResultsButton actionId={row.actionId} isHistoryEnabled />
+    ),
+    []
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'queryText',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
+          defaultMessage: 'Query',
+        }),
+        truncateText: true,
+        width: '40%',
+        render: renderQueryColumn,
+      },
+      {
+        field: 'source',
+        name: i18n.translate('xpack.osquery.unifiedHistory.table.sourceColumnTitle', {
+          defaultMessage: 'Source',
+        }),
+        width: '100px',
+        render: renderSourceColumn,
+      },
+      {
+        field: 'agentCount',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        width: '120px',
+        render: renderAgentsColumn,
+      },
+      {
+        field: 'totalRows',
+        name: i18n.translate('xpack.osquery.unifiedHistory.table.resultsColumnTitle', {
+          defaultMessage: 'Results',
+        }),
+        width: '100px',
+        render: renderResultsColumn,
+      },
+      {
+        field: 'timestamp',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
+          defaultMessage: 'Created at',
+        }),
+        width: '200px',
+        render: renderTimestampColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
+          defaultMessage: 'View details',
+        }),
+        width: '80px',
+        actions: [
+          {
+            render: renderActionsColumn,
+          },
+        ],
+      },
+    ],
+    [
+      renderActionsColumn,
+      renderAgentsColumn,
+      renderQueryColumn,
+      renderResultsColumn,
+      renderSourceColumn,
+      renderTimestampColumn,
+    ]
+  );
+
+  const rowProps = useCallback(
+    (row: UnifiedHistoryRow) => ({
+      'data-test-subj': `row-${row.id}`,
+    }),
+    []
+  );
+
+  const getItemId = useCallback((row: UnifiedHistoryRow) => row.id, []);
+
+  if (isLoading) {
+    return <EuiSkeletonText lines={10} />;
+  }
+
+  return (
+    <>
+      <EuiBasicTable<UnifiedHistoryRow>
+        items={historyData?.rows ?? EMPTY_ROWS}
+        itemId={getItemId}
+        loading={isFetching && !isLoading}
+        columns={columns}
+        rowProps={rowProps}
+        data-test-subj="liveQueryActionsTable"
+        tableCaption={i18n.translate('xpack.osquery.liveQueryActions.table.tableCaption', {
+          defaultMessage: 'Live query actions',
+        })}
+      />
+      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="arrowLeft"
+            onClick={pagination.onPrevPage}
+            isDisabled={!pagination.hasPrevPage}
+            aria-label={i18n.translate('xpack.osquery.unifiedHistory.table.prevPageAriaLabel', {
+              defaultMessage: 'Previous page',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{pagination.currentPageIndex + 1}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="arrowRight"
+            onClick={pagination.onNextPage}
+            isDisabled={!pagination.hasNextPage}
+            aria-label={i18n.translate('xpack.osquery.unifiedHistory.table.nextPageAriaLabel', {
+              defaultMessage: 'Next page',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
+const UnifiedHistoryTable = React.memo(UnifiedHistoryTableComponent);
+
+// ----- Legacy Actions Table -----
+
+const LegacyActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
@@ -333,6 +575,20 @@ const ActionsTableComponent = () => {
       })}
     />
   );
+};
+
+const LegacyActionsTable = React.memo(LegacyActionsTableComponent);
+
+// ----- Main export: delegates based on feature flag -----
+
+const ActionsTableComponent = () => {
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+
+  if (isHistoryEnabled) {
+    return <UnifiedHistoryTable />;
+  }
+
+  return <LegacyActionsTable />;
 };
 
 export const ActionsTable = React.memo(ActionsTableComponent);

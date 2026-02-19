@@ -20,6 +20,7 @@ export const buildResultsQuery = ({
   kuery,
   sort,
   startDate,
+  responseId,
   pagination: { activePage, querySize },
   integrationNamespaces,
 }: ResultsRequestOptions): ISearchRequestParams => {
@@ -38,6 +39,10 @@ export const buildResultsQuery = ({
 
   const agentFilter: estypes.QueryDslQueryContainer[] = agentId
     ? [{ term: { 'agent.id': agentId } }]
+    : [];
+
+  const responseIdFilter: estypes.QueryDslQueryContainer[] = responseId
+    ? [{ term: { response_id: responseId } }]
     : [];
 
   const kueryFilter: estypes.QueryDslQueryContainer[] = !isEmpty(kuery)
@@ -61,6 +66,7 @@ export const buildResultsQuery = ({
     ...timeRangeFilter,
     actionIdFilter,
     ...agentFilter,
+    ...responseIdFilter,
     ...kueryFilter,
   ];
 

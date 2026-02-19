@@ -30,6 +30,7 @@ interface UseAllResults {
   sort: Array<{ field: string; direction: Direction }>;
   kuery?: string;
   isLive?: boolean;
+  responseId?: string;
 }
 
 export const useAllResults = ({
@@ -41,12 +42,13 @@ export const useAllResults = ({
   sort,
   kuery,
   isLive = false,
+  responseId,
 }: UseAllResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
-    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort }],
+    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort, responseId }],
     () =>
       http.get<{ data: ResultsStrategyResponse }>(
         `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,
@@ -61,6 +63,7 @@ export const useAllResults = ({
             }),
             ...(kuery && { kuery }),
             ...(startDate && { startDate }),
+            ...(responseId && { responseId }),
           },
         }
       ),
