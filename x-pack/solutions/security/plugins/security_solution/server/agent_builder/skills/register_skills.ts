@@ -41,7 +41,9 @@ export const registerSkills = async ({
     );
   }
 
-  agentBuilder.skills.register(getEntityAnalysisSkill({ getStartServices, kibanaVersion, logger }));
+  await agentBuilder.skills.register(
+    getEntityAnalysisSkill({ getStartServices, kibanaVersion, logger })
+  );
 
   // agentBuilder.skills.register(alertAnalysisSampleSkill);
 };
