@@ -9,9 +9,7 @@ import { expect } from '@kbn/scout-security/ui';
 import { test, tags } from '../fixtures';
 import { waitForPageReady } from '../common/constants';
 
-// NOTE: This test requires serverless mode with Security Essentials product tier.
-// TODO: Enable when serverless Scout testing is configured.
-test.describe.skip(
+test.describe(
   'App Features for Security Essentials',
   { tag: [...tags.serverless.security.essentials] },
   () => {

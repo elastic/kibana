@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-19T12:49:43.753Z",
-  "sha1": "32efa261e1dc6f6b7502dca33fec859ba474e539",
+  "lastModified": "2026-02-19T13:17:33.113Z",
+  "sha1": "ac00efa59c3dfe37a6dd473292953f36c026669f",
   "tests": [
     {
       "id": "e10b7aba254c752-af29967c4812fcd",
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 9
       }
     },
@@ -30,7 +30,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 9
       }
     },
@@ -46,7 +46,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 9
       }
     },
@@ -62,7 +62,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 9
       }
     },
@@ -118,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/ess_basic.spec.ts",
-        "line": 18,
-        "column": 9
+        "line": 16,
+        "column": 7
       }
     },
     {
@@ -132,21 +132,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/feature_complete.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 9
       }
     },
     {
       "id": "2d260ea9102f475-f77ebeae37db093",
       "title": "App Features for Security Essentials should not have AI Assistant available",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_essentials",
         "@cloud-serverless-security_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/feature_essentials.spec.ts",
-        "line": 17,
+        "line": 16,
         "column": 9
       }
     },
@@ -162,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/messages.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 9
       }
     },
@@ -178,7 +178,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 9
       }
     },
@@ -194,7 +194,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 9
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
-        "line": 112,
+        "line": 113,
         "column": 10
       }
     },
@@ -226,7 +226,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 9
       }
     },
@@ -242,7 +242,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 9
       }
     },
@@ -258,7 +258,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/quick_prompts.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 9
       }
     },
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
-        "line": 18,
-        "column": 9
+        "line": 15,
+        "column": 7
       }
     },
     {
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 19,
+        "column": 7
       }
     },
     {
@@ -300,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 23,
+        "column": 7
       }
     },
     {
@@ -314,8 +314,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 27,
+        "column": 7
       }
     }
   ]
