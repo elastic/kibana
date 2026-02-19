@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { conditionExamplesSchema, validateKqlConditions } from './condition_examples_schema';
+import { conditionExamplesSchema } from './condition_examples_schema';
 import type { PublicTriggerDefinition } from './types';
 
 /**
  * Registry for public-side workflow trigger definitions.
  * Stores UI-related information (title, description, icon, eventSchema) for triggers.
+ * KQL validation for conditionExamples/defaultCondition runs in a dynamically loaded chunk.
  */
 export class PublicTriggerRegistry {
   private readonly registry = new Map<string, PublicTriggerDefinition>();
+  /** Definitions with conditionExamples/defaultCondition are validated async; they sit here until validation passes. */
+  private readonly pending = new Map<string, PublicTriggerDefinition>();
 
   /**
    * Register a trigger definition.
-   * Validates conditionExamples shape and KQL, and defaultCondition if present (valid KQL, only event schema properties).
+   * Validates conditionExamples shape synchronously; KQL validation runs asynchronously (dynamic import).
+   * Definitions with conditionExamples or defaultCondition appear in get/getAll after validation passes.
    * @param definition - The public trigger definition to register
-   * @throws Error if a trigger with the same ID is already registered, or if any conditionExample.condition or defaultCondition is invalid
+   * @throws Error if a trigger with the same ID is already registered, or if conditionExamples shape is invalid
    */
   public register(definition: PublicTriggerDefinition): void {
     const id = String(definition.id);
-    if (this.registry.has(id)) {
+    if (this.registry.has(id) || this.pending.has(id)) {
       throw new Error(
         `Trigger definition for "${id}" is already registered. Each trigger must have a unique identifier.`
       );
@@ -38,28 +42,52 @@ export class PublicTriggerRegistry {
           `Trigger "${id}" has invalid conditionExamples: ${message}. The trigger was not registered.`
         );
       }
-      const validation = validateKqlConditions(
-        parseResult.data.map((ex) => ex.condition),
-        definition.eventSchema
-      );
-      if (!validation.valid) {
-        throw new Error(
-          `Trigger "${id}" has invalid conditionExamples: ${validation.error}. The trigger was not registered.`
-        );
-      }
     }
-    if (definition.defaultCondition !== undefined && definition.defaultCondition !== '') {
-      const validation = validateKqlConditions(
-        [definition.defaultCondition],
-        definition.eventSchema
-      );
-      if (!validation.valid) {
-        throw new Error(
-          `Trigger "${id}" has invalid defaultCondition: ${validation.error}. The trigger was not registered.`
-        );
-      }
+
+    const needsKqlValidation =
+      (definition.conditionExamples && definition.conditionExamples.length > 0) ||
+      (definition.defaultCondition !== undefined && definition.defaultCondition !== '');
+
+    if (!needsKqlValidation) {
+      this.registry.set(id, definition);
+      return;
     }
-    this.registry.set(id, definition);
+
+    this.pending.set(id, definition);
+    void this.validateAndPromote(id, definition);
+  }
+
+  private validateAndPromote(id: string, definition: PublicTriggerDefinition): void {
+    import('./validate_kql_conditions').then(
+      ({ validateKqlConditions }) => {
+        if (!this.pending.has(id)) return;
+
+        const conditionsToValidate: string[] = [];
+        if (definition.conditionExamples && definition.conditionExamples.length > 0) {
+          conditionsToValidate.push(...definition.conditionExamples.map((ex) => ex.condition));
+        }
+        if (definition.defaultCondition !== undefined && definition.defaultCondition !== '') {
+          conditionsToValidate.push(definition.defaultCondition);
+        }
+
+        const validation = validateKqlConditions(conditionsToValidate, definition.eventSchema);
+        if (!validation.valid) {
+          this.pending.delete(id);
+          // eslint-disable-next-line no-console
+          console.error(
+            `[workflows_extensions] Trigger "${id}" was not registered: ${validation.error}`
+          );
+          return;
+        }
+        this.pending.delete(id);
+        this.registry.set(id, definition);
+      },
+      (err) => {
+        this.pending.delete(id);
+        // eslint-disable-next-line no-console
+        console.error(`[workflows_extensions] Failed to validate trigger "${id}":`, err);
+      }
+    );
   }
 
   /**
