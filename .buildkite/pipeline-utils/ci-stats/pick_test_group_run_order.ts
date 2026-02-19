@@ -292,7 +292,7 @@ export async function pickTestGroupRunOrder() {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
-        overheadMin: 0.4,
+        overheadMin: 0.2,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },
