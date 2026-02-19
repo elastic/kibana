@@ -37,7 +37,6 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
 
 **Management**:
-* Adds a concat processor [#247940]({{kib-pull}}247940).
 
 
 ### Fixes [kibana-9.3.1-fixes]
