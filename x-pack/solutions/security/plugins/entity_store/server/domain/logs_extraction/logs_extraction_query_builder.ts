@@ -95,16 +95,16 @@ export const buildLogsExtractionEsqlQuery = ({
 function recentFieldStats(fields: EntityField[]) {
   return fields
     .map((field) => {
-      const { retention, destination: dest } = field;
+      const { retention, destination: dest, source } = field;
       const recentDest = recentData(dest);
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
+          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
@@ -116,14 +116,16 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
   return fields
     .map((field) => {
       const { retention, destination: dest } = field;
-      const recentDest = castDestType(recentData(dest), field);
+      const recentDest = recentData(dest);
       if (dest === idFieldName) {
         return null; // id field should not be merged
       }
 
       switch (retention.operation) {
         case 'collect_values':
-          return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
+          return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
+            retention.maxLength - 1
+          })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
         case 'prefer_oldest_value':
@@ -164,7 +166,7 @@ function castSrcType(field: EntityField) {
     case 'keyword':
       return `TO_STRING(${field.source})`;
     case 'date':
-      return `TO_STRING(${field.source})`;
+      return `TO_DATETIME(${field.source})`;
     case 'boolean':
       return `TO_BOOLEAN(${field.source})`;
     case 'long':
@@ -179,16 +181,5 @@ function castSrcType(field: EntityField) {
       return `${field.source}`;
     default:
       return field.source;
-  }
-}
-
-function castDestType(fieldName: string, field: EntityField) {
-  // We only to cast date to string and back to the original type
-  // because of a limitation in ESQL.
-  switch (field.mapping?.type) {
-    case 'date':
-      return `TO_DATETIME(${fieldName})`;
-    default:
-      return fieldName;
   }
 }

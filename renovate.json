@@ -1263,7 +1263,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:all-open",
+        "backport:skip",
         "Team:obs-onboarding"
       ],
       "enabled": true,
@@ -3458,7 +3458,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3479,7 +3479,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3501,7 +3501,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3524,7 +3524,7 @@
       ],
       "reviewers": [
         "team:kibana-management",
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3891,7 +3891,7 @@
         "react-hook-form"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3912,7 +3912,7 @@
         "@types/react-window-infinite-loader"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3932,7 +3932,7 @@
         "redux-saga-testing"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3952,7 +3952,7 @@
         "form-data"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3972,7 +3972,7 @@
         "@faker-js/faker"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3992,7 +3992,7 @@
         "@elastic/synthetics"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4030,7 +4030,7 @@
         "redux-saga"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4371,27 +4371,6 @@
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
-      "enabled": true
-    },
-    {
-      "groupName": "XState5",
-      "matchDepNames": [
-        "xstate5",
-        "@xstate5/react"
-      ],
-      "reviewers": [
-        "team:obs-onboarding-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:obs-onboarding",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "separateMajorMinor": true,
       "enabled": true
     },
     {

@@ -19,6 +19,12 @@ import type { ConnectorsResponse } from '../../../connectors/model/types';
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
+  /**
+   * Whether the YAML editor's internal value is synced with the Redux store.
+   * When false, there are pending debounced changes that haven't been dispatched yet.
+   * The save button should be disabled when this is false to prevent saving stale data.
+   */
+  isYamlSynced: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
@@ -29,6 +35,8 @@ export interface WorkflowDetailState {
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
   activeTab?: ActiveTab;
+  /** The last known cursor position in the YAML editor (1-based line and column) */
+  cursorPosition?: LineColumnPosition;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
   /** The step id that is highlighted in the workflow yaml editor */

@@ -29,6 +29,9 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       invoke: jest.fn(),
     } as unknown as StructuredTool;
   }),
+}));
+
+jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
   reverseMap: jest.fn((map) => {
     const reversed = new Map();
     map.forEach((value: string, key: string) => {
@@ -176,18 +179,152 @@ describe('ToolManager', () => {
       expect(mappings.size).toBeGreaterThan(0);
     });
 
-    it('handles event emitter when provided', async () => {
+    it('removes a dynamic tool when the same tool is later added as static', async () => {
       const tool = createMockExecutableTool('tool-1');
-      const eventEmitter = jest.fn();
+
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual(['tool-1']);
+
+      // Re-adding as static should remove from dynamic cache and keep only the static tool.
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
+
+      // Adding a new dynamic tool should keep tool-1 static and only track tool-2 as dynamic.
+      const tool2 = createMockExecutableTool('tool-2');
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool2,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual([
+        'langchain_tool-1',
+        'langchain_tool-2',
+      ]);
+      expect(toolManager.getDynamicToolIds()).toEqual(['tool-2']);
+    });
+
+    it('does not add a dynamic tool when a static tool with the same name exists', async () => {
+      const tool = createMockExecutableTool('tool-1');
 
       await toolManager.addTools({
         type: ToolManagerToolType.executable,
         tools: tool,
         logger: mockLogger,
-        eventEmitter,
       });
 
-      expect(toolManager.list()).toHaveLength(1);
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
+    });
+  });
+
+  describe('setEventEmitter', () => {
+    it('passes the event emitter to toolToLangchain when set', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+
+      const tool = createMockExecutableTool('tool-1');
+      const eventEmitter = jest.fn();
+
+      toolManager.setEventEmitter(eventEmitter);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolToLangchain).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sendEvent: eventEmitter,
+        })
+      );
+    });
+
+    it('uses the event emitter for tools added in subsequent addTools calls', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      toolToLangchain.mockClear();
+
+      const eventEmitter = jest.fn();
+      toolManager.setEventEmitter(eventEmitter);
+
+      // First addTools call
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool-1'),
+        logger: mockLogger,
+      });
+
+      // Second addTools call (simulating skill tools being added later)
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: createMockExecutableTool('skill-tool'),
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      // Both calls should have received the event emitter
+      expect(toolToLangchain).toHaveBeenCalledTimes(2);
+      expect(toolToLangchain).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ sendEvent: eventEmitter })
+      );
+      expect(toolToLangchain).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ sendEvent: eventEmitter })
+      );
+    });
+
+    it('does not pass event emitter when not set', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolToLangchain).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sendEvent: undefined,
+        })
+      );
     });
   });
 

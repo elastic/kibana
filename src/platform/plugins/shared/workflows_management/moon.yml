@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -94,6 +95,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - server/**/*.json
