@@ -118,8 +118,15 @@ export function AddSignificantEventFlyout({
   }, [stoppedGettingTaskStatus, gettingTaskStatus]);
 
   useEffect(() => {
+    // Skip initial status fetch when we are about to schedule a new generation on mount,
+    // to avoid a race where the previous completed task resolves after the reset and
+    // surfaces stale queries alongside the new loading indicator.
+    if (generateOnMount && initialFlow === 'ai') {
+      return;
+    }
+
     getTaskStatus();
-  }, [getTaskStatus]);
+  }, [generateOnMount, getTaskStatus, initialFlow]);
 
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
