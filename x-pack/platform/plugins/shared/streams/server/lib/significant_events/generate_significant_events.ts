@@ -7,7 +7,13 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { Feature, GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import {
+  buildEsqlWhereCondition,
+  type Feature,
+  type GeneratedSignificantEventQuery,
+  type Streams,
+  type System,
+} from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -54,11 +60,16 @@ export async function generateSignificantEventDefinitions(
     features,
   });
 
+  const feature = system
+    ? { name: system.name, filter: system.filter, type: system.type }
+    : undefined;
+
   return {
     queries: queries.map((query) => ({
       title: query.title,
       kql: query.kql,
-      feature: system ? { name: system.name, filter: system.filter, type: system.type } : undefined,
+      feature,
+      esql: { where: buildEsqlWhereCondition({ kql: { query: query.kql }, feature }) },
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),
