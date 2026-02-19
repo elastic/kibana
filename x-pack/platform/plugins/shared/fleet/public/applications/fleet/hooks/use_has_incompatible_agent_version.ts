@@ -12,12 +12,14 @@ import satisfies from 'semver/functions/satisfies';
 import type { AgentPolicy } from '../types';
 import type { PackageInfo } from '../../../../common/types';
 
-export type IncompatibleAgentVersionStatus = 'NONE' | 'SOME' | 'ALL';
+export type IncompatibleAgentVersionResult =
+  | { status: 'NONE' }
+  | { status: 'SOME' | 'ALL'; versionCondition: string };
 
 export const useHasIncompatibleAgentVersion = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined
-): IncompatibleAgentVersionStatus => {
+): IncompatibleAgentVersionResult => {
   return useMemo(() => {
     return getIncompatibleAgentVersionStatus(packageInfo, agentPolicies);
   }, [packageInfo, agentPolicies]);
@@ -26,12 +28,12 @@ export const useHasIncompatibleAgentVersion = (
 export const getIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined
-): IncompatibleAgentVersionStatus => {
+): IncompatibleAgentVersionResult => {
   const versionCondition = packageInfo?.conditions?.agent?.version;
   if (!versionCondition) {
-    return 'NONE';
+    return { status: 'NONE' };
   }
-  return (agentPolicies ?? []).reduce<IncompatibleAgentVersionStatus>((acc, agentPolicy) => {
+  const status = (agentPolicies ?? []).reduce<'NONE' | 'SOME' | 'ALL'>((acc, agentPolicy) => {
     if (acc === 'SOME') return acc;
     const { agents_per_version: agentPerVersion } = agentPolicy;
     if (!agentPerVersion) {
@@ -45,4 +47,9 @@ export const getIncompatibleAgentVersionStatus = (
     );
     return hasAllIncompatible ? 'ALL' : hasSomeIncompatible ? 'SOME' : acc;
   }, 'NONE');
+
+  if (status === 'NONE') {
+    return { status: 'NONE' };
+  }
+  return { status, versionCondition };
 };

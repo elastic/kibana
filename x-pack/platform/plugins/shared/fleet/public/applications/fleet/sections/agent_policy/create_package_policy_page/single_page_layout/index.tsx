@@ -323,7 +323,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
 
-  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
     packageInfo,
     agentPolicyData?.items
   );
@@ -684,8 +684,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         </>
       )}
 
-      {hasIncompatibleAgentVersion !== 'NONE' && (
-        <IncompatibleAgentVersionCallout incompatibility={hasIncompatibleAgentVersion} />
+      {incompatibleAgentVersion.status !== 'NONE' && (
+        <IncompatibleAgentVersionCallout
+          incompatibility={incompatibleAgentVersion.status}
+          versionCondition={incompatibleAgentVersion.versionCondition}
+        />
       )}
 
       {showSecretsDisabledCallout && (

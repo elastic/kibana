@@ -172,11 +172,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     (policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id)
   );
 
-  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
     packageInfo,
     newlySelectedAgentPolicies
   );
-  const someNewAgentPoliciesHaveAllAgentIncompatible = hasIncompatibleAgentVersion === 'ALL';
+  const someNewAgentPoliciesHaveAllAgentIncompatible = incompatibleAgentVersion.status === 'ALL';
 
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
@@ -264,7 +264,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : someNewAgentPoliciesHaveAllAgentIncompatible ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError"
-                    defaultMessage="None of the agents using the selected agent policies are compatible with this integration."
+                    defaultMessage="None of the agents using the selected agent policies are compatible with this integration. This integration requires agents on version {versionCondition}."
+                    values={{
+                      versionCondition: incompatibleAgentVersion.versionCondition,
+                    }}
                   />
                 ) : null
               }

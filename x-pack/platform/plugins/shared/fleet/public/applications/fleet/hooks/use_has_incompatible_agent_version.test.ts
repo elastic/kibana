@@ -23,64 +23,64 @@ const createPackageInfo = (agentVersionCondition?: string): PackageInfo =>
   } as unknown as PackageInfo);
 
 describe('getIncompatibleAgentVersionStatus', () => {
-  it('returns NONE when packageInfo is undefined', () => {
+  it('returns { status: NONE } when packageInfo is undefined', () => {
     const result = getIncompatibleAgentVersionStatus(undefined, []);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns NONE when no agent version condition is set', () => {
+  it('returns { status: NONE } when no agent version condition is set', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo(), []);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns NONE when agentPolicies is undefined', () => {
+  it('returns { status: NONE } when agentPolicies is undefined', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), undefined);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns NONE when agentPolicies is empty', () => {
+  it('returns { status: NONE } when agentPolicies is empty', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), []);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns NONE when agent policy has no agents_per_version', () => {
+  it('returns { status: NONE } when agent policy has no agents_per_version', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy(undefined),
     ]);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns NONE when all agents satisfy the version condition', () => {
+  it('returns { status: NONE } when all agents satisfy the version condition', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy([
         { version: '8.1.0', count: 3 },
         { version: '8.2.0', count: 5 },
       ]),
     ]);
-    expect(result).toBe('NONE');
+    expect(result).toEqual({ status: 'NONE' });
   });
 
-  it('returns SOME when some agents are incompatible and some are compatible', () => {
+  it('returns { status: SOME } with versionCondition when some agents are incompatible', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy([
         { version: '7.17.0', count: 2 },
         { version: '8.1.0', count: 5 },
       ]),
     ]);
-    expect(result).toBe('SOME');
+    expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
   });
 
-  it('returns ALL when all agents are incompatible', () => {
+  it('returns { status: ALL } with versionCondition when all agents are incompatible', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy([
         { version: '7.16.0', count: 2 },
         { version: '7.17.0', count: 3 },
       ]),
     ]);
-    expect(result).toBe('ALL');
+    expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
   });
 
-  it('returns SOME across multiple agent policies with mixed compatibility', () => {
+  it('returns { status: SOME } across multiple agent policies with mixed compatibility', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy([{ version: '8.1.0', count: 5 }]),
       createAgentPolicy([
@@ -88,14 +88,14 @@ describe('getIncompatibleAgentVersionStatus', () => {
         { version: '8.1.0', count: 3 },
       ]),
     ]);
-    expect(result).toBe('SOME');
+    expect(result).toEqual({ status: 'SOME', versionCondition: '>=8.0.0' });
   });
 
-  it('returns ALL when all agents across all policies are incompatible', () => {
+  it('returns { status: ALL } when all agents across all policies are incompatible', () => {
     const result = getIncompatibleAgentVersionStatus(createPackageInfo('>=8.0.0'), [
       createAgentPolicy([{ version: '7.16.0', count: 2 }]),
       createAgentPolicy([{ version: '7.17.0', count: 3 }]),
     ]);
-    expect(result).toBe('ALL');
+    expect(result).toEqual({ status: 'ALL', versionCondition: '>=8.0.0' });
   });
 });

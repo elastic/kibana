@@ -218,12 +218,10 @@ export const EditPackagePolicyForm = memo<{
       agentPolicies.find((policy) => policy.id === existingPolicy.id)
     );
   }, [agentPolicies, existingAgentPolicies]);
-  const hasIncompatibleAgentVersion = useHasIncompatibleAgentVersion(
+  const incompatibleAgentVersion = useHasIncompatibleAgentVersion(
     packageInfo,
     selectedExistingPolicies
   );
-  console.log('TEST', selectedExistingPolicies);
-
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -604,9 +602,12 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="m" />
               </>
             ) : null}
-            {hasIncompatibleAgentVersion !== 'NONE' && (
+            {incompatibleAgentVersion.status !== 'NONE' && (
               <>
-                <IncompatibleAgentVersionCallout incompatibility={hasIncompatibleAgentVersion} />
+                <IncompatibleAgentVersionCallout
+                  incompatibility={incompatibleAgentVersion.status}
+                  versionCondition={incompatibleAgentVersion.versionCondition}
+                />
                 <EuiSpacer size="m" />
               </>
             )}

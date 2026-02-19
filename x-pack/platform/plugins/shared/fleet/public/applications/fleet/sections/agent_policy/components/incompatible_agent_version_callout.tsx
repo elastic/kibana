@@ -11,7 +11,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export const IncompatibleAgentVersionCallout: React.FC<{
   incompatibility: 'SOME' | 'ALL';
-}> = ({ incompatibility }) => {
+  versionCondition?: string;
+}> = ({ incompatibility, versionCondition }) => {
   return (
     <>
       <EuiCallOut
@@ -27,12 +28,14 @@ export const IncompatibleAgentVersionCallout: React.FC<{
         {incompatibility === 'SOME' ? (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.StepSelectPolicy.someIncompatibleAgentVersionWarning"
-            defaultMessage="Some agents using the selected agent policy are running on a version that is not compatible with this integration."
+            defaultMessage="Some agents using the selected agent policy are running on a version that is not compatible with this integration. This integration requires agents on version {versionCondition}."
+            values={{ versionCondition }}
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning"
-            defaultMessage="None of the agents using the selected agent policy are compatible with this integration."
+            defaultMessage="None of the agents using the selected agent policy are compatible with this integration. This integration requires agents on version {versionCondition}."
+            values={{ versionCondition }}
           />
         )}
       </EuiCallOut>
