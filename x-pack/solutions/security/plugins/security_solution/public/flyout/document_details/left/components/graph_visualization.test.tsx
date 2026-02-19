@@ -27,6 +27,11 @@ const mockInvestigateInTimeline = {
   investigateInTimeline: jest.fn(),
 };
 
+const mockTimeRange = {
+  from: '2024-01-01T00:00:00.000Z||-30m',
+  to: '2024-01-01T00:00:00.000Z||+30m',
+};
+
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
 jest.mock('@kbn/expandable-flyout', () => ({

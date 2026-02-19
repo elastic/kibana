@@ -209,7 +209,7 @@ export interface GraphInvestigationProps {
   /**
    * Callback when "show entity/event preview" is clicked.
    */
-  onOpenEventPreview?: (node: NodeViewModel) => void;
+  onOpenEventPreview?: (node: NodeViewModel, timeRange: TimeRange) => void;
 
   /**
    * Callback when IP address is clicked to open network preview panel.

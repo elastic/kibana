@@ -180,9 +180,20 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   {
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
-      // TODO Fix typing issue here
-      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
-      return <GraphGroupedNodePreviewPanel {...params} />;
+      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps & {
+        id?: string;
+        scopeId?: string;
+        banner?: unknown;
+        isPreviewMode?: boolean;
+      };
+      return (
+        <GraphGroupedNodePreviewPanel
+          type={params.type}
+          documentIds={params.documentIds}
+          start={params.start}
+          end={params.end}
+        />
+      );
     },
     'aria-label': GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
   },

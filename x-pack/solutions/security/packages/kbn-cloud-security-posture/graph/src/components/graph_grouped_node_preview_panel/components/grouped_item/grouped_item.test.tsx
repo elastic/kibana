@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+import { formatDate } from '@elastic/eui';
 import { render } from '@testing-library/react';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import {
   GROUPED_ITEM_TEST_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -19,10 +21,8 @@ import {
   GROUPED_ITEM_GEO_TEST_ID,
 } from '../../test_ids';
 import { GroupedItem } from './grouped_item';
-import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
-import type { EntityOrEventItem } from './types';
 
 const mockOpenPreviewPanel = jest.fn();
 
@@ -48,14 +48,13 @@ describe('<GroupedItem />', () => {
 
   describe('render items', () => {
     it('renders entity item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { queryByTestId, getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             icon: 'node',
             timestamp,
             risk: 55,
@@ -79,17 +78,17 @@ describe('<GroupedItem />', () => {
     });
 
     it('renders event item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-id',
+            isAlert: false,
             action: 'process_start',
             timestamp,
-            actor: { id: 'a1', label: 'user1', icon: 'user' },
-            target: { id: 'p1', label: 'proc.exe', icon: 'document' },
+            actor: { id: 'a1', name: 'user1', icon: 'user' },
+            target: { id: 'p1', name: 'proc.exe', icon: 'document' },
           }}
         />
       );
@@ -106,17 +105,17 @@ describe('<GroupedItem />', () => {
     });
 
     it('renders alert item with full details', () => {
-      const timestamp = Date.now();
+      const timestamp = new Date().toISOString();
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'alert',
             id: 'alert-id',
+            isAlert: true,
             action: 'alert_action',
             timestamp,
-            actor: { id: 'host-1', label: 'host', icon: 'storage' },
-            target: { id: 'p1', label: 'proc.exe', icon: 'document' },
+            actor: { id: 'host-1', name: 'host', icon: 'storage' },
+            target: { id: 'p1', name: 'proc.exe', icon: 'document' },
           }}
         />
       );
@@ -138,7 +137,7 @@ describe('<GroupedItem />', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
         const { getByTestId } = render(
-          <GroupedItem scopeId={TEST_SCOPE_ID} item={{ itemType: 'entity', id: entityId }} />
+          <GroupedItem item={{ id: entityId }} scopeId={TEST_SCOPE_ID} />
         );
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
@@ -148,7 +147,7 @@ describe('<GroupedItem />', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
         const { getByTestId } = render(
-          <GroupedItem scopeId={TEST_SCOPE_ID} item={{ itemType: 'event', id: eventId }} />
+          <GroupedItem item={{ id: eventId, isAlert: false }} scopeId={TEST_SCOPE_ID} />
         );
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(eventId);
       });
@@ -158,7 +157,7 @@ describe('<GroupedItem />', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
         const { getByTestId } = render(
-          <GroupedItem scopeId={TEST_SCOPE_ID} item={{ itemType: 'alert', id: alertId }} />
+          <GroupedItem item={{ id: alertId, isAlert: true }} scopeId={TEST_SCOPE_ID} />
         );
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK).textContent).toBe(alertId);
       });
@@ -172,11 +171,10 @@ describe('<GroupedItem />', () => {
           scopeId={TEST_SCOPE_ID}
           item={
             {
-              itemType: 'entity',
               id: 'e1',
-              label: 'entity-1',
-              actor: { id: 'a1', label: 'actor' },
-              target: { id: 't1', label: 'target' },
+              name: 'entity-1',
+              actor: { id: 'a1', name: 'actor' },
+              target: { id: 't1', name: 'target' },
             } as any // eslint-disable-line @typescript-eslint/no-explicit-any
           } // Type assertion needed for test case
         />
@@ -191,10 +189,10 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
-            target: { id: 't1', label: 'target' },
+            target: { id: 't1', name: 'target' },
           }}
         />
       );
@@ -208,10 +206,10 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
+            actor: { id: 'a1', name: 'actor' },
           }}
         />
       );
@@ -225,10 +223,10 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
-            target: { id: 't1', label: 'target' },
+            target: { id: 't1', name: 'target' },
           }}
         />
       );
@@ -242,10 +240,10 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
+            actor: { id: 'a1', name: 'actor' },
           }}
         />
       );
@@ -259,11 +257,11 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1', label: 'target' },
+            actor: { id: 'a1', name: 'actor' },
+            target: { id: 't1', name: 'target' },
           }}
         />
       );
@@ -277,11 +275,11 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'alert',
             id: 'alert-1',
+            isAlert: true,
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1', label: 'target' },
+            actor: { id: 'a1', name: 'actor' },
+            target: { id: 't1', name: 'target' },
           }}
         />
       );
@@ -290,16 +288,16 @@ describe('<GroupedItem />', () => {
       expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toBe('target');
     });
 
-    it('renders actor id gracefully with missing label', () => {
+    it('renders actor id gracefully with missing name', () => {
       const { getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
-            actor: { id: 'a1' }, // No label
-            target: { id: 't1', label: 'target' },
+            actor: { id: 'a1' }, // No name
+            target: { id: 't1', name: 'target' },
           }}
         />
       );
@@ -308,16 +306,16 @@ describe('<GroupedItem />', () => {
       expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toBe('target');
     });
 
-    it('renders target id gracefully with missing label', () => {
+    it('renders target id gracefully with missing name', () => {
       const { getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor' },
-            target: { id: 't1' }, // No label
+            actor: { id: 'a1', name: 'actor' },
+            target: { id: 't1' }, // No name
           }}
         />
       );
@@ -326,13 +324,13 @@ describe('<GroupedItem />', () => {
       expect(getByTestId(GROUPED_ITEM_TARGET_TEST_ID).textContent).toBe('t1');
     });
 
-    it('renders actor and target with only id when missing both labels', () => {
+    it('renders actor and target with only id when missing both names', () => {
       const { getByTestId } = render(
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
             id: 'event-1',
+            isAlert: false,
             action: 'test_action',
             actor: { id: 'a1' }, // Only id
             target: { id: 't1' }, // Only id
@@ -349,11 +347,11 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
+            isAlert: false,
             id: 'event-1',
             action: 'test_action',
-            actor: { id: 'a1', label: 'actor', icon: 'user' },
-            target: { id: 't1', label: 'target', icon: 'document' },
+            actor: { id: 'a1', name: 'actor', icon: 'user' },
+            target: { id: 't1', name: 'target', icon: 'document' },
           }}
         />
       );
@@ -377,7 +375,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'alert',
+            isAlert: true,
             id: 'alert-1',
             action: 'test_action',
           }}
@@ -394,7 +392,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'event',
+            isAlert: false,
             id: 'event-1',
             action: 'test_action',
           }}
@@ -410,9 +408,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'entity-1',
-            label: 'test_entity',
+            name: 'test_entity',
           }}
         />
       );
@@ -428,9 +425,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: ['il'],
           }}
         />
@@ -444,9 +440,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: undefined,
           }}
         />
@@ -460,9 +455,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: [''],
           }}
         />
@@ -476,9 +470,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: ['INVALID'],
           }}
         />
@@ -489,10 +482,9 @@ describe('<GroupedItem />', () => {
     });
 
     it('handles uppercase, lowercase or mixed case country codes', () => {
-      const item: EntityOrEventItem = {
-        itemType: 'entity',
+      const item: EntityItem = {
         id: 'e1',
-        label: 'entity-1',
+        name: 'entity-1',
       };
 
       const { getByTestId, rerender } = render(
@@ -527,9 +519,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: undefined,
           }}
         />
@@ -543,9 +534,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: [''],
           }}
         />
@@ -560,9 +550,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: [ipv4],
           }}
         />
@@ -577,9 +566,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: ipArray,
           }}
         />
@@ -593,9 +581,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: [],
           }}
         />
@@ -609,9 +596,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             ips: ['', ''],
           }}
         />
@@ -628,9 +614,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: countryArray,
           }}
         />
@@ -646,9 +631,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: [],
           }}
         />
@@ -662,9 +646,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
             countryCodes: ['', ''],
           }}
         />
@@ -689,9 +672,8 @@ describe('<GroupedItem />', () => {
           scopeId={TEST_SCOPE_ID}
           isLoading
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
           }}
         />
       );
@@ -707,9 +689,8 @@ describe('<GroupedItem />', () => {
           scopeId={TEST_SCOPE_ID}
           isLoading={false}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
           }}
         />
       );
@@ -724,9 +705,8 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           scopeId={TEST_SCOPE_ID}
           item={{
-            itemType: 'entity',
             id: 'e1',
-            label: 'entity-1',
+            name: 'entity-1',
           }}
         />
       );

@@ -19,17 +19,14 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  DOCUMENT_TYPE_EVENT,
-  DOCUMENT_TYPE_ALERT,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { isEntityItem, isEventOrAlertItem } from '../../../../utils';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
@@ -49,10 +46,8 @@ const entityUnavailableTooltip = i18n.translate(
 );
 
 export interface HeaderRowProps {
-  item: EntityOrEventItem;
-  /**
-   * Unique identifier for the graph instance, used to scope filter state.
-   */
+  item: EntityItem | EventOrAlertItem;
+  /** Unique identifier for the graph instance, used to scope filter state. */
   scopeId: string;
 }
 
@@ -61,22 +56,17 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const title = useMemo(() => {
-    switch (item.itemType) {
-      case DOCUMENT_TYPE_EVENT:
-      case DOCUMENT_TYPE_ALERT:
-        return displayEventName(item);
-      case DOCUMENT_TYPE_ENTITY:
-        return displayEntityName(item);
-      default:
-        return '-';
+    if (isEventOrAlertItem(item)) {
+      return displayEventName(item);
     }
+    return displayEntityName(item);
   }, [item]);
 
   const handlePreviewClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
 
-      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+      if (isEntityItem(item)) {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
@@ -95,8 +85,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
             id: item.docId,
             indexName: item.index,
             scopeId,
-            banner:
-              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            banner: item.isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
@@ -105,24 +94,24 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
     [item, openPreviewPanel, scopeId]
   );
 
-  const isClickable =
-    item.itemType === DOCUMENT_TYPE_EVENT ||
-    item.itemType === DOCUMENT_TYPE_ALERT ||
-    (item.itemType === DOCUMENT_TYPE_ENTITY && item.availableInEntityStore);
+  const isEntity = isEntityItem(item);
+  const isEventOrAlert = isEventOrAlertItem(item);
+  const isClickable = isEventOrAlert || (isEntity && item.availableInEntityStore);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {item.itemType === DOCUMENT_TYPE_ALERT && (
+      {isEventOrAlert && item.isAlert && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="warningFilled" size="m" color="danger" aria-hidden={true} />
         </EuiFlexItem>
       )}
-      {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
+      {isEntity && item.icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={item.icon}
             size="m"
             color="primary"
+            aria-hidden={true}
             css={css`
               /* Icon is 1px mis-aligned vs link (entity name) */
               position: relative;
@@ -162,6 +151,9 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
               data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
               css={css`
                 font-weight: ${euiTheme.font.weight.medium};
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
               `}
             >
               <EuiTextTruncate text={title} truncation="middle" />
@@ -170,10 +162,10 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {item.itemType === DOCUMENT_TYPE_ENTITY ? (
-          <EntityActionsButton item={item as EntityItem} scopeId={scopeId} />
+        {isEntityItem(item) ? (
+          <EntityActionsButton item={item} scopeId={scopeId} />
         ) : (
-          <EventActionsButton item={item as EventItem | AlertItem} scopeId={scopeId} />
+          <EventActionsButton item={item} scopeId={scopeId} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
