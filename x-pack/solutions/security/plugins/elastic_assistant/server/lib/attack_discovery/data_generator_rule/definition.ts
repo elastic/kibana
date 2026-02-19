@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AlertInstanceContext, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
-import type { z } from '@kbn/zod/v4';
 import {
   CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
   type CreateAttackDiscoveryAlertsParams,
@@ -58,7 +57,7 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
     schemas: {
       params: {
         type: 'zod',
-        schema: CreateAttackDiscoveryAlertsParamsSchema as unknown as z.ZodObject<any>,
+        schema: CreateAttackDiscoveryAlertsParamsSchema,
       },
     },
     minimumLicenseRequired: 'basic',

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { Replacements } from '../conversations/common_attributes.gen';
 import { NonEmptyTimestamp, User } from '../common_attributes.gen';

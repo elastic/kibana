@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString, ScreenContext, PromptIds } from '../common_attributes.gen';
