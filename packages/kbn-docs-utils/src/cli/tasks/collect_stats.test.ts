@@ -20,6 +20,14 @@ const { collectApiStatsForPlugin } = jest.requireMock('../../stats');
 const { countEslintDisableLines } = jest.requireMock('../../count_eslint_disable');
 const { countEnzymeImports } = jest.requireMock('../../count_enzyme_imports');
 
+const createDeferred = <T>() => {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
 describe('collectStats', () => {
   let log: ToolingLog;
   let transaction: any;
@@ -27,6 +35,8 @@ describe('collectStats', () => {
   let apiMapResult: BuildApiMapResult;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     log = new ToolingLog({
       level: 'silent',
       writeTo: process.stdout,
@@ -135,5 +145,40 @@ describe('collectStats', () => {
 
     expect(countEslintDisableLines).toHaveBeenCalled();
     expect(countEnzymeImports).toHaveBeenCalled();
+  });
+
+  it('runs eslint and enzyme counters concurrently per plugin', async () => {
+    const options: CliOptions = {
+      collectReferences: false,
+    };
+
+    const eslintDeferred = createDeferred<{
+      eslintDisableLineCount: number;
+      eslintDisableFileCount: number;
+    }>();
+    const enzymeDeferred = createDeferred<{ enzymeImportCount: number }>();
+
+    (countEslintDisableLines as jest.Mock).mockReturnValue(eslintDeferred.promise);
+    (countEnzymeImports as jest.Mock).mockReturnValue(enzymeDeferred.promise);
+
+    const collectStatsPromise = collectStats(setupResult, apiMapResult, log, transaction, options);
+
+    expect(countEslintDisableLines).toHaveBeenCalledTimes(1);
+    expect(countEnzymeImports).toHaveBeenCalledTimes(1);
+    expect(collectApiStatsForPlugin).not.toHaveBeenCalled();
+
+    eslintDeferred.resolve({
+      eslintDisableLineCount: 0,
+      eslintDisableFileCount: 0,
+    });
+    await Promise.resolve();
+    expect(collectApiStatsForPlugin).not.toHaveBeenCalled();
+
+    enzymeDeferred.resolve({
+      enzymeImportCount: 0,
+    });
+    await collectStatsPromise;
+
+    expect(collectApiStatsForPlugin).toHaveBeenCalledTimes(1);
   });
 });
