@@ -1,5 +1,5 @@
 ---
-navigation_title: Scout
+navigation_title: Scout testing framework
 ---
 
 # Scout [scout]

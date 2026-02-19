@@ -53,12 +53,6 @@ toc:
       - file: kibana-issue-reporting.md
       - file: pr-review.md
       - file: kibana-linting.md
-  - file: external-plugin-development.md
-    children:
-      - file: plugin-tooling.md
-      - file: external-plugin-functional-tests.md
-      - file: external-plugin-localization.md
-      - file: testing-kibana-plugin.md
   - file: scout.md
     children:
       - file: scout/getting-started.md
@@ -85,6 +79,12 @@ toc:
         children:
           - file: scout/write-api-tests.md
           - file: scout/api-auth.md
+  - file: external-plugin-development.md
+    children:
+      - file: plugin-tooling.md
+      - file: external-plugin-functional-tests.md
+      - file: external-plugin-localization.md
+      - file: testing-kibana-plugin.md
   - file: advanced.md
     children:
       - file: running-elasticsearch.md
