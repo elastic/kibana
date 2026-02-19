@@ -305,6 +305,12 @@ export class AutomaticImportService {
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    // Mark the data stream as deleting first so we can track if deletion is in progress
+    await this.savedObjectService.updateDataStreamStatus(
+      dataStreamId,
+      integrationId,
+      TASK_STATUSES.deleting
+    );
     // Remove the data stream creation task
     await this.taskManagerService.removeDataStreamCreationTask({
       integrationId,
@@ -318,6 +324,44 @@ export class AutomaticImportService {
     );
     // Delete the data stream from the saved objects
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
+  }
+
+  public async reanalyzeDataStream(
+    params: {
+      integrationId: string;
+      dataStreamId: string;
+      connectorId: string;
+      langSmithOptions?: { projectName: string; apiKey: string };
+    },
+    request: KibanaRequest
+  ): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const { integrationId, dataStreamId, connectorId, langSmithOptions } = params;
+
+    // Ensure the task is no longer running (useful for API scripts)
+    await this.taskManagerService.removeDataStreamCreationTask({
+      integrationId,
+      dataStreamId,
+    });
+
+    const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
+      {
+        integrationId,
+        dataStreamId,
+        connectorId,
+        langSmithOptions,
+      },
+      request
+    );
+
+    await this.savedObjectService.resetDataStreamForReanalysis({
+      integrationId,
+      dataStreamId,
+      newTaskId: taskId,
+      jobType: DATA_STREAM_CREATION_TASK_TYPE,
+    });
+
+    this.logger.debug(`Data stream ${dataStreamId} scheduled for reanalysis with task ${taskId}`);
   }
 
   public async addSamplesToDataStream(

@@ -9,14 +9,16 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   EntityType,
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import type { PaginationParams } from './logs_extraction/logs_extraction_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  extractPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
@@ -47,6 +49,7 @@ interface LogsExtractionOptions {
 interface ExtractedLogsSummarySuccess {
   success: true;
   count: number;
+  pages: number;
   scannedIndices: string[];
 }
 
@@ -86,7 +89,7 @@ export class LogsExtractionClient {
 
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { esqlResponse, indexPatterns } = await this.runQueryAndIngestDocs({
+      const { count, pages, indexPatterns } = await this.runQueryAndIngestDocs({
         engineDescriptor,
         opts,
         delayMs,
@@ -95,7 +98,8 @@ export class LogsExtractionClient {
 
       const operationResult = {
         success: true as const,
-        count: esqlResponse.values.length,
+        count,
+        pages,
         scannedIndices: indexPatterns,
       };
 
@@ -103,14 +107,27 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      const paginationTimestamp = this.extractLastSeenTimestamp(esqlResponse, delayMs);
-      await this.engineDescriptorClient.update(type, {
-        logExtractionState: {
-          ...engineDescriptor.logExtractionState,
-          paginationTimestamp,
-          lastExecutionTimestamp: moment().utc().toISOString(),
+      await this.engineDescriptorClient.update(
+        type,
+        {
+          ...engineDescriptor,
+          logExtractionState: {
+            ...engineDescriptor.logExtractionState,
+
+            // we went through all the pages,
+            // therefore we can leave the lastExecutionTimestamp as the beginning of the next
+            // window
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+
+            lastExecutionTimestamp: moment().utc().toISOString(),
+          },
+
+          // we need to do a full write to overwrite pagination
+          // id and timestamp cursors with undefined
         },
-      });
+        { mergeAttributes: false }
+      );
 
       return operationResult;
     } catch (error) {
@@ -145,55 +162,96 @@ export class LogsExtractionClient {
     // too, so we have a few runs and understand it.
     this.validateExtractionWindow(fromDateISO, toDateISO);
 
-    const query = buildLogsExtractionEsqlQuery({
-      indexPatterns,
-      latestIndex,
-      entityDefinition,
-      docsLimit,
-      fromDateISO,
-      toDateISO,
-    });
+    let totalCount = 0;
+    let pages = 0;
+    let pagination: PaginationParams | undefined;
 
-    this.logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
-    const esqlResponse = await executeEsqlQuery({
-      esClient: this.esClient,
-      query,
-      abortController: opts?.abortController,
-    });
+    const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
+    opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    if (!opts?.countOnly) {
-      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-      await ingestEntities({
+    let recoveryId: string | undefined = engineDescriptor.logExtractionState.paginationId;
+    if (recoveryId) {
+      this.logger.warn(
+        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beggning of the window.`
+      );
+    }
+    do {
+      const query = buildLogsExtractionEsqlQuery({
+        indexPatterns,
+        latestIndex,
+        entityDefinition,
+        docsLimit,
+        fromDateISO,
+        toDateISO,
+        pagination,
+        recoveryId,
+      });
+
+      // Recovery id already used, clean up for next iteration
+      recoveryId = undefined;
+
+      this.logger.debug(
+        `Running query to extract logs from ${fromDateISO} to ${toDateISO} ${
+          pagination
+            ? `with pagination: ${pagination.timestampCursor} | ${pagination.idCursor}`
+            : ''
+        }`
+      );
+
+      const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
-        esqlResponse,
-        esIdField: HASHED_ID_FIELD,
-        targetIndex: latestIndex,
-        logger: this.logger,
+        query,
         abortController: opts?.abortController,
       });
-    }
 
-    return { esqlResponse, indexPatterns };
+      totalCount += esqlResponse.values.length;
+      pagination = extractPaginationParams(esqlResponse, docsLimit);
+      if (esqlResponse.values.length > 0) {
+        pages++;
+      }
+
+      if (!opts?.countOnly) {
+        this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+        await ingestEntities({
+          esClient: this.esClient,
+          esqlResponse,
+          esIdField: HASHED_ID_FIELD,
+          fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
+          targetIndex: latestIndex,
+          logger: this.logger,
+          abortController: opts?.abortController,
+        });
+      }
+
+      // On pagination we save the pagination to the last seen timestamp cursor
+      // so we can recover from corrupt state
+      if (pagination) {
+        await this.engineDescriptorClient.update(engineDescriptor.type, {
+          logExtractionState: {
+            ...engineDescriptor.logExtractionState,
+            paginationTimestamp: pagination?.timestampCursor,
+            paginationId: pagination?.idCursor,
+            lastExecutionTimestamp: moment().utc().toISOString(),
+          },
+        });
+      }
+
+      // should never be larger than limit, just being safe
+    } while (pagination);
+
+    opts?.abortController?.signal.removeEventListener('abort', onAbort);
+
+    return {
+      count: totalCount,
+      pages,
+      indexPatterns,
+    };
   }
 
   private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
     if (moment(fromDateISO).isAfter(moment(toDateISO))) {
-      throw new Error('From date is after to date');
+      throw new Error(`From ${fromDateISO} date is after to ${toDateISO} date`);
     }
-  }
-
-  private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse, delayMs: number): string {
-    if (esqlResponse.values.length === 0) {
-      // if no logs are found, we use the current time as the last seenTimestamp
-      return moment().utc().subtract(delayMs, 'millisecond').toISOString();
-    }
-
-    const timestampIndex = esqlResponse.columns.findIndex((column) => column.name === '@timestamp');
-    if (timestampIndex === -1) {
-      throw new Error('@timestamp column not found in esql response, internal logic error');
-    }
-
-    return esqlResponse.values[esqlResponse.values.length - 1][timestampIndex] as string;
   }
 
   // Window scenarios:
@@ -204,21 +262,34 @@ export class LogsExtractionClient {
   // 3. LastExecutionTimestamp is present:
   //    fromDate = lastExecutionTimestamp | toDate = now - delay
   private getExtractionWindow(
-    logExtractionState: LogExtractionState,
+    logsExtractionState: LogExtractionState,
     delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
+    const { paginationTimestamp } = logsExtractionState;
+
     const fromDateISO =
-      logExtractionState.paginationTimestamp ||
-      logExtractionState.lastExecutionTimestamp ||
-      this.getFromDate(logExtractionState);
+      paginationTimestamp ||
+      this.getDelayedLastExecutionTimestamp(logsExtractionState, delayMs) ||
+      this.getFromDateBasedOnLookback(logsExtractionState);
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
   }
 
-  private getFromDate(logExtractionState: LogExtractionState): string {
-    const lookbackPeriodMs = parseDurationToMs(logExtractionState.lookbackPeriod);
+  private getDelayedLastExecutionTimestamp(
+    { lastExecutionTimestamp }: LogExtractionState,
+    durationMs: number
+  ): string | undefined {
+    if (!lastExecutionTimestamp) {
+      return undefined;
+    }
+
+    return moment(lastExecutionTimestamp).subtract(durationMs, 'millisecond').toISOString();
+  }
+
+  private getFromDateBasedOnLookback({ lookbackPeriod }: LogExtractionState): string {
+    const lookbackPeriodMs = parseDurationToMs(lookbackPeriod);
     return moment().utc().subtract(lookbackPeriodMs, 'millisecond').toISOString();
   }
 
