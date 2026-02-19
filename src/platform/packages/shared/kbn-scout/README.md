@@ -1,5 +1,7 @@
 # @kbn/scout
 
+Sample test
+
 `kbn-scout` is a modern test framework for Kibana. It uses Playwright for UI integration tests. Its primary goal is to enhance the developer experience by offering a lightweight and flexible testing solution to create UI tests next to the plugin source code. This README explains the structure of the `kbn-scout` package and provides an overview of its key components.
 
 ### Table of Contents
