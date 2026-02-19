@@ -222,10 +222,16 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         <EuiSpacer />
         {childSize && (
           <>
-            <EuiButton onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}>
+            <EuiButton
+              onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
+              data-test-subj={`openChildFlyoutAOverlaysButton-${title}`}
+            >
               {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
             </EuiButton>{' '}
-            <EuiButton onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}>
+            <EuiButton
+              onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
+              data-test-subj={`openChildFlyoutBOverlaysButton-${title}`}
+            >
               {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
             </EuiButton>
           </>
@@ -234,7 +240,11 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
+            <EuiButtonEmpty
+              onClick={handleCloseFlyout}
+              aria-label="Close"
+              data-test-subj={`closeMainFlyoutOverlaysButton-${title}`}
+            >
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -316,6 +326,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title={title}
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -323,6 +334,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title={title}
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
@@ -331,7 +343,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+          <EuiButton
+            onClick={openFlyout}
+            disabled={isFlyoutOpen}
+            data-test-subj={`openMainFlyoutOverlaysButton-${title}`}
+          >
             Open {title}
           </EuiButton>
         </EuiFlexItem>
@@ -378,7 +394,11 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={handleClose} aria-label="Close">
+                  <EuiButtonEmpty
+                    onClick={handleClose}
+                    aria-label="Close"
+                    data-test-subj="closeNonSessionFlyoutOverlaysButton"
+                  >
                     Close
                   </EuiButtonEmpty>
                 </EuiFlexItem>
@@ -407,6 +427,7 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
             <EuiFlexItem grow={false}>
               <FlyoutTypeSwitch
                 // switch for flyout type: push or overlay
+                title="Non-session flyout"
                 flyoutType={flyoutType}
                 onChange={setFlyoutType}
               />
@@ -414,6 +435,7 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
             <EuiFlexItem grow={false}>
               <FlyoutOwnFocusSwitch
                 // switch for ownFocus behavior
+                title="Non-session flyout"
                 flyoutOwnFocus={flyoutOwnFocus}
                 onChange={setFlyoutOwnFocus}
                 disabled={flyoutType === 'push'}
@@ -422,7 +444,11 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+          <EuiButton
+            onClick={openFlyout}
+            disabled={isFlyoutOpen}
+            data-test-subj="openNonSessionFlyoutOverlaysButton"
+          >
             Open Non-session Flyout
           </EuiButton>
         </EuiFlexItem>
