@@ -39,7 +39,7 @@ export interface CascadedDocumentsContext
   viewModeToggle: ReactElement | undefined;
   getDataCascadeUiState: () => DataCascadeUiState | undefined;
   getDataGridUiStateMap: () => CascadedDocumentsDataGridUiStateMap | undefined;
-  setDataCascadeUiState: (uiState: DataCascadeUiState) => void;
+  setDataCascadeUiState: (uiState: DataCascadeUiState | undefined) => void;
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
