@@ -68,6 +68,7 @@ import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
   DASHBOARD_APP_ID,
+  DASHBOARD_DRILLDOWN_TYPE,
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
@@ -154,7 +155,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, home, data, urlForwarding }: DashboardSetupDependencies
+    { embeddable, share, home, data, urlForwarding }: DashboardSetupDependencies
   ): DashboardSetup {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -301,6 +302,11 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    embeddable.registerDrilldown(DASHBOARD_DRILLDOWN_TYPE, async () => {
+      const { dashboardDrilldown } = await import('./dashboard_renderer/dashboard_module');
+      return dashboardDrilldown;
+    });
 
     return {
       registerListingPageTab: (tab: DashboardListingTab) => {
