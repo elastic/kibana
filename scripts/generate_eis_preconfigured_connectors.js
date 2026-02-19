@@ -21,12 +21,21 @@
  * Requires Elasticsearch with EIS/CCM connected so GET /_inference/chat_completion/_all returns endpoints.
  */
 
-var ELASTICSEARCH_HOST =
-  process.env.ELASTICSEARCH_HOST || process.env.ES_URL || 'http://localhost:9200';
+var ELASTICSEARCH_HOST = process.env.ELASTICSEARCH_HOST || 'http://localhost:9200';
 var ELASTICSEARCH_USERNAME = process.env.ELASTICSEARCH_USERNAME || 'elastic';
 var ELASTICSEARCH_PASSWORD = process.env.ELASTICSEARCH_PASSWORD || 'changeme';
 
 /** @typedef {{ inference_id: string, task_type: string, service: string, service_settings?: { model_id?: string } }} EisInferenceEndpoint */
+
+/**
+ * Escapes a string for use inside a YAML double-quoted scalar (backslash, quote, newline).
+ * @param {string} value
+ * @returns {string}
+ */
+function yamlQuoted(value) {
+  var s = String(value);
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
+}
 
 /**
  * @param {string} modelId
@@ -56,28 +65,23 @@ function toDisplayName(modelId) {
 
 /**
  * @param {EisInferenceEndpoint} endpoint
+ * @param {{ id: string, name: string, modelId: string }} resolved
  * @returns {string} YAML block for one preconfigured connector
  */
-function endpointToYaml(endpoint) {
-  var modelId =
-    endpoint.service_settings && endpoint.service_settings.model_id
-      ? endpoint.service_settings.model_id
-      : endpoint.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
-  var id = toConnectorId(modelId);
-  var name = toDisplayName(modelId);
+function endpointToYaml(endpoint, resolved) {
   return (
     '  ' +
-    id +
-    ':\n    name: ' +
-    name +
-    '\n    actionTypeId: .inference\n    exposeConfig: true\n    config:\n      provider: "' +
-    endpoint.service +
+    resolved.id +
+    ':\n    name: "' +
+    yamlQuoted(resolved.name) +
+    '"\n    actionTypeId: .inference\n    exposeConfig: true\n    config:\n      provider: "' +
+    yamlQuoted(endpoint.service) +
     '"\n      taskType: "' +
-    endpoint.task_type +
+    yamlQuoted(endpoint.task_type) +
     '"\n      inferenceId: "' +
-    endpoint.inference_id +
+    yamlQuoted(endpoint.inference_id) +
     '"\n      providerConfig:\n        model_id: "' +
-    modelId +
+    yamlQuoted(resolved.modelId) +
     '"'
   );
 }
@@ -110,11 +114,40 @@ function main() {
         console.error('No chat_completion endpoints found.');
         process.exit(1);
       }
+      endpoints.sort(function (a, b) {
+        return (a.inference_id || '').localeCompare(b.inference_id || '');
+      });
+      var seen = Object.create(null);
+      var entries = [];
+      for (var i = 0; i < endpoints.length; i++) {
+        var endpoint = endpoints[i];
+        var modelId =
+          endpoint.service_settings && endpoint.service_settings.model_id
+            ? endpoint.service_settings.model_id
+            : endpoint.inference_id.replace(/^\./, '').replace(/-chat_completion$/, '');
+        var baseId = toConnectorId(modelId);
+        if (!baseId) {
+          baseId = toConnectorId(endpoint.inference_id) || 'connector';
+        }
+        var id = baseId;
+        var n = 1;
+        while (seen[id]) {
+          id = baseId + '-' + ++n;
+        }
+        seen[id] = true;
+        entries.push({
+          endpoint: endpoint,
+          id: id,
+          name: toDisplayName(modelId),
+          modelId: modelId,
+        });
+      }
       var lines = [
         '# Paste these blocks under xpack.actions.preconfigured: in config/kibana.dev.yml',
       ];
-      for (var i = 0; i < endpoints.length; i++) {
-        lines.push(endpointToYaml(endpoints[i]));
+      for (var j = 0; j < entries.length; j++) {
+        var e = entries[j];
+        lines.push(endpointToYaml(e.endpoint, { id: e.id, name: e.name, modelId: e.modelId }));
       }
       console.log(lines.join('\n'));
     })
