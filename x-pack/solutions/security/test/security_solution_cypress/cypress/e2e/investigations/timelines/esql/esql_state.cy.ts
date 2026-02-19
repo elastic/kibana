@@ -54,8 +54,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Flaky: https://github.com/elastic/kibana/issues/180755
-describe.skip(
+describe(
   'Timeline Discover ESQL State',
   {
     tags: ['@ess'],
