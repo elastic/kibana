@@ -8,41 +8,43 @@ import type { EuiTabbedContentProps } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
-import { buildKqlFilter } from './build_kql_filter';
+import { InfrastructureDashboard } from './static_dashboard';
+import { useMetricsDataView } from './static_dashboard/use_metrics_data_view';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
-  id: 'containers' | 'pods' | 'hosts';
+  id: 'containers' | 'hosts' | 'deployments';
   hidden?: boolean;
 };
 
 export enum InfraTab {
   containers = 'containers',
-  pods = 'pods',
   hosts = 'hosts',
+  deployments = 'deployments',
 }
 
 export function useTabs({
   containerIds,
-  podNames,
   hostNames,
+  podNames,
+  deploymentNames,
+  nodeNames,
   start,
   end,
 }: {
   containerIds: string[];
-  podNames: string[];
   hostNames: string[];
+  podNames: string[];
+  deploymentNames: string[];
+  nodeNames: string[];
   start: string;
   end: string;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { metricsDataAccess } = services;
-  const HostMetricsTable = metricsDataAccess?.HostMetricsTable;
-  const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
-  const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
+  const { notifications } = services;
+  const { dataView } = useMetricsDataView();
 
   const timerange = useMemo(
     () => ({
@@ -52,69 +54,86 @@ export function useTabs({
     [start, end]
   );
 
-  const hostsFilter = useMemo(() => buildKqlFilter(HOST_NAME, hostNames), [hostNames]);
-  const podsFilter = useMemo(() => buildKqlFilter(KUBERNETES_POD_NAME, podNames), [podNames]);
-  const containersFilter = useMemo(
-    () => buildKqlFilter(CONTAINER_ID, containerIds),
-    [containerIds]
-  );
-
-  const containerMetricsTable = (
+  const containerDashboard = dataView ? (
     <>
       <EuiSpacer />
-      {ContainerMetricsTable &&
-        ContainerMetricsTable({
-          timerange,
-          kuery: containersFilter,
-        })}
+      <InfrastructureDashboard
+        dashboardType="otel_containers"
+        dataView={dataView}
+        containerNames={containerIds}
+        timeRange={timerange}
+        notifications={notifications}
+      />
     </>
+  ) : (
+    <EuiLoadingSpinner size="xl" />
   );
 
-  const podMetricsTable = (
+  const hostDashboard = dataView ? (
     <>
       <EuiSpacer />
-      {PodMetricsTable &&
-        PodMetricsTable({
-          timerange,
-          kuery: podsFilter,
-        })}
+      <InfrastructureDashboard
+        dashboardType="otel_on_host"
+        dataView={dataView}
+        hostNames={hostNames}
+        timeRange={timerange}
+        notifications={notifications}
+      />
     </>
+  ) : (
+    <EuiLoadingSpinner size="xl" />
   );
 
-  const hostMetricsTable = (
+  const deploymentsContent = dataView ? (
     <>
       <EuiSpacer />
-      {HostMetricsTable &&
-        HostMetricsTable({
-          timerange,
-          kuery: hostsFilter,
-        })}
+      <InfrastructureDashboard
+        dashboardType="k8s_deployments_otel"
+        dataView={dataView}
+        deploymentNames={deploymentNames}
+        timeRange={timerange}
+        notifications={notifications}
+      />
+      {nodeNames.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <InfrastructureDashboard
+            dashboardType="k8s_nodes_otel"
+            dataView={dataView}
+            nodeNames={nodeNames}
+            timeRange={timerange}
+            notifications={notifications}
+          />
+        </>
+      )}
     </>
+  ) : (
+    <EuiLoadingSpinner size="xl" />
   );
 
   const tabs: Tab[] = [
+    {
+      id: InfraTab.deployments,
+      name: i18n.translate('xpack.apm.views.infra.tabs.deployments', {
+        defaultMessage: 'Deployments',
+      }),
+      content: deploymentsContent,
+      hidden: podNames.length <= 0,
+    },
     {
       id: InfraTab.containers,
       name: i18n.translate('xpack.apm.views.infra.tabs.containers', {
         defaultMessage: 'Containers',
       }),
-      content: containerMetricsTable,
-      hidden: containerIds && containerIds.length <= 0,
-    },
-    {
-      id: InfraTab.pods,
-      name: i18n.translate('xpack.apm.views.infra.tabs.pods', {
-        defaultMessage: 'Pods',
-      }),
-      content: podMetricsTable,
-      hidden: podNames && podNames.length <= 0,
+      content: containerDashboard,
+      hidden: containerIds.length <= 0,
     },
     {
       id: InfraTab.hosts,
       name: i18n.translate('xpack.apm.views.infra.tabs.hosts', {
         defaultMessage: 'Hosts',
       }),
-      content: hostMetricsTable,
+      content: hostDashboard,
     },
   ];
 

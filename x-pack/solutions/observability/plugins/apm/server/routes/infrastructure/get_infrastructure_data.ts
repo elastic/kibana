@@ -12,6 +12,7 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   KUBERNETES_POD_NAME,
+  KUBERNETES_POD_NAME_OTEL,
   HOST_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -19,6 +20,7 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
 export const getInfrastructureData = async ({
   kuery,
   serviceName,
+  isSemconv,
   environment,
   apmEventClient,
   start,
@@ -26,11 +28,14 @@ export const getInfrastructureData = async ({
 }: {
   kuery: string;
   serviceName: string;
+  isSemconv: boolean;
   environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) => {
+  const podNameField = isSemconv ? KUBERNETES_POD_NAME_OTEL : KUBERNETES_POD_NAME;
+
   const response = await apmEventClient.search('get_service_infrastructure', {
     apm: {
       events: [ProcessorEvent.metric],
@@ -62,18 +67,23 @@ export const getInfrastructureData = async ({
       },
       podNames: {
         terms: {
-          field: KUBERNETES_POD_NAME,
+          field: podNameField,
           size: 500,
         },
       },
     },
   });
 
+  const extractKeys = (buckets?: Array<{ key: string | number }>) =>
+    buckets?.map((bucket) => bucket.key as string) ?? [];
+
+  const containerIds = extractKeys(response.aggregations?.containerIds?.buckets);
+  const hostNames = extractKeys(response.aggregations?.hostNames?.buckets);
+  const podNames = extractKeys(response.aggregations?.podNames?.buckets);
+
   return {
-    containerIds:
-      response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key as string) ?? [],
-    hostNames:
-      response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key as string) ?? [],
-    podNames: response.aggregations?.podNames?.buckets.map((bucket) => bucket.key as string) ?? [],
+    containerIds,
+    hostNames,
+    podNames,
   };
 };

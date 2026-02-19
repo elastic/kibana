@@ -164,12 +164,15 @@ export const CONTAINER_IMAGE = 'container.image.name';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
+export const KUBERNETES_NODE_NAME_OTEL = 'k8s.node.name';
 export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
 export const KUBERNETES_CONTAINER_ID = 'kubernetes.container.id';
 export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const KUBERNETES_DEPLOYMENT_NAME_OTEL = 'k8s.deployment.name';
 export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const FAAS_ID = 'faas.id';
