@@ -7,36 +7,12 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-genai-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
 
-/**
- * Describes when to use each supported chart type.
- *
- * This record MUST cover every member of {@link SupportedChartType}.
- * When a new chart type is added to the enum, TypeScript will produce a
- * compile error here until a description is provided — ensuring the skill
- * content always stays in sync with the available chart types.
- */
-const chartTypeDescriptions: Record<SupportedChartType, string> = {
-  [SupportedChartType.Metric]:
-    'Use for a single aggregate number: a total count, sum, average, min, or max displayed prominently. Example: total request count, average response time, current error rate.',
-  [SupportedChartType.Gauge]:
-    'Use when showing a value against a known threshold or range. Example: CPU usage percentage, disk capacity remaining, SLA compliance rate.',
-  [SupportedChartType.XY]:
-    'Use for time series, comparisons, distributions, and trends rendered as line, bar, or area charts. This is the most versatile type. Example: requests over time, latency per service, error counts by status code.',
-  [SupportedChartType.Heatmap]:
-    'Use for two-dimensional density or distribution patterns. Example: event density by hour-of-day and day-of-week, response time distribution across hosts.',
-  [SupportedChartType.Tagcloud]:
-    'Use for top-N categorical terms displayed by frequency or magnitude. Example: most common log sources, top user agents, most frequent error messages.',
-  [SupportedChartType.RegionMap]:
-    'Use for geographically distributed data rendered on a map. Example: request counts by country, traffic by region, user distribution by location.',
-};
-
-const chartTypeGuideContent = Object.entries(chartTypeDescriptions)
-  .map(([type, description]) => `- **\`${type}\`** — ${description}`)
-  .join('\n');
+const chartTypeSelectionContent = getChartTypeSelectionPromptContent();
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
@@ -173,7 +149,7 @@ Always use the actual field names discovered in Step 2 when composing visualizat
 
 Choose chart type based on what the data represents and what the user wants to understand:
 
-${chartTypeGuideContent}
+${chartTypeSelectionContent}
 
 When you are unsure which chart type fits best, **omit \`chartType\`** and let the visualization generator decide based on the query content.
 
