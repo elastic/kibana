@@ -121,13 +121,11 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const queryService = get(QueryServiceScopedToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
-      const request = get(Request);
 
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
-        request,
         workflowsManagement.management
       );
     })
@@ -141,12 +139,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const queryService = get(QueryServiceInternalToken);
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
-      const request = get(Request);
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
-        request,
         workflowsManagement.management
       );
     })

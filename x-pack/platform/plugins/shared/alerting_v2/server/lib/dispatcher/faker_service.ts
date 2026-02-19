@@ -35,6 +35,7 @@ const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
       interval: '1h',
     },
     workflowId: 'workflow-dbaaec7e-77a2-40eb-bbe9-9c26620b7850',
+    apiKey: undefined, // no API key for fake policies; dispatch will be skipped unless a real policy is created via API
   },
   policy_456: {
     id: 'policy_456',
@@ -45,6 +46,7 @@ const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
       interval: undefined,
     },
     workflowId: 'workflow-dbaaec7e-77a2-40eb-bbe9-9c26620b7850',
+    apiKey: undefined, // no API key for fake policies; dispatch will be skipped unless a real policy is created via API
   },
 };
 

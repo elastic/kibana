@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server/workflows_management/workflows_management_api';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
@@ -54,7 +55,6 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
-    @inject(Request) private readonly request: KibanaRequest,
     private readonly workflowsManagement: WorkflowsManagementApi
   ) {}
 
@@ -88,7 +88,16 @@ export class DispatcherService implements DispatcherServiceContract {
     );
 
     for (const group of dispatch) {
-      await dispatchWorkflow(group, this.request, this.workflowsManagement);
+      const policy = policies.get(group.policyId);
+      if (!policy?.apiKey) {
+        this.logger.warn({
+          message: () =>
+            `Skipping dispatch for group ${group.id}: notification policy ${group.policyId} has no API key`,
+        });
+        continue;
+      }
+      const fakeRequest = this.craftFakeRequest(policy.apiKey);
+      await dispatchWorkflow(group, fakeRequest, this.workflowsManagement);
     }
 
     const now = new Date();
@@ -299,6 +308,14 @@ export class DispatcherService implements DispatcherServiceContract {
       source: 'internal',
       reason,
     };
+  }
+
+  private craftFakeRequest(apiKey: string): KibanaRequest {
+    const fakeRawRequest: FakeRawRequest = {
+      headers: { authorization: `ApiKey ${apiKey}` },
+      path: '/',
+    };
+    return kibanaRequestFactory(fakeRawRequest);
   }
 
   private async fetchAlertEpisodeSuppressions(

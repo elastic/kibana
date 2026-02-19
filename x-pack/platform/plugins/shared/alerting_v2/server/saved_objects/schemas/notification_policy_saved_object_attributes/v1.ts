@@ -14,6 +14,7 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   workflow_id: schema.string(),
+  apiKey: schema.nullable(schema.string()),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   createdAt: schema.string(),
