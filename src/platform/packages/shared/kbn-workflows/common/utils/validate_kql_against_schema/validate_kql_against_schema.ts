@@ -15,6 +15,13 @@ import { extractSchemaPropertyPaths } from '../extract_schema_property_paths/ext
 
 export type ValidateKqlAgainstSchemaResult = { valid: true } | { valid: false; error: string };
 
+function normalizeFieldPath(field: string | null | undefined): string {
+  if (field === null || field === undefined) {
+    return '';
+  }
+  return String(field).trim();
+}
+
 export interface ValidateKqlAgainstSchemaOptions {
   /**
    * Prefix for schema-derived field paths (e.g. "event" for trigger conditions using event.severity).
@@ -91,9 +98,7 @@ export function validateKqlAgainstSchema(
   }
 
   const kqlFieldPaths = getKqlFieldNames(ast);
-  const normalizedFields = kqlFieldPaths
-    .map((field) => (field === null || field === undefined ? '' : String(field).trim()))
-    .filter(Boolean);
+  const normalizedFields = kqlFieldPaths.map(normalizeFieldPath).filter(Boolean);
 
   for (const field of normalizedFields) {
     const isWildcard = field.endsWith('.*');

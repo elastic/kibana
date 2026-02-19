@@ -39,8 +39,8 @@ function getZodDescription(schema: z.ZodType): string | undefined {
     innerType?: z.ZodType;
   };
   if (typeof s.description === 'string') return s.description;
-  const inner = s.unwrap?.() ?? s.innerType;
-  if (inner) return getZodDescription(inner);
+  const unwrappedSchema = s.unwrap?.() ?? s.innerType;
+  if (unwrappedSchema) return getZodDescription(unwrappedSchema);
   return undefined;
 }
 
@@ -135,14 +135,12 @@ function generateTriggerUsage(
       })
     );
     for (const example of conditionExamples) {
-      const yamlSnippet = [
-        `# ${example.title}`,
-        'triggers:',
-        `  - type: ${triggerType}`,
-        '    with:',
-        `      condition: '${example.condition}'`,
-        '',
-      ].join('\n');
+      const yamlSnippet = `# ${example.title}
+triggers:
+  - type: ${triggerType}
+    with:
+      condition: '${example.condition}'
+`;
       lines.push('```yaml', yamlSnippet, '```');
       lines.push('');
     }
