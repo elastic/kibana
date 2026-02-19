@@ -1,8 +1,9 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout.sh
-    label: 'AI Assistant Scout Tests (Stateful + Serverless)'
+    label: 'AI Assistant Scout Tests (Stateful)'
     env:
       FTR_GEN_AI: '1'
+      SCOUT_AI_ASSISTANT_MODE: '--arch stateful --domain classic'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -14,7 +15,28 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout.sh
+    label: 'AI Assistant Scout Tests (Serverless)'
+    env:
+      FTR_GEN_AI: '1'
+      SCOUT_AI_ASSISTANT_MODE: '--arch serverless --domain security_complete'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
     timeout_in_minutes: 120
     retry:
       automatic:
