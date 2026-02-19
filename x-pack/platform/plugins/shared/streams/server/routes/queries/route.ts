@@ -6,7 +6,7 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { streamQueryInputSchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
@@ -109,7 +109,6 @@ const upsertQueryRoute = createServerRoute({
       kql: {
         query: body.kql.query,
       },
-      esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
     });
@@ -191,7 +190,7 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            index: streamQuerySchema,
+            index: streamQueryInputSchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),

@@ -79,7 +79,13 @@ export {
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
-export { type StreamQuery, upsertStreamQueryRequestSchema, streamQuerySchema } from './src/queries';
+export {
+  type StreamQuery,
+  type StreamQueryInput,
+  upsertStreamQueryRequestSchema,
+  streamQuerySchema,
+  streamQueryInputSchema,
+} from './src/queries';
 
 export {
   findInheritedLifecycle,

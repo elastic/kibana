@@ -10,7 +10,7 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
 import { buildEsqlQuery, buildEsqlWhereCondition } from '@kbn/streams-schema';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
@@ -100,6 +100,10 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 ): QueryLink {
   return {
     ...asset,
+    query: {
+      ...asset.query,
+      esql: { where: buildEsqlWhereCondition(asset.query) },
+    },
     [ASSET_UUID]: getQueryLinkUuid(name, asset),
     stream_name: name,
   };
@@ -547,7 +551,7 @@ export class QueryClient {
     );
   }
 
-  public async upsert(stream: string, query: StreamQuery) {
+  public async upsert(stream: string, query: StreamQueryInput) {
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping upsert for stream "${stream}" because significant events feature is disabled.`
@@ -584,7 +588,7 @@ export class QueryClient {
 
   public async bulk(
     stream: string,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    operations: Array<{ index?: StreamQueryInput; delete?: { id: string } }>,
     options?: { createRules?: boolean }
   ) {
     if (!this.isSignificantEventsEnabled) {
@@ -599,7 +603,10 @@ export class QueryClient {
     const indexOperationsMap = new Map(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => [operation.index!.id, operation.index!])
+        .map((operation) => [
+          operation.index!.id,
+          { ...operation.index!, esql: { where: buildEsqlWhereCondition(operation.index!) } },
+        ])
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
@@ -614,7 +621,12 @@ export class QueryClient {
         }),
       ...operations
         .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
-        .map((operation) => toQueryLinkFromQuery(operation.index!, stream)),
+        .map((operation) =>
+          toQueryLinkFromQuery(
+            { ...operation.index!, esql: { where: buildEsqlWhereCondition(operation.index!) } },
+            stream
+          )
+        ),
     ];
 
     if (options?.createRules === false) {

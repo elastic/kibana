@@ -11,7 +11,7 @@ import type {
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
-import { buildEsqlWhereCondition, TaskStatus } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
 import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
@@ -265,9 +265,6 @@ export async function saveQueries(
       index: {
         id: v4(),
         kql: { query: query.kql },
-        esql: {
-          where: buildEsqlWhereCondition({ kql: { query: query.kql }, feature: query.feature }),
-        },
         title: query.title,
         feature: query.feature,
         severity_score: query.severity_score,

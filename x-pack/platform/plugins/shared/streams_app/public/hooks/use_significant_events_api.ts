@@ -8,6 +8,7 @@
 import { useAbortController } from '@kbn/react-hooks';
 import type {
   StreamQuery,
+  StreamQueryInput,
   System,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -15,7 +16,7 @@ import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQuery;
+  index: StreamQueryInput;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -52,7 +53,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ id, ...body }) => {
+    upsertQuery: async ({ id, esql, ...body }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {

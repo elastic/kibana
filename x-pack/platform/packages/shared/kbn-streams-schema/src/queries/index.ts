@@ -49,7 +49,9 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
+export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
+
+export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     feature: z
@@ -62,6 +64,14 @@ export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
     kql: z.object({
       query: z.string(),
     }),
+    severity_score: z.number().optional(),
+    evidence: z.array(z.string()).optional(),
+  })
+);
+
+export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
+  streamQueryInputSchema,
+  z.object({
     esql: z.object({
       where: z
         .string()
@@ -69,8 +79,6 @@ export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
           'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
         ),
     }),
-    severity_score: z.number().optional(),
-    evidence: z.array(z.string()).optional(),
   })
 );
 
@@ -89,13 +97,6 @@ export const upsertStreamQueryRequestSchema = z.object({
     .optional(),
   kql: z.object({
     query: z.string(),
-  }),
-  esql: z.object({
-    where: z
-      .string()
-      .describe(
-        'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
-      ),
   }),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),

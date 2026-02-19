@@ -278,7 +278,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           body: {
             title: 'Init Query',
             kql: { query: 'test' },
-            esql: { where: 'KQL("test")' },
           },
         },
       });

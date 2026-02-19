@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
@@ -138,7 +138,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
-                esql: { where: 'KQL("message:\'initial query\'")' },
               },
             },
           })
@@ -175,7 +174,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: { query: 'updated query' },
-                esql: { where: 'KQL("updated query")' },
               },
             },
           })
@@ -220,7 +218,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: 'updated title',
                 kql: { query: query.kql.query },
-                esql: { where: 'KQL("initial query")' },
               },
             },
           })
@@ -265,7 +262,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
-                esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
                 feature: initialFeature,
               },
             },
@@ -286,7 +282,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
-                esql: { where: 'KQL("test query") AND `host.name` == "host2"' },
                 feature: updatedFeature,
               },
             },
@@ -319,7 +314,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: query.title,
                 kql: query.kql,
-                esql: { where: 'KQL("initial query") AND `host.name` == "host1"' },
                 feature,
               },
             },
@@ -333,7 +327,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 title: 'updated title',
                 kql: { query: 'updated query' },
-                esql: { where: 'KQL("updated query") AND `host.name` == "host1"' },
                 feature,
               },
             },
@@ -433,6 +426,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         esql: { where: 'KQL("query 3 updated")' },
       };
 
+      const { esql: _ne, ...newQueryInput } = newQuery;
+      const { esql: _ute, ...updateThirdQueryInput } = updateThirdQuery;
+
       const bulkResponse = await apiClient
         .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
           params: {
@@ -440,7 +436,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               operations: [
                 {
-                  index: newQuery,
+                  index: newQueryInput,
                 },
                 {
                   delete: {
@@ -448,7 +444,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 {
-                  index: updateThirdQuery,
+                  index: updateThirdQueryInput,
                 },
                 {
                   delete: {
@@ -502,7 +498,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               title: queryWithFeature.title,
               kql: queryWithFeature.kql,
-              esql: { where: 'KQL("test query") AND `host.name` == "host1"' },
               feature: initialFeature,
             },
           },
@@ -515,6 +510,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         type: 'system' as const,
       };
 
+      const { esql, ...queryWithFeatureInput } = queryWithFeature;
+
       await apiClient
         .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
           params: {
@@ -523,7 +520,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               operations: [
                 {
                   index: {
-                    ...queryWithFeature,
+                    ...queryWithFeatureInput,
                     feature: updatedFeature,
                   },
                 },
