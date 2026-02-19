@@ -23,6 +23,7 @@ import { registerDocumentsSampleRoute } from './register_documents_sample_route'
 
 import { registerIndicesGet } from './indices_get';
 import { registerIndicesStats } from './indices_stats';
+import { registerUserStatusPrivilegeRoutes } from './register_user_status_route';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerClearCacheRoute(dependencies);
@@ -40,4 +41,5 @@ export function registerIndicesRoutes(dependencies: RouteDependencies) {
   registerIndicesGet(dependencies);
   registerIndicesStats(dependencies);
   registerDocumentsSampleRoute(dependencies);
+  registerUserStatusPrivilegeRoutes(dependencies);
 }
