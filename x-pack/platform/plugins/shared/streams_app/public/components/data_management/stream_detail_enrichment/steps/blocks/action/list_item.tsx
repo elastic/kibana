@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
@@ -51,28 +51,6 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   });
 
   const hasValidationErrors = validationErrors.length > 0;
-
-  // Truncation detection for action name
-  const actionTextRef = useRef<HTMLSpanElement>(null);
-  const [isActionTruncated, setIsActionTruncated] = useState(false);
-
-  useEffect(() => {
-    const checkTruncation = () => {
-      const element = actionTextRef.current;
-      if (element) {
-        setIsActionTruncated(element.scrollWidth > element.clientWidth);
-      }
-    };
-
-    checkTruncation();
-
-    const resizeObserver = new ResizeObserver(checkTruncation);
-    if (actionTextRef.current) {
-      resizeObserver.observe(actionTextRef.current);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, []);
 
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
@@ -134,11 +112,9 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                     position="top"
                     content={
                       <>
-                        {isActionTruncated && (
-                          <p>
-                            <strong>{actionDisplayName}</strong>
-                          </p>
-                        )}
+                        <p>
+                          <strong>{actionDisplayName}</strong>
+                        </p>
                         <p>
                           {i18n.translate(
                             'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
@@ -166,21 +142,17 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                         max-width: 100%;
                       `}
                     >
-                      <span
-                        ref={actionTextRef}
+                      <EuiText
+                        size="s"
+                        component="span"
+                        style={{ fontWeight: euiTheme.font.weight.bold }}
                         css={css`
                           display: block;
                           ${euiTextTruncate()}
                         `}
                       >
-                        <EuiText
-                          size="s"
-                          component="span"
-                          style={{ fontWeight: euiTheme.font.weight.bold }}
-                        >
-                          {actionDisplayName}
-                        </EuiText>
-                      </span>
+                        {actionDisplayName}
+                      </EuiText>
                     </EuiButtonEmpty>
                   </EuiToolTip>
                 </EuiFlexItem>
