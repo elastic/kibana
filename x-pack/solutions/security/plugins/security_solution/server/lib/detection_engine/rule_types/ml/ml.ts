@@ -139,7 +139,7 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.info(`Alerts from ML anomalies: ${anomalyCount}`);
+      ruleExecutionLogger.debug(`Alerts from ML anomalies: ${anomalyCount}`);
     }
 
     if (

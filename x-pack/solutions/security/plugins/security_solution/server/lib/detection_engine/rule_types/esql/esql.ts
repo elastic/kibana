@@ -235,8 +235,9 @@ export const esqlExecutor = async ({
             maxNumberOfAlertsMultiplier: 1,
           });
 
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
-          ruleExecutionLogger.info(`Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}, Alerts suppressed: ${bulkCreateResult.suppressedItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,
@@ -267,7 +268,9 @@ export const esqlExecutor = async ({
           });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-          ruleExecutionLogger.info(`Alerts created: ${bulkCreateResult.createdItemsCount}`);
+          ruleExecutionLogger.debug(
+            `Alerts bulk creation completed. Alerts created: ${bulkCreateResult.createdItemsCount}.`
+          );
 
           updateExcludedDocuments({
             excludedDocuments,

@@ -545,6 +545,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
 
             const createdSignalsCount = result.createdSignals.length;
+            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
+
+            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
+            if (suppressedAlertsCount > 0) {
+              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
+            }
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -589,8 +595,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
-              ruleExecutionLogger.info(
-                `Alerts created: ${createdSignalsCount}\nFinished indexing ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
+              ruleExecutionLogger.debug(
+                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
                 )}".${
                   !isEmpty(tuples)
