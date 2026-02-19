@@ -54,7 +54,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(response.statusCode).toBe(200);
   });
 
-  apiTest('Should extract properly generate euid for host', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
     const expectedResultCount = 22;
 
     const extractionResponse = await apiClient.post(
@@ -70,6 +70,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
@@ -81,6 +82,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -90,7 +92,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
-  apiTest('Should extract properly generate euid for user', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract user', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
       {
@@ -104,6 +106,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
@@ -115,6 +118,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -124,7 +128,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
   });
 
-  apiTest('Should extract properly generate euid for service', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract service', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
       {
@@ -138,6 +142,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
@@ -149,6 +154,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -158,7 +164,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
   });
 
-  apiTest('Should extract properly generate euid for generic', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
       {
@@ -172,6 +178,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
@@ -183,6 +190,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 

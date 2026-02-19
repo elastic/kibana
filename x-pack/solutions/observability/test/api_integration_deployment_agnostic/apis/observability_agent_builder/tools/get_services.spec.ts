@@ -377,7 +377,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            environment: PRODUCTION_ENVIRONMENT,
+            kqlFilter: `service.environment: "${PRODUCTION_ENVIRONMENT}"`,
           },
         });
 
@@ -396,7 +396,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            environment: STAGING_ENVIRONMENT,
+            kqlFilter: `service.environment: "${STAGING_ENVIRONMENT}"`,
           },
         });
 
@@ -407,6 +407,102 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(serviceNames).to.contain(LOG_SERVICE_2);
         expect(serviceNames).to.not.contain(APM_SERVICE_1);
         expect(serviceNames).to.not.contain(LOG_SERVICE_1);
+      });
+    });
+
+    describe('filtering by kqlFilter', () => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+
+        const apmServices: ApmServiceConfig[] = [
+          {
+            name: APM_SERVICE_1,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'nodejs',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 50,
+            errorRate: 0.1,
+          },
+          {
+            name: APM_SERVICE_2,
+            environment: PRODUCTION_ENVIRONMENT,
+            agentName: 'python',
+            transactionName: 'GET /api',
+            transactionType: 'request',
+            duration: 100,
+            errorRate: 0.2,
+          },
+        ];
+
+        const range = timerange(START, END);
+        const { client: apmClient, generator: apmGenerator } = generateApmServicesData({
+          range,
+          apmEsClient: apmSynthtraceEsClient,
+          services: apmServices,
+        });
+
+        await apmClient.index(apmGenerator);
+      });
+
+      after(async () => {
+        await apmSynthtraceEsClient.clean();
+      });
+
+      it('filters services by kqlFilter on service.name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: `service.name: "${APM_SERVICE_1}"`,
+          },
+        });
+
+        const { data } = results[0];
+        const services = data.services;
+        const serviceNames = services.map((s) => s.serviceName);
+
+        expect(serviceNames).to.contain(APM_SERVICE_1);
+        expect(serviceNames).to.not.contain(APM_SERVICE_2);
+      });
+
+      it('filters services by kqlFilter on agent.name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: 'agent.name: "python"',
+          },
+        });
+
+        const { data } = results[0];
+        const services = data.services;
+        const serviceNames = services.map((s) => s.serviceName);
+
+        expect(serviceNames).to.contain(APM_SERVICE_2);
+        expect(serviceNames).to.not.contain(APM_SERVICE_1);
+      });
+
+      it('filters services by kqlFilter on host.name', async () => {
+        // Synthtrace sets host.name to `${serviceName}-01` by default
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: `host.name: "${APM_SERVICE_1}-01"`,
+          },
+        });
+
+        const { data } = results[0];
+        const services = data.services;
+        const serviceNames = services.map((s) => s.serviceName);
+
+        expect(serviceNames).to.contain(APM_SERVICE_1);
+        expect(serviceNames).to.not.contain(APM_SERVICE_2);
       });
     });
   });
