@@ -314,7 +314,7 @@ describe('bulkEditRules', () => {
     ).rejects.toThrow('More than 10000 rules matched for bulk edit');
   });
 
-  test('does not throw error if no aggregation buckets found', async () => {
+  test('throws error if no aggregation buckets found', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: { alertTypeId: {} },
       saved_objects: [],
@@ -322,19 +322,15 @@ describe('bulkEditRules', () => {
       page: 0,
       total: 0,
     });
-    const result = await bulkEditRules(rulesClientContext, {
-      name: `rulesClient.bulkEdit`,
-      updateFn: jest.fn(),
-      shouldInvalidateApiKeys: false,
-      requiredAuthOperation: WriteOperations.BulkEdit,
-      auditAction: RuleAuditAction.BULK_EDIT,
-    });
-    expect(result).toEqual({
-      errors: [],
-      rules: [],
-      skipped: [],
-      total: 0,
-    });
+    await expect(
+      bulkEditRules(rulesClientContext, {
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        shouldInvalidateApiKeys: false,
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+      })
+    ).rejects.toThrow('No rules found for bulk edit');
   });
 
   test('should throw error if rule type is not enabled', async () => {

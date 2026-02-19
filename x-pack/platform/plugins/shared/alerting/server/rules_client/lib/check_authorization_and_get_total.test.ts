@@ -133,34 +133,6 @@ describe('checkAuthorizationAndGetTotal', () => {
       expect(authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
     });
 
-    it.each([
-      { action: 'BULK_EDIT', operation: WriteOperations.BulkEdit },
-      { action: 'BULK_EDIT_PARAMS', operation: ReadOperations.BulkEditParams },
-    ] as const)(
-      'does not throw for %s when no rules returned from find',
-      async ({ action, operation }) => {
-        unsecuredSavedObjectsClient.find.mockResolvedValue({
-          aggregations: { alertTypeId: { buckets: [] } },
-          saved_objects: [],
-          per_page: 0,
-          page: 1,
-          total: 0,
-        });
-
-        const result = await checkAuthorizationAndGetTotal(context, {
-          filter: null,
-          action,
-        });
-
-        expect(result).toEqual({ total: 0 });
-        expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
-          ruleTypeIdConsumersPairs: [],
-          operation,
-          entity: 'rule',
-        });
-      }
-    );
-
     it('throws when rules found exceed MAX_RULES_NUMBER_FOR_BULK_OPERATION', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue({
         ...defaultFindResponse,

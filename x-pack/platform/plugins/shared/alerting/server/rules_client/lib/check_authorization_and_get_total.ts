@@ -98,7 +98,7 @@ export const checkAuthorizationAndGetTotal = async (
 
   const buckets = aggregations?.alertTypeId.buckets ?? [];
 
-  if (buckets?.length === 0 && !['BULK_EDIT', 'BULK_EDIT_PARAMS'].includes(action)) {
+  if (buckets?.length === 0) {
     throw Boom.badRequest(`No rules found for bulk ${errorMessageLabel}`);
   }
 
