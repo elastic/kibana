@@ -68,8 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.discover.waitUntilTabIsLoaded();
 
-        const testQuery =
-          'FROM logs-* | SORT @timestamp DESC | LIMIT 1';
+        const testQuery = 'FROM logs-* | SORT @timestamp DESC | LIMIT 1';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.discover.waitUntilTabIsLoaded();
