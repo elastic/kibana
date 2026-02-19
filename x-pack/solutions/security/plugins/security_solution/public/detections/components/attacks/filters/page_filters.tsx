@@ -31,8 +31,8 @@ const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
   },
   {
     title: 'Attack ID',
-    fieldName: 'kibana.alert.attack_ids',
-    existsSelected: true,
+    field_name: 'kibana.alert.attack_ids',
+    exists_selected: true,
     persist: true,
   },
 ];
