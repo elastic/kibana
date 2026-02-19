@@ -155,6 +155,58 @@ describe('writeDocs', () => {
     expect(writePluginDocs).toHaveBeenCalled();
   });
 
+  it('writes deprecation docs once when multiple plugins are processed', async () => {
+    const secondPlugin = {
+      id: 'second-plugin',
+      directory: 'src/plugins/second',
+      isPlugin: true,
+      manifest: {
+        id: 'second-plugin',
+        owner: { name: 'second-team' },
+        serviceFolders: [],
+      },
+      manifestPath: 'src/plugins/second/kibana.json',
+    };
+
+    setupResult = {
+      ...setupResult,
+      plugins: [...setupResult.plugins, secondPlugin],
+    };
+
+    apiMapResult = {
+      ...apiMapResult,
+      pluginApiMap: {
+        ...apiMapResult.pluginApiMap,
+        'second-plugin': {
+          id: 'second-plugin',
+          client: [],
+          server: [],
+          common: [],
+        },
+      },
+    };
+
+    allPluginStats = {
+      ...allPluginStats,
+      'second-plugin': {
+        ...allPluginStats['test-plugin'],
+        owner: { name: 'second-team' },
+        description: 'Second plugin',
+      },
+    };
+
+    const options: CliOptions = {
+      collectReferences: false,
+    };
+
+    await writeDocs(context, setupResult, apiMapResult, allPluginStats, options);
+
+    expect(writePluginDocs).toHaveBeenCalledTimes(2);
+    expect(writeDeprecationDocByPlugin).toHaveBeenCalledTimes(1);
+    expect(writeDeprecationDueByTeam).toHaveBeenCalledTimes(1);
+    expect(writeDeprecationDocByApi).toHaveBeenCalledTimes(1);
+  });
+
   it('trims deleted docs from nav when initialDocIds are provided', async () => {
     const options: CliOptions = {
       collectReferences: false,
