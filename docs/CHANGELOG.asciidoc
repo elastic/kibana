@@ -134,7 +134,7 @@ For the Elastic Security 8.19.12 release information, refer to {security-guide}/
 [[fixes-v8.19.12]]
 === Fixes
 Elastic Observability solution::
-* Fixes SLO filter containing space and wildcard characters ({kibana-pull}251033[#251033]).
+* Fixes SLO filters that contain spaces and wildcard characters ({kibana-pull}251033[#251033]).
 Elastic Security solution::
 For the Elastic Security 8.19.12 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
