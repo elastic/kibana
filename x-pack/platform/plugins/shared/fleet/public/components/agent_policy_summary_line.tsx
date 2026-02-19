@@ -47,8 +47,11 @@ export const AgentPolicySummaryLine = memo<{
     const { name, id, is_managed: isManaged, description } = policy;
 
     const revision = agent ? agent.policy_revision : policy.revision;
-    const isOutdated =
-      agent?.type !== 'OPAMP' && agent?.policy_revision && policy.revision > agent.policy_revision;
+    const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
+
+    if (agent?.type === 'OPAMP') {
+      return <EuiText>-</EuiText>;
+    }
 
     return (
       <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
