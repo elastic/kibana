@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './management';
-export * as WatchlistDataSources from './data_source';
+export * from './create.gen';
+export * from './delete.gen';
+export * from './get.gen';
+export * from './list.gen';
+export * from './update.gen';
