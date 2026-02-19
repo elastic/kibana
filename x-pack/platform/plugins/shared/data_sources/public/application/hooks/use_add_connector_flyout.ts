@@ -115,7 +115,7 @@ export const useAddConnectorFlyout = ({
         loadingToastRef.current = undefined;
       }
 
-      // Show error toast with the server error message so users can act on it
+      // Show the proper error toast
       toasts.addError(new Error(error.body?.message || 'Internal Error'), {
         title: i18n.translate('xpack.dataSources.hooks.useAddConnectorFlyout.createErrorTitle', {
           defaultMessage: 'Failed to create data source {connectorName}',
