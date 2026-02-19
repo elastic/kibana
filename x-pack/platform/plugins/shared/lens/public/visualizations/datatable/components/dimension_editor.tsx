@@ -105,12 +105,10 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   let displayStops: Array<{ color: string; stop: number }>;
 
   if (showColorByTerms) {
-    // Terms coloring uses 'default' categorical palette
+    // Terms coloring uses the existing palette or the 'default' categorical palette
     activePalette = {
       type: 'palette',
-      name: 'default',
-      ...column?.palette,
-      params: { ...column?.palette?.params },
+      name: column?.palette?.name ?? 'default',
     };
     displayStops = [];
   } else {
@@ -119,6 +117,12 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     activePalette = result.palette;
     displayStops = result.displayStops;
   }
+
+  const isLegacyTermsMode =
+    showColorByTerms &&
+    !column.colorMapping &&
+    Boolean(column.palette) &&
+    !column.palette?.params?.stops?.length;
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
@@ -213,20 +217,20 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 };
 
                 if (newMode !== 'none') {
-                  if (!column?.colorMapping && showColorByTerms) {
-                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-                  }
-
-                  // also set palette for now
-                  if (!column?.palette) {
-                    params.palette = {
-                      ...activePalette,
-                      params: {
-                        ...activePalette.params,
-                        // that's ok, at first open we're going to throw them away and recompute
-                        stops: displayStops,
-                      },
-                    };
+                  if (showColorByTerms) {
+                    if (!column?.colorMapping) {
+                      params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                    }
+                  } else {
+                    if (!column?.palette) {
+                      params.palette = {
+                        ...activePalette,
+                        params: {
+                          ...activePalette.params,
+                          stops: displayStops,
+                        },
+                      };
+                    }
                   }
                 }
 
@@ -244,7 +248,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             (showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
-                colorMapping={column.colorMapping}
+                colorMapping={
+                  isLegacyTermsMode
+                    ? undefined
+                    : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
+                }
                 palette={activePalette}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
@@ -252,7 +260,10 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                   updateColumnState(accessor, { palette, colorMapping: undefined });
                 }}
                 setColorMapping={(colorMapping) => {
-                  updateColumnState(accessor, { colorMapping });
+                  updateColumnState(accessor, {
+                    colorMapping,
+                    ...(colorMapping != null ? { palette: undefined } : {}),
+                  });
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
