@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import { fetchEvents } from './fetch_events_graph';
 import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
-import type { EventEdge, RelationshipEdge } from './types';
+import type { EventEdge, RelationshipEdge, OriginEventId, EsQuery } from './types';
 
 jest.mock('./fetch_events_graph');
 jest.mock('./fetch_entity_relationships_graph');
