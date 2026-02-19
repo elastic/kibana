@@ -17,7 +17,6 @@ interface EndpointLike {
   id: string;
   methods?: string[];
   priority?: number;
-  [key: string]: unknown;
 }
 
 export class AcceptEndpointComponent extends SharedComponent {
