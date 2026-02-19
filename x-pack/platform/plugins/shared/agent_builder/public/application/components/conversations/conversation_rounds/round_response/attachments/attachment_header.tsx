@@ -20,11 +20,29 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import { AttachmentActions } from './attachment_actions';
 
+const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
+  defaultMessage: 'Preview Only',
+});
+
+const CURRENTLY_PREVIEWING_LABEL = i18n.translate(
+  'xpack.agentBuilder.attachmentHeader.currentlyPreviewing',
+  {
+    defaultMessage: "You're previewing this",
+  }
+);
+
+const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
+  defaultMessage: 'Close',
+});
+
+const HEADER_HEIGHT = 72;
+
 interface AttachmentHeaderProps {
   title: string;
   actionButtons?: ActionButton[];
   onClose?: () => void;
   showPreviewBadge?: boolean;
+  showCurrentlyPreviewingBadge?: boolean;
 }
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
@@ -32,6 +50,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   actionButtons,
   onClose,
   showPreviewBadge = false,
+  showCurrentlyPreviewingBadge = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -41,8 +60,12 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const headerStyles = css`
     position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
+    min-height: ${HEADER_HEIGHT}px;
   `;
 
   const badgeStyles = css`
@@ -61,9 +84,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
       {showPreviewBadge && (
         <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
-          {i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
-            defaultMessage: 'Preview Only',
-          })}
+          {PREVIEW_ONLY_LABEL}
         </EuiBadge>
       )}
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
@@ -72,13 +93,16 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             {title}
           </EuiText>
         </EuiFlexItem>
-        <AttachmentActions buttons={actionButtons} />
+        {showCurrentlyPreviewingBadge === false && <AttachmentActions buttons={actionButtons} />}
+        {showCurrentlyPreviewingBadge === true && (
+          <EuiBadge iconType="eye" color="success">
+            {CURRENTLY_PREVIEWING_LABEL}
+          </EuiBadge>
+        )}
         {onClose && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label={i18n.translate('xpack.agentBuilder.attachmentHeader.close', {
-                defaultMessage: 'Close',
-              })}
+              aria-label={CLOSE_BUTTON_ARIA_LABEL}
               iconType="cross"
               onClick={onClose}
               size="s"

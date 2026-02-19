@@ -29,7 +29,7 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
   isSidebar,
   conversationId,
 }) => {
-  const { openCanvas: openCanvasContext } = useCanvasContext();
+  const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
@@ -54,6 +54,10 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
     [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
   );
 
+  const isViewingAttachmentInCanvas = useMemo(() => {
+    return canvasState?.attachment.id === attachment.id;
+  }, [canvasState, attachment]);
+
   if (!uiDefinition) {
     return null;
   }
@@ -62,7 +66,11 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
 
   return (
     <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
-      <AttachmentHeader title={title} actionButtons={inlineActionButtons} />
+      <AttachmentHeader
+        title={title}
+        actionButtons={inlineActionButtons}
+        showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
+      />
       <InlineAttachmentContent>
         {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
       </InlineAttachmentContent>
