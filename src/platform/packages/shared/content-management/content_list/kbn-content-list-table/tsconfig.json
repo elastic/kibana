@@ -26,6 +26,7 @@
     "@kbn/content-list-mock-data",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/content-list-toolbar",
   ],
   "exclude": [
     "target/**/*"
