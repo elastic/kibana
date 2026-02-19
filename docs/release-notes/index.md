@@ -343,7 +343,7 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.2.6-fixes]
 
 **Alerting and cases**:
-* Rule execution fails due to null execution UUIDs [#252618]({{kib-pull}}252618).
+* Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 
 **Discover**:
 * Fixes handling of missing values [#251892]({{kib-pull}}251892).
@@ -356,9 +356,9 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 
 **Search**:
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
-* Fixes Beats tutorial authentication instructions in Serverless environments to show the correct API key-based configuration instead of unsupported `cloud.id`/`cloud.auth` instructions. [#253164]({{kib-pull}}253164).
-* Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
-* APM: improve copy of missing trace relationship [#251850]({{kib-pull}}251850).
+* Fixes Beats tutorial authentication instructions in Serverless environments to show the correct API key-based configuration instead of unsupported `cloud.id`/`cloud.auth` instructions [#253164]({{kib-pull}}253164).
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+* Improves copy for missing trace relationships in APM [#251850]({{kib-pull}}251850).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
