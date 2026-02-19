@@ -73,7 +73,7 @@ describe('FROM Autocomplete', () => {
     test('suggests Browse indices in empty source slots when enabled', async () => {
       mockCallbacks = {
         ...mockCallbacks,
-        isResourceBrowserEnabled: jest.fn().mockResolvedValue(true),
+        canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
       };
 
       const suggest = async (query: string) => {

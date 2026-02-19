@@ -71,7 +71,7 @@ describe('TS Autocomplete', () => {
     };
 
     test('suggests Browse indices in empty source slots when enabled', async () => {
-      mockCallbacks.isResourceBrowserEnabled = jest.fn().mockResolvedValue(true);
+      mockCallbacks.canSuggestResourceBrowser = jest.fn().mockResolvedValue(true);
 
       const suggestions = await suggest('TS ');
       const labels = suggestions.map((s) => s.label);
