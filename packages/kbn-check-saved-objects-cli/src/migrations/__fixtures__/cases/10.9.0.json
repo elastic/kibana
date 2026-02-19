@@ -26,9 +26,11 @@
       "duration": null,
       "external_service": null,
       "owner": "securitySolution",
-      "severity": 0,
+      "severity": 10,
       "status": 0,
-      "tags": ["fixture"],
+      "tags": [
+        "fixture"
+      ],
       "title": "Cases SO fixture",
       "total_alerts": 0,
       "total_comments": 0,
@@ -70,9 +72,11 @@
       "duration": null,
       "external_service": null,
       "owner": "securitySolution",
-      "severity": 0,
+      "severity": 10,
       "status": 0,
-      "tags": ["fixture"],
+      "tags": [
+        "fixture"
+      ],
       "title": "Cases SO fixture",
       "total_alerts": 0,
       "total_comments": 0,
