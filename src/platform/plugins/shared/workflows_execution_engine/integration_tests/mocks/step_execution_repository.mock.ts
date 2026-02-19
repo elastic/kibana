@@ -20,7 +20,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     );
   }
 
-  public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
+  public bulkCreate(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
     for (const stepExecution of stepExecutions) {
       if (!stepExecution.id) {
         throw new Error('Step execution ID is required for upsert');

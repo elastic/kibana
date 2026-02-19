@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_EXECUTION_STATE_INDEX } from './mappings';
-export { createIndexes } from './create_indexes';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import { StepExecutionRepository } from '.';
+import { initializeDataStreamClient } from './data_stream';
+
+export async function createStepExecutionRepository(
+  coreDataStreams: DataStreamsStart
+): Promise<StepExecutionRepository> {
+  const dataStream = await initializeDataStreamClient(coreDataStreams);
+  return new StepExecutionRepository(dataStream);
+}

@@ -16,8 +16,7 @@ import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { UrlValidator } from '../lib/url_validator';
 import { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
-import { StepExecutionRepository } from '../repositories/step_execution_repository/step_execution_repository';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository/workflow_execution_repository';
+import { createWorkflowExecutionRepository } from '../repositories/workflow_execution_repository/create_workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -44,8 +43,9 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const workflowExecutionRepository = await createWorkflowExecutionRepository(
+    coreStart.dataStreams
+  );
   const executionStateRepository = new ExecutionStateRepository(internalEsClient);
 
   const executions = await executionStateRepository.getExecutions(

@@ -14,7 +14,7 @@ import type { GetStepExecutions } from '../types';
 
 export function getStepExecutionsFn(
   executionStateRepository: ExecutionStateRepository,
-  stepExecutionRepository: StepExecutionRepository
+  stepExecutionRepositoryPromise: Promise<StepExecutionRepository>
 ): GetStepExecutions {
   return async (executionId: string, spaceId: string) => {
     const executionsFromState = await executionStateRepository.getExecutions(
@@ -29,7 +29,7 @@ export function getStepExecutionsFn(
       )) as Record<string, EsWorkflowStepExecution>;
     }
 
-    // TODO: use mget to get all step executions by ids
+    const stepExecutionRepository = await stepExecutionRepositoryPromise;
     const stepExecutions = await stepExecutionRepository.searchStepExecutionsByExecutionId(
       executionId
     );

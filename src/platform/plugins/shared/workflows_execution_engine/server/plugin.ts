@@ -38,8 +38,10 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository/step_execution_repository';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository/workflow_execution_repository';
+import { createStepExecutionRepository } from './repositories/step_execution_repository/create_step_execution_repository';
+import { initializeStepExecutionDataStream } from './repositories/step_execution_repository/data_stream';
+import { createWorkflowExecutionRepository } from './repositories/workflow_execution_repository/create_workflow_execution_repository';
+import { initializeWorkflowExecutionDataStream } from './repositories/workflow_execution_repository/data_stream';
 import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
@@ -96,6 +98,8 @@ export class WorkflowsExecutionEnginePlugin
     const config = this.config;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeStepExecutionDataStream(core.dataStreams);
+    initializeWorkflowExecutionDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -312,7 +316,10 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const workflowExecutionRepository = await createWorkflowExecutionRepository(
+                coreStart.dataStreams
+              );
+              const executionStateRepository = new ExecutionStateRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -327,7 +334,7 @@ export class WorkflowsExecutionEnginePlugin
                 const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
                   workflow,
                   spaceId,
-                  workflowExecutionRepository,
+                  executionStateRepository,
                   taskInstance,
                   logger
                 );
@@ -411,11 +418,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
-              // for deduplication checks by subsequent scheduled tasks
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-                refresh: 'wait_for',
-              });
+              await executionStateRepository.bulkUpsert(workflowExecution);
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -466,16 +469,11 @@ export class WorkflowsExecutionEnginePlugin
     const executionStateRepository = new ExecutionStateRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
+    const workflowExecutionRepositoryPromise = createWorkflowExecutionRepository(
+      coreStart.dataStreams
     );
-    const stepExecutionRepository = new StepExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
-    this.concurrencyManager = new ConcurrencyManager(
-      workflowTaskManager,
-      workflowExecutionRepository
-    );
+    const stepExecutionRepositoryPromise = createStepExecutionRepository(coreStart.dataStreams);
+    this.concurrencyManager = new ConcurrencyManager(workflowTaskManager, executionStateRepository);
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -685,6 +683,7 @@ export class WorkflowsExecutionEnginePlugin
         triggeredBy,
       };
 
+      const workflowExecutionRepository = await workflowExecutionRepositoryPromise;
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       const taskInstance = {
@@ -768,12 +767,15 @@ export class WorkflowsExecutionEnginePlugin
       cancelWorkflowExecution,
       getWorkflowExecution: getWorkflowExecutionFn(
         executionStateRepository,
-        workflowExecutionRepository
+        workflowExecutionRepositoryPromise
       ),
       searchWorkflowExecutions: searchWorkflowExecutionsFn(
         coreStart.elasticsearch.client.asInternalUser
       ),
-      getStepExecutions: getStepExecutionsFn(executionStateRepository, stepExecutionRepository),
+      getStepExecutions: getStepExecutionsFn(
+        executionStateRepository,
+        stepExecutionRepositoryPromise
+      ),
     };
   }
 

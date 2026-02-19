@@ -65,6 +65,40 @@ export class ExecutionStateRepository {
     return response._source || null;
   }
 
+  public async bulkCreate(executions: Array<Partial<EsExecution>>): Promise<void> {
+    if (executions.length === 0) {
+      return;
+    }
+
+    executions.forEach((execution) => {
+      if (!execution.id) {
+        throw new Error('Execution ID is required for upsert');
+      }
+    });
+
+    const bulkResponse = await this.esClient.bulk({
+      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
+      index: this.indexName,
+      body: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+    });
+
+    if (bulkResponse.errors) {
+      const erroredDocuments = bulkResponse.items
+        .filter((item) => item.update?.error)
+        .map((item) => ({
+          id: item.update?._id,
+          error: item.update?.error,
+          status: item.update?.status,
+        }));
+
+      throw new Error(
+        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
+          erroredDocuments
+        )}`
+      );
+    }
+  }
+
   public async bulkUpsert(executions: Array<Partial<EsExecution>>): Promise<void> {
     if (executions.length === 0) {
       return;

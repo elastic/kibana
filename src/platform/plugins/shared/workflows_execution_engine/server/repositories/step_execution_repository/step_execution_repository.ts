@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import type { StepExecutionDataStreamClient } from './data_stream';
 
 export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
-
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private readonly dataStreamClient: StepExecutionDataStreamClient) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -25,16 +22,15 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
-      index: this.indexName,
+    const response = await this.dataStreamClient.search({
       query: {
         match: { workflowRunId: executionId },
       },
-      sort: 'startedAt:desc',
-      size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
+      sort: [{ startedAt: { order: 'desc' } }],
+      size: 10000,
     });
 
-    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+    return response.hits.hits.map((hit) => hit._source as unknown as EsWorkflowStepExecution);
   }
 
   public async bulkCreate(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
@@ -42,28 +38,8 @@ export class StepExecutionRepository {
       return;
     }
 
-    const bulkResponse = await this.esClient.bulk({
-      index: this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { index: { _id: stepExecution.id } },
-        stepExecution,
-      ]),
+    await this.dataStreamClient.create({
+      documents: stepExecutions as Array<Record<string, unknown>>,
     });
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
-      throw new Error(
-        `Failed to create ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
   }
 }

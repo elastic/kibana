@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_EXECUTION_STATE_INDEX } from './mappings';
-export { createIndexes } from './create_indexes';
+export const WORKFLOWS_EXECUTIONS_DATA_STREAM = '.workflows-execution-data-stream-executions';

@@ -11,8 +11,6 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 export const WORKFLOWS_EXECUTION_STATE_INDEX = '.workflows-execution-state';
 
 export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
@@ -41,95 +39,6 @@ export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     createdAt: {
       type: 'date',
-    },
-  },
-};
-
-export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  properties: {
-    spaceId: {
-      type: 'keyword',
-    },
-    id: {
-      type: 'keyword',
-    },
-    workflowId: {
-      type: 'keyword',
-    },
-    status: {
-      type: 'keyword',
-    },
-    workflowDefinition: {
-      type: 'object',
-      enabled: false,
-    },
-    createdAt: {
-      type: 'date',
-    },
-    isTestRun: {
-      type: 'boolean',
-    },
-    createdBy: {
-      type: 'keyword',
-    },
-    executedBy: {
-      type: 'keyword',
-    },
-    startedAt: {
-      type: 'date',
-    },
-    finishedAt: {
-      type: 'date',
-    },
-    duration: {
-      type: 'long',
-    },
-    triggeredBy: {
-      type: 'keyword',
-    },
-    concurrencyGroupKey: {
-      type: 'keyword',
-    },
-    type: {
-      type: 'keyword',
-    },
-  },
-};
-
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  properties: {
-    spaceId: {
-      type: 'keyword',
-    },
-    id: {
-      type: 'keyword',
-    },
-    stepId: {
-      type: 'keyword',
-    },
-    workflowRunId: {
-      type: 'keyword',
-    },
-    workflowId: {
-      type: 'keyword',
-    },
-    status: {
-      type: 'keyword',
-    },
-    startedAt: {
-      type: 'date',
-    },
-    finishedAt: {
-      type: 'date',
-    },
-    duration: {
-      // milliseconds
-      type: 'long',
-    },
-    type: {
-      type: 'keyword',
     },
   },
 };

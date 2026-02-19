@@ -10,7 +10,8 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows/types/latest';
-import { WORKFLOWS_EXECUTION_STATE_INDEX, WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../common/mappings';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../repositories/workflow_execution_repository/constants';
 import type { SearchWorkflowExecutions } from '../types';
 
 export function searchWorkflowExecutionsFn(
@@ -38,7 +39,7 @@ export function searchWorkflowExecutionsFn(
     };
 
     const response = await esClient.search({
-      index: [WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_STATE_INDEX],
+      index: [WORKFLOWS_EXECUTIONS_DATA_STREAM, WORKFLOWS_EXECUTION_STATE_INDEX],
       query: modifiedQuery,
       sort,
       size,

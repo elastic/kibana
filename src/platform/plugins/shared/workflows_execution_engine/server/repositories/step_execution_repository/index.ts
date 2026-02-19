@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_EXECUTION_STATE_INDEX } from './mappings';
-export { createIndexes } from './create_indexes';
+export { StepExecutionRepository } from './step_execution_repository';
+export { createStepExecutionRepository } from './create_step_execution_repository';
+export { initializeStepExecutionDataStream } from './data_stream';

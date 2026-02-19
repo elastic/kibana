@@ -14,7 +14,7 @@ import type { GetWorkflowExecution } from '../types';
 
 export function getWorkflowExecutionFn(
   executionStateRepository: ExecutionStateRepository,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepositoryPromise: Promise<WorkflowExecutionRepository>
 ): GetWorkflowExecution {
   return async (executionId: string, spaceId: string) => {
     const executionsFromState = await executionStateRepository.getExecutions(
@@ -26,6 +26,7 @@ export function getWorkflowExecutionFn(
       return executionsFromState[executionId] as EsWorkflowExecution;
     }
 
+    const workflowExecutionRepository = await workflowExecutionRepositoryPromise;
     const executionFromRepository = await workflowExecutionRepository.getWorkflowExecutionById(
       executionId,
       spaceId
