@@ -24,8 +24,8 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
+import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
 const querySchema = schema.object({
   code: schema.maybe(
@@ -404,7 +404,15 @@ export const oauthCallbackRoute = (
             }),
           });
         }
-        const username = currentUser.username;
+
+        const { username, profile_uid: profileUid } = currentUser;
+
+        if (!profileUid) {
+          return respondWithError(res, {
+            details: 'Unable to retrieve Kibana user profile ID.',
+          });
+        }
+
         oauthRateLimiter.log(username, 'callback');
         if (oauthRateLimiter.isRateLimited(username, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);
@@ -432,7 +440,7 @@ export const oauthCallbackRoute = (
           }),
           logger: routeLogger,
         });
-        const oauthState = await oauthStateClient.get(stateParam);
+        const oauthState = await oauthStateClient.get(stateParam, profileUid);
         if (!oauthState) {
           return respondWithError(res, {
             details:
@@ -476,6 +484,7 @@ export const oauthCallbackRoute = (
           const clientSecret = secrets.clientSecret;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
           const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
+
           if (!clientId || !clientSecret || !tokenUrl) {
             throw new Error(
               'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
@@ -503,27 +512,30 @@ export const oauthCallbackRoute = (
             `Successfully exchanged authorization code for access token for connectorId: ${stateConnectorId}`
           );
 
-          const connectorTokenClient = new ConnectorTokenClient({
+          const userConnectorTokenClient = new UserConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+              includedHiddenTypes: ['user_connector_token'],
             }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+              includedHiddenTypes: ['user_connector_token'],
             }),
             logger: routeLogger,
           });
-          await connectorTokenClient.deleteConnectorTokens({
+
+          await userConnectorTokenClient.deleteConnectorTokens({
             connectorId: stateConnectorId,
             tokenType: 'access_token',
+            profileUid,
           });
           const formattedToken = `${capitalize(tokenResult.tokenType)} ${tokenResult.accessToken}`;
-          await connectorTokenClient.createWithRefreshToken({
+          await userConnectorTokenClient.createWithRefreshToken({
             connectorId: stateConnectorId,
             accessToken: formattedToken,
             refreshToken: tokenResult.refreshToken,
             expiresIn: tokenResult.expiresIn,
             refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
             tokenType: 'access_token',
+            profileUid,
           });
 
           await oauthStateClient.delete(oauthState.id);

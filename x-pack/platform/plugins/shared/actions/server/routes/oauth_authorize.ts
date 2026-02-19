@@ -59,9 +59,16 @@ export const oauthAuthorizeRoute = (
           // Check rate limit
           const currentUser = core.security.authc.getCurrentUser();
           if (!currentUser) {
-            throw new Error('User should be authenticated to initiate OAuth authorization.');
+            return res.unauthorized({
+              body: {
+                message: 'User should be authenticated to initiate OAuth authorization.',
+              },
+            });
           }
-          const username = currentUser.username;
+          const { username, profile_uid } = currentUser;
+          if (!profile_uid) {
+            throw new Error('Unable to retrieve Kibana user profile ID.');
+          }
           oauthRateLimiter.log(username, 'authorize');
           if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
             routeLogger.warn(
@@ -136,6 +143,7 @@ export const oauthAuthorizeRoute = (
             connectorId,
             kibanaReturnUrl,
             spaceId,
+            createdBy: profile_uid,
           });
 
           const authorizationUrl = oauthService.buildAuthorizationUrl({
