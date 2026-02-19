@@ -126,7 +126,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'servicesItems',
     async ({ request, environment, kuery, start, end, searchQuery }) => {
-      const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
+      const { apmEventClient, randomSamplerSeed, mlClient, apmAlertsClient } =
         await buildApmToolResources({
           core,
           plugins,
@@ -140,7 +140,7 @@ export function registerDataProviders({
       return getServicesItems({
         apmEventClient,
         apmAlertsClient,
-        randomSampler,
+        randomSampler: { seed: randomSamplerSeed, probability: 1 },
         mlClient,
         logger,
         environment: environment ?? ENVIRONMENT_ALL.value,
@@ -240,7 +240,7 @@ export function registerDataProviders({
   observabilityAgentBuilder.registerDataProvider(
     'apmConnectionStats',
     async ({ request, start, end, filter }) => {
-      const { apmEventClient, randomSampler } = await buildApmToolResources({
+      const { apmEventClient, randomSamplerSeed } = await buildApmToolResources({
         core,
         plugins,
         request,
@@ -253,7 +253,11 @@ export function registerDataProviders({
         end,
         filter,
         collapseBy: 'downstream',
-        randomSampler,
+
+        // getDestinationMap (called by getConnectionStats) computes its own dynamic
+        // probability internally. probability: 1 here is only used as a fallback
+        // for small datasets (<20M docs) where sampling is unnecessary.
+        randomSampler: { seed: randomSamplerSeed, probability: 1 },
         numBuckets: 1, // not used when withTimeseries: false, but required param
         withTimeseries: false,
       });
