@@ -160,10 +160,8 @@ export class WorkflowsMeteringService {
         const response = await this.usageReportingService.reportUsage([record]);
 
         if (response.ok) {
-          this.logger.info(
-            `[Workflows] Successfully reported metering for execution ${record.id} (attempt ${
-              attempt + 1
-            })`
+          this.logger.debug(
+            `Successfully reported metering for execution ${record.id} (attempt ${attempt + 1})`
           );
           return;
         }

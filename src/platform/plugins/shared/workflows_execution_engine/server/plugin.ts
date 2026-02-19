@@ -102,28 +102,15 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize metering from the centralized Usage API plugin
     const usageApiConfig = plugins.usageApi?.config;
-    const projectId = plugins.cloud?.serverless?.projectId;
-    const deploymentId = plugins.cloud?.deploymentId;
-
-    this.logger.info(
-      `Workflows metering config: ` +
-        `usageApiPlugin=${plugins.usageApi ? 'present' : 'missing'}, ` +
-        `enabled=${usageApiConfig?.enabled ?? 'N/A'}, ` +
-        `url=${usageApiConfig?.url ? 'configured' : 'not configured'}, ` +
-        `tls=${usageApiConfig?.tls ? 'configured' : 'not configured'}, ` +
-        `projectId=${projectId ?? 'none'}, ` +
-        `deploymentId=${deploymentId ?? 'none'}`
-    );
-
     if (usageApiConfig?.enabled && usageApiConfig.url) {
       const usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
       this.meteringService = new WorkflowsMeteringService(
         usageReportingService,
         this.logger.get('metering')
       );
-      this.logger.info('Workflows metering service initialized');
+      this.logger.debug('Workflows metering service initialized');
     } else {
-      this.logger.info(
+      this.logger.debug(
         'Workflows metering service not initialized: Usage API plugin is not available or not configured'
       );
     }
