@@ -67,7 +67,7 @@ export class WorkflowListPage {
       '[data-test-subj="euiCollapsedItemActionsButton"]'
     );
     // eslint-disable-next-line playwright/no-nth-methods
-    buttons.nth(index).click();
+    await buttons.nth(index).click();
     return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
   }
 
