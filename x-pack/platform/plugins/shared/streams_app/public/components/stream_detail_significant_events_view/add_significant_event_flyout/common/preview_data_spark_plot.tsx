@@ -16,12 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-  type StreamQuery,
-  type Streams,
-} from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -94,11 +89,11 @@ export function PreviewDataSparkPlot({
       id: DISCOVER_APP_LOCATOR,
       params: {
         query: {
-          esql: isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : '',
+          esql: isQueryValid ? query.esql.query : '',
         },
       },
     }),
-    [definition, query, isQueryValid]
+    [query, isQueryValid]
   );
 
   function renderContent() {
@@ -124,12 +119,12 @@ export function PreviewDataSparkPlot({
 
     if (previewFetch.error) {
       if (compressed) {
-        return <EuiIcon type="cross" color="danger" size="l" />;
+        return <EuiIcon type="cross" color="danger" size="l" aria-hidden={true} />;
       }
 
       return (
         <>
-          <EuiIcon type="cross" color="danger" size="xl" />
+          <EuiIcon type="cross" color="danger" size="xl" aria-hidden={true} />
           <EuiText size="s" textAlign="center">
             {i18n.translate(
               'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartError',
@@ -144,7 +139,9 @@ export function PreviewDataSparkPlot({
 
     if (noOccurrencesFound) {
       if (compressed) {
-        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+        return (
+          <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
+        );
       }
 
       return (

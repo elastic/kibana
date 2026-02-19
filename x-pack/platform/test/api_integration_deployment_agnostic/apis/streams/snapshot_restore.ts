@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
@@ -174,7 +174,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'slow-requests',
               title: 'Slow Requests',
               kql: { query: 'attributes.response_time_ms > 100' },
-              esql: { where: 'KQL("attributes.response_time_ms > 100")' },
+              esql: {
+                query:
+                  'FROM logs.web-app,logs.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
+              },
             },
           ],
         };

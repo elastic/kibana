@@ -16,7 +16,7 @@ export function defaultQuery(): StreamQuery {
       query: '',
     },
     esql: {
-      where: '',
+      query: '',
     },
     feature: undefined,
   };

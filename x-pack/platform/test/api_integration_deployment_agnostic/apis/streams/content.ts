@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
@@ -75,7 +75,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'my-error-query',
               title: 'error query',
               kql: { query: 'message: ERROR' },
-              esql: { where: 'KQL("message: ERROR")' },
+              esql: {
+                query:
+                  'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+              },
             },
           ],
         })
@@ -258,7 +261,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: 'my-error-query',
             title: 'error query',
             kql: { query: 'message: ERROR' },
-            esql: { where: 'KQL("message: ERROR")' },
+            esql: {
+              query:
+                'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -503,7 +509,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: 'my-error-query',
             title: 'error query',
             kql: { query: 'message: ERROR' },
-            esql: { where: 'KQL("message: ERROR")' },
+            esql: {
+              query:
+                'FROM logs.branch_c.nested,logs.branch_c.nested.* | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -759,7 +768,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     id: 'my-error-query',
                     title: 'error query',
                     kql: { query: 'message: ERROR' },
-                    esql: { where: 'KQL("message: ERROR")' },
+                    esql: {
+                      query:
+                        'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+                    },
                   },
                 ],
               },

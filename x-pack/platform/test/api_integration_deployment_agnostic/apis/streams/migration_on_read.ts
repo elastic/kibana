@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { Streams } from '@kbn/streams-schema';
 import {
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
@@ -208,7 +208,9 @@ const expectedQueriesResponse = {
       id: '12345',
       title: 'Test',
       kql: { query: 'atest' },
-      esql: { where: 'KQL("atest")' },
+      esql: {
+        query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* | WHERE KQL("atest")`,
+      },
     },
   ],
 };

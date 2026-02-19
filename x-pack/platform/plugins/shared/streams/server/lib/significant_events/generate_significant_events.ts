@@ -8,7 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import {
-  buildEsqlWhereCondition,
+  buildEsqlQuery,
+  getIndexPatternsForStream,
   type GeneratedSignificantEventQuery,
   type Streams,
   type System,
@@ -77,7 +78,12 @@ export async function generateSignificantEventDefinitions(
       title: query.title,
       kql: query.kql,
       feature,
-      esql: { where: buildEsqlWhereCondition({ kql: { query: query.kql }, feature }) },
+      esql: {
+        query: buildEsqlQuery(getIndexPatternsForStream(definition), {
+          kql: { query: query.kql },
+          feature,
+        }),
+      },
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),

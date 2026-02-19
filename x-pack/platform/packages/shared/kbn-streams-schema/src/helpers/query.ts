@@ -6,33 +6,12 @@
  */
 
 import { conditionToESQLAst } from '@kbn/streamlang';
-import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
-import type { ESQLCommand } from '@kbn/esql-language';
-import type { StreamQuery } from '../queries';
-
-/**
- * Builds the WHERE condition for a StreamQuery as an ESQL expression string.
- * Combines the KQL query with the feature filter (if present) using AND.
- *
- * @example
- * // Returns: 'KQL("message: error") AND `system.name` == "auth"'
- * buildEsqlWhereCondition({ kql: { query: 'message: error' }, feature: { filter: { field: 'system.name', eq: 'auth' } } })
- */
-export const buildEsqlWhereCondition = (query: Pick<StreamQuery, 'kql' | 'feature'>): string => {
-  const kqlQuery = Builder.expression.func.call('KQL', [
-    Builder.expression.literal.string(query.kql.query),
-  ]);
-
-  const whereConditionAst = query.feature?.filter
-    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
-    : kqlQuery;
-
-  return BasicPrettyPrinter.expression(whereConditionAst);
-};
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import type { StreamQueryInput } from '../queries';
 
 export const buildEsqlQuery = (
   indices: string[],
-  query: StreamQuery,
+  input: Pick<StreamQueryInput, 'kql' | 'feature'>,
   includeMetadata: boolean = false
 ): string => {
   const fromCommand = Builder.command({
@@ -57,16 +36,20 @@ export const buildEsqlQuery = (
     ],
   });
 
-  const commands: ESQLCommand[] = [fromCommand];
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(input.kql.query),
+  ]);
 
-  commands.push(
-    Builder.command({
-      name: 'where',
-      args: [Parser.parseExpression(query.esql.where).root],
-    })
-  );
+  const whereCondition = input.feature?.filter
+    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(input.feature.filter)])
+    : kqlQuery;
 
-  const esqlQuery = Builder.expression.query(commands);
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: [whereCondition],
+  });
+
+  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
 
   return BasicPrettyPrinter.print(esqlQuery);
 };

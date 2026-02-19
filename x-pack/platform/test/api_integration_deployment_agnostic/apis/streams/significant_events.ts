@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
@@ -83,7 +83,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'aaa',
               title: 'OOM Error',
               kql: { query: "message: 'OOM Error'" },
-              esql: { where: 'KQL("message: \'OOM Error\'")' },
+              esql: {
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
+              },
             },
           ],
         });
@@ -95,7 +97,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'aaa',
           title: 'OOM Error',
           kql: { query: "message: 'OOM Error'" },
-          esql: { where: 'KQL("message: \'OOM Error\'")' },
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
+          },
         });
       });
 
@@ -125,7 +129,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.query1',
               title: 'should not be deleted',
               kql: { query: 'message:"irrelevant"' },
-              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
+              esql: {
+                query:
+                  'FROM logs.queries-test,logs.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
+              },
             },
           ],
         });
@@ -165,7 +172,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.child.query1',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
-              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
+              esql: {
+                query:
+                  'FROM logs.queries-test.child,logs.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
+              },
             },
           ],
         });
@@ -179,13 +189,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.child.first.query1',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
-              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
+              esql: {
+                query:
+                  'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
+              },
             },
             {
               id: 'logs.queries-test.child.first.query2',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
-              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
+              esql: {
+                query:
+                  'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
+              },
             },
           ],
         });
@@ -260,7 +276,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'aaa',
               title: 'OOM Error',
               kql: { query: "message: 'OOM Error'" },
-              esql: { where: 'KQL("message: \'OOM Error\'")' },
+              esql: {
+                query: `FROM ${indexName},${indexName}.* | WHERE KQL("message: 'OOM Error'")`,
+              },
             },
           ],
         });
@@ -272,7 +290,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'aaa',
           title: 'OOM Error',
           kql: { query: "message: 'OOM Error'" },
-          esql: { where: 'KQL("message: \'OOM Error\'")' },
+          esql: {
+            query: `FROM ${indexName},${indexName}.* | WHERE KQL("message: 'OOM Error'")`,
+          },
         });
 
         await clean();

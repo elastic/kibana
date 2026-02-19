@@ -19,7 +19,7 @@ interface StreamQueryBase {
 
 export interface StreamQuery extends StreamQueryBase {
   /**
-   * @deprecated Use esql.where instead. Will be removed in a future version.
+   * @deprecated Use esql.query instead. Will be removed in a future version.
    */
   feature?: {
     name: string;
@@ -27,17 +27,17 @@ export interface StreamQuery extends StreamQueryBase {
     type: 'system';
   };
   /**
-   * @deprecated Use esql.where instead. Will be removed in a future version.
+   * @deprecated Use esql.query instead. Will be removed in a future version.
    */
   kql: {
     query: string;
   };
   /**
-   * ESQL-based query condition. Contains the WHERE clause condition
-   * that combines the KQL query with the feature filter.
+   * Full ES|QL query built from the stream indices, KQL query, and feature filter.
+   * Example: FROM stream,stream.* | WHERE KQL("message: error")
    */
   esql: {
-    where: string;
+    query: string;
   };
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
@@ -73,11 +73,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryInputSchema,
   z.object({
     esql: z.object({
-      where: z
-        .string()
-        .describe(
-          'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
-        ),
+      query: z.string().describe('Full ES|QL query.'),
     }),
   })
 );

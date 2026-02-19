@@ -64,7 +64,7 @@ interface GeneratedSignificantEventQuery {
     type: 'system';
   };
   esql: {
-    where: string;
+    query: string;
   };
   severity_score: number;
   evidence?: string[];

@@ -139,7 +139,7 @@ export function AddSignificantEventFlyout({
             id: v4(),
             kql: { query: nextQuery.kql },
             esql: {
-              where: nextQuery.esql.where,
+              query: nextQuery.esql.query,
             },
             title: nextQuery.title,
             feature: nextQuery.feature,
