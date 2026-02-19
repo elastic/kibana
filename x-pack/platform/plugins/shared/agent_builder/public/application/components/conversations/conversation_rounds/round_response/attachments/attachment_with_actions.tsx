@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import { EuiButton } from '@elastic/eui';
+import { EuiSplitPanel } from '@elastic/eui';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { AttachmentsService } from '../../../../../services/attachments/attachements_service';
-import { useKibana } from '../../../../hooks/use_kibana';
+import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { CanvasModeFlyout } from './canvas_mode_flyout';
+import { InlineAttachmentHeader } from './inline_attachment_header';
+import { InlineAttachmentContent } from './inline_attachment_content';
 
 interface AttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -47,34 +49,43 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
     setIsCanvasFlyoutOpen(false);
   }, []);
 
+  const updateOrigin = useCallback(async (originId: string) => {
+    // TODO: Implement updateOrigin
+    //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
+  }, []);
+
+  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+
+  const actionButtons = useMemo(
+    () =>
+      uiDefinition?.getActionButtons?.({
+        attachment,
+        isSidebar,
+        updateOrigin,
+        openCanvas,
+      }),
+    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
+  );
+
   if (isExperimentalFeaturesEnabled === false) {
     return null;
   }
-
-  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   if (!uiDefinition) {
     return null;
   }
 
-  const actionButtons = uiDefinition.getActionButtons?.({
-    attachment,
-    isSidebar,
-    updateOrigin: async (originId: string) => {
-      // TODO: Implement updateOrigin
-      //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
-    },
-    openCanvas,
-  });
-
   return (
     <>
-      {actionButtons?.map((button) => (
-        <EuiButton key={button.label} onClick={button.handler}>
-          {button.label}
-        </EuiButton>
-      ))}
-      {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+      <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+        <InlineAttachmentHeader
+          label={attachment.type.toUpperCase()}
+          actionButtons={actionButtons}
+        />
+        <InlineAttachmentContent>
+          {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+        </InlineAttachmentContent>
+      </EuiSplitPanel.Outer>
       {isCanvasFlyoutOpen && uiDefinition?.renderCanvasContent && (
         <CanvasModeFlyout
           isOpen={isCanvasFlyoutOpen}
