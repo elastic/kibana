@@ -54,7 +54,7 @@ const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
  *
  * @see src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts
  */
-describe('CPS project_routing on serverless ES', () => {
+describe('project_routing on serverless CPS', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let client: ElasticsearchClient;
