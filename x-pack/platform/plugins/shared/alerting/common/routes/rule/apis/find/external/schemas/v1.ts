@@ -11,7 +11,7 @@ import { ruleResponseSchemaV1 } from '../../../../response';
 
 export const findRuleParamsExamples = () => path.join(__dirname, 'examples_find_rules.yaml');
 
-const unsupportedFields = ['monitoring', 'mapped_params', 'snoozeSchedule', 'activeSnoozes'];
+const UNSUPPORTED_FIELDS = ['monitoring', 'mapped_params', 'snoozeSchedule', 'activeSnoozes'];
 
 export const findRulesRequestQuerySchema = schema.object({
   per_page: schema.number({
@@ -127,7 +127,7 @@ export const findRulesResponseSchema = schema.object({
 });
 
 const validateUnsupportedFields = (
-  value?: string | string[],
+  value: string | string[] | undefined,
   getErrorMessage: (field: string) => string
 ) => {
   const includesInValue = (val: string, search: string) => {
@@ -141,7 +141,7 @@ const validateUnsupportedFields = (
   const valueArray = Array.isArray(value) ? value : [value];
 
   const unsupportedFieldValue = valueArray.find((field) =>
-    unsupportedFields.some((unsupportedField) => includesInValue(field, unsupportedField))
+    UNSUPPORTED_FIELDS.some((unsupportedField) => includesInValue(field, unsupportedField))
   );
 
   return unsupportedFieldValue ? getErrorMessage(unsupportedFieldValue) : undefined;

@@ -14,7 +14,6 @@ import type {
 import type { FindResult } from '../../../../../../../application/rule/methods/find';
 import {
   transformRuleActionsV1,
-  transformMonitoringV1,
   transformRuleLastRunV1,
   transformFlappingV1,
 } from '../../../../../transforms';
@@ -38,7 +37,6 @@ export const transformPartialRule = (
       ? { actions: transformRuleActionsV1(rule.actions || [], rule.systemActions || []) }
       : {}),
     ...(rule.params ? { params: rule.params } : {}),
-    ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
     ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
     ...(rule.createdBy !== undefined ? { created_by: rule.createdBy } : {}),
     ...(rule.updatedBy !== undefined ? { updated_by: rule.updatedBy } : {}),
@@ -66,21 +64,12 @@ export const transformPartialRule = (
           },
         }
       : {}),
-    ...(rule.monitoring ? { monitoring: transformMonitoringV1(rule.monitoring) } : {}),
-    ...(!isEmpty(rule.snoozeSchedule) ? { snooze_schedule: rule.snoozeSchedule } : {}),
-    ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
-    ...(rule.isSnoozedUntil !== undefined
-      ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
-      : {}),
     ...(rule.lastRun !== undefined
       ? { last_run: rule.lastRun ? transformRuleLastRunV1(rule.lastRun) : null }
       : {}),
     ...(rule.nextRun !== undefined ? { next_run: rule.nextRun?.toISOString() || null } : {}),
     ...(rule.revision !== undefined ? { revision: rule.revision } : {}),
     ...(rule.running !== undefined ? { running: rule.running } : {}),
-    ...(rule.viewInAppRelativeUrl !== undefined
-      ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
-      : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
     ...(areArtifactsEmpty(rule.artifacts) ? { artifacts: rule.artifacts } : {}),

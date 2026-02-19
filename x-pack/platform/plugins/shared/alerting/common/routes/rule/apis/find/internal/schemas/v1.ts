@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { stringOrStringArraySchema } from '../../../../../../schemas';
-import { ruleResponseSchemaV1 } from '../../../../response';
+import { ruleResponseInternalSchema } from '../../../../response/schemas/v1';
 
 export const findRulesInternalRequestBodySchema = schema.object({
   per_page: schema.number({
@@ -40,7 +40,7 @@ export const findRulesInternalRequestBodySchema = schema.object({
   consumers: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-const findRulesInternalResponseDataSchema = schema.arrayOf(ruleResponseSchemaV1.extends({}));
+const findRulesInternalResponseDataSchema = schema.arrayOf(ruleResponseInternalSchema);
 
 export const findRulesInternalResponseSchema = schema.object({
   page: schema.number(),
