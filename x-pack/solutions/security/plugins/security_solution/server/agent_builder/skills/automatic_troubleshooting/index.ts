@@ -74,7 +74,7 @@ Reference './available_indices' for the list of indices available for troublesho
         content: JSON.stringify(AVAILABLE_INDICES, null, 2),
       },
     ],
-    getAllowedTools: () => [
+    getRegistryTools: () => [
       platformCoreTools.search,
       platformCoreTools.getDocumentById,
       platformCoreTools.integrationKnowledge,
