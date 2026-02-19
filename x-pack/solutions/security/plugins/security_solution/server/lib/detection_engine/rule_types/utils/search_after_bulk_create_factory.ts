@@ -230,9 +230,7 @@ export const searchAfterAndBulkCreateFactory = async ({
         ]);
       }
     }
-    ruleExecutionLogger.debug(
-      `Completed bulk indexing. Alerts created: ${toReturn.createdSignalsCount}.`
-    );
+    ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);
 
     if (isLoggedRequestsEnabled) {
       toReturn.loggedRequests = loggedRequests;
