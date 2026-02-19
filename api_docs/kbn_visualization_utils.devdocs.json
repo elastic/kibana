@@ -204,7 +204,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; }; title: string; version: 1; }"
+          "[]; }; title: string; version: 2; }"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
         "lineNumber": 15,

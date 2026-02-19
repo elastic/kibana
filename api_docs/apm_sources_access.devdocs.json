@@ -87,7 +87,7 @@
           },
           "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
           "APMSourcesRouteHandlerResources",
-          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }, T>>"
+          ", Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>, {}>; }, T>>"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
         "lineNumber": 16,
@@ -220,7 +220,7 @@
           "\nSchema for APM indices"
         ],
         "signature": [
-          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+          "{ readonly error: string; readonly metric: string; readonly transaction: string; readonly span: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
         "lineNumber": 32,
@@ -249,7 +249,7 @@
           "section": "def-public.SourcesApiOptions",
           "text": "SourcesApiOptions"
         },
-        ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+        ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
         {
           "pluginId": "apmSourcesAccess",
           "scope": "public",
@@ -267,7 +267,7 @@
           "section": "def-public.SourcesApiOptions",
           "text": "SourcesApiOptions"
         },
-        " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+        " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
         "SavedObject",
         "<{}>>; }"
       ],
@@ -364,7 +364,7 @@
           },
           "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
           "APMSourcesRouteHandlerResources",
-          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
+          ", Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -480,7 +480,7 @@
           },
           "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
           "APMSourcesRouteHandlerResources",
-          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
+          ", Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -564,7 +564,7 @@
           "\nSchema for APM indices"
         ],
         "signature": [
-          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+          "{ readonly error: string; readonly metric: string; readonly transaction: string; readonly span: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
         "lineNumber": 32,
@@ -583,7 +583,7 @@
           "\nSchema for APM Sources configuration"
         ],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
+          "{ readonly indices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
         "lineNumber": 28,
@@ -650,7 +650,7 @@
           },
           "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
           "APMSourcesRouteHandlerResources",
-          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }"
+          ", Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>, {}>; }"
         ],
         "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
         "lineNumber": 25,
@@ -754,7 +754,7 @@
         "\nAPM Source setup services"
       ],
       "signature": [
-        "{ apmIndicesFromConfigFile: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; getApmIndices: (savedObjectsClient: ",
+        "{ apmIndicesFromConfigFile: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>; getApmIndices: (savedObjectsClient: ",
         "SavedObjectsClientContract",
         ") => Promise<{ error: string; onboarding: string; span: string; transaction: string; metric: string; sourcemap: string; }>; }"
       ],

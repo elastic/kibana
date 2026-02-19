@@ -135,7 +135,7 @@
           "<TPluginsStart, TStart>"
         ],
         "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -169,7 +169,7 @@
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -187,7 +187,7 @@
               "CapabilitiesSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -205,7 +205,7 @@
               "CustomBrandingSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -223,7 +223,7 @@
               "DocLinksServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -241,7 +241,7 @@
               "ElasticsearchServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -259,7 +259,7 @@
               "ExecutionContextSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +277,7 @@
               "FeatureFlagsSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -300,7 +300,7 @@
               "; }"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -318,7 +318,7 @@
               "I18nServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,7 +336,7 @@
               "LoggingServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -354,7 +354,7 @@
               "MetricsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -372,7 +372,7 @@
               "SavedObjectsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -390,7 +390,7 @@
               "StatusServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -408,7 +408,7 @@
               "UiSettingsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -426,7 +426,7 @@
               "UserSettingsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -444,7 +444,25 @@
               "DeprecationsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.userActivity",
+            "type": "Object",
+            "tags": [],
+            "label": "userActivity",
+            "description": [
+              "{@link UserActivityServiceSetup}"
+            ],
+            "signature": [
+              "UserActivityServiceSetup"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -464,7 +482,7 @@
               ", TPluginsStart, TStart]>"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 85,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -488,7 +506,7 @@
               ">"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 87,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -506,7 +524,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-                "lineNumber": 119,
+                "lineNumber": 122,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -526,7 +544,7 @@
               "PluginsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 91,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +562,7 @@
               "PricingServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 93,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -562,7 +580,7 @@
               "SecurityServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 95,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -580,7 +598,7 @@
               "UserProfileServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 97,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -598,7 +616,7 @@
               "CoreDiServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 99,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -616,7 +634,7 @@
               "DataStreamsSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-            "lineNumber": 101,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -634,7 +652,7 @@
           "\nContext passed to the plugins `start` method.\n"
         ],
         "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -658,7 +676,7 @@
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -676,7 +694,7 @@
               "CapabilitiesStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -694,7 +712,7 @@
               "CustomBrandingStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -712,7 +730,7 @@
               "DocLinksServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -730,7 +748,7 @@
               "ElasticsearchServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -748,7 +766,7 @@
               "ExecutionContextSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -766,7 +784,7 @@
               "FeatureFlagsStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -784,7 +802,7 @@
               "HttpServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -802,7 +820,7 @@
               "MetricsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -820,7 +838,7 @@
               "SavedObjectsServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -838,7 +856,25 @@
               "UiSettingsServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.userActivity",
+            "type": "Object",
+            "tags": [],
+            "label": "userActivity",
+            "description": [
+              "{@link UserActivityServiceStart}"
+            ],
+            "signature": [
+              "UserActivityServiceStart"
+            ],
+            "path": "src/core/packages/lifecycle/server/src/core_start.ts",
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -856,7 +892,7 @@
               "PluginsServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 59,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +910,7 @@
               "PricingServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 61,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -892,7 +928,7 @@
               "SecurityServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 63,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -910,7 +946,7 @@
               "UserProfileService"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 65,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -928,7 +964,7 @@
               "CoreDiServiceStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 67,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -946,7 +982,7 @@
               "DataStreamsStart"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_start.ts",
-            "lineNumber": 69,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -972,7 +1008,7 @@
           ", TPluginsStart, TStart]>"
         ],
         "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
-        "lineNumber": 105,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

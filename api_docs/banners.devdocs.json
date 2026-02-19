@@ -41,7 +41,7 @@
             "label": "placement",
             "description": [],
             "signature": [
-              "\"disabled\" | \"top\""
+              "\"top\" | \"disabled\""
             ],
             "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "lineNumber": 16,
@@ -166,7 +166,7 @@
         "label": "BannerPlacement",
         "description": [],
         "signature": [
-          "\"disabled\" | \"top\""
+          "\"top\" | \"disabled\""
         ],
         "path": "x-pack/platform/plugins/private/banners/common/types.ts",
         "lineNumber": 13,

@@ -27,7 +27,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "{Error} the error"
+            ],
             "path": "src/platform/plugins/shared/saved_objects/public/saved_object/helpers/save_saved_object.ts",
             "lineNumber": 16,
             "columnNumber": 40,
@@ -284,7 +286,7 @@
             "section": "def-public.ShowSaveModalMinimalSaveModalProps",
             "text": "ShowSaveModalMinimalSaveModalProps"
           },
-          ", string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
+          ">, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "lineNumber": 37,
@@ -317,6 +319,14 @@
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
           },
           {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/open_save_modal.tsx"
           },
@@ -331,14 +341,6 @@
           {
             "plugin": "dashboard",
             "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
           },
           {
             "plugin": "graph",
