@@ -14,6 +14,7 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -24,6 +25,7 @@ const READ_ONLY_SETTINGS: string[] = [
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
