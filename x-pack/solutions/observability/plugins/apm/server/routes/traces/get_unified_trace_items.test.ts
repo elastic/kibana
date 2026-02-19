@@ -454,7 +454,7 @@ describe('getUnifiedTraceItems', () => {
       expect(result.traceItems[0].result).toBe('HTTPS 200');
     });
 
-    it('should set result from otel http scheme when only scheme is present', async () => {
+    it('should leave result undefined when only otel http scheme is present', async () => {
       const mockSearchResponse = {
         hits: {
           hits: [
@@ -475,10 +475,10 @@ describe('getUnifiedTraceItems', () => {
 
       const result = await getUnifiedTraceItems(defaultParams);
 
-      expect(result.traceItems[0].result).toBe('http');
+      expect(result.traceItems[0].result).toBeUndefined();
     });
 
-    it('should set result from otel http status code when only status code is present', async () => {
+    it('should leave result undefined when only otel http status code is present', async () => {
       const mockSearchResponse = {
         hits: {
           hits: [
@@ -499,7 +499,7 @@ describe('getUnifiedTraceItems', () => {
 
       const result = await getUnifiedTraceItems(defaultParams);
 
-      expect(result.traceItems[0].result).toBe('404');
+      expect(result.traceItems[0].result).toBeUndefined();
     });
 
     it('should leave result undefined when no transaction or otel http result fields are present', async () => {
