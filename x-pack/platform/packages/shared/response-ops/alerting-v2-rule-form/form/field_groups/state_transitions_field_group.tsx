@@ -11,6 +11,7 @@ import { EuiText, EuiSpacer } from '@elastic/eui';
 import type { RuleFormServices } from '../rule_form';
 import { FieldGroup } from './field_group';
 import { RecoveryPolicyField } from '../fields/recovery_policy_field';
+import { NoDataField } from '../fields/no_data_field';
 
 interface StateTransitionsFieldGroupProps {
   services: RuleFormServices;
@@ -28,11 +29,13 @@ export const StateTransitionsFieldGroup: React.FC<StateTransitionsFieldGroupProp
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.alertingV2.ruleForm.stateTransitionsDescription', {
           defaultMessage:
-            'Configure how alerts recover from an active state. Choose between automatic recovery when conditions are no longer met, or define a custom recovery query.',
+            'Configure how alerts transition between states, including recovery behavior and handling of missing data.',
         })}
       </EuiText>
       <EuiSpacer size="m" />
       <RecoveryPolicyField services={services} />
+      <EuiSpacer size="l" />
+      <NoDataField services={services} />
     </FieldGroup>
   );
 };

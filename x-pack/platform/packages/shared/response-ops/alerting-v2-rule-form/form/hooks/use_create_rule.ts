@@ -20,9 +20,13 @@ interface UseCreateRuleProps {
  * Maps form values to the API request payload.
  * This function serves as the boundary between the form contract (FormValues)
  * and the API contract (CreateRuleData).
+ *
+ * Only includes optional fields (recoveryPolicy, noData) when they have been
+ * explicitly configured by the user.
  */
 const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData => {
-  const { kind, metadata, timeField, schedule, evaluation, grouping } = formValues;
+  const { kind, metadata, timeField, schedule, evaluation, grouping, recoveryPolicy, noData } =
+    formValues;
 
   return {
     kind,
@@ -42,7 +46,25 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
         condition: '', // Required by API but not in form yet
       },
     },
+    // Only include optional fields if explicitly configured
     ...(grouping?.fields?.length ? { grouping: { fields: grouping.fields } } : {}),
+    ...(recoveryPolicy?.type
+      ? {
+          recovery_policy: {
+            type: recoveryPolicy.type,
+            ...(recoveryPolicy.query ? { query: { base: recoveryPolicy.query } } : {}),
+          },
+        }
+      : {}),
+    // TODO: Add query field to no_data once the API schema supports it
+    ...(noData
+      ? {
+          no_data: {
+            behavior: noData.behavior,
+            timeframe: noData.timeframe,
+          },
+        }
+      : {}),
   };
 };
 

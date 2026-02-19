@@ -58,6 +58,26 @@ export interface RecoveryPolicy {
 }
 
 /**
+ * No data behavior - determines what happens when no data is received.
+ * - 'no_data': Alert transitions to a "no data" state
+ * - 'last_status': Alert maintains its last known status
+ * - 'recover': Alert automatically recovers
+ */
+export type NoDataBehavior = 'no_data' | 'last_status' | 'recover';
+
+/**
+ * No data configuration that determines how the rule handles missing data.
+ */
+export interface NoDataConfig {
+  /** Behavior when no data is detected */
+  behavior: NoDataBehavior;
+  /** Time window after which no data is detected (e.g., "5m", "1h") */
+  timeframe: string;
+  /** ES|QL query for no data detection */
+  query: string;
+}
+
+/**
  * Form values for creating a new alerting rule.
  * This interface defines the contract for the rule creation form,
  * independent of the API schema to allow for controlled evolution.
@@ -70,4 +90,5 @@ export interface FormValues {
   evaluation: RuleEvaluation;
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
+  noData?: NoDataConfig;
 }

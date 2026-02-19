@@ -12,7 +12,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { FormValues } from '../types';
 import { useQueryGroupingValidation } from './use_query_grouping_validation';
 
-interface UseRecoveryQueryValidationProps {
+interface UseNoDataQueryValidationProps {
   control: Control<FormValues>;
   setError: UseFormSetError<FormValues>;
   clearErrors: UseFormClearErrors<FormValues>;
@@ -26,25 +26,25 @@ interface UseRecoveryQueryValidationProps {
 }
 
 /**
- * Hook that validates the recovery query contains all the columns
+ * Hook that validates the no data query contains all the columns
  * specified in the grouping.fields field.
  *
  * When alerts are grouped by certain columns (e.g., host.name, service.name),
- * the recovery query must also return those columns so the system can properly
- * identify which alert instances should recover.
+ * the no data query must also return those columns so the system can properly
+ * identify which alert instances should trigger the no data behavior.
  */
-export const useRecoveryQueryValidation = ({
+export const useNoDataQueryValidation = ({
   control,
   setError,
   clearErrors,
   search,
   query,
-}: UseRecoveryQueryValidationProps) => {
+}: UseNoDataQueryValidationProps) => {
   const getErrorMessage = useCallback(
     (missingColumns: string[]) =>
-      i18n.translate('xpack.alertingV2.ruleForm.recoveryQueryMissingColumnsError', {
+      i18n.translate('xpack.alertingV2.ruleForm.noDataQueryMissingColumnsError', {
         defaultMessage:
-          'Recovery query is missing columns used for grouping: {columns}. The recovery query must include these columns to properly identify which alerts should recover.',
+          'No data query is missing columns used for grouping: {columns}. The no data query must include these columns to properly identify which alerts should be affected.',
         values: { columns: missingColumns.join(', ') },
       }),
     []
@@ -56,12 +56,12 @@ export const useRecoveryQueryValidation = ({
     clearErrors,
     search,
     query,
-    fieldPath: 'recoveryPolicy.query',
+    fieldPath: 'noData.query',
     getErrorMessage,
   });
 
   return {
     ...result,
-    recoveryColumns: result.queryColumns,
+    noDataColumns: result.queryColumns,
   };
 };
