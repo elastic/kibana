@@ -17,95 +17,111 @@ describe('getTemplateLocalContext', () => {
     it('returns assign variable names before offset', () => {
       const template = '{% assign x = 1 %} {{ x }}';
       const ctx = getTemplateLocalContext(template, template.length);
-      expect(ctx.assignCaptureNames).toContain('x');
+      expect(ctx.assignVars.map((a) => a.name)).toContain('x');
     });
 
     it('returns capture variable names before offset', () => {
       const template = '{% capture y %}hello{% endcapture %} {{ y }}';
       const ctx = getTemplateLocalContext(template, template.length);
-      expect(ctx.assignCaptureNames).toContain('y');
+      expect(ctx.captureNames).toContain('y');
     });
 
     it('does not include assign after offset', () => {
       const template = '{{ a }} {% assign a = 1 %}';
       const ctx = getTemplateLocalContext(template, 6);
-      expect(ctx.assignCaptureNames).not.toContain('a');
+      expect(ctx.assignVars.map((a) => a.name)).not.toContain('a');
     });
 
     it('handles assign with hyphen trim', () => {
       const template = '{%- assign z = 2 -%}{{ z }}';
       const ctx = getTemplateLocalContext(template, template.length);
-      expect(ctx.assignCaptureNames).toContain('z');
+      expect(ctx.assignVars.map((a) => a.name)).toContain('z');
     });
 
     it('returns multiple assign/capture names', () => {
       const template = '{% assign a = 1 %}{% capture b %}x{% endcapture %} {{ a }} {{ b }}';
       const ctx = getTemplateLocalContext(template, template.length);
-      expect(ctx.assignCaptureNames).toContain('a');
-      expect(ctx.assignCaptureNames).toContain('b');
+      expect(ctx.assignVars.map((av) => av.name)).toContain('a');
+      expect(ctx.captureNames).toContain('b');
     });
 
     it('returns assignVars with name and rhs for type inference', () => {
       const template = '{% assign x = steps.fetch.outputs.value %} {{ x }}';
       const ctx = getTemplateLocalContext(template, template.length);
-      expect(ctx.assignVars).toContainEqual({ name: 'x', rhs: 'steps.fetch.outputs.value' });
+      expect(ctx.assignVars).toContainEqual({
+        name: 'x',
+        rhs: 'steps.fetch.outputs.value',
+      });
     });
 
     it('returns captureNames separately (capture is always string)', () => {
       const template = '{% capture y %}hello{% endcapture %} {{ y }}';
       const ctx = getTemplateLocalContext(template, template.length);
       expect(ctx.captureNames).toContain('y');
-      expect(ctx.assignCaptureNames).toContain('y');
     });
   });
 
   describe('for-loop scopes', () => {
-    it('returns single for-loop body range', () => {
+    it('detects a for-loop scope with body range', () => {
       const template = '{% for item in items %} {{ item }} {% endfor %}';
-      const ctx = getTemplateLocalContext(template, 0);
+      const ctx = getTemplateLocalContext(template, template.length);
       expect(ctx.forLoopScopes).toHaveLength(1);
       expect(ctx.forLoopScopes[0].variableName).toBe('item');
       expect(ctx.forLoopScopes[0].bodyStart).toBeGreaterThan(0);
-      expect(ctx.forLoopScopes[0].bodyEnd).toBeLessThanOrEqual(template.length);
+      expect(ctx.forLoopScopes[0].bodyEnd).toBeGreaterThan(ctx.forLoopScopes[0].bodyStart);
     });
 
-    it('forLoopScopesContainingOffset filters to scopes containing offset', () => {
-      const template = '{% for item in items %} {{ item }} {% endfor %}';
-      const ctx = getTemplateLocalContext(template, 0);
-      const bodyStart = ctx.forLoopScopes[0].bodyStart;
-      const bodyEnd = ctx.forLoopScopes[0].bodyEnd;
-      const inside = Math.floor((bodyStart + bodyEnd) / 2);
-      const containing = forLoopScopesContainingOffset(ctx.forLoopScopes, inside);
-      expect(containing).toHaveLength(1);
-      expect(containing[0].variableName).toBe('item');
-    });
-
-    it('forLoopScopesContainingOffset returns empty when offset outside loop', () => {
-      const template = 'before {% for item in items %} x {% endfor %} after';
-      const ctx = getTemplateLocalContext(template, 0);
-      const containing = forLoopScopesContainingOffset(ctx.forLoopScopes, 0);
-      expect(containing).toHaveLength(0);
-    });
-
-    it('handles nested for loops', () => {
+    it('detects nested for-loop scopes', () => {
       const template =
         '{% for outer in list %} {% for inner in outer.items %} {{ inner }} {% endfor %} {% endfor %}';
-      const ctx = getTemplateLocalContext(template, 0);
-      expect(ctx.forLoopScopes.length).toBeGreaterThanOrEqual(2);
-      const outerScope = ctx.forLoopScopes.find((s) => s.variableName === 'outer');
-      const innerScope = ctx.forLoopScopes.find((s) => s.variableName === 'inner');
-      expect(outerScope).toBeDefined();
-      expect(innerScope).toBeDefined();
-      expect(innerScope!.bodyStart).toBeGreaterThan(outerScope!.bodyStart);
-      expect(innerScope!.bodyEnd).toBeLessThan(outerScope!.bodyEnd);
+      const ctx = getTemplateLocalContext(template, template.length);
+      const names = ctx.forLoopScopes.map((s) => s.variableName);
+      expect(names).toContain('outer');
+      expect(names).toContain('inner');
     });
 
-    it('extracts collectionPath from for-tag args', () => {
+    it('does not include the built-in forloop object in forLoopScopes', () => {
+      const template = '{% for item in items %} {{ forloop.index }} {% endfor %}';
+      const ctx = getTemplateLocalContext(template, template.length);
+      expect(ctx.forLoopScopes.map((s) => s.variableName)).not.toContain('forloop');
+    });
+
+    it('extracts collectionPath from for-tag', () => {
       const template = '{% for item in steps.fetch.outputs.results %} {{ item.name }} {% endfor %}';
-      const ctx = getTemplateLocalContext(template, template.indexOf('item.name'));
+      const ctx = getTemplateLocalContext(template, template.length);
       expect(ctx.forLoopScopes).toHaveLength(1);
       expect(ctx.forLoopScopes[0].variableName).toBe('item');
       expect(ctx.forLoopScopes[0].collectionPath).toBe('steps.fetch.outputs.results');
+    });
+  });
+
+  describe('forLoopScopesContainingOffset', () => {
+    it('returns scopes that contain the given offset', () => {
+      const template = '{% for item in items %} {{ item }} {% endfor %} after';
+      const ctx = getTemplateLocalContext(template, template.length);
+      const bodyOffset = template.indexOf('{{ item }}') + 3;
+      const active = forLoopScopesContainingOffset(ctx.forLoopScopes, bodyOffset);
+      expect(active).toHaveLength(1);
+      expect(active[0].variableName).toBe('item');
+    });
+
+    it('returns empty when offset is outside for-loop body', () => {
+      const template = '{% for item in items %} {{ item }} {% endfor %} after';
+      const ctx = getTemplateLocalContext(template, template.length);
+      const afterOffset = template.indexOf('after');
+      const active = forLoopScopesContainingOffset(ctx.forLoopScopes, afterOffset);
+      expect(active).toHaveLength(0);
+    });
+
+    it('returns both scopes for nested for-loops when offset is inside inner', () => {
+      const template =
+        '{% for outer in list %}{% for inner in outer.items %} {{ inner }} {% endfor %}{% endfor %}';
+      const ctx = getTemplateLocalContext(template, template.length);
+      const innerBodyOffset = template.indexOf('{{ inner }}') + 3;
+      const active = forLoopScopesContainingOffset(ctx.forLoopScopes, innerBodyOffset);
+      const names = active.map((s) => s.variableName);
+      expect(names).toContain('outer');
+      expect(names).toContain('inner');
     });
   });
 
@@ -113,7 +129,18 @@ describe('getTemplateLocalContext', () => {
     it('returns empty context when template is invalid Liquid', () => {
       const invalid = '{% assign x = %} {{ x }}';
       const ctx = getTemplateLocalContext(invalid, invalid.length);
-      expect(ctx.assignCaptureNames).toEqual([]);
+      expect(ctx.assignVars).toEqual([]);
+      expect(ctx.captureNames).toEqual([]);
+      expect(ctx.forLoopScopes).toEqual([]);
+    });
+  });
+
+  describe('templates without tags', () => {
+    it('returns empty context for plain output templates', () => {
+      const template = '{{ workflow.id }}';
+      const ctx = getTemplateLocalContext(template, 0);
+      expect(ctx.assignVars).toEqual([]);
+      expect(ctx.captureNames).toEqual([]);
       expect(ctx.forLoopScopes).toEqual([]);
     });
   });

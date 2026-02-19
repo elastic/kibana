@@ -118,7 +118,6 @@ export function extendContextWithTemplateLocals(
     templateString,
     offsetInTemplate
   );
-  const containingLoops = forLoopScopesContainingOffset(forLoopScopes, offsetInTemplate);
 
   const extension: Record<string, z.ZodType> = {};
   for (const { name, rhs } of assignVars) {
@@ -127,11 +126,13 @@ export function extendContextWithTemplateLocals(
   for (const name of captureNames) {
     extension[name] = z.string();
   }
-  for (const scope of containingLoops) {
+
+  const activeScopes = forLoopScopesContainingOffset(forLoopScopes, offsetInTemplate);
+  for (const { variableName, collectionPath } of activeScopes) {
     let itemSchema: z.ZodType = z.unknown();
-    if (scope.collectionPath) {
+    if (collectionPath) {
       try {
-        const resolved = getForeachItemSchema(baseSchema, scope.collectionPath);
+        const resolved = getForeachItemSchema(baseSchema, collectionPath);
         if (!(resolved instanceof z.ZodUnknown)) {
           itemSchema = resolved;
         }
@@ -139,7 +140,7 @@ export function extendContextWithTemplateLocals(
         // keep z.unknown() when path is invalid or schema cannot be resolved
       }
     }
-    extension[scope.variableName] = itemSchema;
+    extension[variableName] = itemSchema;
     extension.forloop = FORLOOP_SCHEMA;
   }
 
