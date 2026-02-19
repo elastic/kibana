@@ -81,9 +81,11 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     let { installed_kibana: installedObjects } = installedPkg.attributes;
     logger.debug('Retry transition - clean up Kibana assets first');
 
-    // Do not delete creatd alerting rules
+    // Do not delete created alerting rules or alerting rule templates
     installedObjects = (installedObjects ?? []).filter(
-      (asset) => asset.type !== KibanaSavedObjectType.alert
+      (asset) =>
+        asset.type !== KibanaSavedObjectType.alert &&
+        asset.type !== KibanaSavedObjectType.alertingRuleTemplate
     );
 
     await deleteKibanaAssets({
@@ -123,8 +125,12 @@ export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
   const nextAssetRefKeys = new Set(
     installedKibanaAssetsRefs.map((asset: KibanaAssetReference) => `${asset.id}-${asset.type}`)
   );
+  // Do not remove alerting rules or alerting rule templates (they are managed separately)
   const assetsToRemove = previousAssetRefs.filter(
-    (existingAsset) => !nextAssetRefKeys.has(`${existingAsset.id}-${existingAsset.type}`)
+    (existingAsset) =>
+      !nextAssetRefKeys.has(`${existingAsset.id}-${existingAsset.type}`) &&
+      existingAsset.type !== KibanaSavedObjectType.alert &&
+      existingAsset.type !== KibanaSavedObjectType.alertingRuleTemplate
   );
 
   if (assetsToRemove.length === 0) {

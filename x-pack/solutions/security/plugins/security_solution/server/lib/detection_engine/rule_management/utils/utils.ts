@@ -150,7 +150,7 @@ export const swapActionIds = async (
       return { ...action, id: foundAction.saved_objects[0].id };
     } else if (foundAction.saved_objects.length > 1) {
       return new Error(
-        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
+        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details`
       );
     }
     return action;
