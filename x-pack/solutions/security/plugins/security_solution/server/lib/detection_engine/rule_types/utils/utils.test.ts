@@ -480,18 +480,21 @@ describe('utils', () => {
   });
 
   describe('checkForNoReadableIndices', () => {
-    let fieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>>;
-
-    test('returns foundNoIndices true when the fieldCapsResponse is empty', async () => {
-      fieldCapsResponse = {
+    type ResponseType = TransportResult<estypes.FieldCapsResponse, unknown>;
+    // creating a partial response type to override the default response
+    const buildFieldCapsMockResponse = (overrides: Partial<ResponseType> = {}): ResponseType =>
+      ({
         body: {
           indices: [],
           fields: {},
         },
-      };
+        ...overrides,
+      } as ResponseType);
+    const fieldCapsResponse = buildFieldCapsMockResponse();
 
+    test('returns foundNoIndices true when the fieldCapsResponse is empty', async () => {
       const { foundNoIndices } = await checkForNoReadableIndices({
-        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
+        fieldCapsResponse,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });
@@ -500,19 +503,11 @@ describe('utils', () => {
     });
 
     test('logs a special Endpoint Security message when the rule name is "Endpoint Security"', async () => {
-      fieldCapsResponse = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
       ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'Endpoint Security',
       });
-
       await checkForNoReadableIndices({
-        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
+        fieldCapsResponse,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });
@@ -525,20 +520,13 @@ describe('utils', () => {
     });
 
     test('logs a generic missing-index message when the rule name is not "Endpoint Security"', async () => {
-      fieldCapsResponse = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
       // SUT uses rule execution logger's context to check the rule name
       ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'NOT Endpoint Security',
       });
 
       await checkForNoReadableIndices({
-        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
+        fieldCapsResponse,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });
