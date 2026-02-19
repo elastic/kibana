@@ -15,5 +15,7 @@ export const validate = (
   ast: ESQLCommand[],
   context?: ICommandContext
 ): ESQLMessage[] => {
+  // validate types of fields in MMR command, e.g. query vector should be a dense vector, limit should be a number, options should be an object with valid keys and values, etc.
+  // validate required fields are present, e.g. on, field, limit, number
   return [];
 };
