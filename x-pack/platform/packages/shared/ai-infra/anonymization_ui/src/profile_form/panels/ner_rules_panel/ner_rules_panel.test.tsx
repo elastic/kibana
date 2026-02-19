@@ -106,12 +106,11 @@ describe('NerRulesPanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('requires allowed entities to enable add button', () => {
+  it('shows allowed entity multiselect placeholders', () => {
     setContext();
     render(<NerRulesPanel />);
 
-    fireEvent.change(screen.getByLabelText('New allowed entities'), { target: { value: '' } });
-    expect(screen.getByRole('button', { name: 'Add NER' })).toBeDisabled();
+    expect(screen.getAllByPlaceholderText('Select allowed entities')).toHaveLength(2);
   });
 
   it('shows row-level invalid state when ner validation error is present', () => {
@@ -126,34 +125,18 @@ describe('NerRulesPanel', () => {
         },
       ],
       nerRulesError:
-        'NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC).',
+        'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.',
     });
     render(<NerRulesPanel />);
 
     expect(
       screen.getByText(
-        'NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC).'
+        'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.'
       )
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Allowed entities for NER rule ner-1')).toHaveAttribute(
       'aria-invalid',
       'true'
     );
-  });
-
-  it('preserves commas and spaces while editing allowed entities', () => {
-    const { onNerRulesChange } = setContext();
-    render(<NerRulesPanel />);
-
-    fireEvent.change(screen.getByLabelText('Allowed entities for NER rule ner-1'), {
-      target: { value: 'PER, ORG,' },
-    });
-
-    expect(onNerRulesChange).toHaveBeenCalledWith([
-      expect.objectContaining({
-        id: 'ner-1',
-        allowedEntityClasses: ['PER', ' ORG', ''],
-      }),
-    ]);
   });
 });

@@ -6,19 +6,14 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { NerRule } from '@kbn/anonymization-common';
+import { NER_ENTITY_CLASSES, type NerEntityClass, type NerRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import type { TrustedNerModelOption } from '../../contracts';
 
-const DEFAULT_DRAFT_ALLOWED_ENTITIES = 'PER,ORG';
+const DEFAULT_DRAFT_ALLOWED_ENTITIES: NerEntityClass[] = ['PER', 'ORG'];
 
-const fromAllowedEntitiesCsv = (value: string): string[] => value.split(',');
-
-const toNormalizedAllowedEntities = (value: string): string[] =>
-  value
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
+const isNerEntityClass = (value: string): value is NerEntityClass =>
+  NER_ENTITY_CLASSES.includes(value as NerEntityClass);
 
 interface UseNerRulesPanelStateParams {
   nerRules: NerRule[];
@@ -121,7 +116,7 @@ export const useNerRulesPanelState = ({
       return;
     }
 
-    const allowedEntityClasses = fromAllowedEntitiesCsv(nerDraft.allowedEntityClasses);
+    const allowedEntityClasses = nerDraft.allowedEntityClasses.filter(isNerEntityClass);
     if (allowedEntityClasses.length === 0) {
       return;
     }
@@ -143,7 +138,7 @@ export const useNerRulesPanelState = ({
     setNerDraft((draft) => ({ ...draft, modelId }));
   }, []);
 
-  const setNerDraftAllowedEntities = useCallback((allowedEntityClasses: string) => {
+  const setNerDraftAllowedEntities = useCallback((allowedEntityClasses: NerEntityClass[]) => {
     setNerDraft((draft) => ({ ...draft, allowedEntityClasses }));
   }, []);
 
@@ -155,10 +150,10 @@ export const useNerRulesPanelState = ({
   );
 
   const updateRuleAllowedEntityClasses = useCallback(
-    (ruleId: string, allowedEntityClassesCsv: string) => {
+    (ruleId: string, allowedEntityClasses: NerEntityClass[]) => {
       updateNerRuleById(ruleId, (rule) => ({
         ...rule,
-        allowedEntityClasses: fromAllowedEntitiesCsv(allowedEntityClassesCsv),
+        allowedEntityClasses,
       }));
     },
     [updateNerRuleById]
@@ -211,6 +206,6 @@ export const useNerRulesPanelState = ({
     canAddRule:
       !isNerInputDisabled &&
       nerDraft.modelId.trim().length > 0 &&
-      toNormalizedAllowedEntities(nerDraft.allowedEntityClasses).length > 0,
+      nerDraft.allowedEntityClasses.length > 0,
   };
 };

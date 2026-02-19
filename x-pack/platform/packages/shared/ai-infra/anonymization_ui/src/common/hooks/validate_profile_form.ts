@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { NER_ENTITY_CLASSES } from '@kbn/anonymization-common';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../target_types';
 import type { ProfileFormValidationErrors, ProfileFormValues } from './profile_form_types';
 
-const NER_ENTITY_CLASS_TOKEN_PATTERN = /^[A-Za-z0-9_]+$/;
+const NER_ENTITY_CLASS_SET = new Set<string>(NER_ENTITY_CLASSES);
 
 export const validateProfileForm = (values: ProfileFormValues): ProfileFormValidationErrors => {
   const errors: ProfileFormValidationErrors = {};
@@ -79,15 +80,12 @@ export const validateProfileForm = (values: ProfileFormValues): ProfileFormValid
       return true;
     }
 
-    return rule.allowedEntityClasses.some((entity) => {
-      const normalizedEntity = entity.trim();
-      return !normalizedEntity || !NER_ENTITY_CLASS_TOKEN_PATTERN.test(normalizedEntity);
-    });
+    return rule.allowedEntityClasses.some((entity) => !NER_ENTITY_CLASS_SET.has(entity.trim()));
   });
   if (hasInvalidNerRule) {
     errors.nerRules = i18n.translate('anonymizationUi.profiles.validation.nerRuleFieldsRequired', {
       defaultMessage:
-        'NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC).',
+        'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.',
     });
   }
 

@@ -6,8 +6,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FieldRule } from '@kbn/anonymization-common';
-import { FIELD_RULE_ACTION_ALLOW, type FieldRuleAction } from '../../../hooks/field_rule_actions';
+import { suggestEntityClassForField, type FieldRule } from '@kbn/anonymization-common';
+import {
+  FIELD_RULE_ACTION_ALLOW,
+  FIELD_RULE_ACTION_ANONYMIZE,
+  type FieldRuleAction,
+} from '../../../hooks/field_rule_actions';
 import { applyBulkFieldAction, applyFieldAction, rankFieldRules } from '../../../hooks/field_rules';
 import type { FIELD_ACTION_OPTIONS } from '../../../constants';
 import { FIELD_PAGE_SIZE, toFieldAction } from '../../../constants';
@@ -28,7 +32,7 @@ export const useFieldRulesPanelState = ({
   const [fieldPageIndex, setFieldPageIndex] = useState(0);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [bulkAction, setBulkAction] = useState<FieldRuleAction>(FIELD_RULE_ACTION_ALLOW);
-  const [bulkEntityClass, setBulkEntityClass] = useState('REDACTED');
+  const [bulkEntityClass, setBulkEntityClass] = useState('MISC');
 
   useEffect(() => {
     setSelectedFields([]);
@@ -88,7 +92,19 @@ export const useFieldRulesPanelState = ({
 
   const onRuleActionChange = useCallback(
     (field: string, action: FieldRuleAction) => {
-      updateAllRules((prev) => applyFieldAction(prev, field, action));
+      updateAllRules((prev) => {
+        const targetRule = prev.find((rule) => rule.field === field);
+        if (!targetRule) {
+          return prev;
+        }
+
+        const nextEntityClass =
+          action === FIELD_RULE_ACTION_ANONYMIZE && !targetRule.anonymized
+            ? suggestEntityClassForField(field) ?? 'MISC'
+            : undefined;
+
+        return applyFieldAction(prev, field, action, { entityClass: nextEntityClass });
+      });
     },
     [updateAllRules]
   );

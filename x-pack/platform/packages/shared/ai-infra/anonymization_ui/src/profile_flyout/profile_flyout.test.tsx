@@ -253,7 +253,7 @@ describe('ProfileFlyout', () => {
   it('shows an error indicator on the ner rules tab when ner rules are invalid', () => {
     const { container } = renderFlyout({
       nerRulesError:
-        'NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC).',
+        'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.',
     });
 
     expect(
@@ -276,7 +276,7 @@ describe('ProfileFlyout', () => {
           fieldRules={[{ field: 'host.name', allowed: true, anonymized: false }]}
           regexRules={[]}
           nerRules={[]}
-          nerRulesError="NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC)."
+          nerRulesError="NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC."
           isSubmitting={false}
           onNameChange={jest.fn()}
           onDescriptionChange={jest.fn()}

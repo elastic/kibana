@@ -21,7 +21,7 @@ const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>>
       {
         id: 'regex-1',
         type: 'regex',
-        entityClass: 'REDACTED',
+        entityClass: 'MISC',
         pattern: '/geoip\\..*/',
         enabled: true,
       },

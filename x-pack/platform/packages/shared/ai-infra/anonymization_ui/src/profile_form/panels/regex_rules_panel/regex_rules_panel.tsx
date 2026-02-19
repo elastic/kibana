@@ -22,9 +22,8 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import type { RegexRule } from '@kbn/anonymization-common';
+import { ANONYMIZATION_ENTITY_CLASSES, type RegexRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
-import { ENTITY_CLASS_VALUES } from '../../constants';
 import { useProfileFormContext } from '../../profile_form_context';
 
 const REGEX_RULE_STATE_ENABLED = 'enabled';
@@ -33,7 +32,7 @@ const REGEX_RULE_STATE_DISABLED = 'disabled';
 export const RegexRulesPanel = () => {
   const { regexRules, onRegexRulesChange, isManageMode, isSubmitting, regexRulesError } =
     useProfileFormContext();
-  const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'REDACTED' });
+  const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'MISC' });
   const showValidationErrors = Boolean(regexRulesError);
   const entityClassOptions = [
     {
@@ -42,7 +41,7 @@ export const RegexRulesPanel = () => {
         defaultMessage: 'Select entity class',
       }),
     },
-    ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+    ...ANONYMIZATION_ENTITY_CLASSES.map((value) => ({ value, text: value })),
   ];
 
   const updateRegexRule = useCallback(
@@ -70,7 +69,7 @@ export const RegexRulesPanel = () => {
         enabled: true,
       },
     ]);
-    setRegexDraft({ pattern: '', entityClass: 'REDACTED' });
+    setRegexDraft({ pattern: '', entityClass: 'MISC' });
   }, [onRegexRulesChange, regexDraft.entityClass, regexDraft.pattern, regexRules]);
 
   const removeRegexRule = useCallback(

@@ -12,6 +12,8 @@ import {
   EuiButtonGroup,
   EuiButton,
   EuiCallOut,
+  EuiComboBox,
+  type EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +24,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import type { NerRule } from '@kbn/anonymization-common';
+import { NER_ENTITY_CLASSES, type NerEntityClass, type NerRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { useProfileFormContext } from '../../profile_form_context';
 import { useNerRulesPanelState } from '../../hooks/use_ner_rules_panel_state';
@@ -30,7 +32,20 @@ import { useNerRulesPanelState } from '../../hooks/use_ner_rules_panel_state';
 const NER_RULE_STATE_ENABLED = 'enabled';
 const NER_RULE_STATE_DISABLED = 'disabled';
 
-const toAllowedEntitiesCsv = (values: string[]) => values.join(',');
+const nerEntityClassOptions: Array<EuiComboBoxOptionOption<string>> = NER_ENTITY_CLASSES.map(
+  (value) => ({
+    label: value,
+  })
+);
+
+const isNerEntityClass = (value: string): value is NerEntityClass =>
+  NER_ENTITY_CLASSES.includes(value as NerEntityClass);
+
+const toNerEntityClasses = (options: Array<EuiComboBoxOptionOption<string>>): NerEntityClass[] =>
+  options.map((option) => option.label).filter(isNerEntityClass);
+
+const toComboBoxOptions = (values: NerEntityClass[]): Array<EuiComboBoxOptionOption<string>> =>
+  values.map((value) => ({ label: value }));
 
 export const NerRulesPanel = () => {
   const {
@@ -135,15 +150,15 @@ export const NerRulesPanel = () => {
         </EuiText>
       ),
       width: '220px',
-      render: (_value: string[], rule: NerRule) => {
+      render: (_value: NerEntityClass[], rule: NerRule) => {
         const isInvalid =
           showValidationErrors &&
           (rule.allowedEntityClasses.length === 0 ||
             rule.allowedEntityClasses.some((entity) => !entity.trim()));
         return (
-          <EuiFieldText
+          <EuiComboBox
             compressed
-            value={toAllowedEntitiesCsv(rule.allowedEntityClasses)}
+            selectedOptions={toComboBoxOptions(rule.allowedEntityClasses)}
             isInvalid={isInvalid}
             aria-label={i18n.translate(
               'anonymizationUi.profiles.nerRules.row.allowedEntitiesAriaLabel',
@@ -152,12 +167,17 @@ export const NerRulesPanel = () => {
                 values: { id: rule.id },
               }
             )}
-            onChange={(event) => updateRuleAllowedEntityClasses(rule.id, event.target.value)}
+            options={nerEntityClassOptions}
+            onChange={(options) =>
+              updateRuleAllowedEntityClasses(rule.id, toNerEntityClasses(options))
+            }
+            singleSelection={false}
+            isClearable
             disabled={isNerInputDisabled}
             placeholder={i18n.translate(
               'anonymizationUi.profiles.nerRules.allowedEntitiesPlaceholder',
               {
-                defaultMessage: 'Allowed entities (comma separated)',
+                defaultMessage: 'Select allowed entities',
               }
             )}
             fullWidth
@@ -349,20 +369,23 @@ export const NerRulesPanel = () => {
             })}
             fullWidth
           >
-            <EuiFieldText
+            <EuiComboBox
               compressed
-              value={nerDraft.allowedEntityClasses}
+              selectedOptions={toComboBoxOptions(nerDraft.allowedEntityClasses)}
               aria-label={i18n.translate(
                 'anonymizationUi.profiles.nerRules.create.allowedEntitiesAriaLabel',
                 {
                   defaultMessage: 'New allowed entities',
                 }
               )}
-              onChange={(event) => setNerDraftAllowedEntities(event.target.value)}
+              options={nerEntityClassOptions}
+              onChange={(options) => setNerDraftAllowedEntities(toNerEntityClasses(options))}
+              singleSelection={false}
+              isClearable
               placeholder={i18n.translate(
                 'anonymizationUi.profiles.nerRules.allowedEntitiesPlaceholder',
                 {
-                  defaultMessage: 'Allowed entities (comma separated)',
+                  defaultMessage: 'Select allowed entities',
                 }
               )}
               disabled={isNerInputDisabled}
@@ -398,7 +421,7 @@ export const NerRulesPanel = () => {
           <p>
             {i18n.translate('anonymizationUi.profiles.nerRules.emptyStateHint', {
               defaultMessage:
-                'Add a model id, list allowed entity classes (for example PER,ORG,LOC), and keep the rule enabled.',
+                'Add a model id, select allowed entity classes (for example PER, ORG, LOC), and keep the rule enabled.',
             })}
           </p>
         </EuiCallOut>

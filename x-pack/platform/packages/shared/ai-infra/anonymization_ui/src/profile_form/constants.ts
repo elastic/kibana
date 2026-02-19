@@ -99,17 +99,6 @@ export const POLICY_ACTION_OPTIONS: Array<{ value: FieldRuleAction; text: string
   },
 ];
 
-export const ENTITY_CLASS_VALUES = [
-  'CLOUD_ACCOUNT',
-  'ENTITY_NAME',
-  'IP',
-  'HOST_NAME',
-  'USER_NAME',
-  'RESOURCE_NAME',
-  'RESOURCE_ID',
-  'REDACTED',
-] as const;
-
 export const SAMPLE_PREVIEW_DOCUMENT: Record<string, unknown> = {
   host: { name: 'edge-1', ip: '10.1.1.14' },
   user: { name: 'alice' },

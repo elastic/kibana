@@ -217,7 +217,7 @@ describe('useProfileForm', () => {
     });
 
     expect(result.current.validationErrors.nerRules).toBe(
-      'NER model id is required and allowed entities must be a comma-separated list (for example: PER,ORG,LOC).'
+      'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.'
     );
     expect(mutateAsync).not.toHaveBeenCalled();
   });

@@ -94,7 +94,7 @@ const unsetByPath = (document: Record<string, unknown>, path: string): boolean =
   return false;
 };
 
-const toToken = (rule: FieldRule): string => `<${rule.entityClass ?? 'REDACTED'}>`;
+const toToken = (rule: FieldRule): string => `<${rule.entityClass ?? 'MISC'}>`;
 
 const toAction = (rule: FieldRule): FieldRuleAction => {
   if (!rule.allowed) {

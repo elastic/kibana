@@ -15,10 +15,10 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import type { FieldRule } from '@kbn/anonymization-common';
+import { ANONYMIZATION_ENTITY_CLASSES, type FieldRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { FIELD_RULE_ACTION_ANONYMIZE, type FieldRuleAction } from '../../hooks/field_rule_actions';
-import { ENTITY_CLASS_VALUES, POLICY_ACTION_OPTIONS, toFieldAction } from '../../constants';
+import { POLICY_ACTION_OPTIONS, toFieldAction } from '../../constants';
 import { toActionOption } from './hooks/policy_helpers';
 
 interface FieldRulesPanelRowItemProps {
@@ -41,7 +41,7 @@ const ENTITY_CLASS_OPTIONS = [
       defaultMessage: 'Select entity class',
     }),
   },
-  ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+  ...ANONYMIZATION_ENTITY_CLASSES.map((value) => ({ value, text: value })),
 ];
 
 export const FieldRulesPanelRowItem = ({

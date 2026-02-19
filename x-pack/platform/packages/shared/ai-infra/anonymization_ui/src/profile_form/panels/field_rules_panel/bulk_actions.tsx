@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
+import { ANONYMIZATION_ENTITY_CLASSES } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { FIELD_RULE_ACTION_ANONYMIZE } from '../../hooks/field_rule_actions';
-import { ENTITY_CLASS_VALUES, POLICY_ACTION_OPTIONS } from '../../constants';
+import { POLICY_ACTION_OPTIONS } from '../../constants';
 import { useFieldRulesPanelContext } from './context';
 
 export const FieldRulesPanelBulkActions = () => {
@@ -41,7 +42,7 @@ export const FieldRulesPanelBulkActions = () => {
         }
       ),
     },
-    ...ENTITY_CLASS_VALUES.map((value) => ({ value, text: value })),
+    ...ANONYMIZATION_ENTITY_CLASSES.map((value) => ({ value, text: value })),
   ];
 
   return (

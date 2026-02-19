@@ -121,7 +121,7 @@ describe('useFieldRulesPanelState', () => {
     expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'EMAIL' });
   });
 
-  it('allows clearing entity class without forcing REDACTED', () => {
+  it('allows clearing entity class without forcing a fallback value', () => {
     const onFieldRulesChange = jest.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
@@ -137,6 +137,45 @@ describe('useFieldRulesPanelState', () => {
     const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
     const userRule = nextRules.find((rule) => rule.field === 'user.email');
     expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: '' });
+  });
+
+  it('suggests entity class when toggling field to anonymize', () => {
+    const onFieldRulesChange = jest.fn();
+    const { result } = renderHook(() =>
+      useFieldRulesPanelState({
+        fieldRules: baseRules,
+        onFieldRulesChange,
+      })
+    );
+
+    act(() => {
+      result.current.onRuleActionChange('host.name', FIELD_RULE_ACTION_ANONYMIZE);
+    });
+
+    const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
+    const hostRule = nextRules.find((rule) => rule.field === 'host.name');
+    expect(hostRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'HOST_NAME' });
+  });
+
+  it('falls back to MISC when suggestion is unavailable', () => {
+    const onFieldRulesChange = jest.fn();
+    const rules: FieldRule[] = [
+      { field: 'custom.field', allowed: true, anonymized: false, entityClass: undefined },
+    ];
+
+    const { result } = renderHook(() =>
+      useFieldRulesPanelState({
+        fieldRules: rules,
+        onFieldRulesChange,
+      })
+    );
+
+    act(() => {
+      result.current.onRuleActionChange('custom.field', FIELD_RULE_ACTION_ANONYMIZE);
+    });
+
+    const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
+    expect(nextRules[0]).toMatchObject({ allowed: true, anonymized: true, entityClass: 'MISC' });
   });
 
   it('reports counters for allow/anonymize/deny', () => {

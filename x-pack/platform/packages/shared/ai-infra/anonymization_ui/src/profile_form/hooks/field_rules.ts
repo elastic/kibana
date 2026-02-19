@@ -13,7 +13,7 @@ import {
   type FieldRuleAction,
 } from './field_rule_actions';
 
-const DEFAULT_ENTITY_CLASS = 'REDACTED';
+const DEFAULT_ENTITY_CLASS = 'MISC';
 const ECS_FIELD_PREFIXES = ['@timestamp', 'event.', 'host.', 'user.', 'source.', 'destination.'];
 const DEFAULT_PRIORITY_TOKENS = [
   '@timestamp',
