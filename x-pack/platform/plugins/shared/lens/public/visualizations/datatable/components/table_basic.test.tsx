@@ -130,7 +130,7 @@ describe('DatatableComponent', () => {
       args,
       formatFactory: () =>
         ({
-          convert: (x) => x,
+          convert: (x: unknown) => x,
           convertToReact: () => undefined,
           hasReactSupport: () => false,
         } as unknown as IFieldFormat),
