@@ -236,19 +236,42 @@ export function createEvaluateDataset({
     await executorClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
+        task: async ({ input, output: expected }) => {
+          const SEP = '═'.repeat(60);
+          log.info(`[Task] Prompt: "${input.prompt}"`);
           try {
-            log.debug(`Generating rule for prompt: ${input.prompt.substring(0, 100)}...`);
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
               return { error: taskResult.error || 'No rule returned from agent' };
             }
 
-            log.debug(`Generated rule: ${taskResult.generatedRule.name}`);
-            log.debug(
-              `Generated query preview: ${taskResult.generatedRule.query?.substring(0, 150)}...`
+            log.info(SEP);
+            log.success(`Generated rule: "${taskResult.generatedRule.name}"`);
+            log.info(JSON.stringify(taskResult.generatedRule, null, 2));
+            log.info(SEP);
+
+            // Vibe checks — mirrors what the evaluators will score
+            const genTech = extractMitreTechniques(taskResult.generatedRule);
+            const expTech = extractMitreTechniques(expected ?? {});
+            log.info(
+              `[Result] MITRE: generated=[${[...genTech].join(', ') || 'none'}] | expected=[${[...expTech].join(', ') || 'none'}]`
             );
+
+            const { coverage, missing } = hasRequiredFields(taskResult.generatedRule);
+            log.info(
+              `[Result] Field coverage: ${Math.round(coverage * 100)}%${missing.length ? ` | missing: ${missing.join(', ')}` : ''}`
+            );
+
+            log.info(
+              `[Result] Rule type & language: type=${taskResult.generatedRule.type} | language=${taskResult.generatedRule.language}`
+            );
+
+            const syntaxResult = validateEsqlSyntax(taskResult.generatedRule.query ?? '');
+            log.info(
+              `[Result] Query syntax: ${syntaxResult.valid ? 'valid' : `INVALID — ${syntaxResult.error}`}`
+            );
+
             return taskResult;
           } catch (error) {
             log.error(
