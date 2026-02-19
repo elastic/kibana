@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { AttachmentHeader } from './attachment_header';
 
 interface CanvasModeFlyoutProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title: string;
   children: React.ReactNode;
   isSidebar?: boolean;
+  actionButtons?: ActionButton[];
 }
 
 /**
@@ -28,7 +30,9 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
   title,
   children,
   isSidebar,
+  actionButtons = [],
 }) => {
+  const { euiTheme } = useEuiTheme();
   // Only apply custom width in full-screen context (not sidebar)
   const flyoutStyles = !isSidebar
     ? css`
@@ -48,18 +52,24 @@ export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({
       outsideClickCloses={true}
       css={flyoutStyles}
       type={isSidebar ? 'overlay' : 'push'}
+      hideCloseButton
+      paddingSize="none"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="canvasModeFlyoutTitle">
-            {title ||
-              i18n.translate('xpack.agentBuilder.canvasMode.defaultTitle', {
-                defaultMessage: 'Canvas Mode',
-              })}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <AttachmentHeader
+        title={title}
+        actionButtons={actionButtons}
+        onClose={onClose}
+        showPreviewBadge
+      />
+      <EuiFlyoutBody
+        css={css`
+          &.euiFlyoutBody {
+            padding-top: ${euiTheme.size.m};
+          }
+        `}
+      >
+        {children}
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 };

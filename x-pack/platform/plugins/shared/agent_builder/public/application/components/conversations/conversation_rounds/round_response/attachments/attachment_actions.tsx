@@ -64,6 +64,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                   defaultMessage: 'More actions',
                 })}
                 onClick={togglePopover}
+                size="s"
               />
             }
             isOpen={isPopoverOpen}

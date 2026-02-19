@@ -32,6 +32,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   attachment: TAttachment;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
+  /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
+  isCanvas: boolean;
   /** Function to update the attachment's origin reference */
   updateOrigin: (originId: string) => Promise<void>;
   /** Callback to open the attachment in canvas mode (expanded flyout view) */

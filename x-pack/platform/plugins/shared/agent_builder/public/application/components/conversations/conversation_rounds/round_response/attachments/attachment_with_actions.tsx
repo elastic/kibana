@@ -10,7 +10,7 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { CanvasModeFlyout } from './canvas_mode_flyout';
-import { InlineAttachmentHeader } from './inline_attachment_header';
+import { AttachmentHeader } from './attachment_header';
 import { InlineAttachmentContent } from './inline_attachment_content';
 
 interface AttachmentWithActionsProps {
@@ -46,13 +46,26 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
-  const actionButtons = useMemo(
+  const inlineActionButtons = useMemo(
     () =>
       uiDefinition?.getActionButtons?.({
         attachment,
         isSidebar,
         updateOrigin,
         openCanvas,
+        isCanvas: false,
+      }),
+    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
+  );
+
+  const canvasHeaderActionButtons = useMemo(
+    () =>
+      uiDefinition?.getActionButtons?.({
+        attachment,
+        isSidebar,
+        updateOrigin,
+        openCanvas,
+        isCanvas: true,
       }),
     [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
   );
@@ -61,13 +74,12 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
     return null;
   }
 
+  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+
   return (
     <>
       <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
-        <InlineAttachmentHeader
-          label={attachment.type.toUpperCase()}
-          actionButtons={actionButtons}
-        />
+        <AttachmentHeader title={title} actionButtons={inlineActionButtons} />
         <InlineAttachmentContent>
           {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
         </InlineAttachmentContent>
@@ -76,8 +88,9 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
         <CanvasModeFlyout
           isOpen={isCanvasFlyoutOpen}
           onClose={closeCanvas}
-          title={attachment.type}
+          title={title}
           isSidebar={isSidebar}
+          actionButtons={canvasHeaderActionButtons}
         >
           {uiDefinition.renderCanvasContent({ attachment, isSidebar })}
         </CanvasModeFlyout>
