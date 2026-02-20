@@ -177,14 +177,11 @@ const ActionsTableComponent = () => {
     [profilesMap, isLoadingProfiles]
   );
 
-  const renderSourceColumn = useCallback(
-    (_: unknown, item: SearchHit) => {
-      const userId = (item.fields?.user_id as string[] | undefined)?.[0];
+  const renderSourceColumn = useCallback((_: unknown, item: SearchHit) => {
+    const userId = (item.fields?.user_id as string[] | undefined)?.[0];
 
-      return <SourceColumn userId={userId} />;
-    },
-    []
-  );
+    return <SourceColumn userId={userId} />;
+  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
