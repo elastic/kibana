@@ -16,6 +16,7 @@ import type {
   AutocompleteTermDefinition,
 } from './autocomplete_component';
 import type { AutoCompleteContext } from '../types';
+import { asArray } from '../../utils/array_utils';
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if
@@ -67,10 +68,7 @@ export class ObjectComponent extends SharedComponent {
     _.each(this.constants, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        const next = Array.isArray(componentResult.next)
-          ? componentResult.next
-          : [componentResult.next];
-        result.next.push(...next);
+        result.next.push(...asArray(componentResult.next));
       }
     });
 
@@ -86,10 +84,7 @@ export class ObjectComponent extends SharedComponent {
     _.each(this.patternsAndWildCards, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        const next = Array.isArray(componentResult.next)
-          ? componentResult.next
-          : [componentResult.next];
-        result.next.push(...next);
+        result.next.push(...asArray(componentResult.next));
       }
     });
 

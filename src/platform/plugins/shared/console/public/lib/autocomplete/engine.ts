@@ -14,6 +14,7 @@ import type {
   AutocompleteTermDefinition,
 } from './components/autocomplete_component';
 import type { AutoCompleteContext, ResultTerm } from './types';
+import { asArray } from '../utils/array_utils';
 
 declare global {
   interface Window {
@@ -108,7 +109,7 @@ export function walkTokenPath(
         tracer('matched [' + token + '] with:', result);
         let next: AutocompleteComponent[] = [];
         if (result.next) {
-          next = Array.isArray(result.next) ? result.next : [result.next];
+          next = asArray(result.next);
         }
 
         let extensionList: Array<Record<string, unknown>>;

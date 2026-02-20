@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { SharedComponent } from './shared_component';
 import type { AutocompleteMatch, AutocompleteTermDefinition } from './autocomplete_component';
 import type { AutoCompleteContext } from '../types';
+import { asArray } from '../../utils/array_utils';
 export class ConstantComponent extends SharedComponent {
   options: AutocompleteTermDefinition[];
 
@@ -20,19 +21,14 @@ export class ConstantComponent extends SharedComponent {
     options?: AutocompleteTermDefinition | AutocompleteTermDefinition[]
   ) {
     super(name, parent);
-    if (_.isString(options)) {
-      options = [options];
-    }
-    this.options = options ? (Array.isArray(options) ? options : [options]) : [name];
+    this.options = options !== undefined ? asArray(options) : [name];
   }
   getTerms(): AutocompleteTermDefinition[] {
     return this.options;
   }
 
   addOption(options: AutocompleteTermDefinition | AutocompleteTermDefinition[]) {
-    const asArray = Array.isArray(options) ? options : [options];
-
-    this.options.push(...asArray);
+    this.options.push(...asArray(options));
     this.options = _.uniq(this.options);
   }
 

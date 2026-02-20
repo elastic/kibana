@@ -12,6 +12,7 @@ import { SharedComponent } from './shared_component';
 /** A component that suggests one of the give options, but accepts anything */
 import type { AutocompleteMatch, AutocompleteTermDefinition } from './autocomplete_component';
 import type { AutoCompleteContext } from '../types';
+import { asArray } from '../../utils/array_utils';
 
 type ListGenerator = (
   context?: AutoCompleteContext,
@@ -44,11 +45,7 @@ export class ListComponent extends SharedComponent {
       // already have a value -> no suggestions
       return [];
     }
-    const alreadySet = context.otherTokenValues
-      ? Array.isArray(context.otherTokenValues)
-        ? context.otherTokenValues
-        : [context.otherTokenValues]
-      : [];
+    const alreadySet = context.otherTokenValues ? asArray(context.otherTokenValues) : [];
 
     let ret: AutocompleteTermDefinition[] = _.difference(
       this.listGenerator(context, editor),
@@ -98,7 +95,7 @@ export class ListComponent extends SharedComponent {
     context: AutoCompleteContext,
     editor: unknown
   ): AutocompleteMatch {
-    const tokens = Array.isArray(token) ? token : [token];
+    const tokens = asArray(token);
     if (!this.allowNonValidValues && !this.validateTokens(tokens)) {
       return null;
     }

@@ -20,6 +20,7 @@ import {
 } from './components';
 import type { AutoCompleteContext, ResultTerm } from './types';
 import { isRecord } from '../../../common/utils/record_utils';
+import { asArray } from '../utils/array_utils';
 import type {
   AutocompleteComponent,
   AutocompleteMatch,
@@ -151,10 +152,7 @@ class ScopeResolver extends SharedComponent {
     _.each(components, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
-        const next = Array.isArray(componentResult.next)
-          ? componentResult.next
-          : [componentResult.next];
-        result.next.push(...next);
+        result.next.push(...asArray(componentResult.next));
       }
     });
 

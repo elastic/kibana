@@ -8,6 +8,7 @@
  */
 
 import { getAutocompleteInfo } from '../../services';
+import { asArray } from '../utils/array_utils';
 
 /**
  * Expands provided aliases, data streams and wildcards
@@ -28,9 +29,7 @@ export function expandAliases(indicesOrAliases?: string | string[]): string | st
     return indicesOrAliases;
   }
 
-  if (typeof indicesOrAliases === 'string') {
-    indicesOrAliases = [indicesOrAliases];
-  }
+  indicesOrAliases = asArray(indicesOrAliases);
 
   indicesOrAliases = indicesOrAliases.flatMap((iOrA) => {
     if (perAliasIndexes[iOrA]) {
