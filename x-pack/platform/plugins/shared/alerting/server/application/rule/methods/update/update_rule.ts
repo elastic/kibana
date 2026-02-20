@@ -114,8 +114,16 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+  } = originalRuleSavedObject.attributes;
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -209,10 +217,20 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: apiKeysToInvalidate,
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -330,6 +348,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -342,14 +361,19 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

@@ -73,6 +73,8 @@ exports[`Error DURATION 1`] = `undefined`;
 
 exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
+exports[`Error ERROR_CODE 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -177,6 +179,8 @@ exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -509,6 +513,8 @@ exports[`Span DURATION 1`] = `undefined`;
 
 exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
+exports[`Span ERROR_CODE 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -600,6 +606,8 @@ exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -932,6 +940,8 @@ exports[`Transaction DURATION 1`] = `undefined`;
 
 exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
+exports[`Transaction ERROR_CODE 1`] = `undefined`;
+
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -1033,6 +1043,8 @@ exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
 
