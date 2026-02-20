@@ -23,6 +23,7 @@ jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
 }));
 
 jest.mock('../ilm_phase_select/ilm_phase_select', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IlmPhaseSelect: ({ onSelect, renderButton }: any) => {
     // Keep the flyout's real `renderButton` (and its data-test-subj), but make it deterministic
     // for tests: clicking the button adds the cold phase.
@@ -195,6 +196,7 @@ describe('EditIlmPhasesFlyout', () => {
       const initialPhases: IlmPolicyPhases = {
         hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
         warm: { name: 'warm', size_in_bytes: 0, min_age: '1500ms' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const { onSave } = renderFlyout({ initialPhases }, { initialSelectedPhase: 'warm' });
