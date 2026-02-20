@@ -419,18 +419,6 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           ),
         },
       },
-
-      upload: {
-        fileAlreadyExists: (scriptName: string) =>
-          i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.footer.upload.fileAlreadyExistsMessage',
-            {
-              defaultMessage:
-                'The file you are attempting to upload already exists in [{scriptName}].',
-              values: { scriptName },
-            }
-          ),
-      },
     },
     footer: {
       cancelButtonLabel: i18n.translate(
