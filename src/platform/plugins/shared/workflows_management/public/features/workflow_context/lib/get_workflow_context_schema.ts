@@ -10,7 +10,11 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicWorkflowContextSchema } from '@kbn/workflows';
+import {
+  AlertEventPropsSchema,
+  BaseEventSchema,
+  DynamicWorkflowContextSchema,
+} from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
@@ -78,6 +82,15 @@ export function getWorkflowContextSchema(
     }
   }
 
+  // Build event schema dynamically based on defined triggers.
+  // Only include alert-specific properties (alerts, rule, params) when an alert trigger is present.
+  // spaceId is always included via BaseEventSchema.
+  const triggers = definition.triggers ?? [];
+  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
+  const eventSchema = hasAlertTrigger
+    ? BaseEventSchema.merge(AlertEventPropsSchema).optional()
+    : BaseEventSchema.optional();
+
   // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
   // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
   // The merge() method requires both schemas to have the same base structure
@@ -96,5 +109,7 @@ export function getWorkflowContextSchema(
         ])
       ),
     }),
+    // event schema is dynamic based on triggers
+    event: eventSchema,
   });
 }

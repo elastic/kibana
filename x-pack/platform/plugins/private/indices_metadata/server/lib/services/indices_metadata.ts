@@ -37,6 +37,7 @@ import {
 import { MetadataReceiver } from './receiver';
 import { MetadataSender } from './sender';
 import type { ConfigurationService } from './configuration';
+import type { TelemetryConfigProvider } from './telemetry_config_provider';
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
@@ -50,6 +51,7 @@ export class IndicesMetadataService {
   private sender!: MetadataSender;
   private subscription$!: Subscription;
   private configuration?: IndicesMetadataConfiguration;
+  private telemetryConfigProvider!: TelemetryConfigProvider;
 
   constructor(logger: Logger, configurationService: ConfigurationService) {
     this.logger = logger.get(IndicesMetadataService.name);
@@ -65,12 +67,14 @@ export class IndicesMetadataService {
     taskManager: TaskManagerStartContract,
     analytics: AnalyticsServiceStart,
     esClient: ElasticsearchClient,
-    isServerless: boolean
+    isServerless: boolean,
+    telemetryConfigProvider: TelemetryConfigProvider
   ) {
     this.logger.debug('Starting indices metadata service');
 
     this.receiver = new MetadataReceiver(this.logger, esClient, isServerless);
     this.sender = new MetadataSender(this.logger, analytics);
+    this.telemetryConfigProvider = telemetryConfigProvider;
 
     this.subscription$ = this.configurationService
       .getIndicesMetadataConfiguration$()
@@ -190,7 +194,11 @@ export class IndicesMetadataService {
           return {
             async run() {
               const { state } = taskInstance;
-              await service.publishIndicesMetadata();
+              if (service.telemetryConfigProvider.getIsOptedIn()) {
+                await service.publishIndicesMetadata();
+              } else {
+                service.logger.debug('Telemetry opted out, skipping task run');
+              }
               return { state };
             },
 

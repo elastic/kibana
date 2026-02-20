@@ -7,7 +7,10 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { ENTITY_ANALYTICS_THREAT_HUNTING_URL } from '../../../urls/navigation';
+import {
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
+  ENTITY_ANALYTICS_THREAT_HUNTING_URL,
+} from '../../../urls/navigation';
 import {
   PAGE_TITLE,
   COMBINED_RISK_DONUT_CHART,
@@ -16,6 +19,7 @@ import {
   THREAT_HUNTING_ENTITIES_TABLE_LOADED,
   TIMELINE_ICON,
 } from '../../../screens/entity_analytics/threat_hunting';
+import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/watchlist_filter';
 
 describe(
   'Entity Threat Hunting page',
@@ -87,6 +91,18 @@ describe(
           timeout: 30000,
         }
       ).should('exist');
+    });
+
+    it('navigate to privileged user monitoring page on selecting privileged users watchlist', () => {
+      cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
+
+      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('exist');
+      const comboBoxInput = `${WATCHLIST_FILTER_COMBO_BOX} input`;
+      cy.get(comboBoxInput).first().click();
+      cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
+
+      cy.url({ timeout: 6000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
+      cy.url().should('include', '/entity_analytics_privileged_user_monitoring');
     });
 
     it('displays timeline icon when data is available', () => {

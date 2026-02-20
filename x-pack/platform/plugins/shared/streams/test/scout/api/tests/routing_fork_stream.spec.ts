@@ -6,16 +6,20 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data routing - fork stream API (CRUD)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Stream names must be exactly one level deep when forking from 'logs'
     // Format: logs.<name> where name uses hyphens, not dots
     const streamNamePrefix = 'logs.rt';
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamWhere = any;
 
     apiTest.afterEach(async ({ apiServices }) => {
       // Cleanup test streams - matches any stream starting with 'logs.rt'
@@ -646,7 +650,7 @@ apiTest.describe(
 
       // Find and update the routing rule
       const updatedRouting = parentBody.stream.ingest.wired.routing.map(
-        (rule: { destination: string; where: any; status: string }) => {
+        (rule: { destination: string; where: StreamWhere; status: string }) => {
           if (rule.destination === childStreamName) {
             return {
               ...rule,
@@ -715,7 +719,7 @@ apiTest.describe(
 
         // Update status to disabled
         const updatedRouting = parentBody.stream.ingest.wired.routing.map(
-          (rule: { destination: string; where: any; status: string }) => {
+          (rule: { destination: string; where: StreamWhere; status: string }) => {
             if (rule.destination === childStreamName) {
               return { ...rule, status: 'disabled' };
             }
@@ -874,7 +878,7 @@ apiTest.describe(
 
         // Update to complex AND condition
         const updatedRouting = parentBody.stream.ingest.wired.routing.map(
-          (rule: { destination: string; where: any; status: string }) => {
+          (rule: { destination: string; where: StreamWhere; status: string }) => {
             if (rule.destination === childStreamName) {
               return {
                 ...rule,

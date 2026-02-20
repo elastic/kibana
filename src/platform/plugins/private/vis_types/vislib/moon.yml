@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/react-kibana-context-render'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/embeddable-plugin'
   - '@kbn/chart-expressions-common'
   - '@kbn/visualizations-common'
 tags:
