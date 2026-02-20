@@ -51,7 +51,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
           if (error instanceof EntityNotFoundError) {
             return res.customError({
               statusCode: 404,
-              body: error as EntityNotFoundError,
+              body: error,
             });
           }
 

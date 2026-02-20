@@ -61,7 +61,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
           await crudClient.upsertEntitiesBulk(req.body.entities, req.query.force);
         } catch (error) {
           if (error instanceof BadCRUDRequestError) {
-            return res.badRequest({ body: error as BadCRUDRequestError });
+            return res.badRequest({ body: error });
           }
 
           logger.error(error);
