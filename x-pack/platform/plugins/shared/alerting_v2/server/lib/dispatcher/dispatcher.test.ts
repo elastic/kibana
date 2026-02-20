@@ -20,6 +20,7 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
+import { createWorkflowsManagementApi } from './fixtures/workflows_management_api.mock';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
@@ -105,7 +106,7 @@ describe('DispatcherService', () => {
       queryService,
       loggerService,
       storageService,
-      undefined as any,
+      createWorkflowsManagementApi(),
       rulesSoService,
       npSoService
     );
@@ -334,7 +335,7 @@ describe('DispatcherService', () => {
         queryService,
         loggerService,
         storageService,
-        undefined as any,
+        createWorkflowsManagementApi(),
         rulesSoService,
         npSoService
       );
