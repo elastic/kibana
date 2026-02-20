@@ -46,15 +46,7 @@ const tick = async () => {
 const getTab = (phase: string) => screen.getByTestId(`${DATA_TEST_SUBJ}Tab-${phase}`);
 const queryTab = (phase: string) => screen.queryByTestId(`${DATA_TEST_SUBJ}Tab-${phase}`);
 const getPanel = (phase: string) => screen.getByTestId(`${DATA_TEST_SUBJ}Panel-${phase}`);
-const getPhaseContainer = (phase: string) => {
-  const panel = getPanel(phase);
-  const container = panel.parentElement;
-  if (!container) {
-    throw new Error(`Could not find phase container for "${phase}"`);
-  }
-  return container as HTMLElement;
-};
-const withinPhase = (phase: string) => within(getPhaseContainer(phase));
+const withinPhase = (phase: string) => within(getPanel(phase));
 
 const renderFlyout = (
   props: Partial<React.ComponentProps<typeof EditIlmPhasesFlyout>> = {},
@@ -347,6 +339,55 @@ describe('EditIlmPhasesFlyout', () => {
           },
         })
       );
+    });
+
+    it('hides and unmounts readonly while downsampling is enabled, and re-adds it when disabled', async () => {
+      const onChange = jest.fn();
+      renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          onChange,
+        },
+        { initialSelectedPhase: 'warm' }
+      );
+
+      await tick();
+      const warmPanel = withinPhase('warm');
+
+      // Initially visible.
+      expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).toBeInTheDocument();
+
+      // Set it to true.
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`));
+      await tick();
+
+      // Enable downsampling -> readonly should be cleared and hidden.
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
+      await tick();
+
+      expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
+
+      // Ensure output does not include warm.readonly even if it was previously enabled.
+      expect(onChange).toHaveBeenLastCalledWith({
+        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        warm: {
+          name: 'warm',
+          size_in_bytes: 0,
+          min_age: '30d',
+          downsample: { after: '30d', fixed_interval: '1d' },
+        },
+      });
+
+      // Disable downsampling -> readonly should re-appear (re-mounted).
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
+      await tick();
+
+      const checkbox = warmPanel.getByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`);
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).not.toBeChecked();
     });
 
     it('revalidates cold downsampling interval when re-enabling cold (warm interval changed while cold disabled)', async () => {

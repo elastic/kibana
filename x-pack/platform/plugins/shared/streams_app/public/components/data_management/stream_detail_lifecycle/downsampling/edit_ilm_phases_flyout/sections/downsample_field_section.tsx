@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -38,14 +38,33 @@ export const DownsampleFieldSection = ({
   const enabledPath = `_meta.${phaseName}.downsampleEnabled`;
   const intervalValuePath = `_meta.${phaseName}.downsample.fixedIntervalValue`;
   const intervalUnitPath = `_meta.${phaseName}.downsample.fixedIntervalUnit`;
+  const readonlyPath = `_meta.${phaseName}.readonlyEnabled`;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
 
   useFormData({ form, watch: enabledPath });
 
   const enabledField = form.getFields()[enabledPath];
+  const isEnabled = Boolean(enabledField?.value);
+  const readonlyDefaultValue = form.getFieldDefaultValue<boolean>(readonlyPath);
+  const readonlyField = form.getFields()[readonlyPath];
+  const isReadonlyEnabled = Boolean(readonlyField?.value ?? readonlyDefaultValue);
+
+  const resetReadonly = useCallback(() => {
+    // Ensure the "default value on the form" is reset too so that when the readonly field is re-mounted
+    // (after toggling downsampling off), it comes back unchecked.
+    const payload: Record<string, unknown> = { _meta: { [phaseName]: { readonlyEnabled: false } } };
+    form.updateFieldValues(payload, { runDeserializer: false });
+    form.setFieldValue(readonlyPath, false);
+  }, [form, phaseName, readonlyPath]);
+
+  useEffect(() => {
+    if (isEnabled && isReadonlyEnabled) {
+      resetReadonly();
+    }
+  }, [isEnabled, isReadonlyEnabled, resetReadonly]);
+
   if (!enabledField) return null;
-  const isEnabled = Boolean(enabledField.value);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -82,6 +101,12 @@ export const DownsampleFieldSection = ({
             onChange={(e) => {
               const nextEnabled = e.target.checked;
               enabledField.setValue(nextEnabled);
+
+              if (nextEnabled) {
+                // Downsampling is incompatible with the ILM "readonly" action in this flyout.
+                // Clear and unmount the readonly toggle while downsampling is enabled.
+                resetReadonly();
+              }
 
               // When enabling downsampling, default the fixed_interval to 2x the previous enabled downsample interval.
               // Only do this when the current interval is still the schema default (pristine 1d) to avoid clobbering
