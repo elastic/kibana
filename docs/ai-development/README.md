@@ -38,13 +38,18 @@ Note: Kibana gitignores `.cursor/`. The install copies from this tracked directo
 ## What’s included
 
 - **CLAUDE.md** — Project overview, build/test commands, architecture summary, “where does this go?” guidance.
-- **Rules** (`rules/*.mdc`) — TypeScript, plugin architecture, testing, React/EUI, CI and draft PR workflow.
+- **Rules** (`rules/*.mdc`) — TypeScript, plugin architecture, testing, React/EUI, CI and draft PR workflow, saved objects.
 - **Skills** (`skills/*/SKILL.md`) — Step-by-step guides with validation:
-  - create-kibana-plugin
-  - add-http-route
-  - write-jest-test
-  - write-ftr-api-test
-  - prepare-pr
+  - create-kibana-plugin — scaffold new plugin
+  - add-http-route — HTTP route with validation and FTR API test
+  - create-saved-object — saved object type, modelVersions, CRUD
+  - write-jest-test — Jest unit test
+  - write-ftr-api-test — FTR API integration test
+  - write-ftr-functional-test — FTR functional (UI) test with page objects
+  - prepare-pr — type-check, lint, i18n, tests, commit message
+  - ci-preflight — run same checks CI runs locally
+  - interpret-ci-failure — parse CI logs and suggest fix
+  - debug-server — debug server errors from stack trace
 
 ## Troubleshooting
 
