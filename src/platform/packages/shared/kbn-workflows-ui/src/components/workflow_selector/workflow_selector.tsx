@@ -100,73 +100,89 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   );
 
   // Custom render function for workflow options
-  const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    // Prepare the namePrepend content based on the WorkflowOption properties
-    const getPrependContent = (workflowOption: WorkflowOption) => {
-      const isSelected = workflowOption.checked === 'on';
-      const isDisabled = workflowOption.disabled;
-      const wasSelectedButNowDisabled = isSelected && isDisabled;
+  const renderWorkflowOption = useCallback(
+    (option: WorkflowOption, searchValue: string) => {
+      // Prepare the namePrepend content based on the WorkflowOption properties
+      const getPrependContent = (workflowOption: WorkflowOption) => {
+        const isSelected = workflowOption.checked === 'on';
+        const isDisabled = workflowOption.disabled;
+        const wasSelectedButNowDisabled = isSelected && isDisabled;
 
-      if (wasSelectedButNowDisabled) {
-        return (
-          <EuiIcon
-            type="alert"
-            color="warning"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.WORKFLOW_DISABLED_WARNING}
-          />
+        if (wasSelectedButNowDisabled) {
+          return (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.WORKFLOW_DISABLED_WARNING}
+            />
+          );
+        } else if (isDisabled) {
+          return (
+            <IconDisabledWorkflow
+              size="m"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.DISABLED_BADGE_LABEL}
+            />
+          );
+        } else if (workflowOption.validationResult) {
+          return (
+            <EuiIcon
+              type="warning"
+              style={{ marginRight: '8px' }}
+              color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
+              aria-label={workflowOption.validationResult.message}
+            />
+          );
+        }
+
+        return null;
+      };
+
+      const labelContent =
+        finalConfig.listView && option.checked === 'on' ? (
+          <strong>{option.label}</strong>
+        ) : finalConfig.listView ? (
+          option.label
+        ) : (
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         );
-      } else if (isDisabled) {
-        return (
-          <IconDisabledWorkflow
-            size="m"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.DISABLED_BADGE_LABEL}
-          />
-        );
-      } else if (workflowOption.validationResult) {
-        return (
-          <EuiIcon
-            type="warning"
-            style={{ marginRight: '8px' }}
-            color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
-            aria-label={workflowOption.validationResult.message}
-          />
-        );
+
+      const secondaryContent = finalConfig.listView ? (
+        (option.secondaryContent as string)
+      ) : (
+        <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
+      );
+
+      const content = (
+        // @ts-expect-error upgrade typescript v5.9.3
+        <>
+          <>
+            {getPrependContent(option)}
+            {labelContent}
+          </>
+          {option.secondaryContent && (
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              <small>{secondaryContent}</small>
+            </EuiText>
+          )}
+        </>
+      );
+
+      const tooltipContent = option.disabled
+        ? i18n.DISABLED_WORKFLOW_TOOLTIP
+        : option.validationResult
+        ? option.validationResult.message
+        : undefined;
+
+      if (tooltipContent) {
+        return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
       }
 
-      return null;
-    };
-
-    const content = (
-      // @ts-expect-error upgrade typescript v5.9.3
-      <>
-        <>
-          {getPrependContent(option)}
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </>
-        {option.secondaryContent && (
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>
-              <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
-            </small>
-          </EuiText>
-        )}
-      </>
-    );
-
-    const tooltipContent = option.disabled
-      ? i18n.DISABLED_WORKFLOW_TOOLTIP
-      : option.validationResult
-      ? option.validationResult.message
-      : undefined;
-
-    if (tooltipContent) {
-      return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
-    }
-
-    return content;
-  }, []);
+      return content;
+    },
+    [finalConfig.listView]
+  );
 
   const handleWorkflowChange = useCallback(
     (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
@@ -368,18 +384,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               // This should be configurable in EUI, but it's not :(
               '.euiSelectableListItem__onFocusBadge': {
                 display: 'none',
-              },
-              '.euiSelectableListItem__text': {
-                minWidth: 0,
-                overflow: 'hidden',
-              },
-              '.euiSelectableListItem__text .euiHighlight': {
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'inline-block',
-                maxWidth: '100%',
-                verticalAlign: 'bottom',
               },
             },
           }}
