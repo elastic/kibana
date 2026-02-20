@@ -38,8 +38,13 @@ test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
       await pageObjects.monitorDetails.waitForLoadingToFinish();
     });
 
-    await test.step('open anomaly detection flyout and creates ML job', async () => {
+    await test.step('open anomaly detection flyout and verify no license error', async () => {
       await pageObjects.monitorDetails.enableAnomalyDetection();
+      await expect(page.testSubj.locator('uptimeMLCreateJobBtn')).toBeEnabled();
+      await expect(page.testSubj.locator('uptimeMLLicenseInfo')).toBeHidden();
+    });
+
+    await test.step('create ML job', async () => {
       await pageObjects.monitorDetails.createMLJob();
       await expect(page.testSubj.locator('ruleDefinitionHeaderRuleTypeName')).toHaveText(
         'Uptime Duration Anomaly'
