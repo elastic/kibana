@@ -274,12 +274,12 @@ export class StreamsClient {
   }
 
   async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
-    const definitions = streams.map(({ name, request }) =>
-      convertUpsertRequestIntoDefinition(name, request)
-    );
+    const definitions = streams.map(({ name, request }) => {
+      return { request, definition: convertUpsertRequestIntoDefinition(name, request) };
+    });
 
     const result = await State.attemptChanges(
-      definitions.map((definition) => ({
+      definitions.map(({ definition }) => ({
         type: 'upsert',
         definition,
       })),
@@ -290,7 +290,7 @@ export class StreamsClient {
     );
 
     await Promise.all(
-      definitions.map((definition, i) => this.syncAssets(definition, streams[i].request))
+      definitions.map(({ definition, request }, i) => this.syncAssets(definition, request))
     );
 
     return {
