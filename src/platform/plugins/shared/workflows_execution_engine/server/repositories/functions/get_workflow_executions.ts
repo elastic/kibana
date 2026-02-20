@@ -10,13 +10,12 @@
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../execution_state_repository/execution_state_repository';
 import type { WorkflowExecutionRepository } from '../workflow_execution_repository/workflow_execution_repository';
-import type { GetWorkflowExecution } from '../../types';
 
 export function getWorkflowExecutionFn(
   executionStateRepository: ExecutionStateRepository,
   workflowExecutionRepositoryPromise: Promise<WorkflowExecutionRepository>
-): GetWorkflowExecution {
-  return async (executionId: string, spaceId: string) => {
+) {
+  return async (executionId: string, spaceId: string): Promise<EsWorkflowExecution | null> => {
     const executionsFromState = await executionStateRepository.getWorkflowExecutions(
       new Set([executionId]),
       spaceId

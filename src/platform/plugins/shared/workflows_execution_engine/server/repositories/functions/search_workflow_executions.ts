@@ -7,17 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows/types/latest';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common/mappings';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../workflow_execution_repository/constants';
-import type { SearchWorkflowExecutions } from '../../types';
 
-export function searchWorkflowExecutionsFn(
-  esClient: ElasticsearchClient
-): SearchWorkflowExecutions {
-  return async ({ query, sort = [{ createdAt: 'desc' }], size = 100, from, page = 1 }) => {
+export interface SearchWorkflowExecutionsParams {
+  query: QueryDslQueryContainer;
+  sort?: Sort;
+  size?: number;
+  from?: number;
+  page?: number;
+}
+
+export interface SearchResult<T> {
+  results: T[];
+  page: number;
+  size: number;
+  total: number;
+}
+
+export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
+  return async ({
+    query,
+    sort = [{ createdAt: 'desc' }],
+    size = 100,
+    from,
+    page = 1,
+  }: SearchWorkflowExecutionsParams): Promise<SearchResult<EsWorkflowExecution>> => {
     const filter: QueryDslQueryContainer[] = [];
 
     if (query.bool?.filter) {

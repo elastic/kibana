@@ -19,15 +19,16 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  EsWorkflowExecution,
-  EsWorkflowStepExecution,
-  WorkflowExecutionEngineModel,
-} from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  getStepExecutionsFn,
+  getWorkflowExecutionFn,
+  searchWorkflowExecutionsFn,
+} from './repositories/functions';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
@@ -62,9 +63,9 @@ export interface WorkflowsExecutionEnginePluginStart {
   cancelWorkflowExecution: CancelWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
-  getWorkflowExecution: GetWorkflowExecution;
-  searchWorkflowExecutions: SearchWorkflowExecutions;
-  getStepExecutions: GetStepExecutions;
+  getWorkflowExecution: ReturnType<typeof getWorkflowExecutionFn>;
+  searchWorkflowExecutions: ReturnType<typeof searchWorkflowExecutionsFn>;
+  getStepExecutions: ReturnType<typeof getStepExecutionsFn>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -104,17 +105,3 @@ export type ScheduleWorkflow = (
   context: Record<string, any>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
-
-export type GetWorkflowExecution = (
-  executionId: string,
-  spaceId: string
-) => Promise<EsWorkflowExecution | null>;
-
-export type SearchWorkflowExecutions = (
-  params: SearchWorkflowExecutionsParams
-) => Promise<SearchResult<EsWorkflowExecution>>;
-
-export type GetStepExecutions = (
-  executionId: string,
-  spaceId: string
-) => Promise<Record<string, EsWorkflowStepExecution> | null>;

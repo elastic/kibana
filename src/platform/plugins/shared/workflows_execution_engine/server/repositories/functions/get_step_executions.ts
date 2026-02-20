@@ -10,13 +10,15 @@
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../execution_state_repository/execution_state_repository';
 import type { StepExecutionRepository } from '../step_execution_repository/step_execution_repository';
-import type { GetStepExecutions } from '../../types';
 
 export function getStepExecutionsFn(
   executionStateRepository: ExecutionStateRepository,
   stepExecutionRepositoryPromise: Promise<StepExecutionRepository>
-): GetStepExecutions {
-  return async (executionId: string, spaceId: string) => {
+) {
+  return async (
+    executionId: string,
+    spaceId: string
+  ): Promise<Record<string, EsWorkflowStepExecution> | null> => {
     const executionsFromState = await executionStateRepository.getWorkflowExecutions(
       new Set([executionId]),
       spaceId
