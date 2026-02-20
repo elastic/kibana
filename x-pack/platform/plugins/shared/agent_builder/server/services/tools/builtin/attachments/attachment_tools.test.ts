@@ -111,6 +111,38 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.type).toBe('text');
     });
 
+    it('returns error for unknown attachment type with list of valid types', async () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: (type: string) =>
+          type === 'text'
+            ? {
+                id: 'text',
+                validate: (input: unknown) => ({ valid: true, data: input }),
+                format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+                isReadonly: false,
+              }
+            : undefined,
+        getRegisteredTypeIds: () => ['text', 'esql', 'screen_context'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === 'platform.core.attachment_add')!;
+
+      const result = (await tool.handler(
+        { type: 'image', data: 'binary data', description: 'A photo' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain("Unknown attachment type 'image'");
+      expect((result.results[0] as any).data.message).toContain('text');
+      expect((result.results[0] as any).data.message).toContain('esql');
+      expect((result.results[0] as any).data.message).toContain('screen_context');
+    });
+
     it('returns error for duplicate ID', async () => {
       // First, create an attachment with a specific ID
       await attachmentManager.add({
