@@ -95,9 +95,6 @@ export class CRUDClient {
     });
 
     switch (result as Result) {
-      case 'deleted':
-      case 'not_found':
-        throw new Error(`Could not update entity ID ${hashedId}`);
       case 'updated':
         this.logger.debug(`Updated entity ID ${hashedId}`);
         break;
