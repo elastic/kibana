@@ -87,6 +87,10 @@ export const TargetFieldSelector = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldLabel',
         { defaultMessage: 'Output field' }
       )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.targetFieldHelpText',
+        { defaultMessage: 'If empty, the input field is updated in place.' }
+      )}
       isInvalid={Boolean(errors.to)}
       error={errors.to?.message}
       fullWidth

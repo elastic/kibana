@@ -25,6 +25,10 @@ export const ReplaceTargetFieldSelector = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceTargetFieldLabel',
         { defaultMessage: 'Output field' }
       )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceTargetFieldHelpText',
+        { defaultMessage: 'If empty, the input field is updated in place.' }
+      )}
       isInvalid={Boolean(errors.to)}
       error={errors.to?.message}
       fullWidth

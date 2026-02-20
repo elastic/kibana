@@ -64,6 +64,12 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
           </EuiButtonEmpty>
         ) : undefined
       }
+      helpText={
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateFormatsHelpText"
+          defaultMessage="Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N format."
+        />
+      }
       fullWidth
       isInvalid={invalid}
       error={error?.message}

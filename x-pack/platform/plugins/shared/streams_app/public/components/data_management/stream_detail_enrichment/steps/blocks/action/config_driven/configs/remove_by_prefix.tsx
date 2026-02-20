@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
 import type { RemoveByPrefixProcessor } from '@kbn/streamlang';
 import type {
   ConfigDrivenProcessorConfiguration,
@@ -42,7 +45,20 @@ export const removeByPrefixProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'Remove by prefix',
     }
   ),
-  getDocUrl: () => null,
+  getDocUrl: (docLinks: DocLinksStart) => {
+    return (
+      <EuiLink
+        data-test-subj="streamsAppAvailableProcessorsRemoveByPrefixLink"
+        external
+        target="_blank"
+        href={docLinks.links.ingest.remove}
+      >
+        {i18n.translate('xpack.streams.availableProcessors.removeByPrefixLinkLabel', {
+          defaultMessage: 'Remove a field and all nested fields.',
+        })}
+      </EuiLink>
+    );
+  },
   defaultFormState,
   convertFormStateToConfig: getConvertFormStateToConfig<
     RemoveByPrefixProcessorFormState,

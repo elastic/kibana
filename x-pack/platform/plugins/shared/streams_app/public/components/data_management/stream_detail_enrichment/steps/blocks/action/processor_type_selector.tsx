@@ -356,7 +356,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
-          defaultMessage="Evaluates {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
+          defaultMessage="Evaluate {expressionNote}. Reference fields directly (for example, {example}). The result is written to the Output field."
           values={{
             expressionNote: <strong>arithmetic or logical expressions</strong>,
             example: (
