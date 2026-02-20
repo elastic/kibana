@@ -195,7 +195,7 @@ If a record already exists for the specified entity, that record is overwritten 
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/watchlists', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -432,7 +432,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   initEntityEngine(props: InitEntityEngineProps, kibanaSpace: string = 'default') {
@@ -530,7 +530,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/watchlists/list', kibanaSpace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -691,7 +691,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
         )
       )
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },

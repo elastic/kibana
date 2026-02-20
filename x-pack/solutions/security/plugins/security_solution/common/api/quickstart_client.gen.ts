@@ -986,7 +986,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       .request<CreateWatchlistResponse>({
         path: '/api/entity_analytics/watchlists',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -2163,7 +2163,7 @@ finalize it.
       .request<GetWatchlistResponse>({
         path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -2452,7 +2452,7 @@ providing you with the most current and effective threat detection capabilities.
       .request<ListWatchlistsResponse>({
         path: '/api/entity_analytics/watchlists/list',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -3259,7 +3259,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .request<UpdateWatchlistResponse>({
         path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,

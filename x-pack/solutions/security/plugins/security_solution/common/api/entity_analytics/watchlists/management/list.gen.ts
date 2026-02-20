@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Watchlist Management API
- *   version: 2026-01-28
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
