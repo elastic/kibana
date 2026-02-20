@@ -35,6 +35,7 @@ export const searchDocById = async (esClient: EsClient, id: string) => {
   await esClient.indices.refresh({ index: LATEST_INDEX });
   return await esClient.search({
     index: LATEST_INDEX,
+    version: true,
     query: {
       bool: {
         filter: {
