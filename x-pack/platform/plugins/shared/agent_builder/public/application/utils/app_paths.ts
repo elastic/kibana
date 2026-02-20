@@ -21,6 +21,9 @@ export const appPaths = {
     newWithAgent: ({ agentId }: { agentId: string }) => {
       return `/conversations/${newConversationId}?agent_id=${agentId}`;
     },
+    newWithPrompt: ({ promptId }: { promptId: string }) => {
+      return `/conversations/${newConversationId}?prompt=${promptId}`;
+    },
     conversation: ({ conversationId }: { conversationId: string }) => {
       return `/conversations/${conversationId}`;
     },
@@ -30,5 +33,8 @@ export const appPaths = {
     new: '/tools/new',
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
     bulkImportMcp: '/tools/bulk_import_mcp',
+  },
+  prompts: {
+    list: '/prompts',
   },
 };

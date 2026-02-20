@@ -44,4 +44,10 @@ export const queryKeys = {
         ['tools', 'namespace', 'validate', namespace, connectorId] as const,
     },
   },
+  prompts: {
+    all: ['prompts'] as const,
+    find: (params: { query?: string; page?: number; per_page?: number }) =>
+      ['prompts', 'find', params] as const,
+    byId: (promptId: string) => ['prompts', promptId] as const,
+  },
 };
