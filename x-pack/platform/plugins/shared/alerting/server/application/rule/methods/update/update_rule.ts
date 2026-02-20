@@ -376,7 +376,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

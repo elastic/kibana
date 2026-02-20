@@ -213,13 +213,6 @@ describe('findRulesRoute', () => {
                 },
               ],
               "api_key_owner": "2889684073",
-              "artifacts": Object {
-                "dashboards": Array [
-                  Object {
-                    "id": "dashboard-1",
-                  },
-                ],
-              },
               "consumer": "alerts",
               "created_at": "2024-03-21T13:15:00.498Z",
               "created_by": "elastic",
@@ -243,7 +236,6 @@ describe('findRulesRoute', () => {
                 "interval": "1s",
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
-              "snooze_schedule": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",
@@ -294,13 +286,6 @@ describe('findRulesRoute', () => {
                 },
               ],
               "api_key_owner": "2889684073",
-              "artifacts": Object {
-                "dashboards": Array [
-                  Object {
-                    "id": "dashboard-1",
-                  },
-                ],
-              },
               "consumer": "alerts",
               "created_at": "2024-03-21T13:15:00.498Z",
               "created_by": "elastic",
@@ -324,7 +309,6 @@ describe('findRulesRoute', () => {
                 "interval": "1s",
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
-              "snooze_schedule": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type {
   RuleResponseV1,
   RuleParamsV1,
@@ -55,7 +56,7 @@ export const transformRuleActions = (
         useAlertDataForTemplate,
       } = action;
 
-      return {
+      const actionResponse = {
         group,
         id,
         params,
@@ -75,6 +76,8 @@ export const transformRuleActions = (
           use_alert_data_for_template: useAlertDataForTemplate,
         }),
       };
+
+      return omit(actionResponse, 'alerts_filter.query.dsl');
     }),
     ...systemActions.map((sActions) => {
       const { id, actionTypeId, params, uuid } = sActions;
@@ -112,7 +115,6 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   schedule: rule.schedule,
   actions: transformRuleActions(rule.actions, rule.systemActions ?? []),
   params: rule.params,
-  ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,
@@ -140,21 +142,13 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
         },
       }
     : {}),
-  ...(rule.monitoring ? { monitoring: transformMonitoring(rule.monitoring) } : {}),
-  ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
-  ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
-  ...(rule.isSnoozedUntil !== undefined
-    ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
-    : {}),
   ...(rule.lastRun !== undefined
     ? { last_run: rule.lastRun ? transformRuleLastRun(rule.lastRun) : null }
     : {}),
   ...(rule.nextRun !== undefined ? { next_run: rule.nextRun?.toISOString() || null } : {}),
   revision: rule.revision,
   ...(rule.running !== undefined ? { running: rule.running } : {}),
-  ...(rule.viewInAppRelativeUrl !== undefined
-    ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
-    : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
+  ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
 });

@@ -73,7 +73,6 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     id: ruleId,
     isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
     logger,
-    omitGeneratedValues: false,
     rawRule,
     references,
     ruleTypeId,

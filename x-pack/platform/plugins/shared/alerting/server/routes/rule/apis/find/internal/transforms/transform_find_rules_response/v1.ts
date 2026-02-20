@@ -12,7 +12,7 @@ import type {
 } from '../../../../../../../../common/routes/rule/response';
 import type { FindResult } from '../../../../../../../application/rule/methods/find';
 import {
-  transformRuleActionsV1,
+  transformRuleActionsInternalV1,
   transformMonitoringV1,
   transformRuleLastRunV1,
   transformFlappingV1,
@@ -31,7 +31,7 @@ export const transformPartialRule = (
     ...(rule.consumer !== undefined ? { consumer: rule.consumer } : {}),
     ...(rule.schedule ? { schedule: rule.schedule } : {}),
     ...(rule.actions || rule.systemActions
-      ? { actions: transformRuleActionsV1(rule.actions || [], rule.systemActions || []) }
+      ? { actions: transformRuleActionsInternalV1(rule.actions || [], rule.systemActions || []) }
       : {}),
     ...(rule.params ? { params: rule.params } : {}),
     ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),

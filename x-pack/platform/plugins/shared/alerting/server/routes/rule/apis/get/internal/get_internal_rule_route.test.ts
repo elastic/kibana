@@ -6,16 +6,16 @@
  */
 
 import { pick } from 'lodash';
-import { getInternalRuleRoute } from './get_rule_route';
+import { getInternalRuleRoute } from './get_internal_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../../rules_client.mock';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

@@ -15,24 +15,12 @@ import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes
 import { transformRuleDomainToRule } from './transform_rule_domain_to_rule';
 import type { RuleParams } from '../types';
 
-interface TransformRuleSoToSanitizedRuleOptions {
-  includeLegacyId?: boolean;
-  includeSnoozeData?: boolean;
-  excludeFromPublicApi?: boolean;
-}
-
 type RuleSo = Awaited<ReturnType<typeof getRuleSo>>;
 
 export async function transformRuleSoToSanitizedRule<Params extends RuleParams = never>(
   context: RulesClientContext,
-  ruleSo: RuleSo,
-  options: TransformRuleSoToSanitizedRuleOptions
+  ruleSo: RuleSo
 ) {
-  const {
-    includeLegacyId = false,
-    includeSnoozeData = false,
-    excludeFromPublicApi = false,
-  } = options;
   const ruleType = context.ruleTypeRegistry.get(ruleSo.attributes.alertTypeId);
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
@@ -42,7 +30,6 @@ export async function transformRuleSoToSanitizedRule<Params extends RuleParams =
       logger: context.logger,
       ruleType,
       references: ruleSo.references,
-      includeSnoozeData,
     },
     context.isSystemAction
   );
@@ -54,11 +41,7 @@ export async function transformRuleSoToSanitizedRule<Params extends RuleParams =
     context.logger.warn(`Error validating get rule domain object for id: ${ruleSo.id}, ${e}`);
   }
 
-  // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, {
-    isPublic: excludeFromPublicApi,
-    includeLegacyId,
-  });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // format legacy actions for SIEM rules
   if (ruleSo.attributes.consumer === AlertConsumers.SIEM) {

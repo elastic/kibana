@@ -511,6 +511,7 @@ describe('bulkEditRules', () => {
             lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
             status: 'pending',
           },
+          isSnoozedUntil: null,
           snoozeSchedule: [],
           systemActions: [],
           createdAt: expect.any(Date),

@@ -117,8 +117,6 @@ interface TransformEsToRuleParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
   references?: SavedObjectReference[];
-  includeSnoozeData?: boolean;
-  omitGeneratedValues?: boolean;
 }
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
@@ -128,14 +126,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
-  const {
-    id,
-    logger,
-    ruleType,
-    references,
-    includeSnoozeData = false,
-    omitGeneratedValues = true,
-  } = transformParams;
+  const { id, logger, ruleType, references } = transformParams;
 
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
@@ -159,7 +150,6 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     actions: esRule.actions,
     references,
     isSystemAction,
-    omitGeneratedValues,
   });
   const ruleDomainSystemActions: RuleDomain['systemActions'] =
     transformRawActionsToDomainSystemActions({
@@ -167,7 +157,6 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       actions: esRule.actions,
       references,
       isSystemAction,
-      omitGeneratedValues,
     });
 
   const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
@@ -216,13 +205,9 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
-    ...(includeSnoozeData
-      ? {
-          activeSnoozes,
-          ...(isSnoozedUntil !== undefined
-            ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
-            : {}),
-        }
+    activeSnoozes,
+    ...(isSnoozedUntil !== undefined
+      ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
       : {}),
     ...(lastRun
       ? {

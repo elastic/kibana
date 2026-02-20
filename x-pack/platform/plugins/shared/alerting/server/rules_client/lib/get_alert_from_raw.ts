@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import type {
   Rule,
@@ -36,17 +36,12 @@ export interface GetAlertFromRawParams {
   ruleTypeId: string;
   rawRule: RawRule;
   references: SavedObjectReference[] | undefined;
-  includeLegacyId?: boolean;
-  excludeFromPublicApi?: boolean;
-  includeSnoozeData?: boolean;
-  omitGeneratedValues?: boolean;
 }
 
 interface GetAlertFromRawOpts {
   id: string;
   isSystemAction: (actionId: string) => boolean;
   logger: Logger;
-  omitGeneratedValues?: boolean;
   rawRule: RawRule;
   references: SavedObjectReference[] | undefined;
   ruleTypeId: string;
@@ -62,16 +57,11 @@ type GetPartialRuleFromRawOpts = Omit<GetAlertFromRawOpts, 'ruleTypeRegistry'> &
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   opts: GetAlertFromRawOpts
 ): Rule | RuleWithLegacyId {
-  const { omitGeneratedValues = true } = opts;
   const ruleType = opts.ruleTypeRegistry.get(opts.ruleTypeId);
-  // In order to support the partial update API of Saved Objects we have to support
-  // partial updates of an Alert, but when we receive an actual RawRule, it is safe
-  // to cast the result to an Alert
   const res = getPartialRuleFromRaw<Params>({
     id: opts.id,
     isSystemAction: opts.isSystemAction,
     logger: opts.logger,
-    omitGeneratedValues,
     rawRule: opts.rawRule,
     references: opts.references,
     ruleTypeId: opts.ruleTypeId,
@@ -84,7 +74,7 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
 function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   opts: GetPartialRuleFromRawOpts
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
-  const { omitGeneratedValues = true, rawRule } = opts;
+  const { rawRule } = opts;
 
   const {
     createdAt,
@@ -137,7 +127,6 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           actions,
           references: opts.references || [],
           isSystemAction: opts.isSystemAction,
-          omitGeneratedValues,
         })
       : [],
     systemActions: actions
@@ -146,7 +135,6 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           actions,
           references: opts.references || [],
           isSystemAction: opts.isSystemAction,
-          omitGeneratedValues,
         })
       : [],
     artifacts: transformRawArtifactsToDomainArtifacts(opts.id, artifacts, opts.references),
@@ -187,14 +175,6 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
         }
       : {}),
   };
-
-  if (omitGeneratedValues) {
-    if (rule.actions) {
-      rule.actions = rule.actions.map((ruleAction) => {
-        return omit(ruleAction, 'alertsFilter.query.dsl');
-      });
-    }
-  }
 
   // Need the `rule` object to build a URL
   const viewInAppRelativeUrl =

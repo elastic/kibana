@@ -100,7 +100,6 @@ describe('transformBulkEnableResponse', () => {
               Object {
                 "alerts_filter": Object {
                   "query": Object {
-                    "dsl": "{test:1}",
                     "filters": Array [],
                     "kql": "test:1s",
                   },
