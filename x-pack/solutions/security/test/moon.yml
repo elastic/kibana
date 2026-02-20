@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/expect'
   - '@kbn/core-http-common'
   - '@kbn/scout-info'
-  - '@kbn/scout-security'
   - '@kbn/ftr-common-functional-services'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/tooling-log'
@@ -69,6 +68,7 @@ fileGroups:
     - '!security_solution_cypress/cypress/**/*'
     - '!security_solution_api_integration/**/*'
     - '!security_solution_endpoint/**/*'
+    - '!scout_defend_workflows/ui/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
 tasks: {}
