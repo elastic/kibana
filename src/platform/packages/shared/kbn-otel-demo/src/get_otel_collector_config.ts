@@ -19,14 +19,12 @@ export function getFullOtelCollectorConfig({
   username,
   password,
   logsIndex = 'logs',
-  tracesIndex = 'traces-apm.otel',
   namespace = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   logsIndex?: string;
-  tracesIndex?: string;
   namespace?: string;
 }): string {
   const configYaml = `
@@ -61,6 +59,7 @@ receivers:
     collection_interval: 60s
     auth_type: serviceAccount
     endpoint: "\${env:OTEL_K8S_NODE_NAME}:10250"
+    node: "\${env:OTEL_K8S_NODE_NAME}"
     insecure_skip_verify: true
     extra_metadata_labels:
       - container.id
@@ -107,9 +106,6 @@ receivers:
           system.linux.memory.available:
             enabled: true
       network:
-        metrics:
-          system.network.io.bandwidth:
-            enabled: true
       processes:
         metrics:
           system.processes.count:
@@ -123,10 +119,14 @@ receivers:
           system.filesystem.utilization:
             enabled: true
 
-  # Kubernetes events receiver - collects k8s events as logs
-  k8s_events:
+  # Kubernetes objects receiver - collects k8s events as logs
+  k8sobjects:
     auth_type: serviceAccount
-    namespaces: [${namespace}]
+    objects:
+      - name: events
+        mode: watch
+        group: events.k8s.io
+        namespaces: [${namespace}]
 
   # Filelog receiver for Kubernetes container logs
   filelog/k8s:
@@ -316,6 +316,9 @@ processors:
         value: local-minikube
         action: upsert
 
+  # Convert cumulative histograms to delta (required by Elasticsearch exporter)
+  cumulativetodelta:
+
   # Filter to drop all OTLP logs (we only want filelog container logs)
   filter/drop_otlp_logs:
     error_mode: ignore
@@ -332,7 +335,7 @@ exporters:
     user: USERNAME_PLACEHOLDER
     password: PASSWORD_PLACEHOLDER
     logs_index: LOGS_INDEX_PLACEHOLDER
-    traces_index: TRACES_INDEX_PLACEHOLDER
+    traces_index: traces-generic.otel-default
     mapping:
       mode: otel
     tls:
@@ -360,6 +363,7 @@ connectors:
     exemplars:
       enabled: true
     metrics_flush_interval: 15s
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
 
 extensions:
   health_check:
@@ -380,7 +384,7 @@ service:
       exporters: [elasticsearch, debug]
     # Collect Kubernetes events as logs
     logs/k8s_events:
-      receivers: [k8s_events]
+      receivers: [k8sobjects]
       processors: [resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
     # Export traces to Elasticsearch and generate span metrics
@@ -388,16 +392,15 @@ service:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, spanmetrics, debug]
-    # Accept metrics from OTLP and span metrics connector, export to debug
-    # (Elasticsearch metrics export not yet enabled)
+    # Accept metrics from OTLP and span metrics connector
     metrics:
-      receivers: [otlp]
-      processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [debug]
+      receivers: [otlp, spanmetrics]
+      processors: [k8sattributes, resourcedetection, resource, cumulativetodelta, batch]
+      exporters: [elasticsearch, debug]
     # Collect Kubernetes metrics (cluster, kubelet, host)
     metrics/k8s:
       receivers: [k8s_cluster, kubeletstats, hostmetrics]
-      processors: [resourcedetection, resource, batch]
+      processors: [resourcedetection, resource, cumulativetodelta, batch]
       exporters: [elasticsearch, debug]
 `;
 
@@ -405,6 +408,5 @@ service:
     .replace(/ELASTICSEARCH_ENDPOINT_PLACEHOLDER/g, elasticsearchEndpoint)
     .replace(/USERNAME_PLACEHOLDER/g, username)
     .replace(/PASSWORD_PLACEHOLDER/g, password)
-    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex)
-    .replace(/TRACES_INDEX_PLACEHOLDER/g, tracesIndex);
+    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex);
 }
