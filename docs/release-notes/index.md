@@ -358,7 +358,6 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 * Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
 * Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
-* Improves copy for missing trace relationships in APM [#251850]({{kib-pull}}251850).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
