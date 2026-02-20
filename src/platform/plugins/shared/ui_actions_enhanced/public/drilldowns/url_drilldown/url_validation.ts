@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { validateUrl } from '@kbn/shared-ux-url';
 import type { UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 

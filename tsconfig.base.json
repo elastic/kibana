@@ -2228,8 +2228,6 @@
       "@kbn/shared-ux-table-persist/*": ["src/platform/packages/shared/shared-ux/table_persist/*"],
       "@kbn/shared-ux-toolbar-selector": ["src/platform/packages/shared/shared-ux/toolbar_selector"],
       "@kbn/shared-ux-toolbar-selector/*": ["src/platform/packages/shared/shared-ux/toolbar_selector/*"],
-      "@kbn/shared-ux-url": ["src/platform/packages/shared/shared-ux/url"],
-      "@kbn/shared-ux-url/*": ["src/platform/packages/shared/shared-ux/url/*"],
       "@kbn/shared-ux-utility": ["src/platform/packages/shared/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["src/platform/packages/shared/kbn-shared-ux-utility/*"],
       "@kbn/sidebar-examples-plugin": ["examples/sidebar_examples"],

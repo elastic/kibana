@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/presentation-publishing'
   - '@kbn/licensing-types'
+  - '@kbn/shared-ux-url'
 tags:
   - plugin
   - prod
