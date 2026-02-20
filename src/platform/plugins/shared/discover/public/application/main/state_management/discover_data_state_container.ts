@@ -36,6 +36,7 @@ import {
   hasTransformationalCommand,
 } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
+import { getMergedAccessor } from '../../../context_awareness';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -405,7 +406,16 @@ export function getDataStateContainer({
             }
           }
 
-          if (!isEsqlQueryWithTransformationalCommand) {
+          const chartConfig = getMergedAccessor(
+            scopedProfilesManager.getProfiles(),
+            'getChartSectionConfiguration',
+            () => ({ replaceDefaultChart: false })
+          );
+          const result = chartConfig({ actions: {} });
+          const shouldDelayChartFetch =
+            result.replaceDefaultChart || isEsqlQueryWithTransformationalCommand;
+
+          if (!shouldDelayChartFetch) {
             // Trigger the chart fetch for classic or ESQL without transformational commands, in the case of transformational
             // commands we need to wait for the documents result.
             fetchChart$.next(latestFetchDetails);
@@ -423,7 +433,7 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
-              if (isEsqlQueryWithTransformationalCommand && !abortController.signal.aborted) {
+              if (shouldDelayChartFetch && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL transformational searches
                 fetchChart$.next(latestFetchDetails);
               }
