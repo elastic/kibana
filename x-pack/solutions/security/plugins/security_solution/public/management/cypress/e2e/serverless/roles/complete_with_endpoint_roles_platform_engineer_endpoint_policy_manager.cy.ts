@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { login, ROLE } from '../../../tasks/login';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
@@ -33,6 +35,20 @@ describe(
     },
   },
   () => {
+    let loadedEndpoints: CyIndexEndpointHosts;
+
+    before(() => {
+      indexEndpointHosts().then((response) => {
+        loadedEndpoints = response;
+      });
+    });
+
+    after(() => {
+      if (loadedEndpoints) {
+        loadedEndpoints.cleanup();
+      }
+    });
+
     [ROLE.platform_engineer, ROLE.endpoint_policy_manager].forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
