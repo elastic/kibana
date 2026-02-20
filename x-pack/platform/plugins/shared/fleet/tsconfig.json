@@ -128,6 +128,7 @@
     "@kbn/scout",
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/rule-data-utils"
   ]
 }
