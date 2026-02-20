@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 export type EsqlConversionFailureReason =
   | 'multi_layer_not_supported'
   | 'trend_line_not_supported'
-  | 'non_utc_timezone'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
   | 'runtime_field_not_supported'
@@ -41,10 +40,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
         'Cannot convert to ES|QL: Metric visualizations with trend lines will be supported in an upcoming update.',
     }
   ),
-  non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezoneTooltip', {
-    defaultMessage:
-      'Cannot convert to ES|QL: Non-UTC timezones will be supported in an upcoming update.',
-  }),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
     defaultMessage:
       'Cannot convert to ES|QL: Formula operations will be supported in an upcoming update.',
