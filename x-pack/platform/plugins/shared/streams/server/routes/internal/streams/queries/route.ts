@@ -57,7 +57,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       .nullish(),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
@@ -83,7 +83,8 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
 
     let promoted = 0;
     for (const [streamName, queryIds] of Object.entries(byStream)) {
-      const result = await queryClient.promoteQueries(streamName, queryIds);
+      const definition = await streamsClient.getStream(streamName);
+      const result = await queryClient.promoteQueries(definition, queryIds);
       promoted += result.promoted;
     }
     return { promoted };

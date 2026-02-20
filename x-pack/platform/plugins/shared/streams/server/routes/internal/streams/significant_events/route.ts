@@ -6,7 +6,9 @@
  */
 import {
   buildEsqlQuery,
+  getIndexPatternsForStream,
   systemSchema,
+  type Streams,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
   type SignificantEventsGetResponse,
@@ -36,13 +38,13 @@ const dateFromString = z.string().transform((input) => new Date(input));
  */
 const ensureEsqlQuery = (
   result: SignificantEventsQueriesGenerationTaskResult,
-  streamName: string
+  definition: Streams.all.Definition
 ): SignificantEventsQueriesGenerationTaskResult => {
   if (!('queries' in result)) {
     return result;
   }
 
-  const indices = [streamName, `${streamName}.*`];
+  const indices = getIndexPatternsForStream(definition);
   return {
     ...result,
     queries: result.queries.map((query) => ({
@@ -84,16 +86,16 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    const definition = await streamsClient.getStream(name);
 
     const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
 
-    return ensureEsqlQuery(result, name);
+    return ensureEsqlQuery(result, definition);
   },
 });
 
@@ -142,9 +144,9 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    const definition = await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -184,7 +186,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       ...actionParams,
     });
 
-    return ensureEsqlQuery(result, name);
+    return ensureEsqlQuery(result, definition);
   },
 });
 

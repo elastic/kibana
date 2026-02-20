@@ -146,7 +146,7 @@ export function AddSignificantEventFlyout({
           }))
       );
     }
-  }, [definition.stream.name, isGenerating, task]);
+  }, [isGenerating, task]);
 
   const stopGeneration = useCallback(() => {
     if (task?.status === 'in_progress') {

@@ -277,7 +277,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               title: 'OOM Error',
               kql: { query: "message: 'OOM Error'" },
               esql: {
-                query: `FROM ${indexName},${indexName}.* | WHERE KQL("message: 'OOM Error'")`,
+                query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
               },
             },
           ],
@@ -291,7 +291,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'OOM Error',
           kql: { query: "message: 'OOM Error'" },
           esql: {
-            query: `FROM ${indexName},${indexName}.* | WHERE KQL("message: 'OOM Error'")`,
+            query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
           },
         });
 

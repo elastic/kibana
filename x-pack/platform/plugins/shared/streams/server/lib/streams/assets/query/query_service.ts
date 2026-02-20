@@ -78,6 +78,8 @@ export class QueryService {
                 : undefined,
           };
 
+          // Uses the wired stream pattern as a best-effort fallback:
+          // the definition is not available in the sync storage migration callback.
           const esqlQuery = buildEsqlQuery([streamName, `${streamName}.*`], input);
 
           return { ...source, [QUERY_ESQL_QUERY]: esqlQuery } as StoredQueryLink;
