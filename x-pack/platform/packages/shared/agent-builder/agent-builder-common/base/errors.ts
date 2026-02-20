@@ -22,6 +22,8 @@ export enum AgentBuilderErrorCode {
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
   hookExecutionError = 'hookExecutionError',
+  workflowAborted = 'workflowAborted',
+  workflowExecutionFailed = 'workflowExecutionFailed',
 }
 
 const AgentBuilderError = ServerSentEventError;
@@ -201,6 +203,54 @@ export const createRequestAbortedError = (
 };
 
 /**
+ * Represents execution aborted by a workflow.
+ */
+export type AgentBuilderWorkflowAbortedError =
+  AgentBuilderError<AgentBuilderErrorCode.workflowAborted>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderWorkflowAbortedError}
+ */
+export const isWorkflowAbortedError = (err: unknown): err is AgentBuilderWorkflowAbortedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.workflowAborted;
+};
+
+/**
+ * Represents an unexpected error in the workflow execution.
+ */
+export const createWorkflowAbortedError = (
+  message: string,
+  meta?: { workflow?: string }
+): AgentBuilderWorkflowAbortedError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.workflowAborted, message, meta ?? {});
+};
+
+/**
+ * Represents a workflow execution failure (workflow ran but finished with status FAILED).
+ */
+export type AgentBuilderWorkflowExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.workflowExecutionFailed>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderWorkflowExecutionError}
+ */
+export const isWorkflowExecutionError = (
+  err: unknown
+): err is AgentBuilderWorkflowExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.workflowExecutionFailed;
+};
+
+/**
+ * Creates an error when a workflow execution fails (e.g. step error, timeout).
+ */
+export const createWorkflowExecutionError = (
+  message: string,
+  meta?: { workflow?: string }
+): AgentBuilderWorkflowExecutionError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.workflowExecutionFailed, message, meta ?? {});
+};
+
+/**
  * Represents an error related to agent execution
  */
 export type AgentBuilderAgentExecutionError<
@@ -276,12 +326,17 @@ export const AgentBuilderErrorUtils = {
   isToolNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isWorkflowAbortedError,
+  isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createWorkflowAbortedError,
+  createWorkflowExecutionError,
   createAgentExecutionError,
+  createHooksExecutionError,
   isHooksExecutionError,
 };
