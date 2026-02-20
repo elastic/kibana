@@ -526,6 +526,11 @@ export const getCategorizeColumns = (esql: string): string[] => {
   return columns;
 };
 
+export const getSparklineColumns = (esql: string): string[] => {
+  // hardcoded for now
+  return ['Sparkline'];
+};
+
 /**
  * Extracts the original and renamed columns from a rename function.
  * RENAME original AS renamed Vs RENAME renamed = original
