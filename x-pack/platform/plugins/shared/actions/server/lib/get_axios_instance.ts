@@ -126,6 +126,7 @@ function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): str
 }
 
 interface EarsParams {
+  provider?: string;
   tokenUrl?: string;
 }
 
@@ -153,13 +154,15 @@ async function handleEars401Error({
   error.config._retry = true;
   logger.debug(`Attempting EARS token refresh for connectorId ${connectorId} after 401 error`);
 
-  const { tokenUrl: storedTokenUrl } = secrets;
-  if (!storedTokenUrl) {
-    error.message = 'Authentication failed: Missing required EARS configuration (tokenUrl).';
+  const { provider, tokenUrl: rawTokenUrl } = secrets;
+  const derivedTokenPath = provider ? `/${provider}/oauth/token` : rawTokenUrl;
+  if (!derivedTokenPath) {
+    error.message =
+      'Authentication failed: Missing required EARS configuration (provider or tokenUrl).';
     return Promise.reject(error);
   }
 
-  const tokenUrl = resolveEarsUrl(storedTokenUrl, configurationUtilities.getEarsUrl());
+  const tokenUrl = resolveEarsUrl(derivedTokenPath, configurationUtilities.getEarsUrl());
   const newAccessToken = await getEarsAccessToken({
     connectorId,
     logger,

@@ -13,6 +13,7 @@ import { BASE_ACTION_API_PATH } from '../../common';
  * OAuth connector secrets stored in encrypted saved objects
  */
 interface OAuthConnectorSecrets {
+  provider?: string;
   authorizationUrl?: string;
   clientId?: string;
   clientSecret?: string;
@@ -155,7 +156,10 @@ export class OAuthAuthorizationService {
     // Extract OAuth config - for connector specs, check secrets first, then config
     // For connector specs, OAuth config is always in secrets (encrypted)
     // Fallback to config for backwards compatibility with legacy connectors
-    const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
+    const provider = secrets.provider;
+    const authorizationUrl = provider
+      ? `/${provider}/oauth/authorize`
+      : secrets.authorizationUrl || config?.authorizationUrl;
     const scope = secrets.scope || config?.scope;
 
     if (!authorizationUrl) {

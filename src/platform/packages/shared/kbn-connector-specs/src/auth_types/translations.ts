@@ -185,13 +185,6 @@ export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
   defaultMessage: 'OAuth via Elastic-owned apps',
 });
 
-export const EARS_AUTHORIZATION_URL_LABEL = i18n.translate(
-  'connectorSpecs.earsAuthorizationUrl.label',
-  {
-    defaultMessage: 'Authorization URL',
-  }
-);
-
-export const EARS_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.earsTokenUrl.label', {
-  defaultMessage: 'Token URL',
+export const EARS_PROVIDER_LABEL = i18n.translate('connectorSpecs.earsProvider.label', {
+  defaultMessage: '3rd-party OAuth Provider',
 });

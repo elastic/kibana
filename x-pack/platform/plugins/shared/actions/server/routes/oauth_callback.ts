@@ -94,6 +94,7 @@ function resolveEarsUrl(storedUrl: string, earsBaseUrl: string): string {
 
 interface OAuthConnectorSecrets {
   authType?: string;
+  provider?: string;
   clientId?: string;
   clientSecret?: string;
   tokenUrl?: string;
@@ -383,10 +384,16 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType;
-          const storedTokenUrl = secrets.tokenUrl || config?.tokenUrl;
+
+          // For EARS, derive the token path from the provider field; fall back to stored tokenUrl
+          const storedTokenUrl = secrets.provider
+            ? `/${secrets.provider}/oauth/token`
+            : secrets.tokenUrl || config?.tokenUrl;
 
           if (!storedTokenUrl) {
-            throw new Error('Connector missing required OAuth configuration (tokenUrl)');
+            throw new Error(
+              'Connector missing required OAuth configuration (tokenUrl or provider)'
+            );
           }
 
           let tokenResult;

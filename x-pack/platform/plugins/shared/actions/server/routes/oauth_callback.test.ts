@@ -412,7 +412,7 @@ describe('oauthCallbackRoute', () => {
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.stringContaining(
-          'Connector missing required OAuth configuration (tokenUrl)'
+          'Connector missing required OAuth configuration (tokenUrl or provider)'
         ),
       })
     );

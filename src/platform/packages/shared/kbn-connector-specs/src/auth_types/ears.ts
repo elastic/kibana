@@ -14,8 +14,9 @@ import * as i18n from './translations';
 
 const authSchema = z
   .object({
-    authorizationUrl: z.string().min(1).meta({ label: i18n.EARS_AUTHORIZATION_URL_LABEL }),
-    tokenUrl: z.string().min(1).meta({ label: i18n.EARS_TOKEN_URL_LABEL }),
+    provider: z
+      .enum(['google', 'microsoft', 'github'])
+      .meta({ label: i18n.EARS_PROVIDER_LABEL, widget: 'select', disabled: true }),
     scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
   })
   .meta({ label: i18n.EARS_LABEL });
@@ -51,7 +52,7 @@ export const Ears: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
-        tokenUrl: secret.tokenUrl,
+        tokenUrl: `/${secret.provider}/oauth/token`,
         scope: secret.scope,
       });
     } catch (error) {
