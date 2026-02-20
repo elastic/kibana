@@ -45,6 +45,7 @@ export const EditIlmPhasesFlyout = ({
   onSave,
   onClose,
   isSaving,
+  isMetricsStream,
   canCreateRepository = false,
   searchableSnapshotRepositories = [],
   isLoadingSearchableSnapshotRepositories,
@@ -274,6 +275,7 @@ export const EditIlmPhasesFlyout = ({
                 isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
                 onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
                 onCreateSnapshotRepository={onCreateSnapshotRepository}
+                isMetricsStream={isMetricsStream}
               />
             ))}
           </OnFieldErrorsChangeProvider>

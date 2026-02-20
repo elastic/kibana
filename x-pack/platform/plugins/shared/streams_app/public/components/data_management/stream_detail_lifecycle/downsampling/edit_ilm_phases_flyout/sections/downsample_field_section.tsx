@@ -16,6 +16,7 @@ import {
   EuiIconTip,
   EuiSwitch,
   EuiTitle,
+  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
@@ -26,12 +27,14 @@ export interface DownsampleFieldSectionProps {
   form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   phaseName: DownsamplePhase;
   dataTestSubj: string;
+  isMetricsStream: boolean;
 }
 
 export const DownsampleFieldSection = ({
   form,
   phaseName,
   dataTestSubj,
+  isMetricsStream,
 }: DownsampleFieldSectionProps) => {
   const enabledPath = `_meta.${phaseName}.downsampleEnabled`;
 
@@ -79,6 +82,23 @@ export const DownsampleFieldSection = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {!isMetricsStream && isEnabled && (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          iconType="info"
+          data-test-subj={`${dataTestSubj}DownsamplingNotSupportedCallout-${phaseName}`}
+          title={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle', {
+            defaultMessage: 'Does not apply to this stream',
+          })}
+        >
+          {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
+            defaultMessage:
+              'Downsampling only applies to time series streams. This configuration will be ignored for this stream.',
+          })}
+        </EuiCallOut>
+      )}
 
       <div hidden={!isEnabled} aria-hidden={!isEnabled}>
         <DownsampleIntervalField

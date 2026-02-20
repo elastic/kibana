@@ -52,6 +52,7 @@ interface UseIlmLifecycleSummaryProps {
   stats?: DataStreamStats;
   refreshDefinition?: () => void;
   updateStreamLifecycle: (lifecycle: IngestStreamLifecycle) => Promise<void>;
+  isMetricsStream: boolean;
 }
 
 interface UseIlmLifecycleSummaryResult {
@@ -75,6 +76,7 @@ export const useIlmLifecycleSummary = ({
   stats,
   refreshDefinition,
   updateStreamLifecycle,
+  isMetricsStream,
 }: UseIlmLifecycleSummaryProps): UseIlmLifecycleSummaryResult => {
   const {
     core: { notifications, application },
@@ -553,6 +555,7 @@ export const useIlmLifecycleSummary = ({
           onRefreshSearchableSnapshotRepositories={refreshSnapshotRepositories}
           onCreateSnapshotRepository={handleNavigateToSnapshotRepositories}
           data-test-subj="streamsEditIlmPhasesFlyoutFromSummary"
+          isMetricsStream={isMetricsStream}
         />
       )}
     </>

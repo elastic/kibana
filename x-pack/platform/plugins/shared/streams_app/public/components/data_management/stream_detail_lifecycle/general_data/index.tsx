@@ -144,7 +144,7 @@ export const StreamDetailGeneralData = ({
       <EuiTitle size="xs">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <h4>
@@ -177,6 +177,7 @@ export const StreamDetailGeneralData = ({
           <LifecycleSummary
             definition={definition}
             stats={data.stats?.ds.stats}
+            isMetricsStream={definition.index_mode === 'time_series'}
             refreshDefinition={refreshDefinition}
             onFlyoutOpenChange={setIsEditLifecycleFlyoutOpen}
             onFlyoutUnsavedChangesChange={setHasUnsavedEditLifecycleFlyoutChanges}

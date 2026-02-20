@@ -58,6 +58,7 @@ export interface DataLifecycleSummaryUiState {
 
 interface DataLifecycleSummaryProps {
   model: DataLifecycleSummaryModel;
+  showDownsampling: boolean;
   capabilities: DataLifecycleSummaryCapabilities;
   headerActions?: React.ReactNode;
   phaseActions?: DataLifecycleSummaryPhaseActions;
@@ -67,6 +68,7 @@ interface DataLifecycleSummaryProps {
 
 export const DataLifecycleSummary = ({
   model,
+  showDownsampling,
   capabilities,
   headerActions,
   phaseActions,
@@ -84,11 +86,13 @@ export const DataLifecycleSummary = ({
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
 
-  const hasDslDownsampling = Boolean(downsampleSteps?.length);
+  const hasDslDownsampling = showDownsampling && Boolean(downsampleSteps?.length);
   const dslSegments =
     hasDslDownsampling && downsampleSteps ? buildDslSegments(phases, downsampleSteps) : null;
   const timelineSegments = dslSegments?.timelineSegments ?? buildPhaseTimelineSegments(phases);
-  const downsamplingSegments = buildDownsamplingSegments(phases, dslSegments);
+  const downsamplingSegments = showDownsampling
+    ? buildDownsamplingSegments(phases, dslSegments)
+    : null;
   const gridTemplateColumns = getGridTemplateColumns(timelineSegments);
   const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 

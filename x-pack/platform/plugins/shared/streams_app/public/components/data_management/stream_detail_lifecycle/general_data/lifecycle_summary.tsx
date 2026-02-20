@@ -25,7 +25,7 @@ import { IlmPhaseSelect } from '../downsampling/ilm_phase_select/ilm_phase_selec
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
   {
-    defaultMessage: 'Add data phase and downsampling',
+    defaultMessage: 'Add data phase',
   }
 );
 
@@ -34,10 +34,17 @@ const allPhasesInUseTooltip = i18n.translate(
   { defaultMessage: 'All data phases are in use' }
 );
 
-const renderAddPhaseButton = (buttonProps: IlmPhaseSelectRenderButtonProps) => {
+const addPhaseAndDownsamplingButtonLabel = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.addPhaseAndDownsamplingButtonLabel',
+  {
+    defaultMessage: 'Add data phase and downsampling',
+  }
+);
+
+const renderAddPhaseButton = (label: string) => (buttonProps: IlmPhaseSelectRenderButtonProps) => {
   const button = (
     <EuiButton {...buttonProps} color="text" size="s" iconType="arrowDown" iconSide="right">
-      {addPhaseButtonLabel}
+      {label}
     </EuiButton>
   );
 
@@ -52,6 +59,7 @@ const renderAddPhaseButton = (buttonProps: IlmPhaseSelectRenderButtonProps) => {
 
 interface LifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
+  isMetricsStream: boolean;
   stats?: DataStreamStats;
   refreshDefinition?: () => void;
   onFlyoutOpenChange?: (isOpen: boolean) => void;
@@ -60,6 +68,7 @@ interface LifecycleSummaryProps {
 
 const IlmLifecycleSummary = ({
   definition,
+  isMetricsStream,
   stats,
   refreshDefinition,
   onFlyoutOpenChange,
@@ -71,6 +80,7 @@ const IlmLifecycleSummary = ({
     stats,
     refreshDefinition,
     updateStreamLifecycle,
+    isMetricsStream,
   });
 
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
@@ -94,7 +104,9 @@ const IlmLifecycleSummary = ({
         onSelect={(phase: IlmPhaseSelectOption) => ilmSummary.onAddIlmPhase?.(phase)}
         data-test-subj="dataLifecycleSummaryAddPhase"
         anchorPosition="downRight"
-        renderButton={renderAddPhaseButton}
+        renderButton={renderAddPhaseButton(
+          isMetricsStream ? addPhaseAndDownsamplingButtonLabel : addPhaseButtonLabel
+        )}
       />
     ) : undefined;
 
@@ -105,6 +117,7 @@ const IlmLifecycleSummary = ({
           phases: ilmSummary.phases,
           loading: ilmSummary.loading,
         }}
+        showDownsampling={isMetricsStream}
         capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
         headerActions={headerActions}
         phaseActions={{
@@ -130,6 +143,7 @@ const IlmLifecycleSummary = ({
 
 const NonIlmLifecycleSummary = ({
   definition,
+  isMetricsStream,
   stats,
   onFlyoutOpenChange,
   onFlyoutUnsavedChangesChange,
@@ -152,6 +166,7 @@ const NonIlmLifecycleSummary = ({
         loading: false,
         downsampleSteps: isDsl ? dslSummary.downsampleSteps : undefined,
       }}
+      showDownsampling={isMetricsStream}
       capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
       uiState={{
         editedPhaseName: undefined,

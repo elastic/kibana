@@ -94,6 +94,7 @@ const renderFlyout = (
           onClose={onClose}
           onChange={onChange}
           onSave={onSave}
+          isMetricsStream
           {...props}
         />
       </>
@@ -280,6 +281,29 @@ describe('EditIlmPhasesFlyout', () => {
       );
 
       expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingIntervalValue`)).toBeVisible();
+    });
+
+    it('shows a warning when downsampling is enabled but not supported', async () => {
+      renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          isMetricsStream: false,
+        },
+        { initialSelectedPhase: 'warm' }
+      );
+
+      await tick();
+
+      fireEvent.click(getTab('warm'));
+      const warmPanel = withinPhase('warm');
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
+
+      expect(
+        await screen.findByTestId(`${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`)
+      ).toBeInTheDocument();
     });
   });
 
