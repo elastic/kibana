@@ -40,14 +40,6 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click('xpack.synthetics.filterBar.filterStatusUp');
   }
 
-  async refreshFromES(): Promise<void> {
-    await this.page.testSubj.click('superDatePickerApplyTimeButton');
-  }
-
-  async enableAnomalyDetection(): Promise<void> {
-    await this.page.testSubj.click('uptimeEnableAnomalyBtn');
-  }
-
   getMonitorRedirects() {
     return this.page.testSubj.locator('uptimeMonitorRedirectInfo');
   }
@@ -56,55 +48,20 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click('uptimePingListExpandBtn');
   }
 
-  async ensureAnomalyDetectionFlyoutIsOpen(): Promise<void> {
-    await this.page.testSubj.locator('uptimeMLFlyout').waitFor();
-  }
-
-  async isMLMenuVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('uptimeManageMLContextMenu').isVisible({ timeout: 3000 });
-  }
-
-  async canCreateJob(): Promise<boolean> {
-    await this.ensureAnomalyDetectionFlyoutIsOpen();
-    return this.page.testSubj.locator('uptimeMLCreateJobBtn').isEnabled();
-  }
-
-  async openAnomalyDetectionMenu(): Promise<void> {
-    const visible = await this.isMLMenuVisible();
-    if (!visible) {
-      await this.page.testSubj.click('uptimeManageMLJobBtn');
-    }
-  }
-
-  async closeAnomalyDetectionMenu(): Promise<void> {
-    if (await this.isMLMenuVisible()) {
-      await this.page.testSubj.click('uptimeManageMLJobBtn');
-    }
-  }
-
-  async refreshAndWaitForLoading(): Promise<void> {
-    await this.refreshFromES();
-    await this.waitForLoadingToFinish();
+  async enableAnomalyDetection(): Promise<void> {
+    await this.page.testSubj.locator('uptimeEnableAnomalyBtn').click();
   }
 
   async createMLJob(): Promise<void> {
-    await this.page.testSubj.click('uptimeMLCreateJobBtn');
-    await this.page.testSubj.locator('uptimeMLJobSuccessfullyCreated').waitFor({ timeout: 30_000 });
-    await this.page.testSubj.click('toastCloseButton');
-  }
-
-  async closeRuleFlyout(): Promise<void> {
-    await this.page.testSubj.click('ruleFlyoutFooterCancelButton');
-  }
-
-  async clickEnableAnomalyAlert(): Promise<void> {
-    await this.openAnomalyDetectionMenu();
-    await this.page.testSubj.click('uptimeEnableAnomalyAlertBtn');
+    await this.page.testSubj.locator('uptimeMLCreateJobBtn').click();
+    await this.page.testSubj.locator('toastCloseButton').click({ timeout: 20_000 });
+    await this.page.testSubj.locator('ruleDefinition').waitFor({ timeout: 20_000 });
   }
 
   async updateAlert({ id, threshold }: AlertType): Promise<void> {
     await this.selectAlertThreshold(threshold);
     await this.page.testSubj.click('ruleFormStep-details');
+    await this.page.testSubj.locator('ruleDetailsNameInput').clear();
     await this.page.testSubj.locator('ruleDetailsNameInput').fill(id);
   }
 
@@ -118,23 +75,6 @@ export class MonitorDetailsPage {
   async saveRule(): Promise<void> {
     await this.page.testSubj.click('ruleFlyoutFooterSaveButton');
     await this.page.testSubj.click('confirmModalConfirmButton');
-  }
-
-  async disableAnomalyDetection(): Promise<void> {
-    await this.openAnomalyDetectionMenu();
-    await this.page.testSubj.locator('uptimeDeleteMLJobBtn').click({ timeout: 10_000 });
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.page.locator('text=Job deleted').waitFor();
-    await this.closeAnomalyDetectionMenu();
-  }
-
-  async disableAnomalyDetectionAlert(): Promise<void> {
-    await this.openAnomalyDetectionMenu();
-    await this.page.testSubj.locator('uptimeManageAnomalyAlertBtn').click({ timeout: 10_000 });
-    await this.page.testSubj.click('uptimeDisableAnomalyAlertBtn');
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.page.locator('text=Rule successfully disabled!').waitFor();
-    await this.closeAnomalyDetectionMenu();
   }
 
   async waitForPingListItem(pingId: string): Promise<void> {

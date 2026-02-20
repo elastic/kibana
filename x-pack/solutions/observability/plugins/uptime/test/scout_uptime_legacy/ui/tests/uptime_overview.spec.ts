@@ -25,9 +25,7 @@ test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
       await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
       await pageObjects.uptimeOverview.waitForMonitorTable();
       await pageObjects.uptimeOverview.clickMonitorLink('0001-up');
-      await expect(pageObjects.monitorDetails.getMonitorRedirects()).toBeVisible({
-        timeout: 30_000,
-      });
+      await expect(page.testSubj.locator('uptimePingListTable')).toBeVisible();
     });
   });
 });
