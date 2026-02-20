@@ -9,7 +9,7 @@ import type {
   GetBackfillRequestParamsV1,
   GetBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/get';
-import { getParamsSchemaV1 } from '../../../../../common/routes/backfill/apis/get';
+import { getParamsSchemaV1, getResponseSchemaV1 } from '../../../../../common/routes/backfill/apis/get';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -36,7 +36,24 @@ const buildGetBackfillRoute = ({
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options,
       validate: {
-        params: getParamsSchemaV1,
+        request: {
+          params: getParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => getResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a backfill with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

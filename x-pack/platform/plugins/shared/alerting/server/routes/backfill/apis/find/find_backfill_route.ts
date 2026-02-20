@@ -9,7 +9,7 @@ import type {
   FindBackfillRequestQueryV1,
   FindBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/find';
-import { findQuerySchemaV1 } from '../../../../../common/routes/backfill/apis/find';
+import { findQuerySchemaV1, findResponseSchemaV1 } from '../../../../../common/routes/backfill/apis/find';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -39,7 +39,21 @@ const buildFindBackfillRoute = ({
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options,
       validate: {
-        query: findQuerySchemaV1,
+        request: {
+          query: findQuerySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => findResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

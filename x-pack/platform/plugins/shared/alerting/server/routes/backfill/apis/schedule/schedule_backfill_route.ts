@@ -9,7 +9,10 @@ import type {
   ScheduleBackfillRequestBodyV1,
   ScheduleBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/schedule';
-import { scheduleBodySchemaV1 } from '../../../../../common/routes/backfill/apis/schedule';
+import {
+  scheduleBodySchemaV1,
+  scheduleResponseSchemaV1,
+} from '../../../../../common/routes/backfill/apis/schedule';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -39,7 +42,24 @@ const buildScheduleBackfillRoute = ({
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options,
       validate: {
-        body: scheduleBodySchemaV1,
+        request: {
+          body: scheduleBodySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => scheduleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

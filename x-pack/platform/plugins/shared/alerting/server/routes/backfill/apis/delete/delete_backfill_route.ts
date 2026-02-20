@@ -32,7 +32,23 @@ const buildDeleteBackfillRoute = ({
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options,
       validate: {
-        params: deleteParamsSchemaV1,
+        request: {
+          params: deleteParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a backfill with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
