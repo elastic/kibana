@@ -37,6 +37,7 @@ export interface SingleAgentMenuCallbacks {
   onReassignClick: () => void;
   onUpgradeClick: () => void;
   onViewAgentJsonClick: () => void;
+  onViewAgentPolicyClick: () => void;
   onMigrateAgentClick: () => void;
   onRequestDiagnosticsClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
@@ -80,6 +81,26 @@ export function useSingleAgentMenuItems({
 
   const menuItems = useMemo(() => {
     const items: MenuItem[] = [];
+
+    const viewAgentJsonMenuItem: MenuItem = {
+      id: 'view-json',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentList.viewAgentDetailsJsonText"
+          defaultMessage="View agent JSON"
+        />
+      ),
+      icon: 'code',
+      onClick: () => {
+        callbacks.onViewAgentJsonClick();
+      },
+      'data-test-subj': 'viewAgentDetailsJsonBtn',
+    };
+
+    if (agent.type === 'OPAMP') {
+      items.push(viewAgentJsonMenuItem);
+      return items;
+    }
 
     // View agent - only shown when onViewAgentClick is provided (table row context)
     if (callbacks.onViewAgentClick) {
@@ -208,21 +229,23 @@ export function useSingleAgentMenuItems({
       ),
       panelTitle: 'Maintenance and diagnostics',
       children: [
-        // View agent JSON - always available
+        // View agent policy - available when agent has a policy
         {
-          id: 'view-json',
+          id: 'view-agent-policy',
           name: (
             <FormattedMessage
-              id="xpack.fleet.agentList.viewAgentDetailsJsonText"
-              defaultMessage="View agent JSON"
+              id="xpack.fleet.agentList.viewAgentPolicyText"
+              defaultMessage="View agent policy"
             />
           ),
-          icon: 'code',
+          icon: 'inspect',
+          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
           onClick: () => {
-            callbacks.onViewAgentJsonClick();
+            callbacks.onViewAgentPolicyClick();
           },
-          'data-test-subj': 'viewAgentDetailsJsonBtn',
+          'data-test-subj': 'viewAgentPolicyBtn',
         },
+        viewAgentJsonMenuItem,
       ],
     };
 
@@ -365,6 +388,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
+    authz.fleet.readAgentPolicies,
   ]);
 
   return menuItems;
