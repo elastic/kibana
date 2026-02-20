@@ -1,9 +1,8 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout.sh
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout_stateful.sh
     label: 'AI Assistant Scout Tests (Stateful)'
     env:
       FTR_GEN_AI: '1'
-      SCOUT_AI_ASSISTANT_MODE: '--arch stateful --domain classic'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -21,11 +20,10 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout.sh
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout_serverless.sh
     label: 'AI Assistant Scout Tests (Serverless Security Complete)'
     env:
       FTR_GEN_AI: '1'
-      SCOUT_AI_ASSISTANT_MODE: '--arch serverless --domain security_complete'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -43,11 +41,10 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout.sh
+  - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant_scout_serverless_essentials.sh
     label: 'AI Assistant Scout Tests (Serverless Security Essentials)'
     env:
       FTR_GEN_AI: '1'
-      SCOUT_AI_ASSISTANT_MODE: '--arch serverless --domain security_essentials'
     agents:
       machineType: n2-standard-4
       preemptible: true
