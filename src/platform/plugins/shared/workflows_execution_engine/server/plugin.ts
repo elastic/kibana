@@ -274,14 +274,17 @@ export class WorkflowsExecutionEnginePlugin
                 const migrationOlderThan = new Date(Date.now() - intervalMs);
                 const cleanupOlderThan = new Date(Date.now() - intervalMs * 2);
 
-                await workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
-                  sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                  olderThan: migrationOlderThan,
-                });
-                await stepExecutionRepository.reindexCompletedStepExecutionsFrom({
-                  sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                  olderThan: migrationOlderThan,
-                });
+                await Promise.all([
+                  workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
+                    sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                    olderThan: migrationOlderThan,
+                  }),
+                  stepExecutionRepository.reindexCompletedStepExecutionsFrom({
+                    sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                    olderThan: migrationOlderThan,
+                  }),
+                ]);
+
                 await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
                 logger.info(
                   `Scheduled workflow/step execution migration older than ${migrationOlderThan.toISOString()} and cleanup older than ${cleanupOlderThan.toISOString()}`
