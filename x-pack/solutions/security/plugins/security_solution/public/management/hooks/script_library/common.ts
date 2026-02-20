@@ -9,16 +9,17 @@ import type { EditableScriptFields } from '../../../../common/endpoint/types';
 
 // @remark
 // This utility type guard helps to ensure that only fields that are editable
+const EDITABLE_SCRIPT_FIELD_KEYS = [
+  'name',
+  'platform',
+  'tags',
+  'description',
+  'instructions',
+  'example',
+  'pathToExecutable',
+  'requiresInput',
+] as const;
 
 export const isEditableScriptField = (key: string): key is keyof EditableScriptFields => {
-  return [
-    'name',
-    'platform',
-    'tags',
-    'description',
-    'instructions',
-    'example',
-    'pathToExecutable',
-    'requiresInput',
-  ].includes(key);
+  return EDITABLE_SCRIPT_FIELD_KEYS.includes(key as never);
 };
