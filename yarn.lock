@@ -8316,10 +8316,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scheduling-types@link:src/platform/packages/shared/kbn-scheduling-types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/scout-info@link:src/platform/packages/private/kbn-scout-info":
   version "0.0.0"
   uid ""

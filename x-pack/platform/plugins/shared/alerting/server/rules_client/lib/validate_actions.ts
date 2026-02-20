@@ -9,15 +9,18 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorType } from '@kbn/actions-plugin/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+
 import { validateHours } from '../../routes/lib/validate_hours';
-import type { RawRule } from '../../types';
+import type { RawRule, RuleSchedule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { NormalizedAlertAction, NormalizedSystemAction } from '../types';
 import type { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
-export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle'> & {
+  schedule: RuleSchedule;
   actions: NormalizedAlertAction[];
   systemActions?: NormalizedSystemAction[];
 };
@@ -165,7 +168,6 @@ export async function validateActions(
     }
   }
 
-  const scheduleInterval = parseDuration(data.schedule.interval);
   const actionsWithInvalidThrottles = [];
   const actionWithoutQueryAndTimeframe = [];
   const actionWithInvalidTimeframe = [];
@@ -178,8 +180,9 @@ export async function validateActions(
 
     // check for actions throttled shorter than the rule schedule
     if (
+      isIntervalSchedule(data.schedule) &&
       action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
-      parseDuration(action.frequency.throttle!) < scheduleInterval
+      parseDuration(action.frequency.throttle!) < parseDuration(data.schedule.interval!)
     ) {
       actionsWithInvalidThrottles.push(action);
     }
@@ -226,7 +229,9 @@ export async function validateActions(
         defaultMessage:
           'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
-          scheduleIntervalText: data.schedule.interval,
+          scheduleIntervalText: isIntervalSchedule(data.schedule)
+            ? data.schedule.interval
+            : 'schedule',
           groups: actionsWithInvalidThrottles
             .map((a) => `${a.group} (${a.frequency?.throttle})`)
             .join(', '),

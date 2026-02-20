@@ -11,7 +11,6 @@ import type {
   Rule,
   PartialRule,
   RawRule,
-  IntervalSchedule,
   RuleTypeParams,
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
@@ -150,9 +149,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     id: opts.id,
     notifyWhen,
     ...omit(partialRawRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
-    // we currently only support the Interval Schedule type
-    // Once we support additional types, this type signature will likely change
-    schedule: schedule as IntervalSchedule,
+    schedule,
     actions: actions
       ? transformRawActionsToDomainActions({
           ruleId: opts.id,
