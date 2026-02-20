@@ -100,7 +100,9 @@ run(
     // Lazy-load so --help can run before TS project metadata is available.
     const { TS_PROJECTS } = await import('@kbn/ts-projects');
     const shouldCleanCache = flagsReader.boolean('clean-cache');
-    const shouldUseArchive = flagsReader.boolean('with-archive');
+    const shouldRestoreOnly = flagsReader.boolean('restore-only');
+    // --restore-only implies --with-archive
+    const shouldUseArchive = flagsReader.boolean('with-archive') || shouldRestoreOnly;
 
     if (shouldCleanCache) {
       await asyncForEachWithLimit(TS_PROJECTS, 10, async (proj) => {
@@ -131,6 +133,12 @@ run(
       log.info('Skipping TypeScript cache restore because --clean-cache was provided.');
     } else {
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
+    }
+
+    // If restore-only flag is set, skip the actual type check
+    if (shouldRestoreOnly) {
+      log.info('Cache restored. Skipping type check due to --restore-only flag.');
+      return;
     }
 
     const projectFilter = flagsReader.path('project');
@@ -216,7 +224,7 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
+      boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive', 'restore-only'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -227,6 +235,7 @@ run(
                                   times) but cleaning them prevents leaving garbage around the repo.
         --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
         --with-archive          Restore cached artifacts before running and archive results afterwards
+        --restore-only          Only restore the cache, skip the actual type check (implies --with-archive)
       `,
     },
   }
