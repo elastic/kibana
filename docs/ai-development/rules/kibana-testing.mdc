@@ -9,7 +9,7 @@ Apply when writing or modifying unit and integration tests.
 
 ## FTR vs Scout
 
-Kibana uses **FTR** (Functional Test Runner, mocha) and **Scout** (Playwright-based API and UI tests). When the repo has **`.agent/skills/`** (e.g. `ftr-testing`, `scout-api-testing`, `scout-ui-testing`, `scout-migrate-from-ftr`, `scout-create-scaffold`), follow those skills for API and UI test structure, paths, auth, and run commands. Prefer **Scout** for new tests in modules that already use Scout (`test/scout*/api/`, `test/scout*/ui/`); otherwise use FTR. For migrating FTR to Scout, use the **scout-migrate-from-ftr** skill.
+Kibana uses **FTR** (Functional Test Runner, mocha) and **Scout** (Playwright-based API and UI tests). **Use FTR only for already existing tests** — when adding to or modifying tests under an existing FTR config/suite. **For new test configs** (new suite, new module, or new plugin), **default to Scout**: create Scout scaffold (`node scripts/scout.js generate --path <moduleRoot> --type api` or `ui`/`both`) and write Scout API/UI tests. When the repo has **`.agent/skills/`** (e.g. `ftr-testing`, `scout-api-testing`, `scout-ui-testing`, `scout-migrate-from-ftr`, `scout-create-scaffold`), follow those skills for structure, paths, auth, and run commands. For migrating existing FTR tests to Scout, use the **scout-migrate-from-ftr** skill.
 
 ## Jest (unit tests)
 

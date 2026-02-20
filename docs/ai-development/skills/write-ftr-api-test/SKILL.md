@@ -14,7 +14,7 @@ If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-bui
 - **ftr-testing** — FTR structure, loadTestFile, configs, services, `.buildkite/ftr_*_configs.yml`.
 - **scout-api-testing** — Scout API tests: `apiTest`, `apiClient`, `requestAuth`/`samlAuth`, `apiServices`; paths `test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`; package by module (`@kbn/scout`, `@kbn/scout-oblt`, etc.); assertions from `@kbn/scout/api`; tags required for CI.
 
-**When to use which:** For **new** API tests, if the module already has Scout API tests (`<module-root>/test/scout*/api/`), use **Scout** and follow the **scout-api-testing** skill (run scaffold with `node scripts/scout.js generate --path <moduleRoot> --type api` if needed). Otherwise use **FTR** API (steps below). When in doubt, check for existing `test/scout*/api/` in the plugin; if present, use Scout.
+**When to use which:** For **new** API test configs (new suite or new module), **default to Scout**: use the **scout-api-testing** skill and run **scout-create-scaffold** if needed (`node scripts/scout.js generate --path <moduleRoot> --type api`). Use **FTR** only when adding to or modifying **existing** FTR API tests (plugin already has tests under `test/api_integration/` or `x-pack/.../test/api_integration/` and no `test/scout*/api/`). When in doubt, prefer Scout for new configs.
 
 ## Inputs
 
@@ -22,7 +22,7 @@ If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-bui
 - **Plugin or test suite** — which FTR config/suite this test belongs to (e.g. `test/api_integration/apis/my_plugin`)
 - **Scenarios to cover** — e.g. 200 success, 400 validation, 404, auth required; and any setup/teardown (e.g. create a saved object then delete it)
 
-## Steps (FTR API — use when module does not use Scout API)
+## Steps (FTR API — use only when extending existing FTR API tests)
 
 1. **Locate the right FTR config and test layout.** Find the API integration tests for this plugin or area (e.g. under `test/api_integration/` or `x-pack/test/api_integration`). Note the config file (e.g. `config.js`) and how services are loaded.
 

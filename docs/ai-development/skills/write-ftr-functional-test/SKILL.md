@@ -16,7 +16,7 @@ If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-bui
 - **scout-migrate-from-ftr** — When migrating existing FTR UI tests to Scout (decide UI vs API, map services to fixtures, split loadTestFile).
 - **scout-create-scaffold** — Generate Scout scaffold: `node scripts/scout.js generate --path <moduleRoot> --type ui` (or `both`).
 
-**When to use which:** For **new** UI tests, if the module already has Scout UI tests (`<module-root>/test/scout*/ui/`), use **Scout** and follow the **scout-ui-testing** skill (and **scout-create-scaffold** if the scaffold is missing). Otherwise use **FTR** (steps below). For **migrating** an existing FTR test to Scout, use **scout-migrate-from-ftr** and its required sub-skills. When in doubt, check for existing `test/scout*/ui/` in the plugin; if present, use Scout.
+**When to use which:** For **new** UI test configs (new suite or new module), **default to Scout**: use the **scout-ui-testing** skill and **scout-create-scaffold** if needed (`node scripts/scout.js generate --path <moduleRoot> --type ui`). Use **FTR** only when adding to or modifying **existing** FTR functional tests (plugin already has tests under `test/functional/` or `x-pack/.../test/functional/` and no `test/scout*/ui/`). For **migrating** existing FTR to Scout, use **scout-migrate-from-ftr**. When in doubt, prefer Scout for new configs.
 
 ## Inputs
 
@@ -24,7 +24,7 @@ If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-bui
 - **Test location** — which FTR config and folder (e.g. `test/functional/apps/dashboard`, or `x-pack/solutions/observability/test/functional/apps/uptime`), or Scout path `test/scout*/ui/tests/` / `parallel_tests/`
 - **Scenarios** — what to assert (e.g. "page loads", "filter applies", "save button creates saved object")
 
-## Steps (FTR UI — use when module does not use Scout UI)
+## Steps (FTR UI — use only when extending existing FTR functional tests)
 
 1. **Locate the right FTR config and test layout.** Find the functional test suite for this app (e.g. under `test/functional/` or `x-pack/.../test/functional/`). Note the config file (e.g. `config.base.ts`) and how tests receive `FtrProviderContext` (e.g. `export default ({ getPageObjects, getService }: FtrProviderContext) => { ... }`).
 

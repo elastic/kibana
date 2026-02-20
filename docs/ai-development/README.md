@@ -51,6 +51,10 @@ Note: Kibana gitignores `.cursor/`. The install copies from this tracked directo
   - interpret-ci-failure — parse CI logs and suggest fix
   - debug-server — debug server errors from stack trace
 
+## Optional: Semantic code search
+
+For semantic search over the Kibana codebase (e.g. “find where session tokens are validated”), use the official [elastic/semantic-code-search-mcp-server](https://github.com/elastic/semantic-code-search-mcp-server). Index this repo with the [semantic-code-search-indexer](https://github.com/elastic/semantic-code-search-indexer), then run the MCP server (stdio or Docker) and add it to your Cursor MCP config. Tools include `semantic_code_search`, `symbol_analysis`, `read_file_from_chunks`, and the StartInvestigation prompt.
+
 ## Troubleshooting
 
 ### Cursor doesn’t show the rules or skills

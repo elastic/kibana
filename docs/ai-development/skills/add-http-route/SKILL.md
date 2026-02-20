@@ -30,16 +30,15 @@ Use this skill when the user wants to add a new REST endpoint to an existing plu
 
 4. **Register the route** in the plugin’s `setup()` (or where other routes are registered). Use the same base path pattern as existing routes (e.g. `/api/my_plugin` or `/internal/my_plugin`).
 
-5. **Add an FTR API integration test:**
+5. **Add an API integration test:**
    - Use the repo’s FTR API test config and service injection (e.g. `getService('supertest')`)
-   - In a `describe` block for this endpoint, add `it` cases for: success (e.g. 200 and expected body), validation failure (e.g. 400), and if relevant auth or error cases
-   - Clean up any created data so the test is repeatable
+   Default to **Scout** for new configs (scout-api-testing, create Scout scaffold if needed); use **FTR** only when the plugin already has existing FTR API tests. Cover success (200), validation failure (400), auth/error cases; clean up created data. If FTR: use repo FTR API config and service injection (e.g. `getService('supertest')`).
 
 ## Validation (run these and fix any failures)
 
 1. **Type check:** Run `node scripts/type_check` from repo root. Fix any errors in the new or modified files.
 2. **Lint:** Run `node scripts/eslint_all_files` for the changed paths. Fix any violations.
-3. **FTR API test:** Run the FTR API test suite that includes the new test (e.g. the plugin’s API test group). Ensure the new test passes.
+3. **API test:** Run the API test suite (Scout or FTR) that includes the new test (e.g. the plugin’s API test group). Ensure the new test passes.
 4. **Manual (optional):** Start Kibana and call the endpoint (e.g. with curl or browser) to confirm the response.
 
-After validation, report: route method and path, file(s) changed, and that type-check, lint, and the FTR API test pass.
+After validation, report: route method and path, file(s) changed, and that type-check, lint, and the API test (Scout or FTR) pass.
