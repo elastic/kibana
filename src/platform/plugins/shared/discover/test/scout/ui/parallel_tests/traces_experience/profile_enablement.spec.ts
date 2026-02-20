@@ -43,7 +43,7 @@ spaceTest.describe(
       'should load Discover with trace data in Classic mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('verify Discover loaded with results', async () => {
-          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await pageObjects.discover.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }
@@ -57,6 +57,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover loaded with results', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }
