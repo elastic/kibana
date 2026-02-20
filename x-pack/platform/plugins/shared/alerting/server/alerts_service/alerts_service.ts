@@ -723,7 +723,6 @@ export class AlertsService implements IAlertsService {
         must: [
           { term: { [ALERT_RULE_UUID]: ruleId } },
           { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-          { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
         ],
       },
     };
@@ -764,10 +763,10 @@ export class AlertsService implements IAlertsService {
     }
 
     try {
-      await esClient.updateByQuery({
+      const response = await esClient.updateByQuery({
         index: indices,
         conflicts: 'proceed',
-        wait_for_completion: false,
+        wait_for_completion: true,
         refresh: true,
         ignore_unavailable: true,
         query,
@@ -777,6 +776,11 @@ export class AlertsService implements IAlertsService {
           params,
         },
       });
+      if ((response.updated ?? 0) === 0) {
+        throw new Error(
+          `Unable to snooze alert instance '${alertInstanceId}' for rule '${ruleId}' - no matching alert documents were updated`
+        );
+      }
     } catch (error) {
       logger.error(
         `Error snoozing alert instance '${alertInstanceId}' for rule '${ruleId}' - ${error.message}`
@@ -828,7 +832,7 @@ export class AlertsService implements IAlertsService {
       await esClient.updateByQuery({
         index: indices,
         conflicts: 'proceed',
-        wait_for_completion: false,
+        wait_for_completion: true,
         refresh: true,
         ignore_unavailable: true,
         query,

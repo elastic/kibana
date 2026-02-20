@@ -411,6 +411,50 @@ describe('mute alert instance', () => {
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
+  it('throws when conditional snooze is requested while rule is muted via muteAll', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: ['instance1'],
+        muteAll: true,
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await expect(() =>
+      muteInstance(context, {
+        params: { alertId: '1', alertInstanceId: 'instance1' },
+        query: { validateAlertsExistence: false },
+        body: {
+          conditions: [
+            {
+              type: 'field_change',
+              field: 'kibana.alert.severity',
+              snapshotValue: 'critical',
+            },
+          ],
+        },
+      })
+    ).rejects.toThrow('muted via muteAll');
+
+    expect(getAlertIndicesAliasMock).not.toHaveBeenCalled();
+    expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
+    expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
   it('calls muteAlertInstance when body is absent (simple mute)', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',

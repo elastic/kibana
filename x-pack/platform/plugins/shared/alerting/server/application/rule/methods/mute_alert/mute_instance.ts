@@ -92,6 +92,13 @@ async function muteInstanceWithOCC(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+  if (attributes.muteAll && isConditionalSnooze) {
+    throw Boom.badRequest(
+      `Unable to apply conditional snooze to alert instance "${alertInstanceId}" because rule "${ruleId}" is muted via muteAll`
+    );
+  }
+
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
   if (isConditionalSnooze && (!indices || indices.length === 0)) {

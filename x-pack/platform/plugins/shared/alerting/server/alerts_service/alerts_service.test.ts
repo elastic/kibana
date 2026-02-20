@@ -3082,7 +3082,7 @@ describe('Alerts Service', () => {
 
       describe('snoozeAlertInstance', () => {
         it('calls updateByQuery with snooze fields', async () => {
-          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1 });
 
           const alertsService = new AlertsService({
             logger,
@@ -3113,6 +3113,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
             expect.objectContaining({
               index: ['.alerts-default'],
+              wait_for_completion: true,
               script: expect.objectContaining({
                 lang: 'painless',
                 params: expect.objectContaining({
@@ -3122,10 +3123,20 @@ describe('Alerts Service', () => {
               }),
             })
           );
+          const updateByQueryParams = clusterClient.updateByQuery.mock.calls[0][0];
+          expect(updateByQueryParams.query.bool.must).toEqual(
+            expect.arrayContaining([
+              { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+              { term: { 'kibana.alert.instance.id': 'alert-1' } },
+            ])
+          );
+          expect(updateByQueryParams.query.bool.must).not.toEqual(
+            expect.arrayContaining([{ term: { 'kibana.alert.status': 'active' } }])
+          );
         });
 
         it('writes ALERT_SNOOZE_SNAPSHOT when conditions have snapshotValue', async () => {
-          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1 });
 
           const alertsService = new AlertsService({
             logger,
@@ -3154,6 +3165,7 @@ describe('Alerts Service', () => {
 
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
             expect.objectContaining({
+              wait_for_completion: true,
               script: expect.objectContaining({
                 params: expect.objectContaining({
                   snapshot: { 'kibana.alert.severity': 'critical' },
@@ -3161,6 +3173,56 @@ describe('Alerts Service', () => {
               }),
             })
           );
+        });
+
+        it('throws when no matching alert documents are updated (total > 0 but updated = 0)', async () => {
+          // total counts documents searched; updated counts documents actually modified.
+          // A total > 0 but updated = 0 means documents were found but were already up-to-date
+          // (noop) or the query matched docs of a different type. We still throw because the
+          // intended target document was not mutated.
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 0, total: 5 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrow('no matching alert documents were updated');
+        });
+
+        it('throws when no matching alert documents are updated', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 0, total: 0 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrow('no matching alert documents were updated');
         });
 
         it('throws when no indices are provided', async () => {
@@ -3210,6 +3272,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
             expect.objectContaining({
               index: ['.alerts-default'],
+              wait_for_completion: true,
               query: expect.objectContaining({
                 bool: expect.objectContaining({
                   must: expect.arrayContaining([

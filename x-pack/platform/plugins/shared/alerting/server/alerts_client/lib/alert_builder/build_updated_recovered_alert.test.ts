@@ -32,6 +32,13 @@ import {
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import {
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_SNAPSHOT,
+} from '@kbn/rule-data-utils';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import {
   alertRule,
   existingFlattenedRecoveredAlert,
   existingExpandedRecoveredAlert,
@@ -214,6 +221,76 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_STATUS]: 'recovered',
       [ALERT_WORKFLOW_STATUS]: 'open',
       [TAGS]: ['rule-', '-tags'],
+    });
+  });
+
+  describe('snooze TTL expiry during recovery phase', () => {
+    const baseRawAlert = {
+      meta: { flapping: false, flappingHistory: [] },
+      state: {},
+    };
+
+    test('should clear snooze fields when TTL expires while alert is in recovered state', () => {
+      const expiredAt = new Date(Date.now() - 60 * 1000).toISOString(); // 1 minute ago
+
+      const result = buildUpdatedRecoveredAlert<{}>({
+        alert: {
+          ...existingFlattenedRecoveredAlert,
+          [ALERT_MUTED]: true,
+          [ALERT_SNOOZE_EXPIRES_AT]: expiredAt,
+        } as unknown as Alert,
+        legacyRawAlert: baseRawAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBeUndefined();
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toBeUndefined();
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBeUndefined();
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toBeUndefined();
+    });
+
+    test('should NOT clear snooze fields when TTL has not yet expired', () => {
+      const futureAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour from now
+
+      const result = buildUpdatedRecoveredAlert<{}>({
+        alert: {
+          ...existingFlattenedRecoveredAlert,
+          [ALERT_MUTED]: true,
+          [ALERT_SNOOZE_EXPIRES_AT]: futureAt,
+        } as unknown as Alert,
+        legacyRawAlert: baseRawAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(futureAt);
+    });
+
+    test('should NOT clear condition-only snooze fields (no expires_at) during recovery phase', () => {
+      // Condition-only snoozes have no TTL — they can only be evaluated when the alert
+      // re-activates and in-memory alert data is available to evaluate against.
+      const conditions = [
+        { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
+      ];
+
+      const result = buildUpdatedRecoveredAlert<{}>({
+        alert: {
+          ...existingFlattenedRecoveredAlert,
+          [ALERT_MUTED]: true,
+          [ALERT_SNOOZE_CONDITIONS]: conditions,
+          [ALERT_SNOOZE_CONDITION_OPERATOR]: 'any',
+        } as unknown as Alert,
+        legacyRawAlert: baseRawAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('any');
     });
   });
 });

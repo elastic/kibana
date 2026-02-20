@@ -421,6 +421,16 @@ export class PerAlertActionScheduler<
       conditionOperator: snoozeConditionOperator,
     };
 
+    // NOTE: alertData here comes from getTrackedAlertByInstanceId(), which is populated
+    // during initializeExecution() from documents persisted by the *previous* execution.
+    // The current execution's rule-type-reported field values (e.g. updated severity) are
+    // not yet persisted when this runs. This means condition evaluation is always one
+    // execution cycle behind:
+    //   - Execution N:   rule reports severity=medium (changed from low), but trackedAlerts
+    //                    still holds severity=low from last persist → condition not yet met
+    //   - Execution N+1: trackedAlerts now shows severity=medium → condition met → auto-unmute
+    // For rules on short intervals this is negligible; for hourly rules it adds one interval
+    // of extra suppression after the condition is actually satisfied.
     const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
     if (evalResult.shouldUnmute) {
       // Conditions met -- mark for auto-unmute, allow actions to fire
