@@ -727,8 +727,16 @@ export class AlertsService implements IAlertsService {
       },
     };
 
-    // Build the painless script to set snooze fields
-    const scriptParts: string[] = [`ctx._source['${ALERT_MUTED}'] = true;`];
+    // Clear all snooze fields first, then conditionally re-set the ones from this
+    // request. This prevents stale fields from a prior snooze (e.g. conditions from
+    // a condition-based snooze) from surviving when re-snoozing with a simpler config.
+    const scriptParts: string[] = [
+      `ctx._source['${ALERT_MUTED}'] = true;`,
+      `ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_SNAPSHOT}');`,
+    ];
     const params: Record<string, unknown> = {};
 
     if (expiresAt) {
@@ -739,17 +747,14 @@ export class AlertsService implements IAlertsService {
     if (conditions && conditions.length > 0) {
       scriptParts.push(`ctx._source['${ALERT_SNOOZE_CONDITIONS}'] = params.conditions;`);
       params.conditions = conditions;
-    }
 
-    if (conditionOperator) {
-      scriptParts.push(
-        `ctx._source['${ALERT_SNOOZE_CONDITION_OPERATOR}'] = params.conditionOperator;`
-      );
-      params.conditionOperator = conditionOperator;
-    }
+      if (conditionOperator) {
+        scriptParts.push(
+          `ctx._source['${ALERT_SNOOZE_CONDITION_OPERATOR}'] = params.conditionOperator;`
+        );
+        params.conditionOperator = conditionOperator;
+      }
 
-    // Build a snapshot map from condition snapshotValue fields for audit/debugging
-    if (conditions && conditions.length > 0) {
       const snapshot: Record<string, string> = {};
       for (const c of conditions) {
         if (c.snapshotValue != null) {

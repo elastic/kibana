@@ -3081,7 +3081,7 @@ describe('Alerts Service', () => {
       });
 
       describe('snoozeAlertInstance', () => {
-        it('calls updateByQuery with snooze fields', async () => {
+        it('calls updateByQuery with snooze fields and clears stale fields first', async () => {
           clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1 });
 
           const alertsService = new AlertsService({
@@ -3124,6 +3124,13 @@ describe('Alerts Service', () => {
             })
           );
           const updateByQueryParams = clusterClient.updateByQuery.mock.calls[0][0];
+          const scriptSource = (updateByQueryParams.script as { source: string }).source;
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.expires_at')");
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.conditions')");
+          expect(scriptSource).toContain(
+            "ctx._source.remove('kibana.alert.snooze.condition_operator')"
+          );
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.snapshot')");
           const must = (updateByQueryParams.query as NonNullable<typeof updateByQueryParams.query>)
             .bool!.must;
           expect(must).toEqual(
@@ -3134,6 +3141,56 @@ describe('Alerts Service', () => {
           );
           expect(must).not.toEqual(
             expect.arrayContaining([{ term: { 'kibana.alert.status': 'active' } }])
+          );
+        });
+
+        it('clears stale snooze fields when re-snoozing with time-only config', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.snoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+            expiresAt: '2026-06-01T00:00:00Z',
+          });
+
+          const updateByQueryParams = clusterClient.updateByQuery.mock.calls[0][0];
+          const scriptSource = (updateByQueryParams.script as { source: string }).source;
+          const scriptParams = (updateByQueryParams.script as { params: Record<string, unknown> })
+            .params;
+
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.expires_at')");
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.conditions')");
+          expect(scriptSource).toContain(
+            "ctx._source.remove('kibana.alert.snooze.condition_operator')"
+          );
+          expect(scriptSource).toContain("ctx._source.remove('kibana.alert.snooze.snapshot')");
+
+          expect(scriptParams.expiresAt).toBe('2026-06-01T00:00:00Z');
+          expect(scriptParams).not.toHaveProperty('conditions');
+          expect(scriptParams).not.toHaveProperty('conditionOperator');
+          expect(scriptParams).not.toHaveProperty('snapshot');
+
+          expect(scriptSource).toContain("ctx._source['kibana.alert.snooze.expires_at']");
+          expect(scriptSource).not.toContain(
+            "ctx._source['kibana.alert.snooze.conditions'] = params.conditions"
+          );
+          expect(scriptSource).not.toContain(
+            "ctx._source['kibana.alert.snooze.condition_operator'] = params.conditionOperator"
+          );
+          expect(scriptSource).not.toContain(
+            "ctx._source['kibana.alert.snooze.snapshot'] = params.snapshot"
           );
         });
 
