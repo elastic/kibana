@@ -9,6 +9,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
+// TODO: Expand mappings as the watchlist entity doc schema evolves
 export const WATCHLIST_ENTITY_INDEX_MAPPING: MappingProperties = {
   '@timestamp': {
     type: 'date',
