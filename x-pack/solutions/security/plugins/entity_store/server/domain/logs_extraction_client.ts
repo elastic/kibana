@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -319,7 +320,7 @@ export class LogsExtractionClient {
       const cleanIndices = secSolDataView
         .getIndexPattern()
         .split(',')
-        .filter((index) => index !== alertsIndex);
+        .filter((index) => index !== alertsIndex && !isCCSRemoteIndexName(index));
       indexPatterns.push(...cleanIndices);
     } catch (error) {
       this.logger.warn(

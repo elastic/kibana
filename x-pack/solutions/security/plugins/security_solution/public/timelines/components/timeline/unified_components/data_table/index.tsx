@@ -25,6 +25,7 @@ import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/tri
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -52,6 +53,7 @@ import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
+import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -175,15 +177,26 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
+        const isAttackRow = isAttackDiscoveryRow(eventData);
+        const indexName = eventData.ecs._index ?? '';
+        const rightPanel = isAttackRow
+          ? {
+              id: AttackDetailsRightPanelKey,
+              params: {
+                attackId: eventData._id,
+                indexName,
+              },
+            }
+          : {
+              id: DocumentDetailsRightPanelKey,
+              params: {
+                id: eventData._id,
+                indexName,
+                scopeId: timelineId,
+              },
+            };
         openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventData._id,
-              indexName: eventData.ecs._index ?? '',
-              scopeId: timelineId,
-            },
-          },
+          right: rightPanel,
         });
         telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
