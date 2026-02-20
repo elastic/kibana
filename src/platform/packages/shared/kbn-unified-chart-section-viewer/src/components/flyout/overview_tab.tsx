@@ -158,7 +158,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         <EuiFlexGroup alignItems="center" gutterSize="s">
           {hasIcon && (
             <EuiFlexItem grow={false}>
-              <EuiToken iconType={iconMap.get(dimension.type)!} size="s" />
+              <EuiToken iconType={iconMap.get(dimension.type) ?? ''} size="s" />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
