@@ -68,7 +68,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/cps'
   - '@kbn/cps-utils'
-  - '@kbn/css-utils'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

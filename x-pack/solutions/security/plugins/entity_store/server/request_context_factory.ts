@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
+import { EngineDescriptorClient } from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -22,6 +23,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
+  isServerless: boolean;
 }
 
 export async function createRequestHandlerContext({
@@ -29,11 +31,11 @@ export async function createRequestHandlerContext({
   context,
   coreSetup,
   request,
+  isServerless,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
-
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
@@ -42,21 +44,35 @@ export async function createRequestHandlerContext({
     request
   );
 
+  const engineDescriptorClient = new EngineDescriptorClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
+
+  const logsExtractionClient = new LogsExtractionClient(
+    logger,
+    namespace,
+    core.elasticsearch.client.asCurrentUser,
+    dataViewsService,
+    engineDescriptorClient
+  );
+
   return {
     core,
     logger,
-    assetManager: new AssetManager(
+    assetManager: new AssetManager({
       logger,
-      core.elasticsearch.client.asCurrentUser,
-      taskManagerStart,
-      namespace
-    ),
-    featureFlags: new FeatureFlags(core.uiSettings.client),
-    logsExtractionClient: new LogsExtractionClient(
-      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      taskManager: taskManagerStart,
+      engineDescriptorClient,
       namespace,
-      core.elasticsearch.client.asCurrentUser,
-      dataViewsService
-    ),
+      isServerless,
+      logsExtractionClient,
+      security: startPlugins.security,
+    }),
+    featureFlags: new FeatureFlags(core.uiSettings.client),
+    logsExtractionClient,
+    security: startPlugins.security,
   };
 }

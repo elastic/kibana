@@ -119,10 +119,11 @@ export async function mountApp({
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: RouteComponentProps<{ activeTab?: string }>) => {
     // clear the dashboard duration start mark set during mounting because we
     // went to the listing page instead of a dashboard view
     performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
 
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
@@ -168,7 +169,11 @@ export async function mountApp({
               ]}
               render={renderDashboard}
             />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route
+              exact
+              path={[LANDING_PAGE_PATH, `${LANDING_PAGE_PATH}/:activeTab`]}
+              render={renderListingPage}
+            />
             <Route exact path="/">
               <Redirect to={LANDING_PAGE_PATH} />
             </Route>

@@ -39,8 +39,6 @@ import apm from 'elastic-apm-node';
 
 import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
-import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import {
   packageToPackagePolicy,
   isPackageLimited,
@@ -380,7 +378,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -407,12 +404,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
-
-    let authorizationHeader = options.authorizationHeader;
-
-    if (!authorizationHeader && request) {
-      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
     const basePkgInfo =
@@ -512,7 +503,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgName: enrichedPackagePolicy.package.name,
         pkgVersion: enrichedPackagePolicy.package.version,
         force: options?.force,
-        authorizationHeader,
+        request,
       });
     }
 
@@ -566,7 +557,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicies[0]
+          agentPolicies[0],
+          pkgInfo
         );
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
@@ -785,7 +777,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -3012,7 +3005,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -3034,7 +3028,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev')) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {
@@ -3057,7 +3055,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
           });
         }
-      } else {
+      } else if (policy.id.endsWith(':prev')) {
         if (!previousVersionPolicies[namespace]) {
           previousVersionPolicies[namespace] = [];
         }
@@ -3191,7 +3189,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
-    agentPolicy: AgentPolicy
+    agentPolicy: AgentPolicy,
+    packageInfo: PackageInfo
   ): Promise<CloudConnector | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
@@ -3230,7 +3229,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         // Extract account type from package policy vars
-        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
           // Extract cloud connector name from package policy
           const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
@@ -3350,7 +3349,6 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;

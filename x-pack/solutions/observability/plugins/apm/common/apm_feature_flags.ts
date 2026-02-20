@@ -14,7 +14,6 @@ export enum ApmFeatureFlagName {
   InfrastructureTabAvailable = 'infrastructureTabAvailable',
   InfraUiAvailable = 'infraUiAvailable',
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
-  ServiceMapUseReactFlow = 'serviceMapUseReactFlow',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
@@ -39,10 +38,6 @@ const apmFeatureFlagMap = {
   },
   [ApmFeatureFlagName.MigrationToFleetAvailable]: {
     default: true,
-    type: t.boolean,
-  },
-  [ApmFeatureFlagName.ServiceMapUseReactFlow]: {
-    default: false,
     type: t.boolean,
   },
   [ApmFeatureFlagName.SourcemapApiAvailable]: {

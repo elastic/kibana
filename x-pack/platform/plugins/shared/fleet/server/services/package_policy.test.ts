@@ -274,6 +274,11 @@ jest.mock('./epm/packages/get', () => ({
   }),
 }));
 
+jest.mock('./utils/version_specific_policies', () => ({
+  ...jest.requireActual('./utils/version_specific_policies'),
+  getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock('./agent_policy');
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 jest.mock('./epm/packages/cleanup', () => {
@@ -715,6 +720,26 @@ describe('Package policy service', () => {
     });
   });
   describe('createCloudConnectorForPackagePolicy', () => {
+    // Mock PackageInfo for input-level storage mode (no package-level vars defined)
+    const mockPackageInfo = {
+      name: 'test-package',
+      title: 'Test Package',
+      version: '1.0.0',
+      description: 'Test package',
+      type: 'integration',
+      categories: [],
+      conditions: {},
+      icons: [],
+      assets: {
+        kibana: undefined,
+        elasticsearch: undefined,
+      },
+      policy_templates: [],
+      data_streams: [],
+      owner: { github: 'elastic' },
+      screenshots: [],
+    } as unknown as PackageInfo;
+
     it('should create cloud connector when all conditions are met', async () => {
       const soClient = createSavedObjectClientMock();
       const enrichedPackagePolicy = {
@@ -789,7 +814,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toEqual(mockCloudConnector);
@@ -837,7 +863,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -898,7 +925,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toBeUndefined();
@@ -954,7 +982,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1035,7 +1064,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toEqual(updatedCloudConnector);
@@ -1118,7 +1148,8 @@ describe('Package policy service', () => {
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
             enrichedPackagePolicy,
-            agentPolicy
+            agentPolicy,
+            mockPackageInfo
           )
         ).rejects.toThrow(CloudConnectorUpdateError);
 
@@ -1170,7 +1201,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1224,7 +1256,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1266,7 +1299,8 @@ describe('Package policy service', () => {
       const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
         soClient,
         enrichedPackagePolicy,
-        agentPolicy
+        agentPolicy,
+        mockPackageInfo
       );
 
       expect(result).toBeUndefined();
@@ -1326,7 +1360,8 @@ describe('Package policy service', () => {
           (packagePolicyService as any).createCloudConnectorForPackagePolicy(
             soClient,
             enrichedPackagePolicy,
-            agentPolicy
+            agentPolicy,
+            mockPackageInfo
           )
         ).rejects.toThrow(
           'Error creating cloud connector in Fleet, Cloud connector creation failed'
@@ -1412,7 +1447,8 @@ describe('Package policy service', () => {
         const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicy
+          agentPolicy,
+          mockPackageInfo
         );
 
         expect(result).toEqual(mockCloudConnector);
@@ -8348,6 +8384,49 @@ describe('Package policy service', () => {
         references: [],
         score: 0,
       },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-2`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-2',
+          description: '',
+          namespace: 'default',
+          policy_id: '12345',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.2.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
+      {
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: `${id}-3`,
+        namespaces: ['default'],
+        attributes: {
+          name: 'system-3',
+          policy_ids: ['12345'],
+          enabled: true,
+          inputs: [],
+          package: { name: 'system', title: 'System', version: '2.0.0' },
+          revision: 1,
+          latest_revision: false,
+          created_at: '2024-12-22T21:28:05.380Z',
+          created_by: 'elastic',
+          updated_at: '2024-12-22T21:28:05.380Z',
+          updated_by: 'elastic',
+        },
+        references: [],
+        score: 0,
+      },
     ];
     const mockRollbackResult = {
       updatedPolicies: {
@@ -8516,7 +8595,7 @@ describe('Package policy service', () => {
       });
 
       it('should create temporary saved objects to back up package policies before updating them', async () => {
-        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO, '2.2.0');
         expect(mockSoClient.bulkCreate).toHaveBeenNthCalledWith(
           1,
           [
@@ -8590,7 +8669,7 @@ describe('Package policy service', () => {
       });
 
       it('should update package policies', async () => {
-        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO);
+        await packagePolicyService.rollback(mockSoClient, mockPackagePolicySO, '2.2.0');
         expect(mockSoClient.bulkUpdate).toHaveBeenNthCalledWith(
           1,
           [
@@ -8664,7 +8743,8 @@ describe('Package policy service', () => {
       it('should return the updated and backed up package policies, and the old previous revisions', async () => {
         const rollbackResult = await packagePolicyService.rollback(
           mockSoClient,
-          mockPackagePolicySO
+          mockPackagePolicySO,
+          '2.2.0'
         );
         expect(rollbackResult).toStrictEqual(mockRollbackResult);
       });

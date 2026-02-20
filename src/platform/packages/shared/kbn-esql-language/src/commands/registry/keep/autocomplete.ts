@@ -38,7 +38,6 @@ export async function autocomplete(
     .filter(isColumn)
     .map((arg) => arg.parts.join('.'));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
-
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment, context),

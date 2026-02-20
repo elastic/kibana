@@ -8,21 +8,14 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
-import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
+import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
-import { Controls } from './controls';
-import { Cytoscape } from './cytoscape';
-import { getCytoscapeDivStyle } from './cytoscape_options';
-import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
-import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { SearchBar } from '../../shared/search_bar/search_bar';
@@ -32,8 +25,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
-import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
-import { ReactFlowServiceMap } from './react_flow_service_map';
+import { ServiceMapGraph } from './graph';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -98,22 +90,11 @@ export function ServiceMap({
   end: string;
   serviceGroupId?: string;
 }) {
-  const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-  const showReactFlowServiceMap = useApmFeatureFlag(ApmFeatureFlagName.ServiceMapUseReactFlow);
-
-  const subscriptions = useRef<Subscription>(new Subscription());
-
-  useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-    return () => {
-      currentSubscriptions.unsubscribe();
-    };
-  }, []);
 
   const { data, status, error } = useServiceMap({
     environment,
@@ -125,6 +106,7 @@ export function ServiceMap({
   });
 
   const { ref, height } = useRefDimensions();
+  const { euiTheme } = useEuiTheme();
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
@@ -150,7 +132,9 @@ export function ServiceMap({
     );
   }
 
-  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+  const isEmpty = data.nodes.length === 0;
+
+  if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
       <PromptContainer>
         <EmptyPrompt />
@@ -184,41 +168,29 @@ export function ServiceMap({
     });
   }
 
-  if (showReactFlowServiceMap) {
-    return (
-      <>
-        <SearchBar showTimeComparison />
-        <EuiPanel hasBorder={true} paddingSize="none">
-          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-            <ReactFlowServiceMap height={heightWithPadding} />
-          </div>
-        </EuiPanel>
-      </>
-    );
-  }
-
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
-        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-          <Cytoscape
-            elements={data.elements}
+        <div
+          data-test-subj="serviceMap"
+          style={{
+            height: heightWithPadding,
+            zIndex: Number(euiTheme.levels.content) + 1,
+          }}
+          ref={ref}
+        >
+          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+          <ServiceMapGraph
             height={heightWithPadding}
+            nodes={data.nodes}
+            edges={data.edges}
             serviceName={serviceName}
-            style={getCytoscapeDivStyle(euiTheme, status)}
-          >
-            <Controls />
-            {serviceName && <EmptyBanner />}
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-            />
-          </Cytoscape>
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+          />
         </div>
       </EuiPanel>
     </>

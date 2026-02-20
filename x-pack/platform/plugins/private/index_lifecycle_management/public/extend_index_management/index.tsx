@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 
-import type { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { Index } from '../../common/types';
 
 import { retryLifecycleForIndex } from '../application/services/api';
 import { indexLifecycleTab } from './components/index_lifecycle_summary';

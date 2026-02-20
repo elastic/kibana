@@ -39,6 +39,7 @@ import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
   LICENSING_CASE_ASSIGNMENT_FEATURE,
@@ -72,6 +73,7 @@ export class CasePlugin
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private usageCounter?: IUsageCounter;
@@ -84,6 +86,7 @@ export class CasePlugin
     this.clientFactory = new CasesClientFactory(this.logger);
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
@@ -100,7 +103,8 @@ export class CasePlugin
 
     registerInternalAttachments(
       this.externalReferenceAttachmentTypeRegistry,
-      this.persistableStateAttachmentTypeRegistry
+      this.persistableStateAttachmentTypeRegistry,
+      this.unifiedAttachmentTypeRegistry
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
@@ -128,6 +132,7 @@ export class CasePlugin
       logger: this.logger,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
+      config: this.caseConfig,
     });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
@@ -145,6 +150,7 @@ export class CasePlugin
           usageCollection: plugins.usageCollection,
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
+          templatesConfig: this.caseConfig.templates,
         });
       }
 
@@ -165,7 +171,7 @@ export class CasePlugin
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -209,6 +215,9 @@ export class CasePlugin
         },
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
+        },
+        registerUnified: (unifiedAttachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
         },
       },
       config: this.caseConfig,
@@ -270,6 +279,7 @@ export class CasePlugin
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
@@ -277,6 +287,7 @@ export class CasePlugin
       // usageCounter will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
+      config: this.caseConfig,
     });
 
     return {
@@ -284,6 +295,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
       config: this.caseConfig,
     };
   }
@@ -306,6 +318,7 @@ export class CasePlugin
           return this.clientFactory.create({
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
+            internalClusterClient: coreContext.elasticsearch.client.asInternalUser,
             savedObjectsService: savedObjects,
           });
         },
@@ -321,6 +334,7 @@ export class CasePlugin
       return this.clientFactory.create({
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
+        internalClusterClient: client.asInternalUser,
         savedObjectsService: core.savedObjects,
       });
     };

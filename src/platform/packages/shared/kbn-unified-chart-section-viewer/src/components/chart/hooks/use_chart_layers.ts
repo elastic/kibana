@@ -13,7 +13,6 @@ import type { Dimension, MetricField } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
-  DIMENSIONS_COLUMN,
   getLensMetricFormat,
 } from '../../../common/utils';
 
@@ -42,6 +41,7 @@ export const useChartLayers = ({
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const metricField = createMetricAggregation({
+      type: metric.type,
       instrument: metric.instrument,
       metricName: metric.name,
       customFunction,
@@ -65,12 +65,17 @@ export const useChartLayers = ({
             ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
-        breakdown: hasDimensions
-          ? dimensions.length === 1
-            ? dimensions[0].name
-            : DIMENSIONS_COLUMN
-          : undefined,
+        breakdown: hasDimensions ? dimensions[0].name : undefined,
       },
     ];
-  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
+  }, [
+    color,
+    customFunction,
+    dimensions,
+    metric.type,
+    metric.instrument,
+    metric.name,
+    metric.unit,
+    seriesType,
+  ]);
 };

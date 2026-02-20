@@ -7,7 +7,7 @@
 
 import type { UnionToIntersection, ValuesType } from 'utility-types';
 import { merge, castArray } from 'lodash';
-import stableStringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from

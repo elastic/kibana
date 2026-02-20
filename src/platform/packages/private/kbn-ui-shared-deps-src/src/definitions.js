@@ -96,6 +96,7 @@ const externals = {
     'useToggle',
     'useUnmount',
     'useUpdateEffect',
+    'useObservable',
   ].reduce((memo, subset) => {
     memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
     return memo;
@@ -148,6 +149,7 @@ const externals = {
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
   '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  '@kbn/core-chrome-sidebar-context': '__kbnSharedDeps__.KbnCoreSidebarContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

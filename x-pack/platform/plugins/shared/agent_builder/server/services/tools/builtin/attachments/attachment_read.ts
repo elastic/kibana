@@ -27,6 +27,8 @@ const attachmentReadSchema = z.object({
  */
 export const createAttachmentReadTool = ({
   attachmentManager,
+  attachmentsService,
+  formatContext,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
   id: platformCoreTools.attachmentRead,
   type: ToolType.builtin,
@@ -35,7 +37,9 @@ export const createAttachmentReadTool = ({
   schema: attachmentReadSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, version }) => {
-    const attachment = attachmentManager.get(attachmentId);
+    const attachment = attachmentManager.get(attachmentId, {
+      version,
+    });
 
     if (!attachment) {
       return {
@@ -48,19 +52,33 @@ export const createAttachmentReadTool = ({
       };
     }
 
-    const versionData = version
-      ? attachmentManager.getVersion(attachmentId, version)
-      : attachmentManager.getLatest(attachmentId);
+    const { data: versionData, type } = attachment;
 
-    if (!versionData) {
-      return {
-        results: [
-          createErrorResult({
-            message: `Version ${version} not found for attachment '${attachmentId}'`,
-            metadata: { attachment_id: attachmentId, version },
-          }),
-        ],
-      };
+    let formattedData: unknown = versionData.data;
+    if (attachmentsService && formatContext) {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      const typeReadonly = definition?.isReadonly ?? false;
+      if (definition && typeReadonly) {
+        try {
+          const formatted = await definition.format(
+            {
+              id: attachment.id,
+              type: attachment.type,
+              data: versionData.data,
+            },
+            formatContext
+          );
+          if (formatted.getRepresentation) {
+            const representation = await formatted.getRepresentation();
+            formattedData =
+              representation.type === 'text'
+                ? representation.value
+                : JSON.stringify(representation);
+          }
+        } catch {
+          formattedData = versionData.data;
+        }
+      }
     }
 
     return {
@@ -70,9 +88,9 @@ export const createAttachmentReadTool = ({
           type: ToolResultType.other,
           data: {
             attachment_id: attachmentId,
-            type: attachment.type,
-            version: versionData.version,
-            data: versionData.data,
+            type,
+            version: attachment.version,
+            data: formattedData,
           },
         },
       ],
