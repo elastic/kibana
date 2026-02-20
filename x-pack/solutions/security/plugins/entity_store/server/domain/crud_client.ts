@@ -39,19 +39,26 @@ interface BulkObject {
   doc: Entity;
 }
 
+interface BulkObjectResponse {
+  _id: string;
+  status: number;
+  type: string;
+  reason: string;
+}
+
 function validateAndTransformDoc(
   entityType: EntityType,
   namespace: string,
   doc: Entity,
   force: boolean
 ): Record<string, unknown> {
-    const definition = getEntityDefinition(entityType, namespace);
-    if (!force) {
-      const flat = getFlattenedObject(doc);
-      const fieldDescriptions = getFieldDescriptions(flat, definition);
-      assertOnlyNonForcedAttributesInReq(fieldDescriptions);
-    }
-    return transformDocForUpsert(entityType, doc);
+  const definition = getEntityDefinition(entityType, namespace);
+  if (!force) {
+    const flat = getFlattenedObject(doc);
+    const fieldDescriptions = getFieldDescriptions(flat, definition);
+    assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+  }
+  return transformDocForUpsert(entityType, doc);
 }
 
 export class CRUDClient {
@@ -65,10 +72,7 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
-  private async createEntity(
-    hashedId: string,
-    doc: Record<string, unknown>
-  ): Promise<void> {
+  private async createEntity(hashedId: string, doc: Record<string, unknown>): Promise<void> {
     this.logger.debug(`Creating entity ID: ${hashedId}`);
     await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
@@ -82,7 +86,7 @@ export class CRUDClient {
   private async updateEntity(
     hashedId: string,
     entityType: EntityType,
-    doc: Record<string,unknown>,
+    doc: Record<string, unknown>
   ): Promise<void> {
     this.logger.debug(`Updating entity ID: ${hashedId}`);
     const definition = getEntityDefinition(entityType, this.namespace);
@@ -104,11 +108,7 @@ export class CRUDClient {
     }
   }
 
-  public async upsertEntity(
-    entityType: EntityType,
-    doc: Entity,
-    force: boolean
-  ): Promise<void> {
+  public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
     if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
@@ -118,14 +118,13 @@ export class CRUDClient {
     const hashedId: string = createHash('md5').update(id).digest('hex');
     this.logger.debug(`Upserting entity ID ${id}`);
 
-
     if (!doc.entity?.id) {
       doc.entity.id = id;
     }
-    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
+    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
 
     try {
-      await this.createEntity(hashedId, readyDoc)
+      await this.createEntity(hashedId, readyDoc);
     } catch (error) {
       if (error.statusCode !== 409) {
         throw error;
@@ -133,26 +132,43 @@ export class CRUDClient {
       this.logger.debug(`Conflict while creating entity ID ${id}, updating instead`);
     }
 
-    await this.updateEntity(hashedId, entityType, readyDoc)
+    await this.updateEntity(hashedId, entityType, readyDoc);
     return;
   }
 
-  public async upsertEntitiesBulk(objects: BulkObject[], force: boolean): Promise<void> {
+  public async upsertEntitiesBulk(
+    objects: BulkObject[],
+    force: boolean
+  ): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
+      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
       operations.push({ create: {} }, readyDoc);
     }
 
     this.logger.debug(`Bulk upserting ${objects.length} entities`);
-    await this.esClient.bulk({
+    const resp = await this.esClient.bulk({
       index: getUpdatesEntitiesDataStreamName(this.namespace),
       operations,
       refresh: 'wait_for',
     });
-    return;
+
+    if (!resp.errors) {
+      this.logger.debug(`Successfully bulk upserted ${objects.length} entities`);
+      return [];
+    }
+    this.logger.debug(`Bulk upserted ${objects.length} entities with errors`);
+    return resp.items.map((item) => {
+      const [, value] = Object.entries(item)[0];
+      return {
+        _id: value._id,
+        status: value.status,
+        type: value.error?.type,
+        reason: value.error?.reason,
+      } as BulkObjectResponse;
+    });
   }
 
   public async deleteEntity(id: string): Promise<void> {
@@ -228,10 +244,7 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(
-  type: EntityType,
-  data: Partial<Entity>
-): Record<string, unknown> {
+function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
   const now = new Date().toISOString();
   if (type === 'generic') {
     return {

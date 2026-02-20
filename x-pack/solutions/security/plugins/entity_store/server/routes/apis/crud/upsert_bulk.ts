@@ -58,21 +58,21 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
         }
 
         try {
-          await crudClient.upsertEntitiesBulk(req.body.entities, req.query.force);
+          const errors = await crudClient.upsertEntitiesBulk(req.body.entities, req.query.force);
+          return res.ok({
+            body: {
+              ok: true,
+              errors,
+            },
+          });
         } catch (error) {
           if (error instanceof BadCRUDRequestError) {
-            return res.badRequest({ body: error });
+            return res.badRequest({ body:  error });
           }
 
           logger.error(error);
           throw error;
         }
-
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
       })
     );
 }
