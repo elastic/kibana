@@ -36,7 +36,23 @@ export const createAttachmentAddTool = ({
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {
     const definition = attachmentsService?.getTypeDefinition(type);
-    const isReadonly = definition?.isReadonly ?? true;
+    if (!definition) {
+      const validTypes = attachmentsService?.getRegisteredTypeIds() ?? [];
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: {
+              message: `Unknown attachment type '${type}'. Valid attachment types are: ${validTypes.join(
+                ', '
+              )}`,
+            },
+          },
+        ],
+      };
+    }
+    const isReadonly = definition.isReadonly ?? false;
     if (isReadonly) {
       return {
         results: [
@@ -50,7 +66,8 @@ export const createAttachmentAddTool = ({
     }
 
     // Check for duplicate ID if provided
-    if (id && attachmentManager.get(id)) {
+    const existing = id ? attachmentManager.getAttachmentRecord(id) : undefined;
+    if (existing) {
       return {
         results: [
           {

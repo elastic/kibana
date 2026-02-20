@@ -48,13 +48,7 @@ export class VisualizationsPlugin
     core.savedObjects.registerType(getVisualizationSavedObjectType());
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    plugins.embeddable.registerTransforms(
-      VISUALIZE_EMBEDDABLE_TYPE,
-      getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerTransforms(VISUALIZE_EMBEDDABLE_TYPE, { getTransforms });
 
     plugins.contentManagement.register({
       id: CONTENT_ID,

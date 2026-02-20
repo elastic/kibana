@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 140
+ * Registry groups: 142
  * Metric groups: 497
  * Hardcoded fields: 34
- * Total fields: 1186
+ * Total fields: 1196
  *
  * @internal
  *
- * WARNING: This object contains 1186+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1196+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1812,6 +1812,26 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'instance-1',
   },
+  'gcp.gce.instance_group_manager.name': {
+    name: 'gcp.gce.instance_group_manager.name',
+    description: 'The name of the Instance Group Manager (IGM) that manages this VM, if any.',
+    type: 'keyword',
+    example: 'web-igm',
+  },
+  'gcp.gce.instance_group_manager.region': {
+    name: 'gcp.gce.instance_group_manager.region',
+    description:
+      'The region of a **regional** Instance Group Manager (e.g., `us-central1`). Set this **only** when the IGM is regional.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'gcp.gce.instance_group_manager.zone': {
+    name: 'gcp.gce.instance_group_manager.zone',
+    description:
+      'The zone of a **zonal** Instance Group Manager (e.g., `us-central1-a`). Set this **only** when the IGM is zonal.',
+    type: 'keyword',
+    example: 'us-central1-a',
+  },
   'gen_ai.agent.description': {
     name: 'gen_ai.agent.description',
     description: 'Free-form description of the GenAI agent provided by the application.',
@@ -1997,6 +2017,19 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'gpt-4-0613',
   },
+  'gen_ai.retrieval.documents': {
+    name: 'gen_ai.retrieval.documents',
+    description: 'The documents retrieved.',
+    type: 'keyword',
+    example:
+      '[{"id":"doc_123","score":0.95},{"id":"doc_456","score":0.87},{"id":"doc_789","score":0.82}]',
+  },
+  'gen_ai.retrieval.query.text': {
+    name: 'gen_ai.retrieval.query.text',
+    description: 'The query text used for retrieval.',
+    type: 'keyword',
+    example: 'What is the capital of France?',
+  },
   'gen_ai.system_instructions': {
     name: 'gen_ai.system_instructions',
     description:
@@ -2054,6 +2087,18 @@ export const semconvFlat = {
     description: 'Type of the tool utilized by the agent',
     type: 'keyword',
     example: 'function',
+  },
+  'gen_ai.usage.cache_creation.input_tokens': {
+    name: 'gen_ai.usage.cache_creation.input_tokens',
+    description: 'The number of input tokens written to a provider-managed cache.',
+    type: 'long',
+    example: '25',
+  },
+  'gen_ai.usage.cache_read.input_tokens': {
+    name: 'gen_ai.usage.cache_read.input_tokens',
+    description: 'The number of input tokens served from a provider-managed cache.',
+    type: 'long',
+    example: '50',
   },
   'gen_ai.usage.input_tokens': {
     name: 'gen_ai.usage.input_tokens',
@@ -5232,12 +5277,12 @@ export const semconvFlat = {
   },
   'metrics.rpc.client.call.duration': {
     name: 'metrics.rpc.client.call.duration',
-    description: 'Measures the duration of outbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an outgoing Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.rpc.server.call.duration': {
     name: 'metrics.rpc.server.call.duration',
-    description: 'Measures the duration of inbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an incoming Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
@@ -5696,6 +5741,44 @@ export const semconvFlat = {
     description: 'Parent-child Reference type',
     type: 'keyword',
   },
+  'oracle.db.domain': {
+    name: 'oracle.db.domain',
+    description: 'The database domain associated with the connection.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'oracle.db.instance.name': {
+    name: 'oracle.db.instance.name',
+    description:
+      'The instance name associated with the connection in an Oracle Real Application Clusters environment.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.name': {
+    name: 'oracle.db.name',
+    description: 'The database name associated with the connection.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.pdb': {
+    name: 'oracle.db.pdb',
+    description: 'The pluggable database (PDB) name associated with the connection.',
+    type: 'keyword',
+    example: 'PDB1',
+  },
+  'oracle.db.service': {
+    name: 'oracle.db.service',
+    description: 'The service name currently associated with the database connection.',
+    type: 'keyword',
+    example: 'order-processing-service',
+  },
+  'oracle_cloud.realm': {
+    name: 'oracle_cloud.realm',
+    description:
+      'The OCI realm identifier that indicates the isolated partition in which the tenancy and its resources reside.',
+    type: 'keyword',
+    example: 'oc1',
+  },
   'os.build_id': {
     name: 'os.build_id',
     description: 'Unique identifier for a particular build or compilation of the operating system.',
@@ -6077,27 +6160,6 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.message.compressed_size': {
-    name: 'rpc.message.compressed_size',
-    description: 'Compressed size of the message in bytes.',
-    type: 'long',
-  },
-  'rpc.message.id': {
-    name: 'rpc.message.id',
-    description:
-      'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
-    type: 'long',
-  },
-  'rpc.message.type': {
-    name: 'rpc.message.type',
-    description: 'Whether this is a received or sent message.',
-    type: 'keyword',
-  },
-  'rpc.message.uncompressed_size': {
-    name: 'rpc.message.uncompressed_size',
-    description: 'Uncompressed size of the message in bytes.',
-    type: 'long',
-  },
   'rpc.method': {
     name: 'rpc.method',
     description:
@@ -6220,6 +6282,12 @@ export const semconvFlat = {
     description: 'Server port number.',
     type: 'long',
     example: '80',
+  },
+  'service.criticality': {
+    name: 'service.criticality',
+    description: 'The operational criticality of the service.',
+    type: 'keyword',
+    example: 'critical',
   },
   'service.instance.id': {
     name: 'service.instance.id',

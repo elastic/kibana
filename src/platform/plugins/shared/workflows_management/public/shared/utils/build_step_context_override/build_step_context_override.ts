@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { JsonModelSchemaType, LegacyWorkflowInput, StepContext } from '@kbn/workflows';
+import type { LegacyWorkflowInput, StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -21,6 +21,7 @@ import {
   applyInputDefaults,
   normalizeInputsToJsonSchema,
 } from '@kbn/workflows/spec/lib/input_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {

@@ -33,6 +33,7 @@ export function LayerConfiguration({
   panelId,
   closeFlyout,
   editorContainer,
+  onTextBasedQueryStateChange,
 }: LayerConfigurationProps) {
   // Derive whether we're in text-based mode from the query type
   const isTextBasedMode = isOfAggregateQueryType(attributes.state.query);
@@ -75,6 +76,7 @@ export function LayerConfiguration({
     panelId,
     closeFlyout,
     editorContainer,
+    onTextBasedQueryStateChange,
   };
   return (
     <div

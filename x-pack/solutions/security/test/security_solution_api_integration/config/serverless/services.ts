@@ -10,6 +10,7 @@ import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services
 import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/entity_analytics.gen';
 import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
+import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
 import { SearchSecureService } from '../services/search_secure';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
@@ -25,4 +26,5 @@ export const services = {
   detectionsApi: DetectionsApiProvider,
   entityAnalyticsApi: EntityAnalyticsApiProvider,
   exceptionsApi: ExceptionsApiProvider,
+  rolesUsersProvider: RolesUsersProvider,
 };

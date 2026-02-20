@@ -34,7 +34,7 @@ export const createAttachmentUpdateTool = ({
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, data, description }) => {
-    const existing = attachmentManager.get(attachmentId);
+    const existing = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!existing) {
       return {
@@ -59,7 +59,7 @@ export const createAttachmentUpdateTool = ({
     }
 
     const definition = attachmentsService?.getTypeDefinition(existing.type);
-    const typeReadonly = definition?.isReadonly ?? true;
+    const typeReadonly = definition?.isReadonly ?? false;
     const isReadonly = typeReadonly || existing.readonly === true;
     if (isReadonly) {
       return {

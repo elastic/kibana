@@ -347,7 +347,7 @@ export class WrappingPrettyPrinter {
         // Check if this command has special comma rules
         const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
         const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
-        let separator = txt ? (needsComma ? ',' : '') : '';
+        let separator = txt ? (needsComma ? ',' : ' ') : '';
 
         argIndex++;
 
@@ -376,7 +376,7 @@ export class WrappingPrettyPrinter {
           argsPerLine = 1;
         } else {
           argsPerLine++;
-          fragment = separator + (separator ? ' ' : '') + formattedArg;
+          fragment = separator + (needsComma && separator ? ' ' : '') + formattedArg;
           remainingCurrentLine -= fragment.length;
         }
         txt += fragment;
@@ -539,9 +539,15 @@ export class WrappingPrettyPrinter {
 
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
-      const txt = ctx.node.text ?? '<EXPRESSION>';
+      let text = ctx.node.text ?? '<EXPRESSION>';
+
+      if (text) {
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+      }
+
       // TODO: decorate with comments
-      return { txt };
+      return { txt: text };
     })
 
     .on('visitHeaderCommand', (ctx, inp: Input): Output => {
@@ -723,6 +729,12 @@ export class WrappingPrettyPrinter {
           formatted = '{' + txt + '\n' + inp.indent + '}';
         } else {
           formatted = '{' + txt + '}';
+        }
+      } else if (representation === 'assignment') {
+        // Add initial indentation for assignment maps (bare maps)
+        // Only when not in oneArgumentPerLine mode, as that already handles indentation
+        if (!oneArgumentPerLine) {
+          formatted = this.opts.tab + txt;
         }
       }
 

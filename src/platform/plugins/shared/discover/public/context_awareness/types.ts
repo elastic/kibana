@@ -21,7 +21,6 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type {
@@ -32,17 +31,10 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type {
-  UpdateCascadeGroupingActionPayload,
-  UpdateESQLQueryActionPayload,
-} from '../application/main/state_management/redux/types';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
 
 export type UpdateESQLQueryFn = (
   queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
-) => void;
-
-export type UpdateCascadeGroupingFn = (
-  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
 ) => void;
 
 /**
@@ -193,6 +185,22 @@ export interface DocViewerExtension {
 }
 
 /**
+ * Parameters passed to the additional cell actions extension
+ */
+export interface AdditionalCellActionsParams {
+  /**
+   * Available actions for the additional cell actions extension
+   */
+  actions?: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+  };
+}
+
+/**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
@@ -340,11 +348,6 @@ export interface RowControlsExtensionParams {
    */
   query?: DiscoverAppState['query'];
 }
-
-/**
- * The Discover cell actions trigger
- */
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 /**
  * Metadata passed to Discover cell actions
@@ -510,7 +513,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: () => AdditionalCellAction[];
+  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration

@@ -85,6 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   settings: {},
@@ -136,6 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
+          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -215,6 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -246,6 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -287,6 +291,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...emptyAssets,
               stream: {
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
@@ -330,6 +335,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -376,6 +382,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           stream: {
             description: '',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -528,6 +535,94 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (stream) => stream.name === TEST_STREAM_NAME
         );
         expect(classicStream).to.eql(undefined);
+      });
+    });
+
+    describe('Classic stream name validation', () => {
+      const validClassicStreamBody = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      it('fails to create a classic stream with uppercase characters in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-UpperCase-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it('fails to create a classic stream with spaces in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with space-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain spaces.'
+        );
+      });
+
+      it('fails to create a classic stream with asterisk in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with*asterisk-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "*".'
+        );
+      });
+
+      it('fails to create a classic stream with angle brackets in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with<brackets>-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "<".'
+        );
+      });
+
+      it('fails to create a classic stream with question mark in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with?question-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "?".'
+        );
+      });
+
+      it('fails to create a classic stream with pipe in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with|pipe-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "|".'
+        );
       });
     });
 

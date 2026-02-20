@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data mapping - schema editor - Wired Streams',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
@@ -188,6 +189,56 @@ test.describe(
         rowIndex: 1,
         value: `Alias for ${ecsFieldName}`,
       });
+    });
+
+    test('validates field names for wired streams', async ({ page, pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      // Open the "Add field" flyout
+      await page.getByTestId('streamsAppContentAddFieldButton').click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
+
+      // Try to add a non-namespaced field - should show error
+      const invalidFieldName = 'invalid_field';
+      await pageObjects.streams.typeFieldName(invalidFieldName);
+
+      // Check that an error is displayed
+      const formRow = page
+        .getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName')
+        .locator('..');
+      await expect(formRow.locator('.euiFormErrorText')).toContainText(
+        "doesn't match the namespaced ECS or OTel schema"
+      );
+
+      // Check that the Add button is disabled when there's a validation error
+      const addButton = page.getByTestId('streamsAppSchemaEditorAddFieldButton');
+      await expect(addButton).toBeDisabled();
+
+      // Clear and try with a valid namespaced field
+      const clearButton = page.getByTestId('comboBoxClearButton');
+      await clearButton.click();
+
+      const validFieldName = 'attributes.valid_field';
+      await pageObjects.streams.typeFieldName(validFieldName);
+
+      // Error should be gone
+      await expect(formRow.locator('.euiFormErrorText')).toBeHidden();
+
+      // Set field type and verify Add button works
+      await pageObjects.streams.setFieldMappingType('keyword');
+      await addButton.click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeHidden();
+
+      // Verify the field was staged (visible in review)
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await expect(page.getByText(validFieldName)).toBeVisible();
+
+      // Close the modal to clean up
+      await pageObjects.streams.closeSchemaReviewModal();
     });
   }
 );

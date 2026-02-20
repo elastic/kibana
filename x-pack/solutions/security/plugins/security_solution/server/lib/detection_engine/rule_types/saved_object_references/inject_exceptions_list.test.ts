@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
 import type { RuleParams } from '../../rule_schema';
 import { injectExceptionsReferences } from './inject_exceptions_list';
@@ -28,7 +28,7 @@ describe('inject_exceptions_list', () => {
     {
       id: '123',
       name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-      type: EXCEPTION_LIST_NAMESPACE,
+      type: EXCEPTION_LIST_NAMESPACE_AWARE,
     },
   ];
 

@@ -151,7 +151,9 @@ test('dashboard migration 7.3.0 migrates panels', () => {
 
   const newDoc = migrations730(doc, mockContext) as DashboardDoc730ToLatest;
 
-  const newPanels = JSON.parse(newDoc.attributes.panelsJSON) as RawSavedDashboardPanel730ToLatest[];
+  const newPanels = JSON.parse(
+    newDoc.attributes.panelsJSON ?? '{}'
+  ) as RawSavedDashboardPanel730ToLatest[];
 
   expect(newPanels.length).toBe(1);
   expect(newPanels[0].gridData.w).toEqual(24);

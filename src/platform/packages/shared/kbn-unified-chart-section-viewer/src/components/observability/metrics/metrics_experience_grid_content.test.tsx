@@ -56,13 +56,13 @@ const allFields: MetricField[] = [
     name: 'field1',
     dimensions: [dimensions[0]],
     index: 'metrics-*',
-    type: 'long',
+    type: ES_FIELD_TYPES.LONG,
   },
   {
     name: 'field2',
     dimensions: [dimensions[1]],
     index: 'metrics-*',
-    type: 'long',
+    type: ES_FIELD_TYPES.LONG,
   },
 ];
 
@@ -150,7 +150,7 @@ describe('MetricsExperienceGridContent', () => {
       name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
       dimensions: [dimensions[0]],
       index: 'metrics-*',
-      type: 'long' as const,
+      type: ES_FIELD_TYPES.LONG,
     }));
 
     useMetricsExperienceStateMock.mockReturnValue({

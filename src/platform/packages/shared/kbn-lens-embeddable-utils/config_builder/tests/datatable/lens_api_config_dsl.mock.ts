@@ -438,10 +438,10 @@ export const fullConfigDatatableWithDataView: DatatableState = {
 };
 
 /**
- * Datatable sorted by a transposed metric column (split_metrics_by)
+ * Datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByTransposedMetricColumnDatatable: DatatableState = {
-  title: 'Sorted by transposed metric column',
+export const sortedByPivotedMetricColumnDatatable: DatatableState = {
+  title: 'Sorted by a pivoted metric column',
   type: 'datatable',
   dataset: {
     type: 'dataView',
@@ -601,8 +601,8 @@ export const sortedByTransposedMetricColumnDatatable: DatatableState = {
   },
   paging: 10,
   sort_by: {
-    column_type: 'split_metrics_by',
-    metric_index: 0,
+    column_type: 'pivoted_metric',
+    index: 0,
     values: ['US', 'CH'],
     direction: 'desc',
   },

@@ -38,3 +38,16 @@ export const NONGROUPED_SPANS: Record<string, string[]> = {
 // 'external' with 'http' subtype are groupable nodes used in the tests
 export const GROUPABLE_SPAN_TYPE = 'external';
 export const GROUPABLE_SPAN_SUBTYPE = 'http';
+
+// Node dimensions for React Flow service map
+export const SERVICE_NODE_CIRCLE_SIZE = 56;
+export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+
+/** Border width (px) for service and dependency nodes when not selected. */
+export const NODE_BORDER_WIDTH_DEFAULT = 3;
+/** Border width (px) for service and dependency nodes when selected or critical. */
+export const NODE_BORDER_WIDTH_SELECTED = 4;
+// When rotated 45deg, the diagonal becomes the width/height: size * sqrt(2)
+export const DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE = Math.ceil(
+  DEPENDENCY_NODE_DIAMOND_SIZE * Math.SQRT2
+);

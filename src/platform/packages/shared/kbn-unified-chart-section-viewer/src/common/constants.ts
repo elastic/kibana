@@ -19,8 +19,11 @@ export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrict
 export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
 
 // Selection limits
-export const MAX_DIMENSIONS_SELECTIONS = 1;
+export const MAX_DIMENSIONS_SELECTIONS = 5;
 export const PAGE_SIZE = 20;
+
+// Debounce time for dimensions selector
+export const DEBOUNCE_TIME = 300;
 
 // Lens extra actions
 export const ACTION_COPY_TO_DASHBOARD = 'ACTION_METRICS_EXPERIENCE_COPY_TO_DASHBOARD';

@@ -24,13 +24,13 @@ export const storybookAliases = {
   classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
-  dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
   data: 'src/platform/plugins/shared/data/.storybook',
   discover: 'src/platform/plugins/shared/discover/.storybook',
   es_ui_shared: 'src/platform/plugins/shared/es_ui_shared/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
+  esql_resource_browser: 'src/platform/packages/shared/kbn-esql-resource-browser/.storybook',
   event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
   expression_metric_vis:
@@ -52,6 +52,7 @@ export const storybookAliases = {
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
+  metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

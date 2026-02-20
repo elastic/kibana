@@ -48,6 +48,7 @@ import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
+import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -130,6 +131,8 @@ export class DashboardPlugin
           security,
         })),
     });
+
+    registerDashboardDrilldown(plugins.embeddable);
 
     return {};
   }

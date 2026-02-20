@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/server';
-
-import type { DashboardAttributes as DashboardAttributesV1 } from '../../schema/v1';
-
-import type { GridData } from '../../schema/v2';
+import type { Serializable } from '@kbn/utility-types';
+import type { GridData, RawDashboardSavedObjectAttributes } from '../types';
 
 interface KibanaAttributes {
   kibanaSavedObjectMeta: {
@@ -44,7 +41,7 @@ interface DashboardAttributesTo720 extends KibanaAttributes {
   optionsJSON?: string;
 }
 
-export type DashboardDoc730ToLatest = Doc<DashboardAttributesV1>;
+export type DashboardDoc730ToLatest = Doc<RawDashboardSavedObjectAttributes>;
 
 export type DashboardDoc700To720 = Doc<DashboardAttributesTo720>;
 

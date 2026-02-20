@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
   TabInitializationStatus,
 } from './types';
 
@@ -47,6 +48,7 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectTabAppState,
+  selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
 } from './selectors';

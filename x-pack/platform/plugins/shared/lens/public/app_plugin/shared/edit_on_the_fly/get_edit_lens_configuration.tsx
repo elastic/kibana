@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,9 +21,9 @@ import type {
   TypedLensSerializedState,
   DatasourceMap,
   VisualizationMap,
+  LensAppServices,
   LensStoreDeps,
   LensDocument,
-  SupportedDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -141,6 +142,144 @@ const MaybeWrapper = ({
   );
 };
 
+const EditLensConfiguration: FC<
+  EditLensConfigurationProps & {
+    coreStart: CoreStart;
+    startDependencies: LensPluginStartDependencies;
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+    lensServices: LensAppServices;
+  }
+> = ({
+  coreStart,
+  startDependencies,
+  visualizationMap,
+  datasourceMap,
+  lensServices,
+  attributes,
+  updatePanelState,
+  updateSuggestion,
+  closeFlyout,
+  wrapInFlyout,
+  panelId,
+  savedObjectId,
+  dataLoading$,
+  lensAdapters,
+  updateByRefInput,
+  navigateToLensEditor,
+  displayFlyoutHeader,
+  isNewPanel,
+  hidesSuggestions,
+  onApply,
+  onCancel,
+  isReadOnly,
+  parentApi,
+  applyButtonLabel,
+  hideTextBasedEditor,
+}) => {
+  const [currentAttributes, setCurrentAttributes] =
+    useState<TypedLensSerializedState['attributes']>(attributes);
+
+  /**
+   * During inline editing of a by reference panel, the panel is converted to a by value one.
+   * When the user applies the changes we save them to the Lens SO
+   */
+  const saveByRef = useCallback(
+    async (attrs: LensDocument) => {
+      const lensDocumentService = new LensDocumentService(lensServices.http);
+      await lensDocumentService.save({
+        ...attrs,
+        savedObjectId,
+        type: DOC_TYPE,
+      });
+    },
+    [lensServices.http, savedObjectId]
+  );
+
+  // Derive datasourceId from currentAttributes so it updates when attributes change
+  // (e.g., after converting from formBased to textBased)
+  const currentDatasourceId = getActiveDatasourceIdFromDoc(currentAttributes);
+
+  if (currentDatasourceId === null) {
+    return <LoadingSpinnerWithOverlay />;
+  }
+
+  const datasourceState = currentAttributes.state.datasourceStates[currentDatasourceId];
+
+  const storeDeps: LensStoreDeps = {
+    lensServices,
+    datasourceMap,
+    visualizationMap,
+    initialContext:
+      datasourceState && 'initialContext' in datasourceState
+        ? datasourceState.initialContext
+        : undefined,
+    visualizationType: attributes.visualizationType,
+  };
+  const lensStore: LensRootStore = makeConfigureStore(
+    storeDeps,
+    undefined,
+    updatingMiddleware(updatePanelState)
+  );
+  lensStore.dispatch(
+    loadInitial({
+      initialInput: {
+        attributes: currentAttributes,
+        id: panelId ?? generateId(),
+      },
+      inlineEditing: true,
+      hideTextBasedEditor,
+    })
+  );
+
+  const configPanelProps: EditConfigPanelProps = {
+    attributes: currentAttributes,
+    updatePanelState,
+    updateSuggestion,
+    closeFlyout,
+    coreStart,
+    startDependencies,
+    dataLoading$,
+    lensAdapters,
+    saveByRef,
+    savedObjectId,
+    updateByRefInput,
+    navigateToLensEditor,
+    displayFlyoutHeader,
+    hidesSuggestions,
+    setCurrentAttributes,
+    isNewPanel,
+    onApply,
+    onCancel,
+    isReadOnly,
+    parentApi,
+    panelId,
+    applyButtonLabel,
+    hideTextBasedEditor,
+  };
+
+  return (
+    <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
+      <Provider store={lensStore}>
+        <KibanaRenderContextProvider {...coreStart}>
+          <KibanaContextProvider services={lensServices}>
+            <EditorFrameServiceProvider
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+            >
+              <RootDragDropProvider>
+                {coreStart.rendering.addContext(
+                  <LensEditConfigurationFlyout {...configPanelProps} />
+                )}
+              </RootDragDropProvider>
+            </EditorFrameServiceProvider>
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>
+      </Provider>
+    </MaybeWrapper>
+  );
+};
+
 export async function getEditLensConfiguration(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
@@ -154,128 +293,20 @@ export async function getEditLensConfiguration(
     getLensAttributeService(coreStart.http)
   );
 
-  return ({
-    attributes,
-    updatePanelState,
-    updateSuggestion,
-    closeFlyout,
-    wrapInFlyout,
-    panelId,
-    savedObjectId,
-    dataLoading$,
-    lensAdapters,
-    updateByRefInput,
-    navigateToLensEditor,
-    displayFlyoutHeader,
-    isNewPanel,
-    hidesSuggestions,
-    onApply,
-    onCancel,
-    isReadOnly,
-    parentApi,
-    applyButtonLabel,
-    hideTextBasedEditor,
-  }: EditLensConfigurationProps) => {
+  return (props: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
 
-    const [currentAttributes, setCurrentAttributes] =
-      useState<TypedLensSerializedState['attributes']>(attributes);
-
-    // Derive datasourceId from currentAttributes so it updates when attributes change
-    // (e.g., after converting from formBased to textBased)
-    const currentDatasourceId = getActiveDatasourceIdFromDoc(
-      currentAttributes
-    ) as SupportedDatasourceId;
-
-    /**
-     * During inline editing of a by reference panel, the panel is converted to a by value one.
-     * When the user applies the changes we save them to the Lens SO
-     */
-    const saveByRef = useCallback(
-      async (attrs: LensDocument) => {
-        const lensDocumentService = new LensDocumentService(lensServices.http);
-        await lensDocumentService.save({
-          ...attrs,
-          savedObjectId,
-          type: DOC_TYPE,
-        });
-      },
-      [savedObjectId]
-    );
-    const datasourceState = currentAttributes.state.datasourceStates[currentDatasourceId];
-    const storeDeps: LensStoreDeps = {
-      lensServices,
-      datasourceMap,
-      visualizationMap,
-      initialContext:
-        datasourceState && 'initialContext' in datasourceState
-          ? datasourceState.initialContext
-          : undefined,
-      visualizationType: attributes.visualizationType,
-    };
-    const lensStore: LensRootStore = makeConfigureStore(
-      storeDeps,
-      undefined,
-      updatingMiddleware(updatePanelState)
-    );
-    lensStore.dispatch(
-      loadInitial({
-        initialInput: {
-          attributes: currentAttributes,
-          id: panelId ?? generateId(),
-        },
-        inlineEditing: true,
-        hideTextBasedEditor,
-      })
-    );
-
-    const configPanelProps: EditConfigPanelProps = {
-      attributes: currentAttributes,
-      updatePanelState,
-      updateSuggestion,
-      closeFlyout,
-      coreStart,
-      startDependencies,
-      dataLoading$,
-      lensAdapters,
-      saveByRef,
-      savedObjectId,
-      updateByRefInput,
-      navigateToLensEditor,
-      displayFlyoutHeader,
-      hidesSuggestions,
-      setCurrentAttributes,
-      isNewPanel,
-      onApply,
-      onCancel,
-      isReadOnly,
-      parentApi,
-      panelId,
-      applyButtonLabel,
-      hideTextBasedEditor,
-    };
-
     return (
-      <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
-        <Provider store={lensStore}>
-          <KibanaRenderContextProvider {...coreStart}>
-            <KibanaContextProvider services={lensServices}>
-              <EditorFrameServiceProvider
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
-              >
-                <RootDragDropProvider>
-                  {coreStart.rendering.addContext(
-                    <LensEditConfigurationFlyout {...configPanelProps} />
-                  )}
-                </RootDragDropProvider>
-              </EditorFrameServiceProvider>
-            </KibanaContextProvider>
-          </KibanaRenderContextProvider>
-        </Provider>
-      </MaybeWrapper>
+      <EditLensConfiguration
+        coreStart={coreStart}
+        startDependencies={startDependencies}
+        visualizationMap={visualizationMap}
+        datasourceMap={datasourceMap}
+        lensServices={lensServices}
+        {...props}
+      />
     );
   };
 }

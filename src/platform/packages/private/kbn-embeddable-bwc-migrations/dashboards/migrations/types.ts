@@ -25,6 +25,9 @@ export interface GridData {
 
 export interface RawDashboardSavedObjectAttributes {
   panelsJSON?: string;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON?: string;
+  };
 }
 
 export interface DashboardAttributesAndReferences {

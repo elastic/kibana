@@ -13,13 +13,20 @@ import { readKibanaConfig } from './read_kibana_config';
 import type { Logger } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
-import { getApiKeyHeader } from './get_api_key_header';
+import { getApiKeyHeader, getBasicAuthHeader } from './get_auth_header';
 
 async function getFetchStatus(url: string, apiKey?: string) {
   try {
-    const response = await fetch(url, {
-      dispatcher: getFetchAgent(url),
-      headers: getApiKeyHeader(apiKey),
+    const parsedUrl = new URL(url);
+    const { username, password } = parsedUrl;
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    const response = await fetch(parsedUrl.toString(), {
+      dispatcher: getFetchAgent(parsedUrl.toString()),
+      headers: {
+        ...getBasicAuthHeader(username, password),
+        ...getApiKeyHeader(apiKey),
+      },
     } as RequestInit);
     return response.status;
   } catch (error) {
@@ -79,45 +86,58 @@ async function getKibanaUrl({
       return {
         kibanaUrl: targetKibanaUrl.replace(/\/$/, ''),
         kibanaHeaders: getApiKeyHeader(apiKey),
+        apiKey,
       };
     }
 
-    const targetAuth = parse(targetKibanaUrl).auth;
+    const url = new URL(targetKibanaUrl);
+    const { username, password } = url;
+    url.username = '';
+    url.password = '';
+    const authHeaders = getBasicAuthHeader(username, password);
+    targetKibanaUrl = url.toString();
 
     const unredirectedResponse = await fetch(targetKibanaUrl, {
       method: 'HEAD',
       redirect: 'manual',
+      headers: authHeaders,
       dispatcher: getFetchAgent(targetKibanaUrl),
     } as RequestInit);
 
-    const discoveredKibanaUrl =
+    let discoveredKibanaUrl =
       unredirectedResponse.headers
         .get('location')
         ?.replace('/spaces/enter', '')
         ?.replace('spaces/space_selector', '') || targetKibanaUrl;
 
-    const discoveredKibanaUrlWithAuth = format({
-      ...parse(discoveredKibanaUrl),
-      auth: targetAuth,
-    });
+    // When redirected, it might only return the pathname, so we need to add the base URL back to it
+    if (discoveredKibanaUrl.startsWith('/')) {
+      url.pathname = discoveredKibanaUrl;
+    }
 
-    const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
+    discoveredKibanaUrl = url.toString();
+
+    const redirectedResponse = await fetch(discoveredKibanaUrl, {
       method: 'HEAD',
-      dispatcher: getFetchAgent(discoveredKibanaUrlWithAuth),
+      headers: authHeaders,
+      dispatcher: getFetchAgent(discoveredKibanaUrl),
     } as RequestInit);
 
     if (redirectedResponse.status !== 200) {
       throw new Error(
-        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}, got ${
+        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrl)}, got ${
           redirectedResponse.status
         }`
       );
     }
 
-    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
+    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrl)}`);
 
     return {
-      kibanaUrl: discoveredKibanaUrlWithAuth.replace(/\/$/, ''),
+      kibanaUrl: discoveredKibanaUrl.replace(/\/$/, ''),
+      kibanaHeaders: authHeaders,
+      username,
+      password,
     };
   } catch (error) {
     throw new Error(
@@ -269,7 +289,7 @@ export async function getServiceUrls({
     });
   }
 
-  const { kibanaUrl, kibanaHeaders } = await getKibanaUrl({
+  const { kibanaUrl, kibanaHeaders, username, password } = await getKibanaUrl({
     targetKibanaUrl,
     apiKey,
     logger,
@@ -282,5 +302,8 @@ export async function getServiceUrls({
     esUrl: formattedEsUrl,
     kibanaHeaders,
     esHeaders,
+    username,
+    password,
+    apiKey,
   };
 }
