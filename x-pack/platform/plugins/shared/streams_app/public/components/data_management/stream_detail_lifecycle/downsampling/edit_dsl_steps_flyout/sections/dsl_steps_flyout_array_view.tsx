@@ -25,7 +25,7 @@ import {
   type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
 } from '../form';
-import { getDoubledDurationFromPrevious } from '../../shared';
+import { getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
@@ -102,9 +102,9 @@ export const DslStepsFlyoutArrayView = ({
     (previousStep?: DslStepMetaFields): DslStepMetaFields => {
       if (previousStep === undefined) {
         return {
-          afterValue: '',
+          afterValue: '1',
           afterUnit: 'd',
-          afterToMilliSeconds: -1,
+          afterToMilliSeconds: toMilliseconds('1', 'd'),
           fixedIntervalValue: '1',
           fixedIntervalUnit: 'd',
         };
