@@ -69,7 +69,12 @@ describe('cli_processing', () => {
     });
   });
 
-  describe('getRunCommand', () => {
+  describe('getTestTargetFromProcessArguments', () => {
+    const originalScoutTargetEnv: Record<string, string | undefined> = {
+      SCOUT_TARGET_LOCATION: process.env.SCOUT_TARGET_LOCATION,
+      SCOUT_TARGET_ARCH: process.env.SCOUT_TARGET_ARCH,
+      SCOUT_TARGET_DOMAIN: process.env.SCOUT_TARGET_DOMAIN,
+    };
     const originalEnv = process.env.SCOUT_RUN_COMMAND;
 
     afterEach(() => {
