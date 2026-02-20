@@ -12,6 +12,8 @@ interface LiveActionsQueryOptions {
   cursor?: string;
   kuery?: string;
   spaceId: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const buildLiveActionsQuery = ({
@@ -19,6 +21,8 @@ export const buildLiveActionsQuery = ({
   cursor,
   kuery,
   spaceId,
+  startDate,
+  endDate,
 }: LiveActionsQueryOptions): {
   body: Record<string, unknown>;
 } => {
@@ -44,6 +48,14 @@ export const buildLiveActionsQuery = ({
     filters.push({
       range: { '@timestamp': { lt: cursor } },
     });
+  }
+
+  // Apply time range filter from the date picker
+  if (startDate || endDate) {
+    const rangeFilter: Record<string, string> = {};
+    if (startDate) rangeFilter.gte = startDate;
+    if (endDate) rangeFilter.lte = endDate;
+    filters.push({ range: { '@timestamp': rangeFilter } });
   }
 
   if (kuery) {

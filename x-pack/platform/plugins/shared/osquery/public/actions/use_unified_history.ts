@@ -22,6 +22,8 @@ interface UseUnifiedHistoryConfig {
   scheduledOffset?: number;
   kuery?: string;
   sourceFilters?: string;
+  startDate?: string;
+  endDate?: string;
   skip?: boolean;
 }
 
@@ -32,13 +34,15 @@ export const useUnifiedHistory = ({
   scheduledOffset,
   kuery,
   sourceFilters,
+  startDate,
+  endDate,
   skip = false,
 }: UseUnifiedHistoryConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery<UnifiedHistoryResponse, Error>(
-    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters }],
+    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters, startDate, endDate }],
     () =>
       http.get<UnifiedHistoryResponse>('/internal/osquery/history', {
         version: API_VERSIONS.internal.v1,
@@ -49,6 +53,8 @@ export const useUnifiedHistory = ({
           ...(scheduledCursor ? { scheduledCursor } : {}),
           ...(scheduledOffset != null ? { scheduledOffset } : {}),
           ...(sourceFilters ? { sourceFilters } : {}),
+          ...(startDate ? { startDate } : {}),
+          ...(endDate ? { endDate } : {}),
         },
       }),
     {

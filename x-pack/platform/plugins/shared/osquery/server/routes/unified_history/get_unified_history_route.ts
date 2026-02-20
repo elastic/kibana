@@ -74,6 +74,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               kuery: schema.maybe(schema.string()),
               sourceFilters: schema.maybe(schema.string()), // comma-separated: live,rule,scheduled
               scheduledOffset: schema.number({ defaultValue: 0, min: 0 }),
+              startDate: schema.maybe(schema.string()),
+              endDate: schema.maybe(schema.string()),
             }),
           },
         },
@@ -87,7 +89,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const { pageSize, cursor, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters: sourceFiltersRaw } = request.query;
+          const { pageSize, cursor, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters: sourceFiltersRaw, startDate, endDate } = request.query;
 
           // Parse source filters — when undefined, all sources are included
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
@@ -112,23 +114,61 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               osqueryContext,
               request
             );
-            const packResults = await spaceScopedClient.find<PackSavedObject>({
+            const perPage = 1000;
+            const firstPage = await spaceScopedClient.find<PackSavedObject>({
               type: packSavedObjectType,
-              perPage: 1000,
+              perPage,
             });
-            packSOs = packResults.saved_objects as Array<{
+            packSOs = firstPage.saved_objects as Array<{
               id: string;
               attributes: PackSavedObject;
             }>;
+            // Paginate if more packs exist beyond the first page
+            const totalPages = Math.ceil(firstPage.total / perPage);
+            for (let page = 2; page <= totalPages; page++) {
+              const nextPage = await spaceScopedClient.find<PackSavedObject>({
+                type: packSavedObjectType,
+                perPage,
+                page,
+              });
+              packSOs = packSOs.concat(
+                nextPage.saved_objects as Array<{
+                  id: string;
+                  attributes: PackSavedObject;
+                }>
+              );
+            }
             packCache.set(spaceId, packSOs);
           }
 
-          // When searching, resolve matching schedule IDs from pack saved objects
-          // because scheduled response documents don't contain query/pack names
-          let matchingScheduleIds: string[] | undefined;
+          const logger = osqueryContext.logFactory.get('unifiedHistory');
+
+          // Collect all known schedule IDs from the current space's packs.
+          // This provides space isolation (response docs have no space_id field)
+          // and eliminates orphaned rows from deleted packs.
+          const allScheduleIds: string[] = [];
+          for (const packSO of packSOs) {
+            const pack = packSO.attributes;
+            if (!pack.queries) continue;
+            for (const query of pack.queries) {
+              if (query.schedule_id) {
+                allScheduleIds.push(query.schedule_id);
+              }
+              allScheduleIds.push(`pack_${pack.name}_${query.id}`);
+            }
+          }
+
+          if (allScheduleIds.length > 10000) {
+            logger.warn(
+              `Space "${spaceId}" has ${allScheduleIds.length} schedule IDs — approaching ES terms filter limit`
+            );
+          }
+
+          // When searching, narrow to only schedule IDs matching the search term
+          let scheduleIdsForQuery: string[];
           if (kuery) {
             const searchTerm = kuery.trim().toLowerCase();
-            matchingScheduleIds = [];
+            scheduleIdsForQuery = [];
             for (const packSO of packSOs) {
               const pack = packSO.attributes;
               if (!pack.queries) continue;
@@ -138,14 +178,15 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                   pack.name.toLowerCase().includes(searchTerm) ||
                   query.query.toLowerCase().includes(searchTerm);
                 if (nameMatch) {
-                  // Push both the UUID schedule_id (if set) and the osquery-format ID
                   if (query.schedule_id) {
-                    matchingScheduleIds.push(query.schedule_id);
+                    scheduleIdsForQuery.push(query.schedule_id);
                   }
-                  matchingScheduleIds.push(`pack_${pack.name}_${query.id}`);
+                  scheduleIdsForQuery.push(`pack_${pack.name}_${query.id}`);
                 }
               }
             }
+          } else {
+            scheduleIdsForQuery = allScheduleIds;
           }
 
           const actionsQuery = includeLive
@@ -154,6 +195,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 cursor: effectiveActionsCursor,
                 kuery,
                 spaceId,
+                startDate,
+                endDate,
               })
             : undefined;
 
@@ -161,7 +204,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             ? buildScheduledResponsesQuery({
                 pageSize: fetchSize,
                 cursor: effectiveScheduledCursor,
-                scheduleIds: matchingScheduleIds,
+                scheduleIds: scheduleIdsForQuery,
+                startDate,
+                endDate,
               })
             : undefined;
 

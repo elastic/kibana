@@ -23,24 +23,22 @@ describe('buildScheduledResponsesQuery', () => {
       expect(buildScheduledResponsesQuery({ pageSize: 100 }).body.size).toBe(0);
     });
 
-    test('multi_terms size uses a minimum of 1000 to avoid timestamp-collision pagination gaps', () => {
-      // When pageSize is small (e.g. 25), the aggregation fetches at least 1000 buckets
-      // so that concurrent executions sharing the same timestamp are not silently dropped.
+    test('multi_terms size uses a minimum of 10,000 to support large deployments within a time window', () => {
       const result = buildScheduledResponsesQuery({ pageSize: 25 });
       const aggs = result.body.aggs as Record<string, unknown>;
       const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
         .multi_terms as Record<string, unknown>;
 
-      expect(multiTerms.size).toBe(1000);
+      expect(multiTerms.size).toBe(10000);
     });
 
     test('multi_terms size uses pageSize when it exceeds the minimum', () => {
-      const result = buildScheduledResponsesQuery({ pageSize: 2000 });
+      const result = buildScheduledResponsesQuery({ pageSize: 20000 });
       const aggs = result.body.aggs as Record<string, unknown>;
       const multiTerms = (aggs.scheduled_executions as Record<string, unknown>)
         .multi_terms as Record<string, unknown>;
 
-      expect(multiTerms.size).toBe(2000);
+      expect(multiTerms.size).toBe(20000);
     });
 
     test('multi_terms orders by max_timestamp descending', () => {
@@ -135,12 +133,12 @@ describe('buildScheduledResponsesQuery', () => {
     test('adds match-none equivalent when scheduleIds is an empty array', () => {
       // An empty scheduleIds array means the search term matched no pack queries,
       // so no scheduled results should be returned. The implementation signals this
-      // with a bool.must_not.match_all filter.
+      // with a match_none filter.
       const result = buildScheduledResponsesQuery({ pageSize: 20, scheduleIds: [] });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      expect(filters).toContainEqual({ bool: { must_not: { match_all: {} } } });
+      expect(filters).toContainEqual({ match_none: {} });
     });
 
     test('does not add a scheduleIds filter when scheduleIds is undefined', () => {
@@ -160,6 +158,50 @@ describe('buildScheduledResponsesQuery', () => {
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       expect(filters).toContainEqual({ terms: { schedule_id: ['only-one'] } });
+    });
+  });
+
+  describe('date range filter', () => {
+    test('adds timestamp range filter when both startDate and endDate are provided', () => {
+      const result = buildScheduledResponsesQuery({
+        pageSize: 20,
+        startDate: 'now-24h',
+        endDate: 'now',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { '@timestamp': { gte: 'now-24h', lte: 'now' } },
+      });
+    });
+
+    test('adds only gte when only startDate is provided', () => {
+      const result = buildScheduledResponsesQuery({ pageSize: 20, startDate: 'now-7d' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d' } },
+      });
+    });
+
+    test('adds only lte when only endDate is provided', () => {
+      const result = buildScheduledResponsesQuery({ pageSize: 20, endDate: 'now' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { '@timestamp': { lte: 'now' } },
+      });
+    });
+
+    test('does not add date range filter when neither startDate nor endDate is provided', () => {
+      const result = buildScheduledResponsesQuery({ pageSize: 20 });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toHaveLength(1); // only the base exists filter
     });
   });
 

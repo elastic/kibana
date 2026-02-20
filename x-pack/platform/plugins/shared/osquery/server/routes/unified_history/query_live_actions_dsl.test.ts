@@ -226,6 +226,46 @@ describe('buildLiveActionsQuery', () => {
     });
   });
 
+  describe('date range filter', () => {
+    test('adds timestamp range filter when both startDate and endDate are provided', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        startDate: 'now-24h',
+        endDate: 'now',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { '@timestamp': { gte: 'now-24h', lte: 'now' } },
+      });
+    });
+
+    test('adds only gte when only startDate is provided', () => {
+      const result = buildLiveActionsQuery({
+        pageSize: 20,
+        spaceId: 'default',
+        startDate: 'now-7d',
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d' } },
+      });
+    });
+
+    test('does not add date range filter when neither startDate nor endDate is provided', () => {
+      const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      // base filters only: type, input_type, space_id
+      expect(filters).toHaveLength(3);
+    });
+  });
+
   describe('combined options', () => {
     test('includes all optional filters when cursor, kuery, and non-default spaceId are provided', () => {
       const cursor = '2024-06-01T00:00:00.000Z';

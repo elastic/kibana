@@ -18,11 +18,19 @@ import {
   EuiPopover,
   EuiSkeletonText,
   EuiSelect,
+  EuiSuperDatePicker,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import type {
+  DurationRange,
+  OnRefreshChangeProps,
+} from '@elastic/eui/src/components/date_picker/types';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import React, { useState, useMemo, useCallback } from 'react';
 
+import { useKibana } from '../common/lib/kibana';
 import { useUnifiedHistory } from './use_unified_history';
 import { useCursorPagination } from './use_cursor_pagination';
 import { useUnifiedHistoryColumns } from './unified_history_columns';
@@ -30,13 +38,36 @@ import type { UnifiedHistoryRow, SourceFilter } from '../../common/api/unified_h
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
+const DEFAULT_START_DATE = 'now-24h';
+const DEFAULT_END_DATE = 'now';
+
 const UnifiedHistoryTableComponent = () => {
+  const { uiSettings } = useKibana().services;
   const [searchValue, setSearchValue] = useState('');
   const [activeKuery, setActiveKuery] = useState<string | undefined>();
   const [sourceFilters, setSourceFilters] = useState<Set<SourceFilter>>(
     new Set(['live', 'rule', 'scheduled'])
   );
   const [isSourcePopoverOpen, setIsSourcePopoverOpen] = useState(false);
+  const [startDate, setStartDate] = useState(DEFAULT_START_DATE);
+  const [endDate, setEndDate] = useState(DEFAULT_END_DATE);
+  const [recentlyUsedDateRanges, setRecentlyUsedDateRanges] = useState<
+    EuiSuperDatePickerRecentRange[]
+  >([]);
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(false);
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState(10000);
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      uiSettings
+        ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+        ?.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+          start: from,
+          end: to,
+          label: display,
+        })) ?? [],
+    [uiSettings]
+  );
 
   const {
     pageSize,
@@ -70,6 +101,24 @@ const UnifiedHistoryTableComponent = () => {
   const activeSourceFilters =
     sourceFilters.size === 3 ? undefined : Array.from(sourceFilters).join(',');
 
+  const onTimeChange = useCallback(
+    ({ start, end }: DurationRange) => {
+      setStartDate(start);
+      setEndDate(end);
+      setRecentlyUsedDateRanges((prev) => [
+        { start, end },
+        ...prev.filter((r) => !(r.start === start && r.end === end)).slice(0, 9),
+      ]);
+      resetCursors();
+    },
+    [resetCursors]
+  );
+
+  const onRefreshChange = useCallback(({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+    setIsAutoRefreshEnabled(!isPaused);
+    setAutoRefreshInterval(refreshInterval);
+  }, []);
+
   const handleSearch = useCallback(
     (value: string) => {
       const trimmed = value.trim();
@@ -79,14 +128,20 @@ const UnifiedHistoryTableComponent = () => {
     [resetCursors]
   );
 
-  const { data, isLoading, isFetching } = useUnifiedHistory({
+  const { data, isLoading, isFetching, refetch } = useUnifiedHistory({
     pageSize,
     actionsCursor: currentCursors?.actionsCursor,
     scheduledCursor: currentCursors?.scheduledCursor,
     scheduledOffset: currentCursors?.scheduledOffset,
     kuery: activeKuery,
     sourceFilters: activeSourceFilters,
+    startDate,
+    endDate,
   });
+
+  const onRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   const rows = data?.rows ?? [];
   const hasMore = data?.hasMore ?? false;
@@ -177,6 +232,23 @@ const UnifiedHistoryTableComponent = () => {
               </EuiFilterSelectItem>
             </EuiPopover>
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={startDate}
+            end={endDate}
+            onTimeChange={onTimeChange}
+            onRefresh={onRefresh}
+            onRefreshChange={onRefreshChange}
+            isPaused={!isAutoRefreshEnabled}
+            refreshInterval={autoRefreshInterval}
+            isLoading={isFetching}
+            commonlyUsedRanges={commonlyUsedRanges}
+            recentlyUsedRanges={recentlyUsedDateRanges}
+            dateFormat={uiSettings?.get('dateFormat')}
+            width="auto"
+            data-test-subj="unifiedHistoryDatePicker"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
