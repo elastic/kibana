@@ -95,7 +95,11 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
     getInsightsDiscoveryTaskStatus
   );
-  useTaskPolling(insightsTask, getInsightsDiscoveryTaskStatus, getInsightsTaskStatus);
+  useTaskPolling({
+    task: insightsTask,
+    onPoll: getInsightsDiscoveryTaskStatus,
+    onRefresh: getInsightsTaskStatus,
+  });
 
   const [{ loading: isSchedulingInsights }, scheduleInsightsTask] = useAsyncFn(async () => {
     const streamNames =
