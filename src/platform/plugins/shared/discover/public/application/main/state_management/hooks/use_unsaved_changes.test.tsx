@@ -16,12 +16,11 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
 import { internalStateActions, selectHasUnsavedChanges } from '../redux';
-import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
+import { getPersistedTabMock, getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { fromTabStateToSavedObjectTab } from '../redux';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 
@@ -35,19 +34,10 @@ jest.mock('../redux/selectors', () => {
 
 describe('useUnsavedChanges', () => {
   const getPersistedDiscoverSession = ({ services }: { services: DiscoverServices }) => {
-    const persistedTab = fromTabStateToSavedObjectTab({
-      tab: getTabStateMock({
-        id: 'persisted-tab',
-        initialInternalState: {
-          serializedSearchSource: { index: dataViewWithTimefieldMock.id },
-        },
-        appState: {
-          // Include the default sort that gets applied during initialization for a data view with a time field
-          sort: [['timestamp', 'desc']],
-        },
-      }),
+    const persistedTab = getPersistedTabMock({
+      tabId: 'persisted-tab',
+      dataView: dataViewWithTimefieldMock,
       services,
-      currentDataView: undefined,
     });
 
     return createDiscoverSessionMock({

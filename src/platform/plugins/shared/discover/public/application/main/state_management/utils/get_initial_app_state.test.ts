@@ -177,7 +177,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -219,7 +222,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,

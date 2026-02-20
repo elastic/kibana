@@ -524,6 +524,10 @@ describe('tab mapping utils', () => {
           "sampleSize": undefined,
           "serializedSearchSource": Object {
             "index": "the-data-view-id",
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
           },
           "sort": Array [],
           "timeRange": undefined,
@@ -566,6 +570,10 @@ describe('tab mapping utils', () => {
           "sampleSize": undefined,
           "serializedSearchSource": Object {
             "index": "the-data-view-id",
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
           },
           "sort": Array [],
           "timeRange": Object {
@@ -618,6 +626,10 @@ describe('tab mapping utils', () => {
           "sampleSize": undefined,
           "serializedSearchSource": Object {
             "index": "the-data-view-id",
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
           },
           "sort": Array [],
           "timeRange": Object {
@@ -661,6 +673,10 @@ describe('tab mapping utils', () => {
           "sampleSize": undefined,
           "serializedSearchSource": Object {
             "index": "the-data-view-id",
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
           },
           "sort": Array [],
           "timeRange": Object {

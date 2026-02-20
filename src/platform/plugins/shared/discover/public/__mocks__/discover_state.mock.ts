@@ -115,7 +115,9 @@ export function getDiscoverInternalStateMock({
 
     if (!dataView) {
       throw new Error(
-        `Data view with ID "${id}" not found in provided persistedDataViews mock array`
+        `Data view with ID "${id}" not found in provided persistedDataViews mock array (available: ${persistedDataViews
+          ?.map((dv) => dv.id)
+          .join(', ')})`
       );
     }
 
@@ -132,6 +134,17 @@ export function getDiscoverInternalStateMock({
         timeFieldName: spec.timeFieldName,
         isPersisted: false,
       })
+    )
+  );
+
+  jest.spyOn(services.dataViews, 'getIdsWithTitle').mockImplementation(() =>
+    Promise.resolve(
+      persistedDataViews?.map((dv) => ({
+        id: dv.id!,
+        title: dv.getIndexPattern(),
+        name: dv.name,
+        timeFieldName: dv.timeFieldName,
+      })) ?? []
     )
   );
 
@@ -197,6 +210,10 @@ export function getDiscoverInternalStateMock({
       internalState.dispatch(
         internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
       );
+
+      // Populate savedDataViews before initializing tabs,
+      // needed for computing default app state values (like default sort)
+      await internalState.dispatch(internalStateActions.loadDataViewList());
 
       await internalState
         .dispatch(

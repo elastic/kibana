@@ -54,6 +54,8 @@ import { createBrowserHistory } from 'history';
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
 
+  dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
+
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
 

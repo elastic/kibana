@@ -123,11 +123,15 @@ describe('test fetchAll', () => {
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      {
+        fetchStatus: FetchStatus.LOADING,
+        query: { query: '', language: 'kuery' },
+      },
       {
         fetchStatus: FetchStatus.COMPLETE,
         interceptedWarnings: [],
         result: documents,
+        query: { query: '', language: 'kuery' },
       },
     ]);
   });
