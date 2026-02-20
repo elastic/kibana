@@ -20,9 +20,9 @@ export class FetchRulesStep implements DispatcherStep {
   constructor(private readonly rulesSavedObjectService: RulesSavedObjectServiceContract) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { active = [] } = state;
+    const { dispatchable = [] } = state;
 
-    const uniqueRuleIds = [...new Set(active.map((ep) => ep.rule_id))];
+    const uniqueRuleIds = [...new Set(dispatchable.map((ep) => ep.rule_id))];
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: new Map() } };
     }

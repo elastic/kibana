@@ -36,7 +36,7 @@ describe('FetchRulesStep', () => {
 
     const step = new FetchRulesStep(mockService);
     const state = createDispatcherPipelineState({
-      active: [
+      dispatchable: [
         createAlertEpisode({ rule_id: 'r1' }),
         createAlertEpisode({ rule_id: 'r1', episode_id: 'e2' }),
       ],
@@ -55,7 +55,7 @@ describe('FetchRulesStep', () => {
     const mockService = createMockRulesSoService();
     const step = new FetchRulesStep(mockService);
 
-    const state = createDispatcherPipelineState({ active: [] });
+    const state = createDispatcherPipelineState({ dispatchable: [] });
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
@@ -72,7 +72,7 @@ describe('FetchRulesStep', () => {
 
     const step = new FetchRulesStep(mockService);
     const state = createDispatcherPipelineState({
-      active: [createAlertEpisode({ rule_id: 'r1' })],
+      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
 
     const result = await step.execute(state);

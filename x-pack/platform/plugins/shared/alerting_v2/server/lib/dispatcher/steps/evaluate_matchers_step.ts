@@ -23,22 +23,22 @@ export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { active = [], rules = new Map(), policies = new Map() } = state;
+    const { dispatchable = [], rules = new Map(), policies = new Map() } = state;
 
-    const matched = evaluateMatchers(active, rules, policies);
+    const matched = evaluateMatchers(dispatchable, rules, policies);
 
     return { type: 'continue', data: { matched } };
   }
 }
 
 export function evaluateMatchers(
-  activeEpisodes: readonly AlertEpisode[],
+  dispatchable: readonly AlertEpisode[],
   rules: ReadonlyMap<RuleId, Rule>,
   policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
 
-  for (const episode of activeEpisodes) {
+  for (const episode of dispatchable) {
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 

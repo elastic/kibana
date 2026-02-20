@@ -86,7 +86,7 @@ describe('DispatcherPipeline', () => {
 
       const step2 = createMockDispatcherStep('step2', async (state) => {
         statesReceived.push({ ...state });
-        return { type: 'continue', data: { active: [], suppressed: [] } };
+        return { type: 'continue', data: { dispatchable: [], suppressed: [] } };
       });
 
       const step3 = createMockDispatcherStep('step3', async (state) => {
@@ -104,14 +104,14 @@ describe('DispatcherPipeline', () => {
 
       expect(statesReceived[1].input).toEqual(input);
       expect(statesReceived[1].episodes).toBeDefined();
-      expect(statesReceived[1].active).toBeUndefined();
+      expect(statesReceived[1].dispatchable).toBeUndefined();
 
       expect(statesReceived[2].input).toEqual(input);
       expect(statesReceived[2].episodes).toBeDefined();
-      expect(statesReceived[2].active).toBeDefined();
+      expect(statesReceived[2].dispatchable).toBeDefined();
 
       expect(result.finalState.episodes).toBeDefined();
-      expect(result.finalState.active).toBeDefined();
+      expect(result.finalState.dispatchable).toBeDefined();
     });
 
     it('propagates errors from steps', async () => {

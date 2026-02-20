@@ -97,7 +97,7 @@ export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   readonly episodes?: AlertEpisode[];
   readonly suppressions?: AlertEpisodeSuppression[];
-  readonly active?: AlertEpisode[];
+  readonly dispatchable?: AlertEpisode[];
   readonly suppressed?: Array<AlertEpisode & { reason: string }>;
   readonly rules?: Map<RuleId, Rule>;
   readonly policies?: Map<NotificationPolicyId, NotificationPolicy>;

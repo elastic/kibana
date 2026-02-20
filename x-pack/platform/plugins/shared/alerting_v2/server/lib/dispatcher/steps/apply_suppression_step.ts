@@ -19,16 +19,16 @@ export class ApplySuppressionStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { episodes = [], suppressions = [] } = state;
 
-    const { suppressed, active } = applySuppression(episodes, suppressions);
+    const { suppressed, dispatchable } = applySuppression(episodes, suppressions);
 
-    return { type: 'continue', data: { suppressed, active } };
+    return { type: 'continue', data: { suppressed, dispatchable } };
   }
 }
 
 export function applySuppression(
   episodes: readonly AlertEpisode[],
   suppressions: readonly AlertEpisodeSuppression[]
-): { suppressed: Array<AlertEpisode & { reason: string }>; active: AlertEpisode[] } {
+): { suppressed: Array<AlertEpisode & { reason: string }>; dispatchable: AlertEpisode[] } {
   const suppressionMap = new Map<string, AlertEpisodeSuppression>();
 
   for (const s of suppressions) {
@@ -40,7 +40,7 @@ export function applySuppression(
   }
 
   const suppressed: Array<AlertEpisode & { reason: string }> = [];
-  const active: AlertEpisode[] = [];
+  const dispatchable: AlertEpisode[] = [];
 
   for (const ep of episodes) {
     const episodeKey = `${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`;
@@ -55,11 +55,11 @@ export function applySuppression(
         : seriesSuppression!;
       suppressed.push({ ...ep, reason: getSuppressionReason(matchingSuppression) });
     } else {
-      active.push(ep);
+      dispatchable.push(ep);
     }
   }
 
-  return { suppressed, active };
+  return { suppressed, dispatchable };
 }
 
 function getSuppressionReason(suppression: AlertEpisodeSuppression): string {

@@ -22,7 +22,7 @@ describe('EvaluateMatchersStep', () => {
     const policy = createNotificationPolicy({ id: 'p1' });
 
     const state = createDispatcherPipelineState({
-      active: [episode],
+      dispatchable: [episode],
       rules: new Map([['r1', rule]]),
       policies: new Map([['p1', policy]]),
     });
@@ -38,7 +38,7 @@ describe('EvaluateMatchersStep', () => {
 
   it('returns empty when no episodes', async () => {
     const state = createDispatcherPipelineState({
-      active: [],
+      dispatchable: [],
       rules: new Map(),
       policies: new Map(),
     });

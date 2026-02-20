@@ -47,8 +47,8 @@ describe('ApplySuppressionStep', () => {
     expect(result.data?.suppressed?.[0]).toEqual(
       expect.objectContaining({ rule_id: 'r1', reason: 'ack' })
     );
-    expect(result.data?.active).toHaveLength(1);
-    expect(result.data?.active?.[0]).toEqual(expect.objectContaining({ rule_id: 'r2' }));
+    expect(result.data?.dispatchable).toHaveLength(1);
+    expect(result.data?.dispatchable?.[0]).toEqual(expect.objectContaining({ rule_id: 'r2' }));
   });
 
   it('treats all episodes as active when there are no suppressions', async () => {
@@ -61,7 +61,7 @@ describe('ApplySuppressionStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.active).toHaveLength(2);
+    expect(result.data?.dispatchable).toHaveLength(2);
     expect(result.data?.suppressed).toHaveLength(0);
   });
 
@@ -72,7 +72,7 @@ describe('ApplySuppressionStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.active).toHaveLength(0);
+    expect(result.data?.dispatchable).toHaveLength(0);
     expect(result.data?.suppressed).toHaveLength(0);
   });
 });
@@ -88,11 +88,11 @@ describe('applySuppression', () => {
       last_ack_action: 'ack',
     });
 
-    const { suppressed, active } = applySuppression([episode], [suppression]);
+    const { suppressed, dispatchable } = applySuppression([episode], [suppression]);
 
     expect(suppressed).toHaveLength(1);
     expect(suppressed[0].reason).toBe('ack');
-    expect(active).toHaveLength(0);
+    expect(dispatchable).toHaveLength(0);
   });
 
   it('suppresses by series-level match (null episode_id)', () => {
@@ -105,11 +105,11 @@ describe('applySuppression', () => {
       last_snooze_action: 'snooze',
     });
 
-    const { suppressed, active } = applySuppression([episode], [suppression]);
+    const { suppressed, dispatchable } = applySuppression([episode], [suppression]);
 
     expect(suppressed).toHaveLength(1);
     expect(suppressed[0].reason).toBe('snooze');
-    expect(active).toHaveLength(0);
+    expect(dispatchable).toHaveLength(0);
   });
 
   it('uses deactivate reason when deactivated', () => {
@@ -159,9 +159,9 @@ describe('applySuppression', () => {
       should_suppress: false,
     });
 
-    const { suppressed, active } = applySuppression([episode], [suppression]);
+    const { suppressed, dispatchable } = applySuppression([episode], [suppression]);
 
     expect(suppressed).toHaveLength(0);
-    expect(active).toHaveLength(1);
+    expect(dispatchable).toHaveLength(1);
   });
 });
