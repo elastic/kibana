@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getRunCommand, getRunTarget, stripRunCommand } from './cli_processing';
+import { getRunCommand, stripRunCommand } from './cli_processing';
 
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {

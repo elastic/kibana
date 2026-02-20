@@ -24,14 +24,13 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
   getRunCommand,
-  getRunTarget,
   parseStdout,
   stripFilePath,
 } from '../../../helpers';
