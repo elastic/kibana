@@ -24,6 +24,8 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
+  EuiRadioGroup,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -55,6 +57,10 @@ export interface WorkflowVersionHistoryPanelProps {
   selectedVersionEventId?: string | null;
   /** Set or clear the version used for diff (current YAML vs this version). Pass null to clear. */
   onSelectVersionForDiff?: (payload: { eventId: string; yaml: string } | null) => void;
+  /** How to display the diff: unified (single editor with inline changes) or split (side-by-side). */
+  diffViewMode?: 'unified' | 'split';
+  /** Called when the user changes the diff view mode. */
+  onDiffViewModeChange?: (mode: 'unified' | 'split') => void;
 }
 
 function getInitial(name: string | undefined, userId: string | undefined): string {
@@ -90,6 +96,19 @@ const compareWithVersionLabel = i18n.translate('workflows.versionHistory.compare
 });
 const clearComparisonLabel = i18n.translate('workflows.versionHistory.clearComparison', {
   defaultMessage: 'Clear comparison',
+});
+
+const diffViewSettingsLabel = i18n.translate('workflows.versionHistory.diffViewSettings', {
+  defaultMessage: 'Diff view settings',
+});
+const diffViewSectionTitle = i18n.translate('workflows.versionHistory.diffViewSectionTitle', {
+  defaultMessage: 'Diff view',
+});
+const unifiedViewLabel = i18n.translate('workflows.versionHistory.unifiedView', {
+  defaultMessage: 'Unified',
+});
+const splitViewLabel = i18n.translate('workflows.versionHistory.splitView', {
+  defaultMessage: 'Split',
 });
 
 function VersionHistoryListItem({
@@ -347,6 +366,8 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     onRestoreSuccess,
     selectedVersionEventId = null,
     onSelectVersionForDiff,
+    diffViewMode = 'unified',
+    onDiffViewModeChange,
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = getPanelStyles(euiTheme);
@@ -355,6 +376,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     const { data, isLoading, error } = useWorkflowHistory(workflowId);
     const [restoreTargetEventId, setRestoreTargetEventId] = useState<string | null>(null);
     const [isRestoring, setIsRestoring] = useState(false);
+    const [isDiffSettingsOpen, setIsDiffSettingsOpen] = useState(false);
 
     const onRestoreRequest = useCallback((eventId: string) => {
       setRestoreTargetEventId(eventId);
@@ -452,12 +474,61 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={closeLabel}
-              onClick={onClose}
-              data-test-subj="workflowVersionHistoryPanelClose"
-            />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiToolTip content={diffViewSettingsLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="gear"
+                        aria-label={diffViewSettingsLabel}
+                        onClick={() => setIsDiffSettingsOpen((open) => !open)}
+                        data-test-subj="workflowVersionHistoryDiffSettingsButton"
+                      />
+                    </EuiToolTip>
+                  }
+                  isOpen={isDiffSettingsOpen}
+                  closePopover={() => setIsDiffSettingsOpen(false)}
+                  anchorPosition="downRight"
+                  panelPaddingSize="m"
+                  data-test-subj="workflowVersionHistoryDiffSettingsPopover"
+                >
+                  <EuiText size="s" css={{ fontWeight: 600 }}>
+                    {diffViewSectionTitle}
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  <EuiRadioGroup
+                    options={[
+                      {
+                        id: 'unified',
+                        label: unifiedViewLabel,
+                        value: 'unified',
+                      },
+                      {
+                        id: 'split',
+                        label: splitViewLabel,
+                        value: 'split',
+                      },
+                    ]}
+                    idSelected={diffViewMode}
+                    onChange={(id) => {
+                      onDiffViewModeChange?.(id as 'unified' | 'split');
+                      setIsDiffSettingsOpen(false);
+                    }}
+                    name="diffViewMode"
+                    data-test-subj="workflowVersionHistoryDiffViewMode"
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={closeLabel}
+                  onClick={onClose}
+                  data-test-subj="workflowVersionHistoryPanelClose"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <div css={styles.body}>

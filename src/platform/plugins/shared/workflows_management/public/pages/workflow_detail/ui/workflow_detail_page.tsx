@@ -84,6 +84,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
   const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+  const [diffViewMode, setDiffViewMode] = useState<'unified' | 'split'>('unified');
   const [selectedVersionForDiff, setSelectedVersionForDiff] = useState<{
     eventId: string;
     yaml: string;
@@ -163,6 +164,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               <WorkflowDetailEditor
                 highlightDiff={highlightDiff || !!selectedVersionForDiff}
                 diffOriginalValue={selectedVersionForDiff?.yaml}
+                diffViewMode={diffViewMode}
               />
             }
             executionList={
@@ -199,6 +201,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                     onRestoreSuccess={onVersionHistoryRestoreSuccess}
                     selectedVersionEventId={selectedVersionForDiff?.eventId ?? null}
                     onSelectVersionForDiff={onSelectVersionForDiff}
+                    diffViewMode={diffViewMode}
+                    onDiffViewModeChange={setDiffViewMode}
                   />
                 </div>
               ) : null

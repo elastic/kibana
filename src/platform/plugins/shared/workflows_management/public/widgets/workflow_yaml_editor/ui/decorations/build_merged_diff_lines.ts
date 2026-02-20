@@ -11,6 +11,17 @@ import { diffLines } from 'diff';
 
 export type DiffLineType = 'add' | 'remove' | 'equal';
 
+/**
+ * Normalize text before diffing so that identical content is not shown as changed.
+ * - Unified line endings to \n (avoids \r\n vs \n differences).
+ * - Trim trailing newlines so "a\nb\n" and "a\nb" compare as equal.
+ * Exported so split view can display normalized content and match diff line counts.
+ */
+export function normalizeForDiff(text: string): string {
+  const normalized = (text ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return normalized.replace(/\n+$/, '');
+}
+
 export interface MergedDiffLines {
   /** Full text of the merged diff (one line per array element, joined by \n) */
   text: string;
@@ -24,8 +35,8 @@ export interface MergedDiffLines {
  * Used to show green (+) for additions and red (-) for deletions in the editor.
  */
 export function buildMergedDiffLines(original: string, current: string): MergedDiffLines {
-  const originalNorm = original ?? '';
-  const currentNorm = current ?? '';
+  const originalNorm = normalizeForDiff(original);
+  const currentNorm = normalizeForDiff(current);
   const changes = diffLines(originalNorm, currentNorm, { ignoreWhitespace: false });
 
   const lines: string[] = [];
@@ -48,4 +59,43 @@ export function buildMergedDiffLines(original: string, current: string): MergedD
     text: lines.join('\n'),
     lineTypes,
   };
+}
+
+export interface SplitViewLineTypes {
+  /** Line type for each line in the original (previous) document, 1-based index = array index + 1 */
+  original: DiffLineType[];
+  /** Line type for each line in the current document, 1-based index = array index + 1 */
+  current: DiffLineType[];
+}
+
+/**
+ * Returns per-line diff types for split view: which lines in the original document
+ * are removals (red) and which lines in the current document are additions (green).
+ */
+export function getSplitViewLineTypes(original: string, current: string): SplitViewLineTypes {
+  const originalNorm = normalizeForDiff(original);
+  const currentNorm = normalizeForDiff(current);
+  const changes = diffLines(originalNorm, currentNorm, { ignoreWhitespace: false });
+
+  const originalTypes: DiffLineType[] = [];
+  const currentTypes: DiffLineType[] = [];
+
+  for (const change of changes) {
+    const lineStrings = (change.value ?? '').split('\n');
+    // diffLines includes trailing newline in value, so we often get an empty string at the end
+    if (lineStrings.length > 1 && lineStrings[lineStrings.length - 1] === '') {
+      lineStrings.pop();
+    }
+    const type: DiffLineType = change.added ? 'add' : change.removed ? 'remove' : 'equal';
+    for (const _ of lineStrings) {
+      if (change.removed || (!change.added && !change.removed)) {
+        originalTypes.push(type);
+      }
+      if (change.added || (!change.added && !change.removed)) {
+        currentTypes.push(type);
+      }
+    }
+  }
+
+  return { original: originalTypes, current: currentTypes };
 }
