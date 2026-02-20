@@ -585,7 +585,7 @@ evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
 Some of the evals will use LLM-as-a-judge. For consistent results, you should specify `EVALUATION_CONNECTOR_ID` as an environment variable, in order for the evaluations to always be judged by the same LLM:
 
 ```bash
-EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
+EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
 ### Testing a specific connector
@@ -593,7 +593,7 @@ EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-p
 The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id. To run the evaluations only for a specific connector, use `--project`:
 
 ```bash
-node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts --project azure-gpt4o
+node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
 
 ### Skipping connector setup/teardown
@@ -626,7 +626,7 @@ await executorClient.runExperiment(
 Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
 
 ```bash
-SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 ```
 
 **RAG Evaluator Patterns:** For RAG metrics, use pattern names (`Precision@K`, `Recall@K`, `F1@K`) to select evaluators. The actual K values are controlled by `RAG_EVAL_K`:
@@ -666,7 +666,7 @@ To override the repetitions at runtime without modifying your configuration, use
 
 ```bash
 # Run each example 3 times
-EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
+EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
 ### Running evaluations against your local/development Kibana instance

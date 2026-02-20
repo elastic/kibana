@@ -206,6 +206,7 @@ export function useSingleAgentMenuItems({
                   icon: 'clockCounter',
                   disabled:
                     !agentHasValidRollback ||
+                    isAgentUpgrading(agent) ||
                     !licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK),
                   onClick: () => {
                     callbacks.onRollbackClick();
