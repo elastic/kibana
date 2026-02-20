@@ -26,6 +26,7 @@ import type { MonitorConfigRepository } from '../services/monitor_config_reposit
 import type { SyntheticsEsClient } from '../lib';
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 export type SyntheticsRequest = KibanaRequest<
   Record<string, any>,
   Record<string, any>,
@@ -102,6 +103,7 @@ export interface RouteContext<
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
   spaceId: string;
+  syntheticsPrivateLocationClient: SyntheticsPrivateLocation;
   monitorConfigRepository: MonitorConfigRepository;
 }
 
