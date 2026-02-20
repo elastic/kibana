@@ -62,6 +62,7 @@ export const FailureStoreSummary = ({
     <DataLifecycleSummary
       model={{ phases, testSubjPrefix: 'failureStore' }}
       capabilities={{ canManageLifecycle }}
+      showDownsampling={false}
     />
   );
 };
