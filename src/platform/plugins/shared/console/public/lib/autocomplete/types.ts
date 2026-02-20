@@ -18,6 +18,28 @@ export interface ResultTerm {
   name?: string | boolean;
   value?: string;
   score?: number;
+  /**
+   * Template payload used when inserting an autocomplete suggestion into the editor.
+   *
+   * This value originates from the Console autocomplete DSL (`__template` / `__one_of` / `__any_of`)
+   * and is passed through largely unvalidated. Consumers treat it as an opaque payload with a
+   * single structured special-case (`__raw`); otherwise it is `JSON.stringify`'d.
+   *
+   * Note: the compiler only checks `template !== undefined` before assigning to `ResultTerm.template`,
+   * so other values (including `null`) can flow through unchanged. This is also why editors/LSP may
+   * show the type as `{}` | `null` at some use sites (unknown-but-not-undefined). Note that
+   * TypeScript’s `{}` here is the “any non-nullish value” top type (not a literal empty object),
+   * and the runtime values are not guaranteed to be objects.
+   *
+   * Common shapes produced by the compiler include:
+   * - a string
+   * - an array (e.g. `[]` or a single nested template wrapped as `[template]`)
+   * - a plain object to be `JSON.stringify`'d
+   * - the special raw wrapper `{ __raw: true, value: string }` to bypass JSON stringification
+   *
+   * Because the DSL payload is not validated, other primitives (e.g. `null`, `number`, `boolean`)
+   * can also flow through unchanged.
+   */
   template?: unknown;
 }
 
