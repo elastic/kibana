@@ -43,7 +43,7 @@ import {
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { CanvasProvider } from './attachments/canvas_context';
-import { CanvasModeFlyout } from './attachments/canvas_mode_flyout';
+import { CanvasFlyout } from './attachments/canvas_flyout';
 
 interface Props {
   content: string;
@@ -188,7 +188,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <CanvasModeFlyout attachmentsService={attachmentsService} />
+      <CanvasFlyout attachmentsService={attachmentsService} />
     </CanvasProvider>
   );
 }

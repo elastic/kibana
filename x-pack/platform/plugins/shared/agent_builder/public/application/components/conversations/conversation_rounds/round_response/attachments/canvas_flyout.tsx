@@ -12,7 +12,7 @@ import type { AttachmentsService } from '../../../../../../services/attachments/
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
-interface CanvasModeFlyoutProps {
+interface CanvasFlyoutProps {
   attachmentsService: AttachmentsService;
 }
 
@@ -21,7 +21,7 @@ interface CanvasModeFlyoutProps {
  * Consumes canvas state from context. In full-screen context, renders at 50% screen width.
  * In sidebar context, uses default flyout width.
  */
-export const CanvasModeFlyout: React.FC<CanvasModeFlyoutProps> = ({ attachmentsService }) => {
+export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas } = useCanvasContext();
 

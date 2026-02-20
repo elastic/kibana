@@ -13,7 +13,7 @@ import { AttachmentHeader } from './attachment_header';
 import { InlineAttachmentContent } from './inline_attachment_content';
 import { useCanvasContext } from './canvas_context';
 
-interface AttachmentWithActionsProps {
+interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
   attachmentsService: AttachmentsService;
   isSidebar: boolean;
@@ -21,9 +21,9 @@ interface AttachmentWithActionsProps {
 }
 
 /**
- * Component that renders an attachment with its action buttons.
+ * Component that renders an inline attachment with its action buttons.
  */
-export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
+export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsProps> = ({
   attachment,
   attachmentsService,
   isSidebar,
