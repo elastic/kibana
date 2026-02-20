@@ -17,4 +17,4 @@ import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api
 export const isLegacyHistogram = (field: {
   type: ES_FIELD_TYPES;
   instrument?: MappingTimeSeriesMetricType;
-}): boolean => field.type === ES_FIELD_TYPES.HISTOGRAM && field.instrument === 'histogram';
+}): boolean => field.type === 'histogram' && field.instrument === 'histogram';

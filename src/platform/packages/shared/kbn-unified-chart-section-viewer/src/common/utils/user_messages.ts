@@ -19,7 +19,7 @@ export const LEGACY_HISTOGRAM_USER_MESSAGES: UserMessage[] = [
     }),
     longMessage: i18n.translate('metricsExperience.userMessage.histogram.long', {
       defaultMessage:
-        'Calculated assuming T-Digest encoding. If the histogram was encoded differently, the value is approximate',
+        'Calculated assuming T-Digest encoding. If the histogram was encoded differently, the data is approximate',
     }),
     fixableInEditor: false,
     displayLocations: [{ id: 'embeddableBadge' }],
