@@ -26,7 +26,7 @@ export class DispatchStep implements DispatcherStep {
     for (const group of dispatch) {
       const policy = policies.get(group.policyId);
       if (!policy?.apiKey) {
-        this.logger.warn({
+        this.logger.debug({
           message: () =>
             `Skipping dispatch for group ${group.id}: notification policy ${group.policyId} has no API key`,
         });
