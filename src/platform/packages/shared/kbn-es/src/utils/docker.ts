@@ -1173,6 +1173,10 @@ export interface DockerSnapshotOptions extends EsClusterExecOptions {
   kill?: boolean;
   tag?: string;
   image?: string;
+  /** Container name. Defaults to 'es01'. Use unique names for parallel runs. */
+  name?: string;
+  /** When true, returns immediately after ES is ready instead of tailing logs. */
+  background?: boolean;
 }
 
 /**
@@ -1199,13 +1203,17 @@ const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
  * - Maps `-E path.data=<relative>` → a Docker volume mount
  * - Waits for cluster readiness and sets up the native realm (passwords)
  */
-export async function runDockerSnapshotContainer(log: ToolingLog, options: DockerSnapshotOptions) {
+export async function runDockerSnapshotContainer(
+  log: ToolingLog,
+  options: DockerSnapshotOptions
+): Promise<string> {
   await setupDocker({ log, options });
 
   const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
   const image = resolveDockerImage({ image: options.image, tag, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
   await setupDockerImage({ log, image });
 
+  const containerName = options.name || 'es01';
   const port = options.port || DEFAULT_PORT;
   const password = options.password || 'changeme';
 
@@ -1217,7 +1225,6 @@ export async function runDockerSnapshotContainer(log: ToolingLog, options: Docke
 
   esArgsMap.set('ELASTIC_PASSWORD', password);
 
-  // Process user-supplied -E args; extract path.data for a volume mount
   const volumeMounts: string[] = [];
   const userEsArgs: string[] = options.esArgs
     ? Array.isArray(options.esArgs)
@@ -1265,11 +1272,11 @@ export async function runDockerSnapshotContainer(log: ToolingLog, options: Docke
     '--net',
     'elastic',
     '--name',
-    'es01',
+    containerName,
     '-p',
     `127.0.0.1:${port}:${port}`,
     '-p',
-    '127.0.0.1:9300:9300',
+    `127.0.0.1:${port + 100}:9300`,
     ...envArgs,
     ...volumeMounts,
     image,
@@ -1278,11 +1285,11 @@ export async function runDockerSnapshotContainer(log: ToolingLog, options: Docke
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
   const { stdout: containerId } = await execa('docker', dockerCmd);
 
-  log.info(`Container started: ${containerId.substring(0, 12)}`);
+  log.info(`Container ${containerName} started: ${containerId.substring(0, 12)}`);
 
   process.on('SIGINT', () => {
     try {
-      execa.commandSync('docker kill es01');
+      execa.commandSync(`docker kill ${containerName}`);
     } catch {
       // container may already be stopped
     }
@@ -1321,13 +1328,36 @@ export async function runDockerSnapshotContainer(log: ToolingLog, options: Docke
   }
 
   log.success('ES is ready and native realm is set up');
-  log.info(`  View logs:    ${chalk.bold('docker logs -f es01')}`);
-  log.info(`  Shell:        ${chalk.bold('docker exec -it es01 /bin/bash')}`);
-  log.info(`  Stop:         ${chalk.bold('docker container stop es01')}`);
+  log.info(`  View logs:    ${chalk.bold(`docker logs -f ${containerName}`)}`);
+  log.info(`  Shell:        ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}`);
+  log.info(`  Stop:         ${chalk.bold(`docker container stop ${containerName}`)}`);
 
-  await execa('docker', ['logs', '-f', 'es01'], {
-    stdio: ['ignore', 'inherit', 'inherit'],
-  }).catch(() => {
-    // docker logs exits when the container stops
-  });
+  if (!options.background) {
+    await execa('docker', ['logs', '-f', containerName], {
+      stdio: ['ignore', 'inherit', 'inherit'],
+    }).catch(() => {
+      // docker logs exits when the container stops
+    });
+  }
+
+  return containerName;
+}
+
+export async function stopDockerSnapshotContainer(
+  log: ToolingLog,
+  containerName: string
+): Promise<void> {
+  try {
+    await execa('docker', ['kill', containerName]);
+    log.info(`Docker container ${containerName} killed`);
+  } catch {
+    // container may already be stopped
+  }
+
+  try {
+    await execa('docker', ['rm', '-f', containerName]);
+    log.info(`Docker container ${containerName} removed`);
+  } catch {
+    // container may already be removed
+  }
 }

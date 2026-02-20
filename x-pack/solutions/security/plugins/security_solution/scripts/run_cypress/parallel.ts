@@ -331,6 +331,9 @@ ${JSON.stringify(
               let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
+              const esFromEnv = process.env.CYPRESS_ES_FROM;
+              const esFrom = esFromEnv || config.get('esTestCluster')?.from || 'snapshot';
+
               try {
                 shutdownEs = await pRetry(
                   async () =>
@@ -338,7 +341,7 @@ ${JSON.stringify(
                       config,
                       log,
                       name: `ftr-${esPort}`,
-                      esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                      esFrom,
                       onEarlyExit,
                     }),
                   { retries: 2, forever: false }

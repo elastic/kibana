@@ -30,6 +30,7 @@ import {
   parseEsLog,
   runDockerContainer,
   runDockerSnapshotContainer,
+  stopDockerSnapshotContainer,
   runServerlessCluster,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -112,6 +113,7 @@ export class Cluster {
   private process: execa.ExecaChildProcess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
+  private dockerSnapshotContainerName: string | null;
   private setupPromise: Promise<unknown> | null;
   private stdioTarget: NodeJS.WritableStream | null;
 
@@ -121,6 +123,8 @@ export class Cluster {
     this.stopCalled = false;
     // Serverless Elasticsearch node names, started via Docker
     this.serverlessNodes = [];
+    // Docker snapshot container name, if running via Docker
+    this.dockerSnapshotContainerName = null;
     // properties used exclusively for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
@@ -316,6 +320,11 @@ export class Cluster {
     // Stop ES docker containers
     if (this.serverlessNodes.length) {
       return await stopServerlessCluster(this.log, this.serverlessNodes);
+    }
+
+    // Stop Docker snapshot container
+    if (this.dockerSnapshotContainerName) {
+      return await stopDockerSnapshotContainer(this.log, this.dockerSnapshotContainerName);
     }
 
     // Stop local ES process
@@ -653,6 +662,6 @@ export class Cluster {
       throw new Error('ES stateful cluster has already been started');
     }
 
-    await runDockerSnapshotContainer(this.log, options);
+    this.dockerSnapshotContainerName = await runDockerSnapshotContainer(this.log, options);
   }
 }

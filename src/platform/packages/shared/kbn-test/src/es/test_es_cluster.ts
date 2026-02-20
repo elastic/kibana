@@ -244,7 +244,10 @@ export function createTestEsCluster<
       const second = 1000;
       const minute = second * 60;
 
-      return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
+      if (esFrom === 'snapshot' || esFrom === 'docker') {
+        return 3 * minute;
+      }
+      return 6 * minute;
     }
 
     async start() {
@@ -264,6 +267,18 @@ export function createTestEsCluster<
         }));
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
+      } else if (esFrom === 'docker') {
+        await firstNode.runDockerSnapshot({
+          port,
+          password,
+          license: testLicense,
+          esArgs: customEsArgs,
+          ssl,
+          name: `es-${clusterName}`,
+          background: true,
+          kill: true,
+        });
+        return;
       } else if (esFrom === 'serverless') {
         if (!esServerlessOptions) {
           throw new Error(
