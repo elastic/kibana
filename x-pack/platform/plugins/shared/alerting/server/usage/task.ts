@@ -171,6 +171,10 @@ export function telemetryTaskRunner(
                 count_rules_by_execution_status:
                   totalCountAggregations.count_rules_by_execution_status,
                 count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                count_rules_with_elasticagent_tag:
+                  totalCountAggregations.count_rules_with_elasticagent_tag,
+                count_rules_with_elasticagent_tag_by_type:
+                  totalCountAggregations.count_rules_with_elasticagent_tag_by_type,
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
@@ -180,6 +184,8 @@ export function telemetryTaskRunner(
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:
                   totalCountAggregations.count_rules_with_investigation_guide,
+                count_rules_with_api_key_created_by_user:
+                  totalCountAggregations.count_rules_with_api_key_created_by_user,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:

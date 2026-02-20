@@ -28,17 +28,17 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...titleComparators,
-  dataViewId: 'referenceEquality',
-  fieldName: 'referenceEquality',
-  useGlobalFilters: (a, b) => (a ?? true) === (b ?? true),
-  ignoreValidations: (a, b) => Boolean(a) === Boolean(b),
+  data_view_id: 'referenceEquality',
+  field_name: 'referenceEquality',
+  use_global_filters: (a, b) => (a ?? true) === (b ?? true),
+  ignore_validations: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const defaultDataControlState = {
-  dataViewId: '',
-  fieldName: '',
-  useGlobalFilters: DEFAULT_USE_GLOBAL_FILTERS,
-  ignoreValidations: DEFAULT_IGNORE_VALIDATIONS,
+  data_view_id: '',
+  field_name: '',
+  use_global_filters: DEFAULT_USE_GLOBAL_FILTERS,
+  ignore_validations: DEFAULT_IGNORE_VALIDATIONS,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
@@ -94,7 +94,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataViewReady = reject;
   });
 
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.field_name);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
