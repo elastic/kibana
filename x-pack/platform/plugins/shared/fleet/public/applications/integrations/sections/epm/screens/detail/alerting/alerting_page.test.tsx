@@ -12,31 +12,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
 
-const mockHttpGet = jest.fn();
-const mockSendGetBulkAssets = jest.fn();
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
-
-jest.mock('../../../../../hooks', () => ({
-  useGetPackageInstallStatus: jest.fn().mockReturnValue(() => ({
-    status: 'installed',
-    version: '1.0.0',
-  })),
-  useLink: jest.fn().mockReturnValue({ getPath: jest.fn().mockReturnValue('/mock') }),
-  useStartServices: jest.fn().mockReturnValue({
-    notifications: {
-      toasts: { addInfo: jest.fn(), addSuccess: jest.fn(), addError: jest.fn() },
-    },
-    http: {
-      get: (...args: any[]) => mockHttpGet(...args),
-      basePath: { prepend: (path: string) => `/mock${path}` },
-    },
-  }),
-  useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
-  useAuthz: (...args: any[]) => mockUseAuthz(...args),
-  sendGetBulkAssets: (...args: any[]) => mockSendGetBulkAssets(...args),
-  sendRequestInstallRuleAssets: jest.fn(),
-}));
+const mockUseAlertingAssets = jest.fn();
 
 jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
@@ -48,20 +26,30 @@ jest.mock('../../../components/side_bar_column', () => ({
   SideBarColumn: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
 
+jest.mock('../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../hooks'),
+  useGetPackageInstallStatus: jest.fn().mockReturnValue(() => ({
+    status: 'installed',
+    version: '1.0.0',
+  })),
+  useLink: jest.fn().mockReturnValue({ getPath: jest.fn().mockReturnValue('/mock') }),
+  useStartServices: jest.fn().mockReturnValue({
+    notifications: {
+      toasts: { addInfo: jest.fn(), addSuccess: jest.fn(), addError: jest.fn() },
+    },
+    http: {
+      basePath: { prepend: (path: string) => `/mock${path}` },
+    },
+  }),
+  useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
+  useAuthz: (...args: any[]) => mockUseAuthz(...args),
+  sendRequestInstallRuleAssets: jest.fn(),
+  useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
+}));
+
 import { AlertingPage } from './alerting_page';
 
 describe('AlertingPage', () => {
-  const baseInstallationInfo = {
-    version: '1.0.0',
-    install_source: 'registry' as const,
-    installed_kibana_space_id: 'default',
-    installed_kibana: [
-      { id: 'template-1', type: 'alerting_rule_template' as const },
-      { id: 'template-2', type: 'alerting_rule_template' as const },
-    ],
-    installed_es: [],
-  };
-
   const basePackageInfo = {
     name: 'system',
     title: 'System',
@@ -84,7 +72,16 @@ describe('AlertingPage', () => {
         path: 'syslog',
       },
     ],
-    installationInfo: baseInstallationInfo,
+    installationInfo: {
+      version: '1.0.0',
+      install_source: 'registry' as const,
+      installed_kibana_space_id: 'default',
+      installed_kibana: [
+        { id: 'template-1', type: 'alerting_rule_template' as const },
+        { id: 'template-2', type: 'alerting_rule_template' as const },
+      ],
+      installed_es: [],
+    },
   } as unknown as PackageInfo;
 
   const refetchPackageInfo = jest.fn();
@@ -92,27 +89,40 @@ describe('AlertingPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockHttpGet.mockResolvedValue({ data: [], total: 0 });
-
-    mockSendGetBulkAssets.mockResolvedValue({
-      data: {
-        items: [
-          {
+    mockUseAlertingAssets.mockReturnValue({
+      alertingAssets: [
+        { id: 'template-1', type: 'alerting_rule_template' },
+        { id: 'template-2', type: 'alerting_rule_template' },
+      ],
+      alertingAssetsByType: {
+        alerting_rule_template: [
+          { id: 'template-1', type: 'alerting_rule_template' },
+          { id: 'template-2', type: 'alerting_rule_template' },
+        ],
+      },
+      deferredAlerts: [],
+      assetSavedObjectsByType: {
+        alerting_rule_template: {
+          'template-1': {
             id: 'template-1',
             type: 'alerting_rule_template',
             attributes: { title: '[System] Logs template' },
             appLink:
               '/app/management/insightsAndAlerting/triggersActions/create/template/template-1',
           },
-          {
+          'template-2': {
             id: 'template-2',
             type: 'alerting_rule_template',
             attributes: { title: '[System] Metrics template' },
             appLink:
               '/app/management/insightsAndAlerting/triggersActions/create/template/template-2',
           },
-        ],
+        },
       },
+      userCreatedRules: [],
+      isLoading: false,
+      fetchError: undefined,
+      refetch: jest.fn(),
     });
 
     mockUseAuthz.mockReturnValue({
@@ -137,26 +147,42 @@ describe('AlertingPage', () => {
     );
   };
 
-  it('should render alerting rule templates', async () => {
+  it('should render alerting rule templates from installed_kibana', async () => {
     renderComponent();
 
     await waitFor(() => {
       expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
       expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     });
-
-    expect(mockSendGetBulkAssets).toHaveBeenCalledWith({
-      assetIds: [
-        { id: 'template-1', type: 'alerting_rule_template' },
-        { id: 'template-2', type: 'alerting_rule_template' },
-      ],
-    });
   });
 
-  it('should render user-created rules', async () => {
-    mockHttpGet.mockResolvedValue({
-      data: [{ id: 'user-rule-1', name: '[System] My custom rule' }],
-      total: 1,
+  it('should render user-created rules from the alerting API', async () => {
+    mockUseAlertingAssets.mockReturnValue({
+      alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],
+      alertingAssetsByType: {
+        alerting_rule_template: [{ id: 'template-1', type: 'alerting_rule_template' }],
+      },
+      deferredAlerts: [],
+      assetSavedObjectsByType: {
+        alerting_rule_template: {
+          'template-1': {
+            id: 'template-1',
+            type: 'alerting_rule_template',
+            attributes: { title: '[System] Template' },
+          },
+        },
+      },
+      userCreatedRules: [
+        {
+          id: 'user-rule-1',
+          type: 'alert',
+          attributes: { title: '[System] My custom rule' },
+          appLink: '/app/management/insightsAndAlerting/triggersActions/rule/user-rule-1',
+        },
+      ],
+      isLoading: false,
+      fetchError: undefined,
+      refetch: jest.fn(),
     });
 
     renderComponent();
@@ -164,29 +190,21 @@ describe('AlertingPage', () => {
     await waitFor(() => {
       expect(screen.getByText('[System] My custom rule')).toBeInTheDocument();
     });
-
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/alerting/rules/_find', {
-      query: {
-        filter: 'alert.attributes.tags:"System"',
-        per_page: 1000,
-        fields: '["name"]',
-      },
-    });
   });
 
   it('should show "No alerting assets found" when there are no assets', async () => {
-    const emptyPackage = {
-      ...basePackageInfo,
-      installationInfo: {
-        ...baseInstallationInfo,
-        installed_kibana: [],
-      },
-    } as unknown as PackageInfo;
+    mockUseAlertingAssets.mockReturnValue({
+      alertingAssets: [],
+      alertingAssetsByType: {},
+      deferredAlerts: [],
+      assetSavedObjectsByType: {},
+      userCreatedRules: [],
+      isLoading: false,
+      fetchError: undefined,
+      refetch: jest.fn(),
+    });
 
-    mockSendGetBulkAssets.mockResolvedValue({ data: { items: [] } });
-    mockHttpGet.mockResolvedValue({ data: [], total: 0 });
-
-    renderComponent(emptyPackage);
+    renderComponent();
 
     await waitFor(() => {
       expect(screen.getByText('No alerting assets found')).toBeInTheDocument();
@@ -243,27 +261,28 @@ describe('AlertingPage', () => {
         enableIntegrationInactivityAlerting: true,
       });
 
-      const packageWithoutInactivity = {
-        ...basePackageInfo,
-        installationInfo: {
-          ...baseInstallationInfo,
-          installed_kibana: [{ id: 'template-1', type: 'alerting_rule_template' }],
+      mockUseAlertingAssets.mockReturnValue({
+        alertingAssets: [{ id: 'template-1', type: 'alerting_rule_template' }],
+        alertingAssetsByType: {
+          alerting_rule_template: [{ id: 'template-1', type: 'alerting_rule_template' }],
         },
-      } as unknown as PackageInfo;
-
-      mockSendGetBulkAssets.mockResolvedValue({
-        data: {
-          items: [
-            {
+        deferredAlerts: [],
+        assetSavedObjectsByType: {
+          alerting_rule_template: {
+            'template-1': {
               id: 'template-1',
               type: 'alerting_rule_template',
               attributes: { title: '[System] Template' },
             },
-          ],
+          },
         },
+        userCreatedRules: [],
+        isLoading: false,
+        fetchError: undefined,
+        refetch: jest.fn(),
       });
 
-      renderComponent(packageWithoutInactivity);
+      renderComponent();
 
       await waitFor(() => {
         expect(screen.getByText('Idle data streams alerting available')).toBeInTheDocument();
@@ -287,7 +306,9 @@ describe('AlertingPage', () => {
         expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Idle data streams alerting available')
+      ).not.toBeInTheDocument();
     });
 
     it('should not show callout when inactivity template exists', async () => {
@@ -295,82 +316,91 @@ describe('AlertingPage', () => {
         enableIntegrationInactivityAlerting: true,
       });
 
-      const packageWithInactivity = {
-        ...basePackageInfo,
-        installationInfo: {
-          ...baseInstallationInfo,
-          installed_kibana: [
+      mockUseAlertingAssets.mockReturnValue({
+        alertingAssets: [
+          { id: 'template-1', type: 'alerting_rule_template' },
+          { id: 'fleet-system-inactivity-monitoring', type: 'alerting_rule_template' },
+        ],
+        alertingAssetsByType: {
+          alerting_rule_template: [
             { id: 'template-1', type: 'alerting_rule_template' },
             { id: 'fleet-system-inactivity-monitoring', type: 'alerting_rule_template' },
           ],
         },
-      } as unknown as PackageInfo;
-
-      mockSendGetBulkAssets.mockResolvedValue({
-        data: {
-          items: [
-            {
+        deferredAlerts: [],
+        assetSavedObjectsByType: {
+          alerting_rule_template: {
+            'template-1': {
               id: 'template-1',
               type: 'alerting_rule_template',
               attributes: { title: '[System] Template' },
             },
-            {
+            'fleet-system-inactivity-monitoring': {
               id: 'fleet-system-inactivity-monitoring',
               type: 'alerting_rule_template',
-              attributes: { title: '[System] Inactivity monitoring' },
+              attributes: { title: '[System] Idle data streams' },
             },
-          ],
+          },
         },
+        userCreatedRules: [],
+        isLoading: false,
+        fetchError: undefined,
+        refetch: jest.fn(),
       });
 
-      renderComponent(packageWithInactivity);
+      renderComponent();
 
       await waitFor(() => {
         expect(screen.getByText('[System] Template')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Idle data streams alerting available')
+      ).not.toBeInTheDocument();
     });
   });
 
   it('should deduplicate Fleet-managed rules from alerting API results', async () => {
-    const packageWithFleetRule = {
-      ...basePackageInfo,
-      installationInfo: {
-        ...baseInstallationInfo,
-        installed_kibana: [
-          { id: 'template-1', type: 'alerting_rule_template' },
-          { id: 'fleet-managed-rule-1', type: 'alert' },
-        ],
+    mockUseAlertingAssets.mockReturnValue({
+      alertingAssets: [
+        { id: 'template-1', type: 'alerting_rule_template' },
+        { id: 'fleet-managed-rule-1', type: 'alert' },
+      ],
+      alertingAssetsByType: {
+        alerting_rule_template: [{ id: 'template-1', type: 'alerting_rule_template' }],
+        alert: [{ id: 'fleet-managed-rule-1', type: 'alert' }],
       },
-    } as unknown as PackageInfo;
-
-    mockSendGetBulkAssets.mockResolvedValue({
-      data: {
-        items: [
-          {
+      deferredAlerts: [],
+      assetSavedObjectsByType: {
+        alerting_rule_template: {
+          'template-1': {
             id: 'template-1',
             type: 'alerting_rule_template',
             attributes: { title: '[System] Template' },
           },
-          {
+        },
+        alert: {
+          'fleet-managed-rule-1': {
             id: 'fleet-managed-rule-1',
             type: 'alert',
             attributes: { title: '[System] Fleet rule' },
           },
-        ],
+        },
       },
-    });
-
-    mockHttpGet.mockResolvedValue({
-      data: [
-        { id: 'fleet-managed-rule-1', name: '[System] Fleet rule' },
-        { id: 'user-rule-1', name: '[System] User rule' },
+      userCreatedRules: [
+        {
+          id: 'user-rule-1',
+          type: 'alert',
+          attributes: { title: '[System] User rule' },
+          appLink: '/app/management/insightsAndAlerting/triggersActions/rule/user-rule-1',
+        },
       ],
-      total: 2,
+      isLoading: false,
+      fetchError: undefined,
+      refetch: jest.fn(),
     });
 
-    renderComponent(packageWithFleetRule);
+    renderComponent();
 
     await waitFor(() => {
       expect(screen.getByText('[System] User rule')).toBeInTheDocument();

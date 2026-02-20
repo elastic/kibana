@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { Fragment, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -19,11 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type {
-  AssetSOObject,
-  KibanaAssetReference,
-  SimpleSOAssetType,
-} from '../../../../../../../../common';
 import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 
 import { Error, Loading } from '../../../../../components';
@@ -35,20 +30,18 @@ import {
   useGetPackageInstallStatus,
   useLink,
   useAuthz,
-  useFleetStatus,
   useStartServices,
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
-import { sendGetBulkAssets, sendRequestInstallRuleAssets } from '../../../../../hooks';
+import { sendRequestInstallRuleAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
+
+import { useAlertingAssets } from '../../../../../hooks';
 
 import { AssetsAccordion } from '../assets/assets_accordion';
 import { DeferredAssetsAccordion } from '../assets/deferred_assets_accordion';
 
-const ALERTING_ASSET_TYPES: KibanaSavedObjectType[] = [
-  KibanaSavedObjectType.alertingRuleTemplate,
-  KibanaSavedObjectType.alert,
-];
+import { ALERTING_ASSET_TYPES } from '.';
 
 const getInactivityMonitoringTemplateId = (pkgName: string): string =>
   `fleet-${pkgName}-inactivity-monitoring`;
@@ -62,8 +55,7 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
   const { name, version } = packageInfo;
   const pkgkey = `${name}-${version}`;
 
-  const { spaceId } = useFleetStatus();
-  const { notifications, http } = useStartServices();
+  const { notifications } = useStartServices();
   const authz = useAuthz();
   const canInstallPackages = authz.integrations?.installPackages;
   const canReadPackageSettings = authz.integrations.readPackageInfo;
@@ -72,144 +64,23 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(packageInfo.name);
 
-  const pkgInstallationInfo =
-    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const {
+    alertingAssets,
+    alertingAssetsByType,
+    deferredAlerts,
+    assetSavedObjectsByType,
+    userCreatedRules,
+    isLoading,
+    fetchError,
+    refetch,
+  } = useAlertingAssets(packageInfo);
 
-  const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
-
-  const kibanaAssets = useMemo(() => {
-    return !installedSpaceId || installedSpaceId === spaceId
-      ? pkgInstallationInfo?.installed_kibana || []
-      : pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId || 'default'] || [];
-  }, [
-    installedSpaceId,
-    spaceId,
-    pkgInstallationInfo?.installed_kibana,
-    pkgInstallationInfo?.additional_spaces_installed_kibana,
-  ]);
-
-  const alertingAssets = useMemo(
-    () => kibanaAssets.filter((asset) => ALERTING_ASSET_TYPES.includes(asset.type)),
-    [kibanaAssets]
-  );
-
-  const alertingAssetsByType = useMemo(
-    () =>
-      alertingAssets.reduce((acc, asset) => {
-        if (!acc[asset.type]) {
-          acc[asset.type] = [];
-        }
-        acc[asset.type].push(asset);
-        return acc;
-      }, {} as Record<string, KibanaAssetReference[]>),
-    [alertingAssets]
-  );
-
-  const deferredAlerts = useMemo(
-    () =>
-      alertingAssets.filter(
-        (asset) =>
-          asset.type === KibanaSavedObjectType.alert &&
-          'deferred' in asset &&
-          asset.deferred === true
-      ),
-    [alertingAssets]
-  );
-
-  const [assetSavedObjectsByType, setAssetsSavedObjectsByType] = useState<
-    Record<string, Record<string, SimpleSOAssetType & { appLink?: string }>>
-  >({});
-  const [userCreatedRules, setUserCreatedRules] = useState<
-    Array<SimpleSOAssetType & { appLink?: string }>
-  >([]);
-  const [fetchError, setFetchError] = useState<undefined | Error>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isReinstalling, setIsReinstalling] = useState<boolean>(false);
 
   const forceRefreshAssets = useCallback(() => {
-    if (refetchPackageInfo) {
-      refetchPackageInfo();
-    }
-  }, [refetchPackageInfo]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchAlertingAssets = async () => {
-      if (!pkgInstallationInfo) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch Fleet-managed asset details
-        if (alertingAssets.length > 0) {
-          const assetIds: AssetSOObject[] = alertingAssets.map(({ id, type }) => ({
-            id,
-            type,
-          }));
-
-          const { data, error } = await sendGetBulkAssets({ assetIds });
-          if (error) {
-            setFetchError(error);
-          } else if (!cancelled) {
-            setAssetsSavedObjectsByType(
-              (data?.items || []).reduce((acc, asset) => {
-                if (!acc[asset.type]) {
-                  acc[asset.type] = {};
-                }
-                acc[asset.type][asset.id] = asset;
-                return acc;
-              }, {} as typeof assetSavedObjectsByType)
-            );
-          }
-        }
-
-        // Fetch all rules tagged with this integration's title
-        const { title } = packageInfo;
-        const rulesRes = await http.get<{
-          data: Array<{ id: string; name: string }>;
-          total: number;
-        }>('/api/alerting/rules/_find', {
-          query: {
-            filter: `alert.attributes.tags:"${title}"`,
-            per_page: 1000,
-            fields: '["name"]',
-          },
-        });
-
-        if (!cancelled) {
-          const fleetManagedRuleIds = new Set(
-            alertingAssets.filter((a) => a.type === KibanaSavedObjectType.alert).map((a) => a.id)
-          );
-
-          const externalRules = (rulesRes.data || [])
-            .filter((rule) => !fleetManagedRuleIds.has(rule.id))
-            .map((rule) => ({
-              id: rule.id,
-              type: KibanaSavedObjectType.alert as SimpleSOAssetType['type'],
-              attributes: { title: rule.name },
-              appLink: `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`,
-            }));
-
-          setUserCreatedRules(externalRules);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setFetchError(e);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchAlertingAssets();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [packageInfo, alertingAssets, pkgInstallationInfo, http]);
+    refetchPackageInfo();
+    refetch();
+  }, [refetchPackageInfo, refetch]);
 
   // Detect missing inactivity monitoring template
   const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
