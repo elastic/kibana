@@ -8,7 +8,8 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "docs/openapi/**/*.gen.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -98,7 +99,8 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/react-query",
     "@kbn/zod",
-    "@kbn/securitysolution-es-utils"
+    "@kbn/securitysolution-es-utils",
+    "@kbn/openapi-generator"
   ],
   "exclude": [
     "target/**/*"
