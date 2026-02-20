@@ -255,7 +255,7 @@ export const OptionsListControl = ({
         data-shared-item
       >
         <EuiInputPopover
-          title="test"
+          id={popoverId}
           ownFocus
           input={button}
           repositionOnScroll
