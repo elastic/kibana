@@ -7,21 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BuiltInStepDefinition, StepCategory } from '@kbn/workflows';
+import { builtInStepDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { stepSchemas } from '../../../common/step_schemas';
+import { z as zv4 } from '@kbn/zod/v4';
+import { getAllConnectors } from '../../../common/schema';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
 export const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
-// Tool type constant (matches ToolType.builtin from @kbn/agent-builder-common)
 const TOOL_TYPE_BUILTIN = 'builtin';
-// Result type constant (matches ToolResultType.other from @kbn/agent-builder-common)
 const TOOL_RESULT_TYPE_OTHER = 'other';
+
+interface FormattedStepDefinition {
+  id: string;
+  label: string;
+  description?: string;
+  category: StepCategory;
+  hasParams: boolean;
+  jsonSchema?: unknown;
+  example?: string;
+}
+
+function categorizeConnectorType(type: string): StepCategory {
+  if (type.startsWith('kibana.')) return 'kibana';
+  if (type.startsWith('elasticsearch.')) return 'elasticsearch';
+  if (type.startsWith('ai.')) return 'ai';
+  if (type.startsWith('data.')) return 'data';
+  return 'external';
+}
+
+function zodToJsonSchemaSafe(schema: zv4.ZodType): unknown {
+  try {
+    return zv4.toJSONSchema(schema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function formatBuiltInStep(step: BuiltInStepDefinition): FormattedStepDefinition {
+  return {
+    id: step.type,
+    label: step.description,
+    category: step.category,
+    hasParams: true,
+    jsonSchema: zodToJsonSchemaSafe(step.schema),
+    example: step.example,
+  };
+}
+
+function matchesSearch(search: string, ...fields: Array<string | undefined | null>): boolean {
+  const term = search.toLowerCase();
+  return fields.some((field) => field?.toLowerCase().includes(term));
+}
 
 /**
  * Registers the get_step_definitions tool with the Agent Builder.
  * This tool provides the LLM with information about available workflow step types
- * and their parameter schemas.
+ * and their parameter schemas, including built-in flow control steps.
  */
 export function registerGetStepDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetupContract
@@ -31,59 +77,105 @@ export function registerGetStepDefinitionsTool(
     type: TOOL_TYPE_BUILTIN,
     description: `Get available workflow step types and their parameter schemas.
 Use this tool to understand what step types are available and what parameters they accept.
-This helps you generate correct YAML for workflow steps.`,
+This helps you generate correct YAML for workflow steps.
+
+Supports searching by keyword to find relevant step types (e.g., search "case" to find case management steps, search "loop" or "iterate" to find foreach).
+When a specific step type or small number of results is returned, detailed parameter information and usage examples are included.`,
     tags: ['workflows', 'yaml'],
     schema: z.object({
       stepType: z
         .string()
         .optional()
-        .describe('Filter by specific step type ID (e.g., "http", "foreach", "if")'),
+        .describe('Filter by exact step type ID (e.g., "http", "foreach", "kibana.createCase")'),
+      search: z
+        .string()
+        .optional()
+        .describe(
+          'Search term to match against step type IDs, labels, and descriptions (e.g., "case", "slack", "loop", "alert")'
+        ),
     }),
-    handler: async ({ stepType }) => {
-      const allDefinitions = stepSchemas.getAllRegisteredStepDefinitions();
+    handler: async (params) => {
+      const { stepType, search } = params as { stepType?: string; search?: string };
+      const allConnectors = getAllConnectors();
+      const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.type));
 
-      // Format the definitions for the LLM
-      const formattedDefinitions = allDefinitions
-        .filter((def) => !stepType || def.id === stepType)
-        .map((def) => {
-          const isPublic = stepSchemas.isPublicStepDefinition(def);
+      const connectorDefinitions: FormattedStepDefinition[] = allConnectors
+        .filter((connector) => !builtInTypes.has(connector.type))
+        .map((connector) => ({
+          id: connector.type,
+          label: connector.description ?? connector.type,
+          description: connector.summary ?? undefined,
+          category: categorizeConnectorType(connector.type),
+          hasParams: !!connector.paramsSchema,
+        }));
+
+      const builtInFormatted: FormattedStepDefinition[] =
+        builtInStepDefinitions.map(formatBuiltInStep);
+
+      let allDefinitions = [...builtInFormatted, ...connectorDefinitions];
+
+      if (stepType) {
+        allDefinitions = allDefinitions.filter((def) => def.id === stepType);
+      }
+
+      if (search) {
+        allDefinitions = allDefinitions.filter((def) =>
+          matchesSearch(search, def.id, def.label, def.description)
+        );
+      }
+
+      if (allDefinitions.length === 0 && (stepType || search)) {
+        const term = stepType || search || '';
+        const suggestions = [...builtInFormatted, ...connectorDefinitions].filter((def) =>
+          matchesSearch(term, def.id, def.label, def.description)
+        );
+        return {
+          results: [
+            {
+              type: TOOL_RESULT_TYPE_OTHER,
+              data: {
+                error: stepType
+                  ? `Step type "${stepType}" not found`
+                  : `No step types found for search "${search}"`,
+                ...(suggestions.length > 0 && {
+                  suggestions: suggestions.map((s) => ({ id: s.id, label: s.label })),
+                }),
+                hint: 'Use the "search" parameter to find step types by keyword',
+              },
+            },
+          ],
+        };
+      }
+
+      const includeDetails = allDefinitions.length <= 5;
+
+      const formattedResults = allDefinitions.map((def) => {
+        if (!includeDetails) {
           return {
             id: def.id,
-            label: isPublic ? def.label : def.id,
-            description: isPublic ? def.description : undefined,
-            category: isPublic ? def.category : undefined,
-            // Include schema information if available
-            hasParams: !!def.paramsSchema,
-          };
-        });
-
-      // If a specific stepType was requested and found, provide more detail
-      if (stepType && formattedDefinitions.length === 1) {
-        const def = allDefinitions.find((d) => d.id === stepType);
-        if (def) {
-          return {
-            results: [
-              {
-                type: TOOL_RESULT_TYPE_OTHER,
-                data: {
-                  stepType,
-                  definition: formattedDefinitions[0],
-                  usage: getStepUsageExample(stepType),
-                },
-              },
-            ],
+            label: def.label,
+            description: def.description,
+            category: def.category,
           };
         }
-      }
+        return {
+          id: def.id,
+          label: def.label,
+          description: def.description,
+          category: def.category,
+          ...(def.jsonSchema ? { jsonSchema: def.jsonSchema } : {}),
+          example: def.example ? def.example : getStepUsageExample(def.id),
+        };
+      });
 
       return {
         results: [
           {
             type: TOOL_RESULT_TYPE_OTHER,
             data: {
-              count: formattedDefinitions.length,
-              stepTypes: formattedDefinitions,
-              commonTypes: getCommonStepTypes(),
+              count: formattedResults.length,
+              ...(search && { searchTerm: search }),
+              stepTypes: formattedResults,
             },
           },
         ],
@@ -92,44 +184,13 @@ This helps you generate correct YAML for workflow steps.`,
   });
 }
 
-/**
- * Returns usage examples for common step types
- */
 function getStepUsageExample(stepType: string): string {
+  const builtIn = builtInStepDefinitions.find((s) => s.type === stepType);
+  if (builtIn) {
+    return builtIn.example;
+  }
+
   const examples: Record<string, string> = {
-    http: `- name: my_http_step
-  type: http
-  with:
-    url: "https://api.example.com/endpoint"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ consts.api_key }}"`,
-    foreach: `- name: loop_over_items
-  type: foreach
-  foreach: "{{ steps.previous_step.output.items | json }}"
-  steps:
-    - name: process_item
-      type: console
-      with:
-        message: "Processing: {{ foreach.item }}"`,
-    if: `- name: check_condition
-  type: if
-  condition: "steps.previous_step.output.status : 'success'"
-  steps:
-    - name: on_success
-      type: console
-      with:
-        message: "Success!"
-  else:
-    - name: on_failure
-      type: console
-      with:
-        message: "Failed!"`,
-    'data.set': `- name: set_variable
-  type: data.set
-  with:
-    key: my_variable
-    value: "{{ steps.previous_step.output.result }}"`,
     console: `- name: log_message
   type: console
   with:
@@ -142,6 +203,21 @@ function getStepUsageExample(stepType: string): string {
     query:
       match:
         field: "value"`,
+    'elasticsearch.request': `- name: es_request
+  type: elasticsearch.request
+  with:
+    method: GET
+    path: "/my-index/_search"
+    body:
+      query:
+        match_all: {}`,
+    'kibana.request': `- name: kibana_request
+  type: kibana.request
+  with:
+    method: POST
+    path: "/api/cases"
+    body:
+      title: "My case"`,
   };
 
   return (
@@ -151,24 +227,4 @@ function getStepUsageExample(stepType: string): string {
   with:
     # Add parameters specific to this step type`
   );
-}
-
-/**
- * Returns a summary of the most commonly used step types
- */
-function getCommonStepTypes(): Array<{ type: string; description: string }> {
-  return [
-    { type: 'http', description: 'Make HTTP requests to external APIs' },
-    { type: 'foreach', description: 'Loop over a collection of items' },
-    { type: 'if', description: 'Conditional execution based on expressions' },
-    { type: 'parallel', description: 'Execute multiple branches concurrently' },
-    { type: 'data.set', description: 'Set variables in workflow context' },
-    { type: 'data.transform', description: 'Transform data using expressions' },
-    { type: 'wait', description: 'Pause execution for a specified duration' },
-    { type: 'console', description: 'Log messages to the execution output' },
-    { type: 'elasticsearch.search', description: 'Query Elasticsearch indices' },
-    { type: 'elasticsearch.bulk', description: 'Bulk index documents' },
-    { type: 'elasticsearch.indices.create', description: 'Create Elasticsearch index' },
-    { type: 'kibana.post_agent_builder_converse', description: 'Invoke an AI agent' },
-  ];
 }

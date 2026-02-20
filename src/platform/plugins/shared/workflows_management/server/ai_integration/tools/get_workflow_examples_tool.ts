@@ -10,6 +10,7 @@
 import { readdir, readFile, stat } from 'fs/promises';
 import { relative, resolve } from 'path';
 import type { Logger } from '@kbn/core/server';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { z } from '@kbn/zod';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -20,9 +21,9 @@ const TOOL_TYPE_BUILTIN = 'builtin';
 // Result type constant (matches ToolResultType.other from @kbn/agent-builder-common)
 const TOOL_RESULT_TYPE_OTHER = 'other';
 
-// Path to the example workflows directory (relative to this file's location in dist)
-// In the Kibana repo, examples are at: workflows/workflows/
-const EXAMPLES_DIR = resolve(__dirname, '../../../../../../../../workflows/workflows');
+// Current implemenation expects elastic/workflows repo to be checked out in the same parent directory as elastic/kibana
+// TODO: Replace with indexing examples into Elasticsearch
+const EXAMPLES_DIR = resolve(REPO_ROOT, '../workflows/workflows');
 
 interface WorkflowExample {
   path: string;
