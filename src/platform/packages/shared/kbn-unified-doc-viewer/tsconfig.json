@@ -23,6 +23,8 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/restorable-state"
+    "@kbn/restorable-state",
+    "@kbn/data-view-utils",
+    "@kbn/apm-types"
   ]
 }
