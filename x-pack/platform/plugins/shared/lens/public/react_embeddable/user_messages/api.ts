@@ -207,9 +207,8 @@ export function buildUserMessagesHelpers(
 
     const consumerMessages = getConsumerMessages?.() ?? [];
 
-    if (consumerMessages.length) {
-      userMessages.push(...consumerMessages);
-    }
+    // When an internal error occurs (block chart rendering), the consumer message is not displayed.
+    userMessages.push(...consumerMessages);
 
     return handleMessageOverwriteFromConsumer(
       filterAndSortUserMessages(

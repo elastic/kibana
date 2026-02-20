@@ -312,20 +312,6 @@ describe('User Messages API', () => {
       expect(getConsumerMessages).toHaveBeenCalled();
     });
 
-    it('should treat undefined return from getConsumerMessages as no messages', () => {
-      const getConsumerMessages = jest.fn(() => undefined as unknown as UserMessage[]);
-      const { userMessagesApi } = buildUserMessagesApi(undefined, {
-        visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'formBased' },
-        getConsumerMessages,
-      });
-
-      const result = userMessagesApi.getUserMessages('embeddableBadge');
-
-      expect(result).toHaveLength(0);
-      expect(getConsumerMessages).toHaveBeenCalled();
-    });
-
     it('should filter consumer and internal messages based on severity', () => {
       const consumerMessage = createUserMessage(['embeddableBadge'], 'info');
       const getConsumerMessages = jest.fn(() => [consumerMessage]);

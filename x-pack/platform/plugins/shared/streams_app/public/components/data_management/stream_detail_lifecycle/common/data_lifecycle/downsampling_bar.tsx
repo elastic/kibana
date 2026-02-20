@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { getDownsamplingColor } from '../../helpers/downsampling_colors';
+import { useDownsamplingColors } from '../../hooks/use_downsampling_colors';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
 
@@ -76,10 +76,18 @@ const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
 export interface DownsamplingBarProps {
   segments?: DownsamplingSegment[] | null;
   gridTemplateColumns: string;
+  onRemoveStep?: (stepNumber: number) => void;
+  canManageLifecycle: boolean;
 }
 
-export const DownsamplingBar = ({ segments, gridTemplateColumns }: DownsamplingBarProps) => {
+export const DownsamplingBar = ({
+  segments,
+  gridTemplateColumns,
+  onRemoveStep,
+  canManageLifecycle,
+}: DownsamplingBarProps) => {
   const { euiTheme } = useEuiTheme();
+  const { getDownsamplingColor } = useDownsamplingColors();
 
   if (!segments) {
     return null;
@@ -139,6 +147,8 @@ export const DownsamplingBar = ({ segments, gridTemplateColumns }: DownsamplingB
                     stepNumber={(segment.stepIndex ?? index) + 1}
                     phaseName={segment.phaseName}
                     color={getDownsamplingColor(segment.stepIndex ?? index)}
+                    onRemoveStep={onRemoveStep}
+                    canManageLifecycle={canManageLifecycle}
                   />
                 ) : segment.isDelete ? (
                   <EuiPanel
