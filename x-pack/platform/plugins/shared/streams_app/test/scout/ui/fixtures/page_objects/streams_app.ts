@@ -36,6 +36,7 @@ export class StreamsApp {
   public readonly queryStreamFlyout;
   public readonly queryStreamFlyoutSaveButton;
   public readonly queryStreamCreatedSuccessToast;
+  public readonly childQueryStreamCreatedSuccessToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -78,6 +79,7 @@ export class StreamsApp {
       'streamsAppQueryStreamFlyoutSaveButton'
     );
     this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
   }
 
   async goto() {
@@ -1252,5 +1254,17 @@ export class StreamsApp {
 
   async clickQueryStreamFlyoutSaveButton() {
     await this.queryStreamFlyoutSaveButton.click();
+  }
+
+  async selectChildStreamType(type: 'Query' | 'Index') {
+    await this.childStreamTypeSelector.getByRole('button', { name: type }).click();
+  }
+
+  async clickQueryModeCreateQueryStreamButton() {
+    await this.page.getByTestId('streamsAppQueryModeCreateButton').click();
+  }
+
+  async clickQueryStreamFormCreateButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
   }
 }

@@ -40,5 +40,27 @@ test.describe(
       await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
       await expect(pageObjects.streams.queryStreamCreatedSuccessToast).toBeVisible();
     });
+
+    test('should create a query stream as a child of an ingest stream', async ({
+      page,
+      pageObjects,
+    }) => {
+      const parentStreamName = 'logs';
+      const childStreamName = 'host-1';
+      const esqlQuery = 'FROM logs | WHERE host.name == "host-1"';
+
+      await pageObjects.streams.clickStreamNameLink(parentStreamName);
+      await pageObjects.streams.gotoPartitioningTab(parentStreamName);
+      await pageObjects.streams.selectChildStreamType('Query');
+      await pageObjects.streams.clickQueryModeCreateQueryStreamButton();
+      await pageObjects.streams.fillRoutingRuleName(childStreamName);
+      await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+      await pageObjects.streams.clickQueryStreamFormCreateButton();
+      await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
+      await pageObjects.streams.selectChildStreamType('Query');
+      await expect(
+        page.getByTestId(`queryStream-${parentStreamName}.${childStreamName}`)
+      ).toBeVisible();
+    });
   }
 );
