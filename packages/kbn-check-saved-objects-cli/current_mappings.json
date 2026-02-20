@@ -290,6 +290,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "uiamApiKey": {
+        "type": "binary"
+      },
       "updatedAt": {
         "type": "date"
       },
@@ -328,6 +331,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -1327,6 +1333,9 @@
           "additionalIndexPattern": {
             "type": "keyword"
           },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
           "delay": {
             "type": "keyword"
           },
@@ -1346,6 +1355,9 @@
             "type": "date"
           },
           "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationId": {
             "type": "keyword"
           },
           "paginationTimestamp": {
