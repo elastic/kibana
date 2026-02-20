@@ -213,6 +213,13 @@ describe('findRulesRoute', () => {
                 },
               ],
               "api_key_owner": "2889684073",
+              "artifacts": Object {
+                "dashboards": Array [
+                  Object {
+                    "id": "dashboard-1",
+                  },
+                ],
+              },
               "consumer": "alerts",
               "created_at": "2024-03-21T13:15:00.498Z",
               "created_by": "elastic",
@@ -286,6 +293,13 @@ describe('findRulesRoute', () => {
                 },
               ],
               "api_key_owner": "2889684073",
+              "artifacts": Object {
+                "dashboards": Array [
+                  Object {
+                    "id": "dashboard-1",
+                  },
+                ],
+              },
               "consumer": "alerts",
               "created_at": "2024-03-21T13:15:00.498Z",
               "created_by": "elastic",

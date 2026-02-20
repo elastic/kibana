@@ -130,10 +130,6 @@ const validateUnsupportedFields = (
   value: string | string[] | undefined,
   getErrorMessage: (field: string) => string
 ) => {
-  const includesInValue = (val: string, search: string) => {
-    return val.includes(search);
-  };
-
   if (!value) {
     return;
   }
@@ -141,8 +137,18 @@ const validateUnsupportedFields = (
   const valueArray = Array.isArray(value) ? value : [value];
 
   const unsupportedFieldValue = valueArray.find((field) =>
-    UNSUPPORTED_FIELDS.some((unsupportedField) => includesInValue(field, unsupportedField))
+    UNSUPPORTED_FIELDS.some((unsupportedField) => isFieldUnsupported(field, unsupportedField))
   );
 
   return unsupportedFieldValue ? getErrorMessage(unsupportedFieldValue) : undefined;
 };
+
+/**
+ * Matches the unsupported field as a complete segment either at the start of
+ * a field path (e.g. "monitoring.execution.metrics") or right after
+ * "attributes." in a KQL filter string (e.g. "alert.attributes.monitoring.execution > 50").
+ * A boundary check (non-identifier char, ".", or end of string) prevents
+ * partial matches like "monitoringExtra" or "new_field.monitoring".
+ */
+const isFieldUnsupported = (val: string, unsupportedField: string): boolean =>
+  new RegExp(`(?:^|attributes\\.)${unsupportedField}(?:\\.|[^a-zA-Z0-9_]|$)`).test(val);

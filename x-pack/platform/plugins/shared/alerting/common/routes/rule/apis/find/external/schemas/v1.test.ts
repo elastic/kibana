@@ -31,7 +31,7 @@ describe('findRulesRequestQuerySchema', () => {
           sort_field: 'monitoring.execution.calculated_metrics.success_ratio',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio"`
+        `"[sort_field]: Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio"`
       );
     });
   });
@@ -59,7 +59,7 @@ describe('findRulesRequestQuerySchema', () => {
           search_fields: ['name', 'tags', 'monitoring.execution.calculated_metrics.success_ratio'],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Search field monitoring.execution.calculated_metrics.success_ratio not supported"`
+        `"[search_fields]: Search field monitoring.execution.calculated_metrics.success_ratio is not supported"`
       );
     });
   });
@@ -98,7 +98,7 @@ describe('findRulesRequestQuerySchema', () => {
             'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.monitoring.execution.calculated_metrics.success_ratio"`
+        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50"`
       );
     });
 
@@ -106,10 +106,10 @@ describe('findRulesRequestQuerySchema', () => {
       expect(() =>
         findRulesRequestQuerySchema.validate({
           filter:
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.actions:{ group: ".server-log" }',
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.snoozeSchedule:{ duration: 10000 }',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.actions"`
+        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.snoozeSchedule:{ duration: 10000 }"`
       );
     });
 
@@ -120,7 +120,7 @@ describe('findRulesRequestQuerySchema', () => {
             'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.mapped_params.risk_score > 50',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.mapped_params.risk_score"`
+        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.mapped_params.risk_score > 50"`
       );
     });
   });

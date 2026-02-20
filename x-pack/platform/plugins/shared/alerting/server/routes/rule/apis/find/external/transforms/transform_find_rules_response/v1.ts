@@ -72,7 +72,7 @@ export const transformPartialRule = (
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
-    ...(areArtifactsEmpty(rule.artifacts) ? { artifacts: rule.artifacts } : {}),
+    ...(!areArtifactsEmpty(rule.artifacts) ? { artifacts: rule.artifacts } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
