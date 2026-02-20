@@ -26,7 +26,11 @@ export class AcceptEndpointComponent extends SharedComponent {
     super(endpoint.id, parent);
     this.endpoint = endpoint;
   }
-  match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
+  match(
+    token: string | string[],
+    context: AutoCompleteContext,
+    editor: unknown
+  ): AutocompleteMatch {
     if (token !== URL_PATH_END_MARKER) {
       return null;
     }
