@@ -17,7 +17,18 @@ interface PageEntry {
   siemVersions?: string[];
 }
 
-export const getNavigationPages = (selectors: typeof EssHeaders): PageEntry[] => [
+interface NavigationSelectors {
+  ENDPOINTS: string;
+  POLICIES: string;
+  TRUSTED_APPS: string;
+  TRUSTED_DEVICES: string;
+  EVENT_FILTERS: string;
+  BLOCKLIST: string;
+  HOST_ISOLATION_EXCEPTIONS: string;
+  RESPONSE_ACTIONS_HISTORY: string;
+}
+
+export const getNavigationPages = (selectors: NavigationSelectors): PageEntry[] => [
   {
     name: 'Endpoints',
     privilegePrefix: 'endpoint_list_',
