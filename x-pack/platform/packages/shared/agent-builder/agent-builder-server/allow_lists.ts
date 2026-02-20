@@ -41,6 +41,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.endpoint_status`,
+  `${internalNamespaces.security}.endpoint_response_actions`,
+  `${internalNamespaces.security}.endpoint_action_history`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
