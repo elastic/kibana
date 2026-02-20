@@ -290,7 +290,7 @@ export class StreamsClient {
     );
 
     await Promise.all(
-      definitions.map(({ definition, request }, i) => this.syncAssets(definition, request))
+      definitions.map(({ definition, request }) => this.syncAssets(definition, request))
     );
 
     return {
