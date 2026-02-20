@@ -69,6 +69,8 @@ exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
 exports[`Error DURATION 1`] = `undefined`;
 
+exports[`Error ERROR_CODE 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -477,6 +479,8 @@ exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
 exports[`Span DURATION 1`] = `undefined`;
 
+exports[`Span ERROR_CODE 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -871,6 +875,8 @@ exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
 exports[`Transaction DURATION 1`] = `undefined`;
+
+exports[`Transaction ERROR_CODE 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
