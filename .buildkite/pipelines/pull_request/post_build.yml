@@ -5,4 +5,4 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     agents:
-      machineType: n2-standard-2
+      machineType: n2d-standard-2
