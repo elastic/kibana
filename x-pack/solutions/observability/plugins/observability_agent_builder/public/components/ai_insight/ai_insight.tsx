@@ -118,12 +118,18 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   );
 
   useEffect(() => {
-    if (error) {
-      reportTelemetryEvent(analytics, {
-        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed,
-        payload: { insightType, errorMessage: error, connector: connectorInfo },
-      });
-    }
+    if (!error) return;
+
+    const payload: InsightFailedEvent = {
+      insightType,
+      errorMessage: error,
+      ...(connectorInfo ? { connector: connectorInfo } : {}),
+    };
+
+    reportTelemetryEvent(analytics, {
+      type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed,
+      payload,
+    });
   }, [analytics, connectorInfo, error, insightType]);
 
   if (
