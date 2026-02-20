@@ -109,7 +109,7 @@ describe('WorkflowExecutionPanel', () => {
   const renderComponent = (props = {}, store?: any) => {
     mockStore = store;
     return render(
-      <TestWrapper store={store}>
+      <TestWrapper store={mockStore}>
         <WorkflowExecutionPanel {...defaultProps} {...props} />
       </TestWrapper>
     );
