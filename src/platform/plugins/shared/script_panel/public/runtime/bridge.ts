@@ -57,6 +57,8 @@ export interface BridgeOptions {
   onLog?: (entry: LogEntry) => void;
   /** Callback when error occurs */
   onError?: (error: Error) => void;
+  /** Scripts injected before the Kibana runtime and user code (e.g. Preact/htm). */
+  preludeScripts?: string[];
 }
 
 /**
@@ -72,6 +74,7 @@ export class ScriptPanelBridge {
   private handlers: CapabilityHandlers;
   private onStateChange?: (state: RuntimeState) => void;
   private onError?: (error: Error) => void;
+  private preludeScripts?: string[];
   private state: RuntimeState = 'idle';
   private messageHandler: ((event: MessageEvent) => void) | null = null;
   private scriptTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -87,6 +90,7 @@ export class ScriptPanelBridge {
     this.handlers = options.handlers;
     this.onStateChange = options.onStateChange;
     this.onError = options.onError;
+    this.preludeScripts = options.preludeScripts;
   }
 
   /**
@@ -147,7 +151,12 @@ export class ScriptPanelBridge {
     if (this.destroyed || !this.iframe) return;
 
     // Inject the actual script content (nonce allows inline scripts under parent CSP)
-    this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config, this.cspNonce);
+    this.iframe.srcdoc = generateIframeSrcDoc({
+      userCode: this.scriptCode,
+      config: this.config,
+      nonce: this.cspNonce,
+      preludeScripts: this.preludeScripts,
+    });
 
     // Set up script timeout
     this.scriptTimeout = setTimeout(() => {
@@ -164,6 +173,7 @@ export class ScriptPanelBridge {
       ]);
 
       if (!this.destroyed) {
+        this.clearScriptTimeout();
         this.setState('running');
       }
     } catch (error) {
@@ -183,12 +193,7 @@ export class ScriptPanelBridge {
       this.scriptCode = scriptCode;
     }
 
-    // Clear existing timeout
-    if (this.scriptTimeout) {
-      clearTimeout(this.scriptTimeout);
-      this.scriptTimeout = null;
-    }
-
+    this.clearScriptTimeout();
     this.setState('loading');
 
     // Create new ready promise
@@ -197,7 +202,12 @@ export class ScriptPanelBridge {
     });
 
     if (this.iframe) {
-      this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config, this.cspNonce);
+      this.iframe.srcdoc = generateIframeSrcDoc({
+        userCode: this.scriptCode,
+        config: this.config,
+        nonce: this.cspNonce,
+        preludeScripts: this.preludeScripts,
+      });
     }
 
     // Set up new script timeout
@@ -215,6 +225,7 @@ export class ScriptPanelBridge {
       ]);
 
       if (!this.destroyed) {
+        this.clearScriptTimeout();
         this.setState('running');
       }
     } catch (error) {
@@ -239,6 +250,13 @@ export class ScriptPanelBridge {
     this.iframe.contentWindow.postMessage(message, '*');
   }
 
+  private clearScriptTimeout(): void {
+    if (this.scriptTimeout) {
+      clearTimeout(this.scriptTimeout);
+      this.scriptTimeout = null;
+    }
+  }
+
   /**
    * Destroy the bridge and clean up resources.
    */
@@ -246,10 +264,7 @@ export class ScriptPanelBridge {
     if (this.destroyed) return;
     this.destroyed = true;
 
-    if (this.scriptTimeout) {
-      clearTimeout(this.scriptTimeout);
-      this.scriptTimeout = null;
-    }
+    this.clearScriptTimeout();
 
     if (this.messageHandler) {
       window.removeEventListener('message', this.messageHandler);

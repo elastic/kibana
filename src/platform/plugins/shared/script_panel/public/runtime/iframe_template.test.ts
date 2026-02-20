@@ -299,6 +299,59 @@ describe('Iframe Template Generation', () => {
     });
   });
 
+  describe('prelude scripts', () => {
+    it('should inject prelude scripts before the runtime and user code', () => {
+      const srcDoc = generateIframeSrcDoc({
+        userCode: 'console.log("test");',
+        config: DEFAULT_SANDBOX_CONFIG,
+        preludeScripts: ['var preact = {};', 'var htm = function() {};'],
+      });
+
+      expect(srcDoc).toContain('var preact = {};');
+      expect(srcDoc).toContain('var htm = function() {};');
+
+      const preactIdx = srcDoc.indexOf('var preact = {};');
+      const runtimeIdx = srcDoc.indexOf('KIBANA SCRIPT PANEL RUNTIME');
+      const userCodeIdx = srcDoc.indexOf('console.log("test");');
+      expect(preactIdx).toBeLessThan(runtimeIdx);
+      expect(runtimeIdx).toBeLessThan(userCodeIdx);
+    });
+
+    it('should produce the same output without prelude scripts (backward compat)', () => {
+      const withoutPrelude = generateIframeSrcDoc('// code', DEFAULT_SANDBOX_CONFIG);
+      const withEmptyPrelude = generateIframeSrcDoc({
+        userCode: '// code',
+        config: DEFAULT_SANDBOX_CONFIG,
+        preludeScripts: [],
+      });
+
+      expect(withoutPrelude).toEqual(withEmptyPrelude);
+    });
+
+    it('should escape </script> in prelude scripts', () => {
+      const srcDoc = generateIframeSrcDoc({
+        userCode: '// code',
+        config: DEFAULT_SANDBOX_CONFIG,
+        preludeScripts: ['var x = "</script>";'],
+      });
+
+      expect(srcDoc).not.toContain('</script>";');
+      expect(srcDoc).toContain('<\\/script>');
+    });
+
+    it('should support the options object signature with nonce', () => {
+      const srcDoc = generateIframeSrcDoc({
+        userCode: '// code',
+        config: DEFAULT_SANDBOX_CONFIG,
+        nonce: 'test-nonce-123',
+        preludeScripts: ['var lib = 1;'],
+      });
+
+      expect(srcDoc).toContain('nonce="test-nonce-123"');
+      expect(srcDoc).toContain('var lib = 1;');
+    });
+  });
+
   describe('security considerations', () => {
     it('should not include allow-same-origin in any template', () => {
       const mainDoc = generateIframeSrcDoc('// code', DEFAULT_SANDBOX_CONFIG);

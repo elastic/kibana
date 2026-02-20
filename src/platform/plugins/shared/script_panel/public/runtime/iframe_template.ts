@@ -176,19 +176,80 @@ const generateRuntimeCode = (config: SandboxConfig): string => `
     })
   });
 
+  // Intercept console methods so output is forwarded to the host
+  ['log', 'warn', 'error'].forEach(function(level) {
+    var original = console[level];
+    console[level] = function() {
+      var args = Array.prototype.slice.call(arguments);
+      var rpcLevel = level === 'log' ? 'info' : level;
+      try {
+        sendRequest('log.' + rpcLevel, { args: args });
+      } catch (_) { /* ignore send failures */ }
+      return original.apply(console, arguments);
+    };
+  });
+
+  // Forward unhandled errors to the host
+  window.addEventListener('error', function(ev) {
+    try {
+      sendRequest('log.error', { args: ['Uncaught ' + (ev.error ? (ev.error.stack || ev.message) : ev.message)] });
+    } catch (_) { /* ignore */ }
+  });
+
+  window.addEventListener('unhandledrejection', function(ev) {
+    var reason = ev.reason;
+    var msg = reason instanceof Error ? (reason.stack || reason.message) : String(reason);
+    try {
+      sendRequest('log.error', { args: ['Unhandled promise rejection: ' + msg] });
+    } catch (_) { /* ignore */ }
+  });
+
   // Notify host that runtime is ready
   parent.postMessage({ type: 'event', event: 'ready' }, '*');
 })();
 `;
 
+interface IframeSrcDocOptions {
+  userCode: string;
+  config: SandboxConfig;
+  nonce?: string;
+  /** Scripts injected before the Kibana runtime and user code (e.g. Preact/htm). */
+  preludeScripts?: string[];
+}
+
 /**
  * Generates the complete iframe srcDoc HTML with CSP and runtime.
  */
-export const generateIframeSrcDoc = (userCode: string, config: SandboxConfig, nonce?: string): string => {
-  const nonceAttr = nonce ? ` nonce="${nonce}"` : '';
-  // Escape </script> in user code to prevent the HTML parser from
-  // interpreting it as the end of the script element
-  const escapedUserCode = userCode.replace(/<\/script>/gi, '<\\/script>');
+export const generateIframeSrcDoc = (
+  userCodeOrOptions: string | IframeSrcDocOptions,
+  config?: SandboxConfig,
+  nonce?: string
+): string => {
+  let userCode: string;
+  let resolvedConfig: SandboxConfig;
+  let resolvedNonce: string | undefined;
+  let preludeScripts: string[] | undefined;
+
+  if (typeof userCodeOrOptions === 'string') {
+    userCode = userCodeOrOptions;
+    resolvedConfig = config!;
+    resolvedNonce = nonce;
+  } else {
+    userCode = userCodeOrOptions.userCode;
+    resolvedConfig = userCodeOrOptions.config;
+    resolvedNonce = userCodeOrOptions.nonce;
+    preludeScripts = userCodeOrOptions.preludeScripts;
+  }
+
+  const nonceAttr = resolvedNonce ? ` nonce="${resolvedNonce}"` : '';
+
+  const escapeScript = (src: string) => src.replace(/<\/script>/gi, '<\\/script>');
+
+  const preludeBlocks = (preludeScripts ?? [])
+    .map((src) => `  <script${nonceAttr}>\n    ${escapeScript(src)}\n  </script>`)
+    .join('\n');
+
+  const escapedUserCode = escapeScript(userCode);
 
   return `<!DOCTYPE html>
 <html>
@@ -243,8 +304,9 @@ export const generateIframeSrcDoc = (userCode: string, config: SandboxConfig, no
 </head>
 <body>
   <div id="root"></div>
+${preludeBlocks ? preludeBlocks + '\n' : ''}\
   <script${nonceAttr}>
-    ${generateRuntimeCode(config)}
+    ${generateRuntimeCode(resolvedConfig)}
   </script>
   <script${nonceAttr}>
     // User code execution with error handling

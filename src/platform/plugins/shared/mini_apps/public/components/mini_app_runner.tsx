@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,6 +17,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,25 +37,33 @@ import type { MiniApp } from '../../common';
 import { useMiniAppsContext } from '../context';
 import { useMiniAppBrowserTools, type MiniAppScreenState } from '../hooks/use_browser_tools';
 import { useAgentBuilder } from '../hooks/use_agent_builder';
+import { PREACT_PRELUDE_SCRIPTS } from '../runtime/preact_libs';
+
+const sectionContentCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: 0,
+  overflow: 'hidden',
+});
 
 const iframeContainerCss = css({
   width: '100%',
-  height: '100%',
+  flex: '1 1 0',
+  minHeight: 0,
   position: 'relative',
   overflow: 'hidden',
-  flex: 1,
-  minHeight: '400px',
 });
 
 const loadingContainerCss = css({
   display: 'flex',
-  flex: 1,
+  flex: '1 1 0',
   alignItems: 'center',
   justifyContent: 'center',
-  minHeight: '400px',
 });
 
 const MAX_TRACKED_LOGS = 50;
+const MAX_UNDO_STACK = 20;
 
 /**
  * MiniAppRunner - Executes mini-app code in a sandboxed iframe.
@@ -142,6 +152,9 @@ export const MiniAppRunner: React.FC = () => {
     screenStateRef.current.runtimeError = err.message;
   }, []);
 
+  // Undo stack for agent code changes
+  const [agentUndoStack, setAgentUndoStack] = useState<string[]>([]);
+
   const updateCode = useCallback(
     async (newCode: string) => {
       if (!miniApp) return;
@@ -163,6 +176,28 @@ export const MiniAppRunner: React.FC = () => {
     [miniApp, apiClient, coreStart.notifications.toasts]
   );
 
+  const handleAgentUpdateCode = useCallback(
+    (code: string) => {
+      if (miniApp?.script_code) {
+        setAgentUndoStack((stack) => {
+          const next = [...stack, miniApp.script_code];
+          return next.length > MAX_UNDO_STACK ? next.slice(-MAX_UNDO_STACK) : next;
+        });
+      }
+      updateCode(code);
+    },
+    [miniApp?.script_code, updateCode]
+  );
+
+  const handleUndoAgentChange = useCallback(() => {
+    setAgentUndoStack((stack) => {
+      if (stack.length === 0) return stack;
+      const previous = stack[stack.length - 1];
+      updateCode(previous);
+      return stack.slice(0, -1);
+    });
+  }, [updateCode]);
+
   // Register browser tools for AI agent editing (window registry for backwards compat)
   useMiniAppBrowserTools({
     miniApp,
@@ -177,9 +212,7 @@ export const MiniAppRunner: React.FC = () => {
     scriptCode: miniApp?.script_code ?? '',
     runtimeState,
     runtimeError: runtimeError?.message ?? null,
-    onUpdateCode: (code: string) => {
-      updateCode(code);
-    },
+    onUpdateCode: handleAgentUpdateCode,
   });
 
   // Effect to manage bridge lifecycle
@@ -227,6 +260,7 @@ export const MiniAppRunner: React.FC = () => {
       onStateChange: handleStateChange,
       onLog: handleLog,
       onError: handleError,
+      preludeScripts: PREACT_PRELUDE_SCRIPTS,
     });
 
     bridgeRef.current = bridge;
@@ -303,7 +337,35 @@ export const MiniAppRunner: React.FC = () => {
       <EuiPageTemplate.Header
         pageTitle={miniApp.name}
         rightSideItems={[
-          <EuiFlexGroup key="actions" gutterSize="s" responsive={false}>
+          <EuiFlexGroup key="actions" gutterSize="s" responsive={false} alignItems="center">
+            {agentUndoStack.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('miniApps.runner.undoAgentTooltip', {
+                    defaultMessage: 'Undo the last AI agent code change',
+                  })}
+                >
+                  <EuiButton
+                    onClick={handleUndoAgentChange}
+                    iconType="editorUndo"
+                    color="warning"
+                    size="s"
+                    data-test-subj="miniAppUndoAgentButton"
+                  >
+                    <FormattedMessage
+                      id="miniApps.runner.undoAgentButton"
+                      defaultMessage="Undo AI change"
+                    />
+                    <EuiBadge
+                      color="warning"
+                      css={css({ marginLeft: 4 })}
+                    >
+                      {agentUndoStack.length}
+                    </EuiBadge>
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={handleBack} iconType="arrowLeft">
                 <FormattedMessage id="miniApps.runner.backButton" defaultMessage="Back to list" />
@@ -326,7 +388,7 @@ export const MiniAppRunner: React.FC = () => {
           </EuiFlexGroup>,
         ]}
       />
-      <EuiPageTemplate.Section grow paddingSize="none">
+      <EuiPageTemplate.Section grow paddingSize="none" contentProps={{ css: sectionContentCss }}>
         {runtimeError && (
           <EuiCallOut
             title={i18n.translate('miniApps.runner.runtimeError', {

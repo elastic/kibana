@@ -104,7 +104,7 @@ export const DEFAULT_SANDBOX_CONFIG: SandboxConfig = {
   queryTimeout: 30000,
   maxRows: 10000,
   maxQueryLength: 10240,
-  maxConcurrentQueries: 1,
+  maxConcurrentQueries: 5,
   scriptTimeout: 60000,
 };
 

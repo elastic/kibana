@@ -20,10 +20,12 @@ const UPDATE_CODE_DESCRIPTION = `Replace the mini app's JavaScript code. The app
 
 RULES:
 - Provide the COMPLETE code. This replaces everything.
-- Plain vanilla JavaScript only. NO React, NO JSX, NO imports.
+- NO imports, NO require, NO module system, NO npm packages. Everything is a global in the iframe.
+- The ONLY globals are: preact, preact.hooks, html, Kibana. There is NO "preactHtm", NO "React", NO "ReactDOM".
+- Always start with: const { render } = preact; const { useState, useEffect, useRef, useMemo, useCallback } = preact.hooks;
 - Wrap in an async IIFE: (async () => { ... })();
 - Data: Kibana.esql.query({ query }) for Elasticsearch data. fetch/XHR is blocked.
-- Rendering: Kibana.render.setContent(html) sets initial HTML, then use full DOM APIs (getElementById, addEventListener, createElement, Canvas 2D/WebGL, SVG, requestAnimationFrame, setInterval) for interactivity and animation.
+- Rendering: Use Preact's render() with htm tagged template: render(html\`<\${App} />\`, document.getElementById('root'))
 - CSS: inline <style> tags only.`;
 
 const APPEND_CODE_DESCRIPTION =
@@ -61,9 +63,12 @@ export const buildScreenContextDescription = ({
 
   parts.push(`ENVIRONMENT:`);
   parts.push(
-    `- Mini apps run as plain vanilla JavaScript inside a sandboxed iframe with full DOM access.`
+    `- Mini apps run as JavaScript inside a sandboxed iframe with full DOM access.`
   );
-  parts.push(`- There is NO React, NO JSX, NO npm packages, NO imports, NO module system.`);
+  parts.push(`- NO imports, NO module system, NO npm packages. Only use the globals provided.`);
+  parts.push(
+    `- Preact (lightweight React alternative) + htm (JSX-like tagged templates) are pre-loaded as globals.`
+  );
   parts.push(
     `- The iframe has no network access (fetch/XHR are blocked). All external data comes from Kibana.esql.query().`
   );
@@ -93,21 +98,77 @@ export const buildScreenContextDescription = ({
   parts.push(`Kibana.log.info/warn/error(...args)`);
   parts.push(``);
 
-  parts.push(`DOM ACCESS & REACTIVITY:`);
+  parts.push(`PREACT + HTM (RECOMMENDED for component-based UIs):`);
+  parts.push(``);
+  parts.push(`The iframe has Preact and htm pre-loaded as globals. Use them for React-like component UIs.`);
+  parts.push(``);
+  parts.push(`IMPORTANT: The ONLY globals available are: window.preact, window.html`);
+  parts.push(`There is NO "preactHtm", NO "React", NO "ReactDOM". Do NOT try to import or require anything.`);
+  parts.push(``);
+  parts.push(`Available globals:`);
+  parts.push(`  preact             - the Preact library object`);
+  parts.push(`  preact.h           - createElement function`);
+  parts.push(`  preact.render      - render(vnode, container) to mount a component tree`);
+  parts.push(`  preact.Component   - base class for class components (prefer function components)`);
+  parts.push(`  preact.Fragment    - fragment component`);
   parts.push(
-    `The code runs inside a real iframe with full DOM access. After the script loads, the iframe stays alive.`
+    `  preact.hooks.*     - all hooks: useState, useEffect, useRef, useMemo, useCallback, useReducer, useContext`
   );
-  parts.push(`You are NOT limited to static HTML. You can build fully interactive UIs:`);
+  parts.push(
+    `  html               - htm tagged template literal bound to preact.h. Use like JSX: html\`<div>...</div>\``
+  );
+  parts.push(``);
+  parts.push(`CORRECT setup (copy this exactly):`);
+  parts.push(`  const { render } = preact;`);
+  parts.push(`  const { useState, useEffect, useRef, useMemo, useCallback } = preact.hooks;`);
   parts.push(``);
   parts.push(
-    `- document.getElementById('root') is the root container. You can use setContent() for initial HTML,`
+    `  // Components are plain functions. Use html\`...\` instead of JSX. Interpolate with \${}.`
   );
+  parts.push(`  function App() {`);
+  parts.push(`    const [count, setCount] = useState(0);`);
   parts.push(
-    `  then querySelector/getElementById to bind event listeners. Or skip setContent entirely and build`
+    `    return html\`<button onClick=\${() => setCount(c => c + 1)}>Clicked \${count}</button>\`;`
   );
-  parts.push(`  the DOM imperatively with createElement/appendChild.`);
+  parts.push(`  }`);
+  parts.push(`  render(html\`<\${App} />\`, document.getElementById('root'));`);
+  parts.push(``);
+  parts.push(`  // Async data fetching with useEffect:`);
+  parts.push(`  function DataView() {`);
+  parts.push(`    const [rows, setRows] = useState([]);`);
+  parts.push(`    useEffect(() => {`);
   parts.push(
-    `- All standard DOM events work: click, input, change, mousemove, keydown, submit, etc.`
+    `      Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' }).then(r => setRows(r.rows));`
+  );
+  parts.push(`    }, []);`);
+  parts.push(
+    `    return html\`<ul>\${rows.map(r => html\`<li>\${r.message}</li>\`)}</ul>\`;`
+  );
+  parts.push(`  }`);
+  parts.push(``);
+  parts.push(`  // Children and composition work like React:`);
+  parts.push(`  function Card({ title, children }) {`);
+  parts.push(
+    `    return html\`<div style="border:1px solid #ddd;padding:16px;border-radius:8px"><h3>\${title}</h3>\${children}</div>\`;`
+  );
+  parts.push(`  }`);
+  parts.push(``);
+  parts.push(`IMPORTANT htm syntax notes:`);
+  parts.push(`- Self-closing tags: html\`<\${MyComponent} prop="val" />\``);
+  parts.push(
+    `- Event handlers: use on-prefixed lowercase attrs: onClick, onInput, onChange, onSubmit`
+  );
+  parts.push(`- Spread props: html\`<div ...\${props} />\``);
+  parts.push(`- Lists: html\`<ul>\${items.map(i => html\`<li key=\${i.id}>\${i.name}</li>\`)}</ul>\``);
+  parts.push(
+    `- Conditional rendering: html\`\${show ? html\`<\${Modal} />\` : null}\``
+  );
+  parts.push(`- Style objects: html\`<div style=\${{ color: 'red', fontSize: '16px' }}>text</div>\``);
+  parts.push(``);
+
+  parts.push(`DOM ACCESS (also available alongside Preact):`);
+  parts.push(
+    `The code runs inside a real iframe with full DOM access. After the script loads, the iframe stays alive.`
   );
   parts.push(
     `- Canvas 2D and WebGL: create a <canvas>, get the context, draw freely. Use requestAnimationFrame for animation loops.`
@@ -116,47 +177,71 @@ export const buildScreenContextDescription = ({
   parts.push(
     `- setTimeout / setInterval / requestAnimationFrame all work for timers and animation.`
   );
-  parts.push(`- Forms, inputs, selects, textareas all work with normal event handling.`);
   parts.push(
-    `- You can create elements dynamically, remove them, toggle classes, update textContent or innerHTML on any element.`
-  );
-  parts.push(
-    `- For state management, just use plain variables in your closure. The async IIFE scope persists for the app's lifetime.`
+    `- You can also use plain DOM manipulation with getElementById, createElement, etc. if preferred.`
   );
   parts.push(``);
 
-  parts.push(`COMMON PATTERNS:`);
+  parts.push(`COMMON PATTERNS (prefer Preact + htm):`);
   parts.push(``);
-  parts.push(`1. Data dashboard (query + render):`);
+  parts.push(`1. Data dashboard (query + render with components):`);
   parts.push(`(async () => {`);
+  parts.push(`  const { render } = preact;`);
+  parts.push(`  const { useState, useEffect } = preact.hooks;`);
+  parts.push(``);
+  parts.push(`  function DataTable() {`);
+  parts.push(`    const [data, setData] = useState({ columns: [], rows: [] });`);
+  parts.push(`    const [loading, setLoading] = useState(true);`);
+  parts.push(`    useEffect(() => {`);
   parts.push(
-    `  const { rows, columns } = await Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' });`
+    `      Kibana.esql.query({ query: 'FROM logs-* | LIMIT 100' })`
   );
-  parts.push(`  Kibana.render.setContent('<table id="tbl"></table>');`);
-  parts.push(`  const tbl = document.getElementById('tbl');`);
-  parts.push(`  // ... build rows with createElement, appendChild`);
+  parts.push(`        .then(r => { setData(r); setLoading(false); })`);
+  parts.push(`        .catch(e => { Kibana.log.error(e.message); setLoading(false); });`);
+  parts.push(`    }, []);`);
+  parts.push(`    if (loading) return html\`<p>Loading...</p>\`;`);
+  parts.push(`    return html\``);
+  parts.push(`      <table>`);
+  parts.push(
+    `        <thead><tr>\${data.columns.map(c => html\`<th>\${c.name}</th>\`)}</tr></thead>`
+  );
+  parts.push(
+    `        <tbody>\${data.rows.map(r => html\`<tr>\${data.columns.map(c => html\`<td>\${r[c.name]}</td>\`)}</tr>\`)}</tbody>`
+  );
+  parts.push(`      </table>\`;`);
+  parts.push(`  }`);
+  parts.push(`  render(html\`<\${DataTable} />\`, document.getElementById('root'));`);
   parts.push(`})();`);
   parts.push(``);
-  parts.push(`2. Interactive form (user input triggers queries):`);
+  parts.push(`2. Interactive search form:`);
   parts.push(`(async () => {`);
+  parts.push(`  const { render } = preact;`);
+  parts.push(`  const { useState, useCallback } = preact.hooks;`);
+  parts.push(``);
+  parts.push(`  function SearchApp() {`);
+  parts.push(`    const [query, setQuery] = useState('');`);
+  parts.push(`    const [results, setResults] = useState([]);`);
+  parts.push(`    const search = useCallback(async () => {`);
+  parts.push(`      const { rows } = await Kibana.esql.query({`);
   parts.push(
-    `  Kibana.render.setContent('<input id="q" placeholder="Search..." /><div id="results"></div>');`
+    `        query: \\\`FROM my-index | WHERE name LIKE "*\\\${query}*" | LIMIT 20\\\``
   );
-  parts.push(`  const input = document.getElementById('q');`);
-  parts.push(`  const results = document.getElementById('results');`);
-  parts.push(`  input.addEventListener('input', async () => {`);
-  parts.push(`    const { rows } = await Kibana.esql.query({`);
+  parts.push(`      });`);
+  parts.push(`      setResults(rows);`);
+  parts.push(`    }, [query]);`);
+  parts.push(`    return html\``);
   parts.push(
-    `      query: \\\`FROM my-index | WHERE name LIKE "*\\\${input.value}*" | LIMIT 20\\\``
+    `      <div><input value=\${query} onInput=\${e => setQuery(e.target.value)} placeholder="Search..." />`
   );
-  parts.push(`    });`);
+  parts.push(`      <button onClick=\${search}>Search</button></div>`);
   parts.push(
-    `    results.innerHTML = rows.map(r => '<div>' + r.name + '</div>').join('');`
+    `      <ul>\${results.map(r => html\`<li>\${r.name}</li>\`)}</ul>\`;`
   );
-  parts.push(`  });`);
+  parts.push(`  }`);
+  parts.push(`  render(html\`<\${SearchApp} />\`, document.getElementById('root'));`);
   parts.push(`})();`);
   parts.push(``);
-  parts.push(`3. Canvas visualization:`);
+  parts.push(`3. Canvas visualization (DOM approach is fine here):`);
   parts.push(`(async () => {`);
   parts.push(`  const { width, height } = await Kibana.panel.getSize();`);
   parts.push(`  Kibana.render.setContent('<canvas id="c"></canvas>');`);
@@ -166,15 +251,25 @@ export const buildScreenContextDescription = ({
   parts.push(`  // draw with ctx.fillRect, ctx.arc, ctx.lineTo, etc.`);
   parts.push(`})();`);
   parts.push(``);
-  parts.push(`4. Live-updating (periodic refresh):`);
+  parts.push(`4. Live-updating dashboard:`);
   parts.push(`(async () => {`);
-  parts.push(`  async function refresh() {`);
-  parts.push(`    const { rows } = await Kibana.esql.query({ query: '...' });`);
-  parts.push(`    document.getElementById('count').textContent = rows.length;`);
+  parts.push(`  const { render } = preact;`);
+  parts.push(`  const { useState, useEffect } = preact.hooks;`);
+  parts.push(``);
+  parts.push(`  function LiveCount() {`);
+  parts.push(`    const [count, setCount] = useState('-');`);
+  parts.push(`    useEffect(() => {`);
+  parts.push(`      const refresh = async () => {`);
+  parts.push(`        const { rowCount } = await Kibana.esql.query({ query: 'FROM logs-* | STATS count=COUNT(*)' });`);
+  parts.push(`        setCount(rowCount);`);
+  parts.push(`      };`);
+  parts.push(`      refresh();`);
+  parts.push(`      const id = setInterval(refresh, 5000);`);
+  parts.push(`      return () => clearInterval(id);`);
+  parts.push(`    }, []);`);
+  parts.push(`    return html\`<div style="padding:20px;font-size:24px">Count: \${count}</div>\`;`);
   parts.push(`  }`);
-  parts.push(`  Kibana.render.setContent('<div>Count: <span id="count">-</span></div>');`);
-  parts.push(`  refresh();`);
-  parts.push(`  setInterval(refresh, 5000);`);
+  parts.push(`  render(html\`<\${LiveCount} />\`, document.getElementById('root'));`);
   parts.push(`})();`);
   parts.push(``);
 

@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,9 +22,9 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiResizableContainer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,7 @@ import {
 import type { MiniApp } from '../../common';
 import { useMiniAppsContext } from '../context';
 import { useAgentBuilder } from '../hooks/use_agent_builder';
+import { PREACT_PRELUDE_SCRIPTS } from '../runtime/preact_libs';
 
 const DEFAULT_SCRIPT = `// Welcome to Mini Apps!
 // Use Kibana.render.setContent() to display content
@@ -61,33 +63,79 @@ async function main() {
 main();
 `;
 
-const previewContainerCss = css({
-  width: '100%',
+const sectionContentCss = css({
+  display: 'flex',
+  flexDirection: 'column',
   height: '100%',
+  minHeight: 0,
+  overflow: 'hidden',
+});
+
+const resizableContainerCss = css({
+  flex: '1 1 0',
+  minHeight: 0,
+});
+
+const previewWrapperCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+});
+
+const previewToolbarCss = css({
+  display: 'flex',
+  alignItems: 'center',
+  flexGrow: 0,
+  gap: 8,
+  padding: '4px 8px',
+  borderBottom: '1px solid #d3dae6',
+});
+
+const iframeContainerCss = css({
+  flex: '1 1 0',
+  minHeight: 0,
   position: 'relative',
   overflow: 'hidden',
-  minHeight: 0,
-  flex: 1,
 });
 
-const previewPanelCss = css({
+const consoleToolbarCss = css({
   display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  minHeight: 0,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  flexShrink: 0,
+  padding: '2px 8px',
+  borderBottom: '1px solid #d3dae6',
 });
 
-const editorPanelCss = css({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
+const consoleListCss = css({
+  flex: '1 1 0',
   minHeight: 0,
+  overflowY: 'auto',
+  fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+  fontSize: 12,
+  lineHeight: 1.4,
+  padding: 0,
+  margin: 0,
 });
+
+const LOG_LEVEL_COLORS: Record<LogEntry['level'], string> = {
+  info: '#343741',
+  warn: '#b95d00',
+  error: '#bd271e',
+};
+
+const LOG_LEVEL_BG: Record<LogEntry['level'], string> = {
+  info: 'transparent',
+  warn: '#fff9e8',
+  error: '#fff9f8',
+};
 
 interface EditorFormState {
   name: string;
   script_code: string;
 }
+
+const MAX_UNDO_STACK = 20;
 
 export const MiniAppEditor: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -105,17 +153,36 @@ export const MiniAppEditor: React.FC = () => {
   // Preview state
   const [previewState, setPreviewState] = useState<RuntimeState>('idle');
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewLogs, setPreviewLogs] = useState<LogEntry[]>([]);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<ScriptPanelBridge | null>(null);
   const panelSizeRef = useRef<PanelSize>({ width: 0, height: 0 });
+  const consoleEndRef = useRef<HTMLDivElement>(null);
 
-  // When the agent updates code, update the form and re-run preview
-  const handleAgentUpdateCode = useCallback(
-    (code: string) => {
-      setForm((prev) => ({ ...prev, script_code: code }));
-    },
-    []
-  );
+  // Undo stack for agent code changes
+  const [agentUndoStack, setAgentUndoStack] = useState<string[]>([]);
+
+  const pendingAgentRunRef = useRef(false);
+
+  const handleAgentUpdateCode = useCallback((code: string) => {
+    setForm((prev) => {
+      setAgentUndoStack((stack) => {
+        const next = [...stack, prev.script_code];
+        return next.length > MAX_UNDO_STACK ? next.slice(-MAX_UNDO_STACK) : next;
+      });
+      return { ...prev, script_code: code };
+    });
+    pendingAgentRunRef.current = true;
+  }, []);
+
+  const handleUndoAgentChange = useCallback(() => {
+    setAgentUndoStack((stack) => {
+      if (stack.length === 0) return stack;
+      const previous = stack[stack.length - 1];
+      setForm((prev) => ({ ...prev, script_code: previous }));
+      return stack.slice(0, -1);
+    });
+  }, []);
 
   // Wire up agent builder with browser tools and screen context
   useAgentBuilder({
@@ -249,6 +316,7 @@ export const MiniAppEditor: React.FC = () => {
 
     destroyBridge();
     setPreviewError(null);
+    setPreviewLogs([]);
     setPreviewState('loading');
 
     const esqlExecutor = createEsqlExecutor({
@@ -263,7 +331,7 @@ export const MiniAppEditor: React.FC = () => {
       getPanelSize,
       setContent: () => {},
       setError: (message: string) => setPreviewError(message),
-      onLog: (_entry: LogEntry) => {},
+      onLog: (entry: LogEntry) => setPreviewLogs((prev) => [...prev, entry]),
     });
 
     const bridge = createScriptPanelBridge({
@@ -272,11 +340,11 @@ export const MiniAppEditor: React.FC = () => {
       cspNonce: getKibanaCspNonce(),
       handlers: capabilities.handlers,
       onStateChange: (state: RuntimeState) => setPreviewState(state),
-      onLog: (_entry: LogEntry) => {},
       onError: (err: Error) => {
         setPreviewError(err.message);
         setPreviewState('error');
       },
+      preludeScripts: PREACT_PRELUDE_SCRIPTS,
     });
 
     bridgeRef.current = bridge;
@@ -285,6 +353,14 @@ export const MiniAppEditor: React.FC = () => {
       setPreviewState('error');
     });
   }, [form.script_code, depsStart.data, depsStart.expressions, getPanelSize, destroyBridge]);
+
+  // Auto-run preview after agent code updates
+  useEffect(() => {
+    if (pendingAgentRunRef.current) {
+      pendingAgentRunRef.current = false;
+      runPreview();
+    }
+  }, [form.script_code, runPreview]);
 
   // Resize observer for the preview container
   useEffect(() => {
@@ -316,6 +392,13 @@ export const MiniAppEditor: React.FC = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [runPreview]);
 
+  // Auto-scroll console to bottom when new logs arrive
+  useEffect(() => {
+    consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [previewLogs]);
+
+  const clearLogs = useCallback(() => setPreviewLogs([]), []);
+
   if (loading) {
     return (
       <EuiPageTemplate.EmptyPrompt>
@@ -333,7 +416,32 @@ export const MiniAppEditor: React.FC = () => {
       <EuiPageTemplate.Header
         pageTitle={pageTitle}
         rightSideItems={[
-          <EuiFlexGroup key="actions" gutterSize="s" responsive={false}>
+          <EuiFlexGroup key="actions" gutterSize="s" responsive={false} alignItems="center">
+            {agentUndoStack.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('miniApps.editor.undoAgentTooltip', {
+                    defaultMessage: 'Undo the last AI agent code change',
+                  })}
+                >
+                  <EuiButton
+                    onClick={handleUndoAgentChange}
+                    iconType="editorUndo"
+                    color="warning"
+                    size="s"
+                    data-test-subj="miniAppUndoAgentButton"
+                  >
+                    <FormattedMessage
+                      id="miniApps.editor.undoAgentButton"
+                      defaultMessage="Undo AI change"
+                    />
+                    <EuiBadge color="warning" css={css({ marginLeft: 4 })}>
+                      {agentUndoStack.length}
+                    </EuiBadge>
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={handleCancel} disabled={saving}>
                 <FormattedMessage id="miniApps.editor.cancelButton" defaultMessage="Cancel" />
@@ -350,12 +458,8 @@ export const MiniAppEditor: React.FC = () => {
           </EuiFlexGroup>,
         ]}
       />
-      <EuiPageTemplate.Section
-        grow
-        paddingSize="s"
-        css={css({ display: 'flex', flexDirection: 'column', minHeight: 0 })}
-      >
-        <EuiForm component="form">
+      <EuiPageTemplate.Section grow paddingSize="s" contentProps={{ css: sectionContentCss }}>
+        <EuiForm component="form" css={css({ flexShrink: 0 })}>
           <EuiFormRow
             label={i18n.translate('miniApps.editor.nameLabel', { defaultMessage: 'Name' })}
             error={errors.name}
@@ -375,25 +479,18 @@ export const MiniAppEditor: React.FC = () => {
           </EuiFormRow>
         </EuiForm>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
 
-        <EuiResizableContainer
-          direction="horizontal"
-          css={css({ flex: 1, minHeight: '500px' })}
-        >
+        <EuiResizableContainer direction="horizontal" css={resizableContainerCss}>
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
                 initialSize={50}
-                minSize="300px"
+                minSize="250px"
                 paddingSize="none"
-                css={editorPanelCss}
+                scrollable={false}
               >
-                <EuiPanel
-                  paddingSize="none"
-                  css={css({ overflow: 'hidden', height: '100%' })}
-                  borderRadius="none"
-                >
+                <div css={css({ height: '100%', overflow: 'hidden' })}>
                   <CodeEditor
                     languageId="javascript"
                     value={form.script_code}
@@ -410,7 +507,7 @@ export const MiniAppEditor: React.FC = () => {
                     }}
                     data-test-subj="miniAppCodeEditor"
                   />
-                </EuiPanel>
+                </div>
               </EuiResizablePanel>
 
               <EuiResizableButton indicator="border" />
@@ -419,102 +516,195 @@ export const MiniAppEditor: React.FC = () => {
                 initialSize={50}
                 minSize="200px"
                 paddingSize="none"
-                css={previewPanelCss}
+                scrollable={false}
               >
-                <EuiPanel
-                  css={css({ display: 'flex', flexDirection: 'column', height: '100%' })}
-                  paddingSize="s"
-                  borderRadius="none"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                    css={css({ flexShrink: 0 })}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xxs">
-                        <h3>
-                          <FormattedMessage
-                            id="miniApps.editor.previewTitle"
-                            defaultMessage="Preview"
-                          />
-                        </h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="playFilled"
-                        onClick={runPreview}
-                        aria-label={i18n.translate('miniApps.editor.runPreviewAriaLabel', {
-                          defaultMessage: 'Run preview',
-                        })}
-                        display="base"
-                        size="s"
-                        color="success"
-                        isDisabled={!form.script_code.trim()}
-                        data-test-subj="miniAppRunPreviewButton"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <span
-                        css={css({
-                          fontSize: '12px',
-                          color: '#69707d',
-                        })}
-                      >
-                        {previewState === 'idle' && (
-                          <FormattedMessage
-                            id="miniApps.editor.previewHint"
-                            defaultMessage="Press {shortcut} or click play"
-                            values={{
-                              shortcut: navigator.platform?.includes('Mac') ? '⌘↵' : 'Ctrl+↵',
-                            }}
-                          />
-                        )}
-                        {previewState === 'loading' && (
-                          <FormattedMessage
-                            id="miniApps.editor.previewLoading"
-                            defaultMessage="Loading..."
-                          />
-                        )}
-                        {previewState === 'running' && (
-                          <FormattedMessage
-                            id="miniApps.editor.previewRunning"
-                            defaultMessage="Running"
-                          />
-                        )}
-                        {previewState === 'error' && (
-                          <FormattedMessage
-                            id="miniApps.editor.previewError"
-                            defaultMessage="Error"
-                          />
-                        )}
-                      </span>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <div css={previewWrapperCss}>
+                  <div css={previewToolbarCss}>
+                    <EuiTitle size="xxs">
+                      <h3>
+                        <FormattedMessage
+                          id="miniApps.editor.previewTitle"
+                          defaultMessage="Preview"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiButtonIcon
+                      iconType="playFilled"
+                      onClick={runPreview}
+                      aria-label={i18n.translate('miniApps.editor.runPreviewAriaLabel', {
+                        defaultMessage: 'Run preview',
+                      })}
+                      display="base"
+                      size="s"
+                      color="success"
+                      isDisabled={!form.script_code.trim()}
+                      data-test-subj="miniAppRunPreviewButton"
+                    />
+                    <span css={css({ fontSize: 12, color: '#69707d' })}>
+                      {previewState === 'idle' && (
+                        <FormattedMessage
+                          id="miniApps.editor.previewHint"
+                          defaultMessage="Press {shortcut} or click play"
+                          values={{
+                            shortcut: navigator.platform?.includes('Mac') ? '⌘↵' : 'Ctrl+↵',
+                          }}
+                        />
+                      )}
+                      {previewState === 'loading' && (
+                        <FormattedMessage
+                          id="miniApps.editor.previewLoading"
+                          defaultMessage="Loading..."
+                        />
+                      )}
+                      {previewState === 'running' && (
+                        <FormattedMessage
+                          id="miniApps.editor.previewRunning"
+                          defaultMessage="Running"
+                        />
+                      )}
+                      {previewState === 'error' && (
+                        <FormattedMessage
+                          id="miniApps.editor.previewError"
+                          defaultMessage="Error"
+                        />
+                      )}
+                    </span>
+                  </div>
 
                   {previewError && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EuiCallOut
-                        color="danger"
-                        size="s"
-                        iconType="error"
-                        title={previewError}
-                        css={css({ flexShrink: 0 })}
-                      />
-                    </>
+                    <EuiCallOut
+                      color="danger"
+                      size="s"
+                      iconType="error"
+                      title={previewError}
+                      css={css({ flexShrink: 0 })}
+                    />
                   )}
 
-                  <EuiSpacer size="xs" />
+                  <div css={css({ flex: '1 1 0', minHeight: 0 })}>
+                    <EuiResizableContainer direction="vertical" style={{ height: '100%' }}>
+                      {(EuiResizablePanel2, EuiResizableButton2) => (
+                        <>
+                          <EuiResizablePanel2
+                            initialSize={70}
+                            minSize="60px"
+                            paddingSize="none"
+                            scrollable={false}
+                          >
+                            <div
+                              ref={previewContainerRef}
+                              css={css({
+                                width: '100%',
+                                height: '100%',
+                                position: 'relative',
+                                overflow: 'hidden',
+                              })}
+                              data-test-subj="miniAppPreviewContainer"
+                            />
+                          </EuiResizablePanel2>
 
-                  <div
-                    ref={previewContainerRef}
-                    css={previewContainerCss}
-                    data-test-subj="miniAppPreviewContainer"
-                  />
-                </EuiPanel>
+                          <EuiResizableButton2 indicator="border" />
+
+                          <EuiResizablePanel2
+                            initialSize={30}
+                            minSize="40px"
+                            paddingSize="none"
+                            scrollable={false}
+                          >
+                            <div
+                              css={css({
+                                display: 'flex',
+                                flexDirection: 'column',
+                                height: '100%',
+                              })}
+                            >
+                              <div css={consoleToolbarCss}>
+                                <EuiTitle size="xxxs">
+                                  <h4>
+                                    <FormattedMessage
+                                      id="miniApps.editor.consoleTitle"
+                                      defaultMessage="Console"
+                                    />
+                                    {previewLogs.length > 0 && (
+                                      <EuiBadge
+                                        color={
+                                          previewLogs.some((l) => l.level === 'error')
+                                            ? 'danger'
+                                            : previewLogs.some((l) => l.level === 'warn')
+                                            ? 'warning'
+                                            : 'default'
+                                        }
+                                        css={css({ marginLeft: 6 })}
+                                      >
+                                        {previewLogs.length}
+                                      </EuiBadge>
+                                    )}
+                                  </h4>
+                                </EuiTitle>
+                                {previewLogs.length > 0 && (
+                                  <EuiButtonIcon
+                                    iconType="eraser"
+                                    onClick={clearLogs}
+                                    aria-label={i18n.translate(
+                                      'miniApps.editor.clearConsoleAriaLabel',
+                                      { defaultMessage: 'Clear console' }
+                                    )}
+                                    size="xs"
+                                    color="text"
+                                  />
+                                )}
+                              </div>
+                              <div css={consoleListCss} data-test-subj="miniAppConsoleOutput">
+                                {previewLogs.length === 0 ? (
+                                  <div
+                                    css={css({
+                                      padding: 8,
+                                      color: '#98a2b3',
+                                      fontStyle: 'italic',
+                                    })}
+                                  >
+                                    <FormattedMessage
+                                      id="miniApps.editor.consoleEmpty"
+                                      defaultMessage="No console output yet. Use console.log() or Kibana.log.info() in your code."
+                                    />
+                                  </div>
+                                ) : (
+                                  previewLogs.map((entry, idx) => (
+                                    <div
+                                      key={idx}
+                                      css={css({
+                                        padding: '2px 8px',
+                                        color: LOG_LEVEL_COLORS[entry.level],
+                                        backgroundColor: LOG_LEVEL_BG[entry.level],
+                                        borderBottom: '1px solid #f0f0f0',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                      })}
+                                    >
+                                      <span
+                                        css={css({
+                                          fontWeight: 600,
+                                          marginRight: 6,
+                                          textTransform: 'uppercase',
+                                          fontSize: 10,
+                                          opacity: 0.7,
+                                        })}
+                                      >
+                                        {entry.level}
+                                      </span>
+                                      {entry.message}
+                                    </div>
+                                  ))
+                                )}
+                                <div ref={consoleEndRef} />
+                              </div>
+                            </div>
+                          </EuiResizablePanel2>
+                        </>
+                      )}
+                    </EuiResizableContainer>
+                  </div>
+                </div>
               </EuiResizablePanel>
             </>
           )}

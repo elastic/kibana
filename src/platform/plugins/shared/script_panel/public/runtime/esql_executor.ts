@@ -42,8 +42,7 @@ export class EsqlExecutor {
   private deps: EsqlExecutorDependencies;
   private config: SandboxConfig;
   private getContext?: () => DashboardContext;
-  private activeQueries = 0;
-  private abortController: AbortController | null = null;
+  private activeQueries = new Set<AbortController>();
 
   constructor(options: EsqlExecutorOptions) {
     this.deps = options.deps;
@@ -55,35 +54,33 @@ export class EsqlExecutor {
    * Execute an ES|QL query with optional dashboard context integration.
    */
   async query(params: EsqlQueryParams): Promise<EsqlQueryResult> {
-    // Validate query
     this.validateQuery(params.query);
 
-    // Check rate limiting
-    if (this.activeQueries >= this.config.maxConcurrentQueries) {
+    if (this.activeQueries.size >= this.config.maxConcurrentQueries) {
       throw new Error(
         `Maximum concurrent queries (${this.config.maxConcurrentQueries}) exceeded. Please wait for previous queries to complete.`
       );
     }
 
-    this.activeQueries++;
-    this.abortController = new AbortController();
+    const abortController = new AbortController();
+    this.activeQueries.add(abortController);
 
     try {
-      const result = await this.executeQuery(params);
+      const result = await this.executeQuery(params, abortController);
       return result;
     } finally {
-      this.activeQueries--;
-      this.abortController = null;
+      this.activeQueries.delete(abortController);
     }
   }
 
   /**
-   * Cancel any active queries.
+   * Cancel all active queries.
    */
   cancel(): void {
-    if (this.abortController) {
-      this.abortController.abort('Query cancelled');
+    for (const controller of this.activeQueries) {
+      controller.abort('Query cancelled');
     }
+    this.activeQueries.clear();
   }
 
   /**
@@ -112,27 +109,24 @@ export class EsqlExecutor {
     }
   }
 
-  private async executeQuery(params: EsqlQueryParams): Promise<EsqlQueryResult> {
+  private async executeQuery(
+    params: EsqlQueryParams,
+    abortController: AbortController
+  ): Promise<EsqlQueryResult> {
     const { query, useContext = true } = params;
 
-    // Build context
     const context = useContext ? this.getContext?.() : undefined;
 
-    // Build aggregate query object
     const esqlQuery: AggregateQuery = { esql: query };
 
-    // Prepare time range
     const timeRange: TimeRange | undefined = context?.timeRange
       ? { from: context.timeRange.from, to: context.timeRange.to }
       : undefined;
 
-    // Prepare filters
     const filters: Filter[] | undefined = context?.filters as Filter[] | undefined;
 
-    // Prepare input query (KQL/Lucene from query bar)
     const inputQuery: Query | undefined = context?.query ? (context.query as Query) : undefined;
 
-    // Build expression AST
     const ast = await textBasedQueryStateToAstWithValidation({
       query: esqlQuery,
       inputQuery,
@@ -144,27 +138,25 @@ export class EsqlExecutor {
       throw new Error('Failed to build query expression');
     }
 
-    // Execute the expression
     const contract = this.deps.expressions.execute(ast, null, {
       searchContext: {
         timeRange,
       },
     });
 
-    // Wire up abort signal
-    this.abortController?.signal.addEventListener('abort', () => {
+    abortController.signal.addEventListener('abort', () => {
       contract.cancel(AbortReason.CANCELED);
     });
 
-    // Set up timeout
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        this.cancel();
+      timeoutId = setTimeout(() => {
+        abortController.abort('Query timeout');
         reject(new Error(`Query timeout after ${this.config.queryTimeout}ms`));
       }, this.config.queryTimeout);
     });
 
-    // Execute and collect result
     const execution = contract.getData();
     let result: Datatable | undefined;
     let error: string | undefined;
@@ -196,8 +188,11 @@ export class EsqlExecutor {
       });
     });
 
-    // Race against timeout
-    return Promise.race([resultPromise, timeoutPromise]);
+    try {
+      return await Promise.race([resultPromise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   private formatResult(datatable: Datatable): EsqlQueryResult {
