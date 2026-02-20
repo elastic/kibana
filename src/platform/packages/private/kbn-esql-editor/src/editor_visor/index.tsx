@@ -54,7 +54,7 @@ export function QuickSearchVisor({
   onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, data } = kibana.services;
+  const { kql, data, http } = kibana.services;
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
@@ -113,8 +113,9 @@ export function QuickSearchVisor({
   );
 
   // Create an ad-hoc data view for the selected sources
+  // This runs only when the visor is visible and the sources have changed
   useEffect(() => {
-    if (!sourcesKey) {
+    if (!isVisible || !sourcesKey) {
       setAdHocDataView(null);
       return;
     }
@@ -122,6 +123,7 @@ export function QuickSearchVisor({
     getESQLAdHocDataview({
       dataViewsService: data.dataViews,
       query: `FROM ${sourcesKey}`,
+      http,
     }).then((dataView) => {
       if (!cancelled) {
         setAdHocDataView(dataView);
@@ -130,7 +132,7 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [sourcesKey, data.dataViews]);
+  }, [isVisible, sourcesKey, data.dataViews, http]);
 
   useEffect(() => {
     if (isVisible && kqlInputRef.current) {
