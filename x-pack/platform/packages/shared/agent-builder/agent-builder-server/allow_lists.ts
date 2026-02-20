@@ -22,7 +22,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_log_groups`,
   `${internalNamespaces.observability}.get_alerts`,
   `${internalNamespaces.observability}.get_services`,
-  `${internalNamespaces.observability}.get_correlated_logs`,
   `${internalNamespaces.observability}.get_hosts`,
   `${internalNamespaces.observability}.get_trace_metrics`,
   `${internalNamespaces.observability}.get_log_change_points`,
