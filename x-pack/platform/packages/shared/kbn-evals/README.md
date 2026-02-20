@@ -235,6 +235,40 @@ To sync your local `config.json` from Vault (requires Vault auth):
 node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod
 ```
 
+### Local dev: EIS (CCM)
+
+To run eval suites against **EIS-backed models** locally, you need:
+
+- **EIS connectors** in `KIBANA_TESTING_AI_CONNECTORS` (so `@kbn/evals` can build Playwright projects)
+- **CCM enabled** on your test Elasticsearch cluster (so EIS inference endpoints exist)
+
+Recommended flow (Scout + evals CLI):
+
+```bash
+# 1) Provide the CCM API key (used to enable CCM on your test ES cluster)
+# (requires Vault auth)
+export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+
+# 2) Discover available EIS models (writes target/eis_models.json)
+node scripts/discover_eis_models.js
+
+# 3) Generate EIS connector payload for @kbn/evals (base64 JSON)
+export KIBANA_TESTING_AI_CONNECTORS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js)"
+
+# 4) Pick a connector id to use for judge + project (example prints the first 30 ids)
+node -e "const o=JSON.parse(Buffer.from(process.env.KIBANA_TESTING_AI_CONNECTORS,'base64').toString('utf8'));console.log(Object.keys(o).slice(0,30).join('\\n'))"
+export EVALUATION_CONNECTOR_ID="eis-<model>"
+
+# 5) Start Scout (the evals config sets auto-preconfigure EIS connectors in Kibana from KIBANA_TESTING_AI_CONNECTORS)
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+
+# 6) Enable CCM on the *Scout* ES cluster and wait for EIS endpoints
+node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
+
+# 7) Run an eval suite against a single EIS connector project
+node scripts/evals run --suite <suite-id> --project "$EVALUATION_CONNECTOR_ID"
+```
+
 ### Local dev: LiteLLM (SSO)
 
 If you have access to the internal LiteLLM gateway, you can generate a short-lived virtual key via SSO and export the connector payload needed by `@kbn/evals`:

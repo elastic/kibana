@@ -19,6 +19,46 @@ import { defaultConfig } from '../../default/stateful/base.config';
 
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 
+type AvailableConnector = {
+  name: string;
+  actionTypeId: string;
+  config: Record<string, unknown>;
+  secrets?: Record<string, unknown>;
+};
+
+function getPreconfiguredEisConnectorsArg(): string | undefined {
+  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS;
+  if (!raw) return;
+
+  let connectors: Record<string, AvailableConnector>;
+  try {
+    connectors = JSON.parse(Buffer.from(raw, 'base64').toString('utf8')) as Record<
+      string,
+      AvailableConnector
+    >;
+  } catch (e) {
+    throw new Error(
+      `Failed to parse base64 JSON from KIBANA_TESTING_AI_CONNECTORS: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    );
+  }
+
+  const eisConnectors: Record<string, AvailableConnector> = {};
+  for (const [id, connector] of Object.entries(connectors)) {
+    if (!connector || typeof connector !== 'object') continue;
+    if (connector.actionTypeId !== '.inference') continue;
+    if (connector.config?.provider !== 'elastic') continue;
+    eisConnectors[id] = connector;
+  }
+
+  if (Object.keys(eisConnectors).length === 0) return;
+
+  return `--xpack.actions.preconfigured=${JSON.stringify(eisConnectors)}`;
+}
+
+const preconfiguredEisConnectorsArg = getPreconfiguredEisConnectorsArg();
+
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
@@ -26,6 +66,13 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
       `xpack.inference.elastic.url=${EIS_QA_URL}`,
+    ],
+  },
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
     ],
   },
 };
