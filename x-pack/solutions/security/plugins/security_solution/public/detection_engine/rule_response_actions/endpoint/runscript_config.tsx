@@ -458,7 +458,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     return (
       <EuiFlexGroup
         key={platform}
-        gutterSize="l"
+        gutterSize="m"
         alignItems="flexStart"
         justifyContent="spaceBetween"
         data-test-subj={dataTestSubj}
