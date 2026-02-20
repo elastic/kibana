@@ -15,8 +15,11 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip('endpoints rbac mocked data empty state cy (Cypress migration placeholder)', async () => {
-      // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
-    });
+    spaceTest.skip(
+      'endpoints rbac mocked data empty state cy (Cypress migration placeholder)',
+      async () => {
+        // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
+      }
+    );
   }
 );

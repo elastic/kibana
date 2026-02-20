@@ -19,5 +19,7 @@ export const getByTestSubj = (page: Page, selector: string) => {
  * Wait for the global loading indicator to be hidden (page ready).
  */
 export const waitForPageToBeLoaded = async (page: Page): Promise<void> => {
-  await page.locator(testSubjSelector('globalLoadingIndicator-hidden')).waitFor({ state: 'visible' });
+  await page
+    .locator(testSubjSelector('globalLoadingIndicator-hidden'))
+    .waitFor({ state: 'visible' });
 };

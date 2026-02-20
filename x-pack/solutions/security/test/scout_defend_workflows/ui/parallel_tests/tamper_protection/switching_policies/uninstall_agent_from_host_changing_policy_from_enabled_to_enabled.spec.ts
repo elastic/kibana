@@ -15,8 +15,11 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip('uninstall agent from host changing policy from enabled to enabled cy (Cypress migration placeholder)', async () => {
-      // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
-    });
+    spaceTest.skip(
+      'uninstall agent from host changing policy from enabled to enabled cy (Cypress migration placeholder)',
+      async () => {
+        // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
+      }
+    );
   }
 );

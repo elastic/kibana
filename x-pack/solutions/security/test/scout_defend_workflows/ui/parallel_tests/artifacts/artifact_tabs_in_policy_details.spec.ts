@@ -15,8 +15,11 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip('artifact tabs in policy details cy (Cypress migration placeholder)', async () => {
-      // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
-    });
+    spaceTest.skip(
+      'artifact tabs in policy details cy (Cypress migration placeholder)',
+      async () => {
+        // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
+      }
+    );
   }
 );

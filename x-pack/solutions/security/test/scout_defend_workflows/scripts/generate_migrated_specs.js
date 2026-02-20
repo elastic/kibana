@@ -6,7 +6,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const CYPRESS_E2E = 'x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e';
+const CYPRESS_E2E =
+  'x-pack/solutions/security/plugins/security_solution/public/management/cypress/e2e';
 const SCOUT_PARALLEL = 'x-pack/solutions/security/test/scout_defend_workflows/ui/parallel_tests';
 
 const COPYRIGHT = `/*

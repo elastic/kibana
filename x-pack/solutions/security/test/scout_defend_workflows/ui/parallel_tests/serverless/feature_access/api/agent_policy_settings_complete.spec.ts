@@ -15,8 +15,11 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip('agent policy settings complete cy (Cypress migration placeholder)', async () => {
-      // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
-    });
+    spaceTest.skip(
+      'agent policy settings complete cy (Cypress migration placeholder)',
+      async () => {
+        // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
+      }
+    );
   }
 );
