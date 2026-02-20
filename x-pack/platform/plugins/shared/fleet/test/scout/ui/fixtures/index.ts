@@ -8,23 +8,23 @@
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest } from '@kbn/scout';
 
-import type { StreamsPageObjects } from './page_objects';
+import type { FleetPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
-export interface StreamsTestFixtures extends ScoutTestFixtures {
-  pageObjects: StreamsPageObjects;
+export interface FleetTestFixtures extends ScoutTestFixtures {
+  pageObjects: FleetPageObjects;
 }
 
-export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<FleetTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
       page,
     }: {
-      pageObjects: StreamsPageObjects;
+      pageObjects: FleetPageObjects;
       page: ScoutPage;
     },
-    use: (pageObjects: StreamsPageObjects) => Promise<void>
+    use: (pageObjects: FleetPageObjects) => Promise<void>
   ) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
