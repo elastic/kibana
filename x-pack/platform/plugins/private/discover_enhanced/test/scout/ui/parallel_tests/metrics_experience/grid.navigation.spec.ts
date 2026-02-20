@@ -26,6 +26,12 @@ const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 
+// Sort metrics alphabetically to match UI display order
+const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
+const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
+const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
+const FIRST_CARD_LAST_PAGE = `${SORTED_METRICS[PAGE_SIZE * (TOTAL_PAGES - 1)].name}-0`;
+
 spaceTest.describe(
   'Metrics in Discover - Grid Navigation',
   {
@@ -63,18 +69,27 @@ spaceTest.describe(
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
+          'id',
+          FIRST_CARD_LAST_PAGE
+        );
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
+
         await metricsExperience.pagination.nextButton.click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_2);
+
         await metricsExperience.pagination.prevButton.click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
       });
     });
 
