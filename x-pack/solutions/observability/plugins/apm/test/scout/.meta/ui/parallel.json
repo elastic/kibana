@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-12T16:25:57.837Z",
-  "sha1": "b73bca51c1b9fb65f74863fd796703cc8c87c09f",
+  "lastModified": "2026-02-20T05:08:26.530Z",
+  "sha1": "7cbe11736ae589ed5649e5b209e057f118b02992",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 16,
+        "line": 18,
         "column": 16
       }
     },
@@ -497,6 +497,34 @@
       }
     },
     {
+      "id": "9b7bac9a7589b4d-d035aadde3cc9a4",
+      "title": "Service overview - header filters Filtering by transaction type - changes url when selecting different value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "9b7bac9a7589b4d-4ed45060815dbc2",
+      "title": "Service overview - header filters Filtering by searchbar - filters by transaction.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
       "id": "89c8ff66ee766e0-93d765a7c716612",
       "title": "Agent Configuration Viewer should not be able to modify settings",
       "expectedStatus": "passed",
@@ -916,6 +944,104 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
         "line": 20,
         "column": 9
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-112d7e5de3e69a6",
+      "title": "Span links shows span links for producer-internal-only Span A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-db2064659e35788",
+      "title": "Span links shows span links for producer-external-only Span B",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-0bed012a7fd6b0e",
+      "title": "Span links shows span links flyout details on producer-consumer Transaction C",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 107,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-0f5d62a5eefef8d",
+      "title": "Span links shows span links flyout details on consumer-multiple Transaction D",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 137,
+        "column": 7
+      }
+    },
+    {
+      "id": "7cd820d5686e9ff-db3108594a7760a",
+      "title": "Span links shows span links flyout details on consumer-multiple Span E",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
+        "line": 167,
+        "column": 7
+      }
+    },
+    {
+      "id": "ad2290db23c6832-8c21a2a9d893c81",
+      "title": "Span stacktrace shows APM agent generated stacktrace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "ad2290db23c6832-bb3eadfcab8a1cd",
+      "title": "Span stacktrace shows Otel generated stacktrace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
+        "line": 46,
+        "column": 7
       }
     },
     {
