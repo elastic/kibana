@@ -120,7 +120,7 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
-    const attachmentsService = new AttachmentsService();
+    const attachmentsService = new AttachmentsService({ http });
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
