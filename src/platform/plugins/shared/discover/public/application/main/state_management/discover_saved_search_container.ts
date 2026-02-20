@@ -34,8 +34,6 @@ export interface UpdateParams {
 /**
  * Container for the saved search state, allowing to update the saved search
  * It centralizes functionality that was spread across the Discover main codebase
- * There are 2 hooks to access the state of the saved search in React components:
- * - useSavedSearch for the current state, that's updated on every relevant state change
  */
 export interface DiscoverSavedSearchContainer {
   /**
@@ -68,10 +66,6 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
-  /**
-   * Updates the current state of the saved search with new time range and refresh interval
-   */
-  updateTimeRange: () => void;
 }
 
 export function getSavedSearchContainer({
@@ -121,23 +115,6 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const updateTimeRange = () => {
-    const previousSavedSearch = getState();
-    if (!previousSavedSearch.timeRestore) {
-      return;
-    }
-    const refreshInterval = services.timefilter.getRefreshInterval();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      timeRange: services.timefilter.getTime(),
-      refreshInterval: { value: refreshInterval.value, pause: refreshInterval.pause },
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
-  };
-
   return {
     getCurrent$,
     getInitial$,
@@ -145,7 +122,6 @@ export function getSavedSearchContainer({
     set,
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
-    updateTimeRange,
   };
 }
 

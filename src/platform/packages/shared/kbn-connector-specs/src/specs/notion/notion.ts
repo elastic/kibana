@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import type * as Notion from './types';
 
 export const NotionConnector: ConnectorSpec = {
   metadata: {
@@ -48,22 +49,15 @@ export const NotionConnector: ConnectorSpec = {
         startCursor: z.string().optional(),
         pageSize: z.number().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          query: string;
-          queryObjectType: 'page' | 'data_source';
-          startCursor?: string;
-          pageSize?: number;
-        };
-
+      handler: async (ctx, input: Notion.SearchByTitleInput) => {
         const response = await ctx.client.post('https://api.notion.com/v1/search', {
-          query: typedInput.query,
+          query: input.query,
           filter: {
-            value: typedInput.queryObjectType,
+            value: input.queryObjectType,
             property: 'object',
           },
-          ...(typedInput.startCursor && { start_cursor: typedInput.startCursor }),
-          ...(typedInput.pageSize && { page_size: typedInput.pageSize }),
+          ...(input.startCursor && { start_cursor: input.startCursor }),
+          ...(input.pageSize && { page_size: input.pageSize }),
         });
 
         return response.data;
@@ -74,10 +68,9 @@ export const NotionConnector: ConnectorSpec = {
     getPage: {
       isTool: false,
       input: z.object({ pageId: z.string() }),
-      handler: async (ctx, input) => {
-        const typedInput = input as { pageId: string };
+      handler: async (ctx, input: Notion.GetPageInput) => {
         const response = await ctx.client.get(
-          `https://api.notion.com/v1/pages/${typedInput.pageId}`,
+          `https://api.notion.com/v1/pages/${input.pageId}`,
           {}
         );
         return response.data;
@@ -88,10 +81,9 @@ export const NotionConnector: ConnectorSpec = {
     getDataSource: {
       isTool: false,
       input: z.object({ dataSourceId: z.string() }),
-      handler: async (ctx, input) => {
-        const typedInput = input as { dataSourceId: string };
+      handler: async (ctx, input: Notion.GetDataSourceInput) => {
         const response = await ctx.client.get(
-          `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}`,
+          `https://api.notion.com/v1/data_sources/${input.dataSourceId}`,
           {}
         );
         return response.data;
@@ -107,25 +99,18 @@ export const NotionConnector: ConnectorSpec = {
         startCursor: z.string().optional(),
         pageSize: z.number().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          dataSourceId: string;
-          filter?: string;
-          startCursor?: string;
-          pageSize?: number;
-        };
-
+      handler: async (ctx, input: Notion.QueryDataSourceInput) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let requestData: Record<string, any> = {
-          page_size: typedInput.pageSize,
-          start_cursor: typedInput.startCursor,
+          page_size: input.pageSize,
+          start_cursor: input.startCursor,
         };
-        if (typedInput.filter) {
-          requestData = { ...requestData, filter: JSON.parse(typedInput.filter) };
+        if (input.filter) {
+          requestData = { ...requestData, filter: JSON.parse(input.filter) };
         }
 
         const response = await ctx.client.post(
-          `https://api.notion.com/v1/data_sources/${typedInput.dataSourceId}/query`,
+          `https://api.notion.com/v1/data_sources/${input.dataSourceId}/query`,
           requestData
         );
         return response.data;
@@ -134,7 +119,7 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('ore.kibanaConnectorSpecs.notion.test.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.notion.test.description', {
       defaultMessage: 'Verifies Notion connection by fetching metadata about given data source',
     }),
     // TODO: might need to accept some input here in order to pass to the API endpoint to test
