@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createRbacHostsExistSuite } from './rbac_hosts_exist_test_suite';
+import { createNavigationEssSuite } from './navigation_rbac_test_suite';
 
-describe('Endpoints page RBAC - some hosts are enrolled (siem v4)', { tags: ['@ess'] }, () => {
-  createRbacHostsExistSuite('siemV4');
+describe('Navigation RBAC - ESS (siem v5)', { tags: ['@ess'] }, () => {
+  createNavigationEssSuite('siemV5');
 });
