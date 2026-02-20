@@ -18,6 +18,7 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -144,7 +145,9 @@ export function AlertActions(
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
+            currentPageId !== RULE_DETAILS_PAGE_ID
+              ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
+              : null
           }
           resolveAlertPagePath={(alertId, currentPageId) =>
             currentPageId !== ALERT_DETAILS_PAGE_ID

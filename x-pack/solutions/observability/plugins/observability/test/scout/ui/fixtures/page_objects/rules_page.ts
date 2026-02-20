@@ -24,7 +24,7 @@ export class RulesPage {
    * Navigates to the rules list page (Observability)
    */
   async goto(ruleId: string = '') {
-    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    await this.page.gotoApp(`rules/${ruleId}`);
     if (!ruleId) {
       await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
         timeout: BIGGER_TIMEOUT,
@@ -210,7 +210,7 @@ export class RulesPage {
    * Navigates to the logs tab page via URL
    */
   async gotoLogsTab() {
-    await this.page.gotoApp('observability/alerts/rules/logs');
+    await this.page.gotoApp('rules/logs');
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
     });

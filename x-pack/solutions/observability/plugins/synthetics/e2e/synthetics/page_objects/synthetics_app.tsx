@@ -400,7 +400,7 @@ export function syntheticsAppPageProvider({
     },
 
     async goToRulesPage() {
-      const rulesPage = '/app/observability/alerts/rules';
+      const rulesPage = '/app/rules';
       await page.goto(basePath + rulesPage);
     },
   };
