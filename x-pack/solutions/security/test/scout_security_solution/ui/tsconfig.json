@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/scout-security",
     "@kbn/scout",
-    "@kbn/test",
     "@kbn/cloud-security-posture-common",
     "@kbn/security-solution-plugin"
   ],
