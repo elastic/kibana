@@ -1650,8 +1650,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
-/src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
@@ -1831,6 +1829,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
 /.buildkite/scripts/steps/security @elastic/kibana-security
+/.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -3064,6 +3063,9 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 # Moon related configs
 .moon         @elastic/kibana-operations
 /**/moon.yml  @elastic/kibana-operations
+
+# Leads approval
+/AGENTS.md @elastic/kibana-tech-leads
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

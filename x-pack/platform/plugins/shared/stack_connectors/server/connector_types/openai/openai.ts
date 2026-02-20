@@ -424,7 +424,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         messages,
         model:
           rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+          ('defaultModel' in this.config
+            ? this.config.defaultModel ?? DEFAULT_OPENAI_MODEL
+            : DEFAULT_OPENAI_MODEL),
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);

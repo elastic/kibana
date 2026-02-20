@@ -90,17 +90,6 @@ export function SignificantEventsTable({
                 setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
-            iconOnClick={() => {
-              if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
-              }
-            }}
-            iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
-              {
-                defaultMessage: 'Open feature details',
-              }
-            )}
           >
             {query.feature?.name ?? '--'}
           </EuiBadge>
