@@ -134,7 +134,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -472,7 +472,6 @@ export function Detail() {
       prerelease,
       getAgentlessStatusForPackage,
       packageInfo,
-      isAgentlessDefault,
       returnAppId,
       returnPath,
       services.application,
