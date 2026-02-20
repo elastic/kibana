@@ -41,6 +41,13 @@ describe('FullScreenWaterfall', () => {
     rangeTo: 'now',
     dataView: dataViewMock,
     serviceName: 'test-service',
+    docId: null,
+    docIndex: undefined,
+    activeFlyoutType: null,
+    activeSection: undefined,
+    onNodeClick: jest.fn(),
+    onErrorClick: jest.fn(),
+    onCloseFlyout: jest.fn(),
     onExitFullScreen: jest.fn(),
   };
 

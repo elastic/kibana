@@ -95,6 +95,8 @@ export const Example: StoryFn<any> = () => {
       waterfall={waterfall}
       showCriticalPath={false}
       onShowCriticalPathChange={noop}
+      start="2021-01-01T00:00:00.000Z"
+      end="2021-01-01T01:00:00.000Z"
     />
   );
 };
@@ -114,6 +116,8 @@ export const WaterfallFromJSON: StoryFn<{}> = () => {
         waterfall={waterfall}
         showCriticalPath={false}
         onShowCriticalPathChange={noop}
+        start="2021-01-01T00:00:00.000Z"
+        end="2021-01-01T01:00:00.000Z"
       />
     );
   }

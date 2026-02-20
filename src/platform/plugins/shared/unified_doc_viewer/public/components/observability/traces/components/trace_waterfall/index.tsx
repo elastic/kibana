@@ -11,9 +11,10 @@ import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -21,6 +22,9 @@ import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { spanFlyoutId } from '../full_screen_waterfall/waterfall_flyout/span_flyout';
+import { logsFlyoutId } from '../full_screen_waterfall/waterfall_flyout/logs_flyout';
+import type { DocumentType } from '../full_screen_waterfall/waterfall_flyout/document_detail_flyout';
 
 interface Props {
   traceId: string;
@@ -28,6 +32,17 @@ interface Props {
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
 }
+
+export interface TraceWaterfallRestorableState {
+  showFullScreenWaterfall: boolean;
+  activeFlyoutType: DocumentType | null;
+  activeSection: 'errors-table' | undefined;
+  activeDocId: string | null;
+  activeDocIndex: string | undefined;
+}
+
+const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<TraceWaterfallRestorableState>();
 
 export const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
@@ -43,10 +58,17 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
   defaultMessage: 'Trace summary',
 });
 
-export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
+function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
   const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
-  const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
+  const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useRestorableState(
+    'showFullScreenWaterfall',
+    false
+  );
+  const [activeFlyoutType, setActiveFlyoutType] = useRestorableState('activeFlyoutType', null);
+  const [activeSection, setActiveSection] = useRestorableState('activeSection', undefined);
+  const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null);
+  const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const FocusedTraceWaterfall = discoverShared.features.registry.getById(
@@ -67,6 +89,13 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
 
   const actionId = 'traceWaterfallFullScreenAction';
 
+  const clearActiveFlyout = () => {
+    setActiveFlyoutType(null);
+    setActiveSection(undefined);
+    setActiveDocId(null);
+    setActiveDocIndex(undefined);
+  };
+
   const actions = useMemo(
     () => [
       {
@@ -79,7 +108,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
       },
       ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
     ],
-    [openInDiscoverSectionAction]
+    [openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
 
   if (!FocusedTraceWaterfall) return null;
@@ -93,8 +122,33 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
+          docId={activeDocId}
+          docIndex={activeDocIndex}
+          activeFlyoutType={activeFlyoutType}
+          activeSection={activeSection}
+          onNodeClick={(nodeSpanId) => {
+            setActiveSection(undefined);
+            setActiveDocId(nodeSpanId);
+            setActiveDocIndex(undefined);
+            setActiveFlyoutType(spanFlyoutId);
+          }}
+          onErrorClick={(params) => {
+            if (params.errorCount > 1) {
+              setActiveFlyoutType(spanFlyoutId);
+              setActiveSection('errors-table');
+              setActiveDocId(params.docId);
+              setActiveDocIndex(undefined);
+            } else if (params.errorDocId) {
+              setActiveFlyoutType(logsFlyoutId);
+              setActiveSection(undefined);
+              setActiveDocId(params.errorDocId);
+              setActiveDocIndex(params.docIndex);
+            }
+          }}
+          onCloseFlyout={clearActiveFlyout}
           onExitFullScreen={() => {
             setShowFullScreenWaterfall(false);
+            clearActiveFlyout();
           }}
         />
       ) : null}
@@ -142,3 +196,5 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     </>
   );
 }
+
+export const TraceWaterfall = withRestorableState(InternalTraceWaterfall);
