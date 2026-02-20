@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 
@@ -16,45 +16,53 @@ export enum VisorMode {
   NaturalLanguage = 'nl',
 }
 
-const kqlModeOption: EuiComboBoxOptionOption = {
-  label: i18n.translate('esqlEditor.visor.modeKql', { defaultMessage: 'KQL' }),
-  key: VisorMode.KQL,
-};
+const kqlLabel = i18n.translate('esqlEditor.visor.modeKql', { defaultMessage: 'KQL' });
+const nlLabel = i18n.translate('esqlEditor.visor.modeNaturalLanguage', {
+  defaultMessage: 'Natural language',
+});
 
-const nlModeOption: EuiComboBoxOptionOption = {
-  label: i18n.translate('esqlEditor.visor.modeNaturalLanguage', {
-    defaultMessage: 'Natural Language',
-  }),
-  key: VisorMode.NaturalLanguage,
-};
-
-const modeOptions: EuiComboBoxOptionOption[] = [kqlModeOption, nlModeOption];
+const modeOptions: Array<EuiComboBoxOptionOption<VisorMode>> = [
+  { label: kqlLabel, value: VisorMode.KQL },
+  { label: nlLabel, value: VisorMode.NaturalLanguage },
+];
 
 interface ModeSelectorProps {
   onModeChange: (mode: VisorMode) => void;
 }
 
 export function ModeSelector({ onModeChange }: ModeSelectorProps) {
-  const [selectedMode, setSelectedMode] = useState<EuiComboBoxOptionOption[]>([kqlModeOption]);
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<VisorMode>>>(
+    [modeOptions[0]]
+  );
+  const inputRefSet = useRef(false);
 
   const onChange = useCallback(
-    (options: EuiComboBoxOptionOption[]) => {
+    (options: Array<EuiComboBoxOptionOption<VisorMode>>) => {
       if (options.length > 0) {
-        setSelectedMode(options);
-        onModeChange((options[0].key as VisorMode) ?? VisorMode.KQL);
+        setSelectedOptions(options);
+        onModeChange(options[0].value!);
       }
     },
     [onModeChange]
   );
 
+  const setInputReadOnly = useCallback((el: HTMLInputElement | null) => {
+    if (el && !inputRefSet.current) {
+      el.readOnly = true;
+      inputRefSet.current = true;
+    }
+  }, []);
+
   return (
     <EuiComboBox
       compressed
       singleSelection={{ asPlainText: true }}
-      options={modeOptions}
-      selectedOptions={selectedMode}
-      onChange={onChange}
       isClearable={false}
+      options={modeOptions}
+      selectedOptions={selectedOptions}
+      onChange={onChange}
+      inputRef={setInputReadOnly}
+      inputPopoverProps={{ panelMinWidth: 220 }}
       aria-label={i18n.translate('esqlEditor.visor.modeSelectAriaLabel', {
         defaultMessage: 'Select query mode',
       })}

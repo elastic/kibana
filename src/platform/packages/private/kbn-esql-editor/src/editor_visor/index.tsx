@@ -183,7 +183,8 @@ export function QuickSearchVisor({
     comboBoxWidth,
     Boolean(isSpaceReduced),
     isVisible,
-    isDarkMode
+    isDarkMode,
+    visorMode
   );
 
   if (!KQLComponent) {
@@ -227,7 +228,8 @@ export function QuickSearchVisor({
                 <div ref={kqlInputRef}>
                   <KQLComponent
                     isDisabled={!isVisible}
-                    iconType="search"
+                    // If we remove the prop, the icon still appears (!!)
+                    iconType=""
                     disableLanguageSwitcher={true}
                     indexPatterns={selectedSources.map((source) => source.label)}
                     bubbleSubmitEvent={false}

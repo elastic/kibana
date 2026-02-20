@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EuiThemeComputed } from '@elastic/eui';
+import { euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { VisorMode } from './mode_selector';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
-export const MODE_SELECT_WIDTH = 160;
+export const MODE_SELECT_WIDTH_KQL = 80;
+export const MODE_SELECT_WIDTH_NL = 160;
 const visorGradientPadding = '1px';
 const visorGradient =
   'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
@@ -21,8 +24,11 @@ export const visorStyles = (
   comboBoxWidth: number,
   isSpaceReduced: boolean,
   isVisible: boolean,
-  isDarkMode: boolean
+  isDarkMode: boolean,
+  mode: VisorMode
 ) => {
+  const fontSize = euiFontSizeFromScale('xs', euiTheme);
+  const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
   const visorBoxShadow = isDarkMode
     ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
     : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
@@ -84,7 +90,7 @@ export const visorStyles = (
         left: '0',
         transform: 'translateY(-50%)',
         width: '1px',
-        height: '16px',
+        height: euiTheme.size.base,
         backgroundColor: euiTheme.colors.borderBasePlain,
       },
     },
@@ -111,6 +117,9 @@ export const visorStyles = (
 
       .kbnQueryBar__textarea {
         border-radius: ${euiTheme.size.s} !important;
+        font-size: ${fontSize} !important;
+        padding-left: ${euiTheme.size.s} !important;
+        padding-top: ${euiTheme.size.s} !important;
         box-shadow: none;
         &:focus,
         &:hover {
@@ -126,17 +135,25 @@ export const visorStyles = (
       padding-left: 2px;
       flex-shrink: 0;
       flex-grow: 0;
-      width: ${MODE_SELECT_WIDTH}px;
+      width: ${modeSelectWidth}px;
+      transition: width ${euiTheme.animation.slow} ease-in-out;
 
       .euiComboBox__inputWrap {
-        border: none;
-        box-shadow: none;
-        background: transparent;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        background: transparent !important;
+        font-size: ${fontSize} !important;
+        &:hover,
+        &:focus,
         &:focus-within,
-        &:hover {
+        &:focus-visible {
           box-shadow: none !important;
           outline: none !important;
         }
+      }
+      .euiComboBox__input {
+        font-size: ${fontSize} !important;
       }
     `,
     nlInputWrapper: css`
@@ -149,6 +166,7 @@ export const visorStyles = (
     nlInput: css`
       box-shadow: none;
       border: none;
+      font-size: ${fontSize} !important;
       &:focus,
       &:hover {
         box-shadow: none !important;
@@ -158,6 +176,7 @@ export const visorStyles = (
     searchFieldStyles: css`
       box-shadow: none;
       border-radius: 0;
+      font-size: ${fontSize} !important;
       &:focus,
       &:hover {
         box-shadow: none !important;
