@@ -50,29 +50,30 @@ describe('Endpoints page RBAC - some hosts are enrolled (siem v3/v4)', { tags: [
             for (const integrationsPrivilege of PRIVILEGES) {
               const shouldProvidePolicyLink = endpointPolicyManagementPrivilege !== 'none';
 
-              it(`should show Endpoint list ${shouldProvidePolicyLink ? 'with' : 'without'
-                } link to Endpoint Policy with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
-                  login.withCustomKibanaPrivileges({
-                    [siemVersion]: [
-                      'all',
-                      `endpoint_list_all`,
-                      `policy_management_${endpointPolicyManagementPrivilege}`,
-                    ],
-                    fleet: [integrationsPrivilege],
-                    fleetv2: [fleetPrivilege],
-                  });
-
-                  loadPage(APP_ENDPOINTS_PATH);
-
-                  cy.getByTestSubj('policyNameCellLink').should('exist');
-                  cy.getByTestSubj('policyNameCellLink').within(() => {
-                    if (shouldProvidePolicyLink) {
-                      cy.get('a').should('have.attr', 'href');
-                    } else {
-                      cy.get('a').should('not.exist');
-                    }
-                  });
+              it(`should show Endpoint list ${
+                shouldProvidePolicyLink ? 'with' : 'without'
+              } link to Endpoint Policy with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
+                login.withCustomKibanaPrivileges({
+                  [siemVersion]: [
+                    'all',
+                    `endpoint_list_all`,
+                    `policy_management_${endpointPolicyManagementPrivilege}`,
+                  ],
+                  fleet: [integrationsPrivilege],
+                  fleetv2: [fleetPrivilege],
                 });
+
+                loadPage(APP_ENDPOINTS_PATH);
+
+                cy.getByTestSubj('policyNameCellLink').should('exist');
+                cy.getByTestSubj('policyNameCellLink').within(() => {
+                  if (shouldProvidePolicyLink) {
+                    cy.get('a').should('have.attr', 'href');
+                  } else {
+                    cy.get('a').should('not.exist');
+                  }
+                });
+              });
             }
           }
         });
