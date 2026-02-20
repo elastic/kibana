@@ -8,32 +8,12 @@
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import {
-  DEFEND_WORKFLOWS_ROUTES,
-  createFleetEndpointPolicy,
-  deleteFleetEndpointPolicies,
-} from '../../fixtures';
-import type { IndexedFleetEndpointPolicyResponse } from '../../fixtures';
+import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
 
 spaceTest.describe(
   'Defend Workflows - policy list',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let indexedPolicies: IndexedFleetEndpointPolicyResponse | null = null;
-
-    spaceTest.beforeAll(async ({ kbnClient, log }) => {
-      indexedPolicies = await createFleetEndpointPolicy(kbnClient, {
-        policyPrefix: 'Scout policy list',
-        log,
-      });
-    });
-
-    spaceTest.afterAll(async ({ kbnClient }) => {
-      if (indexedPolicies) {
-        await deleteFleetEndpointPolicies(kbnClient, indexedPolicies);
-      }
-    });
-
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });

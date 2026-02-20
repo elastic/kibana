@@ -13,8 +13,5 @@
   "kbn_references": [
     "@kbn/test-subj-selector",
     "@kbn/scout-security",
-    "@kbn/test",
-    "@kbn/tooling-log",
-    "@kbn/security-solution-plugin",
   ]
 }

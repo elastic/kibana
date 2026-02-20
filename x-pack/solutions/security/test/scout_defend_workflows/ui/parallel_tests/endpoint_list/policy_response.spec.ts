@@ -8,29 +8,12 @@
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import {
-  DEFEND_WORKFLOWS_ROUTES,
-  indexEndpointHostsData,
-  deleteIndexedEndpointHostsData,
-} from '../../fixtures';
-import type { IndexedHostsAndAlertsResponse } from '../../fixtures';
+import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
 
 spaceTest.describe(
   'Defend Workflows - policy response',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let indexedHosts: IndexedHostsAndAlertsResponse | null = null;
-
-    spaceTest.beforeAll(async ({ esClient, kbnClient, log }) => {
-      indexedHosts = await indexEndpointHostsData(esClient, kbnClient, { numHosts: 2, log });
-    });
-
-    spaceTest.afterAll(async ({ esClient, kbnClient }) => {
-      if (indexedHosts) {
-        await deleteIndexedEndpointHostsData(esClient, kbnClient, indexedHosts);
-      }
-    });
-
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
