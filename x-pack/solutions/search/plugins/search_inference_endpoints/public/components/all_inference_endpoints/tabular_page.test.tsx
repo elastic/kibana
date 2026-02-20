@@ -461,6 +461,11 @@ describe('When the tabular page is loaded', () => {
           label: 'Elastic Inference Service',
           countLabel: '5 endpoints',
         },
+        {
+          groupId: 'openai',
+          label: 'OpenAI',
+          countLabel: '1 endpoint',
+        },
       ];
 
       expectedGroups.forEach(({ groupId, label, countLabel }) => {

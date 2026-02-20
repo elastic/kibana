@@ -161,7 +161,7 @@ describe('GroupBySelect', () => {
     });
   });
 
-  it('should call onChange with GroupByOptions.Model when "Service" option is selected', async () => {
+  it('should call onChange with GroupByOptions.Service when "Service" option is selected', async () => {
     const { getByRole } = render(
       <Wrapper>
         <GroupBySelect value={GroupByOptions.None} onChange={mockOnChange} />

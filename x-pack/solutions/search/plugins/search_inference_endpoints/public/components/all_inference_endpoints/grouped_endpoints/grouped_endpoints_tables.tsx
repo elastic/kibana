@@ -14,12 +14,14 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
   EuiSpacer,
+  type EuiTableFieldDataColumnType,
+  type EuiTableComputedColumnType,
 } from '@elastic/eui';
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { useGroupedData } from '../../../hooks/use_grouped_data';
-import { GroupByOptions, type FilterOptions } from '../../../types';
+import { GroupByOptions, type FilterOptions, type GroupByViewOptions } from '../../../types';
 import { GroupPanelStyle } from './styles';
 import { GroupByHeaderButton } from './group_header_button';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../types';
@@ -27,10 +29,18 @@ import { ServiceDescription } from './service_description';
 
 export interface GroupedEndpointsTablesProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
-  groupBy: GroupByOptions;
+  groupBy: GroupByViewOptions;
   filterOptions: FilterOptions;
   searchKey: string;
   columns: EuiBasicTableColumn<InferenceAPIConfigResponse>[];
+}
+
+function isColumnWithId(
+  column: EuiBasicTableColumn<InferenceAPIConfigResponse>
+): column is
+  | EuiTableFieldDataColumnType<InferenceAPIConfigResponse>
+  | EuiTableComputedColumnType<InferenceAPIConfigResponse> {
+  return 'id' in column;
 }
 
 export const GroupedEndpointsTables = ({
@@ -44,7 +54,8 @@ export const GroupedEndpointsTables = ({
   const tableColumns = useMemo(() => {
     switch (groupBy) {
       case GroupByOptions.Service:
-        return columns.filter((col) => col?.id !== 'service-column');
+        // remove service column when grouping by service
+        return columns.filter((col) => (isColumnWithId(col) ? col?.id !== 'service-column' : true));
     }
     return columns;
   }, [columns, groupBy]);
