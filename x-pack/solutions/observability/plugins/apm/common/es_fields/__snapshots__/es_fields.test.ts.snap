@@ -178,6 +178,8 @@ exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
 
+exports[`Error KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
+
 exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
 
 exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
@@ -600,6 +602,8 @@ exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -1033,6 +1037,8 @@ exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
 

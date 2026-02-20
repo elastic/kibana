@@ -88,7 +88,6 @@
     "@kbn/apm-data-view",
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/field-utils",
     "@kbn/react-hooks",
     "@kbn/scout",
