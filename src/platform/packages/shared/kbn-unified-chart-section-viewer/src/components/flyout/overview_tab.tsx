@@ -151,28 +151,32 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     : 0;
 
   // Create list items from dimensions
-  const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
-    const hasIcon = iconMap.has(dimension.type);
-    return {
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          {hasIcon && (
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType={iconMap.get(dimension.type) ?? ''} size="s" />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{dimension.name}</EuiText>
-          </EuiFlexItem>
-          {!hasIcon && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{dimension.type}</EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-    };
-  });
+  const dimensionListItems = useMemo(
+    () =>
+      paginatedDimensions.map((dimension: Dimension) => {
+        const hasIcon = iconMap.has(dimension.type);
+        return {
+          label: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {hasIcon && (
+                <EuiFlexItem grow={false}>
+                  <EuiToken iconType={iconMap.get(dimension.type) ?? ''} size="s" />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{dimension.name}</EuiText>
+              </EuiFlexItem>
+              {!hasIcon && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{dimension.type}</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          ),
+        };
+      }),
+    [paginatedDimensions, iconMap]
+  );
 
   return (
     <>
