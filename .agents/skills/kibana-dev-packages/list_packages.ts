@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { partition } from 'lodash';
 import { fromExternalVariant } from '@kbn/std';
-
-import type { ToolDefinition } from '../types';
 
 interface PackageItem {
   name: string;
@@ -22,22 +19,7 @@ interface PackageItem {
   owner: string[];
 }
 
-const listPackagesInputSchema = z.object({
-  excludePlugins: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('Exclude all plugins. Defaults to false'),
-  owner: z
-    .string()
-    .optional()
-    .default('')
-    .describe(
-      'Optional: only include packages/plugins from the specified Kibana Github team. Use list_teams to get the teams if needed'
-    ),
-});
-
-function listPackages(input: z.infer<typeof listPackagesInputSchema>) {
+function listPackages(input: { excludePlugins: boolean; owner: string }) {
   const packages = getPackages(REPO_ROOT);
 
   const items = packages.map((pkg): { plugin: PackageItem } | { package: PackageItem } => {
@@ -78,19 +60,29 @@ function listPackages(input: z.infer<typeof listPackagesInputSchema>) {
   };
 }
 
-export const listKibanaPackagesTool: ToolDefinition<typeof listPackagesInputSchema> = {
-  name: 'list_kibana_packages',
-  description: 'List Kibana packages and Kibana application plugins',
-  inputSchema: listPackagesInputSchema,
-  handler: async (input) => {
-    const result = listPackages(input);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result),
-        },
-      ],
-    };
-  },
-};
+function main() {
+  const args = process.argv.slice(2);
+  let owner = '';
+  let excludePlugins = false;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--team' && args[i + 1]) {
+      owner = args[i + 1];
+      i++;
+    } else if (args[i] === '--exclude-plugins') {
+      excludePlugins = true;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log('Usage: node -r @kbn/setup-node-env list_packages.ts [--team <team>] [--exclude-plugins]');
+      console.log('');
+      console.log('Options:');
+      console.log('  --team <team>        Filter by owning GitHub team');
+      console.log('  --exclude-plugins    Exclude plugins, show only packages');
+      process.exit(0);
+    }
+  }
+
+  const result = listPackages({ excludePlugins, owner });
+  console.log(JSON.stringify(result, null, 2));
+}
+
+main();

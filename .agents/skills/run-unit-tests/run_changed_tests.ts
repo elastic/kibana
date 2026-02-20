@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { exec } from 'child_process';
 import execa from 'execa';
 import path from 'path';
@@ -17,8 +16,6 @@ import fsPromises from 'fs/promises';
 import os from 'os';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPkgsById } from '@kbn/repo-packages';
-
-import type { ToolDefinition } from '../types';
 
 const execAsync = promisify(exec);
 
@@ -35,23 +32,6 @@ const IGNORED_EXTENSIONS = [
   '.lock',
   '.txt',
 ];
-
-const runUnitTestsInputSchema = z.object({
-  collectCoverage: z
-    .boolean()
-    .optional()
-    .describe('Whether to collect and report code coverage. Defaults to false.'),
-  verbose: z
-    .boolean()
-    .optional()
-    .describe('Include full failure messages and stack traces. Defaults to true.'),
-  package: z
-    .string()
-    .optional()
-    .describe(
-      'Optional package identifier. Can be a package ID (e.g., "@kbn/mcp-dev-server"), a directory path relative to repo root (e.g., "src/platform/packages/shared/kbn-mcp-dev-server"), or an absolute path. If provided, runs all tests for that package instead of only changed files.'
-    ),
-});
 
 /**
  * Detailed information about an individual test assertion.
@@ -483,7 +463,7 @@ const runUnitTests = async (options: {
     if (!pkgDir) {
       return {
         success: false,
-        message: `Package not found: ${options.package}. Please provide a valid package ID (e.g., "@kbn/mcp-dev-server"), directory path, or partial package name.`,
+        message: `Package not found: ${options.package}. Please provide a valid package ID (e.g., "@kbn/std"), directory path, or partial package name.`,
         results: [],
       };
     }
@@ -602,33 +582,43 @@ const runUnitTests = async (options: {
   };
 };
 
-export const runUnitTestsTool: ToolDefinition<typeof runUnitTestsInputSchema> = {
-  name: 'run_unit_tests',
-  description: `Run unit tests for changed files or a specific package.
+async function main() {
+  const args = process.argv.slice(2);
+  let packageId = '';
+  let collectCoverage = false;
+  let verbose = true;
 
-Returns detailed test results including:
-- Individual test case names and their pass/fail status
-- Full failure messages with stack traces for debugging
-- Optional code coverage data with uncovered line numbers
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--package' && args[i + 1]) {
+      packageId = args[i + 1];
+      i++;
+    } else if (args[i] === '--coverage') {
+      collectCoverage = true;
+    } else if (args[i] === '--no-verbose') {
+      verbose = false;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log('Usage: node -r @kbn/setup-node-env run_changed_tests.ts [--package <id>] [--coverage] [--no-verbose]');
+      console.log('');
+      console.log('Options:');
+      console.log('  --package <id>   Run all tests for a specific package (ID, path, or partial name)');
+      console.log('  --coverage       Collect code coverage');
+      console.log('  --no-verbose     Truncate failure messages');
+      console.log('');
+      console.log('Without --package, finds changed files (git diff) and runs related tests.');
+      process.exit(0);
+    }
+  }
 
-Use 'collectCoverage: true' to identify untested code paths.
-Use 'verbose: true' (default) for full error details.
-Use 'package' to run all tests for a specific package instead of only changed files.
-The 'package' parameter accepts:
-- Package ID (e.g., "@kbn/mcp-dev-server")
-- Directory path relative to repo root (e.g., "src/platform/packages/shared/kbn-mcp-dev-server")
-- Absolute directory path
-- Partial package name (will match the first package containing the string)`,
-  inputSchema: runUnitTestsInputSchema,
-  handler: async (input) => {
-    const result = await runUnitTests(input);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
-    };
-  },
-};
+  const result = await runUnitTests({
+    package: packageId || undefined,
+    collectCoverage,
+    verbose,
+  });
+
+  console.log(JSON.stringify(result, null, 2));
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

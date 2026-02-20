@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-
-import type { ToolDefinition } from '../types';
 
 const execFileAsync = promisify(execFile);
 
@@ -32,13 +29,6 @@ interface SearchResult {
   matchingFiles: string[];
   analysisTimeMs: number;
 }
-
-const searchByCodeownerInputSchema = z.object({
-  searchTerm: z.string().describe('The term to search for in files (case-insensitive)'),
-  team: z
-    .string()
-    .describe('The GitHub team to filter by (e.g., "@elastic/kibana-data-discovery")'),
-});
 
 function loadCodeOwners(): CodeOwnerRule[] {
   const codeownersPath = path.join(REPO_ROOT, '.github', 'CODEOWNERS');
@@ -201,20 +191,38 @@ async function performSearch(searchTerm: string, team: string): Promise<SearchRe
   };
 }
 
-export const searchByCodeownerTool: ToolDefinition<typeof searchByCodeownerInputSchema> = {
-  name: 'search_by_codeowner',
-  description:
-    'Search for a term in files owned by a specific team based on CODEOWNERS. Returns all files containing the search term that are owned by the specified team.',
-  inputSchema: searchByCodeownerInputSchema,
-  handler: async (input) => {
-    const result = await performSearch(input.searchTerm, input.team);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
-    };
-  },
-};
+async function main() {
+  const args = process.argv.slice(2);
+  let searchTerm = '';
+  let team = '';
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--search' && args[i + 1]) {
+      searchTerm = args[i + 1];
+      i++;
+    } else if (args[i] === '--team' && args[i + 1]) {
+      team = args[i + 1];
+      i++;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log('Usage: node -r @kbn/setup-node-env search_by_codeowner.ts --team <team> --search <term>');
+      console.log('');
+      console.log('Options:');
+      console.log('  --team <team>      GitHub team (e.g., @elastic/kibana-core)');
+      console.log('  --search <term>    Term to search for (case-insensitive)');
+      process.exit(0);
+    }
+  }
+
+  if (!searchTerm || !team) {
+    console.error('Error: --team and --search are required');
+    process.exit(1);
+  }
+
+  const result = await performSearch(searchTerm, team);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

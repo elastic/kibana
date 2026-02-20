@@ -7512,10 +7512,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
   version "0.0.0"
   uid ""

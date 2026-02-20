@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { uniq } from 'lodash';
-
-import type { ToolDefinition } from '../types';
-
-const listTeamsInputSchema = z.object({});
 
 function listTeams() {
   const packages = getPackages(REPO_ROOT);
@@ -26,19 +21,18 @@ function listTeams() {
   };
 }
 
-export const listKibanaTeamsTool: ToolDefinition<typeof listTeamsInputSchema> = {
-  name: 'list_kibana_teams',
-  description: 'List Kibana Github teams',
-  inputSchema: listTeamsInputSchema,
-  handler: async () => {
-    const result = await listTeams();
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result),
-        },
-      ],
-    };
-  },
-};
+function main() {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: node -r @kbn/setup-node-env list_teams.ts');
+    console.log('');
+    console.log('Lists all GitHub teams that own Kibana packages/plugins.');
+    process.exit(0);
+  }
+
+  const result = listTeams();
+  console.log(JSON.stringify(result, null, 2));
+}
+
+main();

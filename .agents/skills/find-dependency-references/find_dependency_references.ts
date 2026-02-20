@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-
-import type { ToolDefinition } from '../types';
 
 // File extensions to analyze
 const SUPPORTED_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx', '.d.ts'];
@@ -48,10 +45,6 @@ interface CodeOwnerRule {
   teams: string[];
   specificity: number; // Higher = more specific
 }
-
-const findDependencyReferencesInputSchema = z.object({
-  dependencyName: z.string().describe('The name of the dependency to search for (e.g., "enzyme")'),
-});
 
 function loadGitignore(): Set<string> {
   const gitignorePath = path.join(REPO_ROOT, '.gitignore');
@@ -449,22 +442,30 @@ function analyzeDependency(dependencyName: string): AnalysisResult {
   };
 }
 
-export const findDependencyReferencesTool: ToolDefinition<
-  typeof findDependencyReferencesInputSchema
-> = {
-  name: 'find_dependency_references',
-  description:
-    'Find all files that import or use a specific dependency in the codebase, grouped by team ownership from CODEOWNERS',
-  inputSchema: findDependencyReferencesInputSchema,
-  handler: async (input) => {
-    const result = analyzeDependency(input.dependencyName);
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
-    };
-  },
-};
+function main() {
+  const args = process.argv.slice(2);
+  let dependencyName = '';
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--dependency' && args[i + 1]) {
+      dependencyName = args[i + 1];
+      i++;
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      console.log('Usage: node -r @kbn/setup-node-env find_dependency_references.ts --dependency <name>');
+      console.log('');
+      console.log('Options:');
+      console.log('  --dependency <name>  Dependency to search for (e.g., "enzyme", "lodash")');
+      process.exit(0);
+    }
+  }
+
+  if (!dependencyName) {
+    console.error('Error: --dependency is required');
+    process.exit(1);
+  }
+
+  const result = analyzeDependency(dependencyName);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+main();
