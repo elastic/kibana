@@ -10,12 +10,14 @@
 import type { ContentListItemConfig, ContentListSupports } from '@kbn/content-list-provider';
 
 /**
- * Context passed to column builder functions.
+ * Shared context available to all builder functions (columns, actions).
  *
- * Provides provider-level configuration needed to build
- * `EuiBasicTableColumn` definitions from parsed declarative props.
+ * Provides provider-level configuration common to every builder. Specific
+ * builder context interfaces extend this base when they need additional fields
+ * (e.g., `ActionBuilderContext` will add delete orchestration callbacks in a
+ * future PR).
  */
-export interface ColumnBuilderContext {
+export interface BuilderContext {
   /** Item configuration from the content list provider. */
   itemConfig?: ContentListItemConfig;
   /** Whether the table is in read-only mode. */
@@ -25,3 +27,11 @@ export interface ColumnBuilderContext {
   /** Feature support flags from the provider. */
   supports?: ContentListSupports;
 }
+
+/**
+ * Context passed to column builder functions.
+ *
+ * Identical to {@link BuilderContext} today. Kept as a named alias so column
+ * builders have their own type that can diverge independently if needed.
+ */
+export type ColumnBuilderContext = BuilderContext;
