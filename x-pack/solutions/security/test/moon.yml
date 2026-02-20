@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/expect'
   - '@kbn/core-http-common'
   - '@kbn/scout-info'
+  - '@kbn/scout-security'
   - '@kbn/ftr-common-functional-services'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/tooling-log'
