@@ -9,8 +9,8 @@ import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
-import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response
@@ -36,7 +36,7 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQueryKql & {
+type SignificantEventsResponse = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
@@ -62,6 +62,9 @@ interface GeneratedSignificantEventQuery {
     name: string;
     filter: Condition;
     type: 'system';
+  };
+  esql: {
+    query: string;
   };
   severity_score: number;
   evidence?: string[];

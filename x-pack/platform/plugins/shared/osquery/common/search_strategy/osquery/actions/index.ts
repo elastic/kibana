@@ -19,6 +19,23 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
+export interface SingleQueryResultCounts {
+  total_rows: number;
+  responded_agents: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export interface PackResultCounts {
+  total_rows: number;
+  queries_with_results: number;
+  queries_total: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export type ResultCounts = SingleQueryResultCounts | PackResultCounts;
+
 export interface ActionDetails {
   action_id: string;
   expiration: string;
@@ -35,6 +52,7 @@ export interface ActionDetails {
   space_id?: string;
   pack_prebuilt?: boolean;
   status?: string;
+  result_counts?: ResultCounts;
   queries?: Array<{
     action_id: string;
     id: string;
