@@ -290,6 +290,28 @@ describe('EndpointScriptEditForm', () => {
       });
     });
 
+    it('should show file required validation error when fake file picker is removed (and no file is uploaded)', async () => {
+      const { getByTestId } = renderResult;
+
+      const removeFileButton = getByTestId('test-remove-file-button');
+      await userEvent.click(removeFileButton); // just click and no blur
+
+      const fileInput = getByTestId('test-file-picker');
+      expect(fileInput).toHaveAttribute('aria-invalid', 'true');
+      const filePickerRow = getByTestId('test-file-picker-row');
+      const euiFormErrorText = filePickerRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText?.textContent).toEqual('A script file is required.');
+      expect(onChangeMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          script: expect.objectContaining({
+            file: undefined,
+          }),
+          hasFormChanged: true,
+        })
+      );
+    });
+
     it.each([
       ['description', "Provide a brief description of the script's functionality."],
       ['instructions', 'Provide step-by-step instructions on how to use or execute the script.'],

@@ -150,7 +150,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     // fake file picker state for validation
     const [showFakeFilePicker, setShowFakeFilePicker] = useState<boolean>(!!scriptItem?.fileName);
     // callback used for validation when the file name is cleared to denote "existing file was removed"
-    const onRemoveFile = useCallback(() => {
+    const onRemoveFileName = useCallback(() => {
       setShowFakeFilePicker(false);
       toggleHasFileError(true);
       setHasFormChanged(true);
@@ -200,7 +200,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               <EuiButtonEmpty
                 type="button"
                 size="xs"
-                onClick={onRemoveFile}
+                onClick={onRemoveFileName}
                 data-test-subj={getTestId('remove-file-button')}
               >
                 {SCRIPT_LIBRARY_LABELS.flyout.body.edit.removeFileButtonLabel}
@@ -210,7 +210,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           <EuiSpacer size="m" />
         </>
       );
-    }, [fakeFilePickerStyle, getTestId, scriptItem?.fileName, onRemoveFile]);
+    }, [fakeFilePickerStyle, getTestId, scriptItem?.fileName, onRemoveFileName]);
 
     // real file picker
     const filePickerUUID = useMemo(() => {
