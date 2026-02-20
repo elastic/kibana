@@ -381,13 +381,6 @@ export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const NO_WORKFLOW_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.none.selected',
-  {
-    defaultMessage: 'No workflow selected',
-  }
-);
-
 export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
   {

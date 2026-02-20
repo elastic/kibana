@@ -7,22 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
+import type { HttpError, OptimisticContext } from './types';
 
 export interface DeleteWorkflowsActionParams {
+  /** Workflow IDs to delete in a single request. */
   ids: string[];
 }
 
-type HttpError = IHttpFetchError<ResponseErrorBody>;
-
-export const useDeleteWorkflowsAction = <TContext = unknown>(
-  options?: UseMutationOptions<void, HttpError, DeleteWorkflowsActionParams, TContext>
+/**
+ * Deletes one or more workflows by ID.
+ *
+ * Sends `DELETE /api/workflows` with `{ ids }`.
+ * Call with `{ ids }`, where `ids` is an array of workflow IDs to delete.
+ *
+ * @example
+ * ```ts
+ * const { mutate: deleteWorkflows } = useDeleteWorkflowsAction();
+ *
+ * deleteWorkflows({ ids: ['workflow-1', 'workflow-2'] });
+ * ```
+ */
+export const useDeleteWorkflowsAction = (
+  options?: UseMutationOptions<void, HttpError, DeleteWorkflowsActionParams, OptimisticContext>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<void, HttpError, DeleteWorkflowsActionParams, TContext>({
+  return useMutation<void, HttpError, DeleteWorkflowsActionParams, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }) => {
       if (!http) {

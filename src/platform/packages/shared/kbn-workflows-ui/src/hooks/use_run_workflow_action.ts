@@ -7,18 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
+import type { HttpError } from './types';
 
 export type RunWorkflowActionParams = RunWorkflowCommand & {
+  /** Workflow ID to run. */
   id: string;
-  triggerTab?: 'manual' | 'alert' | 'index';
 };
 
-type HttpError = IHttpFetchError<ResponseErrorBody>;
-
+/**
+ * Runs a workflow.
+ *
+ * Sends `POST /api/workflows/{id}/run` with `{ inputs }`.
+ * Call with `{ id, inputs }`:
+ * - `id`: workflow ID to run
+ * - `inputs`: runtime input values consumed by the workflow
+ *
+ * @example
+ * ```ts
+ * const { mutate: runWorkflow } = useRunWorkflowAction();
+ *
+ * runWorkflow({
+ *   id: workflowId,
+ *   inputs: { alertIds: ['alert-1'] }
+ * });
+ * ```
+ */
 export const useRunWorkflowAction = (
   options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowActionParams>
 ) => {

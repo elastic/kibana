@@ -7,27 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import type { HttpError, OptimisticContext } from './types';
 
-export interface UpdateWorkflowActionParams {
+export interface UpdateWorkflowParams {
+  /** Workflow ID to update. */
   id: string;
   workflow: Partial<WorkflowDetailDto>;
 }
 
-type HttpError = IHttpFetchError<ResponseErrorBody>;
-
-export const useUpdateWorkflowAction = <
-  TVariables extends UpdateWorkflowActionParams = UpdateWorkflowActionParams,
-  TContext = unknown
->(
-  options?: UseMutationOptions<void, HttpError, TVariables, TContext>
+/**
+ * Updates a workflow by ID.
+ *
+ * Sends `PUT /api/workflows/{id}` with a partial workflow payload.
+ * Call with `{ id, workflow }`, where:
+ * - `id`: workflow ID to update
+ * - `workflow`: what to update in the workflow
+ *
+ * @example
+ * ```ts
+ * const { mutate: updateWorkflow } = useUpdateWorkflowAction();
+ *
+ * updateWorkflow({
+ *   id: workflowId,
+ *   workflow: { enabled: false },
+ * });
+ * ```
+ */
+export const useUpdateWorkflowAction = (
+  options?: UseMutationOptions<void, HttpError, UpdateWorkflowParams, OptimisticContext>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<void, HttpError, TVariables, TContext>({
+  return useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
     mutationFn: ({ id, workflow }) => {
       if (!http) {

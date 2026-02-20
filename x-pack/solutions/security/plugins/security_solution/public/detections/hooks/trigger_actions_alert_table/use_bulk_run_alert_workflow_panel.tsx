@@ -22,10 +22,12 @@ import {
   RUN_WORKFLOW_BULK_PANEL_ID,
 } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 
-export const useBulkRunAlertWorkflowPanel = (): {
+export interface UseBulkRunAlertWorkflowPanelResult {
   runWorkflowItems: BulkActionsConfig[];
   runWorkflowPanels: ContentPanelConfig[];
-} => {
+}
+
+export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResult => {
   const {
     services: { uiSettings, application },
   } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
@@ -33,6 +35,10 @@ export const useBulkRunAlertWorkflowPanel = (): {
   const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
   const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
   const { hasIndexWrite } = useAlertsPrivileges();
+  const canRunWorkflow = useMemo(
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+  );
 
   const renderContent = useCallback((props: RenderContentPanelProps) => {
     const alertIds = props.alertItems.map((item) => ({
@@ -44,7 +50,7 @@ export const useBulkRunAlertWorkflowPanel = (): {
 
   const runWorkflowItems = useMemo(
     () =>
-      hasIndexWrite && workflowUIEnabled && canExecuteWorkflow
+      canRunWorkflow
         ? [
             {
               key: 'bulk-run-alert-workflow',
@@ -56,12 +62,12 @@ export const useBulkRunAlertWorkflowPanel = (): {
             },
           ]
         : [],
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    [canRunWorkflow]
   );
 
   const runWorkflowPanels = useMemo(
     () =>
-      hasIndexWrite && workflowUIEnabled && canExecuteWorkflow
+      canRunWorkflow
         ? [
             {
               id: RUN_WORKFLOW_BULK_PANEL_ID,
@@ -71,8 +77,14 @@ export const useBulkRunAlertWorkflowPanel = (): {
             },
           ]
         : [],
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, renderContent]
+    [canRunWorkflow, renderContent]
   );
 
-  return { runWorkflowItems, runWorkflowPanels };
+  return useMemo(
+    () => ({
+      runWorkflowItems,
+      runWorkflowPanels,
+    }),
+    [runWorkflowItems, runWorkflowPanels]
+  );
 };

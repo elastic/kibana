@@ -18,26 +18,11 @@ import {
 } from '@kbn/workflows-ui';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
-export interface UpdateWorkflowParams {
-  id: string;
-  workflow: Partial<WorkflowDetailDto>;
-  isBulkAction?: boolean;
-  bulkActionCount?: number;
-}
-
-// Context type for storing previous query data to enable rollback on mutation errors
-interface OptimisticContext {
-  // Map of query keys to their previous data for workflow lists
-  previousData: Map<string, WorkflowListDto>;
-  // Previous workflow detail data for individual workflow view
-  previousWorkflowDetail?: WorkflowDetailDto;
-}
-
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const telemetry = useTelemetry();
 
-  const updateWorkflow = useUpdateWorkflowAction<UpdateWorkflowParams, OptimisticContext>({
+  const updateWorkflow = useUpdateWorkflowAction({
     // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -136,7 +121,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const deleteWorkflows = useDeleteWorkflowsAction<OptimisticContext>({
+  const deleteWorkflows = useDeleteWorkflowsAction({
     // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update

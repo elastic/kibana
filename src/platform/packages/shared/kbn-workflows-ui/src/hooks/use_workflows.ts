@@ -11,6 +11,16 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
 
+/**
+ * Fetches a paginated/filterable list of workflows.
+ *
+ * Sends `POST /api/workflows/search` with the provided search params.
+ *
+ * @example
+ * ```ts
+ * const { data } = useWorkflows({ page: 1, size: 20, query: 'security' });
+ * ```
+ */
 export function useWorkflows(params: WorkflowsSearchParams) {
   const { http } = useKibana().services;
 

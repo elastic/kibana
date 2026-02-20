@@ -7,17 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import type { HttpError } from './types';
 
 export interface CloneWorkflowActionParams {
+  /** Workflow ID to clone. */
   id: string;
 }
 
-type HttpError = IHttpFetchError<ResponseErrorBody>;
-
+/**
+ * Clones an existing workflow.
+ *
+ * Sends `POST /api/workflows/{id}/clone` and returns the cloned workflow details.
+ * Call with `{ id }`, where `id` is the workflow ID to clone.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync: cloneWorkflow } = useCloneWorkflowAction();
+ *
+ * const clonedWorkflow: WorkflowDetailDto = await cloneWorkflow({ id: workflowId });
+ * ```
+ */
 export const useCloneWorkflowAction = (
   options?: UseMutationOptions<WorkflowDetailDto, HttpError, CloneWorkflowActionParams>
 ) => {

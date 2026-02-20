@@ -26,24 +26,16 @@ import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
-export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
-export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
-
-export interface UseRunAlertWorkflowPanelProps {
-  closePopover: () => void;
-  ecsRowData: Ecs;
-}
-
-export interface AlertWorkflowAlertId {
-  _id: string;
-  _index: string;
-}
-
 export interface AlertWorkflowsPanelProps {
-  alertIds: AlertWorkflowAlertId[];
+  /** Array and alert ids and their respective indices */
+  alertIds: {
+    _id: string;
+    _index: string;
+  }[];
   onClose: () => void;
 }
 
+/** A panel that lets users select and execute a workflow against one or more alerts. **/
 export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
   const {
     services: { application, rendering },
@@ -155,10 +147,26 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
   );
 };
 
+export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
+export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
+
+export interface UseRunAlertWorkflowPanelProps {
+  /** ECS document for the selected alert row. */
+  ecsRowData: Ecs;
+  closePopover: () => void;
+}
+
+export interface UseRunAlertWorkflowPanelResult {
+  /** Context menu action that opens the run workflow panel. */
+  runWorkflowMenuItem: AlertTableContextMenuItem[];
+  /** Context menu panel descriptor used to render the workflow selector. */
+  runAlertWorkflowPanel: EuiContextMenuPanelDescriptor[];
+}
+
 export const useRunAlertWorkflowPanel = ({
   closePopover,
   ecsRowData,
-}: UseRunAlertWorkflowPanelProps) => {
+}: UseRunAlertWorkflowPanelProps): UseRunAlertWorkflowPanelResult => {
   const {
     services: { uiSettings, application },
   } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
@@ -166,6 +174,10 @@ export const useRunAlertWorkflowPanel = ({
   const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
   const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
   const { hasIndexWrite } = useAlertsPrivileges();
+  const canRunWorkflow = useMemo(
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+  );
 
   const runWorkflowMenuItem: AlertTableContextMenuItem[] = useMemo(
     () => [
@@ -198,10 +210,11 @@ export const useRunAlertWorkflowPanel = ({
     [closePopover, ecsRowData]
   );
 
-  return {
-    runWorkflowMenuItem:
-      hasIndexWrite && workflowUIEnabled && canExecuteWorkflow ? runWorkflowMenuItem : [],
-    runAlertWorkflowPanel:
-      hasIndexWrite && workflowUIEnabled && canExecuteWorkflow ? runAlertWorkflowPanel : [],
-  };
+  return useMemo(
+    () => ({
+      runWorkflowMenuItem: canRunWorkflow ? runWorkflowMenuItem : [],
+      runAlertWorkflowPanel: canRunWorkflow ? runAlertWorkflowPanel : [],
+    }),
+    [canRunWorkflow, runWorkflowMenuItem, runAlertWorkflowPanel]
+  );
 };

@@ -7,13 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunStepCommand, RunWorkflowResponseDto } from '@kbn/workflows';
+import type { HttpError } from './types';
 
-type HttpError = IHttpFetchError<ResponseErrorBody>;
-
+/**
+ * Runs a single workflow step.
+ *
+ * Sends `POST /api/workflows/testStep` with the provided `RunStepCommand`.
+ * Call with `{ stepId, contextOverride, workflowYaml }`:
+ * - `stepId`: ID of the step to execute
+ * - `contextOverride`: test context values for the step
+ * - `workflowYaml`: raw workflow YAML string content
+ *
+ * @example
+ * ```ts
+ * const { mutate: testStep } = useRunWorkflowStepAction();
+ *
+ * testStep({
+ *   stepId: 'send_slack_message',
+ *   contextOverride: { message: 'Hello from test run' },
+ *   workflowYaml,
+ * });
+ * ```
+ */
 export const useRunWorkflowStepAction = (
   options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunStepCommand>
 ) => {
