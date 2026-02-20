@@ -1,0 +1,19 @@
+version: '1'
+name: 'sources.salesforce.get_record'
+description: 'Retrieve a single record by sobject name and record ID'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sobject_name
+    type: string
+  - name: record_id
+    type: string
+steps:
+  - name: get-record
+    type: salesforce.get_record
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      sobjectName: "${{inputs.sobject_name}}"
+      recordId: "${{inputs.record_id}}"

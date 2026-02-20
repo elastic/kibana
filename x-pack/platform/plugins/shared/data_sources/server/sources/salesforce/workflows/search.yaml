@@ -1,0 +1,20 @@
+version: '1'
+name: 'sources.salesforce.search'
+description: 'Run a SOQL query against Salesforce. For large result sets, use nextRecordsUrl from the response to fetch the next page.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: soql
+    type: string
+  - name: next_records_url
+    type: string
+    required: false
+steps:
+  - name: search
+    type: salesforce.search
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      soql: "${{inputs.soql}}"
+      nextRecordsUrl: "${{inputs.next_records_url}}"

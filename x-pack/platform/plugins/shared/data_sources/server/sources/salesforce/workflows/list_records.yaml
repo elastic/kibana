@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.salesforce.list_records'
+description: 'List records for a Salesforce sobject (e.g. Account, Contact). Use limit to cap results (default 200, max 2000). Use nextRecordsUrl from the response to fetch the next page.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sobject_name
+    type: string
+  - name: limit
+    type: number
+    required: false
+    default: 200
+  - name: next_records_url
+    type: string
+    required: false
+steps:
+  - name: list-records
+    type: salesforce.list_records
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      sobjectName: "${{inputs.sobject_name}}"
+      limit: ${{inputs.limit}}
+      nextRecordsUrl: "${{inputs.next_records_url}}"
