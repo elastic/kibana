@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Slack (v2) connectors have the following configuration properties:
 
 Temporary Slack user token
-::   A Slack **user token** (for example, `xoxp-...`). This is a **temporary** MVP authentication method. Treat it as sensitive and rotate it if exposed.
+:   A Slack **user token** (for example, `xoxp-...`). This is a **temporary** MVP authentication method. Treat it as sensitive and rotate it if exposed.
 
 ## Test connectors [slack-v2-action-configuration]
 
@@ -29,7 +29,7 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 The Slack (v2) connector has the following actions:
 
 Search messages
-::   Search for messages in Slack.
+:   Search for messages in Slack.
     - **query** (required): Slack search query string.
     - **inChannel** (optional): Adds `in:<channel_name>` to the query.
     - **fromUser** (optional): Adds `from:<@UserID>` or `from:username` to the query.
@@ -45,7 +45,7 @@ Search messages
     - **raw** (optional): If `true`, return the full raw Slack response (verbose).
 
 Resolve channel ID
-::   Resolve a Slack conversation ID (`C...` for public channels, `G...` for private channels) from a human channel name (for example, `#general`).
+:   Resolve a Slack conversation ID (`C...` for public channels, `G...` for private channels) from a human channel name (for example, `#general`).
     - **name** (required): Channel name (with or without `#`).
     - **types** (optional): Conversation types to search. Defaults to `public_channel`.
     - **match** (optional): `exact` (default) or `contains`.
@@ -55,7 +55,7 @@ Resolve channel ID
     - **maxPages** (optional): Max pages to scan before giving up. Defaults to `10`.
 
 Send message
-::   Send a message to a Slack conversation ID.
+:   Send a message to a Slack conversation ID.
     - **channel** (required): Conversation ID (for example, `C123...`). Use **Resolve channel ID** first if you only have a channel name.
     - **text** (required): Message text.
     - **threadTs** (optional): Reply in a thread (timestamp of the parent message).
