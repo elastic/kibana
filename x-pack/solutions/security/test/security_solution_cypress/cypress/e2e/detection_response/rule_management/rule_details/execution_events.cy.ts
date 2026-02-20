@@ -89,6 +89,15 @@ describe(
 
       it('should filter by log level', function () {
         setExtendedRuleExecutionLoggingMinLevel('debug');
+        createRule({
+          ...getCustomQueryRuleParams({
+            enabled: true,
+          }),
+        }).then((rule) => {
+          visit(ruleDetailsUrl(rule.body.id, 'execution_events'));
+        });
+        waitForTheRuleToBeExecuted();
+
         filterExecutionEventsByLogLevel('DEBUG');
         assertAllEventsHaveLogLevel('DEBUG');
         setExtendedRuleExecutionLoggingMinLevel('info');
