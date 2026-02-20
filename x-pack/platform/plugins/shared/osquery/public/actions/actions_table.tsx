@@ -24,10 +24,12 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
+import { useBulkGetUserProfiles } from './use_user_profiles';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
+import { RunByColumn } from './components/run_by_column';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -79,6 +81,15 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
+  const actionItems = useMemo(
+    () => actionsData?.data?.items ?? EMPTY_ARRAY,
+    [actionsData?.data?.items]
+  );
+
+  const { profilesMap, isLoading: isLoadingProfiles } = useBulkGetUserProfiles(
+    isHistoryEnabled ? actionItems : EMPTY_ARRAY
+  );
+
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
 
@@ -117,6 +128,23 @@ const ActionsTableComponent = () => {
   const renderCreatedByColumn = useCallback(
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
     []
+  );
+
+  const renderRunByColumn = useCallback(
+    (_: unknown, item: SearchHit) => {
+      const userId = (item.fields?.user_id as string[] | undefined)?.[0];
+      const userProfileUid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
+
+      return (
+        <RunByColumn
+          userId={userId}
+          userProfileUid={userProfileUid}
+          profilesMap={profilesMap}
+          isLoadingProfiles={isLoadingProfiles}
+        />
+      );
+    },
+    [profilesMap, isLoadingProfiles]
   );
 
   const renderTimestampColumn = useCallback(
@@ -247,7 +275,7 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Run by',
         }),
         width: '200px',
-        render: renderCreatedByColumn,
+        render: isHistoryEnabled ? renderRunByColumn : renderCreatedByColumn,
       },
       {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
@@ -273,6 +301,7 @@ const ActionsTableComponent = () => {
       renderCreatedByColumn,
       renderPlayButton,
       renderQueryColumn,
+      renderRunByColumn,
       renderTimestampColumn,
     ]
   );
@@ -300,7 +329,7 @@ const ActionsTableComponent = () => {
 
   return (
     <EuiBasicTable
-      items={actionsData?.data?.items ?? EMPTY_ARRAY}
+      items={actionItems}
       loading={isFetching && !isLoading}
       // @ts-expect-error update types
       columns={columns}
