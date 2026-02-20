@@ -13,12 +13,15 @@ import type { EsWorkflowExecution } from '@kbn/workflows/types/latest';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common/mappings';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../workflow_execution_repository/constants';
 
-export interface SearchWorkflowExecutionsParams {
+export interface SearchWorkflowExecutionsParams<
+  K extends keyof EsWorkflowExecution = keyof EsWorkflowExecution
+> {
   query: QueryDslQueryContainer;
   sort?: Sort;
   size?: number;
   from?: number;
   page?: number;
+  fields?: K[];
 }
 
 export interface SearchResult<T> {
@@ -29,13 +32,24 @@ export interface SearchResult<T> {
 }
 
 export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
-  return async ({
-    query,
-    sort = [{ createdAt: 'desc' }],
-    size = 100,
-    from,
-    page = 1,
-  }: SearchWorkflowExecutionsParams): Promise<SearchResult<EsWorkflowExecution>> => {
+  /**
+   * Searches workflow executions across both hot storage (execution state index) and
+   * cold storage (execution history data stream), using field collapsing to deduplicate.
+   *
+   * When `fields` is provided, only those properties are fetched via `_source_includes`
+   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>`.
+   * Results are automatically scoped to `type: 'workflow'` documents.
+   */
+  async function searchWorkflowExecutions(
+    params: SearchWorkflowExecutionsParams
+  ): Promise<SearchResult<EsWorkflowExecution>>;
+  async function searchWorkflowExecutions<K extends keyof EsWorkflowExecution>(
+    params: SearchWorkflowExecutionsParams<K>
+  ): Promise<SearchResult<Pick<EsWorkflowExecution, K>>>;
+  async function searchWorkflowExecutions<K extends keyof EsWorkflowExecution>(
+    params: SearchWorkflowExecutionsParams<K>
+  ): Promise<SearchResult<EsWorkflowExecution | Pick<EsWorkflowExecution, K>>> {
+    const { query, sort = [{ createdAt: 'desc' }], size = 100, from, page = 1, fields } = params;
     const filter: QueryDslQueryContainer[] = [];
 
     if (query.bool?.filter) {
@@ -64,10 +78,11 @@ export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
       from,
       track_total_hits: true,
       collapse: { field: 'id' },
+      _source: fields,
     });
 
     return {
-      results: response.hits.hits.map((hit) => hit._source as EsWorkflowExecution),
+      results: response.hits.hits.map((hit) => hit._source as Pick<EsWorkflowExecution, K>),
       page,
       size,
       total:
@@ -75,5 +90,7 @@ export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
           ? response.hits.total
           : response.hits.total?.value ?? 0,
     };
-  };
+  }
+
+  return searchWorkflowExecutions;
 }

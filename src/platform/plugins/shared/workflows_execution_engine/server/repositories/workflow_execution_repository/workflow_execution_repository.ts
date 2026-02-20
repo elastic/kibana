@@ -20,16 +20,25 @@ export class WorkflowExecutionRepository {
   ) {}
 
   /**
-   * Retrieves a workflow execution by its ID from the data stream.
+   * Retrieves a workflow execution by its ID from cold storage (data stream).
    *
-   * @param workflowExecutionId - The ID of the workflow execution to retrieve.
-   * @param spaceId - The ID of the space associated with the workflow execution.
-   * @returns A promise that resolves to the workflow execution document, or null if not found.
+   * When `fields` is provided, only those properties are fetched via `_source_includes`
+   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>`.
    */
   public async getWorkflowExecutionById(
     workflowExecutionId: string,
     spaceId: string
-  ): Promise<EsWorkflowExecution | null> {
+  ): Promise<EsWorkflowExecution | null>;
+  public async getWorkflowExecutionById<K extends keyof EsWorkflowExecution>(
+    workflowExecutionId: string,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Pick<EsWorkflowExecution, K> | null>;
+  public async getWorkflowExecutionById<K extends keyof EsWorkflowExecution>(
+    workflowExecutionId: string,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<EsWorkflowExecution | Pick<EsWorkflowExecution, K> | null> {
     const response = await this.dataStreamClient.search({
       query: {
         bool: {
@@ -37,13 +46,14 @@ export class WorkflowExecutionRepository {
         },
       },
       size: 1,
+      _source: fields,
     });
 
     const doc = response.hits.hits[0]?._source;
     if (!doc) {
       return null;
     }
-    return doc as unknown as EsWorkflowExecution;
+    return doc as unknown as Pick<EsWorkflowExecution, K>;
   }
 
   /**

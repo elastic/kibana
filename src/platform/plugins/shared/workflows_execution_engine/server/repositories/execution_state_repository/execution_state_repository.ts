@@ -18,7 +18,10 @@ import type {
 import { NonTerminalExecutionStatuses, TerminalExecutionStatuses } from '@kbn/workflows/types/v1';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common';
 
+type RequiredExecutionFields = 'id' | 'type' | 'spaceId';
+
 export class ExecutionStateRepository {
+  private static readonly REQUIRED_FIELDS: RequiredExecutionFields[] = ['id', 'type', 'spaceId'];
   private indexName = WORKFLOWS_EXECUTION_STATE_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
@@ -28,25 +31,28 @@ export class ExecutionStateRepository {
    * Results are filtered to the given spaceId and only include documents with `type: 'workflow'`.
    *
    * When `fields` is provided, only those properties are included in the response
-   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>`.
+   * and the return type is narrowed accordingly. The fields `id`, `type`, and `spaceId`
+   * are always included regardless of what is passed, as they are required for filtering and keying.
    */
   public async getWorkflowExecutions(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string
   ): Promise<Record<string, EsWorkflowExecution>>;
   public async getWorkflowExecutions<K extends keyof EsWorkflowExecution>(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string,
     fields: K[]
-  ): Promise<Record<string, Pick<EsWorkflowExecution, K>>>;
+  ): Promise<Record<string, Pick<EsWorkflowExecution, K | RequiredExecutionFields>>>;
   public async getWorkflowExecutions<K extends keyof EsWorkflowExecution>(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string,
     fields?: K[]
-  ): Promise<Record<string, EsWorkflowExecution | Pick<EsWorkflowExecution, K>>> {
-    return (await this.getExecutions(executionIds, spaceId, 'workflow', fields)) as Record<
+  ): Promise<
+    Record<string, EsWorkflowExecution | Pick<EsWorkflowExecution, K | RequiredExecutionFields>>
+  > {
+    return (await this.getExecutions(ids, spaceId, 'workflow', fields)) as Record<
       string,
-      Pick<EsWorkflowExecution, K>
+      Pick<EsWorkflowExecution, K | RequiredExecutionFields>
     >;
   }
 
@@ -55,25 +61,31 @@ export class ExecutionStateRepository {
    * Results are filtered to the given spaceId and only include documents with `type: 'step'`.
    *
    * When `fields` is provided, only those properties are included in the response
-   * and the return type is narrowed to `Pick<EsWorkflowStepExecution, K>`.
+   * and the return type is narrowed accordingly. The fields `id`, `type`, and `spaceId`
+   * are always included regardless of what is passed, as they are required for filtering and keying.
    */
   public async getStepExecutions(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string
   ): Promise<Record<string, EsWorkflowStepExecution>>;
   public async getStepExecutions<K extends keyof EsWorkflowStepExecution>(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string,
     fields: K[]
-  ): Promise<Record<string, Pick<EsWorkflowStepExecution, K>>>;
+  ): Promise<Record<string, Pick<EsWorkflowStepExecution, K | RequiredExecutionFields>>>;
   public async getStepExecutions<K extends keyof EsWorkflowStepExecution>(
-    executionIds: Set<string>,
+    ids: Set<string>,
     spaceId: string,
     fields?: K[]
-  ): Promise<Record<string, EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K>>> {
-    return (await this.getExecutions(executionIds, spaceId, 'step', fields)) as Record<
+  ): Promise<
+    Record<
       string,
-      Pick<EsWorkflowStepExecution, K>
+      EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K | RequiredExecutionFields>
+    >
+  > {
+    return (await this.getExecutions(ids, spaceId, 'step', fields)) as Record<
+      string,
+      Pick<EsWorkflowStepExecution, K | RequiredExecutionFields>
     >;
   }
 
@@ -260,6 +272,7 @@ export class ExecutionStateRepository {
   /**
    * Fetches executions by ID via mget, filtering by spaceId and optionally by type.
    * When fields is provided, only those properties are included in the response.
+   * The fields `id`, `type`, and `spaceId` are always fetched regardless of the fields parameter.
    */
   private async getExecutions(
     executionIds: Set<string>,
@@ -271,10 +284,14 @@ export class ExecutionStateRepository {
       return {};
     }
 
+    const sourceFields = fields
+      ? [...new Set([...fields, ...ExecutionStateRepository.REQUIRED_FIELDS])]
+      : true;
+
     const mgetResponse = await this.esClient.mget<EsExecution>({
       index: this.indexName,
       ids: Array.from(executionIds),
-      _source: fields || true,
+      _source: sourceFields,
     });
 
     const executions: Record<string, EsExecution> = {};

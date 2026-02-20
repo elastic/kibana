@@ -15,26 +15,50 @@ export function getWorkflowExecutionFn(
   executionStateRepository: ExecutionStateRepository,
   workflowExecutionRepositoryPromise: Promise<WorkflowExecutionRepository>
 ) {
-  return async (executionId: string, spaceId: string): Promise<EsWorkflowExecution | null> => {
-    const executionsFromState = await executionStateRepository.getWorkflowExecutions(
-      new Set([executionId]),
-      spaceId
-    );
+  /**
+   * Retrieves a workflow execution by ID, checking hot storage first and falling back to cold storage.
+   *
+   * When `fields` is provided, only those properties are fetched from hot storage
+   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>`.
+   * The cold storage fallback always returns full documents.
+   */
+  async function getWorkflowExecution(
+    executionId: string,
+    spaceId: string
+  ): Promise<EsWorkflowExecution | null>;
+  async function getWorkflowExecution<K extends keyof EsWorkflowExecution>(
+    executionId: string,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Pick<EsWorkflowExecution, K> | null>;
+  async function getWorkflowExecution<K extends keyof EsWorkflowExecution>(
+    executionId: string,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<EsWorkflowExecution | Pick<EsWorkflowExecution, K> | null> {
+    const executionsFromState = fields
+      ? await executionStateRepository.getWorkflowExecutions(
+          new Set([executionId]),
+          spaceId,
+          fields
+        )
+      : await executionStateRepository.getWorkflowExecutions(new Set([executionId]), spaceId);
 
     if (executionsFromState[executionId]) {
-      return executionsFromState[executionId] as EsWorkflowExecution;
+      return executionsFromState[executionId];
     }
 
     const workflowExecutionRepository = await workflowExecutionRepositoryPromise;
-    const executionFromRepository = await workflowExecutionRepository.getWorkflowExecutionById(
-      executionId,
-      spaceId
-    );
+    const executionFromRepository = fields
+      ? await workflowExecutionRepository.getWorkflowExecutionById(executionId, spaceId, fields)
+      : await workflowExecutionRepository.getWorkflowExecutionById(executionId, spaceId);
 
     if (executionFromRepository) {
       return executionFromRepository;
     }
 
     return null;
-  };
+  }
+
+  return getWorkflowExecution;
 }

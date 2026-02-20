@@ -15,30 +15,39 @@ export function getStepExecutionsFn(
   executionStateRepository: ExecutionStateRepository,
   stepExecutionRepositoryPromise: Promise<StepExecutionRepository>
 ) {
-  return async (
+  async function getStepExecutions(
     executionId: string,
     spaceId: string
-  ): Promise<Record<string, EsWorkflowStepExecution> | null> => {
+  ): Promise<EsWorkflowStepExecution[] | null>;
+  async function getStepExecutions<K extends keyof EsWorkflowStepExecution>(
+    executionId: string,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Pick<EsWorkflowStepExecution, K>[] | null>;
+  async function getStepExecutions<K extends keyof EsWorkflowStepExecution>(
+    executionId: string,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K>[] | null> {
     const executionsFromState = await executionStateRepository.getWorkflowExecutions(
       new Set([executionId]),
       spaceId
     );
 
     if (executionsFromState[executionId]) {
-      return executionStateRepository.getStepExecutions(
-        new Set(executionsFromState[executionId].stepExecutionIds ?? []),
-        spaceId
-      );
+      const stepIds = new Set(executionsFromState[executionId].stepExecutionIds ?? []);
+      const result = fields
+        ? await executionStateRepository.getStepExecutions(stepIds, spaceId, fields)
+        : await executionStateRepository.getStepExecutions(stepIds, spaceId);
+      return Object.values(result);
     }
 
     const stepExecutionRepository = await stepExecutionRepositoryPromise;
-    const stepExecutions = await stepExecutionRepository.searchStepExecutionsByExecutionId(
-      executionId
-    );
+    const result = fields
+      ? await stepExecutionRepository.searchStepExecutionsByExecutionId(executionId, fields)
+      : await stepExecutionRepository.searchStepExecutionsByExecutionId(executionId);
+    return result;
+  }
 
-    return stepExecutions.reduce((acc, stepExecution) => {
-      acc[stepExecution.id] = stepExecution;
-      return acc;
-    }, {} as Record<string, EsWorkflowStepExecution>);
-  };
+  return getStepExecutions;
 }

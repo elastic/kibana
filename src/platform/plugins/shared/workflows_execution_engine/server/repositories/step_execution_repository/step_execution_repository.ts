@@ -8,11 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  TerminalExecutionStatuses,
-  type EsWorkflowStepExecution,
-  type ExecutionStatus,
-} from '@kbn/workflows';
+import { type EsWorkflowStepExecution, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { StepExecutionDataStreamClient } from './data_stream';
 import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './data_stream';
 
@@ -23,23 +19,34 @@ export class StepExecutionRepository {
   ) {}
 
   /**
-   * Searches for step executions by workflow execution ID.
+   * Searches for step executions by workflow execution ID from cold storage (data stream).
    *
-   * @param executionId - The ID of the workflow execution to search for step executions.
-   * @returns A promise that resolves to an array of step executions associated with the given execution ID.
+   * When `fields` is provided, only those properties are fetched via `_source_includes`
+   * and the return type is narrowed to `Pick<EsWorkflowStepExecution, K>`.
    */
   public async searchStepExecutionsByExecutionId(
     executionId: string
-  ): Promise<EsWorkflowStepExecution[]> {
+  ): Promise<EsWorkflowStepExecution[]>;
+  public async searchStepExecutionsByExecutionId<K extends keyof EsWorkflowStepExecution>(
+    executionId: string,
+    fields: K[]
+  ): Promise<Array<Pick<EsWorkflowStepExecution, K>>>;
+  public async searchStepExecutionsByExecutionId<K extends keyof EsWorkflowStepExecution>(
+    executionId: string,
+    fields?: K[]
+  ): Promise<Array<EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K>>> {
     const response = await this.dataStreamClient.search({
       query: {
         match: { workflowRunId: executionId },
       },
       sort: [{ startedAt: { order: 'desc' } }],
       size: 10000,
+      _source_includes: fields,
     });
 
-    return response.hits.hits.map((hit) => hit._source as unknown as EsWorkflowStepExecution);
+    return response.hits.hits.map(
+      (hit) => hit._source as unknown as Pick<EsWorkflowStepExecution, K>
+    );
   }
 
   public async bulkCreate(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
