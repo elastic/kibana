@@ -38,12 +38,12 @@ export class WorkflowExecutionState {
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.executionStateRepository.getExecutions(
+    const foundSteps = await this.executionStateRepository.getStepExecutions(
       new Set(this.workflowExecution.stepExecutionIds ?? []),
       this.workflowExecution.spaceId
     );
     Object.entries(foundSteps).forEach(([id, stepExecution]) =>
-      this.stepExecutions.set(id, stepExecution as EsWorkflowStepExecution)
+      this.stepExecutions.set(id, stepExecution)
     );
     this.buildStepIdExecutionIdIndex();
   }

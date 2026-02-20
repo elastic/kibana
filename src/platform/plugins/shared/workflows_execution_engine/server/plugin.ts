@@ -791,11 +791,12 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
-      const result = await executionStateRepository.getExecutions(
+      const result = await executionStateRepository.getWorkflowExecutions(
         new Set([workflowExecutionId]),
-        spaceId
+        spaceId,
+        ['id', 'status']
       );
-      const workflowExecution = result[workflowExecutionId] as EsWorkflowExecution;
+      const workflowExecution = result[workflowExecutionId];
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);

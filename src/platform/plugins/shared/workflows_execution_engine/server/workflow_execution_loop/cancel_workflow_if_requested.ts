@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import { buildStepExecutionId } from '../utils';
@@ -34,14 +33,13 @@ export async function cancelWorkflowIfRequested(
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
     try {
-      const result = await executionStateRepository.getExecutions(
+      const result = await executionStateRepository.getWorkflowExecutions(
         new Set([workflowExecutionState.getWorkflowExecution().id]),
-        workflowExecutionState.getWorkflowExecution().spaceId
+        workflowExecutionState.getWorkflowExecution().spaceId,
+        ['cancelRequested']
       );
 
-      const currentExecution = result[
-        workflowExecutionState.getWorkflowExecution().id
-      ] as EsWorkflowExecution;
+      const currentExecution = result[workflowExecutionState.getWorkflowExecution().id];
 
       if (!currentExecution?.cancelRequested) {
         return;

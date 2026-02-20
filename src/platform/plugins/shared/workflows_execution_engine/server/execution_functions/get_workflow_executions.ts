@@ -17,12 +17,12 @@ export function getWorkflowExecutionFn(
   workflowExecutionRepositoryPromise: Promise<WorkflowExecutionRepository>
 ): GetWorkflowExecution {
   return async (executionId: string, spaceId: string) => {
-    const executionsFromState = await executionStateRepository.getExecutions(
+    const executionsFromState = await executionStateRepository.getWorkflowExecutions(
       new Set([executionId]),
       spaceId
     );
 
-    if (executionsFromState[executionId] && executionsFromState[executionId].type === 'workflow') {
+    if (executionsFromState[executionId]) {
       return executionsFromState[executionId] as EsWorkflowExecution;
     }
 

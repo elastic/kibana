@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BulkOperationType, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsExecution, EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
+import type {
+  EsExecution,
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import { NonTerminalExecutionStatuses, TerminalExecutionStatuses } from '@kbn/workflows/types/v1';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common';
-
-export interface FindExecutionsOptions {
-  executionIds?: Set<string>;
-  type?: 'workflow' | 'step';
-}
 
 export class ExecutionStateRepository {
   private indexName = WORKFLOWS_EXECUTION_STATE_INDEX;
@@ -23,47 +24,57 @@ export class ExecutionStateRepository {
   constructor(private esClient: ElasticsearchClient) {}
 
   /**
-   * Searches for step executions by workflow execution ID.
+   * Fetches workflow executions by known IDs via mget (O(1) lookup, not subject to refresh interval).
+   * Results are filtered to the given spaceId and only include documents with `type: 'workflow'`.
    *
-   * @param executionId - The ID of the workflow execution to search for step executions.
-   * @returns A promise that resolves to an array of step executions associated with the given execution ID.
+   * When `fields` is provided, only those properties are included in the response
+   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>`.
    */
-  public async getExecutions(
+  public async getWorkflowExecutions(
     executionIds: Set<string>,
     spaceId: string
-  ): Promise<Record<string, EsExecution>> {
-    if (executionIds.size === 0) {
-      return {};
-    }
-
-    const mgetResponse = await this.esClient.mget<EsExecution>({
-      index: this.indexName,
-      ids: Array.from(executionIds),
-    });
-
-    const executions: Record<string, EsExecution> = {};
-    for (const doc of mgetResponse.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        executions[doc._source.id] = doc._source;
-      }
-    }
-
-    Object.values(executions).forEach((execution) => {
-      if (execution.spaceId !== spaceId) {
-        delete executions[execution.id];
-      }
-    });
-
-    return executions;
+  ): Promise<Record<string, EsWorkflowExecution>>;
+  public async getWorkflowExecutions<K extends keyof EsWorkflowExecution>(
+    executionIds: Set<string>,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Record<string, Pick<EsWorkflowExecution, K>>>;
+  public async getWorkflowExecutions<K extends keyof EsWorkflowExecution>(
+    executionIds: Set<string>,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<Record<string, EsWorkflowExecution | Pick<EsWorkflowExecution, K>>> {
+    return (await this.getExecutions(executionIds, spaceId, 'workflow', fields)) as Record<
+      string,
+      Pick<EsWorkflowExecution, K>
+    >;
   }
 
-  // TODO REMOVE THIS
-  public async getExecutionById(executionId: string): Promise<EsExecution | null> {
-    const response = await this.esClient.get<EsExecution>({
-      index: this.indexName,
-      id: executionId,
-    });
-    return response._source || null;
+  /**
+   * Fetches step executions by known IDs via mget (O(1) lookup, not subject to refresh interval).
+   * Results are filtered to the given spaceId and only include documents with `type: 'step'`.
+   *
+   * When `fields` is provided, only those properties are included in the response
+   * and the return type is narrowed to `Pick<EsWorkflowStepExecution, K>`.
+   */
+  public async getStepExecutions(
+    executionIds: Set<string>,
+    spaceId: string
+  ): Promise<Record<string, EsWorkflowStepExecution>>;
+  public async getStepExecutions<K extends keyof EsWorkflowStepExecution>(
+    executionIds: Set<string>,
+    spaceId: string,
+    fields: K[]
+  ): Promise<Record<string, Pick<EsWorkflowStepExecution, K>>>;
+  public async getStepExecutions<K extends keyof EsWorkflowStepExecution>(
+    executionIds: Set<string>,
+    spaceId: string,
+    fields?: K[]
+  ): Promise<Record<string, EsWorkflowStepExecution | Pick<EsWorkflowStepExecution, K>>> {
+    return (await this.getExecutions(executionIds, spaceId, 'step', fields)) as Record<
+      string,
+      Pick<EsWorkflowStepExecution, K>
+    >;
   }
 
   public async bulkCreate(executions: Array<Partial<EsExecution>>): Promise<void> {
@@ -71,33 +82,15 @@ export class ExecutionStateRepository {
       return;
     }
 
-    executions.forEach((execution) => {
-      if (!execution.id) {
-        throw new Error('Execution ID is required for upsert');
-      }
-    });
+    this.assertExecutionIds(executions);
 
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
+      refresh: false,
       index: this.indexName,
       body: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
     });
 
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.create?.error)
-        .map((item) => ({
-          id: item.create?._id,
-          error: item.create?.error,
-          status: item.create?.status,
-        }));
-
-      throw new Error(
-        `Failed to create ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
+    this.throwOnBulkErrors(bulkResponse, 'create', 'create');
   }
 
   public async bulkUpsert(executions: Array<Partial<EsExecution>>): Promise<void> {
@@ -105,14 +98,10 @@ export class ExecutionStateRepository {
       return;
     }
 
-    executions.forEach((execution) => {
-      if (!execution.id) {
-        throw new Error('Execution ID is required for upsert');
-      }
-    });
+    this.assertExecutionIds(executions);
 
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
+      refresh: false,
       index: this.indexName,
       body: executions.flatMap((execution) => [
         { update: { _id: execution.id } },
@@ -120,21 +109,7 @@ export class ExecutionStateRepository {
       ]),
     });
 
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
-      throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
+    this.throwOnBulkErrors(bulkResponse, 'update', 'upsert');
   }
 
   public async bulkUpdate(executions: Array<Partial<EsExecution>>): Promise<void> {
@@ -142,13 +117,15 @@ export class ExecutionStateRepository {
       return;
     }
 
-    await this.esClient.bulk({
+    const bulkResponse = await this.esClient.bulk({
       index: this.indexName,
       body: executions.flatMap((execution) => [
         { update: { _id: execution.id } },
         { doc: execution },
       ]),
     });
+
+    this.throwOnBulkErrors(bulkResponse, 'update', 'update');
   }
 
   /**
@@ -246,6 +223,74 @@ export class ExecutionStateRepository {
           ? response.hits.total
           : response.hits.total?.value ?? 0,
     };
+  }
+
+  private assertExecutionIds(executions: Array<Partial<EsExecution>>): void {
+    for (const execution of executions) {
+      if (!execution.id) {
+        throw new Error('Execution ID is required');
+      }
+    }
+  }
+
+  private throwOnBulkErrors(
+    response: BulkResponse,
+    actionKey: BulkOperationType,
+    operationName: string
+  ): void {
+    if (!response.errors) {
+      return;
+    }
+
+    const erroredDocuments = response.items
+      .filter((item) => item[actionKey]?.error)
+      .map((item) => ({
+        id: item[actionKey]?._id,
+        error: item[actionKey]?.error,
+        status: item[actionKey]?.status,
+      }));
+
+    throw new Error(
+      `Failed to ${operationName} ${erroredDocuments.length} executions: ${JSON.stringify(
+        erroredDocuments
+      )}`
+    );
+  }
+
+  /**
+   * Fetches executions by ID via mget, filtering by spaceId and optionally by type.
+   * When fields is provided, only those properties are included in the response.
+   */
+  private async getExecutions(
+    executionIds: Set<string>,
+    spaceId: string,
+    type?: 'workflow' | 'step',
+    fields?: string[]
+  ): Promise<Record<string, EsExecution>> {
+    if (executionIds.size === 0) {
+      return {};
+    }
+
+    const mgetResponse = await this.esClient.mget<EsExecution>({
+      index: this.indexName,
+      ids: Array.from(executionIds),
+      _source: fields || true,
+    });
+
+    const executions: Record<string, EsExecution> = {};
+    for (const doc of mgetResponse.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        executions[doc._source.id] = doc._source;
+      }
+    }
+
+    Object.values(executions).forEach((execution) => {
+      if (execution.spaceId !== spaceId || (type && execution.type !== type)) {
+        delete executions[execution.id];
+      }
+    });
+
+    return executions;
   }
 
   private async getWorkflowRunIdsWithNonTerminalExecutions(): Promise<string[]> {

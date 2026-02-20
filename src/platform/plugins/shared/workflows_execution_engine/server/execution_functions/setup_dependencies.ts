@@ -54,15 +54,17 @@ export async function setupDependencies(
     internalEsClient
   );
 
-  const executions = await executionStateRepository.getExecutions(
+  const executions = await executionStateRepository.getWorkflowExecutions(
     new Set([workflowRunId]),
     spaceId
   );
 
-  if (!(workflowRunId in executions)) {
+
+  const workflowExecution = executions[workflowRunId];
+
+  if (!workflowExecution) {
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
-  const workflowExecution = executions[workflowRunId] as EsWorkflowExecution;
 
   if (!fakeRequest) {
     logger.error('Cannot execute a workflow without Kibana Request');

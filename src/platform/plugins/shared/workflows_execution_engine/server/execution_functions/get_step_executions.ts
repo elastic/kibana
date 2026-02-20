@@ -17,16 +17,16 @@ export function getStepExecutionsFn(
   stepExecutionRepositoryPromise: Promise<StepExecutionRepository>
 ): GetStepExecutions {
   return async (executionId: string, spaceId: string) => {
-    const executionsFromState = await executionStateRepository.getExecutions(
+    const executionsFromState = await executionStateRepository.getWorkflowExecutions(
       new Set([executionId]),
       spaceId
     );
 
-    if (executionsFromState[executionId] && executionsFromState[executionId].type === 'workflow') {
-      return (await executionStateRepository.getExecutions(
+    if (executionsFromState[executionId]) {
+      return executionStateRepository.getStepExecutions(
         new Set(executionsFromState[executionId].stepExecutionIds ?? []),
         spaceId
-      )) as Record<string, EsWorkflowStepExecution>;
+      );
     }
 
     const stepExecutionRepository = await stepExecutionRepositoryPromise;
