@@ -14,6 +14,9 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
+import { mobileAppData } from '../fixtures/synthtrace/mobile_app_data';
+import { infrastructureData } from '../fixtures/synthtrace/infrastructure_data';
+import { azureFunctionsData } from '../fixtures/synthtrace/azure_functions_data';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
@@ -69,6 +72,30 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
+
+    // Generate mobile app data for mobile transactions page tests
+    const mobileAppDataGenerator = mobileAppData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileAppDataGenerator);
+    log.info('Mobile app data indexed');
+
+    // Generate infrastructure data for infrastructure page tests
+    const infrastructureDataGenerator = infrastructureData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(infrastructureDataGenerator);
+    log.info('Infrastructure data indexed');
+
+    // Generate Azure Functions data for Azure Functions service overview tests
+    const azureFunctionsDataGenerator = azureFunctionsData({
+      start: new Date(testData.START_DATE).getTime(),
+      end: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(azureFunctionsDataGenerator);
+    log.info('Azure Functions data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();
