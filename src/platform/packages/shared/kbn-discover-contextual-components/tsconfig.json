@@ -1,21 +1,10 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "@testing-library/jest-dom",
-      "@testing-library/react"
-    ]
+    "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*", "**/*.stories.ts", "**/*.stories.tsx"],
   "kbn_references": [
     "@kbn/field-formats-plugin",
     "@kbn/discover-utils",
@@ -32,6 +21,6 @@
     "@kbn/custom-icons",
     "@kbn/data-views-plugin",
     "@kbn/data-view-utils",
-    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-theme"
   ]
 }

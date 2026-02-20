@@ -10,6 +10,10 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
@@ -70,6 +74,21 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   hideFilteringOnComputedColumns?: boolean;
+}
+
+/**
+ * Runtime services required by doc viewer components that need access to Kibana platform APIs.
+ *
+ * This type is intentionally a small subset so that Discover (and other consumers) can pass
+ * only what is needed, without relying on plugin-level service singletons.
+ */
+export interface UnifiedDocViewerServices {
+  core: Pick<CoreStart, 'docLinks'>;
+  uiSettings: CoreStart['uiSettings'];
+  storage: Storage;
+  fieldFormats: FieldFormatsStart;
+  toasts: CoreStart['notifications']['toasts'];
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;

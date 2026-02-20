@@ -3,24 +3,26 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/code-editor",
     "@kbn/discover-utils",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
     "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/css-utils",
+    "@kbn/monaco",
     "@kbn/react-field",
     "@kbn/field-utils",
+    "@kbn/core-lifecycle-browser",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/restorable-state",
+    "@kbn/restorable-state"
   ]
 }

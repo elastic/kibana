@@ -9,12 +9,73 @@
 
 import { EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
 import { produce } from 'immer';
 import React from 'react';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';
+
+const buildDataViewMockWithTimeField = (): DataView => {
+  const shallowMockedFields: FieldSpec[] = [
+    {
+      name: '_source',
+      type: '_source',
+      scripted: false,
+      searchable: false,
+      aggregatable: false,
+    },
+    {
+      name: '@timestamp',
+      type: 'date',
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  ];
+
+  const fields = fieldList(shallowMockedFields);
+  fields.create = (spec: FieldSpec) => new DataViewField(spec);
+  fields.getByName = (fieldName: string) => fields.find((field) => field.name === fieldName);
+  fields.getByType = (fieldType: string) => fields.filter((field) => field.type === fieldType);
+  fields.getAll = () => fields;
+
+  return {
+    id: 'the-data-view-id',
+    title: 'the-data-view-title',
+    name: 'the-data-view',
+    metaFields: ['_index', '_score'],
+    fields,
+    type: 'default',
+    getName: () => 'the-data-view',
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, runtimeFields: {} }),
+    getSourceFiltering: () => ({}),
+    getIndexPattern: () => 'the-data-view-title',
+    getFieldByName: jest.fn((fieldName: string) => fields.getByName(fieldName)),
+    timeFieldName: '@timestamp',
+    docvalueFields: [],
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    isTimeBased: () => true,
+    isTimeNanosBased: () => false,
+    isPersisted: () => true,
+    toSpec: () => ({ id: 'the-data-view-id', title: 'the-data-view-title', name: 'the-data-view' }),
+    toMinimalSpec: () => ({
+      id: 'the-data-view-id',
+      title: 'the-data-view-title',
+      name: 'the-data-view',
+    }),
+    getTimeField: () => fields.getByName('@timestamp'),
+    getScriptedField: () => fields.getByName('@timestamp'),
+    getRuntimeField: () => null,
+    getAllowHidden: () => false,
+    isTSDBMode: () => false,
+    setFieldCount: jest.fn(),
+  } as unknown as DataView;
+};
+
+const dataViewMockWithTimeField = buildDataViewMockWithTimeField();
 
 export type UnifiedDocViewerStorybookArgs<T> = Omit<T, 'hit'> & {
   hasApmShowCapability: boolean;

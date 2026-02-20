@@ -10,7 +10,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
+import { ContentFrameworkSection } from '@kbn/discover-contextual-components';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 

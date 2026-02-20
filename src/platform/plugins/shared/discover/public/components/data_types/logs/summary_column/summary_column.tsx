@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { AllSummaryColumnProps } from '@kbn/discover-contextual-components';
+import { LazySummaryColumn } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-
-const LazySummaryColumn = dynamic(
-  () =>
-    import(
-      '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column'
-    )
-);
 
 export const SummaryColumn = (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => {
   const { share, core } = useDiscoverServices();

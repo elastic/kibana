@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer';
 import type { DocView, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_height';

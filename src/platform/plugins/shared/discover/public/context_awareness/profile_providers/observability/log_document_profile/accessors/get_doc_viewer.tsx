@@ -12,12 +12,14 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDocViewerLogsOverview,
+  UnifiedDocViewerServicesProvider,
+  type UnifiedDocViewerContextualServices,
   type UnifiedDocViewerLogsOverviewApi,
-} from '@kbn/unified-doc-viewer-plugin/public';
+} from '@kbn/discover-contextual-components';
 import type { DocViewRenderProps, DocViewActions } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useRef, useState } from 'react';
 import type { BehaviorSubject } from 'rxjs';
@@ -25,6 +27,21 @@ import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import type { LogDocumentProfileProvider } from '../profile';
+
+const getUnifiedDocViewerContextualServices = (
+  services: ProfileProviderServices
+): UnifiedDocViewerContextualServices => ({
+  analytics: services.analytics,
+  data: services.data,
+  fieldFormats: services.fieldFormats,
+  fieldsMetadata: services.fieldsMetadata,
+  toasts: services.core.notifications.toasts,
+  storage: services.storage,
+  uiSettings: services.uiSettings,
+  share: services.share,
+  core: services.core,
+  discoverShared: services.discoverShared,
+});
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -62,6 +79,7 @@ export const createGetDocViewer =
           render: (props: DocViewRenderProps) => {
             return (
               <LogOverviewTab
+                services={services}
                 logOverviewContext$={context.logOverviewContext$}
                 logsAIAssistantFeature={logsAIAssistantFeature}
                 logsAIInsightFeature={logsAIInsightFeature}
@@ -80,6 +98,7 @@ export const createGetDocViewer =
   };
 
 interface LogOverviewTabProps extends DocViewRenderProps {
+  services: ProfileProviderServices;
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
   logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
@@ -89,6 +108,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
 }
 
 const LogOverviewTab = ({
+  services,
   logOverviewContext$,
   logsAIAssistantFeature,
   logsAIInsightFeature,
@@ -103,16 +123,18 @@ const LogOverviewTab = ({
   useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
 
   return (
-    <UnifiedDocViewerLogsOverview
-      {...props}
-      docViewActions={docViewActions}
-      ref={setLogsOverviewApi}
-      renderAIAssistant={logsAIAssistantFeature?.render}
-      renderAIInsight={logsAIInsightFeature?.render}
-      renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
-      renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
-      indexes={indexes}
-    />
+    <UnifiedDocViewerServicesProvider services={getUnifiedDocViewerContextualServices(services)}>
+      <UnifiedDocViewerLogsOverview
+        {...props}
+        docViewActions={docViewActions}
+        ref={setLogsOverviewApi}
+        renderAIAssistant={logsAIAssistantFeature?.render}
+        renderAIInsight={logsAIInsightFeature?.render}
+        renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+        renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+        indexes={indexes}
+      />
+    </UnifiedDocViewerServicesProvider>
   );
 };
 

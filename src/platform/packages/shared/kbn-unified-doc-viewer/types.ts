@@ -14,4 +14,6 @@ export type {
   DocView,
   DocViewerComponent,
   DocViewActions,
+  FieldMapping,
+  UnifiedDocViewerServices,
 } from './src/types';

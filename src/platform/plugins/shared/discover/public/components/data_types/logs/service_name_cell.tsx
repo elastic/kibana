@@ -19,7 +19,7 @@ import {
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/discover-utils';
-import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
+import { FieldBadgeWithActions } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';

@@ -9,8 +9,27 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export * from './data_types/logs/components';
+export * from './common/logs';
+
+export type {
+  LogsOverviewApi as UnifiedDocViewerLogsOverviewApi,
+  LogsOverviewProps as UnifiedDocViewerLogsOverviewProps,
+} from './observability/components/doc_viewer_logs_overview/logs_overview';
+
+export { UnifiedDocViewerLogsOverview } from './observability/components/lazy_doc_viewer_logs_overview';
+export { UnifiedDocViewerObservabilityTracesOverview } from './observability/components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview';
+export { UnifiedDocViewerObservabilityGenericOverview } from './observability/components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview';
+export { UnifiedDocViewerObservabilityAttributesOverview } from './observability/components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
+
+export { ContentFrameworkSection } from './observability/components/content_framework/lazy_content_framework_section';
+export type { ContentFrameworkSectionProps } from './observability/components/content_framework/section/section';
+
+export {
+  UnifiedDocViewerServicesProvider,
+  useUnifiedDocViewerServices,
+} from './observability/services';
+export type { UnifiedDocViewerContextualServices } from './observability/services';
 
 export const LazySummaryColumn = dynamic(
-  () => import('./data_types/logs/components/summary_column/summary_column')
+  () => import('./common/logs/summary_column/summary_column')
 );

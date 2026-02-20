@@ -22,19 +22,18 @@ import { createGetDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
 
-export const createObservabilityTracesDocumentProfileProvider = ({
-  apmContextService,
-  logsContextService,
-}: ProfileProviderServices): DocumentProfileProvider => ({
+export const createObservabilityTracesDocumentProfileProvider = (
+  services: ProfileProviderServices
+): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer({
+    getDocViewer: createGetDocViewer(services, {
       apm: {
-        errors: apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        errors: services.apmContextService.errorsService.getErrorsIndexPattern(),
+        traces: services.apmContextService.tracesService.getAllTracesIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern(),
+      logs: services.logsContextService.getAllLogsIndexPattern(),
     }),
   },
   resolve: ({ record, rootContext }) => {
@@ -42,7 +41,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
     if (
       isObservabilitySolutionView &&
-      isTraceDocument(record, apmContextService.tracesService.isTracesIndexPattern)
+      isTraceDocument(record, services.apmContextService.tracesService.isTracesIndexPattern)
     ) {
       return {
         isMatch: true,

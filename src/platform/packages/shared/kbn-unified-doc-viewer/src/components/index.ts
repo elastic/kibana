@@ -8,4 +8,12 @@
  */
 
 export * from './doc_viewer';
+export * from './doc_viewer_source/get_height';
+export * from './doc_viewer_table/table';
+export * from './doc_viewer_table/field_row';
+export * from './doc_viewer_table/table_cell';
+export * from './doc_viewer_table/table_cell_actions';
+export * from './doc_viewer_table/table_filters';
+export * from './doc_viewer_table/table_grid';
 export * from './field_name';
+export * from './json_code_editor';

@@ -14,4 +14,6 @@ export type {
   DocViewRenderProps,
   DocViewerComponent,
   DocViewerRestorableState,
+  FieldMapping,
+  UnifiedDocViewerServices,
 } from './services/types';

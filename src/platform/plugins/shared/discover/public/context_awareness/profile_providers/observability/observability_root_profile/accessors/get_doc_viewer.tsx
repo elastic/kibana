@@ -9,15 +9,39 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityAttributesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  UnifiedDocViewerObservabilityAttributesOverview,
+  UnifiedDocViewerServicesProvider,
+  type UnifiedDocViewerContextualServices,
+} from '@kbn/discover-contextual-components';
 import { hasAnyFieldWithPrefixes } from '../../utils/has_any_field_with_prefixes';
 import type { ObservabilityRootProfileProvider } from '../types';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
+
+const getUnifiedDocViewerContextualServices = (
+  services: ProfileProviderServices
+): UnifiedDocViewerContextualServices => ({
+  analytics: services.analytics,
+  data: services.data,
+  fieldFormats: services.fieldFormats,
+  fieldsMetadata: services.fieldsMetadata,
+  toasts: services.core.notifications.toasts,
+  storage: services.storage,
+  uiSettings: services.uiSettings,
+  share: services.share,
+  core: services.core,
+  discoverShared: services.discoverShared,
+});
 
 const attributesPrefixes = ['attributes.', 'scope.attributes.', 'resource.attributes.'];
 const hasAnyAttributesField = hasAnyFieldWithPrefixes(attributesPrefixes);
 
-export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocViewer'] =
-  (prev) => (params) => {
+export const createGetDocViewer =
+  (
+    services: ProfileProviderServices
+  ): ObservabilityRootProfileProvider['profile']['getDocViewer'] =>
+  (prev) =>
+  (params) => {
     const prevDocViewer = prev(params);
     const tabTitle = i18n.translate('discover.docViews.observability.attributesOverview.title', {
       defaultMessage: 'Attributes',
@@ -32,7 +56,13 @@ export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocVi
             title: tabTitle,
             order: 9,
             render: (props) => {
-              return <UnifiedDocViewerObservabilityAttributesOverview {...props} />;
+              return (
+                <UnifiedDocViewerServicesProvider
+                  services={getUnifiedDocViewerContextualServices(services)}
+                >
+                  <UnifiedDocViewerObservabilityAttributesOverview {...props} />
+                </UnifiedDocViewerServicesProvider>
+              );
             },
           });
         }

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

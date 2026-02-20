@@ -14,7 +14,7 @@ import { DocViewerSource } from './source';
 import * as hooks from '../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { JsonCodeEditorCommon } from '../json_code_editor';
+import { JsonCodeEditorCommon } from '@kbn/unified-doc-viewer';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';

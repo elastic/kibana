@@ -44,6 +44,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getAvailableResourceFields,
+  getAvailableTraceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
@@ -56,8 +57,12 @@ export {
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
   getFieldValue,
+  getFieldValueWithFallback,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  getFormattedFields,
+  getFlattenedFields,
+  getStacktraceFields,
   DiscoverFlyouts,
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
@@ -74,6 +79,11 @@ export {
 } from './src';
 
 export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
+
+export type { TraceDocument } from './src/data_types/traces/types';
+
+export type { LogDocument } from './src/data_types/logs/types';
+export type { ObservabilityIndexes } from './src/data_types/observability/types';
 
 export * from './src/types';
 

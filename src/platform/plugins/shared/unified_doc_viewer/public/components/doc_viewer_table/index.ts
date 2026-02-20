@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocViewerTable } from './table';
+import React from 'react';
+import { DocViewerTable } from '@kbn/unified-doc-viewer';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+
+import { getUnifiedDocViewerServices } from '../../plugin';
 
 // Required for usage in React.lazy
 // eslint-disable-next-line import/no-default-export
-export default DocViewerTable;
+export default function DocViewerTableWrapper(props: DocViewRenderProps) {
+  return React.createElement(DocViewerTable, {
+    ...props,
+    services: getUnifiedDocViewerServices(),
+  });
+}

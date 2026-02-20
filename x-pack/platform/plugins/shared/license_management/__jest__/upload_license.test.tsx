@@ -109,7 +109,7 @@ describe('UploadLicense', () => {
     const rendered = renderComponent(store);
 
     await act(async () => {
-      await store.dispatch(uploadLicense('INVALID', 'trial'));
+      await store.dispatch(uploadLicense('INVALID', 'trial', undefined));
     });
 
     await screen.findByText(/Check your license file\./);
@@ -122,7 +122,7 @@ describe('UploadLicense', () => {
     const rendered = renderComponent(store);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await act(async () => {
-      await store.dispatch(uploadLicense(invalidLicense, 'trial'));
+      await store.dispatch(uploadLicense(invalidLicense, 'trial', undefined));
     });
 
     await screen.findByText('The supplied license is not valid for this product.');
@@ -135,7 +135,7 @@ describe('UploadLicense', () => {
     const rendered = renderComponent(store);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await act(async () => {
-      await store.dispatch(uploadLicense(invalidLicense, 'trial'));
+      await store.dispatch(uploadLicense(invalidLicense, 'trial', undefined));
     });
 
     await screen.findByText('The supplied license has expired.');
@@ -150,7 +150,7 @@ describe('UploadLicense', () => {
       license: { type: 'basic' },
     });
     await act(async () => {
-      await store.dispatch(uploadLicense(unacknowledgedLicense, 'trial'));
+      await store.dispatch(uploadLicense(unacknowledgedLicense, 'trial', undefined));
     });
 
     await screen.findByText('Confirm License Upload');
@@ -161,7 +161,7 @@ describe('UploadLicense', () => {
     thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
     const store = licenseManagementStore({}, thunkServices);
     const validLicense = JSON.stringify({ license: { type: 'basic' } });
-    await store.dispatch(uploadLicense(validLicense, 'trial'));
+    await store.dispatch(uploadLicense(validLicense, 'trial', undefined));
     expect(appDependencies.plugins.licensing.refresh).toHaveBeenCalled();
     expect(thunkServices.history.replace).toHaveBeenCalled();
   });
@@ -172,7 +172,7 @@ describe('UploadLicense', () => {
     const rendered = renderComponent(store);
     const license = JSON.stringify({ license: { type: 'basic' } });
     await act(async () => {
-      await store.dispatch(uploadLicense(license, 'trial'));
+      await store.dispatch(uploadLicense(license, 'trial', undefined));
     });
 
     await screen.findByText(/Error encountered uploading license:/);

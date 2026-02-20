@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';

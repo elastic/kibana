@@ -9,18 +9,61 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { DocViewerProps } from './doc_viewer';
 import { DocViewer, INITIAL_TAB } from './doc_viewer';
 import type { DocViewRenderProps } from '../../types';
 import { DocViewsRegistry } from '../..';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import userEvent from '@testing-library/user-event';
 
 const analytics = analyticsServiceMock.createAnalyticsServiceStart();
-const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
+const dataViewMock = createStubDataView({
+  spec: {
+    id: 'test',
+    title: 'test',
+    timeFieldName: '@timestamp',
+    fields: {
+      '@timestamp': {
+        name: '@timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: true,
+        scripted: false,
+        isMapped: true,
+      },
+      message: {
+        name: 'message',
+        type: 'string',
+        esTypes: ['keyword'],
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: true,
+        scripted: false,
+        isMapped: true,
+      },
+    },
+  },
+});
+
+const records = [
+  buildDataTableRecord(
+    {
+      _index: 'test',
+      _id: '1',
+      _source: {
+        '@timestamp': '2020-01-01T00:00:00.000Z',
+        message: 'hello',
+      },
+    } as unknown as EsHitRecord,
+    dataViewMock
+  ),
+];
 
 const mockSetLocalStorage = jest.fn();
 const mockLocalStorageKey = INITIAL_TAB;

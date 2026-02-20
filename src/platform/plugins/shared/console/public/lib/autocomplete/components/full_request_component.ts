@@ -12,7 +12,7 @@ import { ConstantComponent } from './constant_component';
 export class FullRequestComponent extends ConstantComponent {
   readonly name: string;
   constructor(name: string, parent: unknown, private readonly template: string) {
-    super(name, parent);
+    super(name, parent, undefined);
     this.name = name;
   }
 

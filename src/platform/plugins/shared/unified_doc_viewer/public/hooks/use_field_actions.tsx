@@ -12,8 +12,7 @@ import createContainer from 'constate';
 import type { IconType } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewRenderProps, FieldMapping } from '@kbn/unified-doc-viewer/types';
 
 interface WithFieldParam {
   field: string;
