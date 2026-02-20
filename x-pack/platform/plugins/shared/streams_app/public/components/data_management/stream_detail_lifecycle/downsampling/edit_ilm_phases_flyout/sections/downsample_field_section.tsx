@@ -90,12 +90,12 @@ export const DownsampleFieldSection = ({
           iconType="info"
           data-test-subj={`${dataTestSubj}DownsamplingNotSupportedCallout-${phaseName}`}
           title={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle', {
-            defaultMessage: 'Does not apply to this stream',
+            defaultMessage: 'Downsampling is unavailable for this stream',
           })}
         >
           {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
             defaultMessage:
-              'Downsampling only applies to time series streams. This configuration will be ignored for this stream.',
+              "Downsampling only works for time series streams. Configuring these settings won't effect how this stream's data is stored.",
           })}
         </EuiCallOut>
       )}
