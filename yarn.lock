@@ -6152,6 +6152,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-server-utils@link:src/platform/packages/shared/kbn-cps-server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps-utils@link:src/platform/packages/shared/kbn-cps-utils":
   version "0.0.0"
   uid ""
@@ -9085,6 +9089,10 @@
   uid ""
 
 "@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
+  version "0.0.0"
+  uid ""
+
+"@kbn/synthetics-forge@link:x-pack/solutions/observability/packages/kbn-synthetics-forge":
   version "0.0.0"
   uid ""
 
