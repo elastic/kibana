@@ -193,6 +193,22 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     });
     expect(resp.hits.hits).toHaveLength(2);
+
+    const extractionResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          fromDateISO: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+          toDateISO: new Date().toISOString(),
+        },
+      }
+    );
+    expect(extractionResponse.statusCode).toBe(200);
+    expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
+    expect(extractionResponse.body.count).toBe(2);
   });
 
   apiTest('Should delete an entity', async ({ apiClient, esClient }) => {
