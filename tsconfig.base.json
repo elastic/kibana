@@ -1852,6 +1852,8 @@
       "@kbn/response-ops-rule-params/*": ["x-pack/platform/packages/shared/response-ops/rule_params/*"],
       "@kbn/response-ops-rules-apis": ["x-pack/platform/packages/shared/response-ops/rules-apis"],
       "@kbn/response-ops-rules-apis/*": ["x-pack/platform/packages/shared/response-ops/rules-apis/*"],
+      "@kbn/response-ops-scheduling-types": ["x-pack/platform/packages/shared/response-ops/scheduling-types"],
+      "@kbn/response-ops-scheduling-types/*": ["x-pack/platform/packages/shared/response-ops/scheduling-types/*"],
       "@kbn/response-stream-plugin": ["examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["examples/response_stream/*"],
       "@kbn/restorable-state": ["src/platform/packages/shared/kbn-restorable-state"],
