@@ -110,7 +110,19 @@ export interface ProductFeatureParams<
   productFeatureConfig?: ProductFeaturesConfig<K, S>;
 }
 
-export interface ConfigExtensions<C extends ProductFeaturesConfig> {
+/** Union of all product feature config types for ConfigExtensions constraint */
+type AnyProductFeaturesConfig =
+  | SecurityProductFeaturesConfig
+  | CasesProductFeaturesConfig
+  | AssistantProductFeaturesConfig
+  | AttackDiscoveryProductFeaturesConfig
+  | TimelineProductFeaturesConfig
+  | NotesProductFeaturesConfig
+  | SiemMigrationsProductFeaturesConfig
+  | RulesProductFeaturesConfig
+  | AlertsProductFeaturesConfig;
+
+export interface ConfigExtensions<C extends AnyProductFeaturesConfig> {
   /** The `allVersions` is used to extend all the versions of the feature group */
   allVersions: C;
   /** The `version` object indexed by the feature `id` */
