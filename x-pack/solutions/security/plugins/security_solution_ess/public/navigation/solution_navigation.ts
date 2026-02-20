@@ -43,6 +43,5 @@ export const registerSolutionNavigation = async (services: Services) => {
     icon: 'logoSecurity',
     homePage: securityLink(SecurityPageName.landing),
     navigationTree$: Rx.of(navigationTree),
-    dataTestSubj: 'securitySolutionSideNav',
   });
 };

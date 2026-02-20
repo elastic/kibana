@@ -10,7 +10,6 @@ import type { ServerlessPluginStart } from './types';
 const startMock = (): ServerlessPluginStart => ({
   initNavigation: jest.fn(),
   setBreadcrumbs: jest.fn(),
-  setProjectHome: jest.fn(),
   getNavigationCards: jest.fn(),
 });
 

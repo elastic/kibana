@@ -663,5 +663,4 @@ export const createDefinition = (
       })
     )
   ),
-  dataTestSubj: 'observabilitySideNav',
 });

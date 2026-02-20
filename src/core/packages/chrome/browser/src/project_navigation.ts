@@ -275,8 +275,6 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   icon?: IconType;
   /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
-  /** data-test-subj attribute for the solution navigation. */
-  dataTestSubj?: string;
 }
 
 export type SolutionNavigationDefinitions = {

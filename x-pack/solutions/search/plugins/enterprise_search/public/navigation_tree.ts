@@ -56,7 +56,6 @@ export const getNavigationTreeDefinition = ({
   isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    dataTestSubj: 'searchSideNav',
     homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
