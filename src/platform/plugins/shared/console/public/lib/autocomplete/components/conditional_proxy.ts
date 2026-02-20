@@ -27,15 +27,11 @@ export class ConditionalProxy extends SharedComponent {
     this.delegate = delegate;
   }
 
-  getTerms(
-    context: AutoCompleteContext,
-    editor: unknown
-  ): AutocompleteTermDefinition[] | null | undefined {
+  getTerms(context: AutoCompleteContext, editor: unknown): AutocompleteTermDefinition[] | null {
     if (this.predicate(context, editor)) {
-      return this.delegate.getTerms(context, editor);
-    } else {
-      return null;
+      return this.delegate.getTerms(context, editor) ?? null;
     }
+    return null;
   }
 
   match(token: unknown, context: AutoCompleteContext, editor: unknown): AutocompleteMatch {
