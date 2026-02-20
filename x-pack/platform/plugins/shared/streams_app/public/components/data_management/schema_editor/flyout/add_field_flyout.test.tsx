@@ -295,4 +295,46 @@ describe('AddFieldFlyout', () => {
       });
     });
   });
+
+  describe('Add field button state', () => {
+    it('disables the Add field button when field name validation fails', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('wired');
+
+      await typeFieldName(user, 'invalid_field');
+
+      await waitFor(() => {
+        const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
+        expect(addFieldButton).toBeDisabled();
+      });
+    });
+
+    it('disables the Add field button when field name is valid but type is not selected', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('wired');
+
+      await typeFieldName(user, 'attributes.custom_field');
+
+      await waitFor(() => {
+        const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
+        expect(addFieldButton).toBeDisabled();
+      });
+    });
+
+    it('enables the Add field button when all required fields are valid', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('wired');
+
+      await typeFieldName(user, 'attributes.custom_field');
+      const typeSelect = screen.getByTestId('streamsAppFieldFormTypeSelect');
+      await user.click(typeSelect);
+      const keywordOption = screen.getByTestId('option-type-keyword');
+      await user.click(keywordOption);
+
+      await waitFor(() => {
+        const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
+        expect(addFieldButton).not.toBeDisabled();
+      });
+    });
+  });
 });

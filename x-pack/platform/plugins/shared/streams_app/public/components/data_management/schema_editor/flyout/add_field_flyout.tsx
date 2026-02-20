@@ -131,7 +131,7 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
           <EuiButton
             data-test-subj="streamsAppSchemaEditorAddFieldButton"
             onClick={methods.handleSubmit(handleSubmit)}
-            isDisabled={methods.formState.isSubmitted && !methods.formState.isValid}
+            isDisabled={!methods.formState.isValid}
           >
             {i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.addButtonLabel', {
               defaultMessage: 'Add field',
