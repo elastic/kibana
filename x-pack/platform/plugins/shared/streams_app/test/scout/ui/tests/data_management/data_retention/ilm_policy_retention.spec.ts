@@ -16,7 +16,7 @@ import {
   toggleInheritSwitch,
 } from '../../../fixtures/retention_helpers';
 
-test.describe.only('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
+test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
