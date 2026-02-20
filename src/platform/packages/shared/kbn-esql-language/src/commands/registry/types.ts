@@ -14,6 +14,7 @@ import type {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
   ESQLCallbacks,
+  EsqlView,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -109,6 +110,8 @@ export type GetColumnsByTypeFn = (
     openSuggestions?: boolean;
     addComma?: boolean;
     variableType?: ESQLVariableType;
+    /** When true, prepends a "Browse fields" suggestion with current columns as preloaded fields. */
+    isFieldsBrowserEnabled?: boolean;
   }
 ) => Promise<ISuggestionItem[]>;
 
@@ -185,7 +188,7 @@ export interface ICommandCallbacks {
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
-  isResourceBrowserEnabled?: () => Promise<boolean>;
+  canSuggestResourceBrowser?: () => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -195,12 +198,14 @@ export interface ICommandContext {
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
+  views?: EsqlView[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
 }
 /**

@@ -219,6 +219,7 @@ describe('Run Single Report Task', () => {
           _id: 'test',
           jobtype: 'test1',
           status: 'pending',
+          useInternalUser: false,
         },
       },
       { request: fakeRawRequest }
@@ -251,6 +252,7 @@ describe('Run Single Report Task', () => {
         _id: 'test',
         jobtype: 'test1',
         status: 'pending',
+        useInternalUser: false,
       },
     });
   });
@@ -281,6 +283,7 @@ describe('Run Single Report Task', () => {
         _id: 'test',
         jobtype: 'test1',
         status: 'pending',
+        useInternalUser: false,
       },
     });
   });

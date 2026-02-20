@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
 
-      await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-dashboard_drilldown');
       await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
         drilldownName: `My drilldown`,
         destinationDashboardTitle: `few panels`,
