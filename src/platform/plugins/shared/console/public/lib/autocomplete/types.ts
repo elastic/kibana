@@ -52,6 +52,14 @@ export interface DataAutoCompleteRulesOneOf {
 }
 
 export interface AutoCompleteContext {
+  /**
+   * Autocomplete context is dynamically extended at runtime with component-specific keys while
+   * resolving/matching DSL rules (for example: `context.indices`, `context.types`, and other
+   * keys derived from component names / endpoint rules).
+   *
+   * This index signature documents that design: callers should treat these dynamic properties as
+   * untyped unless a specific field is declared below.
+   */
   [key: string]: unknown;
   autoCompleteSet?: null | ResultTerm[];
   /**
