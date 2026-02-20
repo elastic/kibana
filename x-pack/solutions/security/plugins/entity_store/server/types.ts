@@ -27,6 +27,7 @@ import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction_client';
 import type { CRUDClient } from './domain/crud_client';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -49,6 +50,7 @@ export interface EntityStoreApiRequestHandlerContext {
   crudClient: CRUDClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
+  security: SecurityPluginStart;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
@@ -57,7 +59,12 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
 
-export type PluginStartContract = void;
-export type PluginSetupContract = void;
+export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
 
-export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, PluginStartContract>;
+export type EntityStoreStartContract = void;
+
+export interface EntityStoreSetupContract {
+  registerEntityMaintainer: RegisterEntityMaintainer;
+}
+
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

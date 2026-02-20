@@ -37,7 +37,6 @@ export async function createRequestHandlerContext({
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
-
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
@@ -77,9 +76,11 @@ export async function createRequestHandlerContext({
       namespace,
       isServerless,
       logsExtractionClient,
+      security: startPlugins.security,
     }),
     crudClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
+    security: startPlugins.security,
   };
 }

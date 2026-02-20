@@ -14,7 +14,7 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
-  UPDATES_DATASTREAM,
+  UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
@@ -185,7 +185,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(bulkUpsert.statusCode).toBe(200);
 
     const resp = await esClient.search({
-      index: UPDATES_DATASTREAM,
+      index: UPDATES_INDEX,
       query: {
         wildcard: {
           'entity.id': 'required-id-*-bulk',

@@ -15,7 +15,11 @@ export function updateMeta<T extends Partial<RawRule>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {
-  if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
+  if (
+    Object.hasOwn(alertAttributes, 'apiKey') ||
+    Object.hasOwn(alertAttributes, 'uiamApiKey') ||
+    Object.hasOwn(alertAttributes, 'apiKeyOwner')
+  ) {
     return {
       ...alertAttributes,
       meta: {

@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/spaces-plugin'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/data-view-validation'
   - '@kbn/data-views-plugin'
   - '@kbn/es-types'
   - '@kbn/security-plugin-types-server'
@@ -39,6 +40,8 @@ dependsOn:
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
   - '@kbn/std'
+  - '@kbn/es-query'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
