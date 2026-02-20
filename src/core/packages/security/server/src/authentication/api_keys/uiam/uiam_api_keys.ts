@@ -83,8 +83,6 @@ export interface ConvertUiamAPIKeyParams {
   keys: Array<{
     /** The base64-encoded Elasticsearch API key value. */
     key: string;
-    /** The Elasticsearch endpoint URI used to validate the key. */
-    endpoint: string;
   }>;
 }
 

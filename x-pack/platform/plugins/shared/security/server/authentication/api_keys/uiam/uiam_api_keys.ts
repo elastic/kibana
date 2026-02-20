@@ -28,6 +28,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
+  elasticsearchHost?: string;
 }
 
 /**
@@ -38,11 +39,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
+  private readonly elasticsearchHost?: string;
 
-  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam, elasticsearchHost }: UiamAPIKeysOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
+    this.elasticsearchHost = elasticsearchHost;
   }
 
   /**
@@ -160,10 +163,17 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
+    if (!this.elasticsearchHost) {
+      throw new Error(
+        'Cannot convert API keys: elasticsearch.hosts is not configured'
+      );
+    }
+
     this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);
 
     try {
-      const mappedKeys = params.keys.map(({ key, endpoint }) => ({
+      const endpoint = this.elasticsearchHost;
+      const mappedKeys = params.keys.map(({ key }) => ({
         type: 'elasticsearch' as const,
         key,
         endpoint,

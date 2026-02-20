@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
@@ -184,6 +184,8 @@ export class SecurityPlugin
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
+  private elasticsearchHost?: string;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -247,6 +249,10 @@ export class SecurityPlugin
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
+    firstValueFrom(core.elasticsearch.legacy.config$).then((esConfig) => {
+      this.elasticsearchHost = esConfig.hosts[0];
+    });
+
     this.authenticationService.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
@@ -433,6 +439,7 @@ export class SecurityPlugin
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      elasticsearchHost: this.elasticsearchHost,
     });
 
     this.authorizationService.start({

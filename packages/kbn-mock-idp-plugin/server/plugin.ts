@@ -366,7 +366,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               keys: schema.arrayOf(
                 schema.object({
                   key: schema.string(),
-                  endpoint: schema.string(),
                 }),
                 { minSize: 1 }
               ),

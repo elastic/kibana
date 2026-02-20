@@ -70,6 +70,7 @@ interface AuthenticationServiceStartParams {
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
   buildFlavor?: BuildFlavor;
+  elasticsearchHost?: string;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -352,6 +353,7 @@ export class AuthenticationService {
     customLogoutURL,
     buildFlavor = 'traditional',
     uiam,
+    elasticsearchHost,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -368,6 +370,7 @@ export class AuthenticationService {
           logger: this.logger.get('api-key-uiam'),
           license: this.license,
           uiam,
+          elasticsearchHost,
         })
       : null;
 
