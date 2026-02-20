@@ -16,8 +16,7 @@ describe('buildLiveActionsQuery', () => {
       expect(result.body).toHaveProperty('query');
       expect(result.body).toHaveProperty('size', 20);
       expect(result.body).toHaveProperty('sort');
-      expect(result.body).toHaveProperty('track_total_hits', true);
-      expect(result.body).toHaveProperty('fields', ['*']);
+      expect(result.body).toHaveProperty('_source', true);
     });
 
     test('size equals pageSize', () => {
@@ -32,16 +31,10 @@ describe('buildLiveActionsQuery', () => {
       expect(sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
     });
 
-    test('track_total_hits is always true', () => {
+    test('_source is always true', () => {
       expect(
-        buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }).body.track_total_hits
+        buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }).body._source
       ).toBe(true);
-    });
-
-    test('fields wildcard is always included', () => {
-      expect(buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' }).body.fields).toEqual([
-        '*',
-      ]);
     });
   });
 
@@ -152,7 +145,7 @@ describe('buildLiveActionsQuery', () => {
   });
 
   describe('kuery filter', () => {
-    test('adds query_string filter when kuery is provided', () => {
+    test('adds simple_query_string filter when kuery is provided', () => {
       const result = buildLiveActionsQuery({
         pageSize: 20,
         spaceId: 'default',
@@ -162,7 +155,7 @@ describe('buildLiveActionsQuery', () => {
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       expect(filters).toContainEqual({
-        query_string: {
+        simple_query_string: {
           query: '*myquery*',
           fields: ['pack_name', 'queries.query', 'queries.id'],
           analyze_wildcard: true,
@@ -180,9 +173,9 @@ describe('buildLiveActionsQuery', () => {
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       const qsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).query_string !== undefined
+        (f) => (f as Record<string, unknown>).simple_query_string !== undefined
       ) as Record<string, unknown>;
-      const qs = qsFilter.query_string as Record<string, unknown>;
+      const qs = qsFilter.simple_query_string as Record<string, unknown>;
 
       expect(qs.query).toBe('*find-me*');
     });
@@ -197,14 +190,14 @@ describe('buildLiveActionsQuery', () => {
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       const qsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).query_string !== undefined
+        (f) => (f as Record<string, unknown>).simple_query_string !== undefined
       ) as Record<string, unknown>;
-      const qs = qsFilter.query_string as Record<string, unknown>;
+      const qs = qsFilter.simple_query_string as Record<string, unknown>;
 
       expect(qs.fields).toEqual(['pack_name', 'queries.query', 'queries.id']);
     });
 
-    test('sets analyze_wildcard to true on the query_string filter', () => {
+    test('sets analyze_wildcard to true on the simple_query_string filter', () => {
       const result = buildLiveActionsQuery({
         pageSize: 20,
         spaceId: 'default',
@@ -214,20 +207,20 @@ describe('buildLiveActionsQuery', () => {
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       const qsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).query_string !== undefined
+        (f) => (f as Record<string, unknown>).simple_query_string !== undefined
       ) as Record<string, unknown>;
-      const qs = qsFilter.query_string as Record<string, unknown>;
+      const qs = qsFilter.simple_query_string as Record<string, unknown>;
 
       expect(qs.analyze_wildcard).toBe(true);
     });
 
-    test('does not add query_string filter when kuery is undefined', () => {
+    test('does not add simple_query_string filter when kuery is undefined', () => {
       const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default' });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       const qsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).query_string !== undefined
+        (f) => (f as Record<string, unknown>).simple_query_string !== undefined
       );
       expect(qsFilter).toBeUndefined();
     });
@@ -245,14 +238,14 @@ describe('buildLiveActionsQuery', () => {
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      // base: type, input_type, space_id term, range, query_string = 5
+      // base: type, input_type, space_id term, range, simple_query_string = 5
       expect(filters).toHaveLength(5);
       expect(filters).toContainEqual({ term: { type: { value: 'INPUT_ACTION' } } });
       expect(filters).toContainEqual({ term: { input_type: { value: 'osquery' } } });
       expect(filters).toContainEqual({ term: { space_id: 'custom-space' } });
       expect(filters).toContainEqual({ range: { '@timestamp': { lt: cursor } } });
       const qsFilter = filters.find(
-        (f) => (f as Record<string, unknown>).query_string !== undefined
+        (f) => (f as Record<string, unknown>).simple_query_string !== undefined
       );
       expect(qsFilter).toBeDefined();
     });

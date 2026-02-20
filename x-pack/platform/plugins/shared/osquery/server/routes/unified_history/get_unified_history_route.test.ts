@@ -15,69 +15,8 @@
  * to fetch the next page without re-fetching rows already seen.
  */
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface MergeableRow {
-  id: string;
-  rowType: 'live' | 'scheduled';
-  timestamp: string;
-}
-
-interface MergeResult {
-  rows: MergeableRow[];
-  hasMore: boolean;
-  nextActionsCursor?: string;
-  nextScheduledCursor?: string;
-  nextScheduledOffset?: number;
-}
-
-// ---------------------------------------------------------------------------
-// Helper — mirrors the merge logic from get_unified_history_route.ts
-// ---------------------------------------------------------------------------
-
-const mergeRows = (
-  liveRows: MergeableRow[],
-  allScheduledRows: MergeableRow[],
-  pageSize: number,
-  scheduledOffset: number = 0
-): MergeResult => {
-  // Apply offset to skip already-consumed scheduled rows (offset-based pagination)
-  const scheduledRows = allScheduledRows.slice(scheduledOffset);
-
-  const allMerged = [...liveRows, ...scheduledRows].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
-
-  const hasMore = allMerged.length > pageSize;
-  const merged = allMerged.slice(0, pageSize);
-
-  const scheduledConsumedOnPage = merged.filter((r) => r.rowType === 'scheduled').length;
-
-  let nextActionsCursor: string | undefined;
-  let nextScheduledCursor: string | undefined;
-
-  for (let i = merged.length - 1; i >= 0; i--) {
-    if (!nextActionsCursor && merged[i].rowType === 'live') {
-      nextActionsCursor = merged[i].timestamp;
-    }
-    if (!nextScheduledCursor && merged[i].rowType === 'scheduled') {
-      nextScheduledCursor = merged[i].timestamp;
-    }
-    if (nextActionsCursor && nextScheduledCursor) break;
-  }
-
-  const nextScheduledOffset = scheduledOffset + scheduledConsumedOnPage;
-
-  return {
-    rows: merged,
-    hasMore,
-    nextActionsCursor: hasMore ? nextActionsCursor : undefined,
-    nextScheduledCursor: hasMore ? nextScheduledCursor : undefined,
-    nextScheduledOffset: hasMore ? nextScheduledOffset : undefined,
-  };
-};
+import { mergeRows } from './merge_rows';
+import type { MergeableRow } from './merge_rows';
 
 // ---------------------------------------------------------------------------
 // Helpers for building fixture rows

@@ -48,6 +48,12 @@ export const buildScheduledResponsesQuery = ({
         },
       },
       aggs: {
+        // We use multi_terms instead of composite aggregation because composite
+        // does not support ordering by sub-aggregation values (max_timestamp),
+        // which is required for time-ordered display. The trade-off is a hard
+        // ceiling of 1000 buckets per request. This is acceptable because the
+        // route uses offset-based pagination to page through results, and in
+        // practice a single page request will not exceed this limit.
         scheduled_executions: {
           multi_terms: {
             terms: [{ field: 'schedule_id' }, { field: 'schedule_execution_count' }],

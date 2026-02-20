@@ -20,6 +20,7 @@ import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_inte
 import { packSavedObjectType } from '../../../common/types';
 import type { PackSavedObject } from '../../common/types';
 import { OsqueryQueries, Direction } from '../../../common/search_strategy';
+import { buildPackLookup } from './pack_lookup';
 import type {
   ScheduledActionResultsRequestOptions,
   ScheduledActionResultsStrategyResponse,
@@ -82,22 +83,10 @@ export const getScheduledExecutionDetailsRoute = (
             packCache.set(spaceId, packSOs);
           }
 
-          let packName: string | undefined;
-          let queryId: string | undefined;
-          let queryText: string | undefined;
-
-          for (const packSO of packSOs) {
-            const queries = packSO.attributes.queries ?? [];
-            const matchingQuery = queries.find(
-              (q: { schedule_id?: string }) => q.schedule_id === scheduleId
-            );
-            if (matchingQuery) {
-              packName = packSO.attributes.name;
-              queryId = matchingQuery.id;
-              queryText = matchingQuery.query;
-              break;
-            }
-          }
+          const packLookup = buildPackLookup(packSOs);
+          const packContext = packLookup.get(scheduleId);
+          const packName = packContext?.packName;
+          const queryText = packContext?.queryText;
 
           const search = await context.search;
 

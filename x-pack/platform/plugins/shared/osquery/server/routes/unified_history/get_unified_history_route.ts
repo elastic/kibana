@@ -26,8 +26,13 @@ import type {
 } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
+import { mergeRows } from './merge_rows';
+import { buildPackLookup } from './pack_lookup';
+import { mapLiveHitToRow } from './map_live_hit_to_row';
+import type { LiveActionHit } from './map_live_hit_to_row';
 
-interface ScheduledBucket {
+/** Shape of an aggregation bucket returned by the scheduled responses query. */
+export interface ScheduledExecutionBucket {
   key: [string, number]; // multi_terms key: [schedule_id, schedule_execution_count]
   key_as_string: string;
   doc_count: number;
@@ -38,43 +43,12 @@ interface ScheduledBucket {
   error_count: { doc_count: number };
 }
 
-interface PackLookupEntry {
-  packId: string;
-  packName: string;
-  queryName: string;
-  queryText: string;
+/** Shape of the aggregations object from the scheduled responses ES query. */
+interface ScheduledAggregations {
+  scheduled_executions?: {
+    buckets: ScheduledExecutionBucket[];
+  };
 }
-
-const buildPackLookup = (
-  packSOs: Array<{ id: string; attributes: PackSavedObject }>
-): Map<string, PackLookupEntry> => {
-  const lookup = new Map<string, PackLookupEntry>();
-
-  for (const packSO of packSOs) {
-    const { queries, name: packName } = packSO.attributes;
-    if (!queries) continue;
-    for (const query of queries) {
-      const entry: PackLookupEntry = {
-        packId: packSO.id,
-        packName,
-        queryName: query.name ?? query.id,
-        queryText: query.query,
-      };
-
-      // Map by the UUID schedule_id stored in the pack SO (new format)
-      if (query.schedule_id) {
-        lookup.set(query.schedule_id, entry);
-      }
-
-      // Also map by the osquery-format schedule name: pack_<packName>_<queryId>
-      // This is how osquery agents report schedule_id in response documents
-      const osqueryScheduleId = `pack_${packName}_${query.id}`;
-      lookup.set(osqueryScheduleId, entry);
-    }
-  }
-
-  return lookup;
-};
 
 export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -209,77 +183,12 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                   },
                   { ignore: [404] }
                 )
-              : Promise.resolve({ aggregations: {} }),
+              : Promise.resolve({ aggregations: {} as ScheduledAggregations }),
           ]);
 
-          const liveRows: UnifiedHistoryRow[] = (actionsResult.hits?.hits ?? []).map(
-            (hit: Record<string, unknown>) => {
-              const hitFields = (hit.fields ?? {}) as Record<string, unknown>;
-              const source = (hit._source ?? {}) as Record<string, unknown>;
-
-              // hit.fields returns leaf values as arrays; _source has the nested structure.
-              // Some fields (e.g. data.query) may only exist in _source, so check both.
-              const getField = (name: string): unknown => {
-                const val = hitFields[name];
-                if (val !== undefined) {
-                  return Array.isArray(val) ? val[0] : val;
-                }
-
-                // Fall back to _source — walk dotted paths (e.g. "data.query")
-                const parts = name.split('.');
-                let cur: unknown = source;
-                for (const part of parts) {
-                  if (cur == null || typeof cur !== 'object') return undefined;
-                  cur = (cur as Record<string, unknown>)[part];
-                }
-
-                return Array.isArray(cur) ? cur[0] : cur;
-              };
-
-              // agents is a genuine array of agent IDs — access it directly
-              const agentsRaw = hitFields.agents ?? source.agents;
-              const agentsList = Array.isArray(agentsRaw) ? agentsRaw : [];
-
-              // Query text and agents live inside _source.queries[]
-              const queries = (source.queries ?? []) as Array<{
-                query?: string;
-                agents?: string[];
-                id?: string;
-              }>;
-              const isPack = queries.length > 1 || getField('pack_id');
-              const queryText = isPack ? '' : queries[0]?.query ?? '';
-
-              // For packs (multiple queries), total agents from the top-level field;
-              // individual query agent counts come from each sub-query's agents array
-              const totalAgents =
-                agentsList.length > 0
-                  ? agentsList.length
-                  : queries.reduce((sum, q) => sum + (q.agents?.length ?? 0), 0);
-
-              // Determine source: if alert_ids is present, it's a Rule-triggered query
-              const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
-              const hasAlertIds =
-                Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
-              const rowSource = hasAlertIds ? ('Rule' as const) : ('Live' as const);
-
-              return {
-                id: getField('action_id') as string,
-                rowType: 'live' as const,
-                timestamp: getField('@timestamp') as string,
-                queryText,
-                queryName: getField('pack_name') as string | undefined,
-                source: rowSource,
-                packName: getField('pack_name') as string | undefined,
-                packId: getField('pack_id') as string | undefined,
-                agentCount: totalAgents,
-                successCount: 0,
-                errorCount: 0,
-                totalRows: 0,
-                userId: getField('user_id') as string | undefined,
-                actionId: getField('action_id') as string,
-              };
-            }
-          );
+          const liveRows: UnifiedHistoryRow[] = (
+            (actionsResult.hits?.hits ?? []) as LiveActionHit[]
+          ).map(mapLiveHitToRow);
 
           // Post-filter live rows by source type when specific filters are active
           const filteredLiveRows = activeFilters
@@ -289,11 +198,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               })
             : liveRows;
 
-          const scheduledAgg =
-            (scheduledResult.aggregations as Record<string, unknown>)?.scheduled_executions ??
-            undefined;
-          const scheduledBuckets: ScheduledBucket[] =
-            (scheduledAgg as Record<string, unknown>)?.buckets ?? [];
+          const scheduledAgg = (scheduledResult.aggregations as ScheduledAggregations)
+            ?.scheduled_executions;
+          const scheduledBuckets: ScheduledExecutionBucket[] = scheduledAgg?.buckets ?? [];
 
           const packLookup = buildPackLookup(packSOs);
 
@@ -324,48 +231,19 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             };
           });
 
-          const scheduledRows = allScheduledRows.slice(scheduledOffset);
-
-          const allMerged = [...filteredLiveRows, ...scheduledRows].sort(
-            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
-
-          const hasMore = allMerged.length > pageSize;
-          const merged = allMerged.slice(0, pageSize);
-
-          // Count how many scheduled rows were consumed on this page
-          const scheduledConsumedOnPage = merged.filter((r) => r.rowType === 'scheduled').length;
-
-          // Compute per-source cursors from the last consumed item of each type
-          let nextActionsCursorValue: string | undefined;
-          let nextScheduledCursorValue: string | undefined;
-
-          for (let i = merged.length - 1; i >= 0; i--) {
-            if (!nextActionsCursorValue && merged[i].rowType === 'live') {
-              nextActionsCursorValue = merged[i].timestamp;
-            }
-            if (!nextScheduledCursorValue && merged[i].rowType === 'scheduled') {
-              nextScheduledCursorValue = merged[i].timestamp;
-            }
-            if (nextActionsCursorValue && nextScheduledCursorValue) break;
-          }
-
-          // The next scheduled offset = current offset + rows consumed on this page.
-          // The scheduled cursor uses `lte:` so the same ES buckets are re-fetched,
-          // and the offset skips the ones already shown.
-          const nextScheduledOffsetValue = scheduledOffset + scheduledConsumedOnPage;
+          const mergeResult = mergeRows(filteredLiveRows, allScheduledRows, pageSize, scheduledOffset);
 
           // Unified cursor for backward compat
-          const lastItem = merged[merged.length - 1];
-          const nextCursor = hasMore && lastItem ? lastItem.timestamp : undefined;
+          const lastItem = mergeResult.rows[mergeResult.rows.length - 1];
+          const nextCursor = mergeResult.hasMore && lastItem ? lastItem.timestamp : undefined;
 
           const body: UnifiedHistoryResponse = {
-            rows: merged,
+            rows: mergeResult.rows,
             nextCursor,
-            nextActionsCursor: hasMore ? nextActionsCursorValue : undefined,
-            nextScheduledCursor: hasMore ? nextScheduledCursorValue : undefined,
-            nextScheduledOffset: hasMore ? nextScheduledOffsetValue : undefined,
-            hasMore,
+            nextActionsCursor: mergeResult.nextActionsCursor,
+            nextScheduledCursor: mergeResult.nextScheduledCursor,
+            nextScheduledOffset: mergeResult.nextScheduledOffset,
+            hasMore: mergeResult.hasMore,
           };
 
           return response.ok({ body });

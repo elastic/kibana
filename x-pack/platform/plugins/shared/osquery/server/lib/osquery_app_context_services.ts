@@ -38,21 +38,31 @@ export interface CachedPackSO {
 
 interface PackCacheEntry {
   packSOs: CachedPackSO[];
+  createdAt: number;
 }
+
+const PACK_CACHE_TTL_MS = 60_000; // 1 minute
 
 /**
  * Per-space cache of pack saved objects.
- * Invalidated on pack create/update/delete/copy operations.
+ * Entries expire after 1 minute (TTL) and are also
+ * invalidated on pack create/update/delete/copy operations.
  */
 export class PackLookupCache {
   private cache = new Map<string, PackCacheEntry>();
 
   public get(spaceId: string): CachedPackSO[] | undefined {
-    return this.cache.get(spaceId)?.packSOs;
+    const entry = this.cache.get(spaceId);
+    if (!entry) return undefined;
+    if (Date.now() - entry.createdAt > PACK_CACHE_TTL_MS) {
+      this.cache.delete(spaceId);
+      return undefined;
+    }
+    return entry.packSOs;
   }
 
   public set(spaceId: string, packSOs: CachedPackSO[]): void {
-    this.cache.set(spaceId, { packSOs });
+    this.cache.set(spaceId, { packSOs, createdAt: Date.now() });
   }
 
   public invalidate(spaceId: string): void {

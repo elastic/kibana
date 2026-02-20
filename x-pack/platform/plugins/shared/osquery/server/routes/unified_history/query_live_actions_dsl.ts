@@ -48,7 +48,7 @@ export const buildLiveActionsQuery = ({
 
   if (kuery) {
     filters.push({
-      query_string: {
+      simple_query_string: {
         query: `*${kuery}*`,
         fields: ['pack_name', 'queries.query', 'queries.id'],
         analyze_wildcard: true,
@@ -65,8 +65,7 @@ export const buildLiveActionsQuery = ({
       },
       size: pageSize,
       sort: [{ '@timestamp': { order: 'desc' as const } }],
-      track_total_hits: true,
-      fields: ['*'],
+      _source: true,
     },
   };
 };

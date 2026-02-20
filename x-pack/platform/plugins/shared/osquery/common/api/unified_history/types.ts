@@ -19,9 +19,9 @@ export interface UnifiedHistoryRow {
   packName?: string;
   packId?: string;
   agentCount: number;
-  successCount: number;
-  errorCount: number;
-  totalRows: number;
+  successCount: number | undefined;
+  errorCount: number | undefined;
+  totalRows: number | undefined;
   userId?: string;
   actionId?: string;
   scheduleId?: string;
