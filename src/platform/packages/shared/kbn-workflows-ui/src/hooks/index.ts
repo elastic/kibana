@@ -13,4 +13,5 @@ export * from './use_update_workflow_action';
 export * from './use_delete_workflows_action';
 export * from './use_run_workflow_step_action';
 export * from './use_clone_workflow_action';
+export * from './use_workflow_actions';
 export * from './types';

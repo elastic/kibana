@@ -9,37 +9,72 @@
 
 import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
-import {
-  useCloneWorkflowAction,
-  useDeleteWorkflowsAction,
-  useRunWorkflowAction,
-  useRunWorkflowStepAction,
-  useUpdateWorkflowAction,
-} from '@kbn/workflows-ui';
-import { useTelemetry } from '../../../hooks/use_telemetry';
+import { useCloneWorkflowAction } from './use_clone_workflow_action';
+import { useDeleteWorkflowsAction } from './use_delete_workflows_action';
+import { useRunWorkflowAction } from './use_run_workflow_action';
+import { useRunWorkflowStepAction } from './use_run_workflow_step_action';
+import { useUpdateWorkflowAction } from './use_update_workflow_action';
 
-export function useWorkflowActions() {
+export interface WorkflowActionsTelemetry {
+  reportWorkflowUpdated: (params: {
+    workflowId: string;
+    workflowUpdate: Partial<WorkflowDetailDto>;
+    hasValidationErrors: boolean;
+    validationErrorCount: number;
+    isBulkAction: boolean;
+    bulkActionCount?: number;
+    origin: 'workflow_list';
+    error?: Error;
+  }) => void;
+  reportWorkflowDeleted: (params: {
+    workflowIds: string[];
+    isBulkDelete: boolean;
+    origin: 'workflow_list';
+    error?: Error;
+  }) => void;
+  reportWorkflowRunInitiated: (params: {
+    workflowId: string;
+    hasInputs: boolean;
+    inputCount: number;
+    origin: 'workflow_list';
+    error?: Error;
+    triggerTab?: 'manual' | 'alert' | 'index';
+  }) => void;
+  reportWorkflowStepTestRunInitiated: (params: {
+    workflowYaml?: string | null;
+    stepId: string;
+    origin: 'workflow_detail';
+    error?: Error;
+  }) => void;
+  reportWorkflowCloned: (params: {
+    sourceWorkflowId: string;
+    newWorkflowId?: string;
+    origin: 'workflow_list';
+    error?: Error;
+  }) => void;
+}
+
+interface UseWorkflowActionsOptions {
+  useTelemetry?: () => WorkflowActionsTelemetry;
+}
+
+export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions = {}) => {
+  const telemetry = useTelemetry?.();
   const queryClient = useQueryClient();
-  const telemetry = useTelemetry();
 
   const updateWorkflow = useUpdateWorkflowAction({
-    // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
-      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
-      // Update all workflow list queries (e.g., different pages, filters)
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately update the workflow in the list with new data
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
@@ -49,13 +84,8 @@ export function useWorkflowActions() {
           }
         });
 
-      // Update workflow detail query (used in YAML editor view)
-      // But skip optimistic update when saving YAML, as the component manages its own state
       const previousWorkflowDetail = queryClient.getQueryData<WorkflowDetailDto>(['workflows', id]);
       if (previousWorkflowDetail && !workflow.yaml) {
-        // Only optimistically update for non-YAML changes (like enabled toggle)
-        // YAML updates are handled by component state and we don't want to show
-        // false "Saved just now" messages when save might fail
         const optimisticWorkflowDetail: WorkflowDetailDto = {
           ...previousWorkflowDetail,
           ...workflow,
@@ -63,31 +93,22 @@ export function useWorkflowActions() {
         queryClient.setQueryData(['workflows', id], optimisticWorkflowDetail);
       }
 
-      // Return previous data for potential rollback
       return { previousData, previousWorkflowDetail };
     },
-    // Rollback: restore previous data if update fails
     onError: (err, variables, context) => {
-      // Restore previous workflow list data
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
           queryClient.setQueryData(queryKey, data);
         });
       }
-      // For workflow detail, only revert if we're updating non-YAML fields (like enabled toggle)
-      // If YAML was being saved, DON'T revert because the YAML editor manages its own state
-      // and the component will handle showing the error and keeping the unsaved changes
+
       if (context?.previousWorkflowDetail && !variables.workflow.yaml) {
-        // Only revert for metadata changes (like enabled toggle)
         queryClient.setQueryData(['workflows', variables.id], context.previousWorkflowDetail);
       }
-      // If YAML was being saved, we intentionally don't revert the detail query
-      // The component's local state keeps the YAML, and the error toast will inform the user
 
-      // Report telemetry for failed update
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry.reportWorkflowUpdated({
+      telemetry?.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
@@ -101,9 +122,7 @@ export function useWorkflowActions() {
       });
     },
     onSuccess: (_, variables) => {
-      // Report telemetry for successful update
-      // The telemetry service automatically determines which event to publish based on the update
-      telemetry.reportWorkflowUpdated({
+      telemetry?.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
@@ -116,29 +135,23 @@ export function useWorkflowActions() {
         error: undefined,
       });
 
-      // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
 
   const deleteWorkflows = useDeleteWorkflowsAction({
-    // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
-      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
-      // Update all workflow list queries (e.g., different pages, filters)
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
@@ -149,12 +162,9 @@ export function useWorkflowActions() {
           }
         });
 
-      // Return previous data for potential rollback
       return { previousData };
     },
-    // Rollback: restore deleted workflows if deletion fails
     onError: (err, variables, context) => {
-      // Restore previous workflow list data (brings back deleted workflows)
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
@@ -162,10 +172,9 @@ export function useWorkflowActions() {
         });
       }
 
-      // Report telemetry for failed deletion
       const errorObj = err instanceof Error ? err : new Error(String(err));
       variables.ids.forEach((workflowId) => {
-        telemetry.reportWorkflowDeleted({
+        telemetry?.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
@@ -174,9 +183,8 @@ export function useWorkflowActions() {
       });
     },
     onSuccess: (_, variables) => {
-      // Report telemetry for successful deletion
       variables.ids.forEach((workflowId) => {
-        telemetry.reportWorkflowDeleted({
+        telemetry?.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
@@ -184,7 +192,6 @@ export function useWorkflowActions() {
         });
       });
 
-      // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
@@ -193,8 +200,7 @@ export function useWorkflowActions() {
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
-      // Report telemetry for successful workflow run
-      telemetry.reportWorkflowRunInitiated({
+      telemetry?.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
@@ -203,7 +209,6 @@ export function useWorkflowActions() {
         triggerTab: variables.triggerTab,
       });
 
-      // FIX: ensure workflow execution document is created at the end of the mutation
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', variables.id, 'executions'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', variables.id] });
@@ -212,8 +217,7 @@ export function useWorkflowActions() {
       const inputCount = Object.keys(variables.inputs || {}).length;
       const errorObj = err instanceof Error ? err : new Error(String(err));
 
-      // Report telemetry for failed workflow run
-      telemetry.reportWorkflowRunInitiated({
+      telemetry?.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
@@ -226,8 +230,7 @@ export function useWorkflowActions() {
 
   const runIndividualStep = useRunWorkflowStepAction({
     onSuccess: ({ workflowExecutionId }, variables) => {
-      // Report telemetry for successful step test run
-      telemetry.reportWorkflowStepTestRunInitiated({
+      telemetry?.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
         origin: 'workflow_detail',
@@ -237,9 +240,8 @@ export function useWorkflowActions() {
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
     },
     onError: (err, variables) => {
-      // Report telemetry for failed step test run
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry.reportWorkflowStepTestRunInitiated({
+      telemetry?.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
         origin: 'workflow_detail',
@@ -250,8 +252,7 @@ export function useWorkflowActions() {
 
   const cloneWorkflow = useCloneWorkflowAction({
     onSuccess: (clonedWorkflow, variables) => {
-      // Report telemetry for successful clone
-      telemetry.reportWorkflowCloned({
+      telemetry?.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         newWorkflowId: clonedWorkflow.id,
         origin: 'workflow_list',
@@ -261,9 +262,8 @@ export function useWorkflowActions() {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
     onError: (err, variables) => {
-      // Report telemetry for failed clone
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry.reportWorkflowCloned({
+      telemetry?.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         origin: 'workflow_list',
         error: errorObj,
@@ -272,10 +272,10 @@ export function useWorkflowActions() {
   });
 
   return {
-    updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
+    updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
   };
-}
+};

@@ -15,6 +15,11 @@ import type { HttpError } from './types';
 export type RunWorkflowActionParams = RunWorkflowCommand & {
   /** Workflow ID to run. */
   id: string;
+  /**
+   * Optional client-only trigger source used for telemetry.
+   * Not sent to the server.
+   */
+  triggerTab?: 'manual' | 'alert' | 'index';
 };
 
 /**

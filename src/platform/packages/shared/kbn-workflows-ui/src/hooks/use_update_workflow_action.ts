@@ -16,6 +16,13 @@ export interface UpdateWorkflowParams {
   /** Workflow ID to update. */
   id: string;
   workflow: Partial<WorkflowDetailDto>;
+  /**
+   * Optional client-only metadata used by telemetry in composed hooks.
+   * Not sent to the server.
+   */
+  isBulkAction?: boolean;
+  /** Optional number of items affected in a bulk update action. */
+  bulkActionCount?: number;
 }
 
 /**
