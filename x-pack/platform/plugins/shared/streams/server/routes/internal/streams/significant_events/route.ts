@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
-  type SignificantEventsGetResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -20,7 +21,6 @@ import {
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
