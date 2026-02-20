@@ -7,14 +7,13 @@
 
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import type { PatchUpdateRequestBody } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE_ITEM } from '../../../../common/endpoint/constants';
 import { isEditableScriptField } from './common';
-import type { ErrorType } from './types';
 
 type PatchRequest = Partial<Omit<PatchUpdateRequestBody, 'file'>> & { file?: File } & {
   id: string;
@@ -23,12 +22,16 @@ export const usePatchEndpointScript = (
   scriptData: PatchRequest,
   options: UseMutationOptions<
     EndpointScriptApiResponse,
-    IHttpFetchError<ErrorType>,
+    IHttpFetchError<ResponseErrorBody>,
     PatchRequest
   > = {}
-): UseMutationResult<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, PatchRequest> => {
+): UseMutationResult<
+  EndpointScriptApiResponse,
+  IHttpFetchError<ResponseErrorBody>,
+  PatchRequest
+> => {
   const http = useHttp();
-  return useMutation<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, PatchRequest>({
+  return useMutation<EndpointScriptApiResponse, IHttpFetchError<ResponseErrorBody>, PatchRequest>({
     ...options,
     mutationKey: ['patch-script-by-id', scriptData],
     mutationFn: () => {
