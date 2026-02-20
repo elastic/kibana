@@ -111,19 +111,22 @@ describe('Autocomplete entities', () => {
         const autoCompleteContext: AutoCompleteContext = {};
         let loadingIndicator: boolean | undefined;
 
-        mapping.isLoading$.subscribe((v: boolean) => {
+        const subscription = mapping.isLoading$.subscribe((v: boolean) => {
           loadingIndicator = v;
         });
 
         // act
         mapping.getMappings('index', [], autoCompleteContext);
+        // Calling again while the first fetch is in-flight should not trigger a second request.
+        mapping.getMappings('index', [], autoCompleteContext);
 
         expect(autoCompleteContext.asyncResultsState!.isLoading).toBe(true);
         expect(loadingIndicator).toBe(true);
 
-        expect(httpMock.get).toHaveBeenCalled();
+        expect(httpMock.get).toHaveBeenCalledTimes(1);
 
         const fields = await autoCompleteContext.asyncResultsState!.results;
+        subscription.unsubscribe();
 
         expect(loadingIndicator).toBe(false);
         expect(autoCompleteContext.asyncResultsState!.isLoading).toBe(false);
