@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
@@ -130,11 +130,11 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
    * When registered (not fullscreen), the parent won't adjust scroll position when this row resizes.
    * When unregistered (fullscreen), scroll adjustments don't matter since we have our own scroll container.
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     let unregister: (() => void) | null = null;
 
     if (virtualizer.scrollElement?.isSameNode(scrollElementGetter())) {
-      // Only register when using the parent's scroll element (not in fullscreen mode)
+      // Only register when using the parent's scroll element (i.e. not in fullscreen mode)
       unregister = preventSizeChangePropagation();
     }
 
