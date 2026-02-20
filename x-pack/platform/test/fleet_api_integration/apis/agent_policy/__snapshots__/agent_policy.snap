@@ -45,6 +45,7 @@ Object {
 exports[`Agent policies fleet_agent_policies POST /api/fleet/agent_policies/_bulk_get should populate package_policies if called with ?full=true 1`] = `
 Object {
   "agents": 0,
+  "agents_per_version": Array [],
   "fips_agents": 0,
   "inactivity_timeout": 1209600,
   "is_managed": false,
@@ -81,6 +82,7 @@ Object {
 exports[`Agent policies fleet_agent_policies POST /api/fleet/agent_policies/_bulk_get should populate package_policies if called with ?full=true 1`] = `
 Object {
   "agents": 0,
+  "agents_per_version": Array [],
   "fips_agents": 0,
   "inactivity_timeout": 1209600,
   "is_managed": false,
