@@ -36,7 +36,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const updateOrigin = useCallback(
     async (originId: string) => {
-      await attachmentsService.updateOrigin(conversationId, attachment.id, originId);
+      return attachmentsService.updateOrigin(conversationId, attachment.id, originId);
     },
     [attachmentsService, conversationId, attachment.id]
   );

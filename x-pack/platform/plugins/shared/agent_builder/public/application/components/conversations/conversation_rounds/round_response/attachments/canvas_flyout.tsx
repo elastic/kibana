@@ -37,7 +37,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       if (!conversationId || !canvasState) {
         return;
       }
-      await attachmentsService.updateOrigin(conversationId, canvasState.attachment.id, originId);
+      return attachmentsService.updateOrigin(conversationId, canvasState.attachment.id, originId);
     },
     [attachmentsService, conversationId, canvasState]
   );
