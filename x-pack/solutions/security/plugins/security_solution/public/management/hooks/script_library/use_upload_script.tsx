@@ -7,25 +7,32 @@
 
 import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { EndpointScriptApiResponse } from '../../../../common/endpoint/types';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { isEditableScriptField } from './common';
-import type { ErrorType } from './types';
 
 type CreateRequestBody = Omit<CreateScriptRequestBody, 'file'> & { file?: File };
 export const usePostEndpointScript = (
   scriptData: CreateRequestBody,
   options: UseMutationOptions<
     EndpointScriptApiResponse,
-    IHttpFetchError<ErrorType>,
+    IHttpFetchError<ResponseErrorBody>,
     CreateRequestBody
   > = {}
-): UseMutationResult<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, CreateRequestBody> => {
+): UseMutationResult<
+  EndpointScriptApiResponse,
+  IHttpFetchError<ResponseErrorBody>,
+  CreateRequestBody
+> => {
   const http = useHttp();
-  return useMutation<EndpointScriptApiResponse, IHttpFetchError<ErrorType>, CreateRequestBody>({
+  return useMutation<
+    EndpointScriptApiResponse,
+    IHttpFetchError<ResponseErrorBody>,
+    CreateRequestBody
+  >({
     ...options,
     mutationKey: ['post-script-upload', scriptData],
     mutationFn: () => {
