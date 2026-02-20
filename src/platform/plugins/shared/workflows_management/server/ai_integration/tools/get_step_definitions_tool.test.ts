@@ -44,11 +44,13 @@ describe('get_step_definitions_tool', () => {
 
   beforeAll(() => {
     const mockRegister = jest.fn();
-    const agentBuilder: AgentBuilderPluginSetupContract = {
+    const agentBuilder = {
       agents: { register: jest.fn() },
       tools: { register: mockRegister },
       attachments: { registerType: jest.fn() },
-    };
+      hooks: { register: jest.fn() },
+      skills: { register: jest.fn() },
+    } as unknown as AgentBuilderPluginSetupContract;
 
     registerGetStepDefinitionsTool(agentBuilder);
 

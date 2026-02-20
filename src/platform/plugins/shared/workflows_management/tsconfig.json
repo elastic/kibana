@@ -82,7 +82,9 @@
     "@kbn/core-http-browser",
     "@kbn/sse-utils-client",
     "@kbn/scout",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

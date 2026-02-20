@@ -12,13 +12,17 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
+import type { HooksServiceSetup } from '@kbn/agent-builder-server';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
@@ -32,6 +36,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { ZodObject, ZodRawShape } from '@kbn/zod';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
@@ -49,41 +54,24 @@ export type WorkflowsServerPluginStart = Record<string, never>;
 
 /**
  * AgentBuilder plugin setup contract interface.
- * Defined here to avoid circular dependency with @kbn/agent-builder-plugin.
+ * Uses types from @kbn/agent-builder-server (shared package) instead of
+ * importing from the plugin directly, to avoid a circular dependency.
  */
 export interface AgentBuilderPluginSetupContract {
   agents: {
-    register: (definition: {
-      id: string;
-      name: string;
-      description: string;
-      avatar_icon?: string;
-      configuration: {
-        instructions?: string;
-        tools?: Array<{ tool_ids: string[] }>;
-      };
-    }) => void;
+    register: (definition: BuiltInAgentDefinition) => void;
   };
   tools: {
-    register: (definition: {
-      id: string;
-      type: string;
-      description: string;
-      tags?: string[];
-      schema: unknown;
-      handler: (
-        params: unknown,
-        context: unknown
-      ) => Promise<{ results: Array<{ type: string; data: unknown }> }>;
-    }) => void;
+    register: <RunInput extends ZodObject<ZodRawShape>>(
+      tool: StaticToolRegistration<RunInput>
+    ) => void;
   };
   attachments: {
-    registerType: (definition: {
-      id: string;
-      type: string;
-      validate: (input: unknown) => { valid: boolean; data?: unknown; error?: string };
-      format: (data: unknown) => { type: string; value: string };
-    }) => void;
+    registerType: (definition: AttachmentTypeDefinition) => void;
+  };
+  hooks: HooksServiceSetup;
+  skills: {
+    register: (definition: SkillDefinition) => Promise<void>;
   };
 }
 
