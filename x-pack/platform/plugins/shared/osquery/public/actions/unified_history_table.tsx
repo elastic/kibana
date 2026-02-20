@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -13,8 +14,12 @@ import {
   EuiButtonIcon,
   EuiCodeBlock,
   EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiSkeletonText,
   EuiSelect,
   EuiText,
@@ -28,7 +33,7 @@ import { useHistory } from 'react-router-dom';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useUnifiedHistory } from './use_unified_history';
 import { useRouterNavigate } from '../common/lib/kibana';
-import type { UnifiedHistoryRow } from '../../common/api/unified_history/types';
+import type { UnifiedHistoryRow, SourceFilter } from '../../common/api/unified_history/types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -57,19 +62,45 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
 
 HistoryDetailsButton.displayName = 'HistoryDetailsButton';
 
+interface CursorState {
+  actionsCursor?: string;
+  scheduledCursor?: string;
+}
+
 const UnifiedHistoryTableComponent = () => {
   const { push } = useHistory();
   const [pageSize, setPageSize] = useState(20);
-  const [cursorStack, setCursorStack] = useState<string[]>([]);
+  const [cursorStack, setCursorStack] = useState<CursorState[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [activeKuery, setActiveKuery] = useState<string | undefined>();
+  const [sourceFilters, setSourceFilters] = useState<Set<SourceFilter>>(
+    new Set(['live', 'rule', 'scheduled'])
+  );
+  const [isSourcePopoverOpen, setIsSourcePopoverOpen] = useState(false);
 
-  const currentCursor = cursorStack.length > 0 ? cursorStack[cursorStack.length - 1] : undefined;
+  const currentCursors = cursorStack.length > 0 ? cursorStack[cursorStack.length - 1] : undefined;
+
+  const toggleSourceFilter = useCallback((filter: SourceFilter) => {
+    setSourceFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(filter)) {
+        next.delete(filter);
+      } else {
+        next.add(filter);
+      }
+      return next;
+    });
+    setCursorStack([]);
+  }, []);
+
+  // Only pass sourceFilters when not all are selected (i.e. when there's an actual filter)
+  const activeSourceFilters =
+    sourceFilters.size === 3 ? undefined : Array.from(sourceFilters).join(',');
 
   const handleSearch = useCallback(
     (value: string) => {
       const trimmed = value.trim();
-      setActiveKuery(trimmed ? `*${trimmed}*` : undefined);
+      setActiveKuery(trimmed || undefined);
       setCursorStack([]);
     },
     []
@@ -77,20 +108,27 @@ const UnifiedHistoryTableComponent = () => {
 
   const { data, isLoading, isFetching } = useUnifiedHistory({
     pageSize,
-    cursor: currentCursor,
+    actionsCursor: currentCursors?.actionsCursor,
+    scheduledCursor: currentCursors?.scheduledCursor,
     kuery: activeKuery,
+    sourceFilters: activeSourceFilters,
   });
 
   const rows = data?.rows ?? [];
   const hasMore = data?.hasMore ?? false;
-  const nextCursor = data?.nextCursor;
   const pageIndex = cursorStack.length;
 
   const handleNextPage = useCallback(() => {
-    if (nextCursor) {
-      setCursorStack((prev) => [...prev, nextCursor]);
+    if (data?.nextActionsCursor || data?.nextScheduledCursor) {
+      setCursorStack((prev) => [
+        ...prev,
+        {
+          actionsCursor: data.nextActionsCursor,
+          scheduledCursor: data.nextScheduledCursor,
+        },
+      ]);
     }
-  }, [nextCursor]);
+  }, [data?.nextActionsCursor, data?.nextScheduledCursor]);
 
   const handlePrevPage = useCallback(() => {
     setCursorStack((prev) => prev.slice(0, -1));
@@ -207,7 +245,7 @@ const UnifiedHistoryTableComponent = () => {
     [handlePlayClick]
   );
 
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<UnifiedHistoryRow>> = useMemo(
     () => [
       {
         field: 'queryText',
@@ -300,22 +338,75 @@ const UnifiedHistoryTableComponent = () => {
 
   return (
     <>
-      <EuiFieldSearch
-        placeholder={i18n.translate('xpack.osquery.unifiedHistory.table.searchPlaceholder', {
-          defaultMessage: 'Search by query or pack name',
-        })}
-        value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
-        onSearch={handleSearch}
-        isClearable
-        fullWidth
-        data-test-subj="unifiedHistorySearch"
-      />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            placeholder={i18n.translate('xpack.osquery.unifiedHistory.table.searchPlaceholder', {
+              defaultMessage: 'Search by query or pack name',
+            })}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onSearch={handleSearch}
+            isClearable
+            fullWidth
+            data-test-subj="unifiedHistorySearch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiPopover
+              isOpen={isSourcePopoverOpen}
+              closePopover={() => setIsSourcePopoverOpen(false)}
+              button={
+                <EuiFilterButton
+                  iconType="arrowDown"
+                  isSelected={isSourcePopoverOpen}
+                  hasActiveFilters={sourceFilters.size < 3}
+                  numActiveFilters={sourceFilters.size < 3 ? sourceFilters.size : 0}
+                  onClick={() => setIsSourcePopoverOpen((prev) => !prev)}
+                  data-test-subj="sourceFilterButton"
+                >
+                  {i18n.translate('xpack.osquery.unifiedHistory.filter.source', {
+                    defaultMessage: 'Source',
+                  })}
+                </EuiFilterButton>
+              }
+            >
+              <EuiFilterSelectItem
+                checked={sourceFilters.has('live') ? 'on' : undefined}
+                onClick={() => toggleSourceFilter('live')}
+                data-test-subj="sourceFilterLive"
+              >
+                {i18n.translate('xpack.osquery.unifiedHistory.filter.live', {
+                  defaultMessage: 'Live',
+                })}
+              </EuiFilterSelectItem>
+              <EuiFilterSelectItem
+                checked={sourceFilters.has('rule') ? 'on' : undefined}
+                onClick={() => toggleSourceFilter('rule')}
+                data-test-subj="sourceFilterRule"
+              >
+                {i18n.translate('xpack.osquery.unifiedHistory.filter.rule', {
+                  defaultMessage: 'Rule',
+                })}
+              </EuiFilterSelectItem>
+              <EuiFilterSelectItem
+                checked={sourceFilters.has('scheduled') ? 'on' : undefined}
+                onClick={() => toggleSourceFilter('scheduled')}
+                data-test-subj="sourceFilterScheduled"
+              >
+                {i18n.translate('xpack.osquery.unifiedHistory.filter.scheduled', {
+                  defaultMessage: 'Scheduled',
+                })}
+              </EuiFilterSelectItem>
+            </EuiPopover>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiBasicTable
+      <EuiBasicTable<UnifiedHistoryRow>
         items={rows}
         loading={isFetching && !isLoading}
-        // @ts-expect-error update types
         columns={columns}
         rowProps={rowProps}
         data-test-subj="unifiedHistoryTable"

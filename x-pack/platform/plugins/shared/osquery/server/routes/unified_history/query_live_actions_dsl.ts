@@ -49,8 +49,9 @@ export const buildLiveActionsQuery = ({
   if (kuery) {
     filters.push({
       query_string: {
-        query: kuery,
+        query: `*${kuery}*`,
         fields: ['pack_name', 'queries.query', 'queries.id'],
+        analyze_wildcard: true,
       },
     });
   }

@@ -140,3 +140,4 @@ const ScheduledExecutionDetailsPageComponent = () => {
 };
 
 export const ScheduledExecutionDetailsPage = React.memo(ScheduledExecutionDetailsPageComponent);
+ScheduledExecutionDetailsPage.displayName = 'ScheduledExecutionDetailsPage';

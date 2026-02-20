@@ -225,6 +225,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
         if (enabled == null && !currentPackSO.attributes.enabled) {
+          osqueryContext.service.getPackLookupCache().invalidateAll();
+
           return response.ok({ body: { data: updatedPackSO } });
         }
 
@@ -405,6 +407,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           shards: attributes.shards,
           saved_object_id: updatedPackSO.id,
         };
+
+        osqueryContext.service.getPackLookupCache().invalidateAll();
 
         return response.ok({
           body: { data },

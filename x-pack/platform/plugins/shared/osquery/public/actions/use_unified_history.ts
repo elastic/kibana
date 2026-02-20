@@ -17,29 +17,35 @@ const UNIFIED_HISTORY_QUERY_KEY = 'unifiedHistory';
 
 interface UseUnifiedHistoryConfig {
   pageSize?: number;
-  cursor?: string;
+  actionsCursor?: string;
+  scheduledCursor?: string;
   kuery?: string;
+  sourceFilters?: string;
   skip?: boolean;
 }
 
 export const useUnifiedHistory = ({
   pageSize = 20,
-  cursor,
+  actionsCursor,
+  scheduledCursor,
   kuery,
+  sourceFilters,
   skip = false,
 }: UseUnifiedHistoryConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery<UnifiedHistoryResponse, Error>(
-    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, cursor, kuery }],
+    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, actionsCursor, scheduledCursor, kuery, sourceFilters }],
     () =>
       http.get<UnifiedHistoryResponse>('/internal/osquery/history', {
         version: API_VERSIONS.internal.v1,
         query: {
           pageSize,
           ...(kuery ? { kuery } : {}),
-          ...(cursor ? { cursor } : {}),
+          ...(actionsCursor ? { actionsCursor } : {}),
+          ...(scheduledCursor ? { scheduledCursor } : {}),
+          ...(sourceFilters ? { sourceFilters } : {}),
         },
       }),
     {

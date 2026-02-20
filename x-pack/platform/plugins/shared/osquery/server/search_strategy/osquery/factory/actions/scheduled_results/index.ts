@@ -28,10 +28,9 @@ export const scheduledActionResults: OsqueryFactory<OsqueryQueries.scheduledActi
 
     return buildScheduledActionResultsQuery(optionsWithDefaults);
   },
-  // @ts-expect-error update types
   parse: async (
-    options,
-    response: ScheduledActionResultsStrategyResponse
+    options: ScheduledActionResultsRequestOptions,
+    response
   ): Promise<ScheduledActionResultsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildScheduledActionResultsQuery(options))],

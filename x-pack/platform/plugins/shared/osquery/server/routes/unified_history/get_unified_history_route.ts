@@ -13,7 +13,6 @@ import { PLUGIN_ID } from '../../../common';
 import {
   API_VERSIONS,
   ACTIONS_INDEX,
-  ACTION_RESPONSES_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -23,6 +22,7 @@ import type { PackSavedObject } from '../../common/types';
 import type {
   UnifiedHistoryRow,
   UnifiedHistoryResponse,
+  SourceFilter,
 } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
@@ -38,23 +38,38 @@ interface ScheduledBucket {
   error_count: { doc_count: number };
 }
 
+interface PackLookupEntry {
+  packId: string;
+  packName: string;
+  queryName: string;
+  queryText: string;
+}
+
 const buildPackLookup = (
   packSOs: Array<{ id: string; attributes: PackSavedObject }>
-): Map<string, { packId: string; packName: string; queryName: string; queryText: string }> => {
-  const lookup = new Map<string, { packId: string; packName: string; queryName: string; queryText: string }>();
+): Map<string, PackLookupEntry> => {
+  const lookup = new Map<string, PackLookupEntry>();
 
   for (const packSO of packSOs) {
     const { queries, name: packName } = packSO.attributes;
     if (!queries) continue;
     for (const query of queries) {
+      const entry: PackLookupEntry = {
+        packId: packSO.id,
+        packName,
+        queryName: query.name ?? query.id,
+        queryText: query.query,
+      };
+
+      // Map by the UUID schedule_id stored in the pack SO (new format)
       if (query.schedule_id) {
-        lookup.set(query.schedule_id, {
-          packId: packSO.id,
-          packName,
-          queryName: query.name ?? query.id,
-          queryText: query.query,
-        });
+        lookup.set(query.schedule_id, entry);
       }
+
+      // Also map by the osquery-format schedule name: pack_<packName>_<queryId>
+      // This is how osquery agents report schedule_id in response documents
+      const osqueryScheduleId = `pack_${packName}_${query.id}`;
+      lookup.set(osqueryScheduleId, entry);
     }
   }
 
@@ -80,7 +95,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             query: schema.object({
               pageSize: schema.number({ defaultValue: 20, min: 1, max: 100 }),
               cursor: schema.maybe(schema.string()),
+              actionsCursor: schema.maybe(schema.string()),
+              scheduledCursor: schema.maybe(schema.string()),
               kuery: schema.maybe(schema.string()),
+              sourceFilters: schema.maybe(schema.string()), // comma-separated: live,rule,scheduled
             }),
           },
         },
@@ -94,75 +112,103 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const { pageSize, cursor, kuery } = request.query;
+          const { pageSize, cursor, actionsCursor, scheduledCursor, kuery, sourceFilters: sourceFiltersRaw } = request.query;
+
+          // Parse source filters — when undefined, all sources are included
+          const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
+            ? new Set(sourceFiltersRaw.split(',').filter(Boolean) as SourceFilter[])
+            : undefined;
+
+          const includeLive = !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
+          const includeScheduled = !activeFilters || activeFilters.has('scheduled');
+
+          // Support both the legacy single cursor and new dual cursors
+          const effectiveActionsCursor = actionsCursor ?? cursor;
+          const effectiveScheduledCursor = scheduledCursor ?? cursor;
 
           // Fetch pageSize + 1 from each source to detect if more pages exist
           const fetchSize = pageSize + 1;
 
-          // Fetch packs once — needed for both search filtering and name resolution
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-          const packResults = await spaceScopedClient.find<PackSavedObject>({
-            type: packSavedObjectType,
-            perPage: 1000,
-          });
-          const packSOs = packResults.saved_objects as Array<{
-            id: string;
-            attributes: PackSavedObject;
-          }>;
+          // Fetch packs — use cache when available, fetch and cache on miss
+          const packCache = osqueryContext.service.getPackLookupCache();
+          let packSOs = packCache.get(spaceId);
+          if (!packSOs) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            const packResults = await spaceScopedClient.find<PackSavedObject>({
+              type: packSavedObjectType,
+              perPage: 1000,
+            });
+            packSOs = packResults.saved_objects as Array<{
+              id: string;
+              attributes: PackSavedObject;
+            }>;
+            packCache.set(spaceId, packSOs);
+          }
 
           // When searching, resolve matching schedule IDs from pack saved objects
           // because scheduled response documents don't contain query/pack names
           let matchingScheduleIds: string[] | undefined;
           if (kuery) {
-            const searchTerm = kuery.replace(/\*/g, '').toLowerCase();
+            const searchTerm = kuery.trim().toLowerCase();
             matchingScheduleIds = [];
             for (const packSO of packSOs) {
               const pack = packSO.attributes;
               if (!pack.queries) continue;
               for (const query of pack.queries) {
-                if (!query.schedule_id) continue;
                 const nameMatch =
                   (query.name ?? query.id).toLowerCase().includes(searchTerm) ||
                   pack.name.toLowerCase().includes(searchTerm) ||
                   query.query.toLowerCase().includes(searchTerm);
                 if (nameMatch) {
-                  matchingScheduleIds.push(query.schedule_id);
+                  // Push both the UUID schedule_id (if set) and the osquery-format ID
+                  if (query.schedule_id) {
+                    matchingScheduleIds.push(query.schedule_id);
+                  }
+                  matchingScheduleIds.push(`pack_${pack.name}_${query.id}`);
                 }
               }
             }
           }
 
-          const actionsQuery = buildLiveActionsQuery({
-            pageSize: fetchSize,
-            cursor,
-            kuery,
-            spaceId,
-          });
+          const actionsQuery = includeLive
+            ? buildLiveActionsQuery({
+                pageSize: fetchSize,
+                cursor: effectiveActionsCursor,
+                kuery,
+                spaceId,
+              })
+            : undefined;
 
-          const scheduledQuery = buildScheduledResponsesQuery({
-            pageSize: fetchSize,
-            cursor,
-            scheduleIds: matchingScheduleIds,
-          });
+          const scheduledQuery = includeScheduled
+            ? buildScheduledResponsesQuery({
+                pageSize: fetchSize,
+                cursor: effectiveScheduledCursor,
+                scheduleIds: matchingScheduleIds,
+              })
+            : undefined;
 
           const [actionsResult, scheduledResult] = await Promise.all([
-            esClient.search(
-              {
-                index: `${ACTIONS_INDEX}*`,
-                ...actionsQuery,
-              },
-              { ignore: [404] }
-            ),
-            esClient.search(
-              {
-                index: `${ACTION_RESPONSES_INDEX}-*,${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
-                ...scheduledQuery,
-              },
-              { ignore: [404] }
-            ),
+            actionsQuery
+              ? esClient.search(
+                  {
+                    index: `${ACTIONS_INDEX}*`,
+                    ...actionsQuery,
+                  },
+                  { ignore: [404] }
+                )
+              : Promise.resolve({ hits: { hits: [] } }),
+            scheduledQuery
+              ? esClient.search(
+                  {
+                    index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                    ...scheduledQuery,
+                  },
+                  { ignore: [404] }
+                )
+              : Promise.resolve({ aggregations: {} }),
           ]);
 
           const liveRows: UnifiedHistoryRow[] = (actionsResult.hits?.hits ?? []).map(
@@ -209,13 +255,19 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                   ? agentsList.length
                   : queries.reduce((sum, q) => sum + (q.agents?.length ?? 0), 0);
 
+              // Determine source: if alert_ids is present, it's a Rule-triggered query
+              const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
+              const hasAlertIds =
+                Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
+              const rowSource = hasAlertIds ? ('Rule' as const) : ('Live' as const);
+
               return {
                 id: getField('action_id') as string,
                 rowType: 'live' as const,
                 timestamp: getField('@timestamp') as string,
                 queryText,
                 queryName: getField('pack_name') as string | undefined,
-                source: 'Live' as const,
+                source: rowSource,
                 packName: getField('pack_name') as string | undefined,
                 packId: getField('pack_id') as string | undefined,
                 agentCount: totalAgents,
@@ -227,6 +279,14 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               };
             }
           );
+
+          // Post-filter live rows by source type when specific filters are active
+          const filteredLiveRows = activeFilters
+            ? liveRows.filter((row) => {
+                if (row.source === 'Rule') return activeFilters.has('rule');
+                return activeFilters.has('live');
+              })
+            : liveRows;
 
           const scheduledAgg =
             (scheduledResult.aggregations as Record<string, unknown>)?.scheduled_executions ??
@@ -259,18 +319,36 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             };
           });
 
-          const allMerged = [...liveRows, ...scheduledRows].sort(
+          const allMerged = [...filteredLiveRows, ...scheduledRows].sort(
             (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           );
 
           const hasMore = allMerged.length > pageSize;
           const merged = allMerged.slice(0, pageSize);
+
+          // Compute per-source cursors from the last consumed item of each type
+          let nextActionsCursorValue: string | undefined;
+          let nextScheduledCursorValue: string | undefined;
+
+          for (let i = merged.length - 1; i >= 0; i--) {
+            if (!nextActionsCursorValue && merged[i].rowType === 'live') {
+              nextActionsCursorValue = merged[i].timestamp;
+            }
+            if (!nextScheduledCursorValue && merged[i].rowType === 'scheduled') {
+              nextScheduledCursorValue = merged[i].timestamp;
+            }
+            if (nextActionsCursorValue && nextScheduledCursorValue) break;
+          }
+
+          // Unified cursor for backward compat
           const lastItem = merged[merged.length - 1];
           const nextCursor = hasMore && lastItem ? lastItem.timestamp : undefined;
 
           const body: UnifiedHistoryResponse = {
             rows: merged,
             nextCursor,
+            nextActionsCursor: hasMore ? nextActionsCursorValue : undefined,
+            nextScheduledCursor: hasMore ? nextScheduledCursorValue : undefined,
             hasMore,
           };
 

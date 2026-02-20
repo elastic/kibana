@@ -11,6 +11,8 @@ import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -45,7 +47,7 @@ export const getScheduledExecutionDetailsRoute = (
           request: {
             params: schema.object({
               scheduleId: schema.string(),
-              executionCount: schema.number(),
+              executionCount: schema.string(),
             }),
           },
         },
@@ -54,23 +56,37 @@ export const getScheduledExecutionDetailsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
-          const { scheduleId, executionCount } = request.params;
+          const { scheduleId, executionCount: executionCountStr } = request.params;
+          const executionCount = Number(executionCountStr);
 
           // 1. Look up pack context to find packName, queryId, queryText
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-          const packResults = await spaceScopedClient.find<PackSavedObject>({
-            type: packSavedObjectType,
-            perPage: 1000,
-          });
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
+          const packCache = osqueryContext.service.getPackLookupCache();
+          let packSOs = packCache.get(spaceId);
+          if (!packSOs) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            const packResults = await spaceScopedClient.find<PackSavedObject>({
+              type: packSavedObjectType,
+              perPage: 1000,
+            });
+            packSOs = packResults.saved_objects as Array<{
+              id: string;
+              attributes: PackSavedObject;
+            }>;
+            packCache.set(spaceId, packSOs);
+          }
 
           let packName: string | undefined;
           let queryId: string | undefined;
           let queryText: string | undefined;
 
-          for (const packSO of packResults.saved_objects) {
+          for (const packSO of packSOs) {
             const queries = packSO.attributes.queries ?? [];
             const matchingQuery = queries.find(
               (q: { schedule_id?: string }) => q.schedule_id === scheduleId

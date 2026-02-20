@@ -29,6 +29,40 @@ import type { ConfigType } from '../../common/config';
 import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
+import type { PackSavedObject } from '../common/types';
+
+export interface CachedPackSO {
+  id: string;
+  attributes: PackSavedObject;
+}
+
+interface PackCacheEntry {
+  packSOs: CachedPackSO[];
+}
+
+/**
+ * Per-space cache of pack saved objects.
+ * Invalidated on pack create/update/delete/copy operations.
+ */
+export class PackLookupCache {
+  private cache = new Map<string, PackCacheEntry>();
+
+  public get(spaceId: string): CachedPackSO[] | undefined {
+    return this.cache.get(spaceId)?.packSOs;
+  }
+
+  public set(spaceId: string, packSOs: CachedPackSO[]): void {
+    this.cache.set(spaceId, { packSOs });
+  }
+
+  public invalidate(spaceId: string): void {
+    this.cache.delete(spaceId);
+  }
+
+  public invalidateAll(): void {
+    this.cache.clear();
+  }
+}
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -59,6 +93,7 @@ export class OsqueryAppContextService {
   private ruleRegistryService: RuleRegistryPluginStartContract | undefined;
   private fleetActionsClient: FleetActionsClientInterface | undefined;
   private spacesService: SpacesServiceStart | undefined;
+  private readonly packLookupCache = new PackLookupCache();
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -98,6 +133,10 @@ export class OsqueryAppContextService {
 
   public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> | undefined {
     return this.spacesService?.getActiveSpace(httpRequest);
+  }
+
+  public getPackLookupCache(): PackLookupCache {
+    return this.packLookupCache;
   }
 
   /**

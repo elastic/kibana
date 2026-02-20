@@ -208,6 +208,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           saved_object_id: packSO.id,
         };
 
+        osqueryContext.service.getPackLookupCache().invalidateAll();
+
         return response.ok({
           body: {
             data,

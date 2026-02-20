@@ -46,7 +46,7 @@ export const getScheduledActionResultsRoute = (
           request: {
             params: schema.object({
               scheduleId: schema.string(),
-              executionCount: schema.number(),
+              executionCount: schema.string(),
             }),
             query: schema.object({
               page: schema.maybe(schema.number()),
@@ -62,7 +62,8 @@ export const getScheduledActionResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
-          const { scheduleId, executionCount } = request.params;
+          const { scheduleId, executionCount: executionCountStr } = request.params;
+          const executionCount = Number(executionCountStr);
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
 

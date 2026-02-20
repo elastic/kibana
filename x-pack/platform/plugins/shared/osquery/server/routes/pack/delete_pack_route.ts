@@ -94,6 +94,8 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           )
         );
 
+        osqueryContext.service.getPackLookupCache().invalidateAll();
+
         return response.ok({
           body: {},
         });

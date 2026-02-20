@@ -114,6 +114,8 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             saved_object_id: newPackSO.id,
           };
 
+          osqueryContext.service.getPackLookupCache().invalidateAll();
+
           return response.ok({
             body: {
               data,

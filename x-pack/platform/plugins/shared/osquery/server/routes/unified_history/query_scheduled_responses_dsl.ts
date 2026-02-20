@@ -10,14 +10,12 @@ import type { estypes } from '@elastic/elasticsearch';
 interface ScheduledResponsesQueryOptions {
   pageSize: number;
   cursor?: string; // ISO timestamp — fetch executions older than this
-  kuery?: string;
   scheduleIds?: string[]; // when searching by name, restrict to these schedule IDs
 }
 
 export const buildScheduledResponsesQuery = ({
   pageSize,
   cursor,
-  kuery,
   scheduleIds,
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
@@ -28,8 +26,8 @@ export const buildScheduledResponsesQuery = ({
   // (names live in saved objects, not in the ES index)
   if (scheduleIds) {
     if (scheduleIds.length === 0) {
-      // No matching schedule IDs — short-circuit with impossible filter
-      filters.push({ term: { schedule_id: '__no_match__' } });
+      // No matching schedule IDs — short-circuit with match_none
+      filters.push({ bool: { must_not: { match_all: {} } } });
     } else {
       filters.push({ terms: { schedule_id: scheduleIds } });
     }

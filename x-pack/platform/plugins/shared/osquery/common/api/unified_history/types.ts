@@ -7,6 +7,7 @@
 
 export type UnifiedHistoryRowType = 'live' | 'scheduled';
 export type UnifiedHistorySource = 'Live' | 'Scheduled' | 'Rule';
+export type SourceFilter = 'live' | 'rule' | 'scheduled';
 
 export interface UnifiedHistoryRow {
   id: string;
@@ -30,5 +31,7 @@ export interface UnifiedHistoryRow {
 export interface UnifiedHistoryResponse {
   rows: UnifiedHistoryRow[];
   nextCursor?: string;
+  nextActionsCursor?: string;
+  nextScheduledCursor?: string;
   hasMore: boolean;
 }
