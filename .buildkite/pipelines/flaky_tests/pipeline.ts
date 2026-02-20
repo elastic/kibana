@@ -233,7 +233,7 @@ for (const testSuite of testSuites) {
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_REPORTER_ENABLED: 'true',
