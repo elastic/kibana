@@ -106,6 +106,5 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-data-streams-server",
     "@kbn/task-manager-plugin",
-    "@kbn/deeplinks-data-sources",
   ]
 }
