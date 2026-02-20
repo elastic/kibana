@@ -7,13 +7,10 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-/**
- * ES|QL Generation evals are intentionally an independent suite:
- * - separate CI step from "Evals: Agent Builder"
- * - separate Playwright config so it can be triggered/run on its own
- */
 export default createPlaywrightEvalsConfig({
-  testDir: Path.resolve(__dirname, '../../../evals/esql'),
+  testDir: Path.resolve(__dirname, './evals'),
+  // CI job timeout is ~1h; keep default low and use EVALUATION_REPETITIONS
+  // for longer/higher-confidence runs.
   repetitions: 1,
   timeout: 30 * 60_000, // 30 minutes timeout given large datasets in use
 });
