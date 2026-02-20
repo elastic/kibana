@@ -281,7 +281,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                         'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedFeaturesWarning',
                         {
                           defaultMessage:
-                            'This input contains deprecated features. Expand to see details.',
+                            'This input contains deprecated features. Expand to show details.',
                         }
                       )}
                     />

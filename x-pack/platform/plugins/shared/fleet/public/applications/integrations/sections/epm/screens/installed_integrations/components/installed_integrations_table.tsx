@@ -191,7 +191,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                           content={i18n.translate(
                             'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
                             {
-                              defaultMessage: 'This integration has deprecated features',
+                              defaultMessage: 'This integration contains deprecated features',
                             }
                           )}
                         />

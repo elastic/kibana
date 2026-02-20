@@ -54,7 +54,7 @@ export const DeprecationCallout: React.FC<{
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.replacedByPackage"
-                  defaultMessage="Please use {link} instead."
+                  defaultMessage="Use {link} instead."
                   values={{
                     link: (
                       <EuiLink
@@ -162,7 +162,7 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
       <EuiCallOut
         data-test-subj="deprecatedFeaturesCallout"
         title={i18n.translate('xpack.fleet.epm.deprecatedFeaturesTitle', {
-          defaultMessage: 'This integration has deprecated features',
+          defaultMessage: 'This integration contains deprecated features',
         })}
         color="warning"
         iconType="warning"
@@ -172,7 +172,7 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
           buttonContent={i18n.translate(
             'xpack.fleet.epm.deprecatedFeaturesAccordionButtonContent',
             {
-              defaultMessage: 'Expand to see all the deprecated features',
+              defaultMessage: 'Expand to show all the deprecated features',
             }
           )}
         >

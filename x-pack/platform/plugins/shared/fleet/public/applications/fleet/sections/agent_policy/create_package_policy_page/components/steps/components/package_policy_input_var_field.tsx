@@ -333,6 +333,9 @@ function getInputComponent({
             defaultMessage: 'Select an option',
           })}
           singleSelection={{ asPlainText: true }}
+          aria-label={i18n.translate('xpack.fleet.packagePolicyField.selectAriaLabel', {
+            defaultMessage: 'Select an option',
+          })}
           options={selectOptions}
           selectedOptions={selectedOptions}
           isClearable={true}
@@ -377,39 +380,6 @@ const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
         </EuiLink>
       </EuiText>
     </EuiPanel>
-  );
-};
-
-const DeprecatedFieldLabel = ({
-  fieldLabel,
-  tooltipContent,
-}: {
-  fieldLabel: string;
-  tooltipContent?: string;
-}) => {
-  return (
-    <EuiFlexGroup alignItems="flexEnd" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued" aria-label={fieldLabel}>
-          {fieldLabel}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip
-          type="warning"
-          color="warning"
-          position="top"
-          content={
-            tooltipContent || (
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.deprecatedVarTooltip"
-                defaultMessage="This variable is deprecated."
-              />
-            )
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
 
