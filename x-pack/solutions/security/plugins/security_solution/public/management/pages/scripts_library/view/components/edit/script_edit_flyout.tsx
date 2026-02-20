@@ -9,18 +9,18 @@ import React, { memo } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { usePatchEndpointScript } from '../../../../../hooks/script_library';
-import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 
 import { EndpointScriptEditFlyoutHeader } from './script_edit_flyout_header';
 import { EndpointScriptEditForm, type EndpointScriptEditFormProps } from './script_edit_form';
 import { EndpointScriptEditFlyoutFooter } from './script_edit_flyout_footer';
 import type { ScriptsLibraryUrlParams } from '../scripts_library_url_params';
+import type { ScriptFlyoutScriptItem } from './types';
 
 export interface EndpointScriptEditFlyoutProps {
   error: ReturnType<typeof usePatchEndpointScript>['error'];
   isDisabled: boolean;
   isSubmittingData: boolean;
-  scriptItem?: EndpointScript & { file?: File };
+  scriptItem?: ScriptFlyoutScriptItem;
   show: Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>;
   onChange: EndpointScriptEditFormProps['onChange'];
   onClose: () => void;

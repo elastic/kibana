@@ -38,12 +38,10 @@ import {
   SCRIPT_TAGS,
   SORTED_SCRIPT_TAGS_KEYS,
 } from '../../../../../../../common/endpoint/service/scripts_library/constants';
-import type {
-  EditableScriptFields,
-  EndpointScript,
-} from '../../../../../../../common/endpoint/types';
+import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import { SCRIPT_LIBRARY_LABELS } from '../../../translations';
 import { EndpointScriptEditItem } from './script_edit_item';
+import type { EditableScriptFieldsWithFile, ScriptFlyoutScriptItem } from './types';
 
 const LabelTooltipWithOptionalInput = memo(
   ({ input, label, tooltip }: { label?: string; input?: React.ReactNode; tooltip: string }) => {
@@ -62,9 +60,7 @@ const LabelTooltipWithOptionalInput = memo(
 
 LabelTooltipWithOptionalInput.displayName = 'LabelTooltipWithOptionalInput';
 
-const buildDraft = (
-  item?: EndpointScript & { file?: File }
-): EditableScriptFields & { file?: File; fileName?: string; fileSize?: number } => ({
+const buildDraft = (item?: ScriptFlyoutScriptItem): EditableScriptFieldsWithFile => ({
   name: item?.name,
   file: item?.file,
   fileName: item?.fileName,
@@ -78,7 +74,7 @@ const buildDraft = (
   example: item?.example,
 });
 
-const buildInitialValidationState = (scriptItem?: EndpointScript & { file?: File }) => ({
+const buildInitialValidationState = (scriptItem?: ScriptFlyoutScriptItem) => ({
   hasFileError: !scriptItem?.fileName || !scriptItem?.fileSize,
   hasNameError: !scriptItem?.name,
   hasPlatformError: !scriptItem?.platform || !scriptItem?.platform.length,
@@ -96,11 +92,11 @@ export interface EndpointScriptEditFormProps {
     hasFormChanged,
     isValid,
   }: {
-    script: EditableScriptFields & { file?: File; fileName?: string; fileSize?: number };
+    script: EditableScriptFieldsWithFile;
     hasFormChanged: boolean;
     isValid: boolean;
   }) => void;
-  scriptItem?: EndpointScript & { file?: File };
+  scriptItem?: ScriptFlyoutScriptItem;
   'data-test-subj'?: string;
 }
 export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
@@ -108,9 +104,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { euiTheme } = useEuiTheme();
 
-    const [draftScript, setDraftScript] = useState<
-      EditableScriptFields & { file?: File; fileName?: string; fileSize?: number }
-    >(() => buildDraft(scriptItem));
+    const [draftScript, setDraftScript] = useState<EditableScriptFieldsWithFile>(() =>
+      buildDraft(scriptItem)
+    );
 
     const [hasFormChanged, setHasFormChanged] = useState<boolean>(false);
 
