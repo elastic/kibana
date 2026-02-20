@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -30,6 +31,12 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
+const ADAPTIVE_ALLOCATIONS_FLAT_KEYS = [
+  'adaptive_allocations.max_number_of_allocations',
+  'adaptive_allocations.enabled',
+  'adaptive_allocations.min_number_of_allocations',
+];
+
 const formDeserializer = (data: InferenceEndpoint) => {
   const maxAllocations =
     data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
@@ -37,12 +44,10 @@ const formDeserializer = (data: InferenceEndpoint) => {
 
   if (maxAllocations || data.config?.headers) {
     const { headers, ...restConfig } = data.config;
-    const {
-      'adaptive_allocations.max_number_of_allocations': _flatMax,
-      'adaptive_allocations.enabled': _flatEnabled,
-      'adaptive_allocations.min_number_of_allocations': _flatMin,
-      ...restProviderConfig
-    } = (data.config.providerConfig || {}) as Record<string, unknown>;
+    const restProviderConfig = omit(
+      data.config.providerConfig || {},
+      ADAPTIVE_ALLOCATIONS_FLAT_KEYS
+    );
 
     return {
       ...data,
