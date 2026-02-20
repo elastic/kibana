@@ -35,6 +35,8 @@ const createEvent = (
   isRedoing: false,
   isFlush: false,
   isEolChange: false,
+  // provide an unknown reason for our mock changes for testing purposes
+  detailedReasonsChangeLengths: changes.map(() => monaco.editor.CursorChangeReason.NotSet),
 });
 
 const createRange = (): monaco.IRange => ({
