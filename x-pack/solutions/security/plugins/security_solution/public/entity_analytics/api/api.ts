@@ -37,7 +37,7 @@ import type {
   UploadAssetCriticalityRecordsResponse,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
-import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
+// import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
@@ -66,7 +66,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
-import { WATCHLISTS_MANAGEMENT_URL } from '../../../common/entity_analytics/watchlists/constants';
+// import { WATCHLISTS_MANAGEMENT_URL } from '../../../common/entity_analytics/watchlists/constants'; // TODO when API merged in remove comments.
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -471,22 +471,22 @@ export const useEntityAnalyticsRoutes = () => {
 
     /**
      * List all watchlists
-     */
+     *
     const fetchWatchlists = async ({ signal }: { signal?: AbortSignal } = {}) =>
       http.fetch<ListWatchlistsResponse>(`${WATCHLISTS_MANAGEMENT_URL}/list`, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         signal,
-      });
+      });*/
 
     /**
      * List unique watchlist names
      * TODO: risk score weighting next
-     */
+     *
     const fetchWatchlistNames = async ({ signal }: { signal?: AbortSignal } = {}) => {
       const watchlists = await fetchWatchlists({ signal });
       return Array.from(new Set(watchlists.map((watchlist) => watchlist.name)));
-    };
+    };*/
 
     return {
       fetchRiskScorePreview,
@@ -518,8 +518,8 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
-      fetchWatchlists,
-      fetchWatchlistNames,
+      // fetchWatchlists,
+      // fetchWatchlistNames,
     };
   }, [http]);
 };

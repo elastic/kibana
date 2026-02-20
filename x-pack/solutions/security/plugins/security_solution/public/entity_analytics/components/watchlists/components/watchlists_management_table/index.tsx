@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useEuiTheme, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { useEuiTheme, EuiPanel, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
@@ -31,6 +31,9 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
             iconType="error"
           />
         )}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem />
+        </EuiFlexGroup>
       </EuiPanel>
     </InspectButtonContainer>
   );
