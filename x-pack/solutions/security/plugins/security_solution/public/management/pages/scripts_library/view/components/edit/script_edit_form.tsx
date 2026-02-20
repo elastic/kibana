@@ -154,6 +154,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
       setShowFakeFilePicker(false);
       toggleHasFileError(true);
       setHasFormChanged(true);
+      setHasFileBeenChanged(true);
 
       setDraftScript((prev) => ({
         ...prev,
