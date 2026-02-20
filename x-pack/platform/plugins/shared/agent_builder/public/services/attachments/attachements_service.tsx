@@ -6,9 +6,11 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
-import type { UpdateOriginResponse } from '../../../common/http_api/attachments';
 import { publicApiPath } from '../../../common/constants';
 
 /**

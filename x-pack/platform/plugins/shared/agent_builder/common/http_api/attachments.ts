@@ -35,8 +35,3 @@ export interface RenameAttachmentResponse {
   success: boolean;
   attachment: VersionedAttachment;
 }
-
-export interface UpdateOriginResponse {
-  success: boolean;
-  attachment: VersionedAttachment;
-}
