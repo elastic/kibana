@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { format as formatUrl } from 'url';
+import { Readable } from 'stream';
+import type { ReadableStream } from 'stream/web';
 import { orderBy } from 'lodash';
+import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
@@ -209,7 +211,10 @@ export default ({ getService }: FtrProviderContext) => {
               let chunkCounter = 0;
               const parseStreamCallback = (c: number) => (chunkCounter = c);
 
-              for await (const action of parseStream(stream, parseStreamCallback)) {
+              for await (const action of parseStream(
+                Readable.fromWeb(stream as ReadableStream),
+                parseStreamCallback
+              )) {
                 expect(action.type).not.to.be('error');
                 data.push(action);
               }
