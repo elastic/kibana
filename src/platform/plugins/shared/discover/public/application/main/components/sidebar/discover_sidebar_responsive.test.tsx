@@ -716,6 +716,9 @@ describe('discover responsive sidebar', function () {
         {
           ...props,
           fieldListVariant: 'button-and-flyout-always',
+          documents$: new BehaviorSubject({
+            fetchStatus: FetchStatus.UNINITIALIZED,
+          }) as DataDocuments$,
         },
         {},
         undefined
@@ -732,6 +735,9 @@ describe('discover responsive sidebar', function () {
         {
           ...props,
           fieldListVariant: 'button-and-flyout-always',
+          documents$: new BehaviorSubject({
+            fetchStatus: FetchStatus.UNINITIALIZED,
+          }) as DataDocuments$,
         },
         {},
         undefined
@@ -754,7 +760,12 @@ describe('discover responsive sidebar', function () {
 
   describe('recommended fields', () => {
     it('should call getRecommendedFieldsAccessor on component mount', async () => {
-      await renderComponent(props);
+      await renderComponent({
+        ...props,
+        documents$: new BehaviorSubject({
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        }) as DataDocuments$,
+      });
 
       expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
     });
@@ -767,7 +778,12 @@ describe('discover responsive sidebar', function () {
       const mockAccessorFn = jest.fn(() => ({ recommendedFields: mockRecommendedFields }));
       mockGetRecommendedFieldsAccessor.mockImplementation(() => mockAccessorFn);
 
-      await renderComponent(props);
+      await renderComponent({
+        ...props,
+        documents$: new BehaviorSubject({
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        }) as DataDocuments$,
+      });
 
       expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
       expect(mockAccessorFn).toHaveBeenCalled();
@@ -779,7 +795,12 @@ describe('discover responsive sidebar', function () {
         return fallback;
       });
 
-      await renderComponent(props);
+      await renderComponent({
+        ...props,
+        documents$: new BehaviorSubject({
+          fetchStatus: FetchStatus.UNINITIALIZED,
+        }) as DataDocuments$,
+      });
 
       expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
       // Verify the fallback function was called with the expected structure
