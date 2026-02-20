@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/i18n'
-  - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core'
   - '@kbn/shared-ux-utility'
   - '@kbn/elastic-agent-utils'
@@ -34,6 +33,29 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/data-view-utils'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/field-utils'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/discover-shared-plugin'
+  - '@kbn/router-utils'
+  - '@kbn/es-query'
+  - '@kbn/esql-composer'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/code-editor-mock'
+  - '@kbn/event-stacktrace'
+  - '@kbn/apm-types'
+  - '@kbn/apm-ui-shared'
+  - '@kbn/object-utils'
+  - '@kbn/apm-types-shared'
+  - '@kbn/i18n-react'
+  - '@kbn/ebt-tools'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/data-plugin'
+  - '@kbn/fields-metadata-plugin'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - shared-browser
   - package
@@ -46,6 +68,8 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+    - '!**/*.stories.ts'
+    - '!**/*.stories.tsx'
 tasks:
   jest:
     args:

@@ -18,17 +18,26 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-doc-viewer
 dependsOn:
+  - '@kbn/code-editor'
   - '@kbn/discover-utils'
   - '@kbn/data-views-plugin'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
+  - '@kbn/field-formats-plugin'
   - '@kbn/i18n-react'
   - '@kbn/i18n'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/css-utils'
+  - '@kbn/monaco'
   - '@kbn/react-field'
   - '@kbn/field-utils'
+  - '@kbn/core-lifecycle-browser'
   - '@kbn/core-analytics-browser-mocks'
+  - '@kbn/fields-metadata-plugin'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/restorable-state'
+  - '@kbn/data-view-utils'
+  - '@kbn/apm-types'
 tags:
   - shared-browser
   - package

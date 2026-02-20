@@ -164,7 +164,6 @@ dependsOn:
   - '@kbn/es'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-kibana-context-styled'
-  - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/unified-data-table'
   - '@kbn/unified-doc-viewer'
   - '@kbn/dom-drag-drop'
