@@ -170,10 +170,21 @@ export const FormattedValue: FC<FormattedValueProps> = memo(
       const formatterId = fieldFormat.type?.id ?? 'unknown';
       logLegacyAdapterUsage(formatterId);
 
-      const htmlResult = fieldFormat.convert(value, 'html', options);
-      return (
-        <LegacyHtmlAdapter html={htmlResult} className={className} data-test-subj={dataTestSubj} />
-      );
+      try {
+        const htmlResult = fieldFormat.convert(value, 'html', options);
+        return (
+          <LegacyHtmlAdapter
+            html={htmlResult}
+            className={className}
+            data-test-subj={dataTestSubj}
+          />
+        );
+      } catch {
+        // If HTML conversion fails (e.g., formatter explicitly throws for HTML),
+        // fall back to text conversion which should always work
+        const textResult = fieldFormat.convert(value, 'text', options);
+        return <span className={className}>{textResult}</span>;
+      }
     }, [fieldFormat, value, options, className, dataTestSubj]);
 
     // If React rendering was used directly, wrap in span for consistent structure

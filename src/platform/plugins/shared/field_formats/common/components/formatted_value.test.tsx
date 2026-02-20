@@ -135,6 +135,20 @@ describe('FormattedValue', () => {
       // Default fallback escapes text and renders it
       expect(container).toHaveTextContent('plain-text');
     });
+
+    it('falls back to text conversion when htmlConvert throws an error', () => {
+      const format = createMockFormat({
+        textConvert: (val) => `text: ${String(val)}`,
+        htmlConvert: () => {
+          throw new Error('HTML rendering not supported');
+        },
+      });
+
+      const { container } = render(<FormattedValue fieldFormat={format} value="test-value" />);
+
+      // Should fall back to text conversion when HTML throws
+      expect(container).toHaveTextContent('text: test-value');
+    });
   });
 
   describe('edge cases', () => {
