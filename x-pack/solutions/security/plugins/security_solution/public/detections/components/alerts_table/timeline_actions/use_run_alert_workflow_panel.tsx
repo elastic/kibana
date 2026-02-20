@@ -119,6 +119,19 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
   const workflowSelector = useMemo(
     () => (
       <WorkflowSelector
+        config={{
+          sortFunction: (workflows) =>
+            workflows.sort((a, b) => {
+              const enabledDiff = Number(b.enabled) - Number(a.enabled);
+              if (enabledDiff !== 0) return enabledDiff;
+
+              const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
+              const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
+              if (aHasAlert && !bHasAlert) return -1;
+              if (!aHasAlert && bHasAlert) return 1;
+              return 0;
+            }),
+        }}
         selectedWorkflowId={selectedId || undefined}
         onWorkflowChange={setSelectedId}
       />
