@@ -8,9 +8,9 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository/workflow_execution_repository';
-import type { GetWorkflowExecution } from '../types';
+import type { ExecutionStateRepository } from '../execution_state_repository/execution_state_repository';
+import type { WorkflowExecutionRepository } from '../workflow_execution_repository/workflow_execution_repository';
+import type { GetWorkflowExecution } from '../../types';
 
 export function getWorkflowExecutionFn(
   executionStateRepository: ExecutionStateRepository,

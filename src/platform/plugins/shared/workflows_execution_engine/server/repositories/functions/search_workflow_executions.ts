@@ -10,9 +10,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows/types/latest';
-import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../common/mappings';
-import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../repositories/workflow_execution_repository/constants';
-import type { SearchWorkflowExecutions } from '../types';
+import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common/mappings';
+import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from '../workflow_execution_repository/constants';
+import type { SearchWorkflowExecutions } from '../../types';
 
 export function searchWorkflowExecutionsFn(
   esClient: ElasticsearchClient

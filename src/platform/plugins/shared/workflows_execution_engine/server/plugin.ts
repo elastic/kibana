@@ -30,13 +30,13 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import { getStepExecutionsFn } from './execution_functions/get_step_executions';
-import { getWorkflowExecutionFn } from './execution_functions/get_workflow_executions';
-import { searchWorkflowExecutionsFn } from './execution_functions/search_workflow_executions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
+import { getStepExecutionsFn } from './repositories/functions/get_step_executions';
+import { getWorkflowExecutionFn } from './repositories/functions/get_workflow_executions';
+import { searchWorkflowExecutionsFn } from './repositories/functions/search_workflow_executions';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { createStepExecutionRepository } from './repositories/step_execution_repository/create_step_execution_repository';
 import { initializeStepExecutionDataStream } from './repositories/step_execution_repository/data_stream';
