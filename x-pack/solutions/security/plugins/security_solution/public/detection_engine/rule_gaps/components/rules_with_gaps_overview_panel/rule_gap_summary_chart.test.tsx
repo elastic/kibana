@@ -12,9 +12,7 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 
-jest.mock(
-  '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context'
-);
+jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 jest.mock('../../../../common/components/charts/donutchart', () => ({
   DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
 }));
@@ -59,9 +57,7 @@ const createGapsResponse = ({
 describe('RuleGapSummaryChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRulesTableContext as jest.Mock).mockReturnValue(
-      useRulesTableContextMock.create()
-    );
+    (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -138,19 +134,13 @@ describe('RuleGapSummaryChart', () => {
     const table = screen.getByTestId('rule-gap-summary-table');
     const rows = table.querySelectorAll('tbody tr');
 
-    const filledRow = Array.from(rows).find((row) =>
-      row.textContent?.includes('Filled')
-    );
+    const filledRow = Array.from(rows).find((row) => row.textContent?.includes('Filled'));
     expect(filledRow).toHaveTextContent('an hour');
 
-    const inProgressRow = Array.from(rows).find((row) =>
-      row.textContent?.includes('In progress')
-    );
+    const inProgressRow = Array.from(rows).find((row) => row.textContent?.includes('In progress'));
     expect(inProgressRow).toHaveTextContent('30 minutes');
 
-    const unfilledRow = Array.from(rows).find((row) =>
-      row.textContent?.includes('Unfilled')
-    );
+    const unfilledRow = Array.from(rows).find((row) => row.textContent?.includes('Unfilled'));
     expect(unfilledRow).toHaveTextContent('5 minutes');
   });
 

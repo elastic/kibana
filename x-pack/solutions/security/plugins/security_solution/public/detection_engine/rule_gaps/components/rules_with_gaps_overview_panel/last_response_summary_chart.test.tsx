@@ -13,9 +13,7 @@ import { useRulesTableContext } from '../../../rule_management_ui/components/rul
 import { useRulesTableContextMock } from '../../../rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 
 jest.mock('../../api/hooks/use_get_space_health');
-jest.mock(
-  '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context'
-);
+jest.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 jest.mock('../../../../common/components/charts/donutchart', () => ({
   DonutChart: jest.fn(() => <div data-test-subj="mock-donut-chart" />),
 }));
@@ -55,9 +53,7 @@ const createSpaceHealthResponse = ({
 describe('LastResponseSummaryChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRulesTableContext as jest.Mock).mockReturnValue(
-      useRulesTableContextMock.create()
-    );
+    (useRulesTableContext as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -130,9 +126,7 @@ describe('LastResponseSummaryChart', () => {
 
     const table = screen.getByTestId('last-response-summary-table');
     const rows = table.querySelectorAll('tr');
-    const noResponseRow = Array.from(rows).find((row) =>
-      row.textContent?.includes('No response')
-    );
+    const noResponseRow = Array.from(rows).find((row) => row.textContent?.includes('No response'));
     expect(noResponseRow).toHaveTextContent('7');
   });
 
