@@ -35,9 +35,11 @@ export async function getAxiosInstance(
     spaces,
     unsecuredSavedObjectsClient,
     connectorTokenClient,
+    getCurrentUserProfileId,
   } = context;
 
   let actionTypeId: string | undefined;
+  let authMode: 'shared' | 'per-user' | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {
@@ -53,6 +55,7 @@ export async function getAxiosInstance(
       );
 
       actionTypeId = attributes.actionTypeId;
+      authMode = attributes.authMode;
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${connectorId}]`, err);
@@ -102,10 +105,14 @@ export async function getAxiosInstance(
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
+  const profileUid = await getCurrentUserProfileId?.(request);
+
   return await getAxiosInstanceWithAuth({
     connectorId,
     connectorTokenClient,
     additionalHeaders: actionType.globalAuthHeaders,
     secrets: validatedSecrets,
+    authMode,
+    profileUid,
   });
 }

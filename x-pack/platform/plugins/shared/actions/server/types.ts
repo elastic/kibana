@@ -96,6 +96,8 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
+  authMode?: 'shared' | 'per-user';
+  profileUid?: string;
 }
 
 export type ActionResult = Connector;
@@ -272,6 +274,7 @@ export interface RawAction extends Record<string, unknown> {
   isMissingSecrets: boolean;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
+  authMode?: 'shared' | 'per-user';
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

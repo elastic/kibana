@@ -120,6 +120,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -145,7 +146,11 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
 }
+
+const noopGetCurrentUserProfileId = async (_request: KibanaRequest): Promise<string | undefined> =>
+  undefined;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -171,6 +176,7 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    getCurrentUserProfileId,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -193,6 +199,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      getCurrentUserProfileId: getCurrentUserProfileId ?? noopGetCurrentUserProfileId,
     };
   }
 
@@ -434,6 +441,21 @@ export class ActionsClient {
     } else if (type === 'authorization_code') {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
+        let authMode: 'shared' | 'per-user' | undefined;
+        try {
+          const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            tokenOpts.connectorId
+          );
+          authMode = rawConnector.attributes.authMode;
+        } catch (err) {
+          this.context.logger.debug(
+            `Failed to read authMode for connector ${tokenOpts.connectorId}: ${err.message}`
+          );
+        }
+
+        const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
+
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,
           logger: this.context.logger,
@@ -444,6 +466,8 @@ export class ActionsClient {
           },
           connectorTokenClient: this.context.connectorTokenClient,
           scope: tokenOpts.scope,
+          authMode,
+          profileUid,
         });
 
         this.context.logger.debug(

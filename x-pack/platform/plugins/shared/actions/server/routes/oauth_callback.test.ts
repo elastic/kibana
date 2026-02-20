@@ -327,7 +327,11 @@ describe('oauthCallbackRoute', () => {
     const [, handler] = registerRoute();
     const context = createMockContext();
     const req = httpServerMock.createKibanaRequest({
-      query: { code: 'auth-code', state: 'valid-state' },
+      query: {
+        code: 'auth-code',
+        state: 'valid-state',
+        scope: 'profile email https://www.googleapis.com/auth/drive.readonly',
+      },
     });
     const res = httpServerMock.createResponseFactory();
 
