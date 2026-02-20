@@ -52,7 +52,7 @@ export const alertActionSchema = z.object({
   last_series_event_timestamp: z.string(),
   expiry: z.string().optional(),
   actor: z.string().nullable(),
-  action_type: z.string(), // "fire" | "suppress" | "notified"
+  action_type: z.string(),
   episode_id: z.string().optional(),
   rule_id: z.string(),
   notification_group_id: z.string().optional(),
