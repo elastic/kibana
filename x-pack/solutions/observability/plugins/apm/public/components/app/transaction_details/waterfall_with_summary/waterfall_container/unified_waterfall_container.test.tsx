@@ -148,11 +148,11 @@ describe('UnifiedWaterfallContainer', () => {
     });
 
     it('renders legend component', async () => {
-      const { getByText } = renderUnifiedWaterfallContainer();
+      const { getAllByText } = renderUnifiedWaterfallContainer();
 
-      await waitFor(() => getByText('products-service'));
-
-      expect(getByText('products-service')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getAllByText('products-service').length).toBeGreaterThan(0);
+      });
     });
 
     it('renders critical path control', async () => {
