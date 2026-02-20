@@ -35,7 +35,7 @@ import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_ed
  * `errors` is non-null, so this keeps the Run button disabled without
  * displaying a visible error message.
  */
-const NOT_READY_SENTINEL = '__historical_not_ready__';
+export const NOT_READY_SENTINEL = '__historical_not_ready__';
 
 export interface WorkflowExecuteHistoricalFormProps {
   workflowId: string | undefined;
@@ -218,7 +218,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                   }}
                   width="100%"
                   onChange={handleChange}
-                  dataTestSubj={'workflow-manual-json-editor'}
+                  dataTestSubj={'workflow-historical-json-editor'}
                   options={{
                     language: 'json',
                     minimap: { enabled: false },

@@ -27,19 +27,19 @@ describe('getTriggerTypeIconType', () => {
 
 describe('getStepIconType', () => {
   it.each([
-    ['http', 'globe'],
+    ['globe', 'http'],
     ['console', 'console'],
-    ['data.set', 'tableOfContents'],
-    ['wait', 'clock'],
-    ['if', 'branch'],
-    ['if-branch', 'tokenBoolean'],
-    ['foreach', 'refresh'],
-    ['foreach-iteration', 'tokenNumber'],
+    ['tableOfContents', 'data.set'],
+    ['clock', 'wait'],
+    ['branch', 'if'],
+    ['tokenBoolean', 'if-branch'],
+    ['refresh', 'foreach'],
+    ['tokenNumber', 'foreach-iteration'],
     ['email', 'email'],
-    ['slack', 'logoSlack'],
-    ['slack_api', 'logoSlack'],
-    ['inference', 'sparkles'],
-  ] as const)('should return "%s" icon for %s', (nodeType, expectedIcon) => {
+    ['logoSlack', 'slack'],
+    ['logoSlack', 'slack_api'],
+    ['sparkles', 'inference'],
+  ])('should return "%s" icon for the "%s" step type', (expectedIcon, nodeType) => {
     expect(getStepIconType(nodeType)).toBe(expectedIcon);
   });
 

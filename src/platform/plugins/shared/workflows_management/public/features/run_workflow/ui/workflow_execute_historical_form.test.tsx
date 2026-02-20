@@ -10,9 +10,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
-
-const NOT_READY_SENTINEL = '__historical_not_ready__';
+import {
+  NOT_READY_SENTINEL,
+  WorkflowExecuteHistoricalForm,
+} from './workflow_execute_historical_form';
 
 const mockUseWorkflowExecution = jest.fn();
 jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
@@ -219,7 +220,7 @@ describe('WorkflowExecuteHistoricalForm', () => {
         />
       );
 
-      const editor = screen.getByTestId('workflow-manual-json-editor');
+      const editor = screen.getByTestId('workflow-historical-json-editor');
       fireEvent.change(editor, { target: { value: '{"valid": true}' } });
 
       expect(defaultProps.setValue).toHaveBeenCalledWith('{"valid": true}');
@@ -247,7 +248,7 @@ describe('WorkflowExecuteHistoricalForm', () => {
         />
       );
 
-      const editor = screen.getByTestId('workflow-manual-json-editor');
+      const editor = screen.getByTestId('workflow-historical-json-editor');
       fireEvent.change(editor, { target: { value: '{invalid' } });
 
       expect(defaultProps.setValue).toHaveBeenCalledWith('{invalid');
