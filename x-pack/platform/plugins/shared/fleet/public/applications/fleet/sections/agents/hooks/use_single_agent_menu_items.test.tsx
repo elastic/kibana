@@ -35,6 +35,7 @@ const mockCallbacks: SingleAgentMenuCallbacks = {
   onUnenrollClick: jest.fn(),
   onUninstallClick: jest.fn(),
   onRollbackClick: jest.fn(),
+  onViewAgentPolicyClick: jest.fn(),
 };
 
 function createMockAgent(overrides: Partial<Agent> = {}): Agent {
