@@ -8,9 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ScriptPanelSerializedState } from '../server';

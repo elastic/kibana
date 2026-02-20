@@ -11,9 +11,9 @@ import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
+  initializeUnsavedChanges,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
