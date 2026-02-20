@@ -29,31 +29,6 @@ const authSchema = z
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
-const SALESFORCE_TOKEN_PATH = '/services/oauth2/token';
-
-/**
- * When the user provides a Salesforce instance URL (e.g. https://elastic--wpsearch.sandbox.my.salesforce.com/)
- * as the token URL, normalize it to the actual token endpoint.
- */
-function normalizeTokenUrl(tokenUrl: string): string {
-  const trimmed = tokenUrl.trim().replace(/\/+$/, '');
-  if (trimmed.includes(SALESFORCE_TOKEN_PATH)) {
-    return tokenUrl;
-  }
-  try {
-    const u = new URL(trimmed);
-    const host = u.hostname ?? '';
-    const path = u.pathname ?? '';
-    const hasNoPath = !path || path === '/';
-    if (hasNoPath && /\.salesforce\.com$/i.test(host)) {
-      return `${trimmed}${SALESFORCE_TOKEN_PATH}`;
-    }
-  } catch {
-    // not a valid URL, return as-is
-  }
-  return tokenUrl;
-}
-
 /**
  * OAuth2 Client Credentials Flow
  */
@@ -65,11 +40,10 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    const tokenUrl = normalizeTokenUrl(secret.tokenUrl);
     let token;
     try {
       token = await ctx.getToken({
-        tokenUrl,
+        tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
