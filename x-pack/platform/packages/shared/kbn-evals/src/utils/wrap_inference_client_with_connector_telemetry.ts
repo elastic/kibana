@@ -81,6 +81,10 @@ function withConnectorTelemetry(
 export function wrapInferenceClientWithEisConnectorTelemetry(
   client: BoundInferenceClient
 ): BoundInferenceClient {
-  const productUseCase = getEisProductUseCase();
-  return productUseCase ? withConnectorTelemetry(client, { pluginId: productUseCase }) : client;
+  // Temporarily disable traffic-tagging while the header value is being finalized.
+  // (We plan to re-enable this soon.)
+  //
+  // const productUseCase = getEisProductUseCase();
+  // return productUseCase ? withConnectorTelemetry(client, { pluginId: productUseCase }) : client;
+  return client;
 }

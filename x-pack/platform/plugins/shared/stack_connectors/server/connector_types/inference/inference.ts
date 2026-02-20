@@ -207,13 +207,16 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         asStream: true,
         meta: true,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        // Temporarily disable traffic-tagging header while the value is being finalized.
+        // (We plan to re-enable this soon.)
+        //
+        // ...(params.telemetryMetadata?.pluginId
+        //   ? {
+        //       headers: {
+        //         'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
+        //       },
+        //     }
+        //   : {}),
       }
     );
     // errors should be thrown as it will not be a stream response
