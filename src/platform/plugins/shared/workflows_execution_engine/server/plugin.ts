@@ -271,23 +271,22 @@ export class WorkflowsExecutionEnginePlugin
                 const executionStateRepository = new ExecutionStateRepository(
                   coreStart.elasticsearch.client.asInternalUser
                 );
-                const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
-                const migrationOlderThan = new Date(Date.now() - intervalMs);
-
-                // Cleanup threshold is 2x the interval to ensure all data is migrated before cleanup
-                const cleanupOlderThan = new Date(Date.now() - intervalMs * 2);
+                const now = new Date();
 
                 await Promise.all([
                   workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
                     sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                    olderThan: migrationOlderThan,
+                    olderThan: now,
                   }),
                   stepExecutionRepository.reindexCompletedStepExecutionsFrom({
                     sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
-                    olderThan: migrationOlderThan,
+                    olderThan: now,
                   }),
                 ]);
 
+                const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
+                // Cleanup threshold is 2x the interval to ensure all data is migrated before cleanup
+                const cleanupOlderThan = new Date(now.getTime() - intervalMs * 2);
                 await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
                 logger.debug('Completed workflow/step execution migration and cleanup');
               } catch (error) {
