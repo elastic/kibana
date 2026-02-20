@@ -47,6 +47,12 @@ export async function generateInsights({
     const streamNamesSet = new Set(streamNames);
     streams = allStreams.filter((s) => streamNamesSet.has(s.name));
   }
+  logger.debug(
+    () =>
+      `Generating insights for ${streams.length} streams: ${streams
+        .map((stream) => stream.name)
+        .join(', ')}`
+  );
 
   const changedQueryIdsByStream = await getChangedQueryIdsByStream({
     queryClient,
@@ -55,14 +61,24 @@ export async function generateInsights({
     from,
     to,
     signal,
+    logger,
   });
 
   if (changedQueryIdsByStream.size === 0) {
+    logger.debug(`No queries have changes in the time range`);
     return {
       insights: [],
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
     };
   }
+
+  logger.debug(
+    () =>
+      `Found ${Array.from(changedQueryIdsByStream.values()).reduce(
+        (sum, queryIds) => sum + queryIds.size,
+        0
+      )} queries with changes in the time range`
+  );
 
   const streamInsightsResults = await Promise.all(
     streams
@@ -99,6 +115,7 @@ export async function generateInsights({
 
   // If no stream insights, return empty
   if (streamInsightsWithData.length === 0) {
+    logger.debug(`No insights found for any stream`);
     return {
       insights: [],
       tokensUsed,
@@ -106,6 +123,13 @@ export async function generateInsights({
   }
 
   try {
+    logger.debug(
+      () =>
+        `Generating insights summary for ${streamInsightsWithData.length} streams:\n` +
+        streamInsightsWithData
+          .map((result) => `- ${result.streamName}: ${result.insights.length} insights`)
+          .join('\n')
+    );
     const response = await inferenceClient.prompt({
       prompt: SummarizeStreamsPrompt,
       input: {
@@ -115,6 +139,8 @@ export async function generateInsights({
     });
 
     const insights = extractInsightsFromResponse(response, logger);
+
+    logger.debug(() => `Generated ${insights.length} system insights`);
 
     return {
       insights,

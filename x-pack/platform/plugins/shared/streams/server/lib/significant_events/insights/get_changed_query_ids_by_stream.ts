@@ -6,7 +6,7 @@
  */
 
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { get, isArray, keyBy } from 'lodash';
 import type { QueryClient } from '../../streams/assets/query/query_client';
@@ -31,6 +31,7 @@ export async function getChangedQueryIdsByStream({
   from,
   to,
   signal,
+  logger,
 }: {
   queryClient: QueryClient;
   esClient: ElasticsearchClient;
@@ -40,6 +41,7 @@ export async function getChangedQueryIdsByStream({
   /** End of the time range (ISO 8601). Elasticsearch accepts this for date range gte/lte. */
   to: string;
   signal: AbortSignal;
+  logger: Logger;
 }): Promise<Map<string, Set<string>>> {
   const queryLinks = await queryClient.getQueryLinks(streamNames);
   if (queryLinks.length === 0) {
@@ -48,6 +50,8 @@ export async function getChangedQueryIdsByStream({
 
   const queryLinkByRuleId = keyBy(queryLinks, (link) => getRuleIdFromQueryLink(link));
   const ruleIds = Object.keys(queryLinkByRuleId);
+
+  logger.debug(`Checking ${ruleIds.length} queries for changes`);
 
   const response = await esClient.search<
     unknown,

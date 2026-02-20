@@ -13,7 +13,7 @@ import type { LogMeta } from '@kbn/logging';
 import { parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
-import { collectQueryData, type QueryData } from './collect_query_data';
+import { collectQueryData } from './collect_query_data';
 import { extractInsightsFromResponse } from './extract_insights_from_response';
 
 export async function generateStreamInsights({
@@ -43,7 +43,7 @@ export async function generateStreamInsights({
   const allQueries = await queryClient.getAssets(stream.name);
   const queries = allQueries.filter((q) => changedQueryIds.has(q.query.id));
 
-  const queryDataResults = await Promise.all(
+  const queryDataList = await Promise.all(
     queries.map((query) =>
       collectQueryData({
         query,
@@ -54,17 +54,15 @@ export async function generateStreamInsights({
     )
   );
 
-  // Filter out queries with no events
-  const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
-
-  if (queryDataList.length === 0) {
-    return {
-      insights: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
-    };
-  }
-
   try {
+    logger.debug(
+      () =>
+        `Generating insights for stream ${stream.name} using ${queryDataList.length} queries\n` +
+        queryDataList
+          .map((q) => `- ${q.title}: total=${q.currentCount}, sampled=${q.sampleEvents.length}`)
+          .join('\n')
+    );
+
     const response = await inferenceClient.prompt({
       prompt: SummarizeQueriesPrompt,
       input: {

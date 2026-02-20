@@ -10,8 +10,6 @@ import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type { Query } from '../../../../common/queries';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
-import { parseError } from '../../streams/errors/parse_error';
-import { SecurityError } from '../../streams/errors/security_error';
 
 export interface QueryData {
   title: string;
@@ -38,53 +36,38 @@ export async function collectQueryData({
   from: string;
   /** End of the time range to filter the query (ISO 8601). */
   to: string;
-}): Promise<QueryData | undefined> {
+}): Promise<QueryData> {
   const ruleId = getRuleIdFromQueryLink(query);
 
-  const currentResponse = await esClient
-    .search<{ original_source: Record<string, unknown> }>({
-      index: '.alerts-streams.alerts-default',
-      size: SAMPLE_EVENTS_COUNT,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: from,
-                  lte: to,
-                },
+  const currentResponse = await esClient.search<{ original_source: Record<string, unknown> }>({
+    index: '.alerts-streams.alerts-default',
+    size: SAMPLE_EVENTS_COUNT,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
               },
             },
-            {
-              term: {
-                'kibana.alert.rule.uuid': ruleId,
-              },
+          },
+          {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
             },
-          ],
-        },
+          },
+        ],
       },
-      track_total_hits: true,
-    })
-    .catch((err) => {
-      const { type, message } = parseError(err);
-      if (type === 'security_exception') {
-        throw new SecurityError(
-          `Cannot read Significant events, insufficient privileges: ${message}`,
-          { cause: err }
-        );
-      }
-      throw err;
-    });
+    },
+    track_total_hits: true,
+  });
 
   const currentCount =
     typeof currentResponse.hits.total === 'number'
       ? currentResponse.hits.total
       : currentResponse.hits.total?.value ?? 0;
-
-  if (currentCount === 0) {
-    return undefined;
-  }
 
   const sampleEvents = currentResponse.hits.hits.map((hit) =>
     JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'))

@@ -61,7 +61,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   esClient: scopedClusterClient.asCurrentUser,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_discovery'),
+                  logger: taskContext.logger.get('insight_discovery'),
                   streamNames,
                   from,
                   to,
