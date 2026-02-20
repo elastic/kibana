@@ -20,10 +20,6 @@ import {
   RuleCreationPage,
   RuleEditPage,
   ExceptionsPage,
-  EndpointListPage,
-  EndpointPolicyPage,
-  ResponseActionsPage,
-  ArtifactsPage,
 } from './page_objects';
 
 export interface ScoutSecuritySolutionPageObjects extends SecurityPageObjects {
@@ -37,10 +33,6 @@ export interface ScoutSecuritySolutionPageObjects extends SecurityPageObjects {
   ruleCreation: RuleCreationPage;
   ruleEdit: RuleEditPage;
   exceptions: ExceptionsPage;
-  endpointList: EndpointListPage;
-  endpointPolicy: EndpointPolicyPage;
-  responseActions: ResponseActionsPage;
-  artifacts: ArtifactsPage;
 }
 
 const extendedTest = baseTest.extend<{

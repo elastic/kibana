@@ -23,7 +23,3 @@ export { DetectionAlertsPage } from './detection_alerts_page';
 export { RuleCreationPage } from './rule_creation_page';
 export { RuleEditPage } from './rule_edit_page';
 export { ExceptionsPage } from './exceptions_page';
-export { EndpointListPage } from './endpoint_list_page';
-export { EndpointPolicyPage } from './endpoint_policy_page';
-export { ResponseActionsPage } from './response_actions_page';
-export { ArtifactsPage } from './artifacts_page';
