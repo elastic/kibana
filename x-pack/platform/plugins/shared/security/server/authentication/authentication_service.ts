@@ -279,8 +279,8 @@ export class AuthenticationService {
         return toolkit.notHandled();
       }
 
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
-      if (getErrorStatusCode(error) !== 401) {
+      // We can only re-authenticate if the original request failed because of the expired access token.
+      if (getErrorStatusCode(error) !== 401 || error.body?.error?.reason !== 'token expired') {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
             error
