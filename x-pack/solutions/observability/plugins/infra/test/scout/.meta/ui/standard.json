@@ -1,5 +1,5 @@
 {
-  "sha1": "f2c5d662e7cd675081be2eb284e927eae5d08507",
+  "sha1": "d1683a2db8f3abb4f1a74380f8dec25359e5b965",
   "tests": [
     {
       "id": "a01812d3d8d03d1-6edec65fe06717b",
@@ -9,11 +9,12 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@needs_clean_environment"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
-        "line": 22,
+        "line": 28,
         "column": 9
       }
     }
