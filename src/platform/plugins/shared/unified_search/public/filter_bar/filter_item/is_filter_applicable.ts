@@ -29,8 +29,7 @@ export const isFilterApplicable = (filter: Filter, dataViews: DataView[]): boole
   // Any filter is applicable if no data views were provided to FilterBar.
   if (!dataViews.length) return true;
 
-  const allFields = dataViews.map((dataView) => dataView.fields.map((field) => field.name));
-  const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
+  const allFields = dataViews.flatMap((dataView) => dataView.fields.map((field) => field.name));
 
   return flattenFilters([filter]).some((f) => {
     const ip = getIndexPatternFromFilter(f, dataViews);
