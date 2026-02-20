@@ -122,7 +122,7 @@ describe('SuggestionStatusColumn', () => {
   });
 
   describe('Available Badge Display', () => {
-    it('should show green badge with available count', () => {
+    it('should show primary (blue) badge with available count', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
@@ -176,7 +176,7 @@ describe('SuggestionStatusColumn', () => {
   });
 
   describe('Mixed Badge Display', () => {
-    it('should show warning badge with both available and failed counts', () => {
+    it('should show primary (blue) badge with both available and failed counts', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"

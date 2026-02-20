@@ -100,14 +100,11 @@ export function SuggestionStatusColumn({
     });
   };
 
-  const getBadgeColor = (): 'success' | 'danger' | 'warning' => {
-    if (availableCount > 0 && failedCount > 0) {
-      return 'warning';
-    }
-    if (failedCount > 0) {
+  const getBadgeColor = (): 'primary' | 'danger' => {
+    if (failedCount > 0 && availableCount === 0) {
       return 'danger';
     }
-    return 'success';
+    return 'primary';
   };
 
   const popoverContent = (

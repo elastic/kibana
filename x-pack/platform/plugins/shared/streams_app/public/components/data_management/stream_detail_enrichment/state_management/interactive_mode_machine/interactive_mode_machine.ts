@@ -523,7 +523,27 @@ export const interactiveModeMachine = setup({
                 actions: [{ type: 'setSuggestionPollingDeadline' }],
               },
               {
-                // For 'none', 'failed', or when stream already has steps - go to idle
+                // Handle pre-existing failed task: show error toast and acknowledge/remove it
+                guard: ({ event }) => event.output.type === 'failed',
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: ({ event }) => {
+                      const output = event.output as { type: 'failed'; error: string };
+                      return {
+                        event: { error: new Error(output.error) },
+                      };
+                    },
+                  },
+                  {
+                    type: 'acknowledgeSuggestionTask',
+                    params: ({ context }) => ({ streamName: context.streamName }),
+                  },
+                ],
+              },
+              {
+                // For 'none', 'being_canceled', or when stream already has steps - go to idle
                 target: 'idle',
               },
             ],

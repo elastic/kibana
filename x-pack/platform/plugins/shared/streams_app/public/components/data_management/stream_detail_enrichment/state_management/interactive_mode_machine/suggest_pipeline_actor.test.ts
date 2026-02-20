@@ -442,4 +442,87 @@ describe('interactive mode pipeline suggestion polling', () => {
 
     actor.stop();
   });
+
+  it('shows error toast and acknowledges task when loading existing suggestion returns failed', async () => {
+    jest.useFakeTimers();
+
+    const acknowledgeSuggestionTaskMock = jest.fn();
+
+    // loadExistingSuggestion returns failed (task had failed before page load)
+    const loadExistingSuggestionMock = jest.fn(async () => ({
+      type: 'failed' as const,
+      error: 'LLM connection failed during background processing',
+    }));
+
+    const testMachine = interactiveModeMachine.provide({
+      actors: {
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => loadExistingSuggestionMock()),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => ({ status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult)),
+      },
+      actions: {
+        notifySuggestionFailure: notifySuggestionFailureMock,
+        acknowledgeSuggestionTask: acknowledgeSuggestionTaskMock,
+      },
+    });
+
+    const input = {
+      dsl: { steps: [] } as unknown as StreamlangDSL,
+      newStepIds: [],
+      parentRef: createParentRef(),
+      privileges: { manage: true, simulate: true },
+      simulationMode: 'complete' as const,
+      streamName: 'logs-generic-default',
+      grokCollection: {} as GrokCollection,
+    };
+
+    const actor = createActor(testMachine, { input });
+    actor.start();
+
+    // Machine should start in loadingExistingSuggestion, then go to idle when failed
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+
+    expect(loadExistingSuggestionMock).toHaveBeenCalledTimes(1);
+
+    // Should show error toast for the pre-existing failed task
+    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
+    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.anything(),
+        event: expect.objectContaining({
+          output: expect.objectContaining({
+            type: 'failed',
+            error: 'LLM connection failed during background processing',
+          }),
+        }),
+      }),
+      expect.objectContaining({
+        event: expect.objectContaining({
+          error: expect.any(Error),
+        }),
+      })
+    );
+
+    // Should acknowledge/remove the failed task from the server
+    expect(acknowledgeSuggestionTaskMock).toHaveBeenCalledTimes(1);
+    expect(acknowledgeSuggestionTaskMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.anything(),
+      }),
+      expect.objectContaining({
+        streamName: 'logs-generic-default',
+      })
+    );
+
+    actor.stop();
+  });
 });
