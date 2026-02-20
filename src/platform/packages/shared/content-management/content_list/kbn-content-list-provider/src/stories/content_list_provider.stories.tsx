@@ -26,12 +26,14 @@ import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-dat
 import { ContentListProvider, useContentListConfig } from '../context';
 import { useContentListItems } from '../state';
 import { useContentListSort } from '../features/sorting';
+import { useContentListPagination } from '../features/pagination';
 import type { FindItemsParams, FindItemsResult } from '../datasource';
 
 interface StoryArgs {
   entityName: string;
   entityNamePlural: string;
   enableSorting: boolean;
+  enablePagination: boolean;
   initialSortField: 'title' | 'updatedAt';
   initialSortDirection: 'asc' | 'desc';
   numberOfItems: number;
@@ -71,17 +73,57 @@ const ConfigDisplay = () => {
  */
 const ItemsList = () => {
   const { items, totalItems, refetch } = useContentListItems();
+  const pagination = useContentListPagination();
 
   return (
     <div>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{totalItems} items</EuiBadge>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{totalItems} items</EuiBadge>
+            </EuiFlexItem>
+            {pagination.isSupported && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  Page {pagination.pageIndex + 1} ({pagination.pageSize}/page)
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" iconType="refresh" onClick={() => refetch()}>
-            Refresh
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s">
+            {pagination.isSupported && pagination.pageIndex > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  iconType="arrowLeft"
+                  onClick={() => pagination.setPageIndex(pagination.pageIndex - 1)}
+                >
+                  Prev
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {pagination.isSupported &&
+              (pagination.pageIndex + 1) * pagination.pageSize < totalItems && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    iconType="arrowRight"
+                    iconSide="right"
+                    onClick={() => pagination.setPageIndex(pagination.pageIndex + 1)}
+                  >
+                    Next
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" iconType="refresh" onClick={() => refetch()}>
+                Refresh
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -129,7 +171,7 @@ const SortControls = () => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sortable" />
+        <EuiIcon type="sortable" aria-label="Sortable" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">Sort by:</EuiText>
@@ -157,6 +199,7 @@ const meta: Meta<StoryArgs> = {
     entityName: { control: 'text', description: 'Singular entity name' },
     entityNamePlural: { control: 'text', description: 'Plural entity name' },
     enableSorting: { control: 'boolean', description: 'Enable sorting feature' },
+    enablePagination: { control: 'boolean', description: 'Enable pagination feature' },
     initialSortField: {
       control: 'select',
       options: ['title', 'updatedAt'],
@@ -219,19 +262,19 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
 
   // Memoize features to maintain stable reference.
   const features = useMemo(
-    () =>
-      args.enableSorting
+    () => ({
+      sorting: args.enableSorting
         ? {
-            sorting: {
-              initialSort: { field: args.initialSortField, direction: args.initialSortDirection },
-            },
+            initialSort: { field: args.initialSortField, direction: args.initialSortDirection },
           }
-        : { sorting: false as const },
-    [args.enableSorting, args.initialSortField, args.initialSortDirection]
+        : (false as const),
+      pagination: args.enablePagination ? { initialPageSize: 5 } : (false as const),
+    }),
+    [args.enableSorting, args.enablePagination, args.initialSortField, args.initialSortDirection]
   );
 
   // Key forces re-mount when configuration changes.
-  const key = `${args.enableSorting}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
+  const key = `${args.enableSorting}-${args.enablePagination}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
 
   return (
     <ContentListProvider
@@ -259,6 +302,7 @@ export const Provider: Story = {
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
     enableSorting: true,
+    enablePagination: true,
     initialSortField: 'title',
     initialSortDirection: 'asc',
     numberOfItems: 8,

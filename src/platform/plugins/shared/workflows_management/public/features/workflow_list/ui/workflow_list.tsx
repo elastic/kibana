@@ -10,6 +10,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -17,6 +18,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
@@ -50,6 +52,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
 
   // Report list viewed telemetry when workflows are loaded
@@ -115,15 +119,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   );
 
   const handleDeleteWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
-      const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
-      if (!confirmed) {
-        return;
-      }
-      deleteWorkflows.mutate({ ids: [item.id] });
-    },
-    [deleteWorkflows]
+    (item: WorkflowListItemDto) => setWorkflowToDelete(item),
+    [setWorkflowToDelete]
   );
+
+  const handleConfirmDelete = useCallback(() => {
+    if (workflowToDelete) {
+      deleteWorkflows.mutate({ ids: [workflowToDelete.id] });
+      setWorkflowToDelete(null);
+    }
+  }, [deleteWorkflows, workflowToDelete]);
 
   const handleCloneWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
@@ -189,6 +194,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                       display: block;
                       max-width: 100%;
                     `}
+                    title={name}
+                    data-test-subj="workflowNameLink"
                   >
                     {name}
                   </Link>
@@ -268,6 +275,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   }
                 >
                   <EuiSwitch
+                    data-test-subj={`workflowToggleSwitch-${item.id}`}
                     disabled={!canUpdateWorkflow || !item.valid}
                     checked={item.enabled}
                     onChange={() => handleToggleWorkflow(item)}
@@ -306,6 +314,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
+            'data-test-subj': 'runWorkflowAction',
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
               getRunTooltipContent({
@@ -328,6 +337,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),
+            'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
@@ -341,6 +351,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone',
             }),
+            'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
             description: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone workflow',
@@ -356,6 +367,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export',
             }),
+            'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
@@ -368,6 +380,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete',
             }),
+            'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
             description: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete workflow',
@@ -450,6 +463,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showEnd={showEnd}
       />
       <EuiBasicTable
+        data-test-subj="workflowListTable"
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
@@ -488,6 +502,34 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
         />
+      )}
+      {workflowToDelete && (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.workflowList.deleteModal.title', {
+            defaultMessage: `Delete "${workflowToDelete.name}"?`,
+            values: { name: workflowToDelete.name },
+          })}
+          titleProps={{ id: modalTitleId }}
+          aria-labelledby={modalTitleId}
+          onCancel={() => setWorkflowToDelete(null)}
+          onConfirm={handleConfirmDelete}
+          cancelButtonText={i18n.translate('workflows.workflowList.deleteModal.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.workflowList.deleteModal.confirm', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflows-delete-confirmation-modal"
+        >
+          <p>
+            {i18n.translate('workflows.workflowList.deleteModal.message', {
+              defaultMessage: `Delete the "${workflowToDelete.name}" workflow? This action cannot be undone.`,
+              values: { name: workflowToDelete.name },
+            })}
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );

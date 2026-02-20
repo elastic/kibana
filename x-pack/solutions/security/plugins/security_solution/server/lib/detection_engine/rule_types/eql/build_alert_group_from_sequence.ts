@@ -106,7 +106,7 @@ export const buildAlertGroupFromSequence = ({
       })
     );
   } catch (error) {
-    ruleExecutionLogger.debug(`Error building alert group from sequence\nError: ${error}`);
+    ruleExecutionLogger.debug(`Error transforming matched events to alerts\nError: ${error}`);
     return { shellAlert: undefined, buildingBlocks: [] };
   }
 
