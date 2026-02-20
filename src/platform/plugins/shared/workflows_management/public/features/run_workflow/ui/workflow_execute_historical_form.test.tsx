@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ExecutionStatus } from '@kbn/workflows';
 import {
   NOT_READY_SENTINEL,
   WorkflowExecuteHistoricalForm,
@@ -113,7 +114,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -136,7 +144,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -158,7 +173,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -182,7 +204,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -208,7 +237,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -236,7 +272,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 
@@ -262,8 +305,18 @@ describe('WorkflowExecuteHistoricalForm', () => {
         data: {
           total: 2,
           results: [
-            { id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false },
-            { id: 'exec-2', startedAt: '2024-01-02T00:00:00Z', isTestRun: true },
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+            {
+              id: 'exec-2',
+              startedAt: '2024-01-02T00:00:00Z',
+              isTestRun: true,
+              status: ExecutionStatus.COMPLETED,
+            },
           ],
         },
       });
@@ -278,7 +331,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: {
           total: 1,
-          results: [{ id: 'exec-1', startedAt: '2024-01-01T00:00:00Z', isTestRun: false }],
+          results: [
+            {
+              id: 'exec-1',
+              startedAt: '2024-01-01T00:00:00Z',
+              isTestRun: false,
+              status: ExecutionStatus.COMPLETED,
+            },
+          ],
         },
       });
 

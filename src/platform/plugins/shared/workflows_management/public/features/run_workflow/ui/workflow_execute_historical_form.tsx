@@ -17,15 +17,16 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
+import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
@@ -49,6 +50,7 @@ export interface WorkflowExecuteHistoricalFormProps {
 
 export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistoricalFormProps>(
   ({ workflowId, initialExecutionId, value, setValue, errors, setErrors }) => {
+    const { euiTheme } = useEuiTheme();
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
@@ -65,37 +67,25 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       if (!results.length) return [];
       return results.map((execution, index): EuiComboBoxOptionOption<string> => {
         const runNumber = total - index;
+        const formattedDateTime =
+          getFormattedDateTime(new Date(execution.startedAt)) ?? execution.startedAt;
+        const statusIcon = getExecutionStatusIcon(euiTheme, execution.status);
         return {
           key: execution.id,
           value: execution.id,
-          label: i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
-            defaultMessage: 'Run #{runNumber} - {dateTime}',
-            values: {
-              runNumber,
-              dateTime: getFormattedDateTime(new Date(execution.startedAt)) ?? execution.startedAt,
-            },
+          label: translations.getRunLabel(runNumber, formattedDateTime),
+          prepend: <EuiFlexItem grow={false}>{statusIcon}</EuiFlexItem>,
+          ...(execution.isTestRun && {
+            append: <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />,
           }),
-          prepend: (
-            <EuiIconTip
-              type={execution.isTestRun ? 'flask' : 'empty'}
-              aria-hidden={true}
-              content={
-                execution.isTestRun
-                  ? i18n.translate('workflows.workflowExecuteModal.testRun', {
-                      defaultMessage: 'Test run',
-                    })
-                  : undefined
-              }
-            />
-          ),
           css: css`
-            .euiComboBoxOption__prepend {
+            .euiComboBoxOption__append {
               margin-top: 3px; /* align the icon with the text */
             }
           `,
         };
       });
-    }, [executionsList, getFormattedDateTime]);
+    }, [euiTheme, executionsList?.results, executionsList?.total, getFormattedDateTime]);
 
     const { data: selectedExecution, isLoading: isLoadingExecution } = useWorkflowExecution({
       executionId: selectedExecutionId,
@@ -138,11 +128,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
           JSON.parse(newValue);
           setErrors(null);
         } catch {
-          setErrors(
-            i18n.translate('workflows.workflowExecuteModal.invalidJson', {
-              defaultMessage: 'Invalid JSON',
-            })
-          );
+          setErrors(translations.invalidJson);
         }
       },
       [setValue, setErrors]
@@ -152,12 +138,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('workflows.workflowExecuteModal.replaySelectLabel', {
-              defaultMessage: 'Select execution',
-            })}
-            fullWidth
-          >
+          <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
             <EuiComboBox
               singleSelection={{ asPlainText: true }}
               options={executionOptions}
@@ -170,17 +151,8 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               isClearable
               fullWidth
               isLoading={!executionsList && !!workflowId}
-              placeholder={i18n.translate(
-                'workflows.workflowExecuteModal.replaySelectPlaceholder',
-                { defaultMessage: 'Search or select a previous run' }
-              )}
+              placeholder={translations.selectExecutionPlaceholder}
               data-test-subj="workflowExecuteModalReplayExecutionComboBox"
-              css={css`
-                .euiComboBoxPlainTextSelection__prepend {
-                  margin-inline-end: 0px;
-                  margin-top: 3px; /* align the icon with the text */
-                }
-              `}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -193,9 +165,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                   announceOnMount
                   color="danger"
                   size="s"
-                  title={i18n.translate('workflows.workflowExecuteModal.replayInvalidJsonTitle', {
-                    defaultMessage: 'Invalid JSON',
-                  })}
+                  title={translations.invalidJson}
                 >
                   <p>{errors}</p>
                 </EuiCallOut>
@@ -203,10 +173,9 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
             )}
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('workflows.workflowExecuteModal.replayInputDataLabel', {
-                  defaultMessage: 'Input data (original: {originalTrigger})',
-                  values: { originalTrigger: getTriggerTypeLabel(selectedExecution.context) },
-                })}
+                label={translations.getInputDataLabel(
+                  getTriggerTypeLabel(selectedExecution.context)
+                )}
                 fullWidth
               >
                 <CodeEditor
@@ -251,10 +220,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         {selectedExecutionId && isLoadingExecution && (
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="workflows.workflowExecuteModal.loadingExecution"
-                defaultMessage="Loading execution…"
-              />
+              {translations.loadingExecution}
             </EuiText>
           </EuiFlexItem>
         )}
@@ -271,3 +237,32 @@ function getTriggerTypeLabel(context?: Record<string, unknown>): string {
   if (event?.documents) return TRIGGER_TABS_LABELS.index;
   return TRIGGER_TABS_LABELS.manual;
 }
+
+const translations = {
+  getRunLabel: (runNumber: number, dateTime: string) =>
+    i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
+      defaultMessage: 'Run #{runNumber} - {dateTime}',
+      values: { runNumber, dateTime },
+    }),
+  testRun: i18n.translate('workflows.workflowExecuteModal.testRun', {
+    defaultMessage: 'Test run',
+  }),
+  invalidJson: i18n.translate('workflows.workflowExecuteModal.invalidJson', {
+    defaultMessage: 'Invalid JSON',
+  }),
+  selectExecutionLabel: i18n.translate('workflows.workflowExecuteModal.selectExecutionLabel', {
+    defaultMessage: 'Select execution',
+  }),
+  selectExecutionPlaceholder: i18n.translate(
+    'workflows.workflowExecuteModal.selectExecutionPlaceholder',
+    { defaultMessage: 'Search or select a previous run' }
+  ),
+  getInputDataLabel: (originalTrigger: string) =>
+    i18n.translate('workflows.workflowExecuteModal.inputDataLabel', {
+      defaultMessage: 'Input data (original: {originalTrigger})',
+      values: { originalTrigger },
+    }),
+  loadingExecution: i18n.translate('workflows.workflowExecuteModal.loadingExecution', {
+    defaultMessage: 'Loading execution…',
+  }),
+};
