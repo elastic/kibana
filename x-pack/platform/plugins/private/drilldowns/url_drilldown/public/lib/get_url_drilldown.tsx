@@ -19,7 +19,6 @@ import type {
   UrlDrilldownGlobalScope,
 } from './types';
 import {
-  UrlDrilldownCollectConfig,
   urlDrilldownCompileUrl,
   urlDrilldownValidateUrlTemplate,
 } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -43,6 +42,9 @@ import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
 import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
+import {
+  UrlDrilldownCollectConfig,
+} from './components/url_drilldown_collect_config';
 
 type ExecutionContext = ChartActionContext & EmbeddableApiContext;
 type SetupContext = EmbeddableApiContext;
