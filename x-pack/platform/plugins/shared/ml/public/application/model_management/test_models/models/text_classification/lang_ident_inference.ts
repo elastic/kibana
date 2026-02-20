@@ -17,7 +17,7 @@ import type { trainedModelsApiProvider } from '../../../../services/ml_api_servi
 import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
-  protected inferenceType: InferenceType = 'classification' as InferenceType;
+  protected inferenceType: InferenceType = 'classification';
   protected inferenceTypeLabel = i18n.translate(
     'xpack.ml.trainedModels.testModelsFlyout.langIdent.label',
     { defaultMessage: 'Language identification' }

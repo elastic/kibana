@@ -40,8 +40,8 @@ export const getSignificantTermRequest = (
 
   let filter: estypes.QueryDslQueryContainer[] = [];
 
-  if (query && query.bool && Array.isArray(query.bool.filter)) {
-    filter = query.bool.filter.filter((d) => d != null && Object.keys(d)[0] !== 'range');
+  if (query.bool && Array.isArray(query.bool.filter)) {
+    filter = query.bool.filter.filter((d) => Object.keys(d || {})[0] !== 'range');
 
     query.bool.filter = [
       ...filter,

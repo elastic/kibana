@@ -224,10 +224,9 @@ export const searchFindingsHandler = (findings: CspFinding[]) =>
       // @ts-expect-error FieldValue is now very broad (can be anything)
       filter[0]?.bool?.should?.[0]?.term?.['rule.section']?.value !== undefined;
 
-    if (hasRuleSectionQuerySearchTerm && filter[0] != null) {
-      const filterFirst = filter[0];
+    if (hasRuleSectionQuerySearchTerm) {
       const filteredFindings = findings.filter((finding) => {
-        const termValue = (filterFirst.bool?.should as estypes.QueryDslQueryContainer[])?.[0]
+        const termValue = (filter[0]?.bool?.should as estypes.QueryDslQueryContainer[])?.[0]
           ?.term?.[
           'rule.section'
           // @ts-expect-error FieldValue is now very broad (can be anything)
@@ -241,10 +240,9 @@ export const searchFindingsHandler = (findings: CspFinding[]) =>
     const hasRuleSectionFilter =
       isArray(filter) && filter?.[0]?.match_phrase?.['rule.section'] !== undefined;
 
-    if (hasRuleSectionFilter && filter?.[0] != null) {
-      const filterFirst = filter[0];
+    if (hasRuleSectionFilter) {
       const filteredFindings = findings.filter((finding) => {
-        return finding.rule.section === filterFirst?.match_phrase?.['rule.section'];
+        return finding.rule.section === filter?.[0]?.match_phrase?.['rule.section'];
       });
 
       return HttpResponse.json(getFindingsSearchResponse(filteredFindings));
@@ -253,10 +251,9 @@ export const searchFindingsHandler = (findings: CspFinding[]) =>
     const hasResultEvaluationFilter =
       isArray(filter) && filter?.[0]?.match_phrase?.['result.evaluation'] !== undefined;
 
-    if (hasResultEvaluationFilter && filter?.[0] != null) {
-      const filterFirst = filter[0];
+    if (hasResultEvaluationFilter) {
       const filteredFindings = findings.filter((finding) => {
-        return finding.result.evaluation === filterFirst?.match_phrase?.['result.evaluation'];
+        return finding.result.evaluation === filter?.[0]?.match_phrase?.['result.evaluation'];
       });
 
       return HttpResponse.json(getFindingsSearchResponse(filteredFindings));

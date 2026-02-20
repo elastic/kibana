@@ -40,7 +40,7 @@ const getTerm2CategoryCountRequest = (
 
   const categoryQuery = getCategoryQuery(categoryFieldName, [category]);
 
-  if (query && Array.isArray(query.bool?.filter)) {
+  if (Array.isArray(query.bool?.filter)) {
     for (const { fieldName, fieldValue } of fieldValuePairs) {
       query.bool?.filter?.push({ term: { [fieldName]: fieldValue } });
     }

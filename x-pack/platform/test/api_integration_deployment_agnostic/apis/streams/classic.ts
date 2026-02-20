@@ -625,10 +625,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
         expect(pipeline._meta?.managed_by).to.eql('streams');
-        const proc0 = pipeline?.processors?.[0];
-        expect(proc0 && 'pipeline' in proc0 ? proc0.pipeline?.name : undefined).to.eql(
-          'mytest-first@stream.processing'
-        );
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-first@stream.processing');
       });
 
       it('Executes processing using the newly created ingest pipeline', async () => {
@@ -683,11 +680,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        expect(
-          pipeline.processors?.map((proc) =>
-            proc && 'pipeline' in proc ? proc.pipeline?.name : undefined
-          )
-        ).to.eql(['mytest-first@stream.processing', 'mytest-second@stream.processing']);
+        expect(pipeline.processors?.map((proc) => proc?.pipeline?.name)).to.eql([
+          'mytest-first@stream.processing',
+          'mytest-second@stream.processing',
+        ]);
       });
 
       it('updates the ingest pipeline when the processing is removed from the first stream', async () => {
@@ -709,10 +705,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        const proc0Second = pipeline?.processors?.[0];
-        expect(
-          proc0Second && 'pipeline' in proc0Second ? proc0Second.pipeline?.name : undefined
-        ).to.eql('mytest-second@stream.processing');
+
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-second@stream.processing');
       });
 
       it('clears the pipeline when processing is removed from the second stream', async () => {

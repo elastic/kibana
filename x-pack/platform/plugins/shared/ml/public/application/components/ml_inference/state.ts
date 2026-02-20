@@ -59,12 +59,12 @@ export const getInitialState = (model: DFAModelItem): MlInferenceState => {
   let targetField;
 
   if (modelType !== undefined) {
-    const config = model.inference_config;
-    const configEntry = config?.[modelType as keyof NonNullable<DFAModelItem['inference_config']>];
-    targetField =
-      config && configEntry && 'results_field' in configEntry
-        ? `ml.inference.${(configEntry as { results_field: string }).results_field}`
-        : undefined;
+    targetField = model.inference_config
+      ? `ml.inference.${
+          model.inference_config[modelType as keyof NonNullable<DFAModelItem['inference_config']>]!
+            .results_field
+        }`
+      : undefined;
   }
 
   return {
@@ -73,7 +73,8 @@ export const getInitialState = (model: DFAModelItem): MlInferenceState => {
     error: false,
     fieldMap: undefined,
     ignoreFailure: false,
-    inferenceConfig: model.inference_config as unknown as MlInferenceState['inferenceConfig'],
+    // @ts-expect-error - ExactlyOne in the ES types makes it really hard to comply without force-casting.
+    inferenceConfig: model.inference_config,
     modelId: model.model_id,
     onFailure: getDefaultOnFailureConfiguration(),
     pipelineDescription: `Uses the pre-trained data frame analytics model ${model.model_id} to infer against the data that is being ingested in the pipeline`,

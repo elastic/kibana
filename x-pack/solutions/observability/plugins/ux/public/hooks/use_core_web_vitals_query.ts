@@ -35,7 +35,7 @@ export function useCoreWebVitalsQuery(uxQuery: ReturnType<typeof useUxQuery>) {
   const data = useMemo(
     () =>
       transformCoreWebVitalsResponse(
-        esQueryResponse as Parameters<typeof transformCoreWebVitalsResponse>[0],
+        esQueryResponse,
         uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT
       ),
     [esQueryResponse, uxQuery?.percentile]

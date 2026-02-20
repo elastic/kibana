@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   TBT_FIELD,
@@ -48,13 +49,12 @@ interface CoreWebVitalsAggregations {
   coreVitalPages?: { doc_count?: number };
 }
 
-interface CoreWebVitalsSearchResponse {
-  aggregations?: CoreWebVitalsAggregations;
-  hits?: { total?: { value?: number } };
-}
-
-export function transformCoreWebVitalsResponse(
-  response?: CoreWebVitalsSearchResponse,
+export function transformCoreWebVitalsResponse<T>(
+  response?: ESSearchResponse<
+    T,
+    ReturnType<typeof coreWebVitalsQuery>,
+    { restTotalHitsAsInt: false }
+  >,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;
@@ -89,7 +89,7 @@ export function coreWebVitalsQuery(
   urlQuery?: string,
   uiFilters?: UxUIFilters,
   percentile = PERCENTILE_DEFAULT
-): ReturnType<typeof mergeProjection> {
+) {
   const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 
   const projection = getRumPageLoadTransactionsProjection({

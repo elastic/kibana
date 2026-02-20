@@ -509,11 +509,11 @@ export class JobCreator {
   }
 
   public get query(): object {
-    return this._datafeed_config.query ?? { match_all: {} };
+    return this._datafeed_config.query!;
   }
 
   public set query(query: object) {
-    this._datafeed_config.query = query as typeof this._datafeed_config.query;
+    this._datafeed_config.query = query;
   }
 
   public get queryDelay(): string | null {

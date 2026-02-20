@@ -84,16 +84,8 @@ export const getPhraseFilterValue = (
 ): PhraseFilterValue => {
   if (isPhraseFilter(filter)) {
     const queryConfig = filter.query.match_phrase || filter.query.match || {};
-    const queryValue = Object.values(queryConfig)[0] as
-      | { query: PhraseFilterValue }
-      | PhraseFilterValue
-      | undefined;
-    if (queryValue === undefined) {
-      return '' as PhraseFilterValue;
-    }
-    return isPlainObject(queryValue)
-      ? (queryValue as { query: PhraseFilterValue }).query
-      : (queryValue as PhraseFilterValue);
+    const queryValue = Object.values(queryConfig)[0];
+    return isPlainObject(queryValue) ? queryValue.query : queryValue;
   } else {
     return filter.query?.script?.script?.params?.value;
   }

@@ -11,7 +11,6 @@ import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@k
 import type { Query } from '@kbn/es-query';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
-import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 import { getTransformConfigQuery } from '../../../../../common';
 
 import type { StepDefineExposedState, QUERY_LANGUAGE } from '../common';
@@ -52,14 +51,11 @@ export const useSearchBar = (
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
           setSearchQuery(
-            toElasticsearchQuery(
-              fromKueryExpression(query.query as string),
-              dataView
-            ) as SavedSearchQuery
+            toElasticsearchQuery(fromKueryExpression(query.query as string), dataView)
           );
           return;
         case QUERY_LANGUAGE_LUCENE:
-          setSearchQuery(luceneStringToDsl(query.query as string) as SavedSearchQuery);
+          setSearchQuery(luceneStringToDsl(query.query as string));
           return;
       }
     } catch (e) {

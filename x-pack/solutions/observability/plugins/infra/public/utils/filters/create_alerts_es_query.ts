@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import type { Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import {
@@ -17,7 +16,9 @@ import {
 import { buildCombinedAssetFilter } from './build';
 import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 
-export type AlertsEsQuery = NonNullable<QueryDslQueryContainer>;
+export interface AlertsEsQuery {
+  bool: BoolQuery;
+}
 
 export const createAlertsEsQuery = ({
   dateRange,
@@ -40,7 +41,7 @@ export const createAlertsEsQuery = ({
 
   const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];
 
-  return buildEsQuery(undefined, [], filters) as unknown as AlertsEsQuery;
+  return buildEsQuery(undefined, [], filters);
 };
 
 const createDateFilter = (date: TimeRange) =>

@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpointInfo,
+  MlInferenceConfigCreateContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ModelDefinitionResponse,
   ModelState,
@@ -393,10 +396,10 @@ export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 /** Trained DFA model */
 export type DFAModelItem = Omit<TrainedModelItem, 'inference_config'> & {
   origin_job_exists?: boolean;
-  inference_config?: {
-    classification?: estypes.MlClassificationInferenceOptions;
-    regression?: estypes.MlRegressionInferenceOptions;
-  };
+  inference_config?: Pick<
+    NonNullable<MlInferenceConfigCreateContainer>,
+    'classification' | 'regression'
+  >;
   metadata?: estypes.MlTrainedModelConfig['metadata'] & {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;

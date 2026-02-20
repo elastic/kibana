@@ -72,13 +72,12 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
 const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
   const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
-  const sourceBool = source.query && 'bool' in source.query ? source.query.bool : undefined;
   return {
     ...source,
     query: {
-      ...(source.query ?? {}),
+      ...source.query,
       bool: {
-        ...sourceBool,
+        ...source.query?.bool,
         filter: [...sourceFilters, ...groupingFilters] as QueryDslQueryContainer[],
       },
     } as QueryDslQueryContainer,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
 import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
@@ -17,13 +18,8 @@ interface InPAggregations {
   inpRanks?: { values?: Array<{ value?: number }> };
 }
 
-interface InPSearchResponse {
-  aggregations?: InPAggregations;
-  hits?: { total?: { value?: number } };
-}
-
-export function transformINPResponse(
-  response?: InPSearchResponse,
+export function transformINPResponse<T>(
+  response?: ESSearchResponse<T, ReturnType<typeof inpQuery>, { restTotalHitsAsInt: false }>,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;
@@ -49,7 +45,7 @@ export function inpQuery(
   urlQuery?: string,
   uiFilters?: UxUIFilters,
   percentile = PERCENTILE_DEFAULT
-): ReturnType<typeof mergeProjection> {
+) {
   const setup: SetupUX = { uiFilters: uiFilters ?? {} };
 
   const projection = getRumPageExitTransactionsProjection({

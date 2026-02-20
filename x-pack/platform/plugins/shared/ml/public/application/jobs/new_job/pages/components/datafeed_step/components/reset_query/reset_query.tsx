@@ -29,7 +29,7 @@ export const ResetQueryButton: FC = () => {
   const showModal = () => setConfirmModalVisible(true);
 
   function resetDatafeed() {
-    jobCreator.query = (getDefaultDatafeedQuery() ?? { match_all: {} }) as object;
+    jobCreator.query = getDefaultDatafeedQuery();
     jobCreatorUpdate();
     closeModal();
   }

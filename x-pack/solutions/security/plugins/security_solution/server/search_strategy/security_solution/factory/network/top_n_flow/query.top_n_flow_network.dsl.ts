@@ -117,96 +117,95 @@ const getFlowTargetAggs = (
   sort: NetworkTopNFlowRequestOptions['sort'],
   flowTarget: FlowTargetSourceDest,
   querySize: number
-): Record<string, AggregationsAggregationWithFieldsContainer> =>
-  ({
-    [flowTarget]: {
-      terms: {
-        field: `${flowTarget}.ip`,
-        size: querySize,
-        order: {
-          ...getQueryOrder(sort),
+): Record<string, AggregationsAggregationWithFieldsContainer> => ({
+  [flowTarget]: {
+    terms: {
+      field: `${flowTarget}.ip`,
+      size: querySize,
+      order: {
+        ...getQueryOrder(sort),
+      },
+    },
+    aggs: {
+      bytes_in: {
+        sum: {
+          field: `${getOppositeField(flowTarget)}.bytes`,
         },
       },
-      aggs: {
-        bytes_in: {
-          sum: {
-            field: `${getOppositeField(flowTarget)}.bytes`,
+      bytes_out: {
+        sum: {
+          field: `${flowTarget}.bytes`,
+        },
+      },
+      domain: {
+        terms: {
+          field: `${flowTarget}.domain`,
+          order: {
+            timestamp: 'desc',
           },
         },
-        bytes_out: {
-          sum: {
-            field: `${flowTarget}.bytes`,
-          },
-        },
-        domain: {
-          terms: {
-            field: `${flowTarget}.domain`,
-            order: {
-              timestamp: 'desc',
-            },
-          },
-          aggs: {
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
             },
           },
         },
-        location: {
-          filter: {
-            exists: {
-              field: `${flowTarget}.geo`,
-            },
+      },
+      location: {
+        filter: {
+          exists: {
+            field: `${flowTarget}.geo`,
           },
-          aggs: {
-            top_geo: {
-              top_hits: {
-                _source: false,
-                fields: [
-                  `${flowTarget}.geo.*`,
-                  {
-                    field: '@timestamp',
-                    format: 'strict_date_optional_time',
-                  },
-                ],
-                size: 1,
-              },
+        },
+        aggs: {
+          top_geo: {
+            top_hits: {
+              _source: false,
+              fields: [
+                `${flowTarget}.geo.*`,
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
+              size: 1,
             },
           },
         },
-        autonomous_system: {
-          filter: {
-            exists: {
-              field: `${flowTarget}.as`,
-            },
+      },
+      autonomous_system: {
+        filter: {
+          exists: {
+            field: `${flowTarget}.as`,
           },
-          aggs: {
-            top_as: {
-              top_hits: {
-                _source: false,
-                fields: [
-                  `${flowTarget}.as.*`,
-                  {
-                    field: '@timestamp',
-                    format: 'strict_date_optional_time',
-                  },
-                ],
-                size: 1,
-              },
+        },
+        aggs: {
+          top_as: {
+            top_hits: {
+              _source: false,
+              fields: [
+                `${flowTarget}.as.*`,
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
+              size: 1,
             },
           },
         },
-        flows: {
-          cardinality: {
-            field: 'network.community_id',
-          },
+      },
+      flows: {
+        cardinality: {
+          field: 'network.community_id',
         },
-        [`${getOppositeField(flowTarget)}_ips`]: {
-          cardinality: {
-            field: `${getOppositeField(flowTarget)}.ip`,
-          },
+      },
+      [`${getOppositeField(flowTarget)}_ips`]: {
+        cardinality: {
+          field: `${getOppositeField(flowTarget)}.ip`,
         },
       },
     },
-  } as unknown as Record<string, AggregationsAggregationWithFieldsContainer>);
+  },
+});

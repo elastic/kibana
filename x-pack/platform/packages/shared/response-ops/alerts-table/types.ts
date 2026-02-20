@@ -217,7 +217,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * A boolean expression or list of ids to refine the alerts search query
    */
-  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
+  query: NonNullable<QueryDslQueryContainer>;
   /**
    * The sort configuration.
    *

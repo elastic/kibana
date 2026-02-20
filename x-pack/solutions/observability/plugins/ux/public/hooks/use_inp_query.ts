@@ -32,7 +32,7 @@ export function useINPQuery(uxQuery: ReturnType<typeof useUxQuery>) {
   const data = useMemo(
     () =>
       transformINPResponse(
-        esQueryResponse as Parameters<typeof transformINPResponse>[0],
+        esQueryResponse,
         uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT
       ),
     [esQueryResponse, uxQuery?.percentile]

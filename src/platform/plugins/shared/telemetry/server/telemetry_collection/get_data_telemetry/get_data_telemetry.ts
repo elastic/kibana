@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { DataPatternName, DataTelemetryType } from './constants';
@@ -218,13 +217,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       esClient.indices.stats(indicesStatsParams),
     ]);
 
-    // ES client may return IndicesStatsResponse directly or TransportResult<IndicesStatsResponse>
-    const statsBody: IndicesStatsResponse | undefined =
-      indexStats && 'body' in indexStats
-        ? (indexStats as { body: IndicesStatsResponse }).body
-        : (indexStats as IndicesStatsResponse | undefined);
-
-    const indexNames = Object.keys({ ...indexMappings, ...statsBody?.indices });
+    const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
 
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
@@ -242,7 +235,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
           indexMappings[name]?.mappings?.properties?.data_stream?.properties?.type?.value,
       };
 
-      const stats = (statsBody?.indices ?? {})[name];
+      const stats = (indexStats?.indices ?? {})[name];
       if (stats) {
         return {
           ...baseIndexInfo,

@@ -31,7 +31,7 @@ const DEFAULT_BAR_TARGET = 75;
 export const useData = (
   selectedDataView: DataView,
   contextId: string,
-  searchQuery: estypes.QueryDslQueryContainer,
+  searchQuery: NonNullable<estypes.QueryDslQueryContainer>,
   onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
@@ -71,7 +71,7 @@ export const useData = (
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
         index: selectedDataView.getIndexPattern(),
-        searchQuery: searchQuery ?? { match_all: {} },
+        searchQuery,
         timeFieldName: selectedDataView.timeFieldName,
         runtimeFieldMap: selectedDataView.getRuntimeMappings(),
       };

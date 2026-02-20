@@ -120,7 +120,7 @@ export const LogCategorizationPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: string | { [key: string]: unknown };
+      searchQuery: NonNullable<estypes.QueryDslQueryContainer>;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -133,7 +133,7 @@ export const LogCategorizationPage: FC = () => {
 
       setUrlState({
         ...stateFromUrl,
-        searchQuery: searchParams.searchQuery as estypes.QueryDslQueryContainer,
+        searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
@@ -350,7 +350,7 @@ export const LogCategorizationPage: FC = () => {
         <EuiFlexItem>
           <SearchPanel
             searchString={searchString ?? ''}
-            searchQuery={searchQuery ?? { match_all: {} }}
+            searchQuery={searchQuery}
             searchQueryLanguage={searchQueryLanguage}
             setSearchParams={setSearchParams}
           />

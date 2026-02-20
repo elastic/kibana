@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import { useTimeBuckets } from '@kbn/observability-plugin/public';
 import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
@@ -64,7 +63,7 @@ export function SloAlertsSummary({
     <AlertSummaryWidget
       ruleTypeIds={SLO_RULE_TYPE_IDS}
       consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
-      filter={esQuery as estypes.QueryDslQueryContainer}
+      filter={esQuery}
       timeRange={alertSummaryTimeRange}
       fullSize
       onLoaded={() => {

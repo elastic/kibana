@@ -40,7 +40,7 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
         [aggregation.type]: {
           field: aggregation.field,
         },
-      } as unknown as AggregationsAggregationContainer,
+      },
       buckets_path: 'metric',
     };
   }
@@ -130,8 +130,7 @@ async function getMetricChangePoints({
           change_point: {
             buckets_path: 'time_series>value',
           },
-          // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-        } as AggregationsAggregationContainer,
+        },
       },
     },
   };
@@ -153,8 +152,7 @@ async function getMetricChangePoints({
         ],
       },
     },
-    // AggregationsAggregationContainer is ExactlyOne - cast through unknown for nested multi-agg structure
-    aggs: aggregations as unknown as Record<string, AggregationsAggregationContainer>,
+    aggs: aggregations,
   });
 
   const buckets = (response.aggregations as { groups?: { buckets?: Bucket[] } })?.groups?.buckets;

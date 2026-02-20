@@ -30,7 +30,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
-import type { QueryDslQueryContainer, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
 import { ML_RULE_TYPE_IDS } from '../../../../common';
@@ -138,10 +138,7 @@ export const AlertsPanel: FC = () => {
   const { anomalyDetectionAlertsStateService } = useAnomalyExplorerContext();
 
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
-  const alertsQuery = useObservable(
-    anomalyDetectionAlertsStateService.alertsQuery$,
-    {} as Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>
-  );
+  const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
   const isLoading = useObservable(anomalyDetectionAlertsStateService.isLoading$, true);
 
   const toggleButtons = [

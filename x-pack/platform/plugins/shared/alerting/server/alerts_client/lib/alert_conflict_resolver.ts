@@ -191,7 +191,7 @@ async function refreshFieldsInDocs(
 /** Update the OCC info in the conflict request with the fresh info. */
 async function updateOCC(conflictRequests: NormalizedBulkRequest[], freshDocs: MgetResponseItem[]) {
   for (const [req, freshDoc] of zip(conflictRequests, freshDocs)) {
-    if (!req?.op || !('index' in req.op) || !req.op.index || !freshDoc) continue;
+    if (!req?.op?.index || !freshDoc) continue;
 
     // @ts-expect-error @elastic/elasticsearch _seq_no is not in the type!
     const seqNo: number | undefined = freshDoc._seq_no;
@@ -214,8 +214,7 @@ async function getFreshDocs(
   const docs: Array<{ _id: string; _index: string }> = [];
 
   conflictRequests.forEach((req) => {
-    const opIndex = req.op && 'index' in req.op ? req.op.index : undefined;
-    const [id, index] = [opIndex?._id, opIndex?._index];
+    const [id, index] = [req.op?.index?._id, req.op?.index?._index];
     if (!id || !index) return;
 
     docs.push({ _id: id, _index: index });
@@ -263,19 +262,14 @@ function normalizeRequest(bulkRequest: BulkRequest) {
   let index = 0;
   while (index < bulkRequest.operations.length) {
     // the "op" data
-    const op = bulkRequest.operations[index];
-    if (op == null) {
-      index++;
-      continue;
-    }
-    const opTyped = op as NonNullable<BulkOperationContainer>;
+    const op = bulkRequest.operations[index] as NonNullable<BulkOperationContainer>;
 
     // now the "doc" data, if there is any (none for delete)
-    if (opTyped.create ?? opTyped.index ?? opTyped.update) {
+    if (op.create || op.index || op.update) {
       index++;
       const doc = bulkRequest.operations[index];
-      result.push({ op: opTyped, doc });
-    } else if (opTyped.delete) {
+      result.push({ op, doc });
+    } else if (op.delete) {
       // no doc for delete op
     } else {
       throw new Error(`Unsupported bulk operation: ${JSON.stringify(op)}`);
@@ -299,9 +293,9 @@ function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
   const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
   const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
   for (const item of sanitizedResponse.items) {
-    const op = item.create ?? item.index ?? item.update ?? item.delete;
+    const op = item.create || item.index || item.update || item.delete;
     if (op?.error) {
-      if (op?.status === 409 && 'index' in item && op === item.index) {
+      if (op?.status === 409 && op === item.index) {
         stats.conflicts++;
       } else {
         stats.errors++;

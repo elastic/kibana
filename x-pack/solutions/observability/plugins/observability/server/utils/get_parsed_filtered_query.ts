@@ -11,9 +11,9 @@ import type { BoolQuery, EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { SearchConfigurationType } from '../../common/custom_threshold_rule/types';
 
-export const getParsedFilterQuery: (filter: string | undefined) => QueryDslQueryContainer[] = (
-  filter
-) => {
+export const getParsedFilterQuery: (
+  filter: string | undefined
+) => NonNullable<QueryDslQueryContainer>[] = (filter) => {
   if (!filter) return [];
 
   try {

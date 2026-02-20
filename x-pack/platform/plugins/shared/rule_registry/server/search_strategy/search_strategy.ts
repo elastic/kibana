@@ -114,8 +114,11 @@ export const ruleRegistrySearchStrategyProvider = (
             return of(EMPTY_RESPONSE);
           }
 
-          const boolFilter = request.query?.bool?.filter;
-          const filter = boolFilter ? (Array.isArray(boolFilter) ? boolFilter : [boolFilter]) : [];
+          const filter = request.query?.bool?.filter
+            ? Array.isArray(request.query.bool.filter)
+              ? request.query.bool.filter
+              : [request.query.bool.filter]
+            : [];
 
           if (authzFilter) {
             filter.push(authzFilter);
@@ -157,7 +160,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query.ids }
               : {
                   bool: {
-                    ...(request.query?.bool ?? {}),
+                    ...request.query?.bool,
                     filter,
                   },
                 }),

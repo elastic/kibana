@@ -165,32 +165,18 @@ async function updateExistingStreamsManagedPipeline({
 }) {
   let processors = pipeline.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter(
-      (processor) => processor != null && 'pipeline' in processor && processor.pipeline != null
-    )
-    .map((processor) => processor!.pipeline!.name)
-    .filter((name): name is string => name != null);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      const procPipelineName =
-        action.processor && 'pipeline' in action.processor
-          ? action.processor.pipeline?.name
-          : undefined;
-      if (
-        procPipelineName !== undefined &&
-        !existingPipelineProcessors.includes(procPipelineName) &&
-        action.processor != null
-      ) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor == null ||
-          !('pipeline' in processor) ||
-          processor.pipeline == null ||
-          processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -229,32 +215,18 @@ async function updateExistingUserManagedPipeline({
 
   let processors = targetPipeline?.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter(
-      (processor) => processor != null && 'pipeline' in processor && processor.pipeline != null
-    )
-    .map((processor) => processor!.pipeline!.name)
-    .filter((name): name is string => name != null);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      const procPipelineName =
-        action.processor && 'pipeline' in action.processor
-          ? action.processor.pipeline?.name
-          : undefined;
-      if (
-        procPipelineName !== undefined &&
-        !existingPipelineProcessors.includes(procPipelineName) &&
-        action.processor != null
-      ) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor == null ||
-          !('pipeline' in processor) ||
-          processor.pipeline == null ||
-          processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -289,8 +261,7 @@ async function findPipelineToModify(
   }
 
   const streamProcessor = pipeline.processors?.find(
-    (processor) =>
-      processor != null && 'pipeline' in processor && processor.pipeline?.name?.includes('@stream.')
+    (processor) => processor?.pipeline && processor.pipeline.name.includes('@stream.')
   );
 
   if (streamProcessor) {
@@ -301,14 +272,13 @@ async function findPipelineToModify(
   }
 
   const customProcessor = pipeline.processors?.findLast(
-    (processor) =>
-      processor != null && 'pipeline' in processor && processor.pipeline?.name?.endsWith('@custom')
+    (processor) => processor?.pipeline && processor.pipeline.name.endsWith('@custom')
   );
 
-  if (customProcessor && 'pipeline' in customProcessor && customProcessor.pipeline?.name) {
+  if (customProcessor) {
     // go one level deeper, find the latest @custom leaf pipeline
     return await findPipelineToModify(
-      customProcessor.pipeline.name,
+      customProcessor.pipeline!.name,
       referencePipelineNames,
       scopedClusterClient
     );

@@ -681,7 +681,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     let datafeedQueryClone =
       datafeedConfig.query !== undefined ? cloneDeep(datafeedConfig.query) : defaultSearchQuery;
 
-    if (datafeedQueryClone && datafeedQueryClone.bool !== undefined) {
+    if (datafeedQueryClone.bool !== undefined) {
       if (datafeedQueryClone.bool.filter === undefined) {
         datafeedQueryClone.bool.filter = [];
       }
@@ -694,8 +694,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       }
     } else {
       // Not a bool query so convert to a bool query so we can add the range filter
-      const baseQuery = datafeedQueryClone ?? defaultSearchQuery;
-      datafeedQueryClone = { bool: { must: [baseQuery], filter: [rangeFilter] } };
+      datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
     }
 
     const esSearchRequest = {

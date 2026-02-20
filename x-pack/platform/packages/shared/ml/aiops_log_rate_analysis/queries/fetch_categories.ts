@@ -92,7 +92,7 @@ export const getCategoryRequest = (
   // In this case we're only interested in the aggregation which
   // `createCategoryRequest` returns, so we're re-applying the original
   // query we create via `getQueryWithParams` here.
-  request.query = query as NonNullable<typeof query>;
+  request.query = query;
 
   return request;
 };

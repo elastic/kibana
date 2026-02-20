@@ -216,34 +216,29 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
   const transpiledIngestPipelineProcessors =
     buildSimulationProcessorsWithConditionNoops(processing);
 
-  return transpiledIngestPipelineProcessors
-    .filter((p): p is NonNullable<typeof p> => p != null)
-    .map((processor) => {
-      const type = Object.keys(processor)[0];
-      const processorConfig =
-        type && type in processor
-          ? (processor as Record<string, Record<string, unknown>>)[type]
-          : undefined;
+  return transpiledIngestPipelineProcessors.map((processor) => {
+    const type = Object.keys(processor)[0];
+    const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
 
-      return {
-        [type]: {
-          ...processorConfig,
-          ignore_failure: false,
-          on_failure: [
-            {
-              append: {
-                field: '_errors',
-                value: {
-                  message: '{{{ _ingest.on_failure_message }}}',
-                  processor_id: processorConfig?.tag,
-                  type: 'generic_processor_failure',
-                },
+    return {
+      [type]: {
+        ...processorConfig,
+        ignore_failure: false,
+        on_failure: [
+          {
+            append: {
+              field: '_errors',
+              value: {
+                message: '{{{ _ingest.on_failure_message }}}',
+                processor_id: processorConfig?.tag,
+                type: 'generic_processor_failure',
               },
             },
-          ],
-        },
-      };
-    }) as IngestProcessorContainer[];
+          },
+        ],
+      },
+    };
+  });
 };
 
 const prepareSimulationData = (
@@ -589,19 +584,16 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processors: IngestProcessorContainer[]
+  processors: NonNullable<IngestProcessorContainer>[]
 ): Record<string, ProcessorMetrics> => {
   // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
   // ID across it's nested processors.
   const ids = new Set<string>();
 
   for (const processor of processors) {
-    if (!processor) continue;
-    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config =
-      type && type in processor
-        ? (processor as Record<string, Record<string, unknown>>)[type]
-        : undefined;
+    const type = Object.keys(processor)[0] as keyof NonNullable<IngestProcessorContainer>;
+    const config = processor[type];
+
     const tag = config?.tag;
 
     if (typeof tag === 'string') {

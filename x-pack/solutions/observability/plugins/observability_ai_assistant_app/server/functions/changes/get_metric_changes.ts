@@ -9,7 +9,7 @@ import type {
   AggregationsAutoDateHistogramAggregation,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateOf, ChangePointType } from '@kbn/es-types/src/search';
+import type { AggregateOf, AggregateOfMap, ChangePointType } from '@kbn/es-types/src/search';
 import type { ObservabilityAIAssistantElasticsearchClient } from '../../clients/elasticsearch';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
@@ -122,8 +122,7 @@ export async function getMetricChanges({
       change_point: {
         buckets_path: 'over_time>value',
       },
-      // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-    } as AggregationsAggregationContainer,
+    },
   };
 
   const response = await client.search('get_metric_changes', {
@@ -156,7 +155,9 @@ export async function getMetricChanges({
     changes?: AggregateOf<{ change_point: { buckets_path: string } }, unknown>;
   }
 
-  const groups = (response.aggregations?.groups.buckets || []) as GroupBucket[];
+  const groups = (response.aggregations?.groups.buckets || []) as Array<
+    AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }
+  >;
 
   const series = groups.map((group: GroupBucket) => {
     const key = group.key ?? 'all';
@@ -166,19 +167,16 @@ export async function getMetricChanges({
       unknown
     >;
 
-    const overTime = group.over_time;
-    const buckets: OverTimeBucket[] = overTime?.buckets ?? [];
-
     return {
       key,
-      over_time: buckets.map((bucket: OverTimeBucket) => {
+      over_time: group.over_time?.buckets?.map((bucket) => {
         return {
-          x: new Date(bucket.key_as_string ?? bucket.key ?? 0).getTime(),
+          x: new Date(bucket.key_as_string!).getTime(),
           y: bucket.value?.value as number | null,
         };
       }),
       changes:
-        !changes || changes.type.indeterminable || !changes.bucket?.key
+        changes.type.indeterminable || !changes.bucket?.key
           ? { type: 'indeterminable' as ChangePointType }
           : {
               time: new Date(changes.bucket.key).toISOString(),

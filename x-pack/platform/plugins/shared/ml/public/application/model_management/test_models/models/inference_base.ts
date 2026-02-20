@@ -20,7 +20,7 @@ import type { ITelemetryClient } from '../../../services/telemetry/types';
 
 export type InferenceType =
   | SupportedPytorchTasksType
-  | keyof estypes.AggregationsInferenceConfigContainer;
+  | keyof NonNullable<estypes.AggregationsInferenceConfigContainer>;
 
 export type InferenceOptions =
   | estypes.MlRegressionInferenceOptions
@@ -370,16 +370,16 @@ export abstract class InferenceBase<TInferResponse> {
     }));
   }
 
-  private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
+  private getDefaultInferenceConfig(): NonNullable<estypes.MlInferenceConfigUpdateContainer>[InferenceType] {
     return this.model.inference_config![
       this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }
 
   protected getNumTopClassesConfig(defaultOverride = 5) {
-    const options = this.getDefaultInferenceConfig() as { num_top_classes?: number } | undefined;
+    const options = this.getDefaultInferenceConfig();
 
-    if (options && (options.num_top_classes ?? 0) > 0) {
+    if (options && 'num_top_classes' in options && (options.num_top_classes ?? 0) > 0) {
       return {};
     }
 

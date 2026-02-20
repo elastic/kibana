@@ -388,10 +388,6 @@ export function getFormStateFromJobConfig(
 
   const analysisConfig = analyticsJobConfig.analysis?.[jobType];
 
-  if (!analysisConfig) {
-    return resultState;
-  }
-
   for (const key in analysisConfig) {
     if (Object.hasOwn(analysisConfig, key)) {
       const camelCased = toCamelCase(key);

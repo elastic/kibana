@@ -96,7 +96,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: string | { [key: string]: unknown };
+      searchQuery: NonNullable<estypes.QueryDslQueryContainer>;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -109,7 +109,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
 
       setUrlState({
         ...stateFromUrl,
-        searchQuery: searchParams.searchQuery as estypes.QueryDslQueryContainer,
+        searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
@@ -303,14 +303,14 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
           <EuiFlexItem>
             <SearchPanel
               searchString={searchString ?? ''}
-              searchQuery={searchQuery ?? { match_all: {} }}
+              searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <LogRateAnalysisContent
-              esSearchQuery={searchQuery ?? { match_all: {} }}
+              esSearchQuery={searchQuery}
               onWindowParametersChange={onWindowParametersHandler}
               onAnalysisCompleted={onAnalysisCompleted}
             />
