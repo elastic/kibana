@@ -345,6 +345,9 @@ For the Elastic Security 9.2.6 release information, refer to [Elastic Security S
 **Alerting and cases**:
 * Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 
+**Dashboards and Visualizations**:
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
 **Discover**:
 * Fixes handling of missing values [#251892]({{kib-pull}}251892).
 
@@ -354,10 +357,11 @@ For the Elastic Observability 9.2.6 release information, refer to [Elastic Obser
 **Elastic Security solution**:
 For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+
 **Search**:
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
-* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
-* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
