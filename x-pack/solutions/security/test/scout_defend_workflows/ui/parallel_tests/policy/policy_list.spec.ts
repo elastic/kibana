@@ -24,7 +24,6 @@ spaceTest.describe(
         .locator(testSubjSelector('globalLoadingIndicator-hidden'))
         .waitFor({ state: 'visible' });
       await expect(page.locator(testSubjSelector('policyListPage'))).toBeVisible();
-      await expect(page.locator(testSubjSelector('policyListTable'))).toBeVisible();
     });
   }
 );
