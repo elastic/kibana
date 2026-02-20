@@ -290,6 +290,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "uiamApiKey": {
+        "type": "binary"
+      },
       "updatedAt": {
         "type": "date"
       },
@@ -452,6 +455,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
