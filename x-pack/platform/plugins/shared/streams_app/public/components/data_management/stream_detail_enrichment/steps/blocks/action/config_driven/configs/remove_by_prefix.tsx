@@ -27,6 +27,12 @@ const defaultFormState: RemoveByPrefixProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'from',
+  fieldHelpText: i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixFieldHelpText',
+    {
+      defaultMessage: 'All nested fields (field.*) will also be removed.',
+    }
+  ),
   includeCondition: false,
   includeIgnoreFailures: true,
   includeIgnoreMissing: false,
