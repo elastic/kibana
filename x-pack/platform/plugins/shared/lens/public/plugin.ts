@@ -406,7 +406,7 @@ export class LensPlugin {
               const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
               const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-              return getTransformOut(builder, transformDrilldownsOut);
+              return getTransformOut(builder, transformDrilldownsOut, true); // This will always be called from a dashboard app
             }
           );
         })
