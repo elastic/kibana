@@ -34,3 +34,12 @@ export {
   type DashboardSuggestionInput,
   type DashboardSuggestionEngineOptions,
 } from './workflows/dashboard_suggestions';
+export {
+  suggestIntegrations,
+  type PackageSearchProvider,
+  type IntegrationSuggestionInput,
+  type IntegrationPackageInfo,
+  type IntegrationSuggestionOutput,
+  type SuggestIntegrationsResult,
+  type SuggestIntegrationsEngineOptions,
+} from './workflows/integration_suggestions';

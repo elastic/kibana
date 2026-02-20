@@ -410,7 +410,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         const bodyPreview = (sampleDoc['body.text'] as string | undefined)?.slice(0, 200);
 
         throw new Error(
-          `Pipeline suggestion returned null for ${input.stream_name}. ` +
+          `Pipeline suggestion returned null/empty for ${input.stream_name}. ` +
             `Task status: ${taskResult.status}. ` +
             `Sample document body.text: ${bodyPreview}. ` +
             `Document count: ${documents.length}`

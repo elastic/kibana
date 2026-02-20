@@ -22,6 +22,10 @@ import {
   STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE,
   getDashboardSuggestionTaskId,
 } from '../../../../lib/tasks/task_definitions/dashboard_suggestion';
+import {
+  STREAMS_PARTITION_SUGGESTION_TASK_TYPE,
+  getPartitionSuggestionTaskId,
+} from '../../../../lib/tasks/task_definitions/partition_suggestion';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { SuggestionBulkStatusItem } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
@@ -211,6 +215,7 @@ function extractStreamNameFromTaskId(taskId: string, taskType: string): string {
  */
 const SUGGESTION_TASK_TYPES = [
   STREAMS_PIPELINE_SUGGESTION_TASK_TYPE,
+  STREAMS_PARTITION_SUGGESTION_TASK_TYPE,
   FEATURES_IDENTIFICATION_TASK_TYPE,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
   STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE,
@@ -251,6 +256,7 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     // Build a map of stream name -> per-type suggestion counts
     interface StreamCounts {
       pipelineCount: number;
+      partitionCount: number;
       featuresCount: number;
       significantEventsCount: number;
       dashboardCount: number;
@@ -260,7 +266,13 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     const getOrCreateCounts = (stream: string): StreamCounts => {
       let counts = streamSuggestionCounts.get(stream);
       if (!counts) {
-        counts = { pipelineCount: 0, featuresCount: 0, significantEventsCount: 0, dashboardCount: 0 };
+        counts = {
+          pipelineCount: 0,
+          partitionCount: 0,
+          featuresCount: 0,
+          significantEventsCount: 0,
+          dashboardCount: 0,
+        };
         streamSuggestionCounts.set(stream, counts);
       }
       return counts;
@@ -273,6 +285,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       if (streamName) {
         if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
           taskIds = [getPipelineSuggestionTaskId(streamName)];
+        } else if (taskType === STREAMS_PARTITION_SUGGESTION_TASK_TYPE) {
+          taskIds = [getPartitionSuggestionTaskId(streamName)];
         } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
           taskIds = [getFeaturesIdentificationTaskId(streamName)];
         } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
@@ -295,6 +309,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
         if (hasSuggestion) {
           if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
             counts.pipelineCount += 1;
+          } else if (taskType === STREAMS_PARTITION_SUGGESTION_TASK_TYPE) {
+            counts.partitionCount += 1;
           } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
             counts.featuresCount += 1;
           } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
@@ -310,11 +326,16 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     const results: SuggestionBulkStatusItem[] = [];
     for (const [stream, counts] of streamSuggestionCounts.entries()) {
       const suggestionCount =
-        counts.pipelineCount + counts.featuresCount + counts.significantEventsCount + counts.dashboardCount;
+        counts.pipelineCount +
+        counts.partitionCount +
+        counts.featuresCount +
+        counts.significantEventsCount +
+        counts.dashboardCount;
       results.push({
         stream,
         suggestionCount,
         pipelineCount: counts.pipelineCount,
+        partitionCount: counts.partitionCount,
         featuresCount: counts.featuresCount,
         significantEventsCount: counts.significantEventsCount,
         dashboardCount: counts.dashboardCount,

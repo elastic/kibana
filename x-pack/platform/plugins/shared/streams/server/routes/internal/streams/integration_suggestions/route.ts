@@ -10,16 +10,18 @@ import { createServerRoute } from '../../../create_server_route';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   IntegrationSuggestionService,
+  FleetPackageSearchProvider,
   type IntegrationSuggestionsResult,
 } from '../../../../lib/streams/integration_suggestions';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export const integrationSuggestionsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/integration_suggestions',
+  endpoint: 'POST /internal/streams/{name}/integration_suggestions',
   options: {
     access: 'internal',
     summary: 'Get integration suggestions for a stream',
     description:
-      'Suggests Fleet integration packages based on detected features (entities and technologies) in the stream. Only returns suggestions for features with confidence >= 80%. Includes OTel receiver config snippets when available.',
+      'Suggests Fleet integration packages based on detected features (entities and technologies) in the stream. Only returns suggestions for features with confidence >= 80%. When a connector_id is provided, uses AI-based reasoning to match features to integrations. Otherwise falls back to static mapping.',
   },
   security: {
     authz: {
@@ -30,6 +32,11 @@ export const integrationSuggestionsRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
+    body: z
+      .object({
+        connector_id: z.string().optional(),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -38,9 +45,10 @@ export const integrationSuggestionsRoute = createServerRoute({
     server,
     logger,
   }): Promise<IntegrationSuggestionsResult> => {
-    const { streamsClient, featureClient } = await getScopedClients({ request });
+    const { streamsClient, featureClient, inferenceClient } = await getScopedClients({ request });
 
     const { name } = params.path;
+    const connectorId = params.body?.connector_id;
 
     // Verify the stream exists
     await streamsClient.ensureStream(name);
@@ -53,11 +61,33 @@ export const integrationSuggestionsRoute = createServerRoute({
       logger.debug('Fleet plugin not available, returning suggestions without package verification');
     }
 
+    const serviceLogger = logger.get('integration-suggestions');
+
+    // Create package search provider if package client is available
+    const packageSearchProvider = packageClient
+      ? new FleetPackageSearchProvider({
+          packageClient,
+          logger: serviceLogger,
+        })
+      : undefined;
+
+    // Create bound inference client if connector_id provided
+    const boundInferenceClient = connectorId
+      ? inferenceClient.bindTo({ connectorId })
+      : undefined;
+
     const integrationSuggestionService = new IntegrationSuggestionService({
-      logger: logger.get('integration-suggestions'),
+      logger: serviceLogger,
     });
 
-    return integrationSuggestionService.getSuggestions(name, featureClient, packageClient);
+    return integrationSuggestionService.getSuggestions({
+      streamName: name,
+      featureClient,
+      packageClient,
+      inferenceClient: boundInferenceClient,
+      packageSearchProvider,
+      signal: getRequestAbortSignal(request),
+    });
   },
 });
 

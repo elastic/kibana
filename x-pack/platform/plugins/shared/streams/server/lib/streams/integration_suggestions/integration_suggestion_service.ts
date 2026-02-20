@@ -7,7 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Feature } from '@kbn/streams-schema';
+import { suggestIntegrations, type PackageSearchProvider } from '@kbn/streams-ai';
 import type { FeatureClient } from '../feature/feature_client';
 import type {
   IntegrationSuggestion,
@@ -192,12 +194,26 @@ export class IntegrationSuggestionService {
 
   /**
    * Gets integration suggestions for a stream based on its detected features.
+   *
+   * When an inference client and package search provider are available, uses
+   * AI-based reasoning to match features to integrations. Otherwise falls back
+   * to static mapping.
    */
-  async getSuggestions(
-    streamName: string,
-    featureClient: FeatureClient,
-    packageClient: PackageClient | undefined
-  ): Promise<IntegrationSuggestionsResult> {
+  async getSuggestions({
+    streamName,
+    featureClient,
+    packageClient,
+    inferenceClient,
+    packageSearchProvider,
+    signal,
+  }: {
+    streamName: string;
+    featureClient: FeatureClient;
+    packageClient: PackageClient | undefined;
+    inferenceClient?: BoundInferenceClient;
+    packageSearchProvider?: PackageSearchProvider;
+    signal: AbortSignal;
+  }): Promise<IntegrationSuggestionsResult> {
     this.logger.debug(`Getting integration suggestions for stream "${streamName}"`);
 
     // Get relevant features from the stream
@@ -212,7 +228,90 @@ export class IntegrationSuggestionService {
       `Found ${features.length} relevant feature(s) for stream "${streamName}"`
     );
 
-    // Match features to integrations
+    // Use AI-based matching if inference client and package search provider are available
+    if (inferenceClient && packageSearchProvider) {
+      this.logger.debug(`Using AI-based integration matching for stream "${streamName}"`);
+      return this.getSuggestionsWithAI({
+        streamName,
+        features,
+        packageClient,
+        inferenceClient,
+        packageSearchProvider,
+        signal,
+      });
+    }
+
+    // Fall back to static mapping
+    this.logger.debug(`Using static mapping for integration matching on stream "${streamName}"`);
+    return this.getSuggestionsWithStaticMapping(streamName, features, packageClient);
+  }
+
+  /**
+   * Gets integration suggestions using AI-based reasoning.
+   */
+  private async getSuggestionsWithAI({
+    streamName,
+    features,
+    packageClient,
+    inferenceClient,
+    packageSearchProvider,
+    signal,
+  }: {
+    streamName: string;
+    features: Feature[];
+    packageClient: PackageClient | undefined;
+    inferenceClient: BoundInferenceClient;
+    packageSearchProvider: PackageSearchProvider;
+    signal: AbortSignal;
+  }): Promise<IntegrationSuggestionsResult> {
+    try {
+      const result = await suggestIntegrations({
+        input: { streamName, features },
+        inferenceClient,
+        packageSearchProvider,
+        logger: this.logger,
+        signal,
+      });
+
+      if (result.error) {
+        this.logger.warn(
+          `AI integration matching failed for stream "${streamName}": ${result.error}. Falling back to static mapping.`
+        );
+        return this.getSuggestionsWithStaticMapping(streamName, features, packageClient);
+      }
+
+      // Convert AI suggestions to IntegrationSuggestion format and enrich with package info
+      const suggestions = await this.enrichAISuggestionsWithPackageInfo(
+        result.suggestions,
+        features,
+        packageClient
+      );
+
+      this.logger.debug(
+        `AI matching returned ${suggestions.length} integration suggestion(s) for stream "${streamName}"`
+      );
+
+      return {
+        streamName,
+        suggestions: suggestions.sort((a, b) => b.confidence - a.confidence),
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error in AI integration matching for stream "${streamName}": ${error}. Falling back to static mapping.`
+      );
+      return this.getSuggestionsWithStaticMapping(streamName, features, packageClient);
+    }
+  }
+
+  /**
+   * Gets integration suggestions using static technology-to-package mapping.
+   */
+  private async getSuggestionsWithStaticMapping(
+    streamName: string,
+    features: Feature[],
+    packageClient: PackageClient | undefined
+  ): Promise<IntegrationSuggestionsResult> {
+    // Match features to integrations using static mapping
     const matchedIntegrations = this.matchFeaturesToIntegrations(features);
 
     if (matchedIntegrations.length === 0) {
@@ -221,10 +320,7 @@ export class IntegrationSuggestionService {
     }
 
     // Verify packages exist and get OTel configs
-    const suggestions = await this.enrichWithPackageInfo(
-      matchedIntegrations,
-      packageClient
-    );
+    const suggestions = await this.enrichWithPackageInfo(matchedIntegrations, packageClient);
 
     this.logger.debug(
       `Returning ${suggestions.length} integration suggestion(s) for stream "${streamName}"`
@@ -234,6 +330,99 @@ export class IntegrationSuggestionService {
       streamName,
       suggestions: suggestions.sort((a, b) => b.confidence - a.confidence),
     };
+  }
+
+  /**
+   * Enriches AI-generated suggestions with package information.
+   */
+  private async enrichAISuggestionsWithPackageInfo(
+    aiSuggestions: Array<{
+      packageName: string;
+      featureId: string;
+      featureTitle: string;
+      reason: string;
+    }>,
+    features: Feature[],
+    packageClient: PackageClient | undefined
+  ): Promise<IntegrationSuggestion[]> {
+    const featureMap = new Map<string, Feature>(features.map((f) => [f.id, f]));
+
+    if (!packageClient) {
+      // Without Fleet, return suggestions without package verification or OTel config
+      this.logger.debug('Fleet not available, returning AI suggestions without OTel configs');
+      return aiSuggestions
+        .filter((suggestion) => featureMap.has(suggestion.featureId))
+        .map((suggestion) => {
+          const feature = featureMap.get(suggestion.featureId)!;
+          return {
+            packageName: suggestion.packageName,
+            packageTitle: this.formatPackageTitle(suggestion.packageName),
+            confidence: feature.confidence,
+            featureId: suggestion.featureId,
+            featureTitle: suggestion.featureTitle,
+            benefits: [suggestion.reason],
+          };
+        });
+    }
+
+    // Get available packages to verify and enrich our matches
+    const availablePackages = await packageClient.getPackages();
+    const packageMap = new Map(availablePackages.map((pkg) => [pkg.name, pkg]));
+
+    const suggestions: IntegrationSuggestion[] = [];
+
+    for (const aiSuggestion of aiSuggestions) {
+      const feature = featureMap.get(aiSuggestion.featureId);
+      if (!feature) {
+        this.logger.debug(
+          `Feature "${aiSuggestion.featureId}" not found, skipping suggestion for "${aiSuggestion.packageName}"`
+        );
+        continue;
+      }
+
+      const pkg = packageMap.get(aiSuggestion.packageName);
+
+      // If package doesn't exist, try without _otel suffix as fallback
+      const fallbackPackageName = aiSuggestion.packageName.replace(/_otel$/, '');
+      const fallbackPkg = !pkg ? packageMap.get(fallbackPackageName) : undefined;
+
+      const resolvedPkg = pkg || fallbackPkg;
+      const resolvedPackageName = pkg ? aiSuggestion.packageName : fallbackPackageName;
+
+      if (!resolvedPkg) {
+        this.logger.debug(
+          `Package "${aiSuggestion.packageName}" not found in registry, skipping AI suggestion`
+        );
+        continue;
+      }
+
+      // Try to get OTel config
+      let otelConfig: string | undefined;
+      try {
+        otelConfig = await this.getOtelConfig(
+          packageClient,
+          resolvedPackageName,
+          resolvedPkg.version
+        );
+      } catch (error) {
+        this.logger.debug(
+          `Failed to get OTel config for "${resolvedPackageName}": ${error.message}`
+        );
+      }
+
+      suggestions.push({
+        packageName: resolvedPackageName,
+        packageTitle: resolvedPkg.title || this.formatPackageTitle(resolvedPackageName),
+        confidence: feature.confidence,
+        featureId: aiSuggestion.featureId,
+        featureTitle: aiSuggestion.featureTitle,
+        otelConfig,
+        benefits: [aiSuggestion.reason],
+        docsUrl: `https://docs.elastic.co/integrations/${resolvedPackageName.replace(/_otel$/, '')}`,
+      });
+    }
+
+    return suggestions;
   }
 
   /**

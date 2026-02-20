@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { partitionSuggestionTaskRoutes } from './partition_suggestion_task_route';
 import { pipelineSuggestionTaskRoutes } from './pipeline_suggestion_task_route';
-import { suggestPartitionsRoute } from './suggest_partitions_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
-  ...suggestPartitionsRoute,
+  ...partitionSuggestionTaskRoutes,
   ...pipelineSuggestionTaskRoutes,
 };

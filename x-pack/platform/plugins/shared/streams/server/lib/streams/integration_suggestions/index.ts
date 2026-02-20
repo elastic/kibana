@@ -6,6 +6,7 @@
  */
 
 export { IntegrationSuggestionService } from './integration_suggestion_service';
+export { FleetPackageSearchProvider } from './fleet_package_search_provider';
 export type {
   IntegrationSuggestion,
   IntegrationSuggestionsResult,

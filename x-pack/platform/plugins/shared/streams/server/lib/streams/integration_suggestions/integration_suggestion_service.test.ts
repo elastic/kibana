@@ -17,6 +17,7 @@ describe('IntegrationSuggestionService', () => {
   let featureClientMock: jest.Mocked<FeatureClient>;
   let packageClientMock: jest.Mocked<PackageClient>;
   let service: IntegrationSuggestionService;
+  let abortController: AbortController;
 
   const createFeature = (overrides: Partial<Feature> = {}): Feature => ({
     uuid: 'test-uuid',
@@ -49,6 +50,7 @@ describe('IntegrationSuggestionService', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
+    abortController = new AbortController();
 
     featureClientMock = {
       getFeatures: jest.fn(),
@@ -65,10 +67,22 @@ describe('IntegrationSuggestionService', () => {
   });
 
   describe('getSuggestions', () => {
+    const callGetSuggestions = (
+      streamName: string,
+      featureClient: jest.Mocked<FeatureClient>,
+      packageClient: jest.Mocked<PackageClient> | undefined
+    ) =>
+      service.getSuggestions({
+        streamName,
+        featureClient,
+        packageClient,
+        signal: abortController.signal,
+      });
+
     it('returns empty suggestions when no features exist', async () => {
       featureClientMock.getFeatures.mockResolvedValue({ hits: [], total: 0 });
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -89,7 +103,7 @@ describe('IntegrationSuggestionService', () => {
         total: 2,
       });
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -129,7 +143,7 @@ service:
       receivers: [mysqlreceiver/mysql]
 `);
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -168,7 +182,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -201,7 +215,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -234,7 +248,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -258,7 +272,7 @@ service:
       // Return empty packages list - no packages available
       packageClientMock.getPackages.mockResolvedValue([]);
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -288,7 +302,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -324,7 +338,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -360,7 +374,7 @@ service:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -386,7 +400,7 @@ service:
       });
 
       // Pass undefined for packageClient (Fleet not available)
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         undefined
@@ -405,11 +419,7 @@ service:
     it('only fetches entity and technology feature types', async () => {
       featureClientMock.getFeatures.mockResolvedValue({ hits: [], total: 0 });
 
-      await service.getSuggestions(
-        'logs-test-default',
-        featureClientMock,
-        packageClientMock
-      );
+      await callGetSuggestions('logs-test-default', featureClientMock, packageClientMock);
 
       // Should call getFeatures twice - once for 'entity', once for 'technology'
       expect(featureClientMock.getFeatures).toHaveBeenCalledTimes(2);
@@ -445,7 +455,7 @@ inputs:
           dataset: mysql.status
 `);
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -475,7 +485,7 @@ inputs:
         new Error('Package config not found')
       );
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -503,7 +513,7 @@ inputs:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock
@@ -532,7 +542,7 @@ inputs:
 
       packageClientMock.getAgentPolicyConfigYAML.mockResolvedValue('');
 
-      const result = await service.getSuggestions(
+      const result = await callGetSuggestions(
         'logs-test-default',
         featureClientMock,
         packageClientMock

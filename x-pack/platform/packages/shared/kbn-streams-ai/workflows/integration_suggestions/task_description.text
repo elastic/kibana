@@ -1,0 +1,29 @@
+## Task: Match Features to Integrations
+
+I need you to analyze the detected features from a data stream and suggest appropriate Fleet integrations.
+
+### Stream Information
+
+Stream: **{{stream_name}}**
+
+### Detected Features
+
+The following features have been detected in this stream with high confidence:
+
+```json
+{{{features_json}}}
+```
+
+### Instructions
+
+1. Review the detected features above
+2. Use `search_integrations` to find relevant Fleet packages for each technology
+3. Analyze the search results to identify the best matches
+4. Call `finalize_suggestions` with your recommendations
+
+For each suggestion, include:
+- The package name (e.g., "nginx_otel")
+- Which feature it matches
+- Why this integration is beneficial
+
+Only suggest integrations that are clearly relevant to the detected features.
