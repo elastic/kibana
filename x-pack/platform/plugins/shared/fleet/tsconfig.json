@@ -127,6 +127,7 @@
     "@kbn/kql",
     "@kbn/scout",
     "@kbn/reporting-common",
-    "@kbn/reporting-plugin"
+    "@kbn/reporting-plugin",
+    "@kbn/css-utils"
   ]
 }
