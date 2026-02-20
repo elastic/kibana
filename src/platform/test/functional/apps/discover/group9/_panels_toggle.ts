@@ -189,7 +189,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
         });
-
       }
 
       it('table can be toggled in document level view', async () => {

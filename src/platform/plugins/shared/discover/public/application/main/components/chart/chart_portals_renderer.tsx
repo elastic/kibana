@@ -10,7 +10,11 @@
 import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import { ChartSectionTemplate, UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
+import {
+  ChartSectionTemplate,
+  UnifiedHistogramChart,
+  useUnifiedHistogram,
+} from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';

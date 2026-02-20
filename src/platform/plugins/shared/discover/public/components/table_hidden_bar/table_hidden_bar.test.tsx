@@ -38,21 +38,17 @@ describe('TableHiddenBar', () => {
       })
     );
 
-    const panelsToggle =
-      props?.panelsToggle ?? (
-        <PanelsToggle
-          sidebarToggleState$={sidebarToggleState$}
-          renderedFor="tabs"
-          isChartAvailable={true}
-        />
-      );
+    const panelsToggle = props?.panelsToggle ?? (
+      <PanelsToggle
+        sidebarToggleState$={sidebarToggleState$}
+        renderedFor="tabs"
+        isChartAvailable={true}
+      />
+    );
 
     return mountWithIntl(
       <DiscoverTestProvider stateContainer={stateContainer}>
-        <TableHiddenBar
-          stateContainer={stateContainer}
-          panelsToggle={panelsToggle}
-        />
+        <TableHiddenBar stateContainer={stateContainer} panelsToggle={panelsToggle} />
       </DiscoverTestProvider>
     );
   };
