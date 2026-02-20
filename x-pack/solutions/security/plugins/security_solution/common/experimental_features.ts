@@ -225,6 +225,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the Detection Engine Rule Execution Troubleshooting Agent Builder skill
+   */
+  deRuleExecutionTroubleshootingSkill: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

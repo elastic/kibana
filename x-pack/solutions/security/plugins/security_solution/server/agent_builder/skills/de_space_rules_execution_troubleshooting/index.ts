@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { alertAnalysisSampleSkill as alertAnalysisSkill } from './alert_analysis_skill';
-export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { createDeSpaceRulesExecutionTroubleshootingSkill } from './de_space_rules_execution_troubleshooting';
-export { registerSkills } from './register_skills';
