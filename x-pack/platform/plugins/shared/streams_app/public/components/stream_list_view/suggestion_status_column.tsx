@@ -12,10 +12,10 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
   EuiPopover,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiButtonIcon,
-  EuiToolTip,
+  EuiText,
+  EuiLink,
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
@@ -25,18 +25,15 @@ interface SuggestionStatusColumnProps {
   streamName: string;
   status: SuggestionBulkStatusItem | undefined;
   isLoading: boolean;
-  onDismiss?: (streamName: string) => void;
 }
 
 export function SuggestionStatusColumn({
   streamName,
   status,
   isLoading,
-  onDismiss,
 }: SuggestionStatusColumnProps) {
   const router = useStreamsAppRouter();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isDismissing, setIsDismissing] = useState(false);
 
   if (isLoading) {
     return (
@@ -48,11 +45,26 @@ export function SuggestionStatusColumn({
     );
   }
 
-  // Calculate badge count - only show pipeline suggestions for now
-  const badgeCount = status ? status.pipelineCount : 0;
+  const availableCount = status ? status.pipelineCount : 0;
+  const inProgressCount = status ? status.pipelineInProgressCount : 0;
+  const failedCount = status ? status.pipelineFailedCount : 0;
 
-  // No suggestions available for this stream
-  if (!status || badgeCount === 0) {
+  if (inProgressCount > 0) {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {GENERATING_LABEL}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (!status || (availableCount === 0 && failedCount === 0)) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
         <EuiFlexItem grow={false}>
@@ -65,88 +77,107 @@ export function SuggestionStatusColumn({
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const handleDismiss = async () => {
-    if (!onDismiss) return;
-    setIsDismissing(true);
-    try {
-      await onDismiss(streamName);
-    } finally {
-      setIsDismissing(false);
+  const processingLink = router.link('/{key}/management/{tab}', {
+    path: { key: streamName, tab: 'processing' },
+  });
+
+  const getBadgeLabel = (): string => {
+    if (availableCount > 0 && failedCount > 0) {
+      return i18n.translate('xpack.streams.suggestionStatusColumn.mixedBadgeLabel', {
+        defaultMessage: '{available} available, {failed} failed',
+        values: { available: availableCount, failed: failedCount },
+      });
     }
+    if (failedCount > 0) {
+      return i18n.translate('xpack.streams.suggestionStatusColumn.failedBadgeLabel', {
+        defaultMessage: '{count} failed',
+        values: { count: failedCount },
+      });
+    }
+    return i18n.translate('xpack.streams.suggestionStatusColumn.availableBadgeLabel', {
+      defaultMessage: '{count} available',
+      values: { count: availableCount },
+    });
   };
 
-  // Build suggestion items for the popover - only show pipeline suggestions for now
-  const suggestionItems: Array<{ count: number; label: string; tab: string }> = [];
-
-  if (status.pipelineCount > 0) {
-    suggestionItems.push({
-      count: status.pipelineCount,
-      label: getProcessingSuggestionLabel(status.pipelineCount),
-      tab: 'processing',
-    });
-  }
+  const getBadgeColor = (): 'success' | 'danger' | 'warning' => {
+    if (availableCount > 0 && failedCount > 0) {
+      return 'warning';
+    }
+    if (failedCount > 0) {
+      return 'danger';
+    }
+    return 'success';
+  };
 
   const popoverContent = (
-    <EuiListGroup gutterSize="none" flush>
-      {suggestionItems.map((item) => (
-        <EuiListGroupItem
-          key={item.tab}
-          label={item.label}
-          href={router.link('/{key}/management/{tab}', {
-            path: { key: streamName, tab: item.tab },
-          })}
-          data-test-subj={`suggestionLink-${streamName}-${item.tab}`}
-          size="s"
-        />
-      ))}
-    </EuiListGroup>
+    <div style={{ maxWidth: 280 }}>
+      <EuiTitle size="xxxs">
+        <h4>{REVIEW_SUGGESTIONS_TITLE}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        {availableCount > 0 && failedCount > 0 ? (
+          <p>
+            {i18n.translate('xpack.streams.suggestionStatusColumn.mixedPopoverDescription', {
+              defaultMessage:
+                '{available, plural, one {# processing suggestion} other {# processing suggestions}} available. {failed, plural, one {# processing suggestion} other {# processing suggestions}} failed.',
+              values: { available: availableCount, failed: failedCount },
+            })}
+          </p>
+        ) : failedCount > 0 ? (
+          <p>
+            {i18n.translate('xpack.streams.suggestionStatusColumn.failedPopoverDescription', {
+              defaultMessage:
+                'Something went wrong while creating the processing suggestion{count, plural, one {} other {s}}.',
+              values: { count: failedCount },
+            })}
+          </p>
+        ) : (
+          <p>
+            {i18n.translate('xpack.streams.suggestionStatusColumn.availablePopoverDescription', {
+              defaultMessage: 'Review new processing suggestion{count, plural, one {} other {s}}.',
+              values: { count: availableCount },
+            })}
+          </p>
+        )}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiLink href={processingLink} data-test-subj={`suggestionLink-${streamName}-processing`}>
+        {failedCount > 0 && availableCount === 0
+          ? REVIEW_IN_PROCESSING_PAGE_FAILED
+          : REVIEW_IN_PROCESSING_PAGE}
+      </EuiLink>
+    </div>
   );
 
-  // Suggestions are available - show count with popover and dismiss button
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
             <EuiBadge
-              color="success"
+              color={getBadgeColor()}
               data-test-subj={`suggestionStatusBadge-${streamName}`}
-              aria-label={getSuggestionAriaLabel(badgeCount)}
+              aria-label={getSuggestionAriaLabel(availableCount, failedCount)}
               onClick={togglePopover}
               onClickAriaLabel={OPEN_SUGGESTIONS_POPOVER_ARIA_LABEL}
             >
-              {badgeCount}
+              {getBadgeLabel()}
             </EuiBadge>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           anchorPosition="downCenter"
-          panelPaddingSize="s"
+          panelPaddingSize="m"
         >
           {popoverContent}
         </EuiPopover>
       </EuiFlexItem>
-      {onDismiss && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={DISMISS_SUGGESTION_TOOLTIP}>
-            <EuiButtonIcon
-              iconType="cross"
-              size="xs"
-              color="text"
-              aria-label={DISMISS_SUGGESTION_ARIA_LABEL}
-              data-test-subj={`suggestionDismissButton-${streamName}`}
-              onClick={handleDismiss}
-              isLoading={isDismissing}
-              disabled={isDismissing}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 }
 
-// Translations
 const NO_SUGGESTION_ARIA_LABEL = i18n.translate(
   'xpack.streams.suggestionStatusColumn.noSuggestionAriaLabel',
   {
@@ -161,31 +192,47 @@ const OPEN_SUGGESTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
-const DISMISS_SUGGESTION_ARIA_LABEL = i18n.translate(
-  'xpack.streams.suggestionStatusColumn.dismissAriaLabel',
+const GENERATING_LABEL = i18n.translate('xpack.streams.suggestionStatusColumn.generatingLabel', {
+  defaultMessage: 'Generating...',
+});
+
+const REVIEW_SUGGESTIONS_TITLE = i18n.translate(
+  'xpack.streams.suggestionStatusColumn.reviewSuggestionsTitle',
   {
-    defaultMessage: 'Dismiss suggestion',
+    defaultMessage: 'Review suggestions',
   }
 );
 
-const DISMISS_SUGGESTION_TOOLTIP = i18n.translate(
-  'xpack.streams.suggestionStatusColumn.dismissTooltip',
+const REVIEW_IN_PROCESSING_PAGE = i18n.translate(
+  'xpack.streams.suggestionStatusColumn.reviewInProcessingPage',
   {
-    defaultMessage: 'Dismiss and delete this suggestion',
+    defaultMessage: 'Review in processing page',
   }
 );
 
-function getSuggestionAriaLabel(count: number): string {
+const REVIEW_IN_PROCESSING_PAGE_FAILED = i18n.translate(
+  'xpack.streams.suggestionStatusColumn.reviewInProcessingPageFailed',
+  {
+    defaultMessage: 'Try again in processing page',
+  }
+);
+
+function getSuggestionAriaLabel(availableCount: number, failedCount: number): string {
+  if (availableCount > 0 && failedCount > 0) {
+    return i18n.translate('xpack.streams.suggestionStatusColumn.mixedAriaLabel', {
+      defaultMessage:
+        '{available, plural, one {# suggestion} other {# suggestions}} available, {failed, plural, one {# suggestion} other {# suggestions}} failed',
+      values: { available: availableCount, failed: failedCount },
+    });
+  }
+  if (failedCount > 0) {
+    return i18n.translate('xpack.streams.suggestionStatusColumn.failedAriaLabel', {
+      defaultMessage: '{count, plural, one {# suggestion} other {# suggestions}} failed',
+      values: { count: failedCount },
+    });
+  }
   return i18n.translate('xpack.streams.suggestionStatusColumn.availableAriaLabel', {
     defaultMessage: '{count, plural, one {# suggestion} other {# suggestions}} available',
-    values: { count },
-  });
-}
-
-function getProcessingSuggestionLabel(count: number): string {
-  return i18n.translate('xpack.streams.suggestionStatusColumn.processingSuggestionLabel', {
-    defaultMessage:
-      '{count, plural, one {# processing suggestion} other {# processing suggestions}}',
-    values: { count },
+    values: { count: availableCount },
   });
 }

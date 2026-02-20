@@ -13,8 +13,12 @@
 export interface SuggestionBulkStatusItem {
   stream: string;
   suggestionCount: number;
-  /** Count of pipeline/processing suggestions */
+  /** Count of completed pipeline/processing suggestions ready to review */
   pipelineCount: number;
+  /** Count of pipeline suggestions currently being generated */
+  pipelineInProgressCount: number;
+  /** Count of pipeline suggestions that failed to generate */
+  pipelineFailedCount: number;
   /** Count of feature identification/partitioning suggestions */
   featuresCount: number;
   /** Count of significant events suggestions */

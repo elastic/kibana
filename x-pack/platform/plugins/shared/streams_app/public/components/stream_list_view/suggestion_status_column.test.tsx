@@ -21,10 +21,30 @@ const mockUseStreamsAppRouter = useStreamsAppRouter as jest.MockedFunction<
   typeof useStreamsAppRouter
 >;
 
-// Helper to render with required providers
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
 };
+
+const createStatus = (
+  overrides: Partial<{
+    stream: string;
+    suggestionCount: number;
+    pipelineCount: number;
+    pipelineInProgressCount: number;
+    pipelineFailedCount: number;
+    featuresCount: number;
+    significantEventsCount: number;
+  }> = {}
+) => ({
+  stream: 'test-stream',
+  suggestionCount: 0,
+  pipelineCount: 0,
+  pipelineInProgressCount: 0,
+  pipelineFailedCount: 0,
+  featuresCount: 0,
+  significantEventsCount: 0,
+  ...overrides,
+});
 
 describe('SuggestionStatusColumn', () => {
   const mockRouterLink = jest.fn((path: string, params: { path: { key: string; tab: string } }) => {
@@ -50,6 +70,21 @@ describe('SuggestionStatusColumn', () => {
     });
   });
 
+  describe('Generating State', () => {
+    it('should show "Generating..." with spinner when pipelineInProgressCount > 0', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={createStatus({ pipelineInProgressCount: 1 })}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.getByText('Generating...')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+  });
+
   describe('No Suggestions', () => {
     it('should show dash when status is undefined', () => {
       renderWithProviders(
@@ -60,17 +95,11 @@ describe('SuggestionStatusColumn', () => {
       expect(screen.getByLabelText('No suggestions')).toBeInTheDocument();
     });
 
-    it('should show dash when suggestionCount is 0', () => {
+    it('should show dash when all counts are 0', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 0,
-            pipelineCount: 0,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
+          status={createStatus()}
           isLoading={false}
         />
       );
@@ -82,81 +111,96 @@ describe('SuggestionStatusColumn', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 2,
-            pipelineCount: 0,
-            featuresCount: 0,
-            significantEventsCount: 2,
-          }}
+          status={createStatus({ suggestionCount: 2, significantEventsCount: 2 })}
           isLoading={false}
         />
       );
 
-      // Even though suggestionCount is 2, badge shows dash because significant events are excluded
       expect(screen.getByText('-')).toBeInTheDocument();
       expect(screen.queryByTestId('suggestionStatusBadge-test-stream')).not.toBeInTheDocument();
     });
   });
 
-  describe('Badge Display', () => {
-    it('should show badge with pipeline count only', () => {
+  describe('Available Badge Display', () => {
+    it('should show green badge with available count', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 3,
-            pipelineCount: 2,
-            featuresCount: 1,
-            significantEventsCount: 0,
-          }}
+          status={createStatus({ pipelineCount: 2 })}
           isLoading={false}
         />
       );
 
       expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
-      // Badge shows only pipelineCount = 2
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('2 available')).toBeInTheDocument();
     });
 
-    it('should have correct aria label for accessibility', () => {
+    it('should have correct aria label for available suggestions', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 5,
-            pipelineCount: 3,
-            featuresCount: 2,
-            significantEventsCount: 0,
-          }}
+          status={createStatus({ pipelineCount: 3 })}
           isLoading={false}
         />
       );
 
-      // Aria label shows only pipelineCount = 3
       expect(screen.getByLabelText('3 suggestions available')).toBeInTheDocument();
     });
+  });
 
-    it('should show dash when only features exist (pipelines are excluded)', () => {
+  describe('Failed Badge Display', () => {
+    it('should show red badge with failed count', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 2,
-            pipelineCount: 0,
-            featuresCount: 2,
-            significantEventsCount: 0,
-          }}
+          status={createStatus({ pipelineFailedCount: 1 })}
           isLoading={false}
         />
       );
 
-      // Even though featuresCount is 2, badge shows dash because only pipelines are shown
-      expect(screen.getByText('-')).toBeInTheDocument();
-      expect(screen.queryByTestId('suggestionStatusBadge-test-stream')).not.toBeInTheDocument();
+      expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
+      expect(screen.getByText('1 failed')).toBeInTheDocument();
+    });
+
+    it('should have correct aria label for failed suggestions', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={createStatus({ pipelineFailedCount: 2 })}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.getByLabelText('2 suggestions failed')).toBeInTheDocument();
+    });
+  });
+
+  describe('Mixed Badge Display', () => {
+    it('should show warning badge with both available and failed counts', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={createStatus({ pipelineCount: 1, pipelineFailedCount: 1 })}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
+      expect(screen.getByText('1 available, 1 failed')).toBeInTheDocument();
+    });
+
+    it('should have correct aria label for mixed state', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={createStatus({ pipelineCount: 2, pipelineFailedCount: 1 })}
+          isLoading={false}
+        />
+      );
+
+      expect(
+        screen.getByLabelText('2 suggestions available, 1 suggestion failed')
+      ).toBeInTheDocument();
     });
   });
 
@@ -167,46 +211,26 @@ describe('SuggestionStatusColumn', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 3,
-            pipelineCount: 2,
-            featuresCount: 1,
-            significantEventsCount: 0,
-          }}
+          status={createStatus({ pipelineCount: 2 })}
           isLoading={false}
         />
       );
 
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
-      // Only processing suggestions are shown (partitioning and significant events excluded)
       await waitFor(() => {
+        expect(screen.getByText('Review suggestions')).toBeInTheDocument();
         expect(screen.getByTestId('suggestionLink-test-stream-processing')).toBeInTheDocument();
       });
-
-      // Partitioning and significant events should not be shown
-      expect(
-        screen.queryByTestId('suggestionLink-test-stream-partitioning')
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('suggestionLink-test-stream-significantEvents')
-      ).not.toBeInTheDocument();
     });
 
-    it('should show correct labels for pipeline suggestions', async () => {
+    it('should show correct description for available suggestions', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 6,
-            pipelineCount: 2,
-            featuresCount: 3,
-            significantEventsCount: 1,
-          }}
+          status={createStatus({ pipelineCount: 2 })}
           isLoading={false}
         />
       );
@@ -214,27 +238,18 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
       await waitFor(() => {
-        expect(screen.getByText('2 processing suggestions')).toBeInTheDocument();
+        expect(screen.getByText('Review new processing suggestions.')).toBeInTheDocument();
+        expect(screen.getByText('Review in processing page')).toBeInTheDocument();
       });
-
-      // Partitioning and significant events are excluded from the popover
-      expect(screen.queryByText('3 partitioning suggestions')).not.toBeInTheDocument();
-      expect(screen.queryByText('1 significant events suggestion')).not.toBeInTheDocument();
     });
 
-    it('should show singular form for count of 1', async () => {
+    it('should show correct description for failed suggestions', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 3,
-            pipelineCount: 1,
-            featuresCount: 1,
-            significantEventsCount: 1,
-          }}
+          status={createStatus({ pipelineFailedCount: 1 })}
           isLoading={false}
         />
       );
@@ -242,29 +257,42 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
 
       await waitFor(() => {
-        expect(screen.getByText('1 processing suggestion')).toBeInTheDocument();
+        expect(
+          screen.getByText('Something went wrong while creating the processing suggestion.')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Try again in processing page')).toBeInTheDocument();
       });
+    });
 
-      // Partitioning and significant events are excluded from the popover
-      expect(screen.queryByText('1 partitioning suggestion')).not.toBeInTheDocument();
-      expect(screen.queryByText('1 significant events suggestion')).not.toBeInTheDocument();
+    it('should show correct description for mixed state', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={createStatus({ pipelineCount: 1, pipelineFailedCount: 2 })}
+          isLoading={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('1 processing suggestion available. 2 processing suggestions failed.')
+        ).toBeInTheDocument();
+      });
     });
   });
 
   describe('Suggestion Links', () => {
-    it('should generate correct link for processing suggestions only', async () => {
+    it('should generate correct link for processing suggestions', async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="logs"
-          status={{
-            stream: 'logs',
-            suggestionCount: 3,
-            pipelineCount: 1,
-            featuresCount: 1,
-            significantEventsCount: 1,
-          }}
+          status={createStatus({ stream: 'logs', pipelineCount: 1 })}
           isLoading={false}
         />
       );
@@ -272,18 +300,9 @@ describe('SuggestionStatusColumn', () => {
       await user.click(screen.getByTestId('suggestionStatusBadge-logs'));
 
       await waitFor(() => {
-        // Only processing link is generated (partitioning and significant events excluded)
         expect(mockRouterLink).toHaveBeenCalledWith('/{key}/management/{tab}', {
           path: { key: 'logs', tab: 'processing' },
         });
-      });
-
-      // Partitioning and significant events links should not be generated
-      expect(mockRouterLink).not.toHaveBeenCalledWith('/{key}/management/{tab}', {
-        path: { key: 'logs', tab: 'partitioning' },
-      });
-      expect(mockRouterLink).not.toHaveBeenCalledWith('/{key}/management/{tab}', {
-        path: { key: 'logs', tab: 'significantEvents' },
       });
     });
 
@@ -293,13 +312,7 @@ describe('SuggestionStatusColumn', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="my-stream"
-          status={{
-            stream: 'my-stream',
-            suggestionCount: 1,
-            pipelineCount: 1,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
+          status={createStatus({ stream: 'my-stream', pipelineCount: 1 })}
           isLoading={false}
         />
       );
@@ -310,94 +323,6 @@ describe('SuggestionStatusColumn', () => {
         const link = screen.getByTestId('suggestionLink-my-stream-processing');
         expect(link).toHaveAttribute('href', '/app/streams/my-stream/management/processing');
       });
-    });
-  });
-
-  describe('Dismiss Button', () => {
-    it('should not show dismiss button when onDismiss is not provided', () => {
-      renderWithProviders(
-        <SuggestionStatusColumn
-          streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 1,
-            pipelineCount: 1,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
-          isLoading={false}
-        />
-      );
-
-      expect(screen.queryByTestId('suggestionDismissButton-test-stream')).not.toBeInTheDocument();
-    });
-
-    it('should show dismiss button when onDismiss is provided', () => {
-      const mockOnDismiss = jest.fn();
-
-      renderWithProviders(
-        <SuggestionStatusColumn
-          streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 1,
-            pipelineCount: 1,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
-          isLoading={false}
-          onDismiss={mockOnDismiss}
-        />
-      );
-
-      expect(screen.getByTestId('suggestionDismissButton-test-stream')).toBeInTheDocument();
-    });
-
-    it('should call onDismiss with stream name when clicked', async () => {
-      const user = userEvent.setup();
-      const mockOnDismiss = jest.fn().mockResolvedValue(undefined);
-
-      renderWithProviders(
-        <SuggestionStatusColumn
-          streamName="logs.linux"
-          status={{
-            stream: 'logs.linux',
-            suggestionCount: 1,
-            pipelineCount: 1,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
-          isLoading={false}
-          onDismiss={mockOnDismiss}
-        />
-      );
-
-      await user.click(screen.getByTestId('suggestionDismissButton-logs.linux'));
-
-      await waitFor(() => {
-        expect(mockOnDismiss).toHaveBeenCalledWith('logs.linux');
-      });
-    });
-
-    it('should have correct aria label', () => {
-      const mockOnDismiss = jest.fn();
-
-      renderWithProviders(
-        <SuggestionStatusColumn
-          streamName="test-stream"
-          status={{
-            stream: 'test-stream',
-            suggestionCount: 1,
-            pipelineCount: 1,
-            featuresCount: 0,
-            significantEventsCount: 0,
-          }}
-          isLoading={false}
-          onDismiss={mockOnDismiss}
-        />
-      );
-
-      expect(screen.getByLabelText('Dismiss suggestion')).toBeInTheDocument();
     });
   });
 });

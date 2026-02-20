@@ -246,6 +246,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     // Build a map of stream name -> per-type suggestion counts
     interface StreamCounts {
       pipelineCount: number;
+      pipelineInProgressCount: number;
+      pipelineFailedCount: number;
       featuresCount: number;
       significantEventsCount: number;
     }
@@ -254,7 +256,13 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     const getOrCreateCounts = (stream: string): StreamCounts => {
       let counts = streamSuggestionCounts.get(stream);
       if (!counts) {
-        counts = { pipelineCount: 0, featuresCount: 0, significantEventsCount: 0 };
+        counts = {
+          pipelineCount: 0,
+          pipelineInProgressCount: 0,
+          pipelineFailedCount: 0,
+          featuresCount: 0,
+          significantEventsCount: 0,
+        };
         streamSuggestionCounts.set(stream, counts);
       }
       return counts;
@@ -278,18 +286,22 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
 
       for (const [taskId, status] of statusMap.entries()) {
         const extractedStreamName = extractStreamNameFromTaskId(taskId, taskType);
-
-        // A suggestion counts as available only if the task completed but not yet acknowledged
-        // Acknowledged tasks have already been accepted/rejected/dismissed by the user
-        const hasSuggestion = status === TaskStatus.Completed;
-
         const counts = getOrCreateCounts(extractedStreamName);
-        if (hasSuggestion) {
-          if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
+
+        if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
+          if (status === TaskStatus.Completed) {
             counts.pipelineCount += 1;
-          } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
+          } else if (status === TaskStatus.InProgress || status === TaskStatus.Stale) {
+            counts.pipelineInProgressCount += 1;
+          } else if (status === TaskStatus.Failed) {
+            counts.pipelineFailedCount += 1;
+          }
+        } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {
+          if (status === TaskStatus.Completed) {
             counts.featuresCount += 1;
-          } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
+          }
+        } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
+          if (status === TaskStatus.Completed) {
             counts.significantEventsCount += 1;
           }
         }
@@ -305,6 +317,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
         stream,
         suggestionCount,
         pipelineCount: counts.pipelineCount,
+        pipelineInProgressCount: counts.pipelineInProgressCount,
+        pipelineFailedCount: counts.pipelineFailedCount,
         featuresCount: counts.featuresCount,
         significantEventsCount: counts.significantEventsCount,
       });
