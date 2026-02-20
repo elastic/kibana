@@ -112,7 +112,7 @@ export class GenAiSettingsPlugin
       [GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS]: {
         readonlyMode: 'ui',
         readonly: true,
-        schema: schema.arrayOf(schema.string()),
+        schema: schema.arrayOf(schema.string(), { maxSize: 100 }),
         value: [],
       },
     });
