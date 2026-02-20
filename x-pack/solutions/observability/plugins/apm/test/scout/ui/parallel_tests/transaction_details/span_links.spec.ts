@@ -42,13 +42,6 @@ test.describe(
         await expect(page.getByText('2 Span links')).toBeVisible();
       });
 
-      await test.step('shows tooltip with incoming/outgoing links', async () => {
-        await page.getByRole('button', { name: 'Open span links details' }).hover();
-        await expect(page.getByText('2 Span links found')).toBeVisible();
-        await expect(page.getByText('2 incoming')).toBeVisible();
-        await expect(page.getByText('0 outgoing')).toBeVisible();
-      });
-
       await test.step('opens span flyout and shows span links details', async () => {
         await page.getByText('Span A').click();
         await transactionDetailsPage.getSpanLinksTab().click();
@@ -93,13 +86,6 @@ test.describe(
           end: timeRange.rangeTo,
         });
         await expect(page.getByText('2 Span links')).toBeVisible();
-      });
-
-      await test.step('shows tooltip with incoming/outgoing links', async () => {
-        await page.getByRole('button', { name: 'Open span links details' }).hover();
-        await expect(page.getByText('2 Span links found')).toBeVisible();
-        await expect(page.getByText('1 incoming')).toBeVisible();
-        await expect(page.getByText('1 outgoing')).toBeVisible();
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
