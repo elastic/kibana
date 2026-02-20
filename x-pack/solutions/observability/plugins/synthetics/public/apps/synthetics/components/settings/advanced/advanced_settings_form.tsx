@@ -23,7 +23,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
+import {
+  DYNAMIC_SETTINGS_DEFAULTS,
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+} from '../../../../../../common/constants';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 import {
   getDynamicSettingsAction,
@@ -31,7 +35,8 @@ import {
 } from '../../../state/settings/actions';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
 
-const MIN_SYNC_INTERVAL = 3;
+const MIN_SYNC_INTERVAL = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+const MAX_SYNC_INTERVAL = MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL;
 
 export const AdvancedSettingsForm = () => {
   const dispatch = useDispatch();
@@ -69,7 +74,10 @@ export const AdvancedSettingsForm = () => {
   };
 
   const isFormDirty = !isEqual(syncInterval, settings?.privateLocationsSyncInterval);
-  const isFormValid = syncInterval >= MIN_SYNC_INTERVAL && Number.isInteger(syncInterval);
+  const isFormValid =
+    syncInterval >= MIN_SYNC_INTERVAL &&
+    syncInterval <= MAX_SYNC_INTERVAL &&
+    Number.isInteger(syncInterval);
 
   return (
     <EuiForm>
@@ -112,8 +120,9 @@ export const AdvancedSettingsForm = () => {
           error={
             !isFormValid
               ? i18n.translate('xpack.synthetics.settings.advanced.syncInterval.error', {
-                  defaultMessage: 'Sync interval must be a whole number of at least {min} minutes.',
-                  values: { min: MIN_SYNC_INTERVAL },
+                  defaultMessage:
+                    'Sync interval must be a whole number between {min} and {max} minutes.',
+                  values: { min: MIN_SYNC_INTERVAL, max: MAX_SYNC_INTERVAL },
                 })
               : undefined
           }
@@ -123,6 +132,7 @@ export const AdvancedSettingsForm = () => {
             data-test-subj="syntheticsSyncIntervalField"
             value={syncInterval}
             min={MIN_SYNC_INTERVAL}
+            max={MAX_SYNC_INTERVAL}
             step={1}
             disabled={isDisabled}
             isLoading={loading}

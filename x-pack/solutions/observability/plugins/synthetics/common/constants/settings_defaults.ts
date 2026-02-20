@@ -7,6 +7,9 @@
 
 import type { DynamicSettings } from '../runtime_types';
 
+export const MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL = 5;
+export const MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL = 1440;
+
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   certAgeThreshold: 730,
   certExpirationThreshold: 30,
@@ -18,5 +21,5 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   },
   defaultTLSRuleEnabled: true,
   defaultStatusRuleEnabled: true,
-  privateLocationsSyncInterval: 5,
+  privateLocationsSyncInterval: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
 };

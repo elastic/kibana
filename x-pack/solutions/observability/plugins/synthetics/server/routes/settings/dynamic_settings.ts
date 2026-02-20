@@ -14,7 +14,11 @@ import {
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  SYNTHETICS_API_URLS,
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+} from '../../../common/constants';
 import { runSynPrivateLocationMonitorsTaskSoon } from '../../tasks/sync_private_locations_monitors_task';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
@@ -53,7 +57,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
 
     // Trigger the sync task immediately so the new interval takes effect right away
     if (syncIntervalChanged) {
-      await runSynPrivateLocationMonitorsTaskSoon({ server });
+      runSynPrivateLocationMonitorsTaskSoon({ server });
     }
 
     return fromSettingsAttribute(attr as DynamicSettingsAttributes);
@@ -100,5 +104,11 @@ export const DynamicSettingsSchema = schema.object({
       bcc: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
-  privateLocationsSyncInterval: schema.maybe(schema.number({ min: 3, validate: validateInteger })),
+  privateLocationsSyncInterval: schema.maybe(
+    schema.number({
+      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      validate: validateInteger,
+    })
+  ),
 });
