@@ -10,18 +10,32 @@
 import { collectUniqueTags, getServerRunFlagsFromTags, getTestTagsForTarget } from './tag_utils';
 
 describe('getTestTagsForTarget', () => {
-  it('returns tags.serverless.all for target "mki"', () => {
+  it('returns only @local-* tags for target "local"', () => {
+    const result = getTestTagsForTarget('local');
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((tag) => expect(tag).toMatch(/^@local-/));
+  });
+
+  it('returns only @local-stateful-* tags for target "local-stateful-only"', () => {
+    const result = getTestTagsForTarget('local-stateful-only');
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((tag) => expect(tag).toMatch(/^@local-stateful-/));
+  });
+
+  it('returns only @cloud-serverless-* tags for target "mki"', () => {
     const result = getTestTagsForTarget('mki');
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
-    result.forEach((tag) => expect(tag.startsWith('@')).toBe(true));
+    result.forEach((tag) => expect(tag).toMatch(/^@cloud-serverless-/));
   });
 
-  it('returns tags.stateful.all for target "ech"', () => {
+  it('returns only @cloud-stateful-* tags for target "ech"', () => {
     const result = getTestTagsForTarget('ech');
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
-    result.forEach((tag) => expect(tag.startsWith('@')).toBe(true));
+    result.forEach((tag) => expect(tag).toMatch(/^@cloud-stateful-/));
   });
 
   it('returns tags.deploymentAgnostic for target "all"', () => {

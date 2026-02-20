@@ -6,7 +6,7 @@
  */
 
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 
 export interface MlFeatureFlags {
   isPatternsEnabled: boolean;
