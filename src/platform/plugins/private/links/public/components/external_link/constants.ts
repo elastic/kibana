@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { encodeUriQuery, encodeQuery, addQueryParam } from './encode_uri_query';
-import { validateUrl } from './validate_url';
-
-export const url = {
-  encodeQuery,
-  encodeUriQuery,
-  addQueryParam,
-  validate: validateUrl
+export const DEFAULT_EXTERNAL_LINK_OPTIONS = {
+  encodeUrl: true,
+  openInNewTab: true,
 };

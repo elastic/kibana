@@ -13,6 +13,7 @@ import { EuiFormRow, EuiLink, EuiAccordion, EuiSpacer, EuiPanel } from '@elastic
 import type { monaco } from '@kbn/monaco';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlTemplateEditor } from '@kbn/kibana-react-plugin/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 import type { UrlDrilldownConfig } from '../../types';
 import {
   txtUrlTemplateSyntaxHelpLinkText,
@@ -25,7 +26,6 @@ import {
 import { VariablePopover } from '../variable_popover';
 import { UrlDrilldownOptionsComponent } from './lazy';
 import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
-import { validateUrl } from '../../url_validation';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
@@ -75,7 +75,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
   }
   const isEmpty = !urlTemplate;
 
-  const isValidUrlFormat = validateUrl(urlTemplate);
+  const isValidUrlFormat = url.validate(urlTemplate);
   const isInvalid = !isPristine && (isEmpty || !isValidUrlFormat.isValid);
 
   const invalidErrorMessage = isInvalid

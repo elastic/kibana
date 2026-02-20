@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import type { UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
@@ -25,31 +26,6 @@ const compileError = (message: string) =>
       message: message.replaceAll('[object Object]', 'context'),
     },
   });
-
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
-export function validateUrl(url: string): {
-  isValid: boolean;
-  error?: string;
-  invalidUrl?: string;
-} {
-  if (!url)
-    return {
-      isValid: false,
-      error: generalFormatError,
-    };
-
-  try {
-    new URL(url);
-    if (!url.match(SAFE_URL_PATTERN)) throw new Error();
-    return { isValid: true };
-  } catch (e) {
-    return {
-      isValid: false,
-      error: generalFormatError,
-      invalidUrl: url,
-    };
-  }
-}
 
 export async function validateUrlTemplate(
   url: string,
@@ -74,7 +50,7 @@ export async function validateUrlTemplate(
   }
 
   try {
-    return validateUrl(compiledUrl);
+    return urlUtils.validate(compiledUrl);
   } catch (e) {
     return {
       isValid: false,

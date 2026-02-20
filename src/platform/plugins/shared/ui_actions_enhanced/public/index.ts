@@ -49,7 +49,6 @@ export {
   UrlDrilldownCollectConfig,
   UrlDrilldownOptionsComponent,
   urlDrilldownGlobalScopeProvider,
-  urlDrilldownValidateUrl,
   urlDrilldownValidateUrlTemplate,
   DEFAULT_URL_DRILLDOWN_OPTIONS,
 } from './drilldowns/url_drilldown';
