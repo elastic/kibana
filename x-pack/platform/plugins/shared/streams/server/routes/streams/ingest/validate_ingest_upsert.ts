@@ -6,19 +6,7 @@
  */
 
 import type { FieldDefinition } from '@kbn/streams-schema';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
 import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
-
-const getFieldsWithUnmappedType = (fields: FieldDefinition | undefined): string[] => {
-  if (!fields) {
-    return [];
-  }
-
-  return Object.entries(fields)
-    .filter(([, config]) => config.type === 'unmapped')
-    .map(([name]) => name);
-};
 
 /**
  * Returns field names that have a description but no type (typeless description-only overrides).
@@ -32,14 +20,6 @@ const getTypelessDescriptionFields = (fields: FieldDefinition | undefined): stri
   return Object.entries(fields)
     .filter(([, config]) => !config.type && config.description)
     .map(([name]) => name);
-};
-
-export const getUnmappedFieldsFromIngestUpsert = (ingest: IngestUpsertRequest): string[] => {
-  if (WiredIngestUpsertRequest.is(ingest)) {
-    return getFieldsWithUnmappedType(ingest.wired.fields);
-  }
-
-  return getFieldsWithUnmappedType(ingest.classic.field_overrides);
 };
 
 /**

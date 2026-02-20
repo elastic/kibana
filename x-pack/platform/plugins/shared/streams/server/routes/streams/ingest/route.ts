@@ -19,10 +19,7 @@ import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
-import {
-  getUnmappedFieldsFromIngestUpsert,
-  getTypelessDescriptionFieldsFromClassicIngest,
-} from './validate_ingest_upsert';
+import { getTypelessDescriptionFieldsFromClassicIngest } from './validate_ingest_upsert';
 
 async function getAssets({
   name,
@@ -212,15 +209,6 @@ const upsertIngestRoute = createServerRoute({
 
     const { name } = params.path;
     const { ingest } = params.body;
-
-    const unmappedFields = getUnmappedFieldsFromIngestUpsert(ingest);
-    if (unmappedFields.length > 0) {
-      throw badRequest(
-        `Field definitions must not use type: 'unmapped'. ` +
-          `For documentation-only fields, omit \`type\` entirely and send { description }. ` +
-          `Invalid fields: ${unmappedFields.join(', ')}`
-      );
-    }
 
     const definition = await streamsClient.getStream(name);
 

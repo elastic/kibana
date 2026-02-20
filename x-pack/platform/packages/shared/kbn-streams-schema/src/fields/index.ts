@@ -54,11 +54,7 @@ export const FIELD_DEFINITION_TYPES = [
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
 // All field types including non-mapping types (for UI purposes)
-export const ALL_FIELD_DEFINITION_TYPES = [
-  ...FIELD_DEFINITION_TYPES,
-  'unmapped',
-  'system',
-] as const;
+export const ALL_FIELD_DEFINITION_TYPES = [...FIELD_DEFINITION_TYPES, 'system'] as const;
 export type AllFieldDefinitionType = (typeof ALL_FIELD_DEFINITION_TYPES)[number];
 
 // We redefine "first class" parameters
@@ -79,10 +75,6 @@ export type FieldDefinitionConfig =
     }
   | {
       type: 'system';
-      description?: string;
-    }
-  | {
-      type: 'unmapped';
       description?: string;
     };
 
@@ -108,10 +100,6 @@ export const fieldDefinitionConfigSchema = z.intersection(
     }),
     z.object({
       type: z.literal('system'),
-      description: z.optional(z.string()),
-    }),
-    z.object({
-      type: z.literal('unmapped'),
       description: z.optional(z.string()),
     }),
   ])
@@ -144,9 +132,7 @@ export type AllowedMappingProperty =
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 
 export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
-  return Object.values(value).every(
-    (prop) => Boolean(prop.type) && prop.type !== 'system' && prop.type !== 'unmapped'
-  );
+  return Object.values(value).every((prop) => Boolean(prop.type) && prop.type !== 'system');
 }
 
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(

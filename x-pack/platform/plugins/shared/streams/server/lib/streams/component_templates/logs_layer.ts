@@ -262,7 +262,7 @@ export function addAliasesForNamespacedFields(
       }
 
       const baseFieldType = baseFields[fieldDef.path]?.type;
-      if (!baseFieldType || baseFieldType === 'system' || baseFieldType === 'unmapped') {
+      if (!baseFieldType || baseFieldType === 'system') {
         return;
       }
 

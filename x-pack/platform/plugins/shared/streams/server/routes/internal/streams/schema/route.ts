@@ -199,7 +199,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
     // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
-    // and UI-only pseudo-types (e.g. `unmapped`, `system`).
+    // and system fields.
     const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
     if (userFieldDefinitions.length === 0) {
       return {
@@ -369,10 +369,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     }
 
     // Only check conflicts for fields that affect ES mappings
-    // Skip system fields, doc-only overrides (no type), and unmapped fields
+    // Skip system fields and doc-only overrides (no type)
     const userFieldDefinitions = params.body.field_definitions.filter(
       (field): field is typeof field & { type: string } =>
-        !!field.type && field.type !== 'system' && field.type !== 'unmapped'
+        !!field.type && field.type !== 'system'
     );
 
     if (userFieldDefinitions.length === 0) {

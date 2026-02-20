@@ -39,21 +39,6 @@ describe('fieldDefinitionConfigSchema', () => {
     expect(fieldDefinitionConfigSchema.parse(field)).toEqual(field);
   });
 
-  it('should accept unmapped type', () => {
-    const unmappedField = {
-      type: 'unmapped',
-    };
-    expect(fieldDefinitionConfigSchema.parse(unmappedField)).toEqual(unmappedField);
-  });
-
-  it('should accept unmapped type with description', () => {
-    const unmappedFieldWithDesc = {
-      type: 'unmapped',
-      description: 'This field is for documentation purposes only',
-    };
-    expect(fieldDefinitionConfigSchema.parse(unmappedFieldWithDesc)).toEqual(unmappedFieldWithDesc);
-  });
-
   it('should accept description-only override without type', () => {
     const descriptionOnlyOverride = {
       description: 'Custom description without freezing inherited mapping',
@@ -116,19 +101,10 @@ describe('isMappingProperties', () => {
     expect(isMappingProperties(fields)).toBe(false);
   });
 
-  it('should return false when containing unmapped type', () => {
+  it('should return false when containing doc-only fields (description without type)', () => {
     const fields: FieldDefinition = {
       field1: { type: 'keyword' },
-      field2: { type: 'unmapped' },
-    };
-    expect(isMappingProperties(fields)).toBe(false);
-  });
-
-  it('should return false when containing both system and unmapped types', () => {
-    const fields: FieldDefinition = {
-      field1: { type: 'keyword' },
-      field2: { type: 'system' },
-      field3: { type: 'unmapped' },
+      field2: { description: 'doc-only field' },
     };
     expect(isMappingProperties(fields)).toBe(false);
   });
