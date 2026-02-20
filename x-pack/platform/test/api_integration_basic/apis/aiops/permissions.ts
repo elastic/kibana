@@ -21,12 +21,13 @@ const API_VERSIONS: ApiVersion[] = ['3'];
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServer = config.get('servers.kibana');
+  let kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   // Native fetch doesn't support credentials in URLs, so we need to extract them
-  const { username, password } = kibanaServer;
-  kibanaServer.username = '';
-  kibanaServer.password = '';
-  const kibanaServerUrl = formatUrl(kibanaServer);
+  const parsedUrl = new URL(kibanaServerUrl);
+  const { username, password } = parsedUrl;
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+  kibanaServerUrl = parsedUrl.toString();
   const authHeader: Record<string, string> =
     username && password
       ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
