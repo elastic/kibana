@@ -11,47 +11,49 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 import type { SidebarToggleState } from '../../application/types';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
 import { internalStateActions } from '../../application/main/state_management/redux';
 
 describe('Panels toggle component', () => {
-  const mountComponent = ({
+  const mountComponent = async ({
     sidebarToggleState$,
     isChartAvailable,
     renderedFor,
     hideChart,
-  }: Omit<PanelsToggleProps, 'stateContainer'> & {
-    hideChart: boolean;
-  }) => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
+    const toolkit = getDiscoverInternalStateMock();
 
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: toolkit.getCurrentTab().id,
         appState: { hideChart },
       })
     );
 
     return mountWithIntl(
-      <DiscoverTestProvider stateContainer={stateContainer}>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
         <PanelsToggle
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}
         />
-      </DiscoverTestProvider>
+      </DiscoverToolkitTestProvider>
     );
   };
 
   describe('inside histogram toolbar', function () {
-    it('should render correctly when sidebar is visible and histogram is visible', () => {
+    it('should render correctly when sidebar is visible and histogram is visible', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: false,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: undefined,
         renderedFor: 'histogram',
@@ -61,12 +63,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideHistogramButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is collapsed and histogram is visible', () => {
+    it('should render correctly when sidebar is collapsed and histogram is visible', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: true,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: undefined,
         renderedFor: 'histogram',
@@ -79,16 +81,15 @@ describe('Panels toggle component', () => {
 
       expect(sidebarToggleState$.getValue().toggle).toHaveBeenCalledWith(false);
     });
-
   });
 
   describe('inside view mode tabs', function () {
-    it('should render correctly when sidebar is visible and histogram is visible', () => {
+    it('should render correctly when sidebar is visible and histogram is visible', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: false,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: true,
         renderedFor: 'tabs',
@@ -100,12 +101,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is visible and histogram is visible but chart is not available', () => {
+    it('should render correctly when sidebar is visible and histogram is visible but chart is not available', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: false,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: false,
         renderedFor: 'tabs',
@@ -117,12 +118,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is hidden and histogram is visible', () => {
+    it('should render correctly when sidebar is hidden and histogram is visible', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: true,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: true,
         renderedFor: 'tabs',
@@ -134,12 +135,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is hidden and histogram is visible but chart is not available', () => {
+    it('should render correctly when sidebar is hidden and histogram is visible but chart is not available', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: true,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: false,
         isChartAvailable: false,
         renderedFor: 'tabs',
@@ -151,12 +152,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscHideTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is visible and histogram is hidden', () => {
+    it('should render correctly when sidebar is visible and histogram is hidden', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: false,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: true,
         isChartAvailable: true,
         renderedFor: 'tabs',
@@ -167,12 +168,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is visible and histogram is hidden but chart is not available', () => {
+    it('should render correctly when sidebar is visible and histogram is hidden but chart is not available', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: false,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: true,
         isChartAvailable: false,
         renderedFor: 'tabs',
@@ -184,12 +185,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is hidden and histogram is hidden', () => {
+    it('should render correctly when sidebar is hidden and histogram is hidden', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: true,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: true,
         isChartAvailable: true,
         renderedFor: 'tabs',
@@ -200,12 +201,12 @@ describe('Panels toggle component', () => {
       expect(findTestSubject(component, 'dscShowTableButton').exists()).toBe(true);
     });
 
-    it('should render correctly when sidebar is hidden and histogram is hidden but chart is not available', () => {
+    it('should render correctly when sidebar is hidden and histogram is hidden but chart is not available', async () => {
       const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
         isCollapsed: true,
         toggle: jest.fn(),
       });
-      const component = mountComponent({
+      const component = await mountComponent({
         hideChart: true,
         isChartAvailable: false,
         renderedFor: 'tabs',

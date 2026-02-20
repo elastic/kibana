@@ -59,7 +59,12 @@ export class CpsUsageOverridesBadge
     return (
       <EuiPopover
         button={
-          <button onClick={() => setIsPopoverOpen(!isPopoverOpen)}>{strings.badgeLabel}</button>
+          <button
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            css={{ fontWeight: euiTheme.font.weight.semiBold }}
+          >
+            {strings.badgeLabel}
+          </button>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
@@ -70,7 +75,7 @@ export class CpsUsageOverridesBadge
         <div css={{ padding: euiTheme.size.m }}>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+              <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
                 {strings.badgeLabel}
               </EuiText>
             </EuiFlexItem>
@@ -102,7 +107,13 @@ export class CpsUsageOverridesBadge
           {overrideValues.map((override, index) => (
             <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
               {override.name && (
-                <EuiText size="xs" css={{ marginBottom: euiTheme.size.xs }}>
+                <EuiText
+                  size="xs"
+                  css={{
+                    marginBottom: euiTheme.size.xs,
+                    fontWeight: euiTheme.font.weight.semiBold,
+                  }}
+                >
                   {override.name}
                 </EuiText>
               )}
@@ -147,10 +158,10 @@ export class CpsUsageOverridesBadge
 
 const strings = {
   badgeLabel: i18n.translate('presentationPanel.badge.cpsUsageOverrides.label', {
-    defaultMessage: 'CPS overrides',
+    defaultMessage: 'Custom CPS scope',
   }),
   displayName: i18n.translate('presentationPanel.badge.cpsUsageOverrides.displayName', {
-    defaultMessage: 'This panel overrides the CPS scope',
+    defaultMessage: 'This panel uses custom CPS scope',
   }),
   editButton: i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.editButton', {
     defaultMessage: 'Edit',

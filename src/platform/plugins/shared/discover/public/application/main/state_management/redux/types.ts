@@ -125,6 +125,7 @@ export interface DiscoverAppState {
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
+  cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
 export enum TabInitializationStatus {

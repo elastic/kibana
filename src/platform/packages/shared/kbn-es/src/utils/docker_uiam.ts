@@ -8,6 +8,7 @@
  */
 
 import { writeFile, mkdir } from 'fs/promises';
+import { fetch } from 'undici';
 import { join } from 'path';
 import {
   generateCosmosDBApiRequestHeaders,
@@ -29,26 +30,24 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import type { ArrayElement } from '@kbn/utility-types';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH } from '../paths';
 
-const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'mcr.microsoft.com';
-const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/cosmosdb/linux/azure-cosmos-emulator`;
+const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
+const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
 
-// Check new version at https://github.com/Azure/azure-cosmos-db-emulator-docker/releases. DON'T use the rolling
-// `vnext-preview` image tag.
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251223';
-export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
+export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:latest-verified`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
-// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
 
 const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_UI_PORT: '8082',
+  UIAM_APP_LOGGING_LEVEL: 'DEBUG',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
 
@@ -115,12 +114,25 @@ export const UIAM_CONTAINERS = [
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/tmp/uiam_cosmosdb.pfx:z`,
+      '--volume',
+      `${CA_CERT_PATH}:/tmp/ca.crt:z`,
+      '--volume',
+      `${KBN_KEY_PATH}:/tmp/server.key:z`,
+      '--volume',
+      `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
       '-p',
-      `127.0.0.1:${new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port}:8080`, // UIAM API port
+      `127.0.0.1:${new URL(MOCK_IDP_UIAM_SERVICE_INTERNAL_URL)?.port}:8443`, // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
+
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
+      '--env',
+      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
 
       '--env',
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
@@ -132,6 +144,8 @@ export const UIAM_CONTAINERS = [
       `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
       '--env',
       `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+      '--env',
+      `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
       '--env',
       'quarkus.log.console.json.enabled=false',
       '--env',
@@ -260,7 +274,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
     method: 'POST',
     headers: generateCosmosDBApiRequestHeaders('POST', 'dbs', ''),
     body: JSON.stringify({ id: MOCK_IDP_UIAM_COSMOS_DB_NAME }),
-    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
     dispatcher: fetchDispatcher,
   });
 
@@ -294,7 +307,6 @@ export async function initializeUiamContainers(log: ToolingLog) {
           `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}`
         ),
         body: JSON.stringify({ id: collection, partitionKey: { paths: ['/id'], kind: 'Hash' } }),
-        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
         dispatcher: fetchDispatcher,
       }
     );
