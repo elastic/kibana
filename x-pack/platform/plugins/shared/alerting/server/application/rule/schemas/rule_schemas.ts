@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
 
@@ -28,14 +27,9 @@ export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(
 export const scheduleSchema = schema.oneOf([
   schema.object({
     interval: schema.string(),
-    rrule: schema.never(),
   }),
-  scheduleRruleSchema.extends({
-    interval: schema.never(),
-  }),
+  scheduleRruleSchema,
 ]);
-
-export type RuleSchedule = TypeOf<typeof scheduleSchema>;
 
 export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf([

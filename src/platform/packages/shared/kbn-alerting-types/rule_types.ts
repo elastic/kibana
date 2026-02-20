@@ -13,6 +13,7 @@ import type {
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
+import type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
 export type RuleTypeSolution = 'observability' | 'security' | 'stack';
@@ -23,9 +24,7 @@ export type RuleActionParam = SavedObjectAttribute;
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
 
-export interface IntervalSchedule extends SavedObjectAttributes {
-  interval: string;
-}
+export type { Schedule as RuleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface RuleActionFrequency extends SavedObjectAttributes {
   summary: boolean;
@@ -234,7 +233,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   tags: string[];
   alertTypeId: string; // this is persisted in the Rule saved object so we would need a migration to change this to ruleTypeId
   consumer: string;
-  schedule: IntervalSchedule;
+  schedule: RuleSchedule;
   actions: RuleAction[];
   systemActions?: RuleSystemAction[];
   params: Params;

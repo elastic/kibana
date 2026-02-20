@@ -35,6 +35,7 @@ export {
   convertMonitoringFromRawAndVerify,
 } from './monitoring';
 export { getNextRun } from './next_run';
+export { getNextRuleRun } from './get_next_rule_run';
 export { processAlerts } from './process_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';

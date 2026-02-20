@@ -13,10 +13,7 @@ export const rawRuleSchema = rawRuleSchemaV9.extends({
   schedule: schema.oneOf([
     schema.object({
       interval: schema.string(),
-      rrule: schema.never(),
     }),
-    scheduleRruleSchema.extends({
-      interval: schema.never(),
-    }),
+    scheduleRruleSchema,
   ]),
 });
