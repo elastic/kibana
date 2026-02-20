@@ -1761,6 +1761,12 @@ class AgentPolicyService {
           .join(', ')}`
     );
 
+    if (fleetServerPolicies.length === 0) {
+      logger.debug('No policies to deploy, skipping bulk write');
+      t.end();
+      return;
+    }
+
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {
         index: {
