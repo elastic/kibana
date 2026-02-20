@@ -357,6 +357,7 @@ enabled:
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts
+  - x-pack/performance/journeys_e2e/many_fields_esql_editor.ts
   - x-pack/performance/journeys_e2e/many_fields_discover.ts
   - x-pack/performance/journeys_e2e/many_fields_discover_esql.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
