@@ -27,28 +27,27 @@ describe(
                 const shouldAllowOnboarding =
                   fleetPrivilege === 'all' && integrationsPrivilege === 'all';
 
-                it(`should show onboarding screen ${
-                  shouldAllowOnboarding ? 'with' : 'without'
-                } 'Add Elastic Defend' button with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
-                  login.withCustomKibanaPrivileges({
-                    [siemVersion]: [
-                      'all',
-                      `endpoint_list_all`,
-                      `policy_management_${endpointPolicyManagementPrivilege}`,
-                    ],
-                    fleet: [integrationsPrivilege],
-                    fleetv2: [fleetPrivilege],
+                it(`should show onboarding screen ${shouldAllowOnboarding ? 'with' : 'without'
+                  } 'Add Elastic Defend' button with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
+                    login.withCustomKibanaPrivileges({
+                      [siemVersion]: [
+                        'all',
+                        `endpoint_list_all`,
+                        `policy_management_${endpointPolicyManagementPrivilege}`,
+                      ],
+                      fleet: [integrationsPrivilege],
+                      fleetv2: [fleetPrivilege],
+                    });
+
+                    loadPage(APP_ENDPOINTS_PATH);
+
+                    cy.getByTestSubj('policyOnboardingInstructions').should('exist');
+                    if (shouldAllowOnboarding) {
+                      cy.getByTestSubj('onboardingStartButton').should('exist');
+                    } else {
+                      cy.getByTestSubj('onboardingStartButton').should('not.exist');
+                    }
                   });
-
-                  loadPage(APP_ENDPOINTS_PATH);
-
-                  cy.getByTestSubj('policyOnboardingInstructions').should('exist');
-                  if (shouldAllowOnboarding) {
-                    cy.getByTestSubj('onboardingStartButton').should('exist');
-                  } else {
-                    cy.getByTestSubj('onboardingStartButton').should('not.exist');
-                  }
-                });
               }
             }
           });
