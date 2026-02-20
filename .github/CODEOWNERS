@@ -697,6 +697,7 @@ src/platform/packages/shared/serverless/settings/security_project @elastic/secur
 src/platform/packages/shared/serverless/settings/workplace_ai_project @elastic/search-kibana
 src/platform/packages/shared/serverless/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/serverless/types @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/ai-components @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/avatar/solution @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button_toolbar @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/button/exit_full_screen @elastic/appex-sharedux

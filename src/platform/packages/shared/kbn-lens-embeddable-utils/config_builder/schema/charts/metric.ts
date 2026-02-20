@@ -18,7 +18,12 @@ import {
   esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
-import { colorByValueAbsolute, staticColorSchema, applyColorToSchema } from '../color';
+import {
+  colorByValueAbsolute,
+  staticColorSchema,
+  applyColorToSchema,
+  colorByValueSchema,
+} from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -168,7 +173,7 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
   /**
    * Where to apply the color (background or value)
    */
@@ -327,6 +332,15 @@ export const esqlMetricState = schema.object({
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChartSchema' },
+  validate: ({ metrics, breakdown_by }) => {
+    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+        return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
+      }
+    }
+  },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
