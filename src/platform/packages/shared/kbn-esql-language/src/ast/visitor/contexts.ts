@@ -576,6 +576,12 @@ export class FuseCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
+// MMR
+export class MmrCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
 // Expressions -----------------------------------------------------------------
 
 export class ExpressionVisitorContext<

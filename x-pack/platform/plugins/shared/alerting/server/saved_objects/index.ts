@@ -13,7 +13,11 @@ import type {
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import {
+  triggersActionsRoute,
+  createRuleFromTemplateRoute,
+  getRuleDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
@@ -44,7 +48,7 @@ export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_schedule
 export const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE =
   'uiam_api_keys_provisioning_status';
 
-export const RuleAttributesToEncrypt = ['apiKey'];
+export const RuleAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
 
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
@@ -122,6 +126,12 @@ export function setupSavedObjects(
       getTitle(ruleSavedObject: SavedObject<RawRule>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
       },
+      getInAppUrl: (savedObject: SavedObject<RawRule>) => {
+        return {
+          path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+        };
+      },
       onImport(ruleSavedObjects) {
         return {
           warnings: getImportWarnings(ruleSavedObjects),
@@ -149,6 +159,9 @@ export function setupSavedObjects(
         },
         createdAt: {
           type: 'date',
+        },
+        uiamApiKey: {
+          type: 'binary',
         },
       },
     },
@@ -301,7 +314,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
 
