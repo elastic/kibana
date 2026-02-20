@@ -38,6 +38,7 @@ describe('applyDefaults', () => {
               kibana: mappings.object({
                 properties: {
                   space_ids: mappings.keyword(),
+                  custom_field: mappings.keyword(),
                 },
               }),
             },
@@ -120,7 +121,8 @@ describe('applyDefaults', () => {
               '@timestamp': mappings.date(),
               kibana: mappings.object({
                 properties: {
-                  custom_field: mappings.keyword(),
+                  custom_field_1: mappings.keyword(),
+                  custom_field_2: mappings.keyword(),
                 },
               }),
             },

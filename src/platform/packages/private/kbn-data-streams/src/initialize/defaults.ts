@@ -20,8 +20,8 @@ function validateMappings(def: AnyDataStreamDefinition): void {
     return;
   }
 
-  const kibanaProperties = get(properties, 'kibana.properties');
-  const kibanaType = get(properties, 'kibana.type');
+  const kibanaProperties: unknown = get(properties, 'kibana.properties');
+  const kibanaType: unknown = get(properties, 'kibana.type');
 
   if ('kibana' in properties && kibanaType !== undefined && kibanaType !== 'object') {
     throw new Error(
