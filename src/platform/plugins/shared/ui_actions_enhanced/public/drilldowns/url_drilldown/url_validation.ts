@@ -26,31 +26,6 @@ const compileError = (message: string) =>
     },
   });
 
-const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
-export function validateUrl(url: string): {
-  isValid: boolean;
-  error?: string;
-  invalidUrl?: string;
-} {
-  if (!url)
-    return {
-      isValid: false,
-      error: generalFormatError,
-    };
-
-  try {
-    new URL(url);
-    if (!url.match(SAFE_URL_PATTERN)) throw new Error();
-    return { isValid: true };
-  } catch (e) {
-    return {
-      isValid: false,
-      error: generalFormatError,
-      invalidUrl: url,
-    };
-  }
-}
-
 export async function validateUrlTemplate(
   url: string,
   scope: UrlDrilldownScope

@@ -661,6 +661,7 @@ src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/packages/shared/kbn-url-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-user-profile-components @elastic/kibana-security
 src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
