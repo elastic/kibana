@@ -130,9 +130,17 @@ Open `<KIBANA_ROOT>/.scout/servers/cloud_mki.json`:
 }
 ```
 
-- `projectType` values: `es`, `security`, `oblt`
+- `projectType` values: `es`, `security`, `oblt`, `workplaceai`
 - `cloudHostName`: the Cloud environment hostname (for example `console.qa.cld.elstc.co` or `cloud.elastic.co`)
 - More information on how to get the `<operator_password>` in the info box below
+
+Run tests with `--project mki`:
+
+```bash
+npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
+  --project mki \
+  --grep @cloud-serverless-<domain>
+```
 
 :::::::{note}
 Internal (Elasticians): `testing-internal` is an operator user with `superuser` privileges plus additional [operator privileges](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/operator-privileges).
@@ -146,21 +154,13 @@ curl -XPOST \
 ```
 
 - `API_KEY`: create in the Elastic Cloud UI (Organization → API keys)
-- `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://cloud.elastic.co`)
+- `CLOUD_ENV_URL`: base URL of your Cloud environment (for example `https://console.qa.cld.elstc.co`)
 - `PROJECT_ID`: serverless project ID from the Cloud UI
   :::::::
 
 ::::
 
 :::::
-
-Run tests with `--project mki`:
-
-```bash
-npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
-  --project mki \
-  --grep @cloud-serverless-<domain>
-```
 
 Example `--grep` values: `@cloud-serverless-search`, `@cloud-serverless-observability_complete`, `@cloud-serverless-security_ease`.
 
@@ -177,7 +177,7 @@ Internal (Elasticians): provisioning Cloud users/roles and populating `<kibana r
 ```bash
 node scripts/scout.js run-tests \
   --arch stateful \
-  --domain classic \
+  --domain <classic|search|observability_complete|security_complete> \
   --location cloud \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
