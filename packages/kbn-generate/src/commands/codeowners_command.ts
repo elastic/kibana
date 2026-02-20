@@ -8,7 +8,6 @@
  */
 
 import Fsp from 'fs/promises';
-import { existsSync } from 'fs';
 import Path from 'path';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
@@ -80,17 +79,11 @@ export const CodeownersCommand: GenerateCommand = {
     pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
 
     const newCodeowners = `${GENERATED_START}${pkgs
-      .flatMap((pkg) => {
-        const owners = pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '';
-        const dirEntry = pkg.normalizedRepoRelativeDir + owners;
-        if (existsSync(Path.resolve(pkg.normalizedRepoRelativeDir, 'test/scout'))) {
-          const scoutMetaOwners = [...new Set([...pkg.manifest.owner, '@kibanamachine'])].join(' ');
-          const scoutMetaEntry = `${pkg.normalizedRepoRelativeDir}/test/scout ${scoutMetaOwners}`;
-          return [dirEntry, scoutMetaEntry];
-        } else {
-          return [dirEntry];
-        }
-      })
+      .map(
+        (pkg) =>
+          pkg.normalizedRepoRelativeDir +
+          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
+      )
       .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {
