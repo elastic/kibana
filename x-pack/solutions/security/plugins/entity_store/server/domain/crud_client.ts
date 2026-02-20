@@ -91,6 +91,7 @@ export class CRUDClient {
       index: getLatestEntitiesIndexName(this.namespace),
       id: hashedId,
       doc,
+      retry_on_conflict: 3,
     });
 
     switch (result as Result) {
