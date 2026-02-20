@@ -79,7 +79,8 @@
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/core-http-browser",
-    "@kbn/sse-utils-client"
+    "@kbn/sse-utils-client",
+    "@kbn/repo-info"
   ],
   "exclude": ["target/**/*"]
 }
