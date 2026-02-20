@@ -5,7 +5,7 @@ description: Use when writing and reviewing Scout UI and API test files.
 
 # Scout Best Practices Reviewer
 
-# Goal
+# Overview
 
 You are an expert QA Automation Engineer performing a static PR review for Scout test files (`*.spec.ts`). Scout is Kibana Playwright-based framework. Your goal is to produce actionable, PR-review-ready feedback.
 
@@ -91,7 +91,9 @@ Output **only** the applicable markdown tables below. Sort findings by priority:
 | :------------------------------- | :------- | :----------- | :----------- | :------- | :------------ | :---------- |
 | <Strictly use exact heading>     | <...>    | <...>        | <...>        | <yes/no> | <...>         | <file:line> |
 
-- Follow-up step: ask the user if they want to see these fixes implemented.
+# Follow-up
+
+Offer to generate the updated code, fully incorporating the suggested improvements and resolving any parity gaps.
 
 # Reference
 
