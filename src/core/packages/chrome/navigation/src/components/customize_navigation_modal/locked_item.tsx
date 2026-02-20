@@ -14,15 +14,12 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSwitch,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-
-const panelCss = css`
-  padding-left: 0;
-  padding-right: 0;
-`;
 
 const CORE_ITEM_IDS = new Set(['discover', 'dashboards']);
 
@@ -38,6 +35,20 @@ interface Props {
 }
 
 export const LockedItem = ({ item }: Props) => {
+  const { euiTheme } = useEuiTheme();
+  const panelCss = css`
+    padding-left: ${euiTheme.size.s};
+    padding-right: ${euiTheme.size.s};
+  `;
+
+  const cellCss = css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+  `;
+
   const isCoreItem = CORE_ITEM_IDS.has(item.id);
 
   const tooltipContent = isCoreItem
@@ -53,15 +64,26 @@ export const LockedItem = ({ item }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiIconTip type="lock" color="subdued" content={tooltipContent} position="left" />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSwitch
-            compressed
-            label={item.title}
-            showLabel={true}
-            checked={!item.hidden}
-            onChange={() => {}}
-            disabled
-          />
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+          <div css={cellCss}>
+            <EuiText size="s" css={css`flex: 1; min-width: 0;`}>
+              {item.title}
+            </EuiText>
+            <EuiSwitch
+              compressed
+              label={i18n.translate(
+                'core.ui.chrome.sideNavigation.customizeNavigation.lockedItemAriaLabel',
+                {
+                  defaultMessage: '{itemTitle} cannot be reordered or hidden',
+                  values: { itemTitle: item.title },
+                }
+              )}
+              showLabel={false}
+              checked={!item.hidden}
+              onChange={() => {}}
+              disabled
+            />
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
