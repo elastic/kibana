@@ -629,7 +629,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.page.getByLabel('Field').fill(value);
+    await this.processorFieldComboBox.setCustomSingleOption(value);
   }
 
   async fillDateProcessorFormatInput(value: string) {
