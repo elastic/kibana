@@ -106,6 +106,8 @@ export interface AttachmentStateManager {
   permanentDelete(id: string): boolean;
   /** Update description without creating new version */
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
+  /** Update the origin reference for an attachment */
+  updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): boolean;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -457,6 +459,22 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.description = description;
+    this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
+    return true;
+  }
+
+  updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): boolean {
+    const attachment = this.attachments.get(id);
+    if (!attachment) {
+      return false;
+    }
+
+    if (attachment.active === false) {
+      return false;
+    }
+
+    attachment.origin = origin;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;

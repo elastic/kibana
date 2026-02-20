@@ -20,6 +20,7 @@ import type {
   DeleteAttachmentResponse,
   RestoreAttachmentResponse,
   RenameAttachmentResponse,
+  UpdateOriginResponse,
 } from '../../common/http_api/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
@@ -674,6 +675,107 @@ export function registerAttachmentRoutes({
           body: {
             success: true,
             attachment: renamed,
+          },
+        });
+      })
+    );
+
+  // Update attachment origin
+  router.versioned
+    .put({
+      path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}/origin`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Update attachment origin',
+      description:
+        'Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.',
+      options: {
+        tags: ['attachment', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.2.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+              attachment_id: schema.string({
+                meta: { description: 'The unique identifier of the attachment to update.' },
+              }),
+            }),
+            body: schema.object({
+              originId: schema.string({
+                meta: {
+                  description:
+                    'The origin identifier (e.g., saved object ID) to link the attachment to.',
+                },
+              }),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
+        const { originId } = request.body;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+        const existing = stateManager.getAttachmentRecord(attachmentId);
+
+        if (!existing) {
+          return response.notFound({
+            body: { message: `Attachment '${attachmentId}' not found` },
+          });
+        }
+
+        if (existing.active === false) {
+          return response.badRequest({
+            body: {
+              message: `Cannot update origin of deleted attachment '${attachmentId}'. Restore it first.`,
+            },
+          });
+        }
+
+        const success = stateManager.updateOrigin(
+          attachmentId,
+          { saved_object_id: originId },
+          ATTACHMENT_REF_ACTOR.user
+        );
+
+        if (!success) {
+          return response.customError({
+            body: { message: `Failed to update origin for attachment '${attachmentId}'` },
+            statusCode: 500,
+          });
+        }
+
+        const updated = stateManager.getAttachmentRecord(attachmentId)!;
+
+        // Save the updated conversation
+        await client.update({
+          id: conversationId,
+          attachments: stateManager.getAll(),
+        });
+
+        return response.ok<UpdateOriginResponse>({
+          body: {
+            success: true,
+            attachment: updated,
           },
         });
       })
