@@ -3,10 +3,7 @@ plugins:
   enabled:
     - data_views
     - console
-    - cloud_security_posture
     - discover_enhanced
-    - entity_store
-    - fleet
     - index_management
     - infra
     - lens
@@ -14,14 +11,11 @@ plugins:
     - observability_onboarding
     - painless_lab
     - profiling
-    - search_getting_started
-    - search_homepage
-    - security
     - security_solution
     - spaces
     - streams_app
     - transform
-    - workflows_extensions
+    - dashboard
   disabled:
 
 packages:
