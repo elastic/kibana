@@ -100,12 +100,3 @@ const filteredFiles = filterFilesByAffectedPackages(
 2. Return affected package IDs
 
 **Performance**: ~2-4 seconds
-
-### Critical Path Detection
-Returns `null` (skip filtering) if critical files change:
-- `.buildkite/`, `scripts/jest.js`, `scripts/jest`
-- `package.json`, `yarn.lock`
-- `tsconfig.json`, `tsconfig.base.json`, `.moon/workspace.yml`, `.moon/tasks/`
-- `src/platform/packages/shared/kbn-test/`
-
-This ensures that changes to infrastructure or build tooling trigger full runs.

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { doAnyChangesMatch } from '../github';
 import { findPackageForPath } from './package_lookup';
 import { getAffectedPackagesGit } from './strategy_git';
 import { getAffectedPackagesMoon } from './strategy_moon';
@@ -55,26 +54,6 @@ function getConfigFromEnv(): AffectedPackagesConfig {
     includeDownstream,
     logging,
   };
-}
-
-/**
- * Check if changes require skipping filtering (e.g., infrastructure changes)
- */
-async function shouldSkipFiltering(): Promise<boolean> {
-  const criticalPaths = [
-    '.buildkite/',
-    'scripts/jest.js',
-    'scripts/jest',
-    'package.json',
-    'yarn.lock',
-    'tsconfig.json',
-    'tsconfig.base.json',
-    '.moon/workspace.yml',
-    '.moon/tasks/',
-    'src/platform/packages/shared/kbn-test/',
-  ];
-
-  return doAnyChangesMatch(criticalPaths.map((p) => new RegExp(p)));
 }
 
 /**
@@ -142,12 +121,6 @@ export async function getAffectedPackagesForFiltering(
   }
 
   log('--- Detecting Affected Packages');
-
-  // Check if we should skip filtering due to critical changes
-  if (await shouldSkipFiltering()) {
-    log('Critical infrastructure files changed - skipping filtering');
-    return null;
-  }
 
   // Get affected packages
   try {
