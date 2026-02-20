@@ -31,7 +31,7 @@ const legendSchemaProps = {
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
   size: legendSizeSchema,
   position: schema.maybe(positionSchema({ meta: { description: 'Legend position' } })),
-  should_truncate: schema.maybe(
+  truncate: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to truncate legend items' } })
   ),
 };
