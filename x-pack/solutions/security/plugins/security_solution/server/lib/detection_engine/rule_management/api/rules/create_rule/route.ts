@@ -21,7 +21,6 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
