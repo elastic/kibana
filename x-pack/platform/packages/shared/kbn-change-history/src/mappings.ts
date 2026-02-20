@@ -76,6 +76,7 @@ export const changeHistoryMappings = {
       properties: {
         space_id: mappings.keyword(),
         version: mappings.keyword(),
+        session_id: mappings.keyword(),
       },
     }),
   },
