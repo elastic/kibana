@@ -10,7 +10,7 @@
 import type { TimeRange, TimeRangeBoundsOption, InitialFocus } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
-import { timeRangeToDisplayText } from './format';
+import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
 
 /**
  * Check a time range is valid
@@ -44,43 +44,6 @@ export function resolveInitialFocus(
 }
 
 /**
- * Extracts the offset portion from a date math bound string, or
- * returns `null` for absolute dates that have no stable offset representation.
- *
- * - `"now"` → `"now"` (sentinel, not an offset)
- * - `"now-15m"` → `"-15m"`
- * - `"now+3d/d"` → `"+3d/d"`
- * - `"now/d"` → `"/d"` (rounding only, no numeric offset)
- * - `"2025-01-01"` → `null`
- */
-function extractOffset(bound: string): string | 'now' | null {
-  if (bound === 'now') return 'now';
-
-  const offsetMatch = bound.match(/^now([+-]\d+[smhdwMy](?:\/[smhdwMy])?)$/);
-  if (offsetMatch) return offsetMatch[1];
-
-  const roundMatch = bound.match(/^now(\/[smhdwMy])$/);
-  if (roundMatch) return roundMatch[1];
-
-  return null;
-}
-
-/**
- * Converts a date math bound into a user-friendly input fragment by stripping
- * the `now` prefix when the result is a valid parseable shorthand (`-15m`, `+3d`).
- * Falls back to the original string when stripping would produce unparseable text.
- */
-function toInputFragment(bound: string): { text: string; isNow: boolean } {
-  if (bound === 'now') return { text: '', isNow: true };
-
-  if (bound.startsWith('now+') || bound.startsWith('now-')) {
-    return { text: bound.slice(3), isNow: false };
-  }
-
-  return { text: bound, isNow: false };
-}
-
-/**
  * Returns a human-readable display label for a time range option.
  * Uses the existing label when present, otherwise generates one using the same
  * pipeline as the control button: build text → parse → format.
@@ -105,8 +68,8 @@ export function getOptionDisplayLabel(option: TimeRangeBoundsOption): string {
  * getOptionShorthand({ start: '2025-01-01', end: 'now' }) // null
  */
 export function getOptionShorthand(option: TimeRangeBoundsOption): string | null {
-  const startOffset = extractOffset(option.start);
-  const endOffset = extractOffset(option.end);
+  const startOffset = boundToRelativeShorthand(option.start);
+  const endOffset = boundToRelativeShorthand(option.end);
 
   if (startOffset === null || endOffset === null) return null;
   if (startOffset === 'now' && endOffset === 'now') return null;
@@ -132,12 +95,46 @@ export function getOptionInputText(option: TimeRangeBoundsOption): string {
     if (!parsed.isInvalid) return option.label;
   }
 
-  const startFragment = toInputFragment(option.start);
-  const endFragment = toInputFragment(option.end);
+  const startFragment = boundToInputFragment(option.start);
+  const endFragment = boundToInputFragment(option.end);
 
   if (startFragment.isNow && endFragment.isNow) return 'now';
   if (startFragment.isNow) return endFragment.text;
   if (endFragment.isNow) return startFragment.text;
 
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
+}
+
+/**
+ * Extracts the offset portion from a date math bound string, or
+ * returns `null` for absolute dates and rounding-only expressions
+ * that have no stable offset representation.
+ *
+ * - `"now"` → `"now"` (sentinel, not an offset)
+ * - `"now-15m"` → `"-15m"`
+ * - `"now+3d/d"` → `"+3d/d"`
+ * - `"now/d"` → `null` (rounding only, no numeric offset)
+ * - `"2025-01-01"` → `null`
+ */
+function boundToRelativeShorthand(bound: string): string | 'now' | null {
+  if (bound === 'now') return 'now';
+
+  const parts = dateMathToRelativeParts(bound);
+  if (!parts) return null;
+
+  const sign = parts.isFuture ? '+' : '-';
+  const round = parts.round ? `/${parts.round}` : '';
+  return `${sign}${parts.count}${parts.unit}${round}`;
+}
+
+/**
+ * Converts a date math bound into a user-friendly input fragment.
+ * Uses `boundToRelativeShorthand` to strip the `now` prefix when possible,
+ * falling back to the original string for absolute dates and rounding-only expressions.
+ */
+function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
+  const shorthand = boundToRelativeShorthand(bound);
+  if (shorthand === 'now') return { text: '', isNow: true };
+  if (shorthand !== null) return { text: shorthand, isNow: false };
+  return { text: bound, isNow: false };
 }
