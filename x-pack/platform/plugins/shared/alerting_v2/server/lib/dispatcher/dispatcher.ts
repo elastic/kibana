@@ -18,8 +18,14 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
-import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode, DispatcherExecutionParams, DispatcherExecutionResult } from './types';
+import { getAlertEpisodeSuppressionsQuery, getDispatchableAlertEventsQuery } from './queries';
+import type {
+  AlertEpisode,
+  AlertEpisodeSuppression,
+  DispatcherExecutionParams,
+  DispatcherExecutionResult,
+} from './types';
+import { withDispatcherSpan } from './with_dispatcher_span';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
@@ -35,73 +41,120 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
-    abortController,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+
+    const alertEpisodes = await withDispatcherSpan('dispatcher:fetch-alert-episodes', () =>
+      this.fetchAlertEpisodes(previousStartedAt)
+    );
+    const suppressions = await withDispatcherSpan('dispatcher:fetch-suppressions', () =>
+      this.fetchAlertEpisodeSuppressions(alertEpisodes)
+    );
+
+    const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
+
+    this.logger.debug({
+      message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressed.length} suppressed, ${active.length} not suppressed`,
+    });
+
+    const now = new Date();
+    await withDispatcherSpan('dispatcher:bulk-index-actions', () =>
+      this.storageService.bulkIndexDocs<AlertAction>({
+        index: ALERT_ACTIONS_DATA_STREAM,
+        docs: [
+          ...suppressed.map((episode) => this.toAction({ episode, actionType: 'suppress', now })),
+          ...active.map((episode) => this.toAction({ episode, actionType: 'fire', now })),
+        ],
+      })
+    );
+
+    return { startedAt };
+  }
+
+  private applySuppression(
+    episodes: AlertEpisode[],
+    suppressions: AlertEpisodeSuppression[]
+  ): { suppressed: AlertEpisode[]; active: AlertEpisode[] } {
+    const suppressionMap = new Map<string, AlertEpisodeSuppression>();
+
+    for (const s of suppressions) {
+      if (s.episode_id) {
+        suppressionMap.set(`${s.rule_id}:${s.group_hash}:${s.episode_id}`, s);
+      } else {
+        suppressionMap.set(`${s.rule_id}:${s.group_hash}:*`, s);
+      }
+    }
+
+    const suppressed: AlertEpisode[] = [];
+    const active: AlertEpisode[] = [];
+
+    for (const ep of episodes) {
+      const episodeKey = `${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`;
+      const seriesKey = `${ep.rule_id}:${ep.group_hash}:*`;
+
+      const episodeSuppression = suppressionMap.get(episodeKey);
+      const seriesSuppression = suppressionMap.get(seriesKey);
+
+      if (episodeSuppression?.should_suppress || seriesSuppression?.should_suppress) {
+        suppressed.push(ep);
+      } else {
+        active.push(ep);
+      }
+    }
+
+    return { suppressed, active };
+  }
+
+  private toAction({
+    episode,
+    actionType,
+    now,
+  }: {
+    episode: AlertEpisode;
+    actionType: 'suppress' | 'fire';
+    now: Date;
+  }): AlertAction {
+    return {
+      '@timestamp': now.toISOString(),
+      group_hash: episode.group_hash,
+      last_series_event_timestamp: episode.last_event_timestamp,
+      actor: 'system',
+      action_type: actionType,
+      rule_id: episode.rule_id,
+      source: 'internal',
+    };
+  }
+
+  private async fetchAlertEpisodeSuppressions(
+    alertEpisodes: AlertEpisode[]
+  ): Promise<AlertEpisodeSuppression[]> {
+    if (alertEpisodes.length === 0) {
+      return [];
+    }
+
+    const result = await this.queryService.executeQuery({
+      query: getAlertEpisodeSuppressionsQuery(alertEpisodes).query,
+    });
+
+    return queryResponseToRecords<AlertEpisodeSuppression>(result);
+  }
+
+  private async fetchAlertEpisodes(previousStartedAt: Date): Promise<AlertEpisode[]> {
     const lookback = moment(previousStartedAt)
       .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
       .toISOString();
 
-    this.logger.debug({
-      message: () => `Dispatcher started. Looking for alert episodes since ${lookback}`,
-    });
-
-    const { query } = getDispatchableAlertEventsQuery();
-
     const result = await this.queryService.executeQuery({
-      query,
+      query: getDispatchableAlertEventsQuery().query,
       filter: {
         range: {
           '@timestamp': {
-            gte: moment(previousStartedAt)
-              .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-              .toISOString(),
+            gte: lookback,
           },
         },
       },
     });
 
-    const dispatchableAlertEvents = queryResponseToRecords<AlertEpisode>({
-      columns: result.columns,
-      values: result.values,
-    });
-    this.logger.debug({
-      message: () =>
-        `Dispatcher found ${dispatchableAlertEvents.length} alert episodes to dispatch.`,
-    });
-
-    const ruleIds = Array.from(new Set(dispatchableAlertEvents.map((event) => event.rule_id)));
-    this.logger.debug({
-      message: () =>
-        `Dispatcher found ${ruleIds.length} unique rules with alert episodes to dispatch.`,
-    });
-
-    // TODO:
-    // Fetch policies associated to ruleIds to determine how to dispatch each alert episode
-    // Suppress dispatchable alert events based on policies
-    // Log suppressed alert events
-    // Call policy defined workflow to dispatch alert events
-    // insert fire-event for non-suppressed alert events
-
-    const now = new Date().toISOString();
-    await this.storageService.bulkIndexDocs<AlertAction>({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: dispatchableAlertEvents.map((alertEpisode) => ({
-        '@timestamp': now,
-        group_hash: alertEpisode.group_hash,
-        last_series_event_timestamp: alertEpisode.last_event_timestamp,
-        actor: 'system',
-        action_type: 'fire-event',
-        rule_id: alertEpisode.rule_id,
-        source: 'internal',
-      })),
-    });
-
-    this.logger.debug({
-      message: () =>
-        `Dispatcher finished processing ${dispatchableAlertEvents.length} alert episodes.`,
-    });
-
-    return { startedAt };
+    return queryResponseToRecords<AlertEpisode>(result);
   }
 }
