@@ -232,9 +232,27 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const listView = useCallback(
     (list: ReactElement, search?: ReactElement) => {
       return (
-        <>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            maxHeight: '100%',
+            minWidth: 0,
+          }}
+        >
           {search}
-          <div style={{ maxHeight: '50vh', overflowY: 'auto' }}>{list}</div>
+          <div
+            style={{
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              minHeight: 0,
+              flex: '1 1 auto',
+              minWidth: 0,
+            }}
+          >
+            {list}
+          </div>
           {workflowOptions.length > 0 && (
             <EuiPanel
               paddingSize="s"
@@ -252,7 +270,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               </EuiText>
             </EuiPanel>
           )}
-        </>
+        </div>
       );
     },
     [euiTheme.colors.backgroundBaseSubdued, workflowManagementLinkProps, workflowOptions.length]
@@ -350,6 +368,18 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               // This should be configurable in EUI, but it's not :(
               '.euiSelectableListItem__onFocusBadge': {
                 display: 'none',
+              },
+              '.euiSelectableListItem__text': {
+                minWidth: 0,
+                overflow: 'hidden',
+              },
+              '.euiSelectableListItem__text .euiHighlight': {
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+                maxWidth: '100%',
+                verticalAlign: 'bottom',
               },
             },
           }}
