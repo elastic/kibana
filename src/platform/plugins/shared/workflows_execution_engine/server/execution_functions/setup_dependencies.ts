@@ -119,7 +119,6 @@ export async function setupDependencies(
     allowedHosts: config.http.allowedHosts,
   });
 
-  // Enhance dependencies with workflow repositories and execution engine
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
     workflowRepository,

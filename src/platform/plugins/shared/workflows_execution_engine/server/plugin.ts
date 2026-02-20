@@ -589,7 +589,6 @@ export class WorkflowsExecutionEnginePlugin
           `Executing workflow directly (already in Task Manager context): ${workflow.id}`
         );
 
-        // Get workflowsExecutionEngine from getStartServices (third element is this plugin's start contract)
         if (!this.coreSetup) {
           throw new Error('Core setup not available');
         }

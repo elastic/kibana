@@ -7,28 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import { isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { LegacyWorkflowInput } from '@kbn/workflows';
-// WorkflowInputChoiceSchema is needed as a value for typeof, not just as a type
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { WorkflowInputChoiceSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod/v4';
-import { getInputPlaceholderValue } from './workflow_input_placeholder';
+import { getPlaceholderForProperty } from './workflow_input_placeholder';
+import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
-type WorkflowInputChoice = z.infer<typeof WorkflowInputChoiceSchema>;
+type WorkflowInputsContext = AutocompleteContext & {
+  workflows: WorkflowsResponse;
+  isInWorkflowInputsContext: boolean;
+};
 
 /**
- * Builds documentation string for a workflow input
+ * Builds documentation string for a workflow input from its JSON Schema property
  */
-function buildInputDocumentation(input: LegacyWorkflowInput): string {
-  const inputType = input.type;
-  const isRequired = input.required || false;
-  const description = input.description || '';
-  const hasDefault = input.default !== undefined;
+function buildDocFromJsonSchema(
+  name: string,
+  propSchema: JSONSchema7,
+  isRequired: boolean
+): string {
+  const inputType = propSchema.type ?? 'unknown';
+  const description = propSchema.description ?? '';
+  const hasDefault = propSchema.default !== undefined;
 
-  let documentation = `Input: ${input.name}\nType: ${inputType}`;
+  let documentation = `Input: ${name}\nType: ${inputType}`;
   if (isRequired) {
     documentation += '\nRequired: Yes';
   }
@@ -36,25 +39,19 @@ function buildInputDocumentation(input: LegacyWorkflowInput): string {
     documentation += `\nDescription: ${description}`;
   }
   if (hasDefault) {
-    documentation += `\nDefault: ${JSON.stringify(input.default)}`;
+    documentation += `\nDefault: ${JSON.stringify(propSchema.default)}`;
   }
 
-  // For choice inputs, show options
-  if (inputType === 'choice') {
-    const choiceInput = input as WorkflowInputChoice;
-    if (choiceInput.options && choiceInput.options.length > 0) {
-      documentation += `\nOptions: ${choiceInput.options.join(', ')}`;
-    }
+  if (propSchema.enum && propSchema.enum.length > 0) {
+    documentation += `\nOptions: ${propSchema.enum.join(', ')}`;
   }
 
-  // For array inputs, show constraints
   if (inputType === 'array') {
-    const arrayInput = input as LegacyWorkflowInput & { minItems?: number; maxItems?: number };
-    if (arrayInput.minItems !== undefined) {
-      documentation += `\nMin items: ${arrayInput.minItems}`;
+    if (propSchema.minItems !== undefined) {
+      documentation += `\nMin items: ${propSchema.minItems}`;
     }
-    if (arrayInput.maxItems !== undefined) {
-      documentation += `\nMax items: ${arrayInput.maxItems}`;
+    if (propSchema.maxItems !== undefined) {
+      documentation += `\nMax items: ${propSchema.maxItems}`;
     }
   }
 
@@ -62,26 +59,21 @@ function buildInputDocumentation(input: LegacyWorkflowInput): string {
 }
 
 /**
- * Determines the insert text for a workflow input based on its type and default value
- */
-function getInputInsertText(input: LegacyWorkflowInput): string {
-  return `${input.name}: ${getInputPlaceholderValue(input)}`;
-}
-
-/**
- * Creates a completion item for a workflow input
+ * Creates a completion item for a workflow input from its JSON Schema property
  */
 function createInputSuggestion(
-  input: LegacyWorkflowInput,
+  name: string,
+  propSchema: JSONSchema7,
+  isRequired: boolean,
   range: monaco.IRange
 ): monaco.languages.CompletionItem {
-  const inputType = input.type;
-  const isRequired = input.required || false;
-  const documentation = buildInputDocumentation(input);
-  const insertText = getInputInsertText(input);
+  const inputType = propSchema.type ?? 'unknown';
+  const documentation = buildDocFromJsonSchema(name, propSchema, isRequired);
+  const placeholder = getPlaceholderForProperty(propSchema);
+  const insertText = `${name}: ${placeholder}`;
 
   return {
-    label: input.name,
+    label: name,
     kind: monaco.languages.CompletionItemKind.Property,
     insertText,
     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
@@ -91,7 +83,7 @@ function createInputSuggestion(
       isTrusted: true,
     },
     detail: `${inputType}${isRequired ? ' (required)' : ''}`,
-    sortText: isRequired ? `!${input.name}` : input.name, // Sort required inputs first
+    sortText: isRequired ? `!${name}` : name,
   };
 }
 
@@ -116,7 +108,7 @@ function extractInputKeyPrefix(lineUpToCursor: string): string {
  * (e.g. JSON Schema) can run.
  */
 export async function getWorkflowInputsSuggestions(
-  autocompleteContext: AutocompleteContext
+  autocompleteContext: WorkflowInputsContext
 ): Promise<monaco.languages.CompletionItem[] | null> {
   const { focusedStepInfo, lineParseResult, lineUpToCursor, range, workflows } =
     autocompleteContext;
@@ -129,7 +121,8 @@ export async function getWorkflowInputsSuggestions(
     return null;
   }
 
-  const isInputsMatchType = lineParseResult?.matchType === 'workflow-inputs';
+  const isInputsMatchType =
+    (lineParseResult as { matchType?: string } | null)?.matchType === 'workflow-inputs';
   const isInputsPath = autocompleteContext.isInWorkflowInputsContext;
 
   if (!isInputsMatchType && !isInputsPath) {
@@ -147,23 +140,28 @@ export async function getWorkflowInputsSuggestions(
   }
 
   const workflow = workflows.workflows[workflowId];
-  if (!workflow || !workflow.inputs || workflow.inputs.length === 0) {
+  const schema = workflow?.inputsSchema;
+  const properties = schema?.properties;
+  if (!workflow || !properties || Object.keys(properties).length === 0) {
     return [];
   }
 
-  const searchPrefix = isInputsMatchType
-    ? lineParseResult?.fullKey || ''
-    : extractInputKeyPrefix(lineUpToCursor);
+  const searchPrefix =
+    isInputsMatchType && lineParseResult
+      ? (lineParseResult as { fullKey?: string }).fullKey ?? ''
+      : extractInputKeyPrefix(lineUpToCursor);
   const lowerSearchPrefix = searchPrefix.toLowerCase();
+  const required = schema.required ?? [];
 
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  for (const input of workflow.inputs) {
-    const matchesPrefix =
-      !lowerSearchPrefix || input.name.toLowerCase().startsWith(lowerSearchPrefix);
+  for (const [name, propSchema] of Object.entries(properties)) {
+    const prop = propSchema as JSONSchema7;
+    const isRequired = required.includes(name);
+    const matchesPrefix = !lowerSearchPrefix || name.toLowerCase().startsWith(lowerSearchPrefix);
 
     if (matchesPrefix) {
-      suggestions.push(createInputSuggestion(input, range));
+      suggestions.push(createInputSuggestion(name, prop, isRequired, range));
     }
   }
 
