@@ -32,7 +32,7 @@ export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'c
   return isNumeric ? 'right' : 'left';
 }
 
-export function detectColorConfigMismatch({
+export function hasIncompatibleColorConfig({
   colorByTerms,
   palette,
   colorMapping,
@@ -40,13 +40,11 @@ export function detectColorConfigMismatch({
   colorByTerms: boolean;
   palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>;
   colorMapping?: ColorMapping.Config | string;
-}) {
+}): boolean {
   const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
-
-  return {
-    hasColorMappingOnNumeric: !colorByTerms && colorMapping != null,
-    hasValuePaletteOnBucket: colorByTerms && isValueBasedPalette,
-  };
+  const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
+  const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette;
+  return hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 }
 
 /**
@@ -100,24 +98,28 @@ export function resolveColorDefaults({
   colorMapping: ColorMapping.Config | undefined;
   hasMismatch: boolean;
 } {
-  const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+  const hasColorConfigMismatch = hasIncompatibleColorConfig({
     colorByTerms,
     palette,
     colorMapping,
   });
-  const hasMismatch = hasColorMappingOnNumeric || hasValuePaletteOnBucket;
-  const needsDefaults = (!palette && !colorMapping) || hasMismatch;
+
+  const needsDefaults = (!palette && !colorMapping) || hasColorConfigMismatch;
 
   if (!needsDefaults) {
     return { palette, colorMapping, hasMismatch: false };
   }
 
   if (colorByTerms) {
-    return { palette: undefined, colorMapping: DEFAULT_COLOR_MAPPING_CONFIG, hasMismatch };
+    return {
+      palette: undefined,
+      colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+      hasMismatch: hasColorConfigMismatch,
+    };
   }
 
   const { palette: defaultPalette } = getColorByValuePalette(paletteService, dataBounds);
-  return { palette: defaultPalette, colorMapping: undefined, hasMismatch };
+  return { palette: defaultPalette, colorMapping: undefined, hasMismatch: hasColorConfigMismatch };
 }
 
 export function getFixedColorConfiguration(

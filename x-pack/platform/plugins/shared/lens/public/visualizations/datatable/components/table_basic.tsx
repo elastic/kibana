@@ -74,7 +74,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment, detectColorConfigMismatch } from '../utils';
+import { getColumnAlignment, hasIncompatibleColorConfig } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -405,12 +405,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
 
-      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
         colorByTerms,
         palette,
         colorMapping,
       });
-      const hasColorConfigMismatch = hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 
       let appliedPalette = hasColorConfigMismatch ? undefined : palette;
       let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;

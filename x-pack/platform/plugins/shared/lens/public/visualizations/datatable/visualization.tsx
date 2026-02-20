@@ -70,7 +70,7 @@ import {
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
 import {
-  detectColorConfigMismatch,
+  hasIncompatibleColorConfig,
   getDataBoundsForAccessor,
   getFixedColorConfiguration,
   resolveColorDefaults,
@@ -898,72 +898,39 @@ export const getDatatableVisualization = ({
       );
       const colorByTerms = isBucketable;
 
-      const { hasColorMappingOnNumeric, hasValuePaletteOnBucket } = detectColorConfigMismatch({
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
         colorByTerms,
         palette,
         colorMapping,
       });
 
-      if (hasColorMappingOnNumeric || hasValuePaletteOnBucket) {
-        // Get column info for user-friendly message
+      if (hasColorConfigMismatch) {
         const operation = datasource.getOperationForColumnId(column.columnId);
-        const columnIndex = index + 1;
-        const columnName = operation?.label;
-        const columnLabelText = columnName
-          ? i18n.translate('xpack.lens.datatableVisualization.columnLabelWithIndex', {
-              defaultMessage: 'column {index} ({label})',
-              values: { index: columnIndex, label: columnName },
-            })
-          : i18n.translate('xpack.lens.datatableVisualization.columnLabelWithoutName', {
-              defaultMessage: 'column {index}',
-              values: { index: columnIndex },
-            });
+        const columnLabel = `Column #${index + 1} ${
+          operation?.label ? `(${operation?.label})` : ''
+        }`;
 
-        if (hasColorMappingOnNumeric) {
-          warnings.push({
-            uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
-            severity: 'warning',
-            shortMessage: i18n.translate(
-              'xpack.lens.datatableVisualization.colorMismatchShortMessage',
-              {
-                defaultMessage: 'Color configuration mismatch',
-              }
-            ),
-            longMessage: (
-              <FormattedMessage
-                id="xpack.lens.datatableVisualization.colorMismatchNumericLongMessage"
-                defaultMessage="The color mapping configuration is not appropriate for {columnLabel}. Default color by value has been applied instead."
-                values={{
-                  columnLabel: <strong>{columnLabelText}</strong>,
-                }}
-              />
-            ),
-            fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-          });
-        } else if (hasValuePaletteOnBucket) {
-          warnings.push({
-            uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
-            severity: 'warning',
-            shortMessage: i18n.translate(
-              'xpack.lens.datatableVisualization.colorMismatchShortMessage',
-              {
-                defaultMessage: 'Color configuration mismatch',
-              }
-            ),
-            longMessage: (
-              <FormattedMessage
-                id="xpack.lens.datatableVisualization.colorMismatchTermsLongMessage"
-                defaultMessage="The color by value configuration is not appropriate for {columnLabel}. Default color mapping has been applied instead."
-                values={{
-                  columnLabel: <strong>{columnLabelText}</strong>,
-                }}
-              />
-            ),
-            fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-          });
-        }
+        warnings.push({
+          uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
+          severity: 'warning',
+          shortMessage: i18n.translate(
+            'xpack.lens.datatableVisualization.colorMismatchShortMessage',
+            {
+              defaultMessage: 'Color configuration mismatch',
+            }
+          ),
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.datatableVisualization.colorMismatchLongMessage"
+              defaultMessage="{columnLabel}: Incompatible color configuration. Defaults have been applied. Save the visualization to persist the fix, or edit the color settings to customize."
+              values={{
+                columnLabel: <strong>{columnLabel}</strong>,
+              }}
+            />
+          ),
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        });
       }
     });
 
