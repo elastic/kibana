@@ -1342,8 +1342,8 @@
     "@timestamp",
     "entityId",
     "entityType",
-    "status",
-    "message"
+    "message",
+    "status"
   ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
