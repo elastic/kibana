@@ -6,7 +6,7 @@
  */
 
 import { type Feature } from '@kbn/streams-schema';
-import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
+import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/sig_events/feature';
 import { pick } from 'lodash';
 
 export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [

@@ -16,7 +16,7 @@ import {
 } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { FeatureClient } from '../streams/feature/feature_client';
+import type { FeatureClient } from '../feature/feature_client';
 
 interface Params {
   definition: Streams.all.Definition;

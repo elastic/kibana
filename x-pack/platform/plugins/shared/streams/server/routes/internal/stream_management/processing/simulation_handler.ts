@@ -38,7 +38,7 @@ import type {
 import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline, validateStreamlang } from '@kbn/streamlang';
+import { validateStreamlang } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/stream_management/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/stream_management/fields';

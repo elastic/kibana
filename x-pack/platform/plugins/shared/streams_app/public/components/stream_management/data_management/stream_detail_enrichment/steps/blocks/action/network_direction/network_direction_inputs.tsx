@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { FieldNameWithIcon } from '@kbn/react-field';
-import { useEnrichmentFieldSuggestions } from '../../../../../../../hooks/use_field_suggestions';
+import { useEnrichmentFieldSuggestions } from '../../../../../../../../hooks/stream_management/use_field_suggestions';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 
 interface IpRequiredFieldProps {

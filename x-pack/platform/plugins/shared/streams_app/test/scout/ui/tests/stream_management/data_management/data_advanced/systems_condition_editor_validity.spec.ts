@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../../../fixtures';
+import { test } from '../../../../fixtures';
 
 const STREAM_NAME = 'logs';
 const SYSTEM_NAME = 'streams-system-validity-test';
