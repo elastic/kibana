@@ -308,20 +308,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const warningMessage = `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`;
                 wrapperWarnings.push(warningMessage);
                 skipExecution = true;
-              } else {
-                ruleExecutionLogger.debug(
-                  `Number of indices found: ${indexPatternsWithMatches.length}`
-                );
-                ruleExecutionLogger.debug(
-                  `Number of index patterns that did not match any indices: ${
-                    inputIndex.length - indexPatternsWithMatches.length
-                  }`
-                );
-                ruleExecutionLogger.debug(
-                  `Index patterns that did not match any indices: ${inputIndex
-                    .filter((index) => !indexPatternsWithMatches.includes(index))
-                    .join(', ')}`
-                );
               }
             } catch (exc) {
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
