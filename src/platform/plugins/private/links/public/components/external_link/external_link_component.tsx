@@ -33,7 +33,7 @@ export const ExternalLinkComponent = ({
   }, [link.options]);
 
   const destination = useMemo(() => {
-    return link.destination && linkOptions?.encodeUrl
+    return link.destination && linkOptions.encodeUrl
       ? encodeURI(link.destination)
       : link.destination;
   }, [linkOptions, link.destination]);
