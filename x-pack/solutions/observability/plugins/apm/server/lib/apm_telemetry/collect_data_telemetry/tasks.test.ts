@@ -1036,146 +1036,6 @@ describe('data telemetry collection tasks', () => {
     });
   });
 
-  describe('otel_agents', () => {
-    const task = tasks.find((t) => t.name === 'otel_agents');
-
-    it('returns OTel agent metrics', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: {
-          total: { value: 1000 },
-        },
-        aggregations: {
-          agent_combinations: {
-            buckets: [
-              {
-                key: {
-                  sdk_name: 'opentelemetry',
-                  sdk_language: 'nodejs',
-                },
-                doc_count: 500,
-              },
-              {
-                key: {
-                  sdk_name: 'opentelemetry',
-                  sdk_language: 'python',
-                },
-                doc_count: 300,
-              },
-            ],
-          },
-        },
-      });
-
-      const indicesStats = jest.fn().mockResolvedValueOnce({
-        _all: {
-          total: {
-            docs: { count: 5000 },
-            store: { size_in_bytes: 10000000 },
-          },
-        },
-      });
-
-      expect(
-        await task?.executor({
-          indices,
-          telemetryClient: { search, indicesStats },
-        } as any)
-      ).toEqual({
-        otel_docs_per_agent: {
-          'opentelemetry/nodejs': 500,
-          'opentelemetry/python': 300,
-        },
-        otel_size_per_agent: {
-          'opentelemetry/nodejs': 1000000,
-          'opentelemetry/python': 600000,
-        },
-        otel_1d_docs: 1000,
-        otel_1d_size_bytes: 2000000,
-      });
-    });
-
-    it('returns empty results when no OTel data', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: { total: { value: 0 } },
-        aggregations: { agent_combinations: { buckets: [] } },
-      });
-
-      const indicesStats = jest.fn().mockResolvedValueOnce({
-        _all: {
-          total: {
-            docs: { count: 0 },
-            store: { size_in_bytes: 0 },
-          },
-        },
-      });
-
-      expect(
-        await task?.executor({
-          indices,
-          telemetryClient: { search, indicesStats },
-        } as any)
-      ).toEqual({
-        otel_docs_per_agent: {},
-        otel_size_per_agent: {},
-        otel_1d_docs: 0,
-        otel_1d_size_bytes: 0,
-      });
-    });
-
-    it('filters out unknown and empty agent names', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: {
-          total: { value: 100 },
-        },
-        aggregations: {
-          agent_combinations: {
-            buckets: [
-              {
-                key: {
-                  sdk_name: 'opentelemetry',
-                  sdk_language: 'go',
-                },
-                doc_count: 50,
-              },
-              {
-                key: {
-                  sdk_name: 'unknown',
-                  sdk_language: 'java',
-                },
-                doc_count: 30,
-              },
-              {
-                key: {
-                  sdk_name: '',
-                  sdk_language: 'python',
-                },
-                doc_count: 20,
-              },
-            ],
-          },
-        },
-      });
-
-      const indicesStats = jest.fn().mockResolvedValueOnce({
-        _all: {
-          total: {
-            docs: { count: 100 },
-            store: { size_in_bytes: 10000 },
-          },
-        },
-      });
-
-      const result = await task?.executor({
-        indices,
-        telemetryClient: { search, indicesStats },
-      } as any);
-
-      expect(result?.otel_docs_per_agent).toEqual({
-        'opentelemetry/go': 50,
-      });
-    });
-  });
-
   describe('otel_agents_by_signal', () => {
     const task = tasks.find((t) => t.name === 'otel_agents_by_signal');
 
@@ -1276,39 +1136,34 @@ describe('data telemetry collection tasks', () => {
       } as any);
 
       expect(result).toEqual({
+        per_otel_agents: {
+          'opentelemetry/nodejs': { docs: 500, size_bytes: 1000000 },
+          'opentelemetry/python': { docs: 260, size_bytes: 520000 },
+          'opentelemetry/java': { docs: 140, size_bytes: 280000 },
+        },
+        otel_1d_docs: 900,
+        otel_1d_size_bytes: 1800000,
         otel_by_signal: {
           traces: {
-            docs_per_agent: {
-              'opentelemetry/nodejs': 300,
-              'opentelemetry/python': 200,
-            },
-            size_per_agent: {
-              'opentelemetry/nodejs': 600000,
-              'opentelemetry/python': 400000,
+            per_agent: {
+              'opentelemetry/nodejs': { docs: 300, size_bytes: 600000 },
+              'opentelemetry/python': { docs: 200, size_bytes: 400000 },
             },
             docs_1d: 500,
             size_1d_bytes: 1000000,
           },
           metrics: {
-            docs_per_agent: {
-              'opentelemetry/nodejs': 200,
-              'opentelemetry/java': 100,
-            },
-            size_per_agent: {
-              'opentelemetry/nodejs': 400000,
-              'opentelemetry/java': 200000,
+            per_agent: {
+              'opentelemetry/nodejs': { docs: 200, size_bytes: 400000 },
+              'opentelemetry/java': { docs: 100, size_bytes: 200000 },
             },
             docs_1d: 300,
             size_1d_bytes: 600000,
           },
           logs: {
-            docs_per_agent: {
-              'opentelemetry/python': 60,
-              'opentelemetry/java': 40,
-            },
-            size_per_agent: {
-              'opentelemetry/python': 120000,
-              'opentelemetry/java': 80000,
+            per_agent: {
+              'opentelemetry/python': { docs: 60, size_bytes: 120000 },
+              'opentelemetry/java': { docs: 40, size_bytes: 80000 },
             },
             docs_1d: 100,
             size_1d_bytes: 200000,
@@ -1338,22 +1193,22 @@ describe('data telemetry collection tasks', () => {
       } as any);
 
       expect(result).toEqual({
+        per_otel_agents: {},
+        otel_1d_docs: 0,
+        otel_1d_size_bytes: 0,
         otel_by_signal: {
           traces: {
-            docs_per_agent: {},
-            size_per_agent: {},
+            per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
           },
           metrics: {
-            docs_per_agent: {},
-            size_per_agent: {},
+            per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
           },
           logs: {
-            docs_per_agent: {},
-            size_per_agent: {},
+            per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
           },

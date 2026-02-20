@@ -74,6 +74,11 @@ import type {
   MetricNotSupportingRollup,
   MetricRollupIntervals,
   MetricSupportingRollUp,
+  OtelAgentCombinationBucket,
+  OtelAgentStats,
+  OtelSignalStats,
+  OtelSdkCombinationBucket,
+  OtelVersionStats,
 } from '../types';
 import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
@@ -92,6 +97,53 @@ type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+// OTel SDK/distro field constants (shared across otel tasks)
+const SDK_NAME_FIELD = 'resource.attributes.telemetry.sdk.name';
+const SDK_VERSION_FIELD = 'resource.attributes.telemetry.sdk.version';
+const SDK_LANGUAGE_FIELD = 'resource.attributes.telemetry.sdk.language';
+const DISTRO_NAME_FIELD = 'resource.attributes.telemetry.distro.name';
+
+/**
+ * Builds an OTel agent key from composite bucket key parts.
+ * Only includes non-null, non-empty values.
+ * e.g. "opentelemetry/java/elastic", "opentelemetry/nodejs", "envoy/cpp"
+ */
+function buildOtelAgentKey(parts: {
+  sdk_name: string;
+  sdk_language?: string | null;
+  distro_name?: string | null;
+}): string | null {
+  const { sdk_name, sdk_language, distro_name } = parts;
+  if (!sdk_name || sdk_name === 'unknown' || sdk_name === '') {
+    return null;
+  }
+  const keyParts = [sdk_name, sdk_language, distro_name].filter(
+    (v) => v != null && v !== ''
+  );
+  return keyParts.join('/');
+}
+
+/**
+ * Accumulates doc count and service count into an OtelVersionStats record,
+ * keyed by `key` and broken down by `version`.
+ */
+function accumulateVersionStats(
+  record: Record<string, OtelVersionStats>,
+  key: string,
+  version: string,
+  docCount: number,
+  serviceCount: number
+): void {
+  if (!record[key]) {
+    record[key] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
+  }
+  record[key].total_docs += docCount;
+  record[key].docs_per_version[version] =
+    (record[key].docs_per_version[version] || 0) + docCount;
+  record[key].services_per_version[version] =
+    (record[key].services_per_version[version] || 0) + serviceCount;
+}
 
 interface TelemetryTask {
   name: string;
@@ -1864,140 +1916,16 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
-    name: 'otel_agents',
-    executor: async ({ indices, telemetryClient }) => {
-
-      const indicesList = [
-        indices.transaction,
-        indices.span,
-        indices.error,
-        indices.metric,
-      ];
-
-      const SDK_NAME_FIELD = 'resource.attributes.telemetry.sdk.name';
-      const SDK_LANGUAGE_FIELD = 'resource.attributes.telemetry.sdk.language';
-      const DISTRO_NAME_FIELD = 'resource.attributes.telemetry.distro.name';
-
-      // Build agent name from SDK fields: sdkName/language or sdkName/language/distro
-      const response = await telemetryClient.search({
-        index: indicesList,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: 0,
-        track_total_hits: true,
-        timeout,
-        query: {
-          bool: {
-              filter: [
-                {
-                  exists: {
-                    field: SDK_NAME_FIELD,
-                  },
-                },
-                range1d,
-              ],
-          },
-        },
-        aggs: {
-          agent_combinations: {
-            composite: {
-              size: 10000,
-              sources: [
-                { sdk_name: { terms: { field: SDK_NAME_FIELD } } },
-                {
-                  sdk_language: {
-                    terms: { field: SDK_LANGUAGE_FIELD, missing_bucket: true },
-                  },
-                },
-                {
-                  distro_name: {
-                    terms: { field: DISTRO_NAME_FIELD, missing_bucket: true },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-
-      const otelDocsPerAgent: Record<string, number> = {};
-
-      const buckets =
-        (
-          response.aggregations?.agent_combinations as {
-            buckets?: Array<{
-              key: { sdk_name: string; sdk_language?: string; distro_name?: string };
-              doc_count: number;
-            }>;
-          }
-        )?.buckets ?? [];
-
-      // Parse results and build agent name key
-      for (const bucket of buckets) {
-        const sdkName = bucket.key.sdk_name;
-        const sdkLanguage = bucket.key.sdk_language || 'unknown';
-        const distroName = bucket.key.distro_name;
-
-        // exclude no-agent and unknown agents
-        if (!sdkName || sdkName === 'unknown' || sdkName === '') {
-          continue;
-        }
-
-        // Build agent name key: sdkName/language or sdkName/language/distro
-        const agentName = distroName ? `${sdkName}/${sdkLanguage}/${distroName}` : `${sdkName}/${sdkLanguage}`;
-        
-        otelDocsPerAgent[agentName] = (otelDocsPerAgent[agentName] || 0) + bucket.doc_count;
-      }
-
-      const otelStatsResponse = await telemetryClient.indicesStats({
-        index: indicesList,
-        metric: ['store', 'docs'],
-      });
-
-      const allTimeDocs = otelStatsResponse._all?.total?.docs?.count ?? 0;
-      const allTimeSizeBytes = otelStatsResponse._all?.total?.store?.size_in_bytes ?? 0;
-      const docsIn1d = (response.hits.total as { value: number })?.value ?? 0;
-
-      const avgDocSizeBytes = allTimeDocs > 0 ? allTimeSizeBytes / allTimeDocs : 0;
-      const estimatedSize1dBytes = Math.round(docsIn1d * avgDocSizeBytes);
-
-      // estimate size per agent based on doc count and average doc size
-      const otelSizePerAgent: Record<string, number> = {};
-      for (const [agentName, docCount] of Object.entries(otelDocsPerAgent)) {
-        otelSizePerAgent[agentName] = Math.round(docCount * avgDocSizeBytes);
-      }
-
-      return {
-        otel_docs_per_agent: otelDocsPerAgent,
-        otel_size_per_agent: otelSizePerAgent,
-        otel_1d_docs: docsIn1d,
-        otel_1d_size_bytes: estimatedSize1dBytes,
-      };
-    },
-  },
-  {
     name: 'otel_agents_by_signal',
     executor: async ({ indices, telemetryClient }) => {
-      // Collect OTel telemetry broken down by signal type (traces, metrics, logs)
-      
-      type SignalStats = {
-        docs_per_agent: Record<string, number>;
-        size_per_agent: Record<string, number>;
-        docs_1d: number;
-        size_1d_bytes: number;
-      };
-
-      const SDK_NAME_FIELD = 'resource.attributes.telemetry.sdk.name';
-      const SDK_LANGUAGE_FIELD = 'resource.attributes.telemetry.sdk.language';
-      const DISTRO_NAME_FIELD = 'resource.attributes.telemetry.distro.name';
+      // Collect OTel telemetry per signal (traces, metrics, logs) then derive totals.
+      // This single task replaces the former otel_agents + otel_agents_by_signal pair.
 
       const collectStatsForSignal = async (
-        indexPattern: string | string[],
-        signalName: string
-      ): Promise<SignalStats> => {
+        indexPattern: string | string[]
+      ): Promise<OtelSignalStats> => {
         const indexList = Array.isArray(indexPattern) ? indexPattern : [indexPattern];
 
-        // Build agent name from SDK fields: sdkName/language or sdkName/language/distro
         const response = await telemetryClient.search({
           index: indexList,
           ignore_unavailable: true,
@@ -2008,11 +1936,7 @@ export const tasks: TelemetryTask[] = [
           query: {
             bool: {
               filter: [
-                {
-                  exists: {
-                    field: SDK_NAME_FIELD,
-                  },
-                },
+                { exists: { field: SDK_NAME_FIELD } },
                 range1d,
               ],
             },
@@ -2039,33 +1963,22 @@ export const tasks: TelemetryTask[] = [
           },
         });
 
-        const docsPerAgent: Record<string, number> = {};
+        const perAgent: Record<string, OtelAgentStats> = {};
 
         const buckets =
           (
             response.aggregations?.agent_combinations as {
-              buckets?: Array<{
-                key: { sdk_name: string; sdk_language?: string; distro_name?: string };
-                doc_count: number;
-              }>;
+              buckets?: OtelAgentCombinationBucket[];
             }
           )?.buckets ?? [];
 
-        // Parse results and build agent name key
         for (const bucket of buckets) {
-          const sdkName = bucket.key.sdk_name;
-          const sdkLanguage = bucket.key.sdk_language || 'unknown';
-          const distroName = bucket.key.distro_name;
-
-          // exclude no-agent and unknown agents
-          if (!sdkName || sdkName === 'unknown' || sdkName === '') {
-            continue;
+          const agentName = buildOtelAgentKey(bucket.key);
+          if (!agentName) continue;
+          if (!perAgent[agentName]) {
+            perAgent[agentName] = { docs: 0, size_bytes: 0 };
           }
-
-          // Build agent name key: sdkName/language or sdkName/language/distro
-          const agentName = distroName ? `${sdkName}/${sdkLanguage}/${distroName}` : `${sdkName}/${sdkLanguage}`;
-          
-          docsPerAgent[agentName] = (docsPerAgent[agentName] || 0) + bucket.doc_count;
+          perAgent[agentName].docs += bucket.doc_count;
         }
 
         const docs1d = (response.hits.total as { value: number })?.value ?? 0;
@@ -2079,33 +1992,47 @@ export const tasks: TelemetryTask[] = [
         const totalDocs = indicesStatsResponse._all?.total?.docs?.count ?? 0;
         const totalSizeBytes = indicesStatsResponse._all?.total?.store?.size_in_bytes ?? 0;
         const avgDocSizeBytes = totalDocs > 0 ? totalSizeBytes / totalDocs : 0;
-        const estimatedSize1dBytes = Math.round(docs1d * avgDocSizeBytes);
 
-        // Calculate size per agent
-        const sizePerAgent: Record<string, number> = {};
-        for (const [agentName, docCount] of Object.entries(docsPerAgent)) {
-          sizePerAgent[agentName] = Math.round(docCount * avgDocSizeBytes);
+        // Estimate size per agent based on doc count × average doc size
+        for (const agent of Object.keys(perAgent)) {
+          perAgent[agent].size_bytes = Math.round(perAgent[agent].docs * avgDocSizeBytes);
         }
 
         return {
-          docs_per_agent: docsPerAgent,
-          size_per_agent: sizePerAgent,
+          per_agent: perAgent,
           docs_1d: docs1d,
-          size_1d_bytes: estimatedSize1dBytes,
+          size_1d_bytes: Math.round(docs1d * avgDocSizeBytes),
         };
       };
 
-      // Collect stats for each signal type
+      // Collect stats for each signal type in parallel
       const [tracesStats, metricsStats, logsStats] = await Promise.all([
-        collectStatsForSignal(
-          [indices.transaction, indices.span],
-          'traces'
-        ),
-        collectStatsForSignal(indices.metric, 'metrics'),
-        collectStatsForSignal(indices.error, 'logs'),
+        collectStatsForSignal([indices.transaction, indices.span]),
+        collectStatsForSignal(indices.metric),
+        collectStatsForSignal(indices.error),
       ]);
 
+      // Derive overall totals by summing across all three signals
+      const perOtelAgents: Record<string, OtelAgentStats> = {};
+      let otel1dDocs = 0;
+      let otel1dSizeBytes = 0;
+
+      for (const signalStats of [tracesStats, metricsStats, logsStats]) {
+        otel1dDocs += signalStats.docs_1d;
+        otel1dSizeBytes += signalStats.size_1d_bytes;
+        for (const [agent, agentStats] of Object.entries(signalStats.per_agent)) {
+          if (!perOtelAgents[agent]) {
+            perOtelAgents[agent] = { docs: 0, size_bytes: 0 };
+          }
+          perOtelAgents[agent].docs += agentStats.docs;
+          perOtelAgents[agent].size_bytes += agentStats.size_bytes;
+        }
+      }
+
       return {
+        per_otel_agents: perOtelAgents,
+        otel_1d_docs: otel1dDocs,
+        otel_1d_size_bytes: otel1dSizeBytes,
         otel_by_signal: {
           traces: tracesStats,
           metrics: metricsStats,
@@ -2123,11 +2050,6 @@ export const tasks: TelemetryTask[] = [
         indices.error,
         indices.metric,
       ];
-
-      const SDK_NAME_FIELD = 'resource.attributes.telemetry.sdk.name';
-      const SDK_VERSION_FIELD = 'resource.attributes.telemetry.sdk.version';
-      const SDK_LANGUAGE_FIELD = 'resource.attributes.telemetry.sdk.language';
-      const DISTRO_NAME_FIELD = 'resource.attributes.telemetry.distro.name';
 
       // Collect SDK and Distro information together
       const sdkResponse = await telemetryClient.search({
@@ -2173,57 +2095,29 @@ export const tasks: TelemetryTask[] = [
       });
 
       // Process SDK results
-      const sdkStats: Record<
-        string,
-        { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
-      > = {};
-      const distroStats: Record<string, { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }> = {};
-      
+      const sdkStats: Record<string, OtelVersionStats> = {};
+      const distroStats: Record<string, OtelVersionStats> = {};
+
       const sdkBuckets =
         (
           sdkResponse.aggregations?.sdk_combinations as {
-            buckets?: Array<{
-              key: { sdk_name: string; sdk_version?: string; sdk_language?: string; distro_name?: string };
-              doc_count: number;
-              services?: { value: number };
-            }>;
+            buckets?: OtelSdkCombinationBucket[];
           }
         )?.buckets ?? [];
 
       for (const bucket of sdkBuckets) {
-        const sdkName = bucket.key.sdk_name;
-        const sdkVersion = bucket.key.sdk_version || 'unknown';
-        const sdkLanguage = bucket.key.sdk_language || 'unknown';
-        const distroName = bucket.key.distro_name;
+        const { sdk_version, distro_name } = bucket.key;
+        const agentName = buildOtelAgentKey(bucket.key);
+        if (!agentName) continue;
+
+        const version = sdk_version || 'unknown';
         const serviceCount = bucket.services?.value || 0;
 
-        if (!sdkName || sdkName === 'unknown' || sdkName === '') {
-          continue;
-        }
-
-        // Build agent name key: sdkName/language or sdkName/language/distro
-        const key = distroName ? `${sdkName}/${sdkLanguage}/${distroName}` : `${sdkName}/${sdkLanguage}`;
-
-        if (!sdkStats[key]) {
-          sdkStats[key] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
-        }
-
-        sdkStats[key].total_docs += bucket.doc_count;
-        sdkStats[key].docs_per_version[sdkVersion] =
-          (sdkStats[key].docs_per_version[sdkVersion] || 0) + bucket.doc_count;
-        sdkStats[key].services_per_version[sdkVersion] =
-          (sdkStats[key].services_per_version[sdkVersion] || 0) + serviceCount;
+        accumulateVersionStats(sdkStats, agentName, version, bucket.doc_count, serviceCount);
 
         // Also track distro separately if it exists
-        if (distroName && distroName !== 'unknown' && distroName !== '') {
-          if (!distroStats[distroName]) {
-            distroStats[distroName] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
-          }
-          distroStats[distroName].total_docs += bucket.doc_count;
-          distroStats[distroName].docs_per_version[sdkVersion] =
-            (distroStats[distroName].docs_per_version[sdkVersion] || 0) + bucket.doc_count;
-          distroStats[distroName].services_per_version[sdkVersion] =
-            (distroStats[distroName].services_per_version[sdkVersion] || 0) + serviceCount;
+        if (distro_name && distro_name !== 'unknown' && distro_name !== '') {
+          accumulateVersionStats(distroStats, distro_name, version, bucket.doc_count, serviceCount);
         }
       }
 

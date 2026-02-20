@@ -73,42 +73,60 @@ export interface APMPerService {
   };
 }
 
+// ── OTel telemetry types (used by otel tasks in tasks.ts) ──
+
+/** Bucket shape returned by composite agg on sdk_name / sdk_language / distro_name */
+export interface OtelAgentCombinationBucket {
+  key: { sdk_name: string; sdk_language?: string; distro_name?: string };
+  doc_count: number;
+}
+
+/** Bucket shape returned by composite agg that also includes sdk_version + services */
+export interface OtelSdkCombinationBucket {
+  key: {
+    sdk_name: string;
+    sdk_version?: string;
+    sdk_language?: string;
+    distro_name?: string;
+  };
+  doc_count: number;
+  services?: { value: number };
+}
+
+/** Nested per-agent stats: docs + estimated size */
+export interface OtelAgentStats {
+  docs: number;
+  size_bytes: number;
+}
+
+/** Per-signal (traces/metrics/logs) breakdown */
+export interface OtelSignalStats {
+  per_agent: Record<string, OtelAgentStats>;
+  docs_1d: number;
+  size_1d_bytes: number;
+}
+
+/** SDK or distro version stats entry */
+export interface OtelVersionStats {
+  total_docs: number;
+  docs_per_version: Record<string, number>;
+  services_per_version: Record<string, number>;
+}
+
 export interface APMUsage {
   has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
+  per_otel_agents: Record<string, OtelAgentStats>;
   otel_1d_docs: number;
   otel_1d_size_bytes: number;
-  otel_docs_per_agent: Record<string, number>;
-  otel_size_per_agent: Record<string, number>;
   otel_by_signal: {
-    traces: {
-      docs_per_agent: Record<string, number>;
-      size_per_agent: Record<string, number>;
-      docs_1d: number;
-      size_1d_bytes: number;
-    };
-    metrics: {
-      docs_per_agent: Record<string, number>;
-      size_per_agent: Record<string, number>;
-      docs_1d: number;
-      size_1d_bytes: number;
-    };
-    logs: {
-      docs_per_agent: Record<string, number>;
-      size_per_agent: Record<string, number>;
-      docs_1d: number;
-      size_1d_bytes: number;
-    };
+    traces: OtelSignalStats;
+    metrics: OtelSignalStats;
+    logs: OtelSignalStats;
   };
-  otel_sdk: Record<
-    string,
-    { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
-  >;
-  otel_distro: Record<
-    string,
-    { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
-  >;
+  otel_sdk: Record<string, OtelVersionStats>;
+  otel_distro: Record<string, OtelVersionStats>;
   version: {
     apm_server: {
       minor: number;
@@ -277,7 +295,6 @@ export interface APMUsage {
     | 'per_service'
     | 'top_traces'
     | 'per_agent_config_settings'
-    | 'otel_agents'
     | 'otel_agents_by_signal'
     | 'otel_sdk_distro',
     { took: { ms: number } }

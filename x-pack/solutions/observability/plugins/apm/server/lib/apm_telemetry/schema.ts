@@ -12,6 +12,7 @@ import type {
   APMPerService,
   DataStreamCombined,
   APMPerAgentConfigSettings,
+  OtelSignalStats,
 } from './types';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
@@ -737,6 +738,39 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
   },
 };
 
+const otelSignalStatsSchema: MakeSchemaFrom<OtelSignalStats, true> = {
+  per_agent: {
+    DYNAMIC_KEY: {
+      docs: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of documents for this OTel agent for this signal within the last day',
+        },
+      },
+      size_bytes: {
+        type: 'long',
+        _meta: {
+          description:
+            'Estimated size in bytes for this OTel agent for this signal within the last day',
+        },
+      },
+    },
+  },
+  docs_1d: {
+    type: 'long',
+    _meta: {
+      description: 'Total number of documents for this signal within the last day',
+    },
+  },
+  size_1d_bytes: {
+    type: 'long',
+    _meta: {
+      description: 'Estimated total size in bytes for this signal within the last day',
+    },
+  },
+};
+
 export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   ...apmPerAgentSchema,
   has_any_services_per_official_agent: {
@@ -764,115 +798,28 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       description: 'Estimated size in bytes of OTel documents within the last day',
     },
   },
-  otel_docs_per_agent: {
+  per_otel_agents: {
     DYNAMIC_KEY: {
-      type: 'long',
-      _meta: {
-        description:
-          'Number of documents per OTel agent name within the last day (from native OTel indices using resource.attributes.agent.name field)',
+      docs: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of documents for this OTel agent within the last day',
+        },
       },
-    },
-  },
-  otel_size_per_agent: {
-    DYNAMIC_KEY: {
-      type: 'long',
-      _meta: {
-        description:
-          'Estimated size in bytes per OTel agent name within the last day (calculated from doc count × average doc size)',
+      size_bytes: {
+        type: 'long',
+        _meta: {
+          description:
+            'Estimated size in bytes for this OTel agent within the last day',
+        },
       },
     },
   },
   otel_by_signal: {
-    traces: {
-      docs_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of documents per agent for traces (transactions + spans) within the last day',
-          },
-        },
-      },
-      size_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Estimated size in bytes per agent for traces within the last day',
-          },
-        },
-      },
-      docs_1d: {
-        type: 'long',
-        _meta: {
-          description: 'Number of trace documents within the last day',
-        },
-      },
-      size_1d_bytes: {
-        type: 'long',
-        _meta: {
-          description: 'Estimated size in bytes of trace documents within the last day',
-        },
-      },
-    },
-    metrics: {
-      docs_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of documents per agent for metrics within the last day',
-          },
-        },
-      },
-      size_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Estimated size in bytes per agent for metrics within the last day',
-          },
-        },
-      },
-      docs_1d: {
-        type: 'long',
-        _meta: {
-          description: 'Number of metric documents within the last day',
-        },
-      },
-      size_1d_bytes: {
-        type: 'long',
-        _meta: {
-          description: 'Estimated size in bytes of metric documents within the last day',
-        },
-      },
-    },
-    logs: {
-      docs_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of documents per agent for logs (errors) within the last day',
-          },
-        },
-      },
-      size_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Estimated size in bytes per agent for logs within the last day',
-          },
-        },
-      },
-      docs_1d: {
-        type: 'long',
-        _meta: {
-          description: 'Number of log documents within the last day',
-        },
-      },
-      size_1d_bytes: {
-        type: 'long',
-        _meta: {
-          description: 'Estimated size in bytes of log documents within the last day',
-        },
-      },
-    },
+    traces: otelSignalStatsSchema,
+    metrics: otelSignalStatsSchema,
+    logs: otelSignalStatsSchema,
   },
   otel_sdk: {
     DYNAMIC_KEY: {
@@ -1646,16 +1593,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "top_traces" task',
-          },
-        },
-      },
-    },
-    otel_agents: {
-      took: {
-        ms: {
-          type: 'long',
-          _meta: {
-            description: 'Execution time in milliseconds for the "otel_agents" task',
           },
         },
       },
