@@ -91,8 +91,8 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
               dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
               variant="outlinedButton"
               indexType="traces"
-              label={i18n.translate('xpack.apm.serviceMap.edgeContents.viewTracesLabel', {
-                defaultMessage: 'View traces',
+              label={i18n.translate('xpack.apm.serviceMap.edgeContents.openInDiscover', {
+                defaultMessage: 'Explore traces',
               })}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}

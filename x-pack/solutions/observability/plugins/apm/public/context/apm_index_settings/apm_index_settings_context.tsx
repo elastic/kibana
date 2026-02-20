@@ -8,7 +8,10 @@
 import React, { createContext } from 'react';
 import type { ReactNode } from 'react';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { useFetcher } from '../../hooks/use_fetcher';
+import type { ApmPluginStartDeps } from '../../plugin';
 
 export interface ApmIndexSettingsContextValue {
   indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
@@ -17,14 +20,23 @@ export interface ApmIndexSettingsContextValue {
 
 export const ApmIndexSettingsContext = createContext<Partial<ApmIndexSettingsContextValue>>({});
 
-export function ApmIndexSettingsContextProvider({
-  children,
-  value,
-}: {
-  children: ReactNode;
-  value: ApmIndexSettingsContextValue;
-}) {
+export function ApmIndexSettingsContextProvider({ children }: { children: ReactNode }) {
+  const {
+    services: { apmSourcesAccess },
+  } = useKibana<ApmPluginStartDeps>();
+  const { data = { apmIndexSettings: [] }, status: indexSettingsStatus } = useFetcher(
+    (_, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+    [apmSourcesAccess]
+  );
+
   return (
-    <ApmIndexSettingsContext.Provider value={value}>{children}</ApmIndexSettingsContext.Provider>
+    <ApmIndexSettingsContext.Provider
+      value={{
+        indexSettings: data.apmIndexSettings,
+        indexSettingsStatus,
+      }}
+    >
+      {children}
+    </ApmIndexSettingsContext.Provider>
   );
 }
