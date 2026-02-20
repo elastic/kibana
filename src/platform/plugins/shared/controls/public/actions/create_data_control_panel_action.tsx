@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
   apiCanPinPanels,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
-import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+  apiPublishesDataViews,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';

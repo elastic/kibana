@@ -393,7 +393,7 @@ describe('UserProfileService', () => {
         startContract.activate({
           type: 'uiamAccessToken',
           accessToken: 'some-token',
-          sharedSecret: 'some-shared-secret',
+          clientAuthentication: { scheme: 'SharedSecret', value: 'some-shared-secret' },
         })
       ).resolves.toMatchInlineSnapshot(`
         Object {

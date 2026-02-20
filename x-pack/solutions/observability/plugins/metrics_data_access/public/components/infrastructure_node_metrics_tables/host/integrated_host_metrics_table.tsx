@@ -11,29 +11,21 @@ import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from
 import { HostMetricsTable } from './host_metrics_table';
 import { useHostMetricsTable } from './use_host_metrics_table';
 
-function HookedHostMetricsTable({
-  timerange,
-  filterClauseDsl,
-  metricsClient,
-}: UseNodeMetricsTableOptions) {
-  const hostMetricsTableProps = useHostMetricsTable({ timerange, filterClauseDsl, metricsClient });
+function HookedHostMetricsTable({ timerange, kuery, metricsClient }: UseNodeMetricsTableOptions) {
+  const hostMetricsTableProps = useHostMetricsTable({ timerange, kuery, metricsClient });
   return <HostMetricsTable {...hostMetricsTableProps} />;
 }
 
 function HostMetricsTableWithProviders({
   timerange,
-  filterClauseDsl,
+  kuery,
   sourceId,
   metricsClient,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
-      <HookedHostMetricsTable
-        timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
-        metricsClient={metricsClient}
-      />
+      <HookedHostMetricsTable timerange={timerange} kuery={kuery} metricsClient={metricsClient} />
     </CoreProviders>
   );
 }

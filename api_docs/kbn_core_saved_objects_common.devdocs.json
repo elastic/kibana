@@ -2000,7 +2000,7 @@
           "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
         ],
         "signature": [
-          "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+          "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
         ],
         "path": "src/core/packages/saved-objects/common/src/saved_objects.ts",
         "lineNumber": 32,

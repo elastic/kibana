@@ -356,7 +356,7 @@
           "\nAgentBuilder tool service's setup contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -388,7 +388,7 @@
               "<RunInput>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 56,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -456,7 +456,7 @@
           "\nAgentBuilder tool service's start contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 62,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -490,7 +490,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -538,7 +538,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -551,7 +551,7 @@
                 "label": "opts",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 73,
+                "lineNumber": 75,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -568,7 +568,7 @@
                       "<unknown, unknown, unknown, any>"
                     ],
                     "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                    "lineNumber": 73,
+                    "lineNumber": 75,
                     "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
@@ -595,7 +595,7 @@
         "\nSetup contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 83,
+      "lineNumber": 85,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -613,7 +613,7 @@
             "AgentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 87,
+          "lineNumber": 89,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -637,7 +637,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 91,
+          "lineNumber": 93,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -655,7 +655,7 @@
             "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 95,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -674,7 +674,7 @@
         "\nStart contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 101,
+      "lineNumber": 103,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -700,7 +700,7 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 105,
+          "lineNumber": 107,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -724,7 +724,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 111,
+          "lineNumber": 113,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

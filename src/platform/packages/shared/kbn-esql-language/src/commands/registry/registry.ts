@@ -14,6 +14,7 @@ import type {
   ICommandCallbacks,
   ESQLColumnData,
   ESQLCommandSummary,
+  UnmappedFieldsStrategy,
 } from './types';
 
 /**
@@ -68,7 +69,8 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
-    newFields: IAdditionalFields
+    newFields: IAdditionalFields,
+    unmappedFieldsStrategy: UnmappedFieldsStrategy
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 
   /**
@@ -83,6 +85,7 @@ export interface ICommandMethods<TContext = any> {
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
   subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
+  viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
@@ -153,6 +156,7 @@ export interface IAdditionalFields {
   fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**

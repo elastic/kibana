@@ -11,7 +11,9 @@ import type {
   StreamsSystemIdentificationIdentifiedProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
+  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
+  StreamsProcessingPipelineSuggestedProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -168,10 +170,68 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
     },
   };
 
+const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of cached tokens used for the generation request',
+      optional: true,
+    },
+  },
+};
+
+const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the pipeline suggestion generation in milliseconds',
+      },
+    },
+    steps_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of reasoning steps the LLM took to generate the suggestion',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the pipeline suggestion was generated successfully',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsSystemIdentificationIdentifiedSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
+  streamsInsightsGeneratedSchema,
+  streamsProcessingPipelineSuggestedSchema,
 };

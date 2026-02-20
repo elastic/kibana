@@ -30,7 +30,13 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { useServiceMap } from './use_service_map';
+import {
+  useServiceMap,
+  isReactFlowServiceMapState,
+  isCytoscapeServiceMapState,
+} from './use_service_map';
+import { APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY } from '../../../../common/apm_feature_flags';
+import { ReactFlowServiceMap } from './react_flow_service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -99,8 +105,15 @@ export function ServiceMap({
   const license = useLicenseContext();
   const serviceName = useServiceName();
 
-  const { config } = useApmPluginContext();
+  const {
+    config,
+    core: { featureFlags },
+  } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
+  const showReactFlowServiceMap = featureFlags.getBooleanValue(
+    APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY,
+    false
+  );
 
   const subscriptions = useRef<Subscription>(new Subscription());
 
@@ -146,7 +159,12 @@ export function ServiceMap({
     );
   }
 
-  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+  // Check for empty state - handle both Cytoscape and React Flow formats
+  const isEmpty = isReactFlowServiceMapState(data)
+    ? data.nodes.length === 0
+    : data.elements.length === 0;
+
+  if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
       <PromptContainer>
         <EmptyPrompt />
@@ -178,6 +196,34 @@ export function ServiceMap({
       },
       meta: { rangeFrom: start, rangeTo: end },
     });
+  }
+
+  if (showReactFlowServiceMap && isReactFlowServiceMapState(data)) {
+    return (
+      <>
+        <SearchBar showTimeComparison />
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <ReactFlowServiceMap
+              height={heightWithPadding}
+              nodes={data.nodes}
+              edges={data.edges}
+              serviceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
+          </div>
+        </EuiPanel>
+      </>
+    );
+  }
+
+  // Fallback to Cytoscape format
+  if (!isCytoscapeServiceMapState(data)) {
+    return null;
   }
 
   return (

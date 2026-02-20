@@ -9,6 +9,7 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -16,7 +17,6 @@ import {
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
-import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
@@ -200,20 +200,11 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#getUserProfileGrant', () => {
-    it('includes shared secret in a profile grant', () => {
-      expect(uiamService.getUserProfileGrant('some-token')).toEqual({
-        type: 'uiamAccessToken',
-        accessToken: 'some-token',
-        sharedSecret: 'secret',
-      });
-    });
-  });
-
-  describe('#getEsClientAuthenticationHeader', () => {
-    it('returns the ES client authentication header with shared secret', () => {
-      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+  describe('#getClientAuthentication', () => {
+    it('includes shared secret in client authentication', () => {
+      expect(uiamService.getClientAuthentication()).toEqual({
+        scheme: 'SharedSecret',
+        value: 'secret',
       });
     });
   });

@@ -9,6 +9,7 @@ import { validateBracketsInFieldNames } from './validate_stream';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 
 describe('validateBracketsInFieldNames', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createWiredStream = (overrides: any = {}) => ({
     ingest: {
       processing: { steps: [] },
@@ -21,6 +22,7 @@ describe('validateBracketsInFieldNames', () => {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createClassicStream = (overrides: any = {}) => ({
     ingest: {
       classic: {
@@ -47,6 +49,7 @@ describe('validateBracketsInFieldNames', () => {
         },
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => validateBracketsInFieldNames(stream as any)).not.toThrow();
   });
 
@@ -54,6 +57,7 @@ describe('validateBracketsInFieldNames', () => {
     const stream = createWiredStream({
       ingest: { wired: { fields: { 'invalid[field]': { type: 'keyword' } } } },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
   });
 
@@ -65,6 +69,7 @@ describe('validateBracketsInFieldNames', () => {
         },
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
   });
 
@@ -72,6 +77,7 @@ describe('validateBracketsInFieldNames', () => {
     const stream = createClassicStream({
       field_overrides: { 'valid.field': { type: 'keyword' } },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => validateBracketsInFieldNames(stream as any)).not.toThrow();
   });
 
@@ -79,6 +85,7 @@ describe('validateBracketsInFieldNames', () => {
     const stream = createClassicStream({
       field_overrides: { 'invalid[field]': { type: 'keyword' } },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(() => validateBracketsInFieldNames(stream as any)).toThrow(MalformedStreamError);
   });
 });

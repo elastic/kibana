@@ -640,12 +640,12 @@
               {
                 "parentPluginId": "@kbn/scout-reporting",
                 "id": "def-common.ScoutTestConfigStats.Unnamed.$1",
-                "type": "Object",
+                "type": "Any",
                 "tags": [],
                 "label": "data",
                 "description": [],
                 "signature": [
-                  "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+                  "z.infer<any>"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
                 "lineNumber": 55,
@@ -665,7 +665,7 @@
             "label": "findConfigByPath",
             "description": [],
             "signature": [
-              "(configPath: string) => { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; } | undefined"
+              "(configPath: string) => any"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
             "lineNumber": 57,
@@ -696,12 +696,12 @@
           {
             "parentPluginId": "@kbn/scout-reporting",
             "id": "def-common.ScoutTestConfigStats.largestConfig",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "largestConfig",
             "description": [],
             "signature": [
-              "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+              "z.infer<any>"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
             "lineNumber": 61,
@@ -2334,11 +2334,28 @@
         "label": "ScoutTestConfigStatsData",
         "description": [],
         "signature": [
-          "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+          "z.infer<any>"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
         "lineNumber": 52,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsDataSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ScoutTestConfigStatsDataSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2351,7 +2368,7 @@
         "label": "ScoutTestConfigStatsEntry",
         "description": [],
         "signature": [
-          "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+          "z.infer<any>"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
         "lineNumber": 36,
@@ -2359,109 +2376,16 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      }
-    ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.ScoutTestConfigStatsDataSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "ScoutTestConfigStatsDataSchema",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ lastUpdated: ",
-          "ZodDate",
-          "; lookbackDays: ",
-          "ZodNumber",
-          "; buildkite: ",
-          "ZodObject",
-          "<{ branch: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; pipeline: ",
-          "ZodOptional",
-          "<",
-          "ZodObject",
-          "<{ slug: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { slug?: string | undefined; }, { slug?: string | undefined; }>>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }, { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }>; configs: ",
-          "ZodArray",
-          "<",
-          "ZodObject",
-          "<{ path: ",
-          "ZodString",
-          "; runCount: ",
-          "ZodNumber",
-          "; runtime: ",
-          "ZodObject",
-          "<{ avg: ",
-          "ZodNumber",
-          "; median: ",
-          "ZodNumber",
-          "; pc95th: ",
-          "ZodNumber",
-          "; pc99th: ",
-          "ZodNumber",
-          "; max: ",
-          "ZodNumber",
-          "; estimate: ",
-          "ZodNumber",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>, \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }, { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }>"
-        ],
-        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
-        "lineNumber": 38,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/scout-reporting",
         "id": "def-common.ScoutTestConfigStatsEntrySchema",
-        "type": "Object",
+        "type": "Any",
         "tags": [],
         "label": "ScoutTestConfigStatsEntrySchema",
         "description": [],
         "signature": [
-          "ZodObject",
-          "<{ path: ",
-          "ZodString",
-          "; runCount: ",
-          "ZodNumber",
-          "; runtime: ",
-          "ZodObject",
-          "<{ avg: ",
-          "ZodNumber",
-          "; median: ",
-          "ZodNumber",
-          "; pc95th: ",
-          "ZodNumber",
-          "; pc99th: ",
-          "ZodNumber",
-          "; max: ",
-          "ZodNumber",
-          "; estimate: ",
-          "ZodNumber",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>"
+          "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
         "lineNumber": 23,
@@ -2470,6 +2394,7 @@
         "trackAdoption": false,
         "initialIsOpen": false
       }
-    ]
+    ],
+    "objects": []
   }
 }

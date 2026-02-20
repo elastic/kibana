@@ -301,6 +301,9 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
+      "description": {
+        "type": "text"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -1215,12 +1218,39 @@
       "integrationName": {
         "type": "keyword"
       },
+      "integrations": {
+        "dynamic": false,
+        "properties": {
+          "syncData": {
+            "dynamic": false,
+            "properties": {
+              "lastFullSync": {
+                "type": "date"
+              },
+              "lastUpdateProcessed": {
+                "type": "date"
+              }
+            },
+            "type": "object"
+          },
+          "syncMarkerIndex": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "managed": {
         "type": "boolean"
+      },
+      "managedVersion": {
+        "type": "integer"
       },
       "matchers": {
         "dynamic": false,
         "type": "object"
+      },
+      "matchersModifiedByUser": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -1276,6 +1306,80 @@
     "properties": {
       "apiKey": {
         "type": "binary"
+      }
+    }
+  },
+  "entity-engine-descriptor-v2": {
+    "dynamic": false,
+    "properties": {
+      "error": {
+        "properties": {
+          "action": {
+            "type": "keyword"
+          },
+          "message": {
+            "type": "text"
+          }
+        }
+      },
+      "logExtractionState": {
+        "properties": {
+          "additionalIndexPattern": {
+            "type": "keyword"
+          },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
+          "delay": {
+            "type": "keyword"
+          },
+          "docsLimit": {
+            "type": "integer"
+          },
+          "fieldHistoryLength": {
+            "type": "integer"
+          },
+          "filter": {
+            "type": "keyword"
+          },
+          "frequency": {
+            "type": "keyword"
+          },
+          "lastExecutionTimestamp": {
+            "type": "date"
+          },
+          "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationId": {
+            "type": "keyword"
+          },
+          "paginationTimestamp": {
+            "type": "date"
+          },
+          "timeout": {
+            "type": "keyword"
+          }
+        }
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "versionState": {
+        "properties": {
+          "isMigratedFromV1": {
+            "type": "boolean"
+          },
+          "state": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
       }
     }
   },
@@ -1854,6 +1958,9 @@
         "index": false,
         "type": "flattened"
       },
+      "has_agent_version_conditions": {
+        "type": "boolean"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -2276,6 +2383,9 @@
       "global_data_tags": {
         "index": false,
         "type": "flattened"
+      },
+      "has_agent_version_conditions": {
+        "type": "boolean"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2707,6 +2817,9 @@
             "type": "boolean"
           }
         }
+      },
+      "download_source_auth_secret_storage_requirements_met": {
+        "type": "boolean"
       },
       "fleet_server_hosts": {
         "type": "keyword"
@@ -3388,6 +3501,9 @@
         "type": "keyword"
       },
       "sessionId": {
+        "type": "keyword"
+      },
+      "status": {
         "type": "keyword"
       },
       "username": {
@@ -4313,6 +4429,16 @@
   "threshold-explorer-view": {
     "dynamic": false,
     "properties": {}
+  },
+  "trial-companion-nba-milestone": {
+    "properties": {
+      "dismiss": {
+        "type": "boolean"
+      },
+      "openTODOs": {
+        "type": "integer"
+      }
+    }
   },
   "ui-metric": {
     "properties": {

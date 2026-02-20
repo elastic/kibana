@@ -13,7 +13,11 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
@@ -106,21 +110,20 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [
+            filter: [
               { term: { workflowId: workflow.id } },
               { term: { spaceId } },
-              { term: { triggeredBy: 'scheduled' } },
-            ],
-            must_not: [
               {
                 terms: {
-                  status: TerminalExecutionStatuses,
+                  status: NonTerminalExecutionStatuses,
                 },
               },
+              { term: { triggeredBy: 'scheduled' } },
             ],
           },
         },
         size: 1,
+        terminate_after: 1,
       });
       expect(esClient.index).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
@@ -161,7 +164,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_EXECUTIONS_INDEX,
-          refresh: true,
+          refresh: false,
           id: expect.any(String),
           document: expect.objectContaining({
             spaceId,
@@ -621,5 +624,62 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         })
       );
     });
+  });
+});
+
+describe('elastic-apm-node dynamic import pattern', () => {
+  const mockStartSpan = jest.fn().mockReturnValue({ end: jest.fn() });
+  const mockSetLabel = jest.fn();
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.mock('elastic-apm-node', () => ({
+      __esModule: true,
+      default: {
+        startSpan: mockStartSpan,
+        currentTransaction: { setLabel: mockSetLabel },
+      },
+    }));
+    mockStartSpan.mockClear();
+    mockSetLabel.mockClear();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should access startSpan on the default export when using destructured import', async () => {
+    // This is the correct pattern used in plugin.ts:
+    //   const { default: apm } = await import('elastic-apm-node');
+    //   apm.startSpan(...)
+    const { default: apm } = await import('elastic-apm-node');
+
+    expect(typeof apm.startSpan).toBe('function');
+
+    const span = apm.startSpan('test span', 'workflow', 'execution');
+    expect(span).toBeDefined();
+    expect(mockStartSpan).toHaveBeenCalledWith('test span', 'workflow', 'execution');
+    span?.end();
+  });
+
+  it('should access currentTransaction on the default export when using destructured import', async () => {
+    const { default: apm } = await import('elastic-apm-node');
+
+    expect(apm.currentTransaction).toBeDefined();
+    apm.currentTransaction?.setLabel('test_key', 'test_value');
+    expect(mockSetLabel).toHaveBeenCalledWith('test_key', 'test_value');
+  });
+
+  it('should NOT have startSpan on module namespace (regression: non-destructured import)', async () => {
+    // This was the bug: using `const apm = await import('elastic-apm-node')`
+    // without destructuring puts the module namespace in `apm`, where
+    // startSpan lives at apm.default.startSpan, not apm.startSpan
+    const moduleNamespace = await import('elastic-apm-node');
+
+    // startSpan should NOT exist on the module namespace directly
+    expect((moduleNamespace as Record<string, unknown>).startSpan).toBeUndefined();
+
+    // It must live on the default export
+    expect(typeof moduleNamespace.default.startSpan).toBe('function');
   });
 });

@@ -10,7 +10,7 @@ import { ThemeProvider, css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { LabelNodeViewModel } from '../..';
 import { Graph } from '../..';
-import { useEventDetailsPopover } from '../../graph_investigation/use_event_details_popover';
+import { useEventDetailsPopover } from '../../popovers/details/use_event_details_popover';
 import { analyzeDocuments } from './analyze_documents';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 

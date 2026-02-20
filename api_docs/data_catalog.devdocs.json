@@ -373,6 +373,21 @@
           },
           {
             "parentPluginId": "dataCatalog",
+            "id": "def-common.DataSource.iconType",
+            "type": "string",
+            "tags": [],
+            "label": "iconType",
+            "description": [
+              "\nIcon type for UI display (e.g., '.github', '.notion', '.salesforce').\nThis determines which icon to show in the UI and is separate from the stack connector type.\nMust correspond to an icon registered in @kbn/connector-specs ConnectorIconsMap."
+            ],
+            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataCatalog",
             "id": "def-common.DataSource.generateWorkflows",
             "type": "Function",
             "tags": [],
@@ -392,7 +407,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 82,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -408,7 +423,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-                "lineNumber": 86,
+                "lineNumber": 92,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -436,7 +451,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 88,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -469,7 +484,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 94,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

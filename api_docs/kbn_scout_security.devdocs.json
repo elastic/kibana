@@ -31,7 +31,7 @@
           "default"
         ],
         "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-        "lineNumber": 139,
+        "lineNumber": 140,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -47,7 +47,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 140,
+            "lineNumber": 141,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -63,7 +63,7 @@
               "string | symbol"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 141,
+            "lineNumber": 142,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -79,7 +79,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -95,7 +95,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 143,
+            "lineNumber": 144,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +111,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 144,
+            "lineNumber": 145,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -127,7 +127,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 145,
+            "lineNumber": 146,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +143,7 @@
               "any"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 146,
+            "lineNumber": 147,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
@@ -159,7 +159,7 @@
                   "ClientOptions"
                 ],
                 "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-                "lineNumber": 146,
+                "lineNumber": 147,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,7 +186,7 @@
               "default"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 147,
+            "lineNumber": 148,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +202,7 @@
                   "ClientOptions"
                 ],
                 "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-                "lineNumber": 151,
+                "lineNumber": 152,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +224,7 @@
               "() => Promise<void>"
             ],
             "path": "node_modules/@elastic/elasticsearch/lib/client.d.ts",
-            "lineNumber": 152,
+            "lineNumber": 153,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
@@ -7917,6 +7917,14 @@
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": [
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
                       {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"

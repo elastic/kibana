@@ -49,8 +49,6 @@ export const buildSecurityApi = ({
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
-              getScopedClusterClientWithApiKey: (apiKey: string) =>
-                getAuthc().apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey),
             }
           : null,
       },

@@ -490,7 +490,7 @@
           "GraphPopoverProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/graph_popover.tsx",
         "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
@@ -506,7 +506,7 @@
             "signature": [
               "GraphPopoverProps"
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/graph_popover.tsx",
             "lineNumber": 24,
             "columnNumber": 30,
             "deprecated": false,
@@ -794,16 +794,16 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.useGraphPopover",
+        "id": "def-public.useGraphPopoverState",
         "type": "Function",
         "tags": [],
-        "label": "useGraphPopover",
+        "label": "useGraphPopoverState",
         "description": [],
         "signature": [
           "(id: string) => ",
           "GraphPopoverState"
         ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/use_graph_popover_state.ts",
         "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
@@ -811,7 +811,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.useGraphPopover.$1",
+            "id": "def-public.useGraphPopoverState.$1",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -819,9 +819,47 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/use_graph_popover_state.ts",
             "lineNumber": 26,
-            "columnNumber": 33,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.useGraphPopoverState",
+        "type": "Function",
+        "tags": [],
+        "label": "useGraphPopoverState",
+        "description": [],
+        "signature": [
+          "(id: string) => ",
+          "GraphPopoverState"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/use_graph_popover_state.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.useGraphPopoverState.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/popovers/primitives/use_graph_popover_state.ts",
+            "lineNumber": 26,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

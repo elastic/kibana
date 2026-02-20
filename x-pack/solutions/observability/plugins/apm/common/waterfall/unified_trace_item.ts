@@ -23,7 +23,7 @@ export interface TraceItem {
   name: string;
   traceId: string;
   duration: number;
-  errors: Array<{ errorDocId: string }>;
+  errors: Array<{ errorDocId: string; errorDocIndex?: string }>;
   status?: {
     fieldName: (typeof STATUS_FIELD_NAME)[number];
     value: EventOutcome | StatusCode;

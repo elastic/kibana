@@ -28,7 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -471,7 +471,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   context: ICommandContext,
   fnDefinition: FunctionDefinition
 ) {
-  const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
+  const argTypes = node.args.map((arg) =>
+    getExpressionType(arg, context?.columns, context?.unmappedFieldsStrategy)
+  );
   const enrichedArgs = node.args.map((arg, idx) => ({
     ...arg,
     dataType: argTypes[idx],

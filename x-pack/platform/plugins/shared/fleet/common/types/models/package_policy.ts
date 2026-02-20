@@ -49,6 +49,7 @@ export interface NewPackagePolicyInputStream {
   };
   release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
 }
 
@@ -91,6 +92,7 @@ export interface NewPackagePolicy {
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];

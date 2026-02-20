@@ -21,12 +21,14 @@ import {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import {
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ActionFactoryContext } from '../url_drilldown';
 import type { Primitive } from './util';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';

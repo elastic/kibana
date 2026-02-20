@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type { UnknownAttachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
 
 /**
  * UI definition for rendering attachments of a specific type.
@@ -20,6 +20,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Returns the icon type to display for the attachment.
    */
   getIcon?: () => IconType;
+  /**
+   * Optional custom click handler for attachment pills.
+   * When provided, pills will invoke this instead of the default behavior.
+   */
+  onClick?: (args: { attachment: TAttachment; version?: AttachmentVersion }) => void;
 }
 
 /**

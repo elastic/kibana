@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -20,7 +20,6 @@ import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;

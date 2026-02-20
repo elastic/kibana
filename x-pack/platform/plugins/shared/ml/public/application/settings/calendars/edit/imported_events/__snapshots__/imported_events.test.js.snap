@@ -261,7 +261,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Calendar events"
               class="euiPagination emotion-euiPagination"
             >
               <span

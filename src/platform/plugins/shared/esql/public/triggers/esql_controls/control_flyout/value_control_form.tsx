@@ -8,7 +8,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import {
@@ -30,6 +38,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -45,7 +54,6 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
-  currentApp?: string;
   esqlVariables: ESQLControlVariable[];
 }
 
@@ -67,7 +75,6 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
-  currentApp,
   esqlVariables,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
@@ -158,6 +165,7 @@ export function ValueControlForm({
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
       try {
+        const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         getESQLResults({
           esqlQuery: query,
           search,
@@ -165,6 +173,7 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
           timeRange,
+          timezone,
           variables: esqlVariables,
         }).then((results) => {
           if (!isMounted()) {
@@ -195,7 +204,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -275,16 +284,29 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
+          <EuiFormLabel
+            css={css`
+              display: block;
+              width: 100%;
+              margin-block-start: ${theme.euiTheme.size.s};
+              padding-block-start: ${theme.euiTheme.size.s};
+              padding-block-end: ${theme.euiTheme.size.s};
+              border-bottom: ${theme.euiTheme.border.thin};
+            `}
+          >
+            {i18n.translate('esql.flyout.valuesQueryEditor.label', {
+              defaultMessage: 'Values query',
+            })}
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
               setValuesQuery(q.esql);
             }}
-            hideTimeFilterInfo={true}
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline
-            hideRunQueryText
             onTextLangQuerySubmit={async (q, a) => {
               if (q) {
                 await onValuesQuerySubmit(q.esql);
@@ -292,10 +314,6 @@ export function ValueControlForm({
             }}
             isDisabled={false}
             isLoading={false}
-            hasOutline
-            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
-              defaultMessage: 'Values query',
-            })}
             esqlVariables={esqlVariables}
           />
           {showValuesPreview && (

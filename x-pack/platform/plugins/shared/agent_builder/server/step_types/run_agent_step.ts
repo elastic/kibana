@@ -5,22 +5,33 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+  isRoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { firstValueFrom, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
  * Server step definition for the "ai.agent" step.
- * This step executes an agentBuilder agent using the internal runner service.
+ * This step executes an agentBuilder agent using the execution service.
  */
 export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
   return createServerStepDefinition({
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { message, schema } = context.input;
-        const { 'agent-id': agentId, 'connector-id': connectorId } = context.config;
+        const { schema, message, conversation_id: conversationId } = context.input;
+
+        const {
+          'agent-id': agentId,
+          'connector-id': connectorId,
+          'create-conversation': createConversation,
+        } = context.config;
 
         context.logger.debug('ai.agent step started');
         const request = context.contextManager.getFakeRequest();
@@ -28,39 +39,66 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           throw new Error('No request available in workflow context');
         }
 
-        context.logger.debug('Executing ai.agent step', {
-          agentId: agentId || agentBuilderDefaultAgentId,
-        });
+        const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
+        const effectiveConnectorId = connectorId as string | undefined;
 
-        const runner = serviceManager.internalStart?.runnerFactory?.getRunner();
-        if (!runner) {
-          throw new Error('agent runner is not available');
+        const storeConversation = createConversation || Boolean(conversationId);
+
+        const executionService = serviceManager.internalStart?.execution;
+        if (!executionService) {
+          throw new Error('execution service is not available');
         }
 
-        const { result } = await runner.runAgent({
-          agentId: agentId || agentBuilderDefaultAgentId,
-          defaultConnectorId: connectorId,
+        context.logger.debug('Executing ai.agent step', {
+          agentId: effectiveAgentId,
+        });
+
+        const { events$ } = await executionService.executeAgent({
           request,
           abortSignal: context.abortSignal,
-          agentParams: {
+          params: {
+            agentId: effectiveAgentId,
+            connectorId: effectiveConnectorId,
+            conversationId,
+            autoCreateConversationWithId: createConversation,
+            storeConversation,
             structuredOutput: !!schema,
             outputSchema: schema,
             nextInput: {
               message,
             },
           },
+          // workflows already run as scheduled tasks
+          useTaskManager: false,
         });
 
-        context.logger.debug('ai.agent step completed successfully');
+        const events = await firstValueFrom(events$.pipe(toArray()));
+        const roundEvent = events.find(isRoundCompleteEvent);
+        if (!roundEvent) {
+          throw new Error('No round_complete event received from execution service');
+        }
 
+        const round = roundEvent.data.round;
         const outputMessage = schema
-          ? JSON.stringify(result.round.response.structured_output)
-          : result.round.response.message;
+          ? JSON.stringify(round.response.structured_output)
+          : round.response.message;
+
+        let outputConversationId: string | undefined;
+        if (storeConversation) {
+          const conversationEvent = events.find(
+            (e) => isConversationCreatedEvent(e) || isConversationUpdatedEvent(e)
+          );
+          if (!conversationEvent) {
+            throw new Error('No conversation_created / conversation_updated event received');
+          }
+          outputConversationId = conversationEvent.data.conversation_id;
+        }
 
         return {
           output: {
             message: outputMessage,
-            structured_output: result.round.response.structured_output,
+            structured_output: round.response.structured_output,
+            ...(outputConversationId && { conversation_id: outputConversationId }),
           },
         };
       } catch (error) {

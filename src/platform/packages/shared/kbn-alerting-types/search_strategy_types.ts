@@ -26,6 +26,7 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   runtimeMappings?: MappingRuntimeFields;
   minScore?: number;
   trackScores?: boolean;
+  includeDelayedAlerts?: boolean;
 };
 
 export interface RuleRegistrySearchRequestPagination {

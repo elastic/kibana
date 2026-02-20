@@ -36,10 +36,21 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
+
+      testIgnore: [
+        // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
+        '**/ai_suggestions_*.spec.ts',
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
     },
     {
       name: 'mki',
+      testIgnore: [
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
     },
   ];
@@ -58,6 +69,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
+          timeout: 180000, // Default to 3 minutes for global setup
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
       ])
@@ -97,6 +109,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      timezoneId: 'GMT',
     },
 
     // Timeout for each test, includes test, hooks and fixtures

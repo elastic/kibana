@@ -25,11 +25,13 @@ const TEMPLATE_PLACEHOLDER = '"__TEMPLATE_PLACEHOLDER__"';
  */
 function replaceTemplateExpressions(kql: string): string {
   // First, match complete {{ ... }} patterns
-  let result = kql.replace(/\{\{[^}]*\}\}/g, TEMPLATE_PLACEHOLDER);
+  // Use [^{}]* instead of [^}]* to prevent ReDoS from catastrophic backtracking
+  let result = kql.replace(/\{\{[^{}]*\}\}/g, TEMPLATE_PLACEHOLDER);
 
   // Also handle unclosed template expressions (e.g., "{{ incomplete" without closing }})
   // This ensures malformed templates don't break KQL parsing
-  result = result.replace(/\{\{[^}]*$/g, TEMPLATE_PLACEHOLDER);
+  // Use [^{}]* instead of [^}]* to prevent ReDoS from catastrophic backtracking
+  result = result.replace(/\{\{[^{}]*$/g, TEMPLATE_PLACEHOLDER);
 
   return result;
 }

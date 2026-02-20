@@ -17,7 +17,19 @@ export const DATA_SOURCES_SHORT_TITLE = i18n.translate('xpack.dataSources.app.sh
 });
 
 export const API_BASE_PATH = '/api/data_sources';
+export const STACK_CONNECTOR_API_ROUTE = '/api/actions/connector';
 
 // Pagination constants
 export const DEFAULT_ITEMS_PER_PAGE = 10;
 export const PAGINATION_ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
+
+// Task Manager constants
+export const DATASOURCES_SCOPE = 'dataSources';
+export const WORKFLOWS_SCOPE = 'workflows';
+export const TOOLS_SCOPE = 'tools';
+export const FAKE_REQUEST_NOT_DEFINED_ERROR = 'fakeRequest is not defined';
+
+// Error and success messages
+export const PARTIALLY_DELETED_ERROR = 'Partially deleted: some resources failed to delete';
+export const TASK_NOT_FOUND_ERROR = 'Task not found';
+export const TASK_MANAGER_NOT_AVAILABLE_ERROR = 'Task Manager is not available';

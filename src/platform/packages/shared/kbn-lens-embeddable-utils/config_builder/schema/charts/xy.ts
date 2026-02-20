@@ -15,6 +15,7 @@ import {
   dslOnlyPanelInfoSchema,
   ignoringGlobalFiltersSchemaRaw,
   layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
@@ -165,69 +166,133 @@ const xyDataLayerSharedSchema = {
  * Common legend configuration properties for positioning and statistics
  */
 const sharedLegendSchema = {
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
+  visibility: schema.oneOf(
+    [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
+    { meta: { description: 'Whether to show the legend' } }
+  ),
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },
       maxSize: statisticsOptionsSize,
     })
   ),
-  truncate_after_lines: schema.maybe(
-    schema.number({ min: 1, max: 5, meta: { description: 'Maximum lines before truncation' } })
-  ),
+  truncate_after_lines: legendTruncateAfterLinesSchema,
 };
+
+const XY_API_LINE_INTERPOLATION = {
+  LINEAR: 'linear',
+  SMOOTH: 'smooth',
+  STEPPED: 'stepped',
+} as const;
+
+export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
+
+const decorationsSchema = schema.object(
+  {
+    show_end_zones: schema.maybe(
+      schema.boolean({ meta: { description: 'Show end zones for partial buckets' } })
+    ),
+    show_current_time_marker: schema.maybe(
+      schema.boolean({ meta: { description: 'Show current time marker line' } })
+    ),
+    point_visibility: schema.maybe(
+      schema.oneOf([schema.literal('auto'), schema.literal('always'), schema.literal('never')], {
+        meta: { description: 'Show data points on lines' },
+      })
+    ),
+    line_interpolation: schema.maybe(
+      schema.oneOf([
+        schema.literal(XY_API_LINE_INTERPOLATION.LINEAR),
+        schema.literal(XY_API_LINE_INTERPOLATION.SMOOTH),
+        schema.literal(XY_API_LINE_INTERPOLATION.STEPPED),
+      ])
+    ),
+    minimum_bar_height: schema.maybe(
+      schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
+    ),
+    show_value_labels: schema.maybe(
+      schema.boolean({ meta: { description: 'Display value labels on data points' } })
+    ),
+    fill_opacity: schema.maybe(
+      schema.number({
+        min: 0,
+        max: 2,
+        meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyDecorations',
+      description: 'Visual enhancements and styling options for the chart',
+    },
+  }
+);
 
 /**
  * Shared settings that apply to the entire XY chart visualization
  */
 const xySharedSettings = {
   legend: schema.maybe(
-    schema.oneOf([
-      schema.object(
-        {
-          ...sharedLegendSchema,
-          inside: schema.maybe(schema.literal(false)),
-          position: schema.maybe(
-            schema.oneOf([
-              schema.literal('top'),
-              schema.literal('bottom'),
-              schema.literal('left'),
-              schema.literal('right'),
-            ])
-          ),
-          size: schema.maybe(
-            schema.oneOf([
-              schema.literal('small'),
-              schema.literal('medium'),
-              schema.literal('large'),
-              schema.literal('xlarge'),
-            ])
-          ),
-        },
-        { meta: { description: 'External legend positioned outside the chart' } }
-      ),
-      schema.object(
-        {
-          ...sharedLegendSchema,
-          inside: schema.literal(true),
-          columns: schema.maybe(
-            schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
-          ),
-          alignment: schema.maybe(
-            schema.oneOf(
-              [
-                schema.literal('top_right'),
-                schema.literal('bottom_right'),
-                schema.literal('top_left'),
-                schema.literal('bottom_left'),
-              ],
-              { meta: { description: 'Legend alignment inside the chart' } }
-            )
-          ),
-        },
-        { meta: { description: 'Internal legend positioned inside the chart' } }
-      ),
-    ])
+    schema.oneOf(
+      [
+        schema.object(
+          {
+            ...sharedLegendSchema,
+            inside: schema.maybe(schema.literal(false)),
+            position: schema.maybe(
+              schema.oneOf([
+                schema.literal('top'),
+                schema.literal('bottom'),
+                schema.literal('left'),
+                schema.literal('right'),
+              ])
+            ),
+            size: schema.maybe(
+              schema.oneOf([
+                schema.literal('small'),
+                schema.literal('medium'),
+                schema.literal('large'),
+                schema.literal('xlarge'),
+              ])
+            ),
+          },
+          {
+            meta: {
+              id: 'xyLegendOutside',
+              description: 'External legend positioned outside the chart',
+            },
+          }
+        ),
+        schema.object(
+          {
+            ...sharedLegendSchema,
+            inside: schema.literal(true),
+            columns: schema.maybe(
+              schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
+            ),
+            alignment: schema.maybe(
+              schema.oneOf(
+                [
+                  schema.literal('top_right'),
+                  schema.literal('bottom_right'),
+                  schema.literal('top_left'),
+                  schema.literal('bottom_left'),
+                ],
+                { meta: { description: 'Legend alignment inside the chart' } }
+              )
+            ),
+          },
+          {
+            meta: {
+              id: 'xyLegendInside',
+              description: 'Internal legend positioned inside the chart',
+            },
+          }
+        ),
+      ],
+      { meta: { id: 'xyLegend', description: 'Legend configuration for XY chart' } }
+    )
   ),
 
   fitting: schema.maybe(
@@ -254,6 +319,7 @@ const xySharedSettings = {
       },
       {
         meta: {
+          id: 'xyFitting',
           description:
             'Missing data interpolation configuration (only valid fitting types applied per chart type)',
         },
@@ -294,48 +360,10 @@ const xySharedSettings = {
         left: schema.maybe(yAxisSchema),
         right: schema.maybe(yAxisSchema),
       },
-      { meta: { description: 'Axis configuration for X, left Y, and right Y axes' } }
+      { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
     )
   ),
-  decorations: schema.maybe(
-    schema.object(
-      {
-        end_zones: schema.maybe(
-          schema.boolean({ meta: { description: 'Show end zones for partial buckets' } })
-        ),
-        current_time_marker: schema.maybe(
-          schema.boolean({ meta: { description: 'Show current time marker line' } })
-        ),
-        point_visibility: schema.maybe(
-          schema.boolean({ meta: { description: 'Show data points on lines' } })
-        ),
-        line_interpolation: schema.maybe(
-          schema.oneOf([
-            schema.literal('linear'),
-            schema.literal('smooth'),
-            schema.literal('stepped'),
-          ])
-        ),
-        minimum_bar_height: schema.maybe(
-          schema.number({ min: 0, meta: { description: 'Minimum bar height in pixels' } })
-        ),
-        show_value_labels: schema.maybe(
-          schema.boolean({ meta: { description: 'Display value labels on data points' } })
-        ),
-        fill_opacity: schema.maybe(
-          schema.number({
-            min: 0,
-            max: 2,
-            meta: { description: 'Area chart fill opacity (0-1 typical, max 2 for legacy)' },
-          })
-        ),
-        value_labels: schema.maybe(
-          schema.boolean({ meta: { description: 'Show value labels (alternative property)' } })
-        ),
-      },
-      { meta: { description: 'Visual enhancements and styling options for the chart' } }
-    )
-  ),
+  decorations: schema.maybe(decorationsSchema),
 };
 
 /**
@@ -347,40 +375,31 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema(
-        schema.object(
-          {
-            collapse_by: schema.maybe(collapseBySchema),
-            color: schema.maybe(colorMappingSchema),
-            aggregate_first: schema.maybe(
-              schema.boolean({
-                meta: { description: 'Whether to aggregate before splitting series' },
-              })
-            ),
-          },
-          { meta: { description: 'Split series configuration with color mapping' } }
-        )
-      )
+      mergeAllBucketsWithChartDimensionSchema({
+        collapse_by: schema.maybe(collapseBySchema),
+        color: schema.maybe(colorMappingSchema),
+        aggregate_first: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Whether to aggregate before splitting series' },
+          })
+        ),
+      })
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        schema.object(
-          {
-            axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
-            color: schema.maybe(staticColorSchema),
-          },
-          { meta: { description: 'Y-axis metric configuration with axis assignment' } }
-        )
-      ),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
+        axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
+        color: schema.maybe(staticColorSchema),
+      }),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema(
-        schema.object({}, { meta: { description: 'X-axis bucket configuration' } })
-      )
-    ),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
   },
-  { meta: { description: 'Data layer for standard queries with metrics and buckets' } }
+  {
+    meta: {
+      id: 'xyLayerNoESQL',
+      description: 'Data layer for standard queries with metrics and buckets',
+    },
+  }
 );
 
 /**
@@ -391,7 +410,15 @@ const xyDataLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
-    breakdown_by: schema.maybe(esqlColumnSchema),
+    breakdown_by: schema.maybe(
+      esqlColumnSchema.extends(
+        {
+          color: schema.maybe(colorMappingSchema),
+          collapse_by: schema.maybe(collapseBySchema),
+        },
+        { meta: { description: 'ES|QL column for breakdown' } }
+      )
+    ),
     y: schema.arrayOf(
       esqlColumnSchema.extends(
         {
@@ -404,32 +431,36 @@ const xyDataLayerSchemaESQL = schema.object(
     ),
     x: schema.maybe(esqlColumnSchema),
   },
-  { meta: { description: 'Data layer for ES|QL queries with column references' } }
+  {
+    meta: { id: 'xyLayerESQL', description: 'Data layer for ES|QL queries with column references' },
+  }
 );
 
 const getListOfAvailableIcons = (description: string) =>
-  schema.oneOf([
-    schema.oneOf([
-      schema.literal('empty'),
-      schema.literal('asterisk'),
-      schema.literal('alert'),
-      schema.literal('bell'),
-      schema.literal('bolt'),
-      schema.literal('bug'),
-      schema.literal('circle'),
-      schema.literal('editorComment'),
-      schema.literal('flag'),
-      schema.literal('heart'),
-    ]),
-    schema.oneOf([
-      schema.literal('mapMarker'),
-      schema.literal('pinFilled'),
-      schema.literal('starEmpty'),
-      schema.literal('starFilled'),
-      schema.literal('tag'),
-      schema.literal('triangle'),
-    ]),
-  ]);
+  schema.oneOf(
+    [
+      schema.oneOf([
+        schema.literal('asterisk'),
+        schema.literal('alert'),
+        schema.literal('bell'),
+        schema.literal('bolt'),
+        schema.literal('bug'),
+        schema.literal('circle'),
+        schema.literal('editorComment'),
+        schema.literal('flag'),
+        schema.literal('heart'),
+      ]),
+      schema.oneOf([
+        schema.literal('mapMarker'),
+        schema.literal('pinFilled'),
+        schema.literal('starEmpty'),
+        schema.literal('starFilled'),
+        schema.literal('tag'),
+        schema.literal('triangle'),
+      ]),
+    ],
+    { meta: { description } }
+  );
 
 const STROKE_WIDTH_MIN = 1;
 const STROKE_WIDTH_MAX = 10;
@@ -479,15 +510,16 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     ...datasetSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(
-        schema.object(referenceLineLayerShared, {
-          meta: { description: 'Reference line threshold configuration' },
-        })
-      ),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
-  { meta: { description: 'Reference line layer for standard queries' } }
+  {
+    meta: {
+      id: 'xyReferenceLineLayerNoESQL',
+      description: 'Reference line layer for standard queries',
+    },
+  }
 );
 
 /**
@@ -498,21 +530,15 @@ const referenceLineLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     type: schema.literal('referenceLines'),
-    thresholds: schema.arrayOf(
-      schema.allOf([
-        esqlColumnSchema,
-        schema.object(referenceLineLayerShared, {
-          meta: { description: 'ES|QL reference line threshold' },
-        }),
-      ]),
-      {
-        meta: { description: 'Array of ES|QL-based reference line thresholds' },
-        minSize: 1,
-        maxSize: 100,
-      }
-    ),
+    thresholds: schema.arrayOf(esqlColumnSchema.extends(referenceLineLayerShared), {
+      meta: { description: 'Array of ES|QL-based reference line thresholds' },
+      minSize: 1,
+      maxSize: 100,
+    }),
   },
-  { meta: { description: 'Reference line layer for ES|QL queries' } }
+  {
+    meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
+  }
 );
 
 /**
@@ -590,7 +616,12 @@ const annotationQuery = schema.object(
       )
     ),
   },
-  { meta: { description: 'Annotation from query results matching a filter' } }
+  {
+    meta: {
+      id: 'xyAnnotationQuery',
+      description: 'Annotation from query results matching a filter',
+    },
+  }
 );
 
 /**
@@ -608,7 +639,12 @@ const annotationManualEvent = schema.object(
       })
     ),
   },
-  { meta: { description: 'Manual point annotation at specific timestamp' } }
+  {
+    meta: {
+      id: 'xyAnnotationManualEvent',
+      description: 'Manual point annotation at specific timestamp',
+    },
+  }
 );
 
 /**
@@ -633,7 +669,12 @@ const annotationManualRange = schema.object(
       })
     ),
   },
-  { meta: { description: 'Manual range annotation spanning time interval' } }
+  {
+    meta: {
+      id: 'xyAnnotationManualRange',
+      description: 'Manual range annotation spanning time interval',
+    },
+  }
 );
 
 /**
@@ -649,7 +690,12 @@ const annotationLayerSchema = schema.object(
       { meta: { description: 'Array of annotation configurations' }, minSize: 1, maxSize: 100 }
     ),
   },
-  { meta: { description: 'Layer containing annotations (query-based, points, and ranges)' } }
+  {
+    meta: {
+      id: 'xyAnnotationLayerNoESQL',
+      description: 'Layer containing annotations (query-based, points, and ranges)',
+    },
+  }
 );
 
 /**
@@ -679,7 +725,7 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChartSchema', description: 'Complete XY chart configuration' } }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;
@@ -695,3 +741,5 @@ export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
+
+export type XYDecorations = TypeOf<typeof decorationsSchema>;

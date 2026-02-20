@@ -546,15 +546,17 @@ async function ensureInstalledIntegrations(
  * checkout_service custom /path/to/error.log
  * ```
  */
-function parseIntegrationsTSV(tsv: string) {
+export const MAX_INTEGRATIONS_LIMIT = 100;
+
+export function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
 
-  return Object.values(
-    tsv
-      .trim()
-      .split('\n')
+  const lines = tsv.trim().split('\n');
+
+  const integrations = Object.values(
+    lines
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
         const key = `${pkgName}-${installSource}`;
@@ -587,6 +589,14 @@ function parseIntegrationsTSV(tsv: string) {
         throw new Error(`Invalid install source: ${installSource}`);
       }, {})
   );
+
+  if (integrations.length > MAX_INTEGRATIONS_LIMIT) {
+    throw new Error(
+      `Too many integrations in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${integrations.length}.`
+    );
+  }
+
+  return integrations;
 }
 
 function parseRegistryIntegrationMetadata(

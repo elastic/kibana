@@ -20,7 +20,7 @@ import type SuperTest from 'supertest';
  */
 export const reviewPrebuiltRulesToInstall = async (
   supertest: SuperTest.Agent,
-  body?: ReviewRuleInstallationRequestBody,
+  body?: Partial<ReviewRuleInstallationRequestBody>,
   expectedStatusCode: number = 200
 ): Promise<ReviewRuleInstallationResponseBody> => {
   const response = await supertest

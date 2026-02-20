@@ -220,17 +220,7 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
     } else if (connectorType.startsWith('kibana.')) {
       className = 'kibana';
     } else {
-      // Handle connectors with dot notation properly
-      if (connectorType.startsWith('.')) {
-        // For connectors like ".jira", remove the leading dot
-        className = connectorType.substring(1);
-      } else if (connectorType.includes('.')) {
-        // For connectors like "thehive.createAlert", use base name
-        className = connectorType.split('.')[0];
-      } else {
-        // For simple connectors like "slack", use as-is
-        className = connectorType;
-      }
+      className = connectorType;
     }
 
     let cssProperties = '';

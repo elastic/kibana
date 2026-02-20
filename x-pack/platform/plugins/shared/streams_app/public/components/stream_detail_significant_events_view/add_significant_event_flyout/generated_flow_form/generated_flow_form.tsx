@@ -25,7 +25,7 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<System, 'description'>[];
+  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   taskStatus?: string;
   taskError?: string;
@@ -41,7 +41,7 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  features,
+  systems,
   dataViews,
   taskStatus,
   taskError,
@@ -123,7 +123,7 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        features={features}
+        systems={systems}
         dataViews={dataViews}
       />
       {isGenerating && (

@@ -25,8 +25,9 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
+import type { AgentExecutionService } from '../services/execution';
+import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -37,7 +38,6 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
-  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -92,7 +92,12 @@ export function registerChatRoutes({
             })
           ),
         }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -136,6 +141,47 @@ export function registerChatRoutes({
         }
       )
     ),
+    configuration_overrides: schema.maybe(
+      schema.object(
+        {
+          instructions: schema.maybe(
+            schema.string({
+              meta: { description: 'Custom instructions for the agent.' },
+            })
+          ),
+          tools: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                tool_ids: schema.arrayOf(schema.string()),
+              }),
+              { meta: { description: 'Tool selection to enable for this execution.' } }
+            )
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Runtime configuration overrides. These override the stored agent configuration for this execution only.',
+          },
+        }
+      )
+    ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
+    _execution_mode: schema.maybe(
+      schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
+        meta: {
+          description:
+            '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -157,18 +203,45 @@ export function registerChatRoutes({
     return results;
   };
 
-  const callConverse = ({
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
+
+  const validateConfigurationOverrides = async ({
+    payload,
+    request,
+  }: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+  }) => {
+    if (payload.configuration_overrides?.tools) {
+      const { tools: toolsService } = getInternalServices();
+      const toolRegistry = await toolsService.getRegistry({ request });
+      const errors = await validateToolSelection({
+        toolRegistry,
+        request,
+        toolSelection: payload.configuration_overrides.tools,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
+      }
+    }
+  };
+
+  const executeAgent = async ({
     payload,
     attachments,
     request,
-    chatService,
     abortSignal,
+    executionService,
   }: {
     payload: Omit<ChatRequestBodyPayload, 'attachments'>;
     attachments: AttachmentInput[];
     request: KibanaRequest;
-    chatService: ChatService;
     abortSignal: AbortSignal;
+    executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
@@ -178,22 +251,35 @@ export function registerChatRoutes({
       prompts,
       capabilities,
       browser_api_tools: browserApiTools,
+      configuration_overrides: configurationOverrides,
+      action,
+      _execution_mode: executionMode,
     } = payload;
 
-    return chatService.converse({
-      agentId,
-      connectorId,
-      conversationId,
-      capabilities,
-      browserApiTools,
-      abortSignal,
-      nextInput: {
-        message: input,
-        prompts,
-        attachments,
-      },
+    const useTaskManager =
+      executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
+
+    const { events$ } = await executionService.executeAgent({
       request,
+      abortSignal,
+      useTaskManager,
+      params: {
+        agentId,
+        connectorId,
+        conversationId,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        action,
+        nextInput: {
+          message: input,
+          prompts,
+          attachments,
+        },
+      },
     });
+
+    return events$;
   };
 
   router.versioned
@@ -205,14 +291,13 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -228,13 +313,9 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService, attachments: attachmentsService } =
+          getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
-
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
 
         const attachments = payload.attachments
           ? await validateAttachments({
@@ -243,12 +324,20 @@ export function registerChatRoutes({
             })
           : [];
 
-        const chatEvents$ = callConverse({
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
+
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
+        const chatEvents$ = await executeAgent({
           payload,
           attachments,
-          chatService,
           request,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -290,7 +379,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -307,13 +395,9 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
+        const { execution: executionService, attachments: attachmentsService } =
+          getInternalServices();
         const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
-
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
 
         const attachments = payload.attachments
           ? await validateAttachments({
@@ -322,12 +406,20 @@ export function registerChatRoutes({
             })
           : [];
 
-        const chatEvents$ = callConverse({
+        await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
+
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
+        const chatEvents$ = await executeAgent({
           payload,
           attachments,
           request,
-          chatService,
           abortSignal: abortController.signal,
+          executionService,
         });
 
         return response.ok({
