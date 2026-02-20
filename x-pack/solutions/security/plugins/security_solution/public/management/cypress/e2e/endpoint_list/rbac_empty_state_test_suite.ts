@@ -17,8 +17,7 @@ export const createRbacEmptyStateSuite = (siemVersion: SiemVersion) => {
     describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
       for (const fleetPrivilege of PRIVILEGES) {
         for (const integrationsPrivilege of PRIVILEGES) {
-          const shouldAllowOnboarding =
-            fleetPrivilege === 'all' && integrationsPrivilege === 'all';
+          const shouldAllowOnboarding = fleetPrivilege === 'all' && integrationsPrivilege === 'all';
 
           it(`should show onboarding screen ${
             shouldAllowOnboarding ? 'with' : 'without'
