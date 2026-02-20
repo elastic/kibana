@@ -45,7 +45,7 @@ else
   echo 'EUI website is not available - skipping EUI Helpers Tests'
 fi
 
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
-ts-node "$(dirname "${0}")/scout_test_run_builder.ts"
+ts-node "$(dirname "${0}")/test_run_builder.ts"
