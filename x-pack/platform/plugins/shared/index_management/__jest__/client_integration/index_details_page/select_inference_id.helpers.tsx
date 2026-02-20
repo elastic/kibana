@@ -26,10 +26,30 @@ export const createMockLocator = () => ({
 export const mockResendRequest = jest.fn();
 
 export const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
-  { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
-  { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
-  { inference_id: 'endpoint-1', task_type: 'text_embedding' },
-  { inference_id: 'endpoint-2', task_type: 'sparse_embedding' },
+  {
+    inference_id: '.preconfigured-elser',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: { model_id: 'elser' },
+  },
+  {
+    inference_id: '.preconfigured-e5',
+    task_type: 'text_embedding',
+    service: 'elastic',
+    service_settings: { model_id: 'e5' },
+  },
+  {
+    inference_id: 'endpoint-1',
+    task_type: 'text_embedding',
+    service: 'openai',
+    service_settings: { model_id: 'text-embedding-3-large' },
+  },
+  {
+    inference_id: 'endpoint-2',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: { model_id: 'elser' },
+  },
 ] as InferenceAPIConfigResponse[];
 
 export const defaultProps: SelectInferenceIdProps = {

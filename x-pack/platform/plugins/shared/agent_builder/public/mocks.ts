@@ -14,9 +14,9 @@ import type {
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
-  ConversationFlyoutRef,
+  ConversationSidebarRef,
 } from './types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { OpenConversationSidebarOptions } from './sidebar/types';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
@@ -66,12 +66,12 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     toggleConversationFlyout: jest.fn(),
     openConversationFlyout: jest
       .fn()
-      .mockImplementation((options: OpenConversationFlyoutOptions) => {
-        const mockFlyoutRef: ConversationFlyoutRef = {
+      .mockImplementation((options: OpenConversationSidebarOptions) => {
+        const mockSidebarRef: ConversationSidebarRef = {
           close: jest.fn(),
         };
         return {
-          flyoutRef: mockFlyoutRef,
+          flyoutRef: mockSidebarRef,
         };
       }),
   };

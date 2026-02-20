@@ -10,6 +10,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -34,6 +35,8 @@ export function useStreamsPrivileges() {
   } = useKibana();
 
   const license = useObservable(licensing.license$);
+
+  const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
@@ -68,6 +71,9 @@ export function useStreamsPrivileges() {
       significantEventsDiscovery: license && {
         enabled: significantEventsDiscoveryEnabled,
         available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
+      },
+      queryStreams: {
+        enabled: queryStreamsEnabled,
       },
       contentPacks: {
         enabled: contentPacksEnabled,

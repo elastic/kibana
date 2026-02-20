@@ -20,16 +20,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from '../generated_text';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
@@ -274,7 +271,7 @@ export const NodeDetailView = memo(function ({
               field: data.title,
               value: data.value ?? data.description,
             }}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             sourcererScopeId={getSourcererScopeId(id)}

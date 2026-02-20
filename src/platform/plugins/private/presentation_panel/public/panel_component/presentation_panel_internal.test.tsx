@@ -9,7 +9,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -178,77 +178,6 @@ describe('Navigation Plugin', () => {
     });
   });
 
-  describe('set feedback button visibility', () => {
-    it('should set the feedback button visibility to "true" when space solution is a known solution', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(true);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should set the feedback button visibility to "false" for deployment in trial via endDate', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
-      const coreSetup = coreMock.createSetup();
-      const cloudSetup = cloudMock.createSetup();
-      cloudSetup.isInTrial.mockReturnValue(true);
-      plugin.setup(coreSetup, { cloud: cloudSetup });
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud: cloudStart, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(false);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-    it('should set the feedback button visibility to "false" for deployment in trial in serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
-      const coreSetup = coreMock.createSetup();
-      const cloudSetup = cloudMock.createSetup();
-      cloudSetup.isInTrial.mockReturnValue(true);
-      plugin.setup(coreSetup, { cloud: cloudSetup });
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud: cloudStart, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(false);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should not set the feedback button visibility for classic or unknown solution', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-
-      for (const solution of ['classic', 'unknown', undefined]) {
-        spaces.getActiveSpace$ = jest.fn().mockReturnValue(of({ solution }));
-        plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).not.toHaveBeenCalled();
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should not set the feedback button visibility when on serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({ buildFlavor: 'serverless' });
-
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).not.toHaveBeenCalled();
-    });
-  });
-
   describe('isSolutionNavEnabled$', () => {
     it('should be off if spaces plugin not available', async () => {
       const { plugin, coreStart, unifiedSearch } = setup();
@@ -345,45 +274,6 @@ describe('Navigation Plugin', () => {
 
       const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
       expect(isEnabled).toBe(false);
-    });
-  });
-  describe('set feedback URL parameters', () => {
-    it('should set the relevant params when on serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({
-        buildFlavor: 'serverless',
-      });
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'serverless',
-        })
-      );
-    });
-    it('should set the relevant params when on cloud', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({});
-      cloud.isCloudEnabled = true;
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'ech',
-        })
-      );
-    });
-    it('should set the relevant params when on local', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
-      cloud.isCloudEnabled = false;
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'local',
-        })
-      );
     });
   });
 });

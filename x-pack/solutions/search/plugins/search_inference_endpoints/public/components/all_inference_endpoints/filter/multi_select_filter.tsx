@@ -86,7 +86,7 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
           searchProps={{
             placeholder: buttonLabel,
           }}
-          emptyMessage="No options"
+          emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
           onChange={onChange}
           singleSelection={false}
           renderOption={renderOption}

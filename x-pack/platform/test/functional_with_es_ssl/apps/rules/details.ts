@@ -17,7 +17,13 @@ import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data'
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header', 'ruleDetailsUI']);
+  const pageObjects = getPageObjects([
+    'common',
+    'triggersActionsUI',
+    'header',
+    'ruleDetailsUI',
+    'savedObjects',
+  ]);
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -41,9 +47,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdConnector;
   }
 
-  async function createAlwaysFiringRule(overwrites: Record<string, any> = {}) {
+  async function createAlwaysFiringRule(overwrites: Record<string, any> = {}, spaceId?: string) {
+    const spaceIdSegment = spaceId ? `s/${spaceId}/` : '';
     const { body: createdRule } = await supertest
-      .post(`/api/alerting/rule`)
+      .post(`/${spaceIdSegment}api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
         getTestAlertData({
@@ -52,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         })
       )
       .expect(200);
-    objectRemover.add(createdRule.id, 'rule', 'alerting');
+    objectRemover.add(createdRule.id, 'rule', 'alerting', false, spaceId);
     return createdRule;
   }
 
@@ -846,6 +853,91 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-timestamp');
         await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-total_search_duration');
+      });
+    });
+
+    describe('Saved Objects Management Navigation', function () {
+      const testRunUuid = uuidv4();
+      const getRuleObjectDisplayName = (title: string) => `Rule: [${title}]`;
+      const spacesService = getService('spaces');
+      const spaceId = 'test-space-' + testRunUuid;
+      const testRuleName = `so-nav-test-rule-${testRunUuid}`;
+      const testSpaceRuleName = `so-nav-test-rule-space-${testRunUuid}`;
+
+      before(async () => {
+        await createAlwaysFiringRule({
+          name: testRuleName,
+        });
+
+        await spacesService.create({
+          id: spaceId,
+          name: `Test Space ${testRunUuid}`,
+          description: 'Test space for saved objects navigation',
+        });
+
+        await createAlwaysFiringRule(
+          {
+            name: testSpaceRuleName,
+          },
+          spaceId
+        );
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+        await spacesService.delete(spaceId);
+      });
+
+      it('should navigate to rule details from saved objects management page in default space', async () => {
+        // Navigate to saved objects management page
+        await pageObjects.common.navigateToUrl('settings', 'kibana/objects', {
+          shouldUseHashForSubUrl: false,
+        });
+
+        await pageObjects.savedObjects.waitTableIsLoaded();
+
+        await pageObjects.savedObjects.clickObjectLinkByTitle(
+          getRuleObjectDisplayName(testRuleName)
+        );
+
+        // Assert we've navigated to the rule details page
+        await retry.tryForTime(10000, async () => {
+          const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+          expect(headingText.includes(testRuleName)).to.be(true);
+        });
+
+        // Verify we're on the rule details page by checking for rule-specific elements
+        await testSubjects.existOrFail('statusDropdown');
+        await testSubjects.existOrFail('openEditRuleFlyoutButton');
+      });
+
+      it('should navigate to rule details from saved objects management page in non-default space', async () => {
+        // Navigate to saved objects management page in the test space
+        await pageObjects.common.navigateToUrl('settings', 'kibana/objects', {
+          basePath: `/s/${spaceId}`,
+          shouldUseHashForSubUrl: false,
+        });
+
+        // Wait for the saved objects table to load
+        await pageObjects.savedObjects.waitTableIsLoaded();
+
+        await pageObjects.savedObjects.clickObjectLinkByTitle(
+          getRuleObjectDisplayName(testSpaceRuleName)
+        );
+
+        // Assert we've navigated to the rule details page
+        await retry.tryForTime(10000, async () => {
+          const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+          expect(headingText.includes(testSpaceRuleName)).to.be(true);
+        });
+
+        // Verify we're on the rule details page by checking for rule-specific elements
+        await testSubjects.existOrFail('statusDropdown');
+        await testSubjects.existOrFail('openEditRuleFlyoutButton');
+
+        // Assert that we're still within the correct space by checking the URL
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain(`/s/${spaceId}/`);
       });
     });
   });

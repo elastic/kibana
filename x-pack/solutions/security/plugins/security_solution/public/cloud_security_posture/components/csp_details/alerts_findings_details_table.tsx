@@ -341,13 +341,13 @@ export const AlertsDetailsTable = memo(
                 field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
                   : OPEN_IN_ALERTS_TITLE_USERNAME,
-              selectedOptions: [value],
-              fieldName: field,
+              selected_options: [value],
+              field_name: field,
             },
             {
               title: OPEN_IN_ALERTS_TITLE_STATUS,
-              selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-              fieldName: 'kibana.alert.workflow_status',
+              selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+              field_name: 'kibana.alert.workflow_status',
             },
           ],
           true,

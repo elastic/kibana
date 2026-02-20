@@ -28,7 +28,7 @@ export function createLatencyEvaluator({
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
-        return response.values[0][0] as number;
+        return response.values[0][0];
       },
     },
   });
@@ -53,8 +53,7 @@ export function createSpanLatencyEvaluator({
 | EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
-        log.info(`Span latency: ${response}`);
-        return response.values[0][0] as number;
+        return response.values[0][0];
       },
     },
   });

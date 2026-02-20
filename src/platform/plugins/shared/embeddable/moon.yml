@@ -33,10 +33,13 @@ dependsOn:
   - '@kbn/content-management-plugin'
   - '@kbn/presentation-panel-plugin'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/analytics'
   - '@kbn/content-management-utils'
   - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
+  - '@kbn/presentation-util'
 tags:
   - plugin
   - prod

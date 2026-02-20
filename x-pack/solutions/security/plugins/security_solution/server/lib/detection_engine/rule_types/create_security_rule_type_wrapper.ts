@@ -217,7 +217,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
+          ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatusEnum.running,
@@ -279,13 +279,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data View not found ${exc}`,
+                  message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed ${exc}`,
+                  message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
 
@@ -589,12 +589,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
-              ruleExecutionLogger.debug(
-                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
+              ruleExecutionLogger.info(
+                `Alerts created: ${createdSignalsCount}\nFinished indexing ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )} ${
+                )}".${
                   !isEmpty(tuples)
-                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
                     : ''
                 }`
               );
@@ -614,7 +614,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              message: `An error occurred during rule execution. ${errorMessage}`,
               userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,

@@ -18,7 +18,12 @@ import {
   esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
-import { colorByValueAbsolute, staticColorSchema, applyColorToSchema } from '../color';
+import {
+  colorByValueAbsolute,
+  staticColorSchema,
+  applyColorToSchema,
+  colorByValueSchema,
+} from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -30,7 +35,11 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
+import {
+  horizontalAlignmentSchema,
+  leftRightAlignmentSchema,
+  beforeAfterAlignmentSchema,
+} from '../alignments';
 
 const compareToSchemaShared = schema.object(
   {
@@ -56,32 +65,25 @@ const barBackgroundChartSchema = schema.object({
 export const complementaryVizSchemaNoESQL = schema.oneOf([
   barBackgroundChartSchema.extends({
     /**
-     * Goal value
+     * Max value
      */
-    goal_value: metricOperationDefinitionSchema,
+    max_value: metricOperationDefinitionSchema,
   }),
   schema.object({
     type: schema.literal('trend'),
   }),
 ]);
 
-export const complementaryVizSchemaESQL = schema.oneOf([
-  barBackgroundChartSchema.extends(
-    {
-      /**
-       * Goal value
-       */
-      goal_value: esqlColumnSchema,
-    },
-    { meta: { id: 'metricComplementaryBar' } }
-  ),
-  schema.object(
-    {
-      type: schema.literal('trend'),
-    },
-    { meta: { id: 'metricComplementaryTrend', description: 'Trend complementary viz' } }
-  ),
-]);
+// Note: 'trend' type is not supported for ES|QL yet
+export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
+  {
+    /**
+     * Max value
+     */
+    max_value: esqlColumnSchema,
+  },
+  { meta: { id: 'metricComplementaryBar' } }
+);
 
 const metricStateBackgroundChartSchemaNoESQL = {
   /**
@@ -130,13 +132,13 @@ const metricStatePrimaryMetricOptionsSchema = {
        */
       value: horizontalAlignmentSchema({
         meta: { description: 'Alignments for value' },
-        defaultValue: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       }),
     },
     {
       defaultValue: {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-        value: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       },
       meta: { id: 'metricPrimaryMetricAlignments' },
     }
@@ -171,7 +173,7 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
   /**
    * Where to apply the color (background or value)
    */
@@ -187,6 +189,15 @@ const metricStateSecondaryMetricOptionsSchema = {
    * Prefix
    */
   prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
+  /**
+   * Label position relative to the secondary metric value. Possible values:
+   * - 'before': Label appears before the value
+   * - 'after': Label appears after the value
+   */
+  label_position: beforeAfterAlignmentSchema({
+    meta: { description: 'Label position relative to the secondary metric value' },
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+  }),
   /**
    * Compare to
    */
@@ -321,6 +332,15 @@ export const esqlMetricState = schema.object({
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChartSchema' },
+  validate: ({ metrics, breakdown_by }) => {
+    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+        return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
+      }
+    }
+  },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

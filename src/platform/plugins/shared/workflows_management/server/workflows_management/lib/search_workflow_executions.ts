@@ -90,6 +90,7 @@ function transformToWorkflowExecutionListModel(
         duration: workflowExecution.duration,
         workflowId: workflowExecution.workflowId,
         triggeredBy: workflowExecution.triggeredBy,
+        executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
       };
     }),
     size,

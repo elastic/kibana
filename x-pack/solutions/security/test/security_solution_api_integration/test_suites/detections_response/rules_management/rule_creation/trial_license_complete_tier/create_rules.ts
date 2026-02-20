@@ -24,6 +24,9 @@ import {
   waitForRulePartialFailure,
   deleteAllAlerts,
 } from '@kbn/detections-response-ftr-services';
+import type TestAgent from 'supertest/lib/agent';
+import { v4 as uuidV4 } from 'uuid';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getActionsWithFrequencies,
@@ -39,6 +42,7 @@ import {
   refreshIndex,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -47,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@serverless @ess @serverlessQA create_rules', () => {
     describe('rule creation', () => {
@@ -691,6 +696,56 @@ export default ({ getService }: FtrProviderContext) => {
             );
           });
         });
+      });
+    });
+
+    describe('with endpoint response actions', () => {
+      let superTestResponseActionsNoAuthz: TestAgent;
+      let apiCreatePayload: ReturnType<typeof getCustomQueryRuleParams>;
+
+      before(async () => {
+        superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+          name: ROLE.endpoint_response_actions_no_access,
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_no_access
+          ),
+        });
+      });
+
+      beforeEach(async () => {
+        apiCreatePayload = getCustomQueryRuleParams({
+          rule_id: uuidV4(),
+          response_actions: [
+            {
+              action_type_id: '.endpoint',
+              params: { command: 'kill-process', config: { field: '', overwrite: true } },
+            },
+          ],
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should create rule with response actions when user has authz', async () => {
+        const { body } = await detectionsApi.createRule({ body: apiCreatePayload }).expect(200);
+
+        expect(body.response_actions).toEqual(apiCreatePayload.response_actions);
+      });
+
+      it('should error creating rule with response actions when user DOES NOT have authz', async () => {
+        const { body } = await superTestResponseActionsNoAuthz
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .send(apiCreatePayload)
+          .expect(403);
+
+        expect(body.message).toEqual(
+          'User is not authorized to create/update kill-process response action'
+        );
       });
     });
   });

@@ -626,3 +626,60 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     });
   });
 });
+
+describe('elastic-apm-node dynamic import pattern', () => {
+  const mockStartSpan = jest.fn().mockReturnValue({ end: jest.fn() });
+  const mockSetLabel = jest.fn();
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.mock('elastic-apm-node', () => ({
+      __esModule: true,
+      default: {
+        startSpan: mockStartSpan,
+        currentTransaction: { setLabel: mockSetLabel },
+      },
+    }));
+    mockStartSpan.mockClear();
+    mockSetLabel.mockClear();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should access startSpan on the default export when using destructured import', async () => {
+    // This is the correct pattern used in plugin.ts:
+    //   const { default: apm } = await import('elastic-apm-node');
+    //   apm.startSpan(...)
+    const { default: apm } = await import('elastic-apm-node');
+
+    expect(typeof apm.startSpan).toBe('function');
+
+    const span = apm.startSpan('test span', 'workflow', 'execution');
+    expect(span).toBeDefined();
+    expect(mockStartSpan).toHaveBeenCalledWith('test span', 'workflow', 'execution');
+    span?.end();
+  });
+
+  it('should access currentTransaction on the default export when using destructured import', async () => {
+    const { default: apm } = await import('elastic-apm-node');
+
+    expect(apm.currentTransaction).toBeDefined();
+    apm.currentTransaction?.setLabel('test_key', 'test_value');
+    expect(mockSetLabel).toHaveBeenCalledWith('test_key', 'test_value');
+  });
+
+  it('should NOT have startSpan on module namespace (regression: non-destructured import)', async () => {
+    // This was the bug: using `const apm = await import('elastic-apm-node')`
+    // without destructuring puts the module namespace in `apm`, where
+    // startSpan lives at apm.default.startSpan, not apm.startSpan
+    const moduleNamespace = await import('elastic-apm-node');
+
+    // startSpan should NOT exist on the module namespace directly
+    expect((moduleNamespace as Record<string, unknown>).startSpan).toBeUndefined();
+
+    // It must live on the default export
+    expect(typeof moduleNamespace.default.startSpan).toBe('function');
+  });
+});

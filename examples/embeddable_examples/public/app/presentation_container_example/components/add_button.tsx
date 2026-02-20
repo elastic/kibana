@@ -11,7 +11,7 @@ import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { of } from 'rxjs';

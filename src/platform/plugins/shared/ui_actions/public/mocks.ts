@@ -24,7 +24,6 @@ const createSetupContract = (): Setup => {
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
   };
   return setupContract;
@@ -43,7 +42,6 @@ const createStartContract = (): Start => {
     getAction: jest.fn(),
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
-    hasTrigger: jest.fn(),
     getTriggerActions: jest.fn(async (id: string) => []),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
@@ -54,7 +52,6 @@ const createStartContract = (): Start => {
     ),
     registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
-    registerTrigger: jest.fn(),
   };
 
   return startContract;

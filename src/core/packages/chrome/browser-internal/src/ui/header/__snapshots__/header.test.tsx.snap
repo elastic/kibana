@@ -122,6 +122,7 @@ exports[`Header renders 1`] = `
                     class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                   >
                     <span
+                      aria-hidden="true"
                       data-euiicon-type="question"
                     />
                   </span>

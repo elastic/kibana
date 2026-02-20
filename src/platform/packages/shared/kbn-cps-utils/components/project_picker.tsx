@@ -128,8 +128,19 @@ export const ProjectPicker = ({
   );
 };
 
-export const DisabledProjectPicker = () => {
+export const DisabledProjectPicker = ({
+  fetchProjects,
+}: {
+  fetchProjects: () => Promise<ProjectsData | null>;
+}) => {
   const styles = useMemoCss(projectPickerStyles);
+  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
+
+  // do not render the component if there aren't linked projects
+  if (!originProject || linkedProjects.length === 0) {
+    return null;
+  }
+
   return (
     <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
       <EuiButtonIcon

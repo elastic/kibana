@@ -698,6 +698,7 @@ export function resolveEsArgs(
 
       esArgs.set('serverless.universal_iam_service.enabled', 'true');
       esArgs.set('serverless.universal_iam_service.url', MOCK_IDP_UIAM_SERVICE_INTERNAL_URL);
+      esArgs.set('serverless.universal_iam_service.ssl.verification_mode', 'none');
     }
   }
 

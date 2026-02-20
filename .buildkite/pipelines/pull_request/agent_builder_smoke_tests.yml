@@ -8,21 +8,42 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     steps:
-      - command: .buildkite/scripts/steps/test/ftr_configs.sh
+      - label: '🔍 Discover EIS Models'
+        command: .buildkite/scripts/steps/test/discover_eis_models.sh
+        key: discover-eis-models
+        timeout_in_minutes: 10
         env:
+          FTR_EIS_CCM: '1'
+        agents:
+          machineType: n2-standard-2
+          preemptible: true
+          spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+        artifact_paths:
+          - 'target/eis_models.json'
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - command: |
+          mkdir -p target
+          buildkite-agent artifact download 'target/eis_models.json' . --step discover-eis-models || echo '{"models":[]}' > target/eis_models.json
+          .buildkite/scripts/steps/test/ftr_configs.sh
+        env:
+          FTR_GEN_AI: '1'
+          FTR_EIS_CCM: '1'
           FTR_CONFIG: 'x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-agent-builder-smoke-tests'
-          FTR_GEN_AI: '1'
         label: Agent Builder API Smoke Tests
         key: ftr-agent-builder-smoke-tests
+        depends_on: discover-eis-models
         timeout_in_minutes: 50
         parallelism: 1
         agents:
           machineType: n2-standard-4
           preemptible: true
-          spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+          spotZones: us-central1-f,us-central1-c,us-central1-a
         retry:
           automatic:
             - exit_status: '-1'

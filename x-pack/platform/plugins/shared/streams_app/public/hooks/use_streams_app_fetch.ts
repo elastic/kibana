@@ -34,6 +34,7 @@ export function useStreamsAppFetch<
   TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deps: any[],
   options?: TOptions
 ): AbortableAsyncState<T> {

@@ -81,6 +81,20 @@ export interface AttackWithTags extends BaseAttackProps {
 }
 
 /**
+ * Represents an attack with markdown used for case attachments.
+ * The related alert IDs are used to attach alerts to a case.
+ */
+export interface AttackWithCase extends BaseAttackProps {
+  /** Markdown comment describing the attack */
+  markdownComment: string;
+}
+
+/**
+ * Represents an attack with alert IDs that should be investigated in Timeline.
+ */
+export type AttackWithTimelineAlerts = BaseAttackProps;
+
+/**
  * Extended content panel configuration for attack bulk actions.
  * Adds optional width property to support custom panel sizing (e.g., for assignees panel).
  */

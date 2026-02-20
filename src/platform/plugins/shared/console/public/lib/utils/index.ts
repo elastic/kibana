@@ -124,6 +124,20 @@ export function splitOnUnquotedCommaSpace(s: string) {
 }
 
 /**
+ * Normalizes a URL string using the URL constructor so that comparisons
+ * are insensitive to trailing-slash differences and other minor formatting
+ * variations (e.g. default-port elision). Returns the original string when
+ * it cannot be parsed as a URL.
+ */
+export function normalizeUrl(url: string): string {
+  try {
+    return new URL(url).toString();
+  } catch {
+    return url;
+  }
+}
+
+/**
  *  Sorts the request data by statusCode in increasing order and
  *  returns the last one which will be rendered in network request status bar
  */

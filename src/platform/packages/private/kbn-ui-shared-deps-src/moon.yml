@@ -18,13 +18,15 @@ project:
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
 dependsOn:
+  - '@kbn/repo-info'
   - '@kbn/ui-shared-deps-npm'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - private
+  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
@@ -67,6 +69,7 @@ tasks:
       - /src/platform/packages/shared/shared-ux/router/impl/**/*.{js,ts,tsx}
       - /src/platform/packages/private/kbn-ui-shared-deps-npm/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}
+      - /src/core/packages/chrome/sidebar/sidebar-context/**/*.{js,ts,tsx}
       - '!/src/**/*.test.{js,ts,tsx}'
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

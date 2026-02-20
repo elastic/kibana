@@ -43,6 +43,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
+    const hasToolUseMessages = messages.some(
+      (m) =>
+        m.role === MessageRole.Tool || (m.role === MessageRole.Assistant && m.toolCalls?.length)
+    );
 
     const converseMessages = messagesToBedrock(messages).map((message) => ({
       role: message.role,
@@ -51,14 +55,21 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
-    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+    const bedRockTools =
+      noToolUsage && !hasToolUseMessages ? [] : toolsToConverseBedrock(tools, messages);
     const connector = executor.getConnector();
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
-      toolChoice: toolChoiceToConverse(toolChoice),
+      // Bedrock/Claude does not support a true "none" tool choice. If we include tool config
+      // (e.g. because the conversation contains tool use/result messages), we must still send a
+      // valid Bedrock toolChoice. The system directive prevents new tool usage in that case.
+      toolChoice:
+        noToolUsage && bedRockTools?.length
+          ? toolChoiceToConverse(ToolChoiceType.auto)
+          : toolChoiceToConverse(toolChoice),
       ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],
@@ -116,7 +127,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
+  const converseMessages: BedRockMessage[] = messages.flatMap((message): BedRockMessage[] => {
     switch (message.role) {
       case MessageRole.User: {
         const rawContent: BedRockMessage['rawContent'] = [];
@@ -124,9 +135,13 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           typeof message.content === 'string' ? [message.content] : message.content;
         for (const contentPart of contentArr) {
           if (typeof contentPart === 'string') {
-            rawContent.push({ text: contentPart });
+            if (contentPart.trim().length > 0) {
+              rawContent.push({ text: contentPart });
+            }
           } else if (contentPart.type === 'text') {
-            rawContent.push({ text: contentPart.text });
+            if (contentPart.text.trim().length > 0) {
+              rawContent.push({ text: contentPart.text });
+            }
           } else if (contentPart.source?.data && contentPart.source?.mimeType) {
             const format = contentPart.source.mimeType.split(
               '/'
@@ -141,14 +156,22 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             });
           }
         }
-        return {
-          role: 'user',
-          rawContent,
-        };
+
+        // Bedrock requires at least one content block per message.
+        if (rawContent.length === 0) {
+          return [];
+        }
+
+        return [
+          {
+            role: 'user',
+            rawContent,
+          },
+        ];
       }
       case MessageRole.Assistant: {
         const rawContent: BedRockMessage['rawContent'] = [];
-        if (message.content) {
+        if (typeof message.content === 'string' && message.content.trim().length > 0) {
           rawContent.push({ text: message.content });
         }
         if (message.toolCalls) {
@@ -164,10 +187,18 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             });
           }
         }
-        return {
-          role: 'assistant',
-          rawContent,
-        };
+
+        // Bedrock requires at least one content block per message.
+        if (rawContent.length === 0) {
+          return [];
+        }
+
+        return [
+          {
+            role: 'assistant',
+            rawContent,
+          },
+        ];
       }
       case MessageRole.Tool: {
         const contentArr: ToolResultContentBlock[] = [];
@@ -186,17 +217,19 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           }
         }
 
-        return {
-          role: 'user',
-          rawContent: [
-            {
-              toolResult: {
-                toolUseId: message.toolCallId,
-                content: contentArr,
+        return [
+          {
+            role: 'user',
+            rawContent: [
+              {
+                toolResult: {
+                  toolUseId: message.toolCallId,
+                  content: contentArr,
+                },
               },
-            },
-          ],
-        };
+            ],
+          },
+        ];
       }
     }
   });

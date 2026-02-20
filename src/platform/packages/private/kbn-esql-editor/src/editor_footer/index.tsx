@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -28,16 +20,13 @@ import React, { memo, useCallback, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
-import { isMac } from '@kbn/shared-ux-utility';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
-import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
+import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
+import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import { ESQLQueryStats } from './query_stats';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QuickSearchAction } from '../editor_visor/quick_search_action';
-
-const COMMAND_KEY = isMac ? '⌘' : '^';
 
 interface EditorFooterProps {
   styles: {
@@ -56,22 +45,22 @@ interface EditorFooterProps {
   measuredContainerWidth: number;
   resizableContainerButton?: JSX.Element;
   resizableContainerHeight: number;
-  hideRunQueryText?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
-  hideQueryHistory?: boolean;
-  hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
-  toggleVisor: () => void;
+  starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
 }
+
+const openDocumentationLabel = i18n.translate('esqlEditor.query.documentationAriaLabel', {
+  defaultMessage: 'Open documentation',
+});
 
 export const EditorFooter = memo(function EditorFooter({
   styles,
   onUpdateAndSubmitQuery,
   onPrettifyQuery,
-  hideRunQueryText,
   editorIsInline,
   isSpaceReduced,
   resizableContainerButton,
@@ -80,27 +69,20 @@ export const EditorFooter = memo(function EditorFooter({
   setIsHistoryOpen,
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
-  hideQueryHistory,
-  hideQuickSearch,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   errors,
   warnings,
   onErrorClick,
   dataErrorsControl,
+  starredQueriesService,
   queryStats,
-  toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
 
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-
-  const toggleHistoryComponent = useCallback(() => {
-    setIsHistoryOpen(!isHistoryOpen);
-    setIsLanguageComponentOpen(false);
-  }, [isHistoryOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const toggleLanguageComponent = useCallback(async () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
@@ -126,7 +108,6 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
@@ -161,56 +142,24 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              {!Boolean(editorIsInline) && (
+              <KeyboardShortcuts />
+              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
+              {displayDocumentationAsFlyout && (
                 <>
-                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
-                  {!hideQueryHistory && (
-                    <QueryHistoryAction
-                      toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
-                      isHistoryOpen={isHistoryOpen}
+                  <EuiToolTip
+                    position="top"
+                    content={openDocumentationLabel}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="documentation"
+                      color="text"
+                      data-test-subj="ESQLEditor-documentation"
+                      size="xs"
+                      onClick={() => toggleLanguageComponent()}
+                      aria-label={openDocumentationLabel}
                     />
-                  )}
-                  <KeyboardShortcuts />
-                </>
-              )}
-              {!hideRunQueryText && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-run-query">
-                        <p>
-                          {i18n.translate('esqlEditor.query.runQuery', {
-                            defaultMessage: 'Run query',
-                          })}
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiCode
-                        transparentBackground
-                        css={css`
-                          font-size: 12px;
-                        `}
-                      >{`${COMMAND_KEY} + Enter`}</EuiCode>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-              {displayDocumentationAsFlyout && !Boolean(editorIsInline) && (
-                <>
-                  <EuiButtonEmpty
-                    iconType="documentation"
-                    color="text"
-                    data-test-subj="ESQLEditor-documentation"
-                    size="m"
-                    onClick={() => toggleLanguageComponent()}
-                    aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                      defaultMessage: 'Open documentation',
-                    })}
-                    css={css`
-                      cursor: pointer;
-                    `}
-                  />
+                  </EuiToolTip>
                   <LanguageDocumentationFlyout
                     searchInDescription
                     linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
@@ -221,41 +170,6 @@ export const EditorFooter = memo(function EditorFooter({
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {Boolean(editorIsInline) && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  {!hideQuickSearch && (
-                    <QuickSearchAction toggleVisor={toggleVisor} isSpaceReduced={true} />
-                  )}
-                  {!hideQueryHistory && (
-                    <QueryHistoryAction
-                      toggleHistory={toggleHistoryComponent}
-                      isHistoryOpen={isHistoryOpen}
-                      isSpaceReduced={true}
-                    />
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate('esqlEditor.query.quickReferenceLabel', {
-                        defaultMessage: 'Quick reference',
-                      })}
-                    >
-                      <EuiButtonIcon
-                        iconType="documentation"
-                        onClick={toggleLanguageComponent}
-                        aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                          defaultMessage: 'Open documentation',
-                        })}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <KeyboardShortcuts />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </>
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       {isHistoryOpen && (
@@ -266,6 +180,7 @@ export const EditorFooter = memo(function EditorFooter({
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}
+            starredQueriesService={starredQueriesService}
           />
         </EuiFlexItem>
       )}

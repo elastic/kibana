@@ -13,6 +13,8 @@ import {
   getFormattedFunctionSignature,
 } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
+import { getPromqlFunctionDefinition } from '../../commands';
+import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover';
 
 export async function getFunctionSignatureHover(
   fnNode: ESQLFunction
@@ -43,4 +45,29 @@ ${formattedSignature}
     setToCache(cacheKey, []);
     return [];
   }
+}
+
+export function getPromqlFunctionSignatureHover(fnName: string): Array<{ value: string }> {
+  const cacheKey = `promql:${fnName}`;
+  const cached = fromCache(cacheKey);
+  if (cached) return cached;
+
+  const fnDefinition = getPromqlFunctionDefinition(fnName);
+  if (!fnDefinition) {
+    setToCache(cacheKey, []);
+    return [];
+  }
+
+  const formattedSignature = getFormattedPromqlFunctionSignature(fnDefinition);
+  const result = [
+    {
+      value: `\`\`\`none
+${formattedSignature}
+\`\`\``,
+    },
+    { value: fnDefinition.description },
+  ];
+
+  setToCache(cacheKey, result);
+  return result;
 }

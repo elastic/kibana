@@ -14,7 +14,7 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { setKibanaServices } from './services/kibana_services';
 import type { LinksParentApi } from './types';

@@ -45,4 +45,4 @@ export * from './src/language';
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
 // temporary export to ease migration
-export * from './src/shared';
+export * from './src/language/autocomplete/utils';

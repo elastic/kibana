@@ -23,6 +23,7 @@ describe('snake case', () => {
 
   test('deeply nested object', () => {
     const deeplyNestedCamelCasedObject = {
+      theseAreFruits: true,
       fruitColours: {
         someApples: 'red',
         banana: 'yellow',
@@ -34,6 +35,7 @@ describe('snake case', () => {
       },
     };
     expect(convertCamelCasedKeysToSnakeCase(deeplyNestedCamelCasedObject)).toEqual({
+      these_are_fruits: true,
       fruit_colours: {
         some_apples: 'red',
         banana: 'yellow',
@@ -86,6 +88,23 @@ describe('snake case', () => {
     expect(convertCamelCasedKeysToSnakeCase(camelCasedObjectWithArray)).toEqual({
       i_am_camel_cased: true,
       i_am_snake_cased: 'true',
+    });
+  });
+
+  test('object with matching key in snake case should prioritize snake case regardless of order', () => {
+    const matchingKeys = {
+      weMatch: true,
+      we_match: 'true',
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeys)).toEqual({
+      we_match: 'true',
+    });
+    const matchingKeysReverseOrder = {
+      we_match: 'true',
+      weMatch: true,
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeysReverseOrder)).toEqual({
+      we_match: 'true',
     });
   });
 });

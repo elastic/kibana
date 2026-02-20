@@ -32,6 +32,9 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
   schema.object({
     http: otlpExportConfigSchema,
   }),
+  schema.object({
+    proto: otlpExportConfigSchema,
+  }),
 ]);
 
 /**

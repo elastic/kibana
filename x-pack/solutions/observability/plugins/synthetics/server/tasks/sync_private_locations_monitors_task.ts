@@ -59,9 +59,9 @@ export class SyncPrivateLocationMonitorsTask {
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
-        title: 'Synthetics Sync Global Params Task',
+        title: 'Synthetics Sync Private Location Monitors Task',
         description:
-          'This task is executed so that we can sync private location monitors for example when global params are updated',
+          'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {

@@ -10,7 +10,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { ApmEmbeddableContext } from '../../embeddable_context';

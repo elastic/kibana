@@ -18,6 +18,7 @@
     "@kbn/observability-utils-server",
     "@kbn/traced-es-client",
     "@kbn/es-query",
-    "@kbn/ai-tools"
+    "@kbn/ai-tools",
+    "@kbn/std"
   ]
 }

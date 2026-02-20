@@ -24,10 +24,10 @@ export const FindEndpointListItemsFilter = NonEmptyString;
 
 export type FindEndpointListItemsRequestQuery = z.infer<typeof FindEndpointListItemsRequestQuery>;
 export const FindEndpointListItemsRequestQuery = z.object({
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the `<field name>:<field value>` syntax.
- 
+
       */
   filter: FindEndpointListItemsFilter.optional(),
   /**

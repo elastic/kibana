@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
+import { setup, assign, fromObservable, fromEventObservable } from 'xstate';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError, of, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';

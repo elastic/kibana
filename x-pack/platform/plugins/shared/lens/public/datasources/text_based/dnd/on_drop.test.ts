@@ -41,7 +41,7 @@ describe('onDrop', () => {
     const expectedColumns = [
       { ...column3, columnId: 'columnId1' },
       column2,
-      { ...column1, columnId: 'columnId3' },
+      { ...column1, columnId: 'columnId3', inMetricDimension: true },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
@@ -189,7 +189,12 @@ describe('onDrop', () => {
     const expectedColumns = [
       column1,
       column2,
-      { columnId: 'columnId3', fieldName: 'currency', meta: { type: 'string' } },
+      {
+        columnId: 'columnId3',
+        fieldName: 'currency',
+        meta: { type: 'string' },
+        inMetricDimension: true,
+      },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
@@ -216,7 +221,13 @@ describe('onDrop', () => {
     const expectedColumns = [
       column1,
       column2,
-      { columnId: 'columnId3', fieldName: '??field', meta: { type: 'number' }, variable: 'field' },
+      {
+        columnId: 'columnId3',
+        fieldName: '??field',
+        meta: { type: 'number' },
+        variable: 'field',
+        inMetricDimension: true,
+      },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
@@ -233,7 +244,42 @@ describe('onDrop', () => {
       ...defaultProps,
       dropType: 'duplicate_compatible' as DropType,
     };
-    const expectedColumns = [column1, column2, { ...column1, columnId: 'columnId3' }];
+    const expectedColumns = [
+      column1,
+      column2,
+      { ...column1, columnId: 'columnId3', inMetricDimension: true },
+    ];
+    expect(onDrop(props)).toEqual(
+      expect.objectContaining({
+        layers: {
+          first: expect.objectContaining({
+            columns: expectedColumns,
+          }),
+        },
+      })
+    );
+  });
+  it('should not set inMetricDimension when target is not a metric dimension', () => {
+    const props = {
+      ...defaultProps,
+      source: {
+        field: 'currency',
+        id: 'currency',
+        humanData: {
+          label: 'currency',
+        },
+      },
+      target: {
+        ...defaultProps.target,
+        isMetricDimension: false,
+      },
+      dropType: 'field_replace' as DropType,
+    } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+    const expectedColumns = [
+      column1,
+      column2,
+      { columnId: 'columnId3', fieldName: 'currency', meta: { type: 'string' } },
+    ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
         layers: {

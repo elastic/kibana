@@ -1750,7 +1750,7 @@ describe('config schema', () => {
     it('should throw error if UIAM is enabled, but UIAM shared secret is not specified', () => {
       expect(() =>
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'https://uaim.service' } },
+          { uiam: { enabled: true, url: 'https://uiam.service' } },
           { serverless: true }
         )
       ).toThrow('[uiam.sharedSecret]: expected value of type [string] but got [undefined]');
@@ -1763,7 +1763,7 @@ describe('config schema', () => {
     });
 
     it('accepts both HTTP and HTTPS URLs for UIAM service', () => {
-      for (const url of ['http://uaim.service', 'https://uaim.service']) {
+      for (const url of ['http://uiam.service', 'https://uiam.service']) {
         expect(
           ConfigSchema.validate(
             { uiam: { enabled: true, url, sharedSecret: 'some-secret' } },
@@ -1779,7 +1779,7 @@ describe('config schema', () => {
 
       expect(() =>
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'ftp://uaim.service', sharedSecret: 'some-secret' } },
+          { uiam: { enabled: true, url: 'ftp://uiam.service', sharedSecret: 'some-secret' } },
           { serverless: true }
         )
       ).toThrow('[uiam.url]: expected URI with scheme [https|http].');
@@ -1788,12 +1788,12 @@ describe('config schema', () => {
     it('accepts full UIAM config', () => {
       expect(
         ConfigSchema.validate(
-          { uiam: { enabled: true, url: 'https://uaim.service', sharedSecret: 'some-secret' } },
+          { uiam: { enabled: true, url: 'https://uiam.service', sharedSecret: 'some-secret' } },
           { serverless: true }
         ).uiam
       ).toEqual({
         enabled: true,
-        url: 'https://uaim.service',
+        url: 'https://uiam.service',
         sharedSecret: 'some-secret',
         ssl: { verificationMode: 'full' },
       });
@@ -1801,19 +1801,19 @@ describe('config schema', () => {
       const validConfigs = [
         {
           enabled: true,
-          url: 'https://uaim.service',
+          url: 'https://uiam.service',
           sharedSecret: 'some-secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: ['/path-1'] },
         },
         {
           enabled: true,
-          url: 'https://uaim.service',
+          url: 'https://uiam.service',
           sharedSecret: 'some-secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: '/path-1' },
         },
         {
           enabled: true,
-          url: 'https://uaim.service',
+          url: 'https://uiam.service',
           sharedSecret: 'some-secret',
           ssl: { verificationMode: 'none' },
         },
@@ -1823,6 +1823,61 @@ describe('config schema', () => {
           uiamConfig
         );
       }
+    });
+
+    it('accepts UIAM config with mTLS client certificate and key', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              ssl: {
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam.ssl
+      ).toEqual({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      });
+    });
+
+    it('should throw error if ssl.certificate is specified without ssl.key', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              ssl: { certificate: '/path/to/cert.pem' },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('must specify [ssl.key] when [ssl.certificate] is specified');
+    });
+
+    it('should throw error if ssl.key is specified without ssl.certificate', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              ssl: { key: '/path/to/key.pem' },
+            },
+          },
+          { serverless: true }
+        )
+      ).toThrow('must specify [ssl.certificate] when [ssl.key] is specified');
     });
   });
 });

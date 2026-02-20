@@ -55,7 +55,7 @@ export const complexMetricAPIAttributes = {
       },
       background_chart: {
         type: 'bar',
-        goal_value: {
+        max_value: {
           operation: 'percentile',
           field: 'bytes',
           percentile: 95,
@@ -113,7 +113,7 @@ export const complexESQLMetricAPIAttributes = {
       },
       background_chart: {
         type: 'bar',
-        goal_value: {
+        max_value: {
           operation: 'value',
           column: 'bytes',
         },

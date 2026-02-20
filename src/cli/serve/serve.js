@@ -16,6 +16,7 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -443,6 +444,9 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (opts.uiam) {
     console.info('Kibana will be configured to support UIAM.');
     lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 
     if (!_.has(rawConfig, 'xpack.security.uiam.url')) {

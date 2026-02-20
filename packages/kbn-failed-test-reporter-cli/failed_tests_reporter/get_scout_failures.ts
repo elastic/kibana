@@ -18,6 +18,7 @@ export interface ScoutTestFailureExtended extends TestFailure {
   location: string;
   duration: number;
   owners: string;
+  errorMessage?: string;
   file?: string;
   kibanaModule?: {
     id: string;
@@ -105,6 +106,7 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
       name: entry.title,
       failure,
       likelyIrrelevant,
+      errorMessage: entry.error.message ? stripAnsi(entry.error.message) : undefined,
       'system-out': entry.stdout ? stripAnsi(entry.stdout) : undefined,
       owners: entry.owner.join(', '), // Convert array to string
       commandLine: entry.command,

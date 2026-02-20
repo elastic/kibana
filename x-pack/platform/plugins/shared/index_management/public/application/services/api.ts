@@ -7,7 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
@@ -557,6 +557,22 @@ export function createIndex(indexName: string, indexMode: string) {
       indexName,
       indexMode,
     }),
+  });
+}
+
+export function useLoadIndexDocumentsSample(indexName: string) {
+  return useRequest<{ results: SearchHit[] }>({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
+    method: 'get',
+  });
+}
+
+export async function deleteDocuments(indexName: string, id: string) {
+  return sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(
+      indexName
+    )}/documents/${encodeURIComponent(id)}`,
+    method: 'delete',
   });
 }
 

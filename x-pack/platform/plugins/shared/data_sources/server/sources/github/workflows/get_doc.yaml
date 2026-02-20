@@ -1,0 +1,33 @@
+version: '1'
+name: 'sources.github.get_doc'
+description: 'Get the contents of a file from a GitHub repository'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+    required: true
+    description: 'The owner of the repository (username or organization)'
+  - name: repo
+    type: string
+    required: true
+    description: 'The name of the repository'
+  - name: path
+    type: string
+    required: true
+    description: 'The path to the file in the repository'
+  - name: ref
+    type: string
+    required: false
+    description: 'The branch, tag, or commit SHA (defaults to main)'
+steps:
+  - name: get-doc
+    type: github.getDoc
+    connector-id: <%= github-stack-connector-id %>
+    with:
+      owner: "${{inputs.owner}}"
+      repo: "${{inputs.repo}}"
+      path: "${{inputs.path}}"
+      ref: "${{inputs.ref}}"

@@ -51,3 +51,56 @@ responses:
                   - platform.core.list_indices
                   - platform.core.get_index_mapping
                   - platform.core.get_document_by_id
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/agents" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "id": "new-agent-id",
+        "name": "Search Index Helper",
+        "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+        "labels": ["custom-indices", "department-search"],
+        "avatar_color": "#BFDBFF",
+        "avatar_symbol": "SI",
+        "configuration": {
+          "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+          "tools": [
+            {
+              "tool_ids": [
+                "platform.core.search",
+                "platform.core.list_indices",
+                "platform.core.get_index_mapping",
+                "platform.core.get_document_by_id"
+              ]
+            }
+          ]
+        }
+    }'
+- lang: Console
+  source: |
+    POST kbn://api/agent_builder/agents
+    {
+      "id": "new-agent-id",
+      "name": "Search Index Helper",
+      "description": "Hi! I can help you search the data within the indices starting with \"content-\" prefix.",
+      "labels": ["custom-indices", "department-search"],
+      "avatar_color": "#BFDBFF",
+      "avatar_symbol": "SI",
+      "configuration": {
+        "instructions": "You are a custom agent that wants to help searching data using all indices starting with prefix \"content-\".",
+        "tools": [
+          {
+            "tool_ids": [
+              "platform.core.search",
+              "platform.core.list_indices",
+              "platform.core.get_index_mapping",
+              "platform.core.get_document_by_id"
+            ]
+          }
+        ]
+      }
+    }

@@ -170,8 +170,8 @@ describe('RuleAlertsTable', () => {
     fireEvent.click(getByTestId('severityRuleAlertsTable-alertCountLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
-      fieldName: 'kibana.alert.rule.name',
-      selectedOptions: ['ruleName'],
+      field_name: 'kibana.alert.rule.name',
+      selected_options: ['ruleName'],
       title: 'Rule name',
     });
   });
@@ -190,9 +190,9 @@ describe('RuleAlertsTable', () => {
 
     await waitFor(() => {
       expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
-        fieldName: 'kibana.alert.workflow_status',
+        field_name: 'kibana.alert.workflow_status',
         title: 'Status',
-        selectedOptions: ['open'],
+        selected_options: ['open'],
       });
     });
   });

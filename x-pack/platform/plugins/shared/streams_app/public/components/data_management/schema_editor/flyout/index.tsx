@@ -39,6 +39,7 @@ export interface SchemaEditorFlyoutProps {
   withFieldSimulation?: boolean;
   fields?: SchemaField[];
   enableGeoPointSuggestions?: boolean;
+  onGoToField?: (fieldName: string) => void;
 }
 
 export const SchemaEditorFlyout = ({
@@ -51,6 +52,7 @@ export const SchemaEditorFlyout = ({
   withFieldSimulation = false,
   fields,
   enableGeoPointSuggestions = true,
+  onGoToField,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
@@ -183,14 +185,17 @@ export const SchemaEditorFlyout = ({
             onChange={setNextField}
             stream={stream}
             enableGeoPointSuggestions={enableGeoPointSuggestions}
+            onGoToField={onGoToField}
           />
-          <AdvancedFieldMappingOptions
-            value={nextField.additionalParameters}
-            onChange={(additionalParameters) => setNextField({ additionalParameters })}
-            onValidate={setValidAdvancedFieldMappings}
-            isEditing={isEditing}
-          />
-          {withFieldSimulation && (
+          {!nextField.alias_for && (
+            <AdvancedFieldMappingOptions
+              value={nextField.additionalParameters}
+              onChange={(additionalParameters) => setNextField({ additionalParameters })}
+              onValidate={setValidAdvancedFieldMappings}
+              isEditing={isEditing}
+            />
+          )}
+          {withFieldSimulation && !nextField.alias_for && (
             <EuiFlexItem grow={false}>
               <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
             </EuiFlexItem>

@@ -49,12 +49,11 @@ export default function (providerContext: FtrProviderContext) {
       previousMinorVersion = `${previousMinor}.0`;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/250457
-    describe.skip('package level agent version condition', () => {
+    describe('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
-      const agentId = `agent-${Date.now()}`;
-      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
+      const agentId = `agent-package-${Date.now()}`;
+      const upgradedAgentId = `upgraded-package-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -102,7 +101,10 @@ export default function (providerContext: FtrProviderContext) {
           'online',
           agentId,
           agentPolicyWithPPId,
-          previousMinorVersion
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
         );
         await fleetAndAgents.generateAgent(
           'online',
@@ -110,7 +112,8 @@ export default function (providerContext: FtrProviderContext) {
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
-          new Date().toISOString()
+          new Date().toISOString(),
+          true
         );
       });
       after(async () => {
@@ -120,6 +123,23 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
       });
+      it('should include agents on version-specific policies in agent count when getting policy', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
+          .expect(200);
+        // One agent on parent policy (agentId), one on version-specific (upgradedAgentId); both counted under parent
+        expect(body.item.agents).to.eql(2);
+      });
+
+      it('should include agents on version-specific policies in agent count when listing with withAgentCount', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies?withAgentCount=true&perPage=100`)
+          .expect(200);
+        const policy = body.items.find((p: { id: string }) => p.id === agentPolicyWithPPId);
+        expect(policy).to.be.ok();
+        expect(policy.agents).to.eql(2);
+      });
+
       it('should create version specific policies with common agent versions and package level agent version condition', async () => {
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
@@ -146,7 +166,7 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
           await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
 
@@ -168,12 +188,11 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/250460
-    describe.skip('template level agent version condition', () => {
+    describe('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
-      const agentId = `agent-${Date.now()}`;
-      const upgradedAgentId = `upgraded-agent-${Date.now()}`;
+      const agentId = `agent-template-${Date.now()}`;
+      const upgradedAgentId = `upgraded-template-${Date.now()}`;
 
       async function createAgentPolicyWithPackagePolicy() {
         const { body: agentPolicyResponse } = await supertest
@@ -267,7 +286,10 @@ export default function (providerContext: FtrProviderContext) {
           'online',
           agentId,
           agentPolicyWithPPId,
-          previousMinorVersion
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
         );
         await fleetAndAgents.generateAgent(
           'online',
@@ -275,7 +297,8 @@ export default function (providerContext: FtrProviderContext) {
           `${agentPolicyWithPPId}#${previousMinor}`,
           kibanaVersion,
           undefined,
-          new Date().toISOString()
+          new Date().toISOString(),
+          true
         );
       });
       after(async () => {
@@ -333,7 +356,7 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
           await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
 

@@ -11,10 +11,12 @@ import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
 import { resolveLocalArtifactsPath } from './local_artifacts';
+import { getFetchOptions } from '../../proxy';
 
 export const downloadToDisk = async (
   fileUrl: string,
-  filePathAtVolume: string
+  filePathAtVolume: string,
+  artifactRepositoryProxyUrl?: string
 ): Promise<string> => {
   const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
   const writeStream = createWriteStream(filePathAtVolume);
@@ -26,7 +28,8 @@ export const downloadToDisk = async (
     const path = resolveLocalArtifactsPath(parsedUrl);
     readStream = createReadStream(path);
   } else {
-    const res = await fetch(fileUrl);
+    const fetchOptions = getFetchOptions(fileUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fileUrl, fetchOptions as RequestInit);
 
     if (!res.body) {
       throw new Error('Response body is null');

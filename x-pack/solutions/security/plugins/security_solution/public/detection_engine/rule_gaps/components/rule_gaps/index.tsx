@@ -38,7 +38,6 @@ import { GapStatusFilter } from './status_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
 import { FillRuleGapsButton } from './fill_rule_gaps_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
@@ -196,8 +195,6 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
-  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
-  const isFillRuleGapsButtonEnabled = canEditRules && isBulkFillRuleGapsEnabled;
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -306,7 +303,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
-            {isFillRuleGapsButtonEnabled && (
+            {canEditRules && (
               <EuiFlexItem grow={false}>
                 <FillRuleGapsButton ruleId={ruleId} />
               </EuiFlexItem>

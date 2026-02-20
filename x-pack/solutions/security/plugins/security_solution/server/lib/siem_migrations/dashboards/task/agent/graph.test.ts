@@ -16,6 +16,7 @@ import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock(
   '../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern',
@@ -66,6 +67,7 @@ const setupAgent = (responses: NodeResponse[]) => {
     },
     request: httpServerMock.createKibanaRequest(),
     connectorId: 'test-connector',
+    experimentalFeatures: { splunkV2DashboardsEnabled: false } as unknown as ExperimentalFeatures,
   });
   return graph;
 };

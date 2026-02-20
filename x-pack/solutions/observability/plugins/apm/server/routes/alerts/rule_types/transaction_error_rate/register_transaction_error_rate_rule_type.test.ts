@@ -162,6 +162,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -285,6 +286,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo',
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -407,6 +409,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -529,6 +532,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -639,6 +643,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'bar',
         'transaction.name': undefined,
         'transaction.type': 'type-bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });

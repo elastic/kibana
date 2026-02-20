@@ -12,18 +12,19 @@ import {
   EuiFlexItem,
   EuiText,
   EuiImage,
-  useIsWithinBreakpoints,
   EuiFlexGrid,
   EuiButtonEmpty,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { isNew } from '../../common/utils';
 interface TutorialMetadata {
   title: string;
   dataTestSubj: string;
@@ -31,15 +32,15 @@ interface TutorialMetadata {
   request: string;
   image: string;
   buttonRef: React.RefObject<HTMLButtonElement>;
-  isNew?: boolean;
+  publishedAt: Date;
 }
 const EXPAND_LIMIT = 3;
 
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
   const assetBasePath = useAssetBasePath();
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
+  const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
+  const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
   const [expanded, setExpanded] = useState(false);
   const toggleExpand = () => {
@@ -63,6 +64,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.basics,
         image: `${assetBasePath}/search_window_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
@@ -79,6 +81,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.semanticSearch,
         image: `${assetBasePath}/search_results_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
@@ -92,6 +95,23 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.esql,
         image: `${assetBasePath}/search_observe_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
+      },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
+          defaultMessage: 'Agent builder',
+        }),
+        dataTestSubj: 'console_tutorials_agent_builder',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
+          {
+            defaultMessage: 'Learn how to use the Agent Builder APIs to create and manage agents.',
+          }
+        ),
+        request: consoleTutorials.agentBuilder,
+        image: `${assetBasePath}/search_task_automation.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2026-02-18'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
@@ -105,10 +125,13 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.timeSeriesDataStreams,
         image: `${assetBasePath}/search_hourglass.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
-        isNew: true,
+        publishedAt: new Date('2026-02-04'),
       },
     ];
-    return sortBy(items, 'isNew').slice(0, expanded ? undefined : EXPAND_LIMIT);
+    return orderBy(items, ({ publishedAt }) => publishedAt.getTime(), ['desc']).slice(
+      0,
+      expanded ? undefined : EXPAND_LIMIT
+    );
   }, [assetBasePath, expanded]);
 
   return (
@@ -130,7 +153,7 @@ export const ConsoleTutorialsGroup = () => {
               hasBorder
               title={tutorial.title}
               betaBadgeProps={{
-                label: tutorial.isNew
+                label: isNew(tutorial.publishedAt)
                   ? i18n.translate('xpack.searchGettingStarted.consoleTutorials.badge', {
                       defaultMessage: 'New',
                     })

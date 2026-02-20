@@ -320,6 +320,14 @@ describe('commands', () => {
       );
     });
   });
+
+  describe('MMR', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ MMR /*1*/ ([0.5, 0.4, 0.3, 0.2])::DENSE_VECTOR /*2*/ ON /*3*/ genre /*4*/ LIMIT /*5*/ 10 /*6*/ WITH /*7*/ {"lambda": 0.5} /*8*/'
+      );
+    });
+  });
 });
 
 describe('subqueries (parens)', () => {

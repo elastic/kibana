@@ -354,6 +354,9 @@ export const agentRouteService = {
   postAgentRollback: (agentId: string) =>
     AGENT_API_ROUTES.ROLLBACK_PATTERN.replace('{agentId}', agentId),
   postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
+  postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+  getAgentEffectiveConfig: (agentId: string) =>
+    AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {

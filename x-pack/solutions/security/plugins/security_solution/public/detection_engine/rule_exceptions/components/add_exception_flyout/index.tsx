@@ -65,6 +65,7 @@ import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/tran
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
+import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 
 const SectionHeader = styled(EuiTitle)`
@@ -493,6 +494,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     prefix: 'exceptionFlyoutTitle',
   });
 
+  const flyoutAriaLabel = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? headerI18n.ADD_ENDPOINT_EXCEPTION
+      : headerI18n.CREATE_RULE_EXCEPTION;
+  }, [listType]);
+
   const confirmModal = useMemo(() => {
     const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
@@ -516,7 +523,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
-      aria-labelledby={exceptionFlyoutTitleId}
+      aria-label={flyoutAriaLabel}
     >
       <ExceptionFlyoutHeader
         listType={listType}

@@ -18,9 +18,12 @@ import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -28,6 +31,7 @@ import type {
   HttpServiceSetup,
   IAuthHeadersStorage,
   IRouter,
+  KibanaRequest,
   KibanaRequestState,
   KibanaRouteOptions,
   OnPostAuthHandler,
@@ -170,6 +174,7 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+  userActivity?: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -194,6 +199,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
+  private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -211,6 +217,13 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  /** @internal */
+  public setRedactedSessionIdGetter(
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) {
+    this.redactedSessionIdGetter = getter;
   }
 
   private registerRouter(router: IRouter) {
@@ -235,6 +248,7 @@ export class HttpServer {
   public async setup({
     config$,
     executionContext,
+    userActivity,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -277,7 +291,7 @@ export class HttpServer {
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext);
+    this.setupRequestStateAssignment(config, executionContext, userActivity);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
@@ -527,7 +541,8 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
+    executionContext?: InternalExecutionContextSetup,
+    userActivity?: InternalUserActivityServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const stop = (request.app as KibanaRequestState).measureElu;
@@ -554,6 +569,18 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
+      let spaceId: string | undefined;
+      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
+      try {
+        spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
+      } catch {
+        spaceId = parentContext?.space;
+      }
+
+      userActivity?.setInjectedContext({
+        kibana: { space: { id: spaceId } },
+      });
+
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
         apm.addLabels(executionContext.getAsLabels());
@@ -574,9 +601,54 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
+    this.server!.ext('onPostAuth', async (request, responseToolkit) => {
+      if (this.redactedSessionIdGetter) {
+        // Store the redacted session ID on the request state so the user
+        // activity service can read it later. We cannot call the service
+        // directly here because this handler is async and would use its
+        // own user-activity
+        try {
+          const kibanaRequest = CoreKibanaRequest.from(request);
+          const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+          (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
+        } catch {
+          // just leave the session id as undefined
+        }
+      }
+      return responseToolkit.continue;
+    });
+
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
       (request.app as KibanaRequestState).span?.end();
       (request.app as KibanaRequestState).span = null;
+
+      const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
+      const { redactedSessionId } = request.app as KibanaRequestState;
+      const remoteAddress = request.info.remoteAddress;
+      userActivity?.setInjectedContext({
+        client: remoteAddress
+          ? {
+              ip: remoteAddress,
+              address: remoteAddress,
+            }
+          : undefined,
+        user: user
+          ? {
+              id: user.profile_uid,
+              username: user.username,
+              email: user.email,
+              roles: user.roles ? [...user.roles] : undefined,
+            }
+          : undefined,
+        session: {
+          id: redactedSessionId,
+        },
+        http: {
+          request: {
+            referrer: request.info.referrer,
+          },
+        },
+      });
 
       return responseToolkit.continue;
     });

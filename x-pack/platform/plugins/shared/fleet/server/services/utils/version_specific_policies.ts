@@ -66,8 +66,8 @@ export async function getVersionSpecificPolicies(
   for (const version of agentVersions ?? (await getAgentVersionsForVersionSpecificPolicies())) {
     let updatedFullPolicy: FullAgentPolicy | null = null;
 
-    // if none of the inputs have package level agent version conditions, it means some inputs have template level conditions, so have to recreate the full agent policy with agent version
-    if (fullPolicy.inputs.every((input) => !input.meta?.package?.agentVersion)) {
+    // if some of the inputs have template level conditions, we have to recreate the full agent policy with agent version
+    if (fullPolicy.inputs.some((input) => !input.meta?.package?.agentVersion)) {
       // read compiled template for agent version from package policy SO
       updatedFullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, fullPolicy.id, {
         agentVersion: version,

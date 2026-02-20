@@ -100,7 +100,7 @@ export class MonitoringEntitySourceDescriptorClient {
       for (const attrs of batch) {
         const existing = existingByName.get(attrs.name ?? '');
         if (existing) {
-          const updatedSo = await this.update({ id: existing.id, ...attrs });
+          const updatedSo = await this.updateWithMatcherProtection(existing, attrs);
           updated++;
           results.push({ action: 'updated', source: updatedSo });
         } else {
@@ -118,7 +118,6 @@ export class MonitoringEntitySourceDescriptorClient {
     monitoringEntitySource: PartialMonitoringEntitySource
   ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(monitoringEntitySource);
-
     const { attributes } = await this.dependencies.soClient.update<MonitoringEntitySource>(
       monitoringEntitySourceTypeName,
       monitoringEntitySource.id,
@@ -127,6 +126,31 @@ export class MonitoringEntitySourceDescriptorClient {
     );
 
     return { ...(attributes as MonitoringEntitySource), id: monitoringEntitySource.id };
+  }
+
+  async updateWithoutMatchers(
+    monitoringEntitySource: PartialMonitoringEntitySource
+  ): Promise<MonitoringEntitySource> {
+    const { matchers: _matchers, ...rest } = monitoringEntitySource;
+    return this.update(rest);
+  }
+
+  /**
+   * If the matchers have been modified by the user,
+   * we need to update the source without the matchers.
+   * This is to prevent custom matchers from being overwritten by the default matchers.
+   * @param existing
+   * @param attrs
+   * @returns
+   */
+  private async updateWithMatcherProtection(
+    existing: MonitoringEntitySource,
+    attrs: UpsertInput
+  ): Promise<MonitoringEntitySource> {
+    const updateFn = existing.matchersModifiedByUser
+      ? (input: PartialMonitoringEntitySource) => this.updateWithoutMatchers(input)
+      : (input: PartialMonitoringEntitySource) => this.update(input);
+    return updateFn({ id: existing.id, ...attrs });
   }
 
   private getQueryFilters = (query?: ListEntitySourcesRequestQuery) => {

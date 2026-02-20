@@ -6,3 +6,4 @@
  */
 
 export * from './missing_privileges';
+export * from './not_found';

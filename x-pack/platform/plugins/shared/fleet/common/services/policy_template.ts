@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { DATASET_VAR_NAME } from '../constants';
+import {
+  DATASET_VAR_NAME,
+  dataTypes,
+  OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
+} from '../constants';
 import type {
   RegistryPolicyTemplate,
   RegistryPolicyInputOnlyTemplate,
@@ -25,6 +30,16 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
     "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
   multi: false,
   required: true,
+  show_user: true,
+};
+
+const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
+  name: USE_APM_VAR_NAME,
+  type: 'bool',
+  title: 'Use APM Server',
+  description: 'enables the apm collector and processor.',
+  multi: false,
+  required: false,
   show_user: true,
 };
 
@@ -84,6 +99,14 @@ export const getNormalizedDataStreams = (
   return policyTemplates.map((policyTemplate) => {
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
+    let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    if (
+      policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
+      (dataStreamType || policyTemplate.type) === dataTypes.Traces
+    ) {
+      vars = addUseAPMVarIfNotPresent(vars);
+    }
+
     const dataStream: RegistryDataStream = {
       type: dataStreamType || policyTemplate.type,
       dataset,
@@ -95,7 +118,7 @@ export const getNormalizedDataStreams = (
       streams: [
         {
           input: policyTemplate.input,
-          vars: addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name),
+          vars,
           template_path: policyTemplate.template_path,
           title: policyTemplate.title,
           description: policyTemplate.title,
@@ -137,6 +160,20 @@ const addDatasetVarIfNotPresent = (
       ...newVars,
       { ...DATA_STREAM_DATASET_VAR, ...(datasetName && { default: datasetName }) },
     ];
+  }
+};
+
+const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+  const newVars = vars ?? [];
+
+  const isUseAPMVarAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_USE_APM_VAR.name
+  );
+
+  if (isUseAPMVarAlreadyAdded) {
+    return newVars;
+  } else {
+    return [...newVars, DATA_STREAM_USE_APM_VAR];
   }
 };
 

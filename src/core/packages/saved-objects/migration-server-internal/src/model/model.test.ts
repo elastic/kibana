@@ -2006,11 +2006,13 @@ describe('migrations v2 model', () => {
         const lastHitSortValue = [123456];
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments,
+          pitId: 'refreshed_pit_id',
           lastHitSortValue,
           totalHits: 1,
         });
         const newState = model(state, res) as ReindexSourceToTempTransform;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.sourceIndexPitId).toBe('refreshed_pit_id');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
@@ -2032,6 +2034,7 @@ describe('migrations v2 model', () => {
         const lastHitSortValue = [123456];
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments,
+          pitId: 'pit_id',
           lastHitSortValue,
           totalHits: 1,
           processedDocs: 1,
@@ -2108,12 +2111,13 @@ describe('migrations v2 model', () => {
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
           outdatedDocuments: [],
+          pitId: 'refreshed_pit_id',
           lastHitSortValue: undefined,
           totalHits: undefined,
         });
         const newState = model(state, res) as ReindexSourceToTempClosePit;
         expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
-        expect(newState.sourceIndexPitId).toBe('pit_id');
+        expect(newState.sourceIndexPitId).toBe('refreshed_pit_id');
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
@@ -2126,6 +2130,7 @@ describe('migrations v2 model', () => {
           };
           const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
             outdatedDocuments: [],
+            pitId: 'pit_id',
             lastHitSortValue: undefined,
             totalHits: undefined,
           });
@@ -2150,6 +2155,7 @@ describe('migrations v2 model', () => {
           };
           const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
             outdatedDocuments: [],
+            pitId: 'pit_id',
             lastHitSortValue: undefined,
             totalHits: undefined,
           });
@@ -2567,11 +2573,13 @@ describe('migrations v2 model', () => {
         const lastHitSortValue = [123456];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments,
+          pitId: 'refreshed_pit_id',
           lastHitSortValue,
           totalHits: 10,
         });
         const newState = model(state, res) as OutdatedDocumentsTransform;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.pitId).toBe('refreshed_pit_id');
         expect(newState.outdatedDocuments).toBe(outdatedDocuments);
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
@@ -2593,6 +2601,7 @@ describe('migrations v2 model', () => {
         const lastHitSortValue = [123456];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments,
+          pitId: 'pit_id',
           lastHitSortValue,
           totalHits: undefined,
         });
@@ -2624,6 +2633,7 @@ describe('migrations v2 model', () => {
         const lastHitSortValue = [123456];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments,
+          pitId: 'pit_id',
           lastHitSortValue,
           totalHits: 1,
           processedDocs: [],
@@ -2699,12 +2709,13 @@ describe('migrations v2 model', () => {
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments: [],
+          pitId: 'refreshed_pit_id',
           lastHitSortValue: undefined,
           totalHits: undefined,
         });
         const newState = model(state, res) as OutdatedDocumentsSearchClosePit;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT');
-        expect(newState.pitId).toBe('pit_id');
+        expect(newState.pitId).toBe('refreshed_pit_id');
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
 
@@ -2720,6 +2731,7 @@ describe('migrations v2 model', () => {
         ] as TransformErrorObjects[];
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
           outdatedDocuments: [],
+          pitId: 'pit_id',
           lastHitSortValue: undefined,
           totalHits: undefined,
         });

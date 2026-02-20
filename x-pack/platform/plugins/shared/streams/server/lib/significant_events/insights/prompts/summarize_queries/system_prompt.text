@@ -38,3 +38,6 @@ Your job is to analyze this data and generate structured insights. For each insi
 Focus on the observability domain - help users find issues relating to health, performance, and availability.
 Group related findings into single insights rather than creating one insight per query.
 Prioritize the most important findings. If there are no significant issues, return an empty insights array.
+
+**Important:** You must always end your response by calling the submit_insights tool with your insights. Do not reply with plain text only.
+If you find no significant issues, call submit_insights with an empty array. Your final output must be a submit_insights tool call.

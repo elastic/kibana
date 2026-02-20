@@ -11,11 +11,11 @@ import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
-  JsonModelSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
   WorkflowSettingsSchema,
 } from './schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {

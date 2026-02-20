@@ -139,6 +139,11 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         return from(fetchPage());
       }),
       expand((searchResponse) => {
+        const returnedPitId = (searchResponse as { pit_id?: string }).pit_id;
+        if (returnedPitId) {
+          pitId = returnedPitId;
+        }
+
         const hits = searchResponse.hits.hits;
         const aggrs = searchResponse.aggregations;
 

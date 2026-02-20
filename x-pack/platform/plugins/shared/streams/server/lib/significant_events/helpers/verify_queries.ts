@@ -7,7 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { kqlQuery } from '@kbn/es-query';
-import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
 import { isKqlQueryValid, rangeQuery } from '../../../../common/query_helpers';
@@ -44,7 +45,7 @@ export async function verifyQueries(
   const { esClient, logger } = dependencies;
 
   const validQueries = queries.filter((query) => isKqlQueryValid(query.kql));
-  if (!queries.length) {
+  if (!validQueries.length) {
     return {
       totalCount: 0,
       queries: [],

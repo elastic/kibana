@@ -285,6 +285,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
+      getIsEsqlDefault: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
@@ -292,6 +293,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
     },
+    trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;
 }
 

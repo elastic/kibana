@@ -40,7 +40,7 @@ exports[`AddData render 1`] = `
         >
           <EuiButton
             data-test-subj="homeAddData"
-            fill={true}
+            fill={false}
             fullWidth={true}
             href="/app/integrations/browse"
             iconType="plusInCircle"

@@ -39,7 +39,7 @@ const createSavedSearch = async (
     ],
   });
 
-test.describe('Discover app - saved search embeddable', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAgnostic }, () => {
   const SAVED_SEARCH_TITLE = 'TempSearch';
   const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 

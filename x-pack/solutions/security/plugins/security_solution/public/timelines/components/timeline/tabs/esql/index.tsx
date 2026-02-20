@@ -237,7 +237,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         );
       }
 
-      const unsubscribeState = stateContainer.appState$.subscribe({
+      const unsubscribeState = stateContainer.createAppStateObservable().subscribe({
         next: setDiscoverAppState,
       });
 

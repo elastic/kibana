@@ -16,7 +16,8 @@ import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/
 import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlLabel } from './shared_form_components';
@@ -28,9 +29,9 @@ interface IdentifierControlFormProps {
   variableName: string;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
-  setControlState: (state: ESQLControlState) => void;
+  setControlState: (state: OptionsListESQLControlState) => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   currentApp?: string;
 }
 
@@ -52,8 +53,8 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.availableOptions
-      ? initialState.availableOptions.map((option) => {
+    initialState?.available_options
+      ? initialState.available_options.map((option) => {
           return {
             label: option,
             key: option,
@@ -149,13 +150,13 @@ export function IdentifierControlForm({
     // removes the double question mark from the variable name
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
-      availableOptions,
-      selectedOptions: [availableOptions[0]],
+      available_options: availableOptions,
+      selected_options: [availableOptions[0]],
       title: label || variableNameWithoutQuestionmark,
-      variableName: variableNameWithoutQuestionmark,
-      variableType,
-      esqlQuery: queryString,
-      controlType: EsqlControlType.STATIC_VALUES,
+      variable_name: variableNameWithoutQuestionmark,
+      variable_type: variableType,
+      esql_query: queryString,
+      control_type: EsqlControlType.STATIC_VALUES,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);

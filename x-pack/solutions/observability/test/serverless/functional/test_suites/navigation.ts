@@ -139,16 +139,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Maintenance Windows']);
     });
 
-    it('renders a feedback callout', async () => {
-      await svlCommonNavigation.sidenav.feedbackCallout.reset();
-      await svlCommonNavigation.sidenav.openPanel('applications');
-      await svlCommonNavigation.sidenav.feedbackCallout.expectExists();
-      await svlCommonNavigation.sidenav.feedbackCallout.dismiss();
-      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
-      await browser.refresh();
-      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
-    });
-
     it('opens panel on legacy management landing page', async () => {
       await common.navigateToApp('management');
       await testSubjects.exists('cards-navigation-page');

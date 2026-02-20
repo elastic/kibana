@@ -14,6 +14,8 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
   return {
     group: css`
       gap: ${euiTheme.size.xs};
+      max-height: calc(${euiTheme.size.base} * 10);
+      overflow-y: auto;
 
       &:not(:empty) {
         margin-top: ${afterQueryBar ? euiTheme.size.s : 0};

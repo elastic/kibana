@@ -75,6 +75,7 @@ export function initializeViewModeManager({
     api: {
       viewMode$,
       setViewMode,
+      isEditableByUser: canUserEditDashboard,
     },
   };
 }

@@ -11,7 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_factory';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
@@ -44,6 +44,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
     {} as EmbeddableAlertsTablePublicStartDependencies
   );
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
+    initializeDrilldownsManager: jest.fn(),
     initialState: {
       timeRange: {
         from: '2025-01-01T00:00:00.000Z',

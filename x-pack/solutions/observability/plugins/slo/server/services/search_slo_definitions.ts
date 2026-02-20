@@ -58,6 +58,9 @@ export class SearchSLODefinitions {
 
   public async execute(params: SearchSLODefinitionsParams): Promise<SearchSLODefinitionResponse> {
     const { search, size = 10, searchAfter } = params ?? {};
+    if (size < 1 || size > 100) {
+      throw new Error('Size must be between 1 and 100');
+    }
     const { indices } = await getSummaryIndices(this.esClient, this.settings);
 
     try {

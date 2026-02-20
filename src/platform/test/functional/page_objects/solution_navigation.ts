@@ -333,9 +333,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         // TODO: find a better way without trying to collapse every time
         // https://github.com/elastic/kibana/issues/236242
         await collapseMoreIfNeeded();
-        // TODO: find a better way without trying to dismiss feedback every time
-        // https://github.com/elastic/kibana/issues/236242
-        await this.feedbackCallout.dismiss();
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
         await testSubjects.click(`~nav-item-id-${navId}`);
@@ -456,41 +453,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
-      },
-      feedbackCallout: {
-        async disable() {
-          await browser.setLocalStorageItem('sideNavigationFeedback', `${Date.now()}`);
-          await browser.refresh();
-        },
-        async reset() {
-          await browser.removeLocalStorageItem('sideNavigationFeedback');
-          await browser.refresh();
-        },
-        async getFeedbackTestSubjectId() {
-          return 'feedbackSnippetPanel';
-        },
-        async getFeedbackDismissTestSubjectId() {
-          return 'feedbackSnippetPanel > sideNavigationFeedbackPanelDismiss';
-        },
-        async expectExists() {
-          await testSubjects.existOrFail(await this.getFeedbackTestSubjectId(), {
-            timeout: TIMEOUT_CHECK,
-          });
-        },
-        async expectMissing() {
-          return await testSubjects.existOrFail('sideNavigationFeedbackButtonSurveyLink', {
-            timeout: TIMEOUT_CHECK,
-          });
-        },
-        async dismiss() {
-          // TODO: find a better way without trying to collapse every time
-          // https://github.com/elastic/kibana/issues/236242
-          await collapseMoreIfNeeded();
-          const feedbackTestSubjectId = await this.getFeedbackTestSubjectId();
-          if (await testSubjects.exists(feedbackTestSubjectId, { timeout: TIMEOUT_CHECK })) {
-            await testSubjects.click(await this.getFeedbackDismissTestSubjectId());
-          }
-        },
       },
     },
     breadcrumbs: {

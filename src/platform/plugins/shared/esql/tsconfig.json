@@ -38,7 +38,9 @@
     "@kbn/field-formats-plugin",
     "@kbn/file-upload-plugin",
     "@kbn/discover-utils",
+    "@kbn/controls-schemas",
     "@kbn/kql",
+    "@kbn/inspector-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -208,7 +208,9 @@ describe('InferenceFlyout', () => {
 
   // Note: UI visibility tests for serverless adaptive allocations are in inference_service_form_fields.test.tsx
   // This file focuses on integration tests: form submission, deserialization, and cross-provider behavior
-  describe('Serverless adaptive allocations', () => {
+  //
+  // FLAKY: https://github.com/elastic/kibana/issues/253332
+  describe.skip('Serverless adaptive allocations', () => {
     it('does not affect other providers like Hugging Face', async () => {
       renderComponent({ enforceAdaptiveAllocations: true });
 

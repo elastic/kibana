@@ -62,9 +62,10 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
       });
     },
     async displaysEmptyMessage() {
-      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
-      const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
-      expect(emptyText).to.eql('No Certificates found.');
+      await testSubjects.existOrFail('uptimeCertificatesTable');
+      expect(await testSubjects.getVisibleText('uptimeCertificatesTable')).to.include.string(
+        'No Certificates found.'
+      );
     },
   };
 }

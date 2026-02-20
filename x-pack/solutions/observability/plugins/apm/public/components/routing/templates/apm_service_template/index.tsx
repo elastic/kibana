@@ -6,8 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -24,6 +29,7 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import type { Tab } from './use_tabs';
 import { useTabs } from './use_tabs';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   title: string;
@@ -48,6 +54,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
+  const { agentBuilder } = useApmPluginContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -69,6 +76,36 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  // Configure agent builder global flyout with the service attachment
+  useEffect(() => {
+    if (!agentBuilder || !serviceName) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+          data: {
+            serviceName,
+            environment,
+            start,
+            end,
+            attachmentLabel: i18n.translate('xpack.apm.serviceDetails.serviceAttachmentLabel', {
+              defaultMessage: '{serviceName} service',
+              values: { serviceName },
+            }),
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, serviceName, environment, start, end]);
 
   if (isMobileAgentName(agentName)) {
     replace(history, {

@@ -166,6 +166,56 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('GET /api/fleet/agent_policies/:id/full', () => {
+      let fullPolicyTestAgentPolicyId: string;
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+        const { body: res } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Test full policy', namespace: 'default' })
+          .expect(200);
+        fullPolicyTestAgentPolicyId = res.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: fullPolicyTestAgentPolicyId })
+          .expect(200);
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      it('should return 400 if revision and kubernetes or standalone are used together', async () => {
+        await supertest
+          .get(
+            `/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1&kubernetes=true`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+
+        await supertest
+          .get(
+            `/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1&standalone=true`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('should return fleet-server document if revision is provided', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${fullPolicyTestAgentPolicyId}/full?revision=1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body.item.id).to.eql(fullPolicyTestAgentPolicyId);
+      });
+    });
+
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       let mockApiServer: http.Server;

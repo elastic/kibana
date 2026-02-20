@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Copy Pack Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    CopyPacksResponse:
+      type: object
+      properties: {}
+      example:
+        data:
+          saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"
+          name: "my_pack_copy"
+          description: "My pack"
+          queries:
+            ports:
+              query: "SELECT * FROM listening_ports;"
+              interval: 60
+              snapshot: true
+              removed: false
+              timeout: 120
+              ecs_mapping:
+                client.port:
+                  field: "port"
+          enabled: false
+          shards: {}
+          created_at: "2025-02-26T13:37:30.452Z"
+          created_by: "elastic"
+          updated_at: "2025-02-26T13:37:30.452Z"
+          updated_by: "elastic"

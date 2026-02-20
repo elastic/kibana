@@ -40,8 +40,10 @@ const createPlugin = (id: string, isPlugin = true): PluginOrPackage => ({
 const createBaseStats = (pluginId: string): AllPluginStats => ({
   [pluginId]: {
     missingComments: [],
+    missingComplexTypeInfo: [],
     isAnyType: [],
     noReferences: [],
+    paramDocMismatches: [],
     apiCount: 0,
     missingExports: 0,
     deprecatedAPIsReferencedCount: 0,

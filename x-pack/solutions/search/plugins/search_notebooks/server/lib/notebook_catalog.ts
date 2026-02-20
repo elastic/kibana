@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import path from 'path';
 import { i18n } from '@kbn/i18n';

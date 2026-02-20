@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateExternalDataset } from '../../src/evaluate_dataset';
 import { createEvaluateExternalDataset } from '../../src/evaluate_dataset';
@@ -26,11 +27,15 @@ const evaluate = base.extend<{ evaluateExternalDataset: EvaluateExternalDataset 
   ],
 });
 
-evaluate.describe('Default Agent - External Phoenix Dataset', { tag: '@svlSearch' }, () => {
-  evaluate.skip(!process.env.DATASET_NAME, 'DATASET_NAME is not set');
+evaluate.describe(
+  'Default Agent - External Phoenix Dataset',
+  { tag: tags.serverless.search },
+  () => {
+    evaluate.skip(!process.env.DATASET_NAME, 'DATASET_NAME is not set');
 
-  evaluate('external dataset', async ({ evaluateExternalDataset }) => {
-    const datasetName = process.env.DATASET_NAME!;
-    await evaluateExternalDataset(datasetName);
-  });
-});
+    evaluate('external dataset', async ({ evaluateExternalDataset }) => {
+      const datasetName = process.env.DATASET_NAME!;
+      await evaluateExternalDataset(datasetName);
+    });
+  }
+);

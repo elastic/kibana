@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import { format, parse } from 'url';
 import { KIBANA_DEFAULT_URL } from './constants';
 
@@ -19,7 +18,6 @@ export async function getKibanaUrl() {
   try {
     const unredirectedResponse = await fetch(KIBANA_DEFAULT_URL, {
       method: 'HEAD',
-      follow: 1,
       redirect: 'manual',
     });
 

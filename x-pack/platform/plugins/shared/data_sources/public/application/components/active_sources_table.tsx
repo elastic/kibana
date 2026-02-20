@@ -196,7 +196,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   onDelete,
 }) => {
   const {
-    services: { chrome },
+    services: { application },
   } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
   const [activePage, setActivePage] = useState(0);
@@ -207,19 +207,22 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  // Get workflow URL for linking
-  const workflowsUrl = useMemo(() => {
-    return chrome?.navLinks.get(WORKFLOWS_APP_ID)?.url;
-  }, [chrome]);
+  // Generate workflows URL with query param
+  const getWorkflowsUrl = useCallback(
+    (source: ActiveSource) => {
+      const path = `?query=${encodeURIComponent(source.name)}`;
+      return application.getUrlForApp(WORKFLOWS_APP_ID, { path });
+    },
+    [application]
+  );
 
   // Generate tools URL with search param
   const getToolsUrl = useCallback(
     (sourceType: string) => {
-      const baseUrl = chrome?.navLinks.get(AGENT_BUILDER_APP_ID)?.url;
-      if (!baseUrl) return undefined;
-      return `${baseUrl}/tools?search=${encodeURIComponent(sourceType)}`;
+      const path = `/tools?search=${encodeURIComponent(sourceType)}`;
+      return application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
     },
-    [chrome]
+    [application]
   );
 
   const paginatedSources = useMemo(() => {
@@ -268,9 +271,9 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
         defaultMessage: 'Workflows',
       }),
       align: 'center',
-      render: (workflows: string[]) =>
+      render: (workflows: string[], source: ActiveSource) =>
         workflows.length > 0 ? (
-          <EuiLink href={workflowsUrl} data-test-subj="workflowsLink">
+          <EuiLink href={getWorkflowsUrl(source)} data-test-subj="workflowsLink">
             <EuiText size="s">{workflows.length}</EuiText>
           </EuiLink>
         ) : (

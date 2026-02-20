@@ -1,5 +1,5 @@
 get:
-  summary:  Get cases for an alert
+  summary: Get cases for an alert
   operationId: getCasesByAlertDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
@@ -36,4 +36,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'

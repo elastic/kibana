@@ -8,7 +8,9 @@
 import { ToolType } from './definition';
 import { internalNamespaces } from '../base/namespaces';
 
-const platformCoreTool = (toolName: string) => {
+const platformCoreTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.${TName}` => {
   return `${internalNamespaces.platformCore}.${toolName}`;
 };
 

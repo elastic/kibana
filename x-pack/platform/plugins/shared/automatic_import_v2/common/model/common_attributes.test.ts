@@ -355,7 +355,15 @@ describe('common attributes schemas', () => {
 
   describe('TaskStatus', () => {
     it('accepts all valid task status values', () => {
-      const validStatuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'];
+      const validStatuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ];
 
       validStatuses.forEach((status) => {
         const result = TaskStatus.safeParse(status);
@@ -380,6 +388,8 @@ describe('common attributes schemas', () => {
       expect(TaskStatusEnum.completed).toBe('completed');
       expect(TaskStatusEnum.failed).toBe('failed');
       expect(TaskStatusEnum.cancelled).toBe('cancelled');
+      expect(TaskStatusEnum.approved).toBe('approved');
+      expect(TaskStatusEnum.deleting).toBe('deleting');
     });
 
     it('rejects non-string values', () => {
@@ -428,7 +438,15 @@ describe('common attributes schemas', () => {
     });
 
     it('accepts all task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validDataStreamResponse, status };
@@ -561,7 +579,15 @@ describe('common attributes schemas', () => {
     });
 
     it('accepts all task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validIntegrationResponse, status };
@@ -671,7 +697,15 @@ describe('common attributes schemas', () => {
     });
 
     it('accepts all valid task statuses', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'cancelled',
+        'approved',
+        'deleting',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = { ...validIntegration, status };

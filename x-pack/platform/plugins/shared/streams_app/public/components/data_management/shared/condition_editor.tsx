@@ -27,7 +27,8 @@ import {
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import debounce from 'lodash/debounce';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -41,6 +42,8 @@ import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
 import { OperatorSelector } from './operator_selector';
 import { RangeInput } from './range_input';
+
+const SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS = 300;
 
 export interface ConditionEditorProps {
   condition: Condition;
@@ -79,9 +82,60 @@ export function ConditionEditor(props: ConditionEditorProps) {
     return fieldSuggestion?.type === 'date';
   }, [condition, conditionEditableInUi, fieldSuggestions]);
 
-  const handleConditionChange = (updatedCondition: Condition) => {
-    onConditionChange(emptyEqualsToAlways(updatedCondition));
-  };
+  const handleConditionChange = useCallback(
+    (updatedCondition: Condition) => {
+      onConditionChange(emptyEqualsToAlways(updatedCondition));
+    },
+    [onConditionChange]
+  );
+
+  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+  const syntaxEditorValueRef = useRef(syntaxEditorValue);
+  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
+
+  const debouncedEmitConditionChange = useMemo(() => {
+    return debounce(
+      (nextCondition: Condition) => {
+        handleConditionChange(nextCondition);
+      },
+      SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS,
+      { trailing: true }
+    );
+  }, [handleConditionChange]);
+
+  useEffect(() => {
+    return () => {
+      // Make sure the last valid condition is not lost on unmount.
+      debouncedEmitConditionChange.flush();
+      debouncedEmitConditionChange.cancel();
+    };
+  }, [debouncedEmitConditionChange]);
+
+  useEffect(() => {
+    // Keep the syntax editor in sync with external condition updates, but only when the user
+    // hasn't diverged from the last serialized value (so we don't clobber in-progress edits).
+    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+    }
+    lastSyncedSerializedConditionRef.current = serializedCondition;
+  }, [serializedCondition]);
+
+  const flushSyntaxEditorCondition = useCallback(() => {
+    const currentValue = syntaxEditorValueRef.current;
+    if (currentValue === lastSyncedSerializedConditionRef.current) {
+      debouncedEmitConditionChange.cancel();
+      return;
+    }
+    try {
+      const parsed = JSON.parse(currentValue) as Condition;
+      debouncedEmitConditionChange.cancel();
+      handleConditionChange(parsed);
+    } catch (error: unknown) {
+      // do nothing
+    }
+  }, [debouncedEmitConditionChange, handleConditionChange]);
 
   return (
     <EuiFormRow
@@ -145,14 +199,18 @@ export function ConditionEditor(props: ConditionEditorProps) {
           dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
           languageId="json"
-          value={JSON.stringify(condition, null, 2)}
+          value={syntaxEditorValue}
           onChange={(value) => {
+            syntaxEditorValueRef.current = value;
+            setSyntaxEditorValue(value);
             try {
-              handleConditionChange(JSON.parse(value));
+              const parsed = JSON.parse(value) as Condition;
+              debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {
-              // do nothing
+              debouncedEmitConditionChange.cancel();
             }
           }}
+          onBlur={flushSyntaxEditorCondition}
           options={{
             readOnly: status === 'disabled',
             automaticLayout: true,

@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -30,6 +29,7 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import { O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -53,7 +53,7 @@ import { ErrorSampleContextualInsight } from './error_sample_contextual_insight'
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
-import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -95,7 +95,10 @@ export function ErrorSampleDetails({
 
   const router = useApmRouter();
 
-  const { query } = useAnyOfApmParams(
+  const {
+    query,
+    path: { groupId },
+  } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
@@ -130,7 +133,7 @@ export function ErrorSampleDetails({
   const externalContextMenuItems = useAsync(() => {
     return getContextMenuItemsFromActions({
       uiActions,
-      triggerId: ObservabilityTriggerId.ApmErrorContextMenu,
+      triggerId: O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER,
       context: {
         error,
         transaction,
@@ -204,7 +207,18 @@ export function ErrorSampleDetails({
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
-          <OpenErrorInDiscoverButton dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton" />
+          <OpenInDiscover
+            dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+            variant="button"
+            indexType="error"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName: error?.service.name,
+              errorGroupId: groupId,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

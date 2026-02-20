@@ -84,6 +84,13 @@ export class GettingStarted {
     return this.page.testSubj.locator(`console_tutorials_${tutorialId}-btn`);
   }
 
+  async getTutorialCards() {
+    // Use CSS selector to match cards starting with console_tutorials_ but exclude -btn elements
+    return this.page
+      .locator('[data-test-subj^="console_tutorials_"]:not([data-test-subj$="-btn"])')
+      .all();
+  }
+
   async clickTutorialCard(tutorialId: string) {
     await this.page.testSubj.locator(`console_tutorials_${tutorialId}`).click();
   }
@@ -100,6 +107,22 @@ export class GettingStarted {
     );
     await button.scrollIntoViewIfNeeded();
     await button.click();
+  }
+
+  async expandTutorialCards() {
+    const buttonText = await (await this.getTutorialExpandButton()).innerText();
+    if (buttonText.includes('Show less')) {
+      return; // Already expanded
+    }
+    await this.clickTutorialExpandButton();
+  }
+
+  async collapseTutorialCards() {
+    const buttonText = await (await this.getTutorialExpandButton()).innerText();
+    if (buttonText.includes('Show more')) {
+      return; // Already collapsed
+    }
+    await this.clickTutorialExpandButton();
   }
 
   async getTutorialExpandButton() {

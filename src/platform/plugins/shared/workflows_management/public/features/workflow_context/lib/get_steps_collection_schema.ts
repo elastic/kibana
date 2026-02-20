@@ -26,8 +26,20 @@ export function getStepsCollectionSchema(
   if (!stepNode) {
     throw new Error(`Step with id ${stepId} not found in the workflow graph.`);
   }
-  // reverse predecessors so the earliest steps are first and will be available when we reach the later ones
-  const predecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
+  // Reverse predecessors so the earliest steps are first and will be available when we reach the later ones.
+  // Deduplicate by stepId: structural nodes (enter-if/exit-if, enter-foreach/exit-foreach, etc.)
+  // share the same stepId, and processing both would cause the later one to overwrite the first.
+  // We keep the first occurrence per stepId since the earliest node (e.g. enter-foreach) carries
+  // the configuration needed for special schema handling (like getForeachStateSchema).
+  const allPredecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
+  const seenStepIds = new Set<string>();
+  const predecessors = allPredecessors.filter((node) => {
+    if (seenStepIds.has(node.stepId)) {
+      return false;
+    }
+    seenStepIds.add(node.stepId);
+    return true;
+  });
 
   if (predecessors.length === 0) {
     return z.object({});

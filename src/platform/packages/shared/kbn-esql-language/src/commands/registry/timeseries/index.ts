@@ -28,6 +28,7 @@ export const timeseriesCommand = {
     type: 'source' as const,
     hidden: false,
     preview: true,
+    isTimeseries: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +

@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRole } from '../../../../../common';
-import { PROJECT_DEFAULT_ROLES } from '../../../../../common';
+import { getPrivilegedRoleName } from '../../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
 export type LoginFunction = (role: string) => Promise<void>;
@@ -78,12 +78,10 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
 
     const loginAsAdmin = () => loginAs('admin');
     const loginAsViewer = () => loginAs('viewer');
-    const loginAsPrivilegedUser = () => {
-      const roleName = config.serverless
-        ? PROJECT_DEFAULT_ROLES.get(config.projectType!)!
-        : 'editor';
-      return loginAs(roleName);
-    };
+    const loginAsPrivilegedUser = () =>
+      loginAs(
+        getPrivilegedRoleName({ serverless: config.serverless, projectType: config.projectType! })
+      );
 
     log.serviceLoaded('browserAuth');
     await use({

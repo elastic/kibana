@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
+import {
+  apiKeyAsAlertAttributes,
+  apiKeyAsRuleDomainProperties,
+} from './api_key_as_alert_attributes';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {
@@ -64,5 +67,78 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
     });
+  });
+
+  test('returns UIAM API Key as well', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          result: {
+            id: '123',
+            name: '123',
+            api_key: 'abc',
+          },
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        false
+      )
+    ).toEqual({
+      apiKey: 'MTIzOmFiYw==',
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: false,
+      uiamApiKey: 'NDU2OmRlZg==',
+    });
+  });
+
+  test('returns only UIAM API Key when ES API Key is not provided', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'NDU2OmRlZg==',
+    });
+  });
+
+  test('does not create both API keys when createdByUser is true', () => {
+    expect(() =>
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          result: {
+            id: '123',
+            name: '123',
+            api_key: 'abc',
+          },
+          uiamResult: {
+            id: '456',
+            name: '456',
+            api_key: 'def',
+          },
+        },
+        'test',
+        true
+      )
+    ).toThrow(
+      'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
+    );
   });
 });

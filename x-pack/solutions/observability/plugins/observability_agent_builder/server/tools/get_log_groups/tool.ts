@@ -65,7 +65,7 @@ const getLogsSchema = z.object({
     .describe(
       dedent`Include firstSeen timestamp for application exception groups. Useful for detecting new exceptions.`
     ),
-  size: z.number().optional().default(20).describe('Maximum number of log groups to return.'),
+  limit: z.number().optional().default(20).describe('Maximum number of log groups to return.'),
 });
 
 export function createGetLogGroupsTool({
@@ -110,7 +110,7 @@ export function createGetLogGroupsTool({
       },
     },
     handler: async (toolParams, context) => {
-      const { index, start, end, kqlFilter, fields, includeStackTrace, includeFirstSeen, size } =
+      const { index, start, end, kqlFilter, fields, includeStackTrace, includeFirstSeen, limit } =
         toolParams;
       const { request, esClient } = context;
 
@@ -128,7 +128,7 @@ export function createGetLogGroupsTool({
           fields,
           includeStackTrace,
           includeFirstSeen,
-          size,
+          size: limit,
         });
 
         return {

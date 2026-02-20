@@ -8,11 +8,11 @@
 
 import { downloadAndStoreAgent, isAgentDownloadFromDiskAvailable } from './agent_downloads_service';
 import fs from 'fs';
-import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
 
+const mockedFetch = jest.spyOn(global, 'fetch');
+
 jest.mock('fs');
-jest.mock('node-fetch');
 jest.mock('stream/promises', () => ({
   finished: jest.fn(),
 }));
@@ -33,11 +33,28 @@ describe('AgentDownloadStorage', () => {
 
   it('downloads and stores the agent if not cached', async () => {
     (fs.existsSync as unknown as jest.Mock).mockReturnValue(false);
-    (fs.createWriteStream as unknown as jest.Mock).mockReturnValue({
-      on: jest.fn(),
+    // Create a more complete mock WriteStream that supports pipe operations
+    const mockWriteStream = {
+      on: jest.fn().mockReturnThis(),
+      once: jest.fn().mockReturnThis(),
+      emit: jest.fn().mockReturnThis(),
       end: jest.fn(),
-    });
-    (nodeFetch as unknown as jest.Mock).mockResolvedValue({ body: { pipe: jest.fn() } });
+      write: jest.fn().mockReturnValue(true),
+      removeListener: jest.fn().mockReturnThis(),
+      removeAllListeners: jest.fn().mockReturnThis(),
+      writable: true,
+    };
+    (fs.createWriteStream as unknown as jest.Mock).mockReturnValue(mockWriteStream);
+    // Create a mock Response with all required properties
+    // Using a plain object that satisfies the Response interface used by the code
+    const mockBody = new ReadableStream();
+    const mockResponse = {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      body: mockBody,
+    } as unknown as Response;
+    mockedFetch.mockResolvedValue(mockResponse);
     (finished as unknown as jest.Mock).mockResolvedValue(undefined);
 
     const result = await downloadAndStoreAgent(url, fileName);

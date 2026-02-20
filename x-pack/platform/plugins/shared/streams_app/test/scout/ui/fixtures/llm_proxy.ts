@@ -99,6 +99,7 @@ export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
   next: (msg: string | ToolMessage) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
@@ -380,6 +381,7 @@ export class LlmProxy {
         await simulator.complete();
         return simulator;
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   }
 }

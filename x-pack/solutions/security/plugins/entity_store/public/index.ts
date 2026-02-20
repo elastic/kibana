@@ -7,6 +7,8 @@
 
 import { EntityStorePlugin } from './plugin';
 
+export { useInstallEntityStoreV2 } from './hooks/useInstallEntityStoreV2';
+
 export function plugin() {
   return new EntityStorePlugin();
 }

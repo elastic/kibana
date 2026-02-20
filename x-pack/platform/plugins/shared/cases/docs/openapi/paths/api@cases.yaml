@@ -22,7 +22,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json:
+        application/json:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
           examples:
@@ -33,8 +33,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
- 
+            $ref: '../components/schemas/response_4xx.yaml'
+
 delete:
   summary: Delete cases
   operationId: deleteCaseDefaultSpace
@@ -56,20 +56,20 @@ delete:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'
   x-code-samples:
-  - label: curl
-    lang: curl
-    source: |
-      curl \
-        --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
-        --header "Authorization: $API_KEY" \
-        --header "Content-Type: application/json"
-        --header "kbn-xsrf: true"
-  - label: Console
-    lang: console
-    source: |
-      DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
+    - label: curl
+      lang: curl
+      source: |
+        curl \
+          --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
+          --header "Authorization: $API_KEY" \
+          --header "Content-Type: application/json"
+          --header "kbn-xsrf: true"
+    - label: Console
+      lang: console
+      source: |
+        DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
 patch:
   summary: Update cases
   operationId: updateCaseDefaultSpace
@@ -106,4 +106,4 @@ patch:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'

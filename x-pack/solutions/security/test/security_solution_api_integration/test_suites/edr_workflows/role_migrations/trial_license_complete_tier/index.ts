@@ -7,7 +7,8 @@
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('Endpoint related user role migrations, feature deprecations', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/250957
+  describe.skip('Endpoint related user role migrations, feature deprecations', function () {
     loadTestFile(require.resolve('./siem_artifact_api_actions'));
     loadTestFile(require.resolve('./siem_artifact_sub_privileges'));
   });

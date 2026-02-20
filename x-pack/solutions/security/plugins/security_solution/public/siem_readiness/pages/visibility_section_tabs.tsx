@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MainCategories } from '@kbn/siem-readiness';
 import type { VisibilityTabId } from './visibility_section_boxes';
 import { CoverageTab } from './tabs/coverage_tab/coverage_tab';
 import { QualityTab } from './tabs/quality/quality_tab';
@@ -17,11 +18,13 @@ import { RetentionTab } from './tabs/retention/retention_tab';
 interface VisibilitySectionTabsProps {
   selectedTabId: VisibilityTabId;
   onTabSelect: (tabId: VisibilityTabId) => void;
+  activeCategories: MainCategories[];
 }
 
 export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
   selectedTabId,
   onTabSelect,
+  activeCategories,
 }) => {
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -29,6 +32,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.tab.title', {
         defaultMessage: 'Coverage',
       }),
+      /* Configuration panel won't be affecting Coverage tab as per plan */
       content: <CoverageTab />,
     },
     {
@@ -36,14 +40,14 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.tab.title', {
         defaultMessage: 'Quality',
       }),
-      content: <QualityTab />,
+      content: <QualityTab activeCategories={activeCategories} />,
     },
     {
       id: 'continuity',
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.continuity.tab.title', {
         defaultMessage: 'Continuity',
       }),
-      content: <ContinuityTab />,
+      content: <ContinuityTab activeCategories={activeCategories} />,
     },
     {
       id: 'retention',

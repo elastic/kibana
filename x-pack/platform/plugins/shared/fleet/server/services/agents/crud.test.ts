@@ -81,9 +81,11 @@ describe('Agents CRUD test', () => {
     ids: string[],
     total: number,
     status: AgentStatus,
-    generateSource: (id: string) => Partial<Agent> = () => ({})
+    generateSource: (id: string) => Partial<Agent> = () => ({}),
+    pitId?: string
   ) {
     return {
+      ...(pitId ? { pit_id: pitId } : {}),
       hits: {
         total,
         hits: ids.map((id: string) => ({
@@ -175,6 +177,38 @@ describe('Agents CRUD test', () => {
   });
 
   describe('getAgentsByKuery', () => {
+    it('should roll forward PIT id from search responses', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
+
+      const firstRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: 'pit-1',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-1' }),
+        })
+      );
+      expect(firstRes.pit).toBe('pit-2');
+
+      searchMock.mockResolvedValueOnce(getEsResponse(['2'], 1, 'online', () => ({}), 'pit-3'));
+
+      const secondRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: firstRes.pit,
+      });
+
+      expect(searchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-2' }),
+        })
+      );
+      expect(secondRes.pit).toBe('pit-3');
+    });
+
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() =>
@@ -563,6 +597,34 @@ describe('Agents CRUD test', () => {
         ).rejects.toThrow('Oh no!');
 
         expect(searchMock).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('kuery replace attributes', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should replace .attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({ 'agent.agent.id': 'agent1' });
+      });
+
+      it('should not replace identifying_attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.identifying_attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({
+          'agent.identifying_attributes.agent.id': 'agent1',
+        });
       });
     });
   });

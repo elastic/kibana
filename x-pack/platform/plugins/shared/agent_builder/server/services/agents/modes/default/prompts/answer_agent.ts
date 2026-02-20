@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
@@ -30,6 +31,9 @@ export const getAnswerAgentPrompt = async (
 
   return [
     ['system', getAnswerSystemMessage(params)],
+    ...getConversationAttachmentsSystemMessages(
+      params.processedConversation.versionedAttachmentPresentation
+    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
@@ -158,6 +162,9 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
+    ...getConversationAttachmentsSystemMessages(
+      processedConversation.versionedAttachmentPresentation
+    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),

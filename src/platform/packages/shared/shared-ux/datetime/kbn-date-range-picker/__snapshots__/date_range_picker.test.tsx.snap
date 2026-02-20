@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DateRangePicker renders 1`] = `
+<div
+  class="euiPopover emotion-euiPopover-block-DateRangePickerDialog"
+>
+  <div
+    class="css-sai07k-containerStyles"
+  >
+    <div
+      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
+    >
+      <div
+        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      >
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+          id="generated-id-wrapper"
+        >
+          <button
+            class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
+            data-test-subj="dateRangePickerControlButton"
+            type="button"
+            value="Last 20 minutes"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
+            >
+              <span
+                class="eui-textTruncate css-z3gg36-textContent"
+              >
+                Last 20 minutes
+              </span>
+               
+              <span
+                class="euiBadge emotion-euiBadge-default"
+                title="20min"
+              >
+                <span
+                  class="euiBadge__content emotion-euiBadge__content"
+                >
+                  <span
+                    class="euiBadge__text emotion-euiBadge__text"
+                  >
+                    20min
+                  </span>
+                </span>
+              </span>
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

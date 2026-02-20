@@ -168,19 +168,22 @@ export async function updateAgentPolicySpaces({
 
   // Update agent actions
   if (agentIndexExists) {
-    const pitId = await openPointInTime(esClient);
+    let pitId = await openPointInTime(esClient);
 
     try {
       let hasMore = true;
       let searchAfter: SortResults | undefined;
       while (hasMore) {
-        const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
+        const { agents, pit } = await getAgentsByKuery(esClient, newSpaceSoClient, {
           kuery: `policy_id:"${agentPolicyId}"`,
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,
           searchAfter,
         });
+        if (pit) {
+          pitId = pit;
+        }
 
         if (agents.length === 0) {
           hasMore = false;

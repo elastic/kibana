@@ -13,6 +13,8 @@ export type MutableNode = Node & {
   value?: string;
   toolResultId?: string;
   chartType?: string;
+  attachmentId?: string;
+  attachmentVersion?: string;
 };
 
 export const createTagParser = <T extends Record<string, string | undefined>>(config: {
@@ -40,8 +42,8 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
           visitParent(child as Parent);
         }
 
-        if (child.type !== 'html') {
-          continue; // terminate iteration if not html node
+        if (child.type !== 'html' && child.type !== 'text') {
+          continue; // terminate iteration if not html/text node
         }
 
         const rawValue = child.value;

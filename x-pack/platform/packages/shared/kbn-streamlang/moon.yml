@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/esql-language'
   - '@kbn/tinymath'
+  - '@kbn/grok-ui'
 tags:
   - shared-common
   - package

@@ -19,10 +19,6 @@ import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
-import { HapiInstrumentation } from '@opentelemetry/instrumentation-hapi';
 import { EvalSpanProcessor } from './eval_span_processor';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
@@ -39,39 +35,6 @@ export function initTracing({
   resource: resources.Resource;
   tracingConfig: TracingConfig;
 }) {
-  /**
-   * Auto-instrumentation is intentionally opt-in.
-   *
-   * It can increase trace volume significantly, and Kibana generally relies on explicit
-   * instrumentation for tracing. For evals, enabling this provides request-scoped context
-   * propagation (so W3C baggage like `kibana.evals.run_id` can be extracted and attached).
-   */
-  if (process.env.KBN_OTEL_AUTO_INSTRUMENTATIONS === 'true') {
-    // Register OpenTelemetry auto-instrumentations once per process.
-    // NOTE: these instrumentations must not be enabled alongside Elastic APM.
-    const INSTRUMENTATIONS_REGISTERED = Symbol.for('kbn.tracing.instrumentations_registered');
-    if (!(globalThis as any)[INSTRUMENTATIONS_REGISTERED]) {
-      (globalThis as any)[INSTRUMENTATIONS_REGISTERED] = true;
-      registerInstrumentations({
-        instrumentations: [
-          // Kibana runs on Hapi. This instrumentation gives us higher-level request spans
-          // and ensures context propagation for request-scoped correlation (like eval run ids).
-          new HapiInstrumentation(),
-          // Create incoming HTTP server spans and extract trace context + baggage.
-          new HttpInstrumentation({
-            // Only create outgoing spans when there is an active parent span.
-            // This keeps noise down and ensures spans remain connected to request traces.
-            requireParentforOutgoingSpans: true,
-          }),
-          // undici is used by Elasticsearch client; require a parent so we don't create a new trace per request.
-          new UndiciInstrumentation({
-            requireParentforSpans: true,
-          }),
-        ],
-      });
-    }
-  }
-
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
@@ -114,6 +77,10 @@ export function initTracing({
 
       case 'grpc':
         LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'grpc'));
+        break;
+
+      case 'proto':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'proto'));
         break;
 
       case 'http':

@@ -10,10 +10,10 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Walker, within } from '../../ast';
 import { Parser } from '../../parser';
 
-import { type ESQLFunction, type ESQLSingleAstItem, type ESQLSource } from '../../types';
+import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '../../types';
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
-import { getVariablesHoverContent } from './helpers';
+import { getPromqlHoverItem, getVariablesHoverContent } from './helpers';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
 import { getPolicyHover } from './get_policy_hover';
 import { getFunctionSignatureHover } from './get_function_signature_hover';
@@ -29,6 +29,12 @@ interface HoverContent {
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
   const correctedQuery = correctQuerySyntax(fullText, offset);
   const { root } = Parser.parse(correctedQuery);
+
+  const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
+
+  if (commandAtOffset?.name === 'promql') {
+    return getPromqlHoverItem(root, offset);
+  }
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
   let node: ESQLSingleAstItem | undefined;

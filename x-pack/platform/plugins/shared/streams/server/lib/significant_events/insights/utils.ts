@@ -6,12 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type { Insight } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
+import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
 
@@ -94,10 +94,10 @@ export async function collectQueryData({
       track_total_hits: true,
     })
     .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      const { type, message } = parseError(err);
+      if (type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read Significant events, insufficient privileges: ${err.message}`,
+          `Cannot read Significant events, insufficient privileges: ${message}`,
           { cause: err }
         );
       }

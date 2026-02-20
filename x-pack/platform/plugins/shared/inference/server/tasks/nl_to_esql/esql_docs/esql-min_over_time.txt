@@ -1,0 +1,26 @@
+# MIN_OVER_TIME
+
+Calculates the minimum value of a field over a specified time window.
+
+## Syntax
+
+`MIN_OVER_TIME(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the minimum value for.
+
+#### window
+
+The time window over which to compute the minimum.
+
+## Examples
+
+Calculates the sum of the minimum network cost within each 1-minute time bucket, grouped by cluster.
+
+```esql
+TS k8s
+| STATS cost=SUM(MIN_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)
+```

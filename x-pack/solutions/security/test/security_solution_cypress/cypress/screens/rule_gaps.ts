@@ -17,3 +17,8 @@ export const GAP_AUTO_FILL_LOGS_STATUS_FILTER =
 export const GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON =
   '[data-test-subj="gap-auto-fill-logs-status-filter-popoverButton"]';
 export const GAP_AUTO_FILL_LOGS_TABLE = '[data-test-subj="gap-auto-fill-logs-table"]';
+
+export const GAP_SCHEDULER_ERRORS_CALLOUT = '[data-test-subj="gap-scheduler-errors-callout"]';
+export const GAP_SCHEDULER_ERRORS_LOGS_LINK = '[data-test-subj="gap-scheduler-errors-logs-link"]';
+export const GAP_SCHEDULER_ERRORS_CALLOUT_DISMISS_BUTTON =
+  '[data-test-subj="euiDismissCalloutButton"]';

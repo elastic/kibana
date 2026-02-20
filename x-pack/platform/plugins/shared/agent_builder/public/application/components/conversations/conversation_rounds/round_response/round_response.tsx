@@ -9,6 +9,10 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
@@ -19,6 +23,10 @@ export interface RoundResponseProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
   hasError: boolean;
+  isLastRound: boolean;
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -26,6 +34,10 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
+  isLastRound,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
 }) => (
   <EuiFlexGroup
     direction="column"
@@ -40,14 +52,26 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   >
     <EuiFlexItem>
       {isLoading ? (
-        <StreamingText content={message} steps={steps} />
+        <StreamingText
+          content={message}
+          steps={steps}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={attachmentRefs}
+          conversationId={conversationId}
+        />
       ) : (
-        <ChatMessageText content={message} steps={steps} />
+        <ChatMessageText
+          content={message}
+          steps={steps}
+          conversationAttachments={conversationAttachments}
+          attachmentRefs={attachmentRefs}
+          conversationId={conversationId}
+        />
       )}
     </EuiFlexItem>
     {!isLoading && !hasError && (
       <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible />
+        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

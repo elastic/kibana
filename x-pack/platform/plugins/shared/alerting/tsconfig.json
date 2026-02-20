@@ -74,6 +74,7 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
     "@kbn/expect",
+    "@kbn/cps",
   ],
   "exclude": ["target/**/*"]
 }

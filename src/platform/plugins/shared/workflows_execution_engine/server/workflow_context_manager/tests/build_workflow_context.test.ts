@@ -50,6 +50,64 @@ describe('buildWorkflowContext', () => {
     cancelRequested: false,
   };
 
+  describe('execution context', () => {
+    it('should include executedBy and triggeredBy in execution context', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'user@example.com',
+        executedBy: 'user@example.com',
+        triggeredBy: 'manual',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('user@example.com');
+      expect(context.execution.triggeredBy).toBe('manual');
+    });
+
+    it('should default to unknown when executedBy is undefined', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'legacy-user',
+        executedBy: undefined,
+        triggeredBy: 'manual',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('unknown');
+      expect(context.execution.triggeredBy).toBe('manual');
+    });
+
+    it('should handle undefined executedBy and triggeredBy', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'system',
+        executedBy: undefined,
+        triggeredBy: undefined,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('unknown');
+      expect(context.execution.triggeredBy).toBeUndefined();
+    });
+
+    it('should include triggeredBy as scheduled for automated executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'system',
+        executedBy: 'system',
+        triggeredBy: 'scheduled',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('system');
+      expect(context.execution.triggeredBy).toBe('scheduled');
+    });
+  });
+
   describe('input default values', () => {
     it('should merge default input values when inputs are not provided', () => {
       const workflowDefinition: WorkflowYaml = {
@@ -376,6 +434,83 @@ describe('buildWorkflowContext', () => {
 
       // Should use empty object for undefined consts
       expect(context.consts).toEqual({});
+    });
+  });
+
+  describe('event context shape', () => {
+    it('should pass through event with spaceId for manual trigger executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          triggers: [{ type: 'manual' }],
+        },
+        context: {
+          event: {
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.event).toBeDefined();
+      expect(context.event?.spaceId).toBe('default');
+      // Manual trigger should not have alert-specific properties
+      expect(context.event).not.toHaveProperty('alerts');
+      expect(context.event).not.toHaveProperty('rule');
+    });
+
+    it('should pass through event with alerts, rule, and spaceId for alert trigger executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          triggers: [{ type: 'alert' }],
+        },
+        context: {
+          event: {
+            spaceId: 'default',
+            alerts: [
+              {
+                _id: 'alert-1',
+                _index: '.alerts-default',
+                kibana: { alert: { status: 'active' } },
+                '@timestamp': '2026-02-17T00:00:00.000Z',
+              },
+            ],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['security'],
+              consumer: 'siem',
+              producer: 'siem',
+              ruleTypeId: 'siem.queryRule',
+            },
+            params: { threshold: 10 },
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.event).toBeDefined();
+      expect(context.event?.spaceId).toBe('default');
+      expect(context.event?.alerts).toHaveLength(1);
+      expect(context.event?.alerts?.[0]._id).toBe('alert-1');
+      expect(context.event?.rule?.name).toBe('Test Rule');
+      expect(context.event?.params).toEqual({ threshold: 10 });
+    });
+
+    it('should handle undefined event context gracefully', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.event).toBeUndefined();
     });
 
     it('should handle when workflowInputs parameter is undefined (uses default)', () => {

@@ -7,6 +7,7 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { MapEmbeddableState } from '../../common';
@@ -43,8 +44,11 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     getIconForSavedObject: () => APP_ICON,
   });
 
-  embeddableSetup.registerLegacyURLTransform(MAP_SAVED_OBJECT_TYPE, async () => {
-    const { getTransformOut } = await import('./embeddable_module');
-    return getTransformOut(embeddableSetup.transformEnhancementsOut);
-  });
+  embeddableSetup.registerLegacyURLTransform(
+    MAP_SAVED_OBJECT_TYPE,
+    async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+      const { getTransformOut } = await import('./embeddable_module');
+      return getTransformOut(transformDrilldownsOut);
+    }
+  );
 }

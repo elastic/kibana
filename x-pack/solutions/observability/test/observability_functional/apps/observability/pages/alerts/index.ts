@@ -257,7 +257,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('Failed transaction rate threshold breached');
+              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
             });
           });
 

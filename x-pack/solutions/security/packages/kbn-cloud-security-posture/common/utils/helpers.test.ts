@@ -500,21 +500,21 @@ describe('test helper methods', () => {
   describe('getEntitiesLatestIndexName', () => {
     it('should return the index name with the provided spaceId', () => {
       const indexName = getEntitiesLatestIndexName('default');
-      const expected = '.entities.v2.latest.security_generic_default';
+      const expected = '.entities.v2.latest.security_default';
       expect(indexName).toEqual(expected);
     });
 
     it('should return a index name with a custom space', () => {
       const space = 'test-space';
       const indexName = getEntitiesLatestIndexName(space);
-      const expected = '.entities.v2.latest.security_generic_test-space';
+      const expected = '.entities.v2.latest.security_test-space';
       expect(indexName).toEqual(expected);
     });
 
     it('should handle special characters in space IDs', () => {
       const space = 'special-chars_123';
       const indexName = getEntitiesLatestIndexName(space);
-      const expected = '.entities.v2.latest.security_generic_special-chars_123';
+      const expected = '.entities.v2.latest.security_special-chars_123';
       expect(indexName).toEqual(expected);
     });
 
@@ -524,8 +524,8 @@ describe('test helper methods', () => {
       const indexName1 = getEntitiesLatestIndexName(space1);
       const indexName2 = getEntitiesLatestIndexName(space2);
       expect(indexName1).not.toEqual(indexName2);
-      expect(indexName1).toEqual('.entities.v2.latest.security_generic_space1');
-      expect(indexName2).toEqual('.entities.v2.latest.security_generic_space2');
+      expect(indexName1).toEqual('.entities.v2.latest.security_space1');
+      expect(indexName2).toEqual('.entities.v2.latest.security_space2');
     });
   });
 });

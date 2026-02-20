@@ -223,6 +223,15 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "network_direction": Object {
+        "destination_ip": "destination_ip",
+        "internal_networks": Array [
+          "private",
+        ],
+        "source_ip": "source_ip",
+      },
+    },
+    Object {
       "script": Object {
         "if": undefined,
         "ignore_failure": undefined,

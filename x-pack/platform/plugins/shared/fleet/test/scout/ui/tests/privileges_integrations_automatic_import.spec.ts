@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
@@ -15,7 +16,7 @@ import {
   getAutomaticImportConnectorAllRole,
 } from '../fixtures/services/privileges';
 
-test.describe('Integrations automatic import privileges', { tag: ['@ess'] }, () => {
+test.describe('Integrations automatic import privileges', { tag: tags.stateful.classic }, () => {
   test.beforeAll(({ config }) => {
     // TODO: Remove when custom roles in ECH are supported by Scout https://github.com/elastic/appex-qa-team/issues/665
     // The following line will skip all tests in this suite when running on ECH

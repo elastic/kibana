@@ -45,6 +45,19 @@ const getRecommendedPackage = (filePath) => {
   return '@kbn/scout';
 };
 
+/**
+ * Checks if a specifier is an expect import.
+ * @param {import("@typescript-eslint/typescript-estree").TSESTree.ImportSpecifier} specifier
+ * @returns {boolean}
+ */
+const isExpectSpecifier = (specifier) => {
+  return (
+    specifier.type === 'ImportSpecifier' &&
+    specifier.imported &&
+    specifier.imported.name === 'expect'
+  );
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -77,12 +90,7 @@ module.exports = {
       ImportDeclaration(node) {
         const source = node.source.value;
 
-        const hasExpectImport = node.specifiers.some(
-          (specifier) =>
-            specifier.type === 'ImportSpecifier' &&
-            specifier.imported &&
-            specifier.imported.name === 'expect'
-        );
+        const hasExpectImport = node.specifiers.some(isExpectSpecifier);
 
         if (!hasExpectImport) {
           return;
@@ -91,6 +99,13 @@ module.exports = {
         if (source === recommendedImport) {
           return;
         }
+
+        // Get all specifiers except 'expect'
+        const otherSpecifiers = node.specifiers.filter(
+          (specifier) => !isExpectSpecifier(specifier)
+        );
+
+        const expectSpecifier = node.specifiers.find(isExpectSpecifier);
 
         context.report({
           node: node.source,
@@ -101,7 +116,105 @@ module.exports = {
             actualImport: source,
           },
           fix(fixer) {
-            return fixer.replaceText(node.source, `'${recommendedImport}'`);
+            const sourceText = context.getSourceCode();
+            // Preserve the alias if present (e.g., "expect as e" or just "expect")
+            const importedName = expectSpecifier.imported?.name || 'expect';
+            const localName = expectSpecifier.local?.name;
+            const expectImportSpecifier =
+              localName && localName !== importedName
+                ? `${importedName} as ${localName}`
+                : importedName;
+
+            // Check if there's already an import from the recommended package
+            const ast = sourceText.ast;
+            const existingImport = ast.body.find(
+              (stmt) =>
+                stmt.type === 'ImportDeclaration' &&
+                stmt.source.value === recommendedImport &&
+                stmt !== node
+            );
+
+            // If expect is the only import, replace the whole import with the correct one
+            if (otherSpecifiers.length === 0) {
+              // If there's an existing import from the correct package, add expect to it and remove this one
+              if (existingImport) {
+                const existingSpecifiers = existingImport.specifiers || [];
+                const hasExpectAlready = existingSpecifiers.some(isExpectSpecifier);
+                if (hasExpectAlready) {
+                  // Already has expect, just remove this import
+                  return fixer.remove(node);
+                }
+                // Add expect to existing import
+                const existingSpecifiersText = existingSpecifiers
+                  .map((spec) => sourceText.getText(spec))
+                  .join(', ');
+                const newSpecifiersText = existingSpecifiersText
+                  ? `${existingSpecifiersText}, ${expectImportSpecifier}`
+                  : expectImportSpecifier;
+                const updatedImport = `import { ${newSpecifiersText} } from '${recommendedImport}';`;
+                return [fixer.remove(node), fixer.replaceText(existingImport, updatedImport)];
+              }
+              // No existing import, just replace this one
+              return fixer.replaceText(
+                node,
+                `import { ${expectImportSpecifier} } from '${recommendedImport}';`
+              );
+            }
+
+            // If there are other imports, remove expect from the existing import
+            const fixes = [];
+
+            // Build the new import without expect
+            let newImportText = 'import ';
+            const defaultSpec = otherSpecifiers.find((s) => s.type === 'ImportDefaultSpecifier');
+            const namespaceSpec = otherSpecifiers.find(
+              (s) => s.type === 'ImportNamespaceSpecifier'
+            );
+            const namedSpecs = otherSpecifiers.filter((s) => s.type === 'ImportSpecifier');
+
+            if (defaultSpec) {
+              newImportText += sourceText.getText(defaultSpec);
+            }
+            if (namespaceSpec) {
+              newImportText += defaultSpec ? ', ' : '';
+              newImportText += sourceText.getText(namespaceSpec);
+            }
+            if (namedSpecs.length > 0) {
+              const namedText = namedSpecs.map((spec) => sourceText.getText(spec)).join(', ');
+              if (defaultSpec || namespaceSpec) {
+                newImportText += `, { ${namedText} }`;
+              } else {
+                newImportText += `{ ${namedText} }`;
+              }
+            }
+            newImportText += ` from ${sourceText.getText(node.source)};`;
+
+            // Replace the existing import (without expect)
+            fixes.push(fixer.replaceText(node, newImportText));
+
+            // Check if we should add to existing import or create new one
+            if (existingImport) {
+              const existingSpecifiers = existingImport.specifiers || [];
+              const hasExpectAlready = existingSpecifiers.some(isExpectSpecifier);
+              if (!hasExpectAlready) {
+                // Add expect to existing import
+                const existingSpecifiersText = existingSpecifiers
+                  .map((spec) => sourceText.getText(spec))
+                  .join(', ');
+                const newSpecifiersText = existingSpecifiersText
+                  ? `${existingSpecifiersText}, ${expectImportSpecifier}`
+                  : expectImportSpecifier;
+                const updatedImport = `import { ${newSpecifiersText} } from '${recommendedImport}';`;
+                fixes.push(fixer.replaceText(existingImport, updatedImport));
+              }
+              // If expect already exists in the correct import, we don't need to add it
+            } else {
+              // No existing import, create a new one
+              const newExpectImport = `import { ${expectImportSpecifier} } from '${recommendedImport}';`;
+              fixes.push(fixer.insertTextAfterRange(node.range, `\n${newExpectImport}`));
+            }
+
+            return fixes;
           },
         });
       },

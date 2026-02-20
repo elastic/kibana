@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import { createServerRoute } from '../../create_server_route';
 import { findConflictingTemplates } from '../../../lib/streams/helpers/validate_template_conflicts';
 
@@ -77,7 +78,9 @@ export const validateClassicStreamRoute = createServerRoute({
         };
       }
     } catch (error) {
-      logger.error(`Unexpected error checking for conflicting index templates: ${error.message}`);
+      logger.error(
+        `Unexpected error checking for conflicting index templates: ${getErrorMessage(error)}`
+      );
       throw error;
     }
 

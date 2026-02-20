@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './engine_descriptor_type';
+export * from './engine_descriptor/constants';
+export * from './engine_descriptor/types';
 export * from './engine_descriptor';
-export * from './constants';

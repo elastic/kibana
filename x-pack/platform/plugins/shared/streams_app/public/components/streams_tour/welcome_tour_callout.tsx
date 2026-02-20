@@ -32,9 +32,11 @@ export function WelcomeTourCallout({
   firstClassicStreamName,
 }: WelcomeTourCalloutProps) {
   const {
-    core: { docLinks },
+    core: { docLinks, notifications },
   } = useKibana();
   const { isCalloutDismissed, dismissCallout, startTour, tourState } = useStreamsTour();
+
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   if (isCalloutDismissed || !hasClassicStreams || tourState.isTourActive) {
     return null;
@@ -84,13 +86,15 @@ export function WelcomeTourCallout({
               <EuiSpacer size="m" />
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton color="primary" size="s" onClick={handleStartTour}>
-                      {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
-                        defaultMessage: 'Start tour',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
+                  {isTourEnabled && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="primary" size="s" onClick={handleStartTour}>
+                        {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
+                          defaultMessage: 'Start tour',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="primary"

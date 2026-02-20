@@ -33,6 +33,7 @@ export interface PackSavedObject {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
+  read_only?: boolean;
   shards: SOShard;
   references: Array<{ name: string; type: string; id: string }>;
 }

@@ -393,4 +393,106 @@ export function initRoutes(
       return response.ok({ body: { attempts, state, status } });
     }
   );
+
+  router.post(
+    {
+      path: '/test_endpoints/api_keys/_grant',
+      validate: false,
+      security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+    },
+    async (_, request, response) => {
+      const [{ security }] = await core.getStartServices();
+
+      const result = await security.authc.apiKeys.grantAsInternalUser(request, {
+        name: 'mock-idp-api-key',
+        kibana_role_descriptors: {},
+      });
+
+      return result
+        ? response.ok({ body: result })
+        : response.badRequest({ body: { message: 'Failed to grant API key' } });
+    }
+  );
+
+  router.post(
+    {
+      path: '/test_endpoints/api_keys/_invalidate',
+      validate: {
+        body: schema.object({ ids: schema.arrayOf(schema.string(), { minSize: 1 }) }),
+      },
+      security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+    },
+    async (_, request, response) => {
+      const [{ security }] = await core.getStartServices();
+
+      const result = await security.authc.apiKeys.invalidateAsInternalUser({
+        ids: request.body.ids,
+      });
+
+      return result
+        ? response.ok({ body: result })
+        : response.badRequest({ body: { message: 'Failed to invalidate API key(s)' } });
+    }
+  );
+
+  router.post(
+    {
+      path: '/test_endpoints/uiam/secondary_auth',
+      validate: {
+        body: schema.object({ apiKey: schema.maybe(schema.string()) }),
+      },
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+      },
+    },
+    async (_, request, response) => {
+      const [{ elasticsearch }] = await core.getStartServices();
+
+      const scopedClient = elasticsearch.client.asScoped(
+        request.body.apiKey
+          ? { headers: { authorization: `ApiKey ${request.body.apiKey}` } }
+          : request
+      );
+
+      return response.ok({
+        body: (await scopedClient.asSecondaryAuthUser.transport.request({
+          method: 'GET',
+          path: `/_metering/stats`,
+        })) as Record<string, unknown>,
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: '/test_endpoints/uiam/scoped_client/_call',
+      validate: {
+        body: schema.object({ apiKey: schema.maybe(schema.string()) }),
+      },
+      security: {
+        authc: { enabled: 'optional' },
+        authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [{ elasticsearch }] = await core.getStartServices();
+
+        const scopedClient = elasticsearch.client.asScoped(
+          request.body.apiKey
+            ? { headers: { authorization: `ApiKey ${request.body.apiKey}` } }
+            : request
+        );
+
+        return response.ok({ body: await scopedClient.asCurrentUser.security.authenticate() });
+      } catch (err) {
+        logger.error(`Failed to authenticate to ES with UIAM API Key: ${err}`, err);
+        return response.customError({
+          statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
 }

@@ -16,6 +16,7 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
 import type {
   SyntheticsPluginsSetupDependencies,
@@ -111,8 +112,10 @@ export class Plugin implements PluginType {
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
-      transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
+      getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
+        transformIn: getTransformIn(drilldownTransforms.transformIn),
+        transformOut: getTransformOut(drilldownTransforms.transformOut),
+      }),
     });
 
     return {};

@@ -36,6 +36,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    isReadonly: true,
     getTools: () => [],
   };
 };

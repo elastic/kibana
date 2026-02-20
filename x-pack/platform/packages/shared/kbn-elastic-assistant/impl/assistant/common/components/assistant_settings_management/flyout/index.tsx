@@ -46,6 +46,7 @@ const FlyoutComponent: React.FC<Props> = ({
       data-test-subj={'flyout'}
       ownFocus
       onClose={onClose}
+      aria-label={title}
       css={css`
         max-width: 656px;
       `}

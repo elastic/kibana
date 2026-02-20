@@ -385,8 +385,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
-    // Failing: https://github.com/elastic/kibana/issues/203045
-    // Failing: https://github.com/elastic/kibana/issues/207865
+    // Failing in Observability projects: https://github.com/elastic/kibana/issues/203045
+    // Failing in MKI Search projects: https://github.com/elastic/kibana/issues/207865
     this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
     before(async () => {
@@ -669,8 +669,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
+      try {
+        await deleteDataView(SOURCE_DATA_VIEW);
+      } catch {
+        // continue
+      }
+
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
       // Navigation to Rule Management is different in Serverless
       await PageObjects.common.navigateToApp('triggersActions');
@@ -699,7 +705,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

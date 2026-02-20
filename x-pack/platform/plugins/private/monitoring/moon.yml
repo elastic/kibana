@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/response-ops-rule-params'
   - '@kbn/kql'
+  - '@kbn/cloud-connect-plugin'
 tags:
   - plugin
   - prod

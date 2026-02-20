@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
+import { deleteAllRules, withSpaceUrl } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-const spaceId = '714-space';
+// Kibana space ID and ES archive with a legacy rule to be migrated on read.
+const SPACE_ID = '714-space';
+const ES_ARCHIVE =
+  'x-pack/solutions/security/test/fixtures/es_archives/security_solution/resolve_read_rules/7_14';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -27,39 +26,36 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess resolve_read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/resolve_read_rules/7_14'
-        );
+        await deleteAllRules(supertest, log);
+        await esArchiver.load(ES_ARCHIVE, { skipExisting: true });
       });
 
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/resolve_read_rules/7_14'
-        );
+        await esArchiver.unload(ES_ARCHIVE);
       });
 
       it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
         // link to the new URL with migrated SO id 74f3e6d7-b7bb-477d-ac28-92ee22728e6e
-        const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
+        const url = `${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
         const readRulesAliasMatchRes = await supertest
-          .get(URL)
+          .get(withSpaceUrl(url, SPACE_ID))
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send();
+
         expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
         expect(readRulesAliasMatchRes.body.alias_purpose).to.eql('savedObjectConversion');
 
         // now that we have the migrated alias_target_id, let's attempt an 'exactMatch' query
         // the result of which should have the outcome as undefined when querying the read rules api.
-        const exactMatchURL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=${readRulesAliasMatchRes.body.alias_target_id}`;
+        const exactMatchUrl = `${DETECTION_ENGINE_RULES_URL}?id=${readRulesAliasMatchRes.body.alias_target_id}`;
         const readRulesExactMatchRes = await supertest
-          .get(exactMatchURL)
+          .get(withSpaceUrl(exactMatchUrl, SPACE_ID))
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send();
+
         expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
       });
 
@@ -144,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             type: 'alert',
             references: [],
-            namespaces: [spaceId],
+            namespaces: [SPACE_ID],
             originId: 'c364e1e0-2615-11ec-811e-db7211397897',
             typeMigrationVersion: '8.0.0',
             coreMigrationVersion: '8.0.0',
@@ -153,13 +149,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // Now that we have a rule id and a legacy-url-alias with the same id, we should have a conflict
-        const conflictURL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
+        const conflictUrl = `${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
         const readRulesConflictRes = await supertest
-          .get(conflictURL)
+          .get(withSpaceUrl(conflictUrl, SPACE_ID))
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
+
         expect(readRulesConflictRes.body.outcome).to.eql('conflict');
       });
     });

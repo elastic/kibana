@@ -60,7 +60,7 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
-import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
+import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -90,7 +90,7 @@ export interface InstallContext extends StateContext<StateNames> {
 /**
  * This data structure defines the sequence of the states and the transitions
  */
-const regularStatesDefinition: StateMachineStates<StateNames> = {
+export const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
@@ -167,11 +167,11 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
-    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    nextState: INSTALL_STATES.CREATE_ALERTING_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
-  create_alerting_rules: {
-    onTransition: stepCreateAlertingRules,
+  create_alerting_assets: {
+    onTransition: stepCreateAlertingAssets,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },
@@ -182,7 +182,7 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
 };
 
-const streamingStatesDefinition: StateMachineStates<string> = {
+export const streamingStatesDefinition: StateMachineStates<string> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onTransition: stepCreateRestartInstallation,
@@ -204,6 +204,7 @@ const streamingStatesDefinition: StateMachineStates<string> = {
     onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   update_so: {
     onPreTransition: cleanUpUnusedKibanaAssetsStep,

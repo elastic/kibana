@@ -8,7 +8,7 @@
  */
 
 import { applyConfigOverrides } from './serve';
-import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
@@ -126,7 +126,7 @@ describe('applyConfigOverrides', () => {
         cloud: {
           organization_id: 'org1234567890',
           projects_url: '',
-          serverless: { project_id: 'abcde1234567890' },
+          serverless: { project_id: 'abcdef12345678901234567890123456' },
         },
         security: {
           authc: {
@@ -147,7 +147,12 @@ describe('applyConfigOverrides', () => {
           uiam: {
             enabled: true,
             sharedSecret: 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=',
-            url: 'http://localhost:8080',
+            url: 'https://localhost:8443',
+            ssl: {
+              certificate: KBN_CERT_PATH,
+              key: KBN_KEY_PATH,
+              verificationMode: 'none',
+            },
           },
         },
       },

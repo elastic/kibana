@@ -53,7 +53,7 @@ export function setupRoutes({
   defineGetCspBenchmarkRulesStatesRoute(router);
   defineGraphRoute(router);
 
-  core.http.registerOnPreRouting(async (request, response, toolkit) => {
+  core.http.registerOnPostAuth(async (request, response, toolkit) => {
     if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {
       try {
         const [coreStart, startDeps] = await core.getStartServices();

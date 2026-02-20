@@ -14,11 +14,12 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { imageClickTrigger } from './actions';
+import {
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 
@@ -36,7 +37,6 @@ export interface ImageEmbeddableStartDependencies {
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -60,15 +60,12 @@ export class ImageEmbeddablePlugin
     core: CoreSetup<ImageEmbeddableStartDependencies>,
     plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
-    plugins.uiActions.registerTrigger(imageClickTrigger);
-
     plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
+      const [_, { getImageEmbeddableFactory }] = await Promise.all([
         untilPluginStartServicesReady(),
         import('./image_embeddable/get_image_embeddable_factory'),
-        core.getStartServices(),
       ]);
-      return getImageEmbeddableFactory({ embeddableEnhanced });
+      return getImageEmbeddableFactory();
     });
     return {};
   }
@@ -86,14 +83,7 @@ export class ImageEmbeddablePlugin
         }
       );
 
-      if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-        // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-        // the create action if the Canvas-specific trigger does indeed exist.
-        plugins.uiActions.attachAction(
-          'ADD_CANVAS_ELEMENT_TRIGGER',
-          ADD_IMAGE_EMBEDDABLE_ACTION_ID
-        );
-      }
+      plugins.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, ADD_IMAGE_EMBEDDABLE_ACTION_ID);
     });
 
     return {};

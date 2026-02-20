@@ -31,21 +31,25 @@ import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
-import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type {
+  VisualizationDimensionEditorProps,
+  MetricVisualizationState,
+  SecondaryTrend,
+  SecondaryTrendType,
+} from '@kbn/lens-common';
 import { css } from '@emotion/react';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_STATE_DEFAULTS,
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
-import {
-  SECONDARY_DEFAULT_STATIC_COLOR,
-  GROUP_ID,
-  metricStateDefaults,
-  legacyMetricStateDefaults,
-} from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -451,7 +455,7 @@ function SecondaryMetricEditor({
     () =>
       state.secondaryTrend?.type === 'static'
         ? state.secondaryTrend.color
-        : SECONDARY_DEFAULT_STATIC_COLOR,
+        : LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     [state]
   );
 
@@ -563,7 +567,7 @@ function SecondaryMetricEditor({
               },
             ]}
             idSelected={`${idPrefix}${
-              state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition
+              state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition
             }`}
             onChange={(_id, secondaryLabelPosition) => {
               setState({
@@ -724,7 +728,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
               setState({
                 ...state,
                 icon: newIcon,
-                iconAlign: legacyMetricStateDefaults.iconAlign,
+                iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
               });
               return;
             }
@@ -733,7 +737,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
             setState({
               ...state,
               icon: newIcon,
-              iconAlign: metricStateDefaults.iconAlign,
+              iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
             });
           }}
         />
@@ -979,7 +983,7 @@ export function DimensionEditorAdditionalSection({
             setState({
               ...state,
               showBar: supportingVisualizationType === 'bar',
-              applyColorTo: metricStateDefaults.applyColorTo,
+              applyColorTo: LENS_METRIC_STATE_DEFAULTS.applyColorTo,
             });
 
             if (supportingVisualizationType === 'trendline') {
@@ -1086,7 +1090,7 @@ export function DimensionEditorAdditionalSection({
               },
             ]}
             idSelected={`${buttonIdPrefix}${
-              state.applyColorTo ?? metricStateDefaults.applyColorTo
+              state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo
             }`}
             onChange={(_id, newApplyColorTo) => {
               setState({
@@ -1210,7 +1214,7 @@ export function DimensionEditorDataExtraComponent({
   setState,
 }: Omit<Props, 'paletteService'>) {
   const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
-  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+  if (!isMetricNumeric || groupId !== LENS_METRIC_GROUP_ID.BREAKDOWN_BY) {
     return null;
   }
   return (

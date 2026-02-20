@@ -27,7 +27,8 @@
       "security",
       "monitoringCollection",
       "serverless",
-      "cloud"
+      "cloud",
+      "usageApi"
     ],
     "extraPublicDirs": [
       "common"

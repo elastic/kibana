@@ -54,7 +54,7 @@ export const getThreatList = async ({
   });
 
   ruleExecutionLogger.debug(
-    `Querying the indicator items from the index: "${threatIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+    `Querying indicator items\nIndex: "${threatIndex}", searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items.`
   );
 
   const response = await esClient.search<
@@ -74,7 +74,7 @@ export const getThreatList = async ({
     pit: { id: pitId },
   });
 
-  ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
+  ruleExecutionLogger.debug(`Indicator items retrieved: ${response.hits.hits.length}`);
 
   reassignPitId(response.pit_id);
 

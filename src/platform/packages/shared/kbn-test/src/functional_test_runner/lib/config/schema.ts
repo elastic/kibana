@@ -230,6 +230,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 

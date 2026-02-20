@@ -46,6 +46,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     ];
     const res = Either.right({
       outdatedDocuments,
+      pitId: 'refreshed_pit_id',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
@@ -54,6 +55,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
 
     expect(newState).toEqual({
       ...state,
+      pitId: 'refreshed_pit_id',
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM',
       outdatedDocuments,
       lastHitSortValue: [12, 24],
@@ -74,6 +76,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     });
     const res = Either.right({
       outdatedDocuments: [],
+      pitId: 'refreshed_pit_id',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
@@ -82,6 +85,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
 
     expect(newState).toEqual({
       ...state,
+      pitId: 'refreshed_pit_id',
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
       logs: expect.any(Array),
     });
@@ -96,6 +100,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     });
     const res = Either.right({
       outdatedDocuments: [],
+      pitId: '42',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
@@ -118,6 +123,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     });
     const res = Either.right({
       outdatedDocuments: [],
+      pitId: '42',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
@@ -142,6 +148,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     });
     const res = Either.right({
       outdatedDocuments: [],
+      pitId: '42',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
@@ -164,6 +171,7 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
     });
     const res = Either.right({
       outdatedDocuments: [],
+      pitId: '42',
       lastHitSortValue: [12, 24],
       totalHits: 9000,
     }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;

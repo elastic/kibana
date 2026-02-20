@@ -169,6 +169,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -200,6 +201,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -231,6 +233,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -333,6 +336,7 @@ describe('Error count alert', () => {
         'service.environment': 'env-foo',
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -369,6 +373,7 @@ describe('Error count alert', () => {
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo-2',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -405,6 +410,7 @@ describe('Error count alert', () => {
         'service.environment': 'env-bar',
         'service.name': 'bar',
         'transaction.name': 'tx-name-bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -508,6 +514,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -542,6 +549,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -576,6 +584,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -672,6 +681,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -703,6 +713,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -734,6 +745,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -832,6 +844,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -864,6 +877,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -895,6 +909,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -1001,6 +1016,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -1038,6 +1054,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -1075,6 +1092,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -1166,6 +1184,7 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });

@@ -85,4 +85,12 @@ describe('Quick search visor', () => {
       expect(screen.getAllByText('logs').length).toBeGreaterThan(0);
     });
   });
+
+  it('should default to the first fetched source when query has no source', async () => {
+    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x =1' }));
+
+    await waitFor(() => {
+      expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
+    });
+  });
 });

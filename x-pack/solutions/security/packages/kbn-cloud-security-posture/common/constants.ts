@@ -115,7 +115,37 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
  * Entity store latest index pattern for LOOKUP JOIN queries.
  * The <space> placeholder should be replaced with the actual space ID.
  */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
+export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
+
+/**
+ * Relationship fields available in the generic entities index.
+ * These represent static/configuration-based relationships between entities.
+ *
+ * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
+ * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
+ * to batch the FORK queries.
+ */
+export const ENTITY_RELATIONSHIP_FIELDS = [
+  'Accesses_frequently',
+  'Communicates_with',
+  'Depends_on',
+  'Owns',
+  'Supervises',
+] as const;
+
+// Keys must match ENTITY_RELATIONSHIP_FIELDS values which use Entity Store naming convention
+/* eslint-disable @typescript-eslint/naming-convention */
+export const ENTITY_RELATIONSHIP_LABELS: Record<
+  (typeof ENTITY_RELATIONSHIP_FIELDS)[number],
+  string
+> = {
+  Accesses_frequently: 'Accesses frequently',
+  Communicates_with: 'Communicates with',
+  Depends_on: 'Depends on',
+  Owns: 'Owns',
+  Supervises: 'Supervises',
+};
+/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * ECS entity actor fields used for graph visualization.

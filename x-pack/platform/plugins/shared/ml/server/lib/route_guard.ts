@@ -131,7 +131,7 @@ export class RouteGuard {
           response,
           context,
           mlSavedObjectService,
-          mlClient: getMlClient(client, mlSavedObjectService, auditLogger),
+          mlClient: getMlClient(client, mlSavedObjectService, auditLogger, this._mlLicense),
           getDataViewsService: getDataViewsServiceFactory(
             this._getDataViews,
             savedObjectClient,

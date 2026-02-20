@@ -53,6 +53,7 @@ export interface UsageStats {
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
+  'agentBuilder:experimentalFeatures': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -187,5 +188,6 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'observability:streamsEnableQueryStreams': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
 }

@@ -203,16 +203,14 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
-      await Promise.all(
-        response.body.results.map(({ id }: { id: string }) => {
-          return supertestWithoutAuth
-            .delete(`/api/observability/slos/${id}`)
-            .set(roleAuthc.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send()
-            .expect(204);
-        })
-      );
+      for (const { id } of response.body.results as Array<{ id: string }>) {
+        await supertestWithoutAuth
+          .delete(`/api/observability/slos/${id}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send()
+          .expect(204);
+      }
     },
 
     async purgeRollupData(

@@ -14,7 +14,6 @@ import {
 } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { FilterStateStore } from '@kbn/es-query';
-import { Frequency } from '@kbn/rrule';
 
 import type { MaintenanceWindowClientContext } from '../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
@@ -58,12 +57,16 @@ describe('MaintenanceWindowClient - create', () => {
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        dtstart: '2023-02-26T00:00:00.000Z',
-        freq: Frequency.WEEKLY,
-        byweekday: ['-4MO', 'TU'],
-        count: 2,
+      schedule: {
+        custom: {
+          start: '2023-02-26T00:00:00.000Z',
+          duration: '1h',
+          recurring: {
+            every: '1w',
+            onWeekDay: ['-4MO', 'TU'],
+            occurrences: 2,
+          },
+        },
       },
     });
 
@@ -78,6 +81,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        schedule: mockMaintenanceWindow.schedule,
       },
     });
 
@@ -87,6 +91,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule,
+        schedule: mockMaintenanceWindow.schedule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
         ...updatedMetadata,
@@ -121,6 +126,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        schedule: mockMaintenanceWindow.schedule,
         categoryIds: ['observability', 'securitySolution'],
       },
     });
@@ -131,6 +137,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule,
+        schedule: mockMaintenanceWindow.schedule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
         categoryIds: ['observability', 'securitySolution'],
@@ -148,12 +155,39 @@ describe('MaintenanceWindowClient - create', () => {
     );
   });
 
-  it('should create maintenance window with scoped query', async () => {
+  it('should create maintenance window with scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
+
+    const query = {
+      kql: "_id: '1234'",
+      filters: [
+        {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: 'kibana.alert.action_group',
+            field: 'kibana.alert.action_group',
+            params: {
+              query: 'test',
+            },
+            type: 'phrase',
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.action_group': 'test',
+            },
+          },
+        },
+      ],
+    };
 
     savedObjectsClient.create.mockResolvedValueOnce({
       attributes: mockMaintenanceWindow,
@@ -166,33 +200,10 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        schedule: mockMaintenanceWindow.schedule,
         categoryIds: ['securitySolution'],
-        scopedQuery: {
-          kql: "_id: '1234'",
-          filters: [
-            {
-              meta: {
-                disabled: false,
-                negate: false,
-                alias: null,
-                key: 'kibana.alert.action_group',
-                field: 'kibana.alert.action_group',
-                params: {
-                  query: 'test',
-                },
-                type: 'phrase',
-              },
-              $state: {
-                store: FilterStateStore.APP_STATE,
-              },
-              query: {
-                match_phrase: {
-                  'kibana.alert.action_group': 'test',
-                },
-              },
-            },
-          ],
-        },
+        scopedQuery: query,
+        scope: { alerting: query },
       },
     });
 
@@ -202,6 +213,7 @@ describe('MaintenanceWindowClient - create', () => {
         title: mockMaintenanceWindow.title,
         duration: mockMaintenanceWindow.duration,
         rRule: mockMaintenanceWindow.rRule,
+        schedule: mockMaintenanceWindow.schedule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
         categoryIds: ['securitySolution'],
@@ -213,11 +225,11 @@ describe('MaintenanceWindowClient - create', () => {
     );
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.kql
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.kql
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -233,7 +245,7 @@ describe('MaintenanceWindowClient - create', () => {
     });
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.dsl
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.dsl
     ).toMatchInlineSnapshot(
       `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"_id\\":\\"'1234'\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"kibana.alert.action_group\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
@@ -254,7 +266,7 @@ describe('MaintenanceWindowClient - create', () => {
     `);
   });
 
-  it('should throw if trying to create a maintenance window with invalid scoped query', async () => {
+  it('should throw if trying to create a maintenance window with invalid scope', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
@@ -267,15 +279,18 @@ describe('MaintenanceWindowClient - create', () => {
           title: mockMaintenanceWindow.title,
           duration: mockMaintenanceWindow.duration,
           rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
           categoryIds: ['observability', 'securitySolution'],
-          scopedQuery: {
-            kql: 'invalid: ',
-            filters: [],
+          scope: {
+            alerting: {
+              kql: 'invalid: ',
+              filters: [],
+            },
           },
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating create maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating create maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);
@@ -294,6 +309,7 @@ describe('MaintenanceWindowClient - create', () => {
           title: mockMaintenanceWindow.title,
           duration: mockMaintenanceWindow.duration,
           rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
           categoryIds: ['invalid_id'] as unknown as MaintenanceWindow['categoryIds'],
         },
       });

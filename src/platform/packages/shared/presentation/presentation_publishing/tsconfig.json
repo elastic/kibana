@@ -13,6 +13,7 @@
     "@kbn/core-execution-context-common",
     "@kbn/utility-types",
     "@kbn/presentation-publishing-schemas",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/safer-lodash-set"
   ]
 }

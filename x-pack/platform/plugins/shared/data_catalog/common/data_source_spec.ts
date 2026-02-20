@@ -60,7 +60,12 @@ export interface CustomOAuthConfiguration {
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
-  importedTools?: string[];
+  importedTools?: ImportedTool[];
+}
+
+export interface ImportedTool {
+  name: string;
+  description?: string;
 }
 
 /**
@@ -105,8 +110,9 @@ export interface DataSource {
   /**
    * Stack connector configuration.
    * Stack connectors are the only model for executing workflow actions against the third party.
+   * More than one stack connector can be associated with a data source type.
    */
-  stackConnector: StackConnectorConfig;
+  stackConnectors: StackConnectorConfig[];
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;

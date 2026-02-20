@@ -48,8 +48,14 @@ jest.mock('../../../lib/autocomplete/engine', () => {
   };
 });
 
+jest.mock('../../hooks', () => ({
+  sendRequest: jest.fn(),
+}));
+
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
+import { sendRequest } from '../../hooks';
+import { serviceContextMock } from '../../contexts/services_context.mock';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -642,6 +648,39 @@ describe('Editor actions provider', () => {
       } as monaco.Selection);
 
       expect(await editorActionsProvider.isKbnRequestSelected()).toEqual(true);
+    });
+  });
+
+  describe('sendRequests', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('falls back to server default and clears stale host when stored host is not in the allowlist', async () => {
+      (sendRequest as jest.Mock).mockResolvedValue([]);
+
+      const context = serviceContextMock.create();
+      jest
+        .spyOn(context.services.settings, 'getSelectedHost')
+        .mockReturnValue('http://localhost:9300/');
+      const setSelectedHostSpy = jest.spyOn(context.services.settings, 'setSelectedHost');
+      jest.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
+      jest
+        .spyOn(context.services.esHostService, 'getAllHosts')
+        .mockReturnValue(['https://localhost:9200/']);
+
+      // Use a custom provider that includes getErrors so sendRequests can proceed past validation
+      const provider = new MonacoEditorActionsProvider(editor, jest.fn(), '.className', {
+        getRequests: jest
+          .fn()
+          .mockResolvedValue([{ startOffset: 0, endOffset: 11, method: 'GET', url: '_search' }]),
+        getErrors: jest.fn().mockResolvedValue([]),
+      } as any);
+
+      await provider.sendRequests(jest.fn(), context);
+
+      expect(sendRequest).toHaveBeenCalledWith(expect.objectContaining({ host: undefined }));
+      expect(setSelectedHostSpy).toHaveBeenCalledWith(null);
     });
   });
 });

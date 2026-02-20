@@ -104,6 +104,17 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const views = [
+  {
+    name: 'view_1',
+    query: 'from logs* | WHERE host.name = "my-host" | LIMIT 100',
+  },
+  {
+    name: 'view_2',
+    query: 'from logs* | STATS count(*) by user.name',
+  },
+];
+
 export const editorExtensions = {
   recommendedQueries: [
     {
@@ -167,6 +178,7 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getViews: jest.fn(async () => ({ views })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
         return {

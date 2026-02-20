@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiMarkdownFormat,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -26,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { EntityHighlightsResponse } from '../types';
-import { useGradientStyles } from './entity_highlights_gradients';
 
 interface EntityHighlightsResultProps {
   assistantResult: {
@@ -44,8 +44,6 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   generatedAt,
   onRefresh,
 }) => {
-  const { gradientPanelStyle, iconGradientStyle } = useGradientStyles();
-
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
 
@@ -54,7 +52,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   }
 
   return (
-    <div css={gradientPanelStyle}>
+    <EuiPanel hasBorder={true}>
       {anonymizedResult.highlights.length > 0 ? (
         anonymizedResult.highlights.map((highlight, index) => (
           <React.Fragment key={index}>
@@ -81,7 +79,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documentation" size="m" css={iconGradientStyle} />
+              <EuiIcon type="documentation" size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
@@ -152,7 +150,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
-    </div>
+    </EuiPanel>
   );
 };
 

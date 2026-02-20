@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaActionStepImpl } from './kibana_action_step';
 import type { KibanaActionStep } from './kibana_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -388,6 +388,253 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           pipelining: 10,
         })
       );
+    });
+  });
+
+  describe('forceServerInfo option', () => {
+    it('should use server info URL when forceServerInfo is true', async () => {
+      mockContextManager.getCoreStart.mockReturnValue({
+        http: {
+          basePath: {
+            publicBaseUrl: 'https://public.kibana.example.com',
+            prepend: jest.fn((path: string) => `/base${path}`),
+          },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'https',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          forceServerInfo: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toBe('https://internal-host:5601/base/api/status');
+      expect(fetchedUrl).not.toContain('public.kibana.example.com');
+    });
+  });
+
+  describe('forceLocalhost option', () => {
+    it('should use localhost URL when forceLocalhost is true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          forceLocalhost: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toBe('http://localhost:5601/api/status');
+    });
+  });
+
+  describe('forceServerInfo and forceLocalhost mutual exclusion', () => {
+    it('should throw an error when both forceServerInfo and forceLocalhost are true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          forceServerInfo: true,
+          forceLocalhost: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await expect((kibanaStep as any)._run(step.with)).rejects.toThrow(
+        'Cannot set both forceServerInfo and forceLocalhost'
+      );
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('debug option', () => {
+    it('should include _debug with fullUrl in output when debug is true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test' },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug).toBeDefined();
+      expect(result.output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
+      expect(result.output._debug.method).toBe('POST');
+    });
+
+    it('should not include _debug when debug is false or absent', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug).toBeUndefined();
+    });
+
+    it('should include _debug in error details when debug is true and request fails', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: jest.fn().mockResolvedValue({}),
+        text: jest.fn().mockResolvedValue('Internal Server Error'),
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'POST',
+          path: '/api/bad-endpoint',
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.details._debug).toBeDefined();
+      expect(result.error.details._debug.kibanaUrl).toBe('https://localhost:5601');
+    });
+
+    it('should include fullUrl with query params in _debug output', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/cases',
+          query: { page: '1', perPage: '10' },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug.fullUrl).toBe(
+        'https://localhost:5601/api/cases?page=1&perPage=10'
+      );
+    });
+  });
+
+  describe('meta params not forwarded to HTTP request', () => {
+    it('should not include forceServerInfo, forceLocalhost, or debug in request body', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.createCase',
+        spaceId: 'default',
+        with: {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'securitySolution',
+          forceServerInfo: false,
+          forceLocalhost: false,
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchOptions = fetchCall[1] as RequestInit;
+      const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
+
+      expect(requestBody.forceServerInfo).toBeUndefined();
+      expect(requestBody.forceLocalhost).toBeUndefined();
+      expect(requestBody.debug).toBeUndefined();
+      expect(requestBody.title).toBe('Test Case');
     });
   });
 

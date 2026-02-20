@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
@@ -13,7 +14,7 @@ import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should handle manual_ingest_pipeline by showing warning message',
@@ -59,11 +60,11 @@ apiTest.describe(
         expect(result.documents.length).toBeGreaterThan(0);
 
         // The original fields should be preserved since manual_ingest_pipeline is not processed
-        expect(result.documents[0]).toHaveProperty('message', 'test message');
-        expect(result.documents[0]).toHaveProperty('existing_field', 'existing_value');
+        expect(result.documents[0]?.message).toBe('test message');
+        expect(result.documents[0]?.existing_field).toBe('existing_value');
 
         // The manual processor should NOT have been applied (no 'status' field)
-        expect(result.documents[0]).not.toHaveProperty('status');
+        expect(result.documents[0]?.status).toBeUndefined();
       }
     );
 
@@ -112,7 +113,7 @@ apiTest.describe(
 
         // Neither document should have the conditional field applied
         result.documents.forEach((doc) => {
-          expect(doc).not.toHaveProperty('conditional_field');
+          expect(doc?.conditional_field).toBeUndefined();
         });
       }
     );
@@ -173,12 +174,12 @@ apiTest.describe(
         const doc = result.documents[0];
 
         // Supported processors should work
-        expect(doc).toHaveProperty('supported_field', 'supported_value');
-        expect(doc).toHaveProperty('new_field', 'to_be_renamed');
-        expect(doc).not.toHaveProperty('old_field'); // Should be renamed
+        expect(doc?.supported_field).toBe('supported_value');
+        expect(doc?.new_field).toBe('to_be_renamed');
+        expect(doc?.old_field).toBeUndefined(); // Should be renamed
 
         // Manual processor should be ignored
-        expect(doc).not.toHaveProperty('unsupported_field');
+        expect(doc?.unsupported_field).toBeUndefined();
       }
     );
   }

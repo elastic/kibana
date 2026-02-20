@@ -39,7 +39,8 @@ describe('<TemplateEdit />', () => {
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([EXISTING_COMPONENT_TEMPLATE]);
   });
 
-  describe('without mappings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253550
+  describe.skip('without mappings', () => {
     const templateToEdit = fixtures.getTemplate({
       name: 'index_template_without_mappings',
       indexPatterns: ['indexPattern1'],

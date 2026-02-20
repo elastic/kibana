@@ -14,7 +14,7 @@ import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../registry/complete_items';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 

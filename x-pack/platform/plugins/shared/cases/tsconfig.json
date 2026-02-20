@@ -8,7 +8,8 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "docs/openapi/**/*.gen.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -99,9 +100,8 @@
     "@kbn/react-query",
     "@kbn/zod",
     "@kbn/securitysolution-es-utils",
-    "@kbn/response-ops-retry-service"
+    "@kbn/response-ops-retry-service",
+    "@kbn/openapi-generator"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -1,0 +1,44 @@
+{
+  "sha1": "f71d52c05492d34f4075b37befb6e0a81cc4d7db",
+  "tests": [
+    {
+      "id": "5cd4dda9894a586-bbbff268a455d11",
+      "title": "custom branding should allow setting custom page title through advanced settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/custom_branding/test/scout/ui/tests/settings.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "5cd4dda9894a586-13bdccfd34a5fae",
+      "title": "custom branding should allow setting custom logo through advanced settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/custom_branding/test/scout/ui/tests/settings.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "5cd4dda9894a586-ee55e6ee4c6efaa",
+      "title": "custom branding should allow setting custom logo text through advanced settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/custom_branding/test/scout/ui/tests/settings.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    }
+  ]
+}

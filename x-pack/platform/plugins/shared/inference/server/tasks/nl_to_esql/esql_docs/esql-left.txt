@@ -1,6 +1,6 @@
 # LEFT
 
-Returns a substring that extracts a specified number of characters from the beginning of a string.
+The LEFT function returns a substring containing a specified number of characters from the beginning (left side) of a string.
 
 ## Syntax
 
@@ -8,22 +8,20 @@ Returns a substring that extracts a specified number of characters from the begi
 
 ### Parameters
 
-#### `string`
+#### string
 
-The string from which to return a substring.
+The string from which the substring will be extracted.
 
-#### `length`
+#### length
 
-The number of characters to return.
+The number of characters to return from the left side of the string.
 
 ## Examples
+
+Extracts the first three characters from the `last_name` column for each employee.
 
 ```esql
 FROM employees
 | KEEP last_name
 | EVAL left = LEFT(last_name, 3)
-| SORT last_name ASC
-| LIMIT 5
 ```
-
-Extracts the first three characters from the `last_name` column, sorts the results alphabetically, and limits the output to the first five rows.

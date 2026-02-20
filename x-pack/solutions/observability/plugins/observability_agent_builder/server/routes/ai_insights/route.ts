@@ -13,7 +13,10 @@ import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
-import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
+import {
+  getAlertAiInsight,
+  type AlertDocForInsight,
+} from './alert_ai_insights/generate_alert_ai_insight';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {

@@ -57,6 +57,98 @@ describe('getKibanaUrl', () => {
   it('returns localhost fallback when no core start is provided', () => {
     expect(getKibanaUrl()).toBe('http://localhost:5601');
   });
+
+  describe('forceServerInfo', () => {
+    it('returns server info URL even when publicBaseUrl is available', () => {
+      const coreStart = {
+        http: {
+          basePath: {
+            publicBaseUrl: 'https://kibana.example.com',
+            prepend: jest.fn((path: string) => `/base-path${path}`),
+          },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'https',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
+        },
+      } as unknown as CoreStart;
+
+      expect(getKibanaUrl(coreStart, undefined, true)).toBe('https://internal-host:5601/base-path');
+    });
+
+    it('returns server info URL even when cloud URL is available', () => {
+      const coreStart = {
+        http: {
+          basePath: {
+            prepend: jest.fn((path: string) => `/base-path${path}`),
+          },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'http',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
+        },
+      } as unknown as CoreStart;
+      const cloudSetup = {
+        kibanaUrl: 'https://cloud.kibana.example.com',
+      } as CloudSetup;
+
+      expect(getKibanaUrl(coreStart, cloudSetup, true)).toBe('http://internal-host:5601/base-path');
+    });
+
+    it('falls back to localhost when forceServerInfo is true but no coreStart', () => {
+      expect(getKibanaUrl(undefined, undefined, true)).toBe('http://localhost:5601');
+    });
+  });
+
+  describe('forceLocalhost', () => {
+    it('returns localhost even when publicBaseUrl is available', () => {
+      const coreStart = {
+        http: {
+          basePath: {
+            publicBaseUrl: 'https://kibana.example.com',
+          },
+        },
+      } as CoreStart;
+
+      expect(getKibanaUrl(coreStart, undefined, false, true)).toBe('http://localhost:5601');
+    });
+
+    it('returns localhost even when cloud URL is available', () => {
+      const cloudSetup = {
+        kibanaUrl: 'https://cloud.kibana.example.com',
+      } as CloudSetup;
+
+      expect(getKibanaUrl(undefined, cloudSetup, false, true)).toBe('http://localhost:5601');
+    });
+  });
+
+  describe('forceServerInfo takes precedence over forceLocalhost', () => {
+    it('returns server info URL when both flags are true', () => {
+      const coreStart = {
+        http: {
+          basePath: {
+            publicBaseUrl: 'https://kibana.example.com',
+            prepend: jest.fn((path: string) => `/base-path${path}`),
+          },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'https',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
+        },
+      } as unknown as CoreStart;
+
+      expect(getKibanaUrl(coreStart, undefined, true, true)).toBe(
+        'https://internal-host:5601/base-path'
+      );
+    });
+
+    it('falls back to localhost when both flags are true but no server info', () => {
+      expect(getKibanaUrl(undefined, undefined, true, true)).toBe('http://localhost:5601');
+    });
+  });
 });
 
 describe('buildWorkflowExecutionUrl', () => {

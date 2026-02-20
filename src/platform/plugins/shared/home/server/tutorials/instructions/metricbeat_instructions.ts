@@ -13,7 +13,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import type { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
+import { cloudPasswordAndResetLink, cloudServerlessApiKeyNote } from './cloud_instructions';
 
 export const createMetricbeatInstructions = memoize(
   (context: TutorialContext) => {
@@ -434,6 +434,107 @@ export const createMetricbeatCloudInstructions = memoize(() => ({
   },
 }));
 
+export const createMetricbeatCloudInstructionsServerless = () => ({
+  CONFIG: {
+    OSX: {
+      title: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.osxTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.osxTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`metricbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    DEB: {
+      title: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.debTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.debTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/metricbeat/metricbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    RPM: {
+      title: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.rpmTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.rpmTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/metricbeat/metricbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    WINDOWS: {
+      title: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.metricbeatCloudInstructionsServerless.config.windowsTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`C:\\Program Files\\Metricbeat\\metricbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+  },
+});
+
 export function metricbeatEnableInstructions(moduleName: string) {
   return {
     OSX: {
@@ -654,7 +755,9 @@ export function onPremCloudInstructions(moduleName: string, context: TutorialCon
 
 export function cloudInstructions(moduleName: string, context: TutorialContext) {
   const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions(context);
-  const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
+  const METRICBEAT_CLOUD_INSTRUCTIONS = context.isServerless
+    ? createMetricbeatCloudInstructionsServerless()
+    : createMetricbeatCloudInstructions();
   const METRICBEAT_ENABLE_INSTRUCTIONS = metricbeatEnableInstructions(moduleName);
 
   return {

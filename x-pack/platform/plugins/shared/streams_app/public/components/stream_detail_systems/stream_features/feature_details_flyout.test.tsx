@@ -24,6 +24,7 @@ function createMinimalFeature(overrides: Partial<Feature> = {}): Feature {
     meta: {},
     status: 'active',
     last_seen: '2025-01-01T00:00:00Z',
+    stream_name: 'test-stream',
     ...overrides,
   };
 }
@@ -82,5 +83,17 @@ describe('FeatureDetailsFlyout', () => {
     expect(metaSection.textContent).toContain('endpoints');
     expect(metaSection.textContent).toContain('"host"');
     expect(metaSection.textContent).toContain('"a"');
+  });
+
+  it('shows the Raw document section with the full feature as JSON', () => {
+    const feature = createMinimalFeature({ id: 'raw-doc-feature', type: 'dataset_analysis' });
+    renderWithProviders(<FeatureDetailsFlyout feature={feature} onClose={mockOnClose} />);
+
+    const rawDocumentSection = screen.getByTestId('streamsAppFeatureDetailsFlyoutRawDocument');
+    expect(rawDocumentSection).toBeInTheDocument();
+    expect(rawDocumentSection.textContent).toContain('"id"');
+    expect(rawDocumentSection.textContent).toContain('"raw-doc-feature"');
+    expect(rawDocumentSection.textContent).toContain('"type"');
+    expect(rawDocumentSection.textContent).toContain('"dataset_analysis"');
   });
 });

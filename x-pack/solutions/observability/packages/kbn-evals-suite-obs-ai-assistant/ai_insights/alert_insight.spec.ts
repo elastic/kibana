@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { AlertInsightParams } from '../src/clients/ai_insight_client';
 import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
@@ -19,7 +20,7 @@ const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 const ALERT_CREATION_WAIT_MS = 3000;
 const INDEX_REFRESH_WAIT_MS = 2500;
 
-evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
+evaluate.describe('Alert AI Insights', { tag: tags.serverless.observability.complete }, () => {
   let ruleId: string;
   let alertId: string;
 
@@ -94,7 +95,7 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
     -   Errors: "Payment request failed. Invalid token. app.loyalty.level=gold" (apmErrors, last seen within alert window, Direct)---handled error, likely user input or session issue.
     -   Anomalies: None detected (apmServiceSummary, alert window, Unrelated)---no evidence of systemic or performance issues.
     -   Change points: None observed (apmServiceSummary, alert window, Unrelated)---no throughput or latency shifts.
-    -   Downstream: Only checkout:5050 referenced in error trace; no evidence of propagation to flagd or other services (apmDownstreamDependencies, Indirect).
+    -   Downstream: Only checkout:5050 referenced in error trace; no evidence of propagation to flagd or other services (apmServiceTopology, Indirect).
 -   Immediate actions:
 
     -   Review recent traces for the affected error group to confirm scope and verify if the error is isolated to specific users or requests.

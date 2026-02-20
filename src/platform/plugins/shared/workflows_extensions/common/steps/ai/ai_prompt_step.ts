@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -15,27 +16,45 @@ import type { CommonStepDefinition } from '../../step_registry/types';
  */
 export const AiPromptStepTypeId = 'ai.prompt';
 
+export const ConfigSchema = z.object({
+  'connector-id': z.string().optional(),
+});
+
+// Maybe we can define specific schema for metadata in the future
+// For now it's a record with string keys and any values
+// Because langchain returns it this format
+export const MetadataSchema = z.record(z.string(), z.any());
+
 /**
  * Input schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
 export const InputSchema = z.object({
   prompt: z.string(),
-  connectorId: z.string().optional(),
-  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  outputSchema: z.any().optional(),
+  systemPrompt: z.string().optional(),
+  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the step.'),
   temperature: z.number().min(0).max(1).optional(),
+});
+
+export function getStructuredOutputSchema(contentSchema: z.ZodType) {
+  return z.object({
+    content: contentSchema,
+    metadata: MetadataSchema,
+  });
+}
+
+const StringOutputSchema = z.object({
+  content: z.string(),
+  metadata: MetadataSchema,
 });
 
 /**
  * Output schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.object({
-  content: z.any(),
-  response_metadata: z.record(z.string(), z.any()).optional(),
-});
+export const OutputSchema = z.union([StringOutputSchema, getStructuredOutputSchema(z.unknown())]);
 
+export type AiPromptStepConfigSchema = typeof ConfigSchema;
 export type AiPromptStepInputSchema = typeof InputSchema;
 export type AiPromptStepOutputSchema = typeof OutputSchema;
 
@@ -46,9 +65,11 @@ export type AiPromptStepOutputSchema = typeof OutputSchema;
  */
 export const AiPromptStepCommonDefinition: CommonStepDefinition<
   AiPromptStepInputSchema,
-  AiPromptStepOutputSchema
+  AiPromptStepOutputSchema,
+  AiPromptStepConfigSchema
 > = {
   id: AiPromptStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema,
 };

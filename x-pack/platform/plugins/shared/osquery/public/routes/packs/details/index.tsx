@@ -18,12 +18,14 @@ import {
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { usePack } from '../../../packs/use_pack';
+import { useCopyPack } from '../../../packs/use_copy_pack';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
@@ -37,11 +39,19 @@ const dividerCss = ({ euiTheme }: UseEuiTheme) => ({
 
 const PackDetailsPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { packId } = useParams<{ packId: string }>();
   const packsListProps = useRouterNavigate('packs');
   const editQueryLinkProps = useRouterNavigate(`packs/${packId}/edit`);
 
   const { data } = usePack({ packId });
+  const copyPackMutation = useCopyPack({ packId });
+
+  const handleDuplicateClick = useCallback(
+    () => copyPackMutation.mutateAsync(),
+    [copyPackMutation]
+  );
+
   const { data: agentIds } = useAgentPolicyAgentIds({
     agentPolicyId: data?.policy_ids?.[0],
     skip: !data,
@@ -111,9 +121,28 @@ const PackDetailsPageComponent = () => {
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          <div css={dividerCss} />
-        </EuiFlexItem>
+        {queryHistoryRework && (
+          <>
+            <EuiFlexItem grow={false} key="agents_failed_count_divider">
+              <div css={dividerCss} />
+            </EuiFlexItem>
+            {permissions.writePacks && (
+              <EuiFlexItem grow={false} key="duplicate_button">
+                <EuiButton
+                  data-test-subj="duplicate-pack-button"
+                  onClick={handleDuplicateClick}
+                  iconType="copy"
+                  isLoading={copyPackMutation.isLoading}
+                >
+                  <FormattedMessage
+                    id="xpack.osquery.packDetailsPage.duplicatePackButtonLabel"
+                    defaultMessage="Duplicate"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </>
+        )}
         <EuiFlexItem grow={false} key="edit_button">
           <EuiButton
             data-test-subj="edit-pack-button"
@@ -130,7 +159,14 @@ const PackDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [data?.policy_ids, editQueryLinkProps, permissions]
+    [
+      queryHistoryRework,
+      data?.policy_ids,
+      copyPackMutation.isLoading,
+      editQueryLinkProps,
+      handleDuplicateClick,
+      permissions,
+    ]
   );
 
   return (

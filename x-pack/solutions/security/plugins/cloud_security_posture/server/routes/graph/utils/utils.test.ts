@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { transformEntityTypeToIconAndShape } from './utils';
+import type { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  transformEntityTypeToIconAndShape,
+  checkIfEntitiesIndexLookupMode,
+  compareConnectorNodes,
+} from './utils';
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -76,6 +83,143 @@ describe('utils', () => {
           shape: 'hexagon',
         });
       });
+    });
+  });
+
+  describe('checkIfEntitiesIndexLookupMode', () => {
+    const esClient = elasticsearchServiceMock.createScopedClusterClient();
+    let logger: Logger;
+
+    beforeEach(() => {
+      logger = {
+        trace: jest.fn(),
+        debug: jest.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+      } as unknown as Logger;
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should return true when index exists and is in lookup mode', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: {
+            settings: { index: { mode: 'lookup' } },
+          },
+        });
+
+      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when index exists but is not in lookup mode', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: {
+            settings: { index: { mode: 'standard' } },
+          },
+        });
+
+      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when index settings are not found', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: undefined,
+        });
+
+      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
+      expect(result).toBe(false);
+    });
+
+    it('should return false when index does not exist (404)', async () => {
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockRejectedValueOnce({ statusCode: 404 });
+
+      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
+      expect(result).toBe(false);
+    });
+
+    it('should return false and log error on unexpected errors', async () => {
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockRejectedValueOnce({ statusCode: 500, message: 'Internal error' });
+
+      const result = await checkIfEntitiesIndexLookupMode(esClient, logger, 'default');
+      expect(result).toBe(false);
+    });
+
+    it('should use correct index name for the given spaceId', async () => {
+      const spaceId = 'custom-space';
+      const indexName = getEntitiesLatestIndexName(spaceId);
+
+      (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+        .fn()
+        .mockResolvedValueOnce({
+          [indexName]: {
+            settings: { index: { mode: 'lookup' } },
+          },
+        });
+
+      await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+
+      expect(esClient.asInternalUser.indices.getSettings).toHaveBeenCalledWith({
+        index: indexName,
+      });
+    });
+  });
+
+  describe('compareConnectorNodes', () => {
+    it('should sort relationship nodes before label nodes', () => {
+      const rel = { shape: 'relationship', label: 'Owns' };
+      const lbl = { shape: 'label', label: 'Action' };
+
+      expect(compareConnectorNodes(rel, lbl)).toBe(-1);
+      expect(compareConnectorNodes(lbl, rel)).toBe(1);
+    });
+
+    it('should sort alphabetically within the same shape type', () => {
+      const a = { shape: 'relationship', label: 'Accesses frequently' };
+      const b = { shape: 'relationship', label: 'Owns' };
+
+      expect(compareConnectorNodes(a, b)).toBeLessThan(0);
+      expect(compareConnectorNodes(b, a)).toBeGreaterThan(0);
+    });
+
+    it('should return 0 for identical nodes', () => {
+      const node = { shape: 'label', label: 'Same' };
+
+      expect(compareConnectorNodes(node, node)).toBe(0);
+    });
+
+    it('should handle undefined values', () => {
+      expect(compareConnectorNodes(undefined, undefined)).toBe(0);
+      expect(
+        compareConnectorNodes({ shape: 'relationship', label: 'Owns' }, undefined)
+      ).toBeGreaterThan(0);
+      expect(compareConnectorNodes(undefined, { shape: 'label', label: 'Action' })).toBeLessThan(0);
+    });
+
+    it('should treat missing label as empty string', () => {
+      const a = { shape: 'label' };
+      const b = { shape: 'label', label: 'Action' };
+
+      expect(compareConnectorNodes(a, b)).toBeLessThan(0);
     });
   });
 });

@@ -1,26 +1,29 @@
 # SAMPLE
 
-The SAMPLE command selects a random fraction of rows from the table, based on the specified probability.
+The SAMPLE function collects a specified number of sample values from a field.
 
 ## Syntax
 
-`SAMPLE probability`
+`SAMPLE(field, limit)`
 
 ### Parameters
 
-#### probability
+#### field
 
-The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+The field from which to collect sample values.
+
+#### limit
+
+The maximum number of values to collect.
 
 ## Examples
 
+Collects up to 5 sample values from the `gender` field across all employee records.
+
 ```esql
 FROM employees
+| STATS sample = SAMPLE(gender, 5)
+```OM employees
 | KEEP emp_no
 | SAMPLE 0.05
 ```
-Randomly select approximately 5% of the employee numbers from the employees table.
-
-## Limitations
-
-This functionality is in technical preview and may be changed or removed in a future release. Features in technical preview are not subject to the support SLA of official GA features.

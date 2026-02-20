@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { Parser } from '@kbn/esql-language';
 
 import type {
   SuggestionRequest,
@@ -43,6 +44,29 @@ const COLUMN_SORT_ORDER = {
  *
  * @param opts
  */
+/**
+ * For TS/PromQL ES|QL queries, prefers 'line' when the x-axis uses a date column (time series),
+ * Otherwise returns undefined so the default series type is used.
+ */
+function getPreferredSeriesTypeForTimeSeriesQuery(
+  query: SuggestionRequest['query'],
+  xValue?: TableSuggestionColumn
+): SeriesType | undefined {
+  if (!query?.esql) return undefined;
+  try {
+    const { root } = Parser.parse(query.esql);
+    const isPromqlOrTs = root.commands.find(({ name }) => name === 'promql' || name === 'ts');
+    if (!isPromqlOrTs) return undefined;
+    // Prefer line when x-axis is a date (time series) or when x-axis is missing (same context, consistent type)
+    if (xValue?.operation.dataType === 'date') {
+      return 'line';
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function getSuggestions({
   table,
   state,
@@ -52,6 +76,7 @@ export function getSuggestions({
   isFromContext,
   allowMixed,
   datasourceId,
+  query,
 }: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -78,7 +103,8 @@ export function getSuggestions({
     subVisualizationId as SeriesType | undefined,
     mainPalette,
     allowMixed,
-    datasourceId
+    datasourceId,
+    query
   );
 
   if (Array.isArray(suggestions)) {
@@ -95,7 +121,8 @@ function getSuggestionForColumns(
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
-  datasourceId?: string
+  datasourceId?: string,
+  query?: SuggestionRequest['query']
 ): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
@@ -107,6 +134,7 @@ function getSuggestionForColumns(
     requestedSeriesType: seriesType,
     mainPalette,
     allowMixed,
+    query,
   };
 
   const isEsql = datasourceId === 'textBased';
@@ -206,6 +234,7 @@ function getSuggestionsForLayer({
   requestedSeriesType,
   mainPalette,
   allowMixed,
+  query,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -218,10 +247,13 @@ function getSuggestionsForLayer({
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  query?: SuggestionRequest['query'];
 }): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
-    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+    requestedSeriesType ||
+    getPreferredSeriesTypeForTimeSeriesQuery(query, xValue) ||
+    getSeriesType(currentState, layerId, xValue);
 
   const splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -239,23 +271,24 @@ function getSuggestionsForLayer({
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
   };
-
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
-    // Chart switcher needs to include every chart type
+    // For TS/PromQL time series, prefer line as the visible default; otherwise bar_stacked
+    const preferredForSwitcher =
+      getPreferredSeriesTypeForTimeSeriesQuery(query, xValue) ?? 'bar_stacked';
     return visualizationSubtypes
       .map((visType) => {
         return {
           ...buildSuggestion({
             ...options,
             seriesType: visType.id as SeriesType,
-            // explicitly hide everything besides stacked bars, use default hiding logic for stacked bars
-            hide: visType.id === 'bar_stacked' ? undefined : true,
+            // explicitly hide everything besides the preferred type (line for TS/PromQL, bar_stacked otherwise)
+            hide: visType.id === preferredForSwitcher ? undefined : true,
           }),
           title: visType.label,
         };
       })
-      .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
+      .sort((a, b) => (a.state.preferredSeriesType === preferredForSwitcher ? -1 : 1));
   }
 
   const isSameState = currentState && changeType === 'unchanged';

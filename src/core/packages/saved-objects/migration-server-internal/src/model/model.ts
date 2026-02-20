@@ -963,11 +963,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // we carry through any failures we've seen with transforming documents on state
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      const sourceIndexPitId = res.right.pitId;
       const progress = setProgressTotal(stateP.progress, res.right.totalHits);
       logs = logProgress(stateP.logs, progress);
       if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
+          sourceIndexPitId,
           controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
@@ -1012,6 +1014,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // Close the PIT search and carry on with the happy path.
         return {
           ...stateP,
+          sourceIndexPitId,
           controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
           logs,
         };
@@ -1308,11 +1311,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       if (res.right.outdatedDocuments.length > 0) {
+        const pitId = res.right.pitId;
         const progress = setProgressTotal(stateP.progress, res.right.totalHits);
         logs = logProgress(stateP.logs, progress);
 
         return {
           ...stateP,
+          pitId,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
@@ -1356,6 +1361,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // and can proceed to the next step
         return {
           ...stateP,
+          pitId: res.right.pitId,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
         };
       }

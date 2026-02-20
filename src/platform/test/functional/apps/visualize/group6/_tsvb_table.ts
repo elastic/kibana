@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const findService = getService('find');
   const retry = getService('retry');
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/253005
+  describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });

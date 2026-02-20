@@ -444,4 +444,39 @@ describe('BarDetails', () => {
       expect(queryByText('cold start')).not.toBeInTheDocument();
     });
   });
+
+  describe('in case of service name badge', () => {
+    it('renders service name badge when serviceName is present', () => {
+      const mockItemWithServiceName = {
+        ...mockItem,
+        serviceName: 'my-service',
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithServiceName} left={10} />
+      );
+      expect(getByTestId('apmBarDetailsServiceNameBadge')).toBeInTheDocument();
+      expect(getByText('my-service')).toBeInTheDocument();
+    });
+
+    it('does not render service name badge when serviceName is empty', () => {
+      const mockItemWithoutServiceName = {
+        ...mockItem,
+        serviceName: '',
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
+      expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render service name badge when serviceName is undefined', () => {
+      const mockItemWithoutServiceName = {
+        ...mockItem,
+        serviceName: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
+      expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
+    });
+  });
 });

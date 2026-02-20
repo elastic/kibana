@@ -22,7 +22,8 @@ import { createMatcherError } from './utils';
 export function toHaveHeaders(
   obj: unknown,
   expectedHeaders: Record<string, string>,
-  isNegated = false
+  isNegated = false,
+  message?: string
 ): void {
   if (typeof obj !== 'object' || obj === null || !('headers' in obj)) {
     throw createMatcherError({
@@ -30,6 +31,7 @@ export function toHaveHeaders(
       matcherName: 'toHaveHeaders',
       received: obj,
       isNegated,
+      message,
     });
   }
 
@@ -56,6 +58,7 @@ export function toHaveHeaders(
       matcherName: 'toHaveHeaders',
       received: JSON.stringify(actualHeaders),
       isNegated,
+      message,
     });
   }
 }

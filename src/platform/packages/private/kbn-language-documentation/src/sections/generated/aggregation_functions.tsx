@@ -137,28 +137,23 @@ export const functions = {
   ### FIRST
   This function calculates the earliest occurrence of the search field
   (the first parameter), where sorting order is determined by the sort
-  field (the second parameter). Both fields support null, single-valued,
-  and multi-valued input. If the earliest sort field value appears in
-  multiple documents, this function is allowed to return any corresponding
-  search field value. Null values of the sort field always sort last.
+  field (the second parameter). This sorting order is always ascending
+  and null values always sort last. Both fields support null,
+  single-valued, and multi-valued input. If the earliest sort field
+  value appears in multiple documents, this function is allowed to
+  return any corresponding search field value.
 
   \`\`\`esql
-  ROW row = [
-    #       @timestamp        |  name   | number
-    "2025-11-25T00:00:00.000Z | alpha   | ",
-    "2025-11-25T00:00:01.000Z | alpha   | 2",
-    "2025-11-25T00:00:02.000Z | bravo   | ",
-    "2025-11-25T00:00:03.000Z | alpha   | 4",
-    "2025-11-25T00:00:04.000Z | bravo   | 5",
-    "2025-11-25T00:00:05.000Z | charlie | 6",
-    "2025-11-25T00:00:06.000Z | delta   | "
-  ]
-  | MV_EXPAND row
-  | DISSECT row """%'{@timestamp}' | %'{name}' | %'{number}'"""
-  | KEEP @timestamp, name, number
-  | EVAL @timestamp = TO_DATETIME(@timestamp),
-         name = TRIM(name),
-         number = TO_LONG(number)
+          @timestamp        |  name   | number
+  "2025-11-25T00:00:00.000Z | alpha   | 1"
+  "2025-11-25T00:00:01.000Z | alpha   | 2"
+  "2025-11-25T00:00:02.000Z | bravo   | null"
+  "2025-11-25T00:00:03.000Z | alpha   | 4"
+  "2025-11-25T00:00:04.000Z | bravo   | 5"
+  "2025-11-25T00:00:05.000Z | charlie | [6, 7, 8]"
+  "2025-11-25T00:00:06.000Z | delta   | null"
+
+  From dataset
   | STATS first_val = FIRST(number, @timestamp)
   \`\`\`
   `,
@@ -181,28 +176,23 @@ export const functions = {
   ### LAST
   This function calculates the latest occurrence of the search field
   (the first parameter), where sorting order is determined by the sort
-  field (the second parameter). Both fields support null, single-valued,
-  and multi-valued input. If the latest sort field value appears in
-  multiple documents, this function is allowed to return any corresponding
-  search field value. Null values of the sort field always sort last.
+  field (the second parameter). This sorting order is always ascending
+  and null values always sort last. Both fields support null,
+  single-valued, and multi-valued input. If the latest sort field
+  value appears in multiple documents, this function is allowed to
+  return any corresponding search field value.
 
   \`\`\`esql
-  ROW row = [
-    #       @timestamp        |  name   | number
-    "2025-11-25T00:00:00.000Z | alpha   | ",
-    "2025-11-25T00:00:01.000Z | alpha   | 2",
-    "2025-11-25T00:00:02.000Z | bravo   | ",
-    "2025-11-25T00:00:03.000Z | alpha   | 4",
-    "2025-11-25T00:00:04.000Z | bravo   | 5",
-    "2025-11-25T00:00:05.000Z | charlie | 6",
-    "2025-11-25T00:00:06.000Z | delta   | "
-  ]
-  | MV_EXPAND row
-  | DISSECT row """%'{@timestamp}' | %'{name}' | %'{number}'"""
-  | KEEP @timestamp, name, number
-  | EVAL @timestamp = TO_DATETIME(@timestamp),
-         name = TRIM(name),
-         number = TO_LONG(number)
+          @timestamp        |  name   | number
+  "2025-11-25T00:00:00.000Z | alpha   | 1"
+  "2025-11-25T00:00:01.000Z | alpha   | 2"
+  "2025-11-25T00:00:02.000Z | bravo   | null"
+  "2025-11-25T00:00:03.000Z | alpha   | 4"
+  "2025-11-25T00:00:04.000Z | bravo   | 5"
+  "2025-11-25T00:00:05.000Z | charlie | [6, 7, 8]"
+  "2025-11-25T00:00:06.000Z | delta   | null"
+
+  From dataset
   | STATS last_val = LAST(number, @timestamp) BY name
   \`\`\`
   `,
@@ -403,14 +393,24 @@ export const functions = {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
       preview: true,
-      license: undefined,
+      license: {
+        licenses: [
+          {
+            name: 'platinum',
+            isSignatureSpecific: true,
+            paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+          },
+        ],
+        hasMultipleLicenses: false,
+      },
       description: {
         markdownContent: i18n.translate(
           'languageDocumentation.documentationESQL.st_centroid_agg.markdown',
           {
             defaultMessage: `
   ### ST CENTROID AGG
-  Calculate the spatial centroid over a field with spatial point geometry type.
+  Calculate the spatial centroid over a field with spatial geometry type.
+  Supports \`geo_point\` and \`cartesian_point\`, as well as \`geo_shape\` and \`cartesian_shape\`.
 
   \`\`\`esql
   FROM airports

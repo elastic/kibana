@@ -7,9 +7,14 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
 import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
+import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { LogMeta } from '@kbn/logging';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -22,10 +27,6 @@ export interface FeaturesIdentificationTaskParams {
   start: number;
   end: number;
   streamName: string;
-}
-
-export interface IdentifyFeaturesResult {
-  features: BaseFeature[];
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
@@ -71,14 +72,20 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
+                const { hits: sampleDocuments } = await getSampleDocuments({
+                  esClient,
+                  index: stream.name,
+                  start,
+                  end,
+                  size: 20,
+                });
+
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({
-                    start,
-                    end,
-                    esClient,
+                    streamName: stream.name,
+                    sampleDocuments,
                     inferenceClient: boundInferenceClient,
                     logger: taskContext.logger.get('features_identification'),
-                    stream,
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
                   }),
@@ -87,6 +94,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     esClient,
+                    logger: taskContext.logger.get('computed_features'),
                   }),
                 ]);
 
@@ -138,17 +146,18 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
-                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
+                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
+                  { error } as LogMeta
                 );
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
@@ -156,6 +165,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { connectorId, start, end, streamName },
                   errorMessage
                 );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

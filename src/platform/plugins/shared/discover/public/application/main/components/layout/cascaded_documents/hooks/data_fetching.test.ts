@@ -8,43 +8,17 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { AggregateQuery } from '@kbn/es-query';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
-import { discoverServiceMock } from '../../../../../../__mocks__/services';
-import {
-  useGroupedCascadeData,
-  useScopedESQLQueryFetchClient,
-  useDataCascadeRowExpansionHandlers,
-} from './data_fetching';
-import { fetchEsql } from '../../../../data_fetching/fetch_esql';
-import { constructCascadeQuery } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import { apm } from '@elastic/apm-rum';
+import { useGroupedCascadeData, useDataCascadeRowExpansionHandlers } from './data_fetching';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { ESQLDataGroupNode } from '../blocks';
-import type { RecordsFetchResponse } from '../../../../../types';
-
-jest.mock('../../../../data_fetching/fetch_esql', () => ({
-  fetchEsql: jest.fn(),
-}));
-
-jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers', () => ({
-  ...jest.requireActual('@kbn/esql-utils/src/utils/cascaded_documents_helpers'),
-  constructCascadeQuery: jest.fn(),
-}));
-
-jest.mock('@elastic/apm-rum', () => ({
-  apm: {
-    captureError: jest.fn(),
-  },
-}));
-
-const mockFetchEsql = fetchEsql as jest.MockedFunction<typeof fetchEsql>;
-const mockConstructCascadeQuery = constructCascadeQuery as jest.MockedFunction<
-  typeof constructCascadeQuery
->;
-const mockApmCaptureError = apm.captureError as jest.MockedFunction<typeof apm.captureError>;
+import { CascadedDocumentsProvider } from '../cascaded_documents_provider';
+import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
+import { createElement, type ReactNode } from 'react';
+import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
 
 describe('data_fetching related hooks', () => {
   beforeEach(() => {
@@ -219,187 +193,34 @@ describe('data_fetching related hooks', () => {
     });
   });
 
-  describe('useScopedESQLQueryFetchClient', () => {
-    const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
-      scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
-    });
-
-    const defaultProps = {
-      query: { esql: 'FROM logs | STATS count() BY category' },
-      dataView: dataViewWithTimefieldMock,
-      data: discoverServiceMock.data,
-      expressions: discoverServiceMock.expressions,
-      esqlVariables: undefined,
-      filters: undefined,
-      timeRange: undefined,
-      scopedProfilesManager,
-      inspectorAdapters: { requests: new RequestAdapter() },
-    };
-
-    const createMockFetchResponse = (records: DataTableRecord[] = []): RecordsFetchResponse => ({
-      records,
-      esqlQueryColumns: [],
-      esqlHeaderWarning: undefined,
-      interceptedWarnings: [],
-    });
-
-    beforeEach(() => {
-      mockFetchEsql.mockResolvedValue(createMockFetchResponse());
-      mockConstructCascadeQuery.mockReturnValue({ esql: 'FROM logs | WHERE category == "A"' });
-    });
-
-    it('should return a fetch function with cancel method', () => {
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      expect(result.current).toBeInstanceOf(Function);
-      expect(result.current.cancel).toBeInstanceOf(Function);
-    });
-
-    it('should fetch data by invoking constructCascadeQuery and fetchEsql', async () => {
-      const mockRecords: DataTableRecord[] = [{ id: '1', raw: {}, flattened: { category: 'A' } }];
-      mockFetchEsql.mockResolvedValue(createMockFetchResponse(mockRecords));
-
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      let records: DataTableRecord[] = [];
-
-      await act(async () => {
-        records = await result.current({
-          nodeType: 'leaf',
-          nodePath: ['category'],
-          nodePathMap: { category: 'A' },
-        });
-      });
-
-      expect(mockConstructCascadeQuery).toHaveBeenCalledWith({
-        query: defaultProps.query,
-        esqlVariables: undefined,
-        dataView: dataViewWithTimefieldMock,
-        nodeType: 'leaf',
-        nodePath: ['category'],
-        nodePathMap: { category: 'A' },
-      });
-      expect(mockFetchEsql).toHaveBeenCalled();
-      expect(records).toEqual(mockRecords);
-    });
-
-    it('should return empty array and capture error when constructCascadeQuery returns undefined', async () => {
-      mockConstructCascadeQuery.mockReturnValue(undefined);
-
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      let records: DataTableRecord[] = [];
-      await act(async () => {
-        records = await result.current({
-          nodeType: 'leaf',
-          nodePath: ['category'],
-          nodePathMap: { category: 'A' },
-        });
-      });
-
-      expect(records).toEqual([]);
-      expect(mockApmCaptureError).toHaveBeenCalledWith(
-        new Error('Failed to construct cascade query')
-      );
-      expect(mockFetchEsql).not.toHaveBeenCalled();
-    });
-
-    it('should abort previous requests when making a new request', async () => {
-      const mockRecords: DataTableRecord[] = [{ id: '1', raw: {}, flattened: { category: 'A' } }];
-
-      let resolveFirst: (value: RecordsFetchResponse) => void;
-      const firstPromise = new Promise<RecordsFetchResponse>((resolve) => {
-        resolveFirst = resolve;
-      });
-
-      mockFetchEsql
-        .mockImplementationOnce(() => firstPromise)
-        .mockResolvedValueOnce(createMockFetchResponse(mockRecords));
-
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      // Start first request (don't await)
-      result.current({
-        nodeType: 'leaf',
-        nodePath: ['category'],
-        nodePathMap: { category: 'A' },
-      });
-
-      // Start second request immediately (should abort first)
-      const secondRequest = result.current({
-        nodeType: 'leaf',
-        nodePath: ['category'],
-        nodePathMap: { category: 'B' },
-      });
-
-      // Resolve first request after abort
-      resolveFirst!(createMockFetchResponse());
-
-      const secondRecords = await secondRequest;
-      expect(secondRecords).toEqual(mockRecords);
-    });
-
-    it('should handle abort errors gracefully', async () => {
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      let records: DataTableRecord[] = [];
-
-      const pendingRequest = result.current({
-        nodeType: 'leaf',
-        nodePath: ['category'],
-        nodePathMap: { category: 'A' },
-      });
-
-      act(() => {
-        result.current.cancel();
-      });
-
-      await act(async () => {
-        records = await pendingRequest;
-      });
-
-      expect(records).toEqual([]);
-    });
-
-    it('should rethrow non-abort errors', async () => {
-      const networkError = new Error('Network failure');
-      mockFetchEsql.mockRejectedValue(networkError);
-
-      const { result } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      await expect(
-        result.current({
-          nodeType: 'leaf',
-          nodePath: ['category'],
-          nodePathMap: { category: 'A' },
-        })
-      ).rejects.toThrow('Network failure');
-    });
-
-    it('should cancel pending requests on unmount', async () => {
-      const { result, unmount } = renderHook(() => useScopedESQLQueryFetchClient(defaultProps));
-
-      // Start a request
-      const pendingRequestPromise = result.current({
-        nodeType: 'leaf',
-        nodePath: ['category'],
-        nodePathMap: { category: 'A' },
-      });
-
-      // Unmount the hook
-      unmount();
-
-      // The abort controller should have been called
-      // Request should complete gracefully
-      await expect(pendingRequestPromise).resolves.toBeDefined();
-    });
-  });
-
   describe('useDataCascadeRowExpansionHandlers', () => {
-    const createMockCascadeFetchClient = () => {
-      const mockFetch = jest.fn().mockResolvedValue([]) as jest.Mock & { cancel: jest.Mock };
-      mockFetch.cancel = jest.fn();
-      return mockFetch as unknown as ReturnType<typeof useScopedESQLQueryFetchClient>;
+    const createMockFetcher = () =>
+      ({
+        fetchCascadedDocuments: jest.fn().mockResolvedValue([]),
+        cancelFetch: jest.fn(),
+      } as unknown as CascadedDocumentsFetcher);
+
+    const createWrapper = (overrides?: Partial<CascadedDocumentsContext>) => {
+      const esqlQuery: AggregateQuery = { esql: 'FROM logs | STATS count() BY category' };
+
+      const contextValue: CascadedDocumentsContext = {
+        availableCascadeGroups: ['category'],
+        selectedCascadeGroups: ['category'],
+        cascadedDocumentsFetcher: createMockFetcher(),
+        esqlQuery,
+        esqlVariables: undefined,
+        timeRange: undefined,
+        viewModeToggle: undefined,
+        cascadeGroupingChangeHandler: jest.fn(),
+        onUpdateESQLQuery: jest.fn(),
+        openInNewTab: jest.fn(),
+        ...overrides,
+      };
+
+      const Wrapper = ({ children }: { children: ReactNode }) =>
+        createElement(CascadedDocumentsProvider, { value: contextValue }, children);
+
+      return { Wrapper, contextValue };
     };
 
     const createMockRowData = (): ESQLDataGroupNode => ({
@@ -410,13 +231,12 @@ describe('data_fetching related hooks', () => {
     });
 
     it('should return all four expansion handlers', () => {
-      const mockCascadeFetchClient = createMockCascadeFetchClient();
+      const { Wrapper } = createWrapper();
+      const dataView = dataViewWithTimefieldMock;
 
-      const { result } = renderHook(() =>
-        useDataCascadeRowExpansionHandlers({
-          cascadeFetchClient: mockCascadeFetchClient,
-        })
-      );
+      const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current.onCascadeGroupNodeExpanded).toBeInstanceOf(Function);
       expect(result.current.onCascadeGroupNodeCollapsed).toBeInstanceOf(Function);
@@ -425,42 +245,35 @@ describe('data_fetching related hooks', () => {
     });
 
     describe('onCascadeGroupNodeExpanded', () => {
-      it('should call cascadeFetchClient with nodeType "group"', async () => {
-        const mockCascadeFetchClient = createMockCascadeFetchClient();
+      it('should return an empty array and not fetch', async () => {
         const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper();
+        const dataView = dataViewWithTimefieldMock;
 
-        const { result } = renderHook(() =>
-          useDataCascadeRowExpansionHandlers({
-            cascadeFetchClient: mockCascadeFetchClient,
-          })
-        );
-
-        await act(async () => {
-          await result.current.onCascadeGroupNodeExpanded({
-            row: mockRow,
-            nodePath: ['category', 'subcategory'],
-            nodePathMap: { category: 'A', subcategory: 'X' },
-          });
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
         });
 
-        expect(mockCascadeFetchClient).toHaveBeenCalledWith({
+        const response = await result.current.onCascadeGroupNodeExpanded({
+          row: mockRow,
           nodePath: ['category', 'subcategory'],
           nodePathMap: { category: 'A', subcategory: 'X' },
-          nodeType: 'group',
         });
+
+        expect(response).toEqual([]);
+        expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).not.toHaveBeenCalled();
       });
     });
 
     describe('onCascadeGroupNodeCollapsed', () => {
-      it('should call cascadeFetchClient.cancel', () => {
-        const mockCascadeFetchClient = createMockCascadeFetchClient();
+      it('should not cancel any fetches', () => {
         const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper();
+        const dataView = dataViewWithTimefieldMock;
 
-        const { result } = renderHook(() =>
-          useDataCascadeRowExpansionHandlers({
-            cascadeFetchClient: mockCascadeFetchClient,
-          })
-        );
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
 
         result.current.onCascadeGroupNodeCollapsed!({
           row: mockRow,
@@ -468,20 +281,19 @@ describe('data_fetching related hooks', () => {
           nodePathMap: { category: 'A' },
         });
 
-        expect(mockCascadeFetchClient.cancel).toHaveBeenCalled();
+        expect(contextValue.cascadedDocumentsFetcher.cancelFetch).not.toHaveBeenCalled();
       });
     });
 
     describe('onCascadeLeafNodeExpanded', () => {
-      it('should call cascadeFetchClient with nodeType "leaf"', async () => {
-        const mockCascadeFetchClient = createMockCascadeFetchClient();
+      it('should call cascadedDocumentsFetcher.fetchCascadedDocuments', async () => {
         const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper();
+        const dataView = dataViewWithTimefieldMock;
 
-        const { result } = renderHook(() =>
-          useDataCascadeRowExpansionHandlers({
-            cascadeFetchClient: mockCascadeFetchClient,
-          })
-        );
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
 
         await act(async () => {
           await result.current.onCascadeLeafNodeExpanded({
@@ -491,24 +303,28 @@ describe('data_fetching related hooks', () => {
           });
         });
 
-        expect(mockCascadeFetchClient).toHaveBeenCalledWith({
+        expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).toHaveBeenCalledWith({
+          nodeId: mockRow.id,
+          nodeType: 'leaf',
           nodePath: ['category'],
           nodePathMap: { category: 'A' },
-          nodeType: 'leaf',
+          query: contextValue.esqlQuery,
+          esqlVariables: contextValue.esqlVariables,
+          timeRange: contextValue.timeRange,
+          dataView,
         });
       });
     });
 
     describe('onCascadeLeafNodeCollapsed', () => {
-      it('should call cascadeFetchClient.cancel', () => {
-        const mockCascadeFetchClient = createMockCascadeFetchClient();
+      it('should call cascadedDocumentsFetcher.cancelFetch', () => {
         const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper();
+        const dataView = dataViewWithTimefieldMock;
 
-        const { result } = renderHook(() =>
-          useDataCascadeRowExpansionHandlers({
-            cascadeFetchClient: mockCascadeFetchClient,
-          })
-        );
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
 
         result.current.onCascadeLeafNodeCollapsed!({
           row: mockRow,
@@ -516,17 +332,17 @@ describe('data_fetching related hooks', () => {
           nodePathMap: { category: 'A' },
         });
 
-        expect(mockCascadeFetchClient.cancel).toHaveBeenCalled();
+        expect(contextValue.cascadedDocumentsFetcher.cancelFetch).toHaveBeenCalledWith(mockRow.id);
       });
     });
 
     it('should memoize handlers and return same references on rerender', () => {
-      const mockCascadeFetchClient = createMockCascadeFetchClient();
+      const { Wrapper } = createWrapper();
+      const dataView = dataViewWithTimefieldMock;
 
-      const { result, rerender } = renderHook(() =>
-        useDataCascadeRowExpansionHandlers({
-          cascadeFetchClient: mockCascadeFetchClient,
-        })
+      const { result, rerender } = renderHook(
+        () => useDataCascadeRowExpansionHandlers({ dataView }),
+        { wrapper: Wrapper }
       );
 
       const firstResult = result.current;
@@ -542,30 +358,6 @@ describe('data_fetching related hooks', () => {
       expect(result.current.onCascadeLeafNodeExpanded).toBe(firstResult.onCascadeLeafNodeExpanded);
       expect(result.current.onCascadeLeafNodeCollapsed).toBe(
         firstResult.onCascadeLeafNodeCollapsed
-      );
-    });
-
-    it('should update handlers when cascadeFetchClient changes', () => {
-      const mockCascadeFetchClient1 = createMockCascadeFetchClient();
-      const mockCascadeFetchClient2 = createMockCascadeFetchClient();
-
-      const { result, rerender } = renderHook(
-        ({ cascadeFetchClient }) =>
-          useDataCascadeRowExpansionHandlers({
-            cascadeFetchClient,
-          }),
-        {
-          initialProps: { cascadeFetchClient: mockCascadeFetchClient1 },
-        }
-      );
-
-      const firstResult = result.current;
-
-      rerender({ cascadeFetchClient: mockCascadeFetchClient2 });
-
-      // Handlers should be new references after dependency change
-      expect(result.current.onCascadeGroupNodeExpanded).not.toBe(
-        firstResult.onCascadeGroupNodeExpanded
       );
     });
   });

@@ -105,6 +105,91 @@ describe('getStepsCollectionSchema', () => {
     expect(step1Schema.shape.error.def.type).toBe('optional');
   });
 
+  it('should deduplicate predecessor nodes sharing the same stepId', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '["a", "b"]',
+          steps: [
+            {
+              name: 'inner-step',
+              type: 'console',
+              with: { message: 'hi' },
+            },
+          ],
+        },
+        {
+          name: 'after-loop',
+          type: 'console',
+          with: { message: 'done' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'after-loop'
+    );
+
+    const loopSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.loop;
+    expect(loopSchema).toBeDefined();
+    expect(loopSchema.def.type).toBe('object');
+    const loopShape = (loopSchema as z.ZodObject<any>).shape;
+    expect(loopShape.items).toBeDefined();
+    expect(loopShape.index).toBeDefined();
+    expect(loopShape.total).toBeDefined();
+  });
+
+  it('should include if-step output schema with conditionResult for steps after an if block', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'check',
+          type: 'if',
+          condition: 'true',
+          steps: [
+            {
+              name: 'then-step',
+              type: 'console',
+              with: { message: 'yes' },
+            },
+          ],
+        },
+        {
+          name: 'after-check',
+          type: 'console',
+          with: { message: 'done' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'after-check'
+    );
+
+    const checkSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.check;
+    expect(checkSchema).toBeDefined();
+    const checkShape = (checkSchema as z.ZodObject<any>).shape;
+    expect(checkShape.output).toBeDefined();
+
+    const outputInnerType = checkShape.output.unwrap();
+    const outputShape = (outputInnerType as z.ZodObject<any>).shape;
+    expect(outputShape.conditionResult).toBeDefined();
+  });
+
   it('should use step names as is', () => {
     const definition = {
       version: '1' as const,

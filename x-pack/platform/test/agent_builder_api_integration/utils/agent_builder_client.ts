@@ -12,13 +12,18 @@ import type {
 } from '@kbn/agent-builder-plugin/common/http_api/chat';
 import type { Conversation } from '@kbn/agent-builder-common';
 
-export function createAgentBuilderApiClient(supertest: Agent) {
+export type ExecutionMode = 'local' | 'task_manager';
+
+export function createAgentBuilderApiClient(
+  supertest: Agent,
+  options?: { executionMode?: ExecutionMode }
+) {
   return {
     async converse(payload: ChatRequestBodyPayload): Promise<ChatResponse> {
       const res = await supertest
         .post('/api/agent_builder/converse')
         .set('kbn-xsrf', 'true')
-        .send(payload);
+        .send({ ...payload, _execution_mode: options?.executionMode });
       return res.body;
     },
 

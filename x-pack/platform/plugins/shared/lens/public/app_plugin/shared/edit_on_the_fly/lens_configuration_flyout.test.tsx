@@ -93,12 +93,17 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
+// Shared state object for reference equality in isEqual comparisons
+const mockFormBasedState = { layers: {} };
+// Different state to simulate changes detected
+const mockFormBasedStateChanged = { layers: { layer1: {} } };
+
 const lensAttributes = {
   title: 'test',
   visualizationType: 'testVis',
   state: {
     datasourceStates: {
-      testDatasource: {},
+      formBased: mockFormBasedStateChanged,
     },
     visualization: {},
     filters: [],
@@ -171,12 +176,12 @@ describe('LensEditConfigurationFlyout', () => {
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: 'state',
+              state: mockFormBasedState,
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           query: query as Query,
           visualization: {
             state: {},
@@ -273,7 +278,7 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { testDatasource: 'state' },
+        datasourceStates: { formBased: mockFormBasedState },
         visualization: {},
         filters: [],
         query: { esql: 'from index1 | limit 10' },
@@ -350,9 +355,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
-    // @ts-ignore
-    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    // Set formBased to match the preloaded Redux state so no changes are detected
+    newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
@@ -367,8 +371,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       datasourceMap: {
         ...datasourceMap,
-        testDatasource: {
-          ...datasourceMap.testDatasource,
+        formBased: {
+          ...datasourceMap.formBased,
           toExpression: jest.fn(() => null),
         },
       },

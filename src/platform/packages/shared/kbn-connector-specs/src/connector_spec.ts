@@ -257,7 +257,8 @@ export interface ConnectorSpec {
 
   policies?: ConnectorPolicies;
 
-  actions: Record<string, ActionDefinition>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
+  actions: Record<string, ActionDefinition<any, any, any>>;
 
   test?: ConnectorTest;
 

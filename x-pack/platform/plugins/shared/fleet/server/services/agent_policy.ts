@@ -49,6 +49,7 @@ import {
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
+  AGENT_POLICY_VERSION_SEPARATOR,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -922,11 +923,13 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
+            // Wildcard outside quotes so KQL treats * as wildcard for version-specific policies
+            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" or ${AGENTS_PREFIX}.policy_id:${agentPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
+              kuery: policyKuery,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -1403,7 +1406,7 @@ class AgentPolicyService {
     outputId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
@@ -1891,6 +1894,30 @@ class AgentPolicyService {
       },
       size: 1,
       sort: [{ revision_idx: { order: 'desc' } }],
+    });
+
+    if ((res.hits.total as number) === 0) {
+      return null;
+    }
+
+    return res.hits.hits[0]._source;
+  }
+
+  public async getFleetServerPolicy(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string,
+    revision: number
+  ) {
+    const res = await esClient.search<FleetServerPolicy>({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      rest_total_hits_as_int: true,
+      query: {
+        bool: {
+          filter: [{ term: { policy_id: agentPolicyId } }, { term: { revision_idx: revision } }],
+        },
+      },
+      size: 1,
     });
 
     if ((res.hits.total as number) === 0) {

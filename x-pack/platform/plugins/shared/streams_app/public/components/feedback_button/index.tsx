@@ -19,7 +19,9 @@ export function FeedbackButton() {
       start: { cloud },
     },
     services: { version },
+    core: { notifications },
   } = useKibana();
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
   const deploymentType = isServerless
     ? 'Serverless'
     : cloud?.isCloudEnabled
@@ -30,6 +32,8 @@ export function FeedbackButton() {
 
   const queryParams = new URLSearchParams({ environment: deploymentType, version, path });
   const feedbackUrl = `${STREAMS_FEEDBACK_URL}?${queryParams.toString()}`;
+
+  if (!isFeedbackEnabled) return null;
 
   return (
     <EuiButtonEmpty

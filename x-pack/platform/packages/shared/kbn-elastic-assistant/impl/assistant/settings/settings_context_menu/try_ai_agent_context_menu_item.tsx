@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import * as i18n from './translations';
-import { robotIconType } from './robot_icon';
 
 export const TryAIAgentContextMenuItem: React.FC<{
   analytics?: AnalyticsServiceStart;
@@ -46,7 +45,7 @@ export const TryAIAgentContextMenuItem: React.FC<{
             <EuiButton
               aria-label={i18n.TRY_AI_AGENT}
               onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-              iconType={robotIconType}
+              iconType="productAgent"
               color="accent"
               size="s"
               fullWidth
@@ -64,7 +63,7 @@ export const TryAIAgentContextMenuItem: React.FC<{
         <EuiButton
           aria-label={i18n.TRY_AI_AGENT}
           onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-          iconType={robotIconType}
+          iconType="productAgent"
           color="accent"
           size="s"
           fullWidth

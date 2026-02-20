@@ -1,0 +1,69 @@
+# https://buildkite.com/elastic/kibana-uiam-cosmos-db-emulator-verify-and-promote/
+
+### Parameters for this job:
+# UIAM_COSMOSDB_IMAGE: the full image path for the docker image to test
+# FORCE_PROMOTE: if set to true, promotion will happen on non-main branches
+
+agents:
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: 'Annotate runtime parameters'
+    command: .buildkite/scripts/steps/uiam/annotate_runtime_parameters_cosmos_db_emulator.sh
+
+  - label: 'Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    key: pre-build
+    timeout_in_minutes: 10
+
+  - label: 'Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      machineType: n2-standard-8
+      diskSizeGb: 100
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    depends_on: pre-build
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2-standard-4
+      diskSizeGb: 115
+    key: build_scout_tests
+    timeout_in_minutes: 30
+    depends_on:
+      - build
+    env:
+      UIAM_COSMOSDB_DOCKER_IMAGE: $UIAM_COSMOSDB_IMAGE
+      SERVERLESS_TESTS_ONLY: 'true'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+
+  - label: ':arrow_up::key::arrow_up: Promote UIAM Cosmos DB Emulator docker image'
+    command: .buildkite/scripts/steps/uiam/promote_image_cosmos_db_emulator.sh $UIAM_COSMOSDB_IMAGE
+    key: promote-uiam-image
+    if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - wait: ~
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    timeout_in_minutes: 10

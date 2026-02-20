@@ -16,6 +16,7 @@ import type { Agent, AgentPolicy } from '../../../../../types';
 
 import { AgentDetailsOverviewSection } from './agent_details_overview';
 import { AgentDetailsIntegrations } from './agent_details_integrations';
+import { OpAMPComponentHealth } from './opamp_component_health';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -27,6 +28,8 @@ export const AgentDetailsContent: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   outputs?: OutputsForAgentPolicy;
 }> = memo(({ agent, agentPolicy, outputs }) => {
+  const agentHealth = agent.health;
+
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
@@ -42,18 +45,34 @@ export const AgentDetailsContent: React.FunctionComponent<{
           <EuiSpacer size="s" />
           <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
         </FlexItemWithMinWidth>
-        <FlexItemWithMinWidth>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.fleet.agentDetails.integrationsSectionTitle"
-                defaultMessage="Integrations"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
-        </FlexItemWithMinWidth>
+        {agent.type !== 'OPAMP' && (
+          <FlexItemWithMinWidth>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.agentDetails.integrationsSectionTitle"
+                  defaultMessage="Integrations"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
+          </FlexItemWithMinWidth>
+        )}
+        {agent.health && (
+          <FlexItemWithMinWidth>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.agentDetails.componentHealthSectionTitle"
+                  defaultMessage="Component health"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <OpAMPComponentHealth health={agentHealth} />
+          </FlexItemWithMinWidth>
+        )}
       </EuiFlexGroup>
     </>
   );

@@ -73,15 +73,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('renders a feedback callout', async function () {
-        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
-        await solutionNavigation.sidenav.feedbackCallout.expectExists();
-        await solutionNavigation.sidenav.feedbackCallout.dismiss();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-        await browser.refresh();
-        await solutionNavigation.sidenav.feedbackCallout.expectMissing();
-      });
-
       it('opens panel on legacy management landing page', async () => {
         await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
         await testSubjects.existOrFail('managementHomeSolution');

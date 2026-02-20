@@ -35,7 +35,10 @@ import {
 } from '../../../application/rule/transforms';
 import { getMappedParams } from '../mapped_params_utils';
 
-type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>;
+type ApiKeyAttributes = Pick<
+  RawRule,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'
+>;
 type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
 export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
@@ -73,6 +76,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     apiKeysMap.set(rule.id, {
       oldApiKey: rule.attributes.apiKey,
       oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
+      oldUiamApiKey: rule.attributes.uiamApiKey,
     });
   }
 
@@ -83,8 +87,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.actions || [],
     rule.references || []
   );
-
-  context.logger.info(`ruleActions ${JSON.stringify(ruleActions)}`);
 
   const ruleArtifacts = injectReferencesIntoArtifacts(
     rule.id,
@@ -103,16 +105,12 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     context.isSystemAction
   );
 
-  context.logger.info(`ruleDomain ${JSON.stringify(ruleDomain)}`);
-
   const {
     rule: updatedRule,
     ruleActions: updatedRuleActions,
     hasUpdateApiKeyOperation,
     isAttributesUpdateSkipped,
   } = await updateAttributesFn({ domainRule: ruleDomain, ruleActions, ruleType });
-
-  context.logger.info(`updatedRule ${JSON.stringify(updatedRule)}`);
 
   const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
     ? // TODO (http-versioning): Remove the cast when all rule types are fixed
@@ -173,8 +171,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     artifactsWithRefs,
   });
 
-  context.logger.info(`ruleAttributes ${JSON.stringify(ruleAttributes)}`);
-
   let apiKeyAttributes: ApiKeyAttributes | undefined;
   if (shouldInvalidateApiKeys) {
     const { apiKeyAttributes: preparedApiKeyAttributes } = await prepareApiKeys(
@@ -198,8 +194,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     username,
   });
 
-  context.logger.info(`updatedAttributes ${JSON.stringify(updatedAttributes)}`);
-
   rules.push({ ...rule, references, attributes: updatedAttributes });
 }
 
@@ -222,10 +216,13 @@ async function prepareApiKeys(
 
   // collect generated API keys
   if (apiKeyAttributes.apiKey) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
+
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
-      newApiKey: apiKeyAttributes.apiKey,
-      newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
+      newApiKey: apiKey,
+      newApiKeyCreatedByUser: apiKeyCreatedByUser,
+      ...(uiamApiKey ? { newUiamApiKey: uiamApiKey } : {}),
     });
   }
 

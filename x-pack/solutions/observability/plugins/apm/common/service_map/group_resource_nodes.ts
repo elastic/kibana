@@ -5,48 +5,50 @@
  * 2.0.
  */
 
+/**
+ * Groups nodes for the service map.
+ * This is a native implementation of resource node grouping.
+ */
+
 import { i18n } from '@kbn/i18n';
-import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
 import type {
-  ConnectionEdge,
-  ConnectionElement,
-  ConnectionNode,
-  GroupResourceNodesResponse,
-  GroupedConnection,
-  GroupedEdge,
-  GroupedNode,
+  ServiceMapNode,
+  ServiceMapEdge,
+  GroupedNodeData,
+  GroupInfo,
+  GroupResourceNodesResult,
 } from './types';
-import { getEdgeId, isSpanGroupingSupported } from './utils';
-import { MINIMUM_GROUP_SIZE } from './constants';
+import { isDependencyNodeData } from './types';
+import { isSpanGroupingSupported, getEdgeId, createEdgeMarker } from './utils';
+import { MINIMUM_GROUP_SIZE, DEFAULT_EDGE_STYLE } from './constants';
 
-const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
-  Boolean(el.data.source && el.data.target);
-const isNode = (el: ConnectionElement): el is { data: ConnectionNode } => !isEdge(el);
-const isElligibleGroupNode = (el: ConnectionElement): el is { data: ConnectionNode } => {
-  if (isNode(el) && SPAN_TYPE in el.data) {
-    return isSpanGroupingSupported(el.data[SPAN_TYPE], el.data[SPAN_SUBTYPE]);
-  }
-  return false;
-};
+/**
+ * Check if a node is eligible for grouping (external dependency with supported span type).
+ */
+function isGroupableNode(node: ServiceMapNode): boolean {
+  if (!isDependencyNodeData(node.data)) return false;
 
-function groupConnections({
-  edgesMap,
-  groupableNodeIds,
-}: {
-  edgesMap: Map<string, ConnectionElement>;
-  groupableNodeIds: Set<string>;
-}) {
+  return isSpanGroupingSupported(node.data.spanType, node.data.spanSubtype);
+}
+
+/**
+ * Find groups of nodes that share the same sources and have ≥ `MINIMUM_GROUP_SIZE` targets.
+ */
+function findGroups(nodes: ServiceMapNode[], edges: ServiceMapEdge[]): GroupInfo[] {
+  const groupableNodeIds = new Set(nodes.filter(isGroupableNode).map((n) => n.id));
+
+  // Build target -> sources mapping
   const sourcesByTarget = new Map<string, string[]>();
-  for (const { data } of edgesMap.values()) {
-    const { source, target } = data;
-    if (groupableNodeIds.has(target)) {
-      const sources = sourcesByTarget.get(target) ?? [];
-      sources.push(source);
-      sourcesByTarget.set(target, sources);
+  for (const edge of edges) {
+    if (groupableNodeIds.has(edge.target)) {
+      const sources = sourcesByTarget.get(edge.target) ?? [];
+      sources.push(edge.source);
+      sourcesByTarget.set(edge.target, sources);
     }
   }
 
-  const groups = new Map<string, { id: string; sources: string[]; targets: string[] }>();
+  // Group by same sources
+  const groups = new Map<string, GroupInfo>();
   for (const [target, sources] of sourcesByTarget) {
     const groupId = `resourceGroup{${[...sources].sort().join(';')}}`;
     const group = groups.get(groupId) ?? { id: groupId, sources, targets: [] };
@@ -54,123 +56,149 @@ function groupConnections({
     groups.set(groupId, group);
   }
 
-  return Array.from(groups.values()).filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
+  // Only keep groups with ≥ `MINIMUM_GROUP_SIZE` targets
+  return [...groups.values()].filter((g) => g.targets.length >= MINIMUM_GROUP_SIZE);
 }
 
-function getUngroupedNodesAndEdges({
-  nodesMap,
-  edgesMap,
-  groupedConnections,
-}: {
-  nodesMap: Map<string, { data: ConnectionNode }>;
-  edgesMap: Map<string, { data: ConnectionEdge }>;
-  groupedConnections: ReturnType<typeof groupConnections>;
-}) {
-  const ungroupedEdges = new Map(edgesMap);
-  const ungroupedNodes = new Map(nodesMap);
+/**
+ * Create a grouped node from a group of nodes.
+ */
+function createGroupedNode(
+  group: GroupInfo,
+  nodesById: Map<string, ServiceMapNode>
+): ServiceMapNode {
+  const firstTarget = nodesById.get(group.targets[0]);
+  const firstData =
+    firstTarget && isDependencyNodeData(firstTarget.data) ? firstTarget.data : undefined;
 
-  for (const { sources, targets } of groupedConnections) {
-    targets.forEach((target) => {
-      ungroupedNodes.delete(target);
-      sources.forEach((source) => {
-        ungroupedEdges.delete(getEdgeId(source, target));
+  const groupedConnections: GroupedNodeData['groupedConnections'] = [];
+  for (const targetId of group.targets) {
+    const node = nodesById.get(targetId);
+    if (node && isDependencyNodeData(node.data)) {
+      groupedConnections.push({
+        id: node.data.id,
+        label: node.data.label,
+        spanType: node.data.spanType,
+        spanSubtype: node.data.spanSubtype,
       });
-    });
+    }
   }
 
+  const groupedData: GroupedNodeData = {
+    id: group.id,
+    label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
+      defaultMessage: '{count} resources',
+      values: { count: group.targets.length },
+    }),
+    isService: false,
+    isGrouped: true,
+    spanType: firstData?.spanType,
+    spanSubtype: firstData?.spanSubtype,
+    groupedConnections,
+    count: group.targets.length,
+  };
+
   return {
-    ungroupedNodes,
-    ungroupedEdges,
+    id: group.id,
+    type: 'groupedResources',
+    position: { x: 0, y: 0 },
+    data: groupedData,
   };
 }
 
-function groupNodes({
-  nodesMap,
-  groupedConnections,
-}: {
-  nodesMap: Map<string, ConnectionElement>;
-  groupedConnections: ReturnType<typeof groupConnections>;
-}) {
-  return groupedConnections.map(({ id, targets }): GroupedNode => {
-    // Get spanType and spanSubtype from the first target node
-    const firstTarget = nodesMap.get(targets[0]);
-    const firstTargetData = firstTarget && isNode(firstTarget) ? firstTarget.data : undefined;
-    const spanType = firstTargetData?.[SPAN_TYPE];
-    const spanSubtype = firstTargetData?.[SPAN_SUBTYPE];
-
-    return {
-      data: {
-        id,
-        [SPAN_TYPE]: spanType || 'external',
-        ...(spanSubtype && { [SPAN_SUBTYPE]: spanSubtype }),
-        label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
-          defaultMessage: '{count} resources',
-          values: { count: targets.length },
-        }),
-        groupedConnections: targets
-          .map((target) => {
-            const targetElement = nodesMap.get(target);
-            return targetElement
-              ? {
-                  ...targetElement.data,
-                  label: targetElement.data.label || targetElement.data.id,
-                }
-              : undefined;
-          })
-          .filter((target): target is GroupedConnection => !!target),
-      },
-    };
-  });
+/**
+ * Create edges from sources to a grouped node
+ */
+function createIncomingGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
+  return group.sources.map((source) => ({
+    id: `${source}~>${group.id}`,
+    source,
+    target: group.id,
+    type: 'default' as const,
+    style: DEFAULT_EDGE_STYLE,
+    markerEnd: createEdgeMarker(),
+    data: { isBidirectional: false },
+  }));
 }
 
-function groupEdges({
-  groupedConnections,
-}: {
-  groupedConnections: ReturnType<typeof groupConnections>;
-}) {
-  return groupedConnections.flatMap(({ id, sources }) =>
-    sources.map(
-      (source): GroupedEdge => ({
-        data: {
-          id: `${source}~>${id}`,
-          source,
-          target: id,
-        },
-      })
-    )
-  );
+function createOutgoingGroupedEdges(
+  groups: GroupInfo[],
+  edges: ServiceMapEdge[],
+  groupedNodeIds: Set<string>
+): ServiceMapEdge[] {
+  const nodeToGroup = new Map<string, string>();
+  const outgoingEdgeKeys = new Set<string>();
+  const outgoingEdges: ServiceMapEdge[] = [];
+
+  for (const group of groups) {
+    for (const target of group.targets) {
+      nodeToGroup.set(target, group.id);
+    }
+  }
+
+  for (const edge of edges) {
+    const groupId = nodeToGroup.get(edge.source);
+    if (groupId && !groupedNodeIds.has(edge.target)) {
+      const edgeKey = `${groupId}~>${edge.target}`;
+      if (!outgoingEdgeKeys.has(edgeKey)) {
+        outgoingEdgeKeys.add(edgeKey);
+        outgoingEdges.push({
+          id: edgeKey,
+          source: groupId,
+          target: edge.target,
+          type: 'default' as const,
+          style: DEFAULT_EDGE_STYLE,
+          markerEnd: createEdgeMarker(),
+          data: { isBidirectional: false },
+        });
+      }
+    }
+  }
+
+  return outgoingEdges;
 }
 
-export function groupResourceNodes({
-  elements,
-}: {
-  elements: ConnectionElement[];
-}): GroupResourceNodesResponse {
-  const nodesMap = new Map(elements.filter(isNode).map((node) => [node.data.id, node]));
-  const edgesMap = new Map(
-    elements.filter(isEdge).map((edge) => [getEdgeId(edge.data.source, edge.data.target), edge])
-  );
-  const groupableNodeIds = new Set(
-    elements.filter(isElligibleGroupNode).map(({ data: { id } }) => id)
+/**
+ * Groups nodes that share the same sources.
+ * Nodes with 4+ targets from the same source(s) are grouped into a single node.
+ *
+ * This is a native ReactFlow implementation that doesn't require
+ * grouping.
+ */
+export function groupResourceNodes(
+  nodes: ServiceMapNode[],
+  edges: ServiceMapEdge[]
+): GroupResourceNodesResult {
+  const nodesById = new Map(nodes.map((n) => [n.id, n]));
+
+  const groups = findGroups(nodes, edges);
+
+  // Collect IDs of nodes/edges that will be grouped
+  const groupedNodeIds = new Set<string>();
+  const groupedEdgeIds = new Set<string>();
+
+  for (const group of groups) {
+    for (const target of group.targets) {
+      groupedNodeIds.add(target);
+      for (const source of group.sources) {
+        groupedEdgeIds.add(getEdgeId(source, target));
+      }
+    }
+  }
+
+  const ungroupedNodes = nodes.filter((n) => !groupedNodeIds.has(n.id));
+  const ungroupedEdges = edges.filter(
+    (e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)) && !groupedNodeIds.has(e.source)
   );
 
-  const groupedConnections = groupConnections({ edgesMap, groupableNodeIds });
-  const { ungroupedEdges, ungroupedNodes } = getUngroupedNodesAndEdges({
-    nodesMap,
-    edgesMap,
-    groupedConnections,
-  });
-
-  const groupedNodes = groupNodes({ nodesMap, groupedConnections });
-  const groupedEdges = groupEdges({ groupedConnections });
+  // Create grouped nodes and edges
+  const groupedNodes = groups.map((g) => createGroupedNode(g, nodesById));
+  const incomingGroupedEdges = groups.flatMap((g) => createIncomingGroupedEdges(g));
+  const outgoingGroupedEdges = createOutgoingGroupedEdges(groups, edges, groupedNodeIds);
 
   return {
-    elements: [
-      ...ungroupedNodes.values(),
-      ...groupedNodes,
-      ...ungroupedEdges.values(),
-      ...groupedEdges,
-    ],
-    nodesCount: ungroupedNodes.size,
+    nodes: [...ungroupedNodes, ...groupedNodes],
+    edges: [...ungroupedEdges, ...incomingGroupedEdges, ...outgoingGroupedEdges],
+    nodesCount: ungroupedNodes.length,
   };
 }

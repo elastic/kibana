@@ -51,11 +51,6 @@ function setAppChrome() {
         linkType: 'documentation',
         href: `${mapUrl}`,
       },
-      {
-        linkType: 'github',
-        title: '[Maps]',
-        labels: ['Team:Geo'],
-      },
     ],
   });
 }

@@ -22,7 +22,7 @@ export const createTransformStringESQL = (esqlFunc: string) => {
     const commands: ESQLAstCommand[] = [];
 
     // Add missing field filter if needed (ignore_missing = false)
-    const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+    const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
     if (missingFieldFilter) {
       commands.push(missingFieldFilter);
     }

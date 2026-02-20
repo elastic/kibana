@@ -12,6 +12,7 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';
+import type { SignificantEventsResponse } from '../api/significant_events';
 
 interface StreamQueryBase {
   id: string;
@@ -80,3 +81,15 @@ export const upsertStreamQueryRequestSchema = z.object({
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
+
+export interface QueriesGetResponse {
+  queries: SignificantEventsResponse[];
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface QueriesOccurrencesGetResponse {
+  occurrences_histogram: Array<{ x: string; y: number }>;
+  total_occurrences: number;
+}

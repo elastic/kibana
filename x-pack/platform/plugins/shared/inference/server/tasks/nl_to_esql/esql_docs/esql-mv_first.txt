@@ -1,6 +1,6 @@
 # MV_FIRST
 
-Converts a multivalued expression into a single-valued column containing the first value. This is particularly useful when working with functions like `SPLIT` that produce multivalued columns in a known order.
+The MV_FIRST function converts a multivalued expression into a single-valued column containing the first value. This is especially useful when working with functions that produce multivalued columns in a known order, such as `SPLIT`. The order in which multivalued fields are read from underlying storage is not guaranteed and is frequently ascending, but you should not rely on this. If you need the minimum value, use `MV_MIN` instead, as it is optimized for sorted values and does not offer a performance benefit over `MV_FIRST`.
 
 ## Syntax
 
@@ -8,22 +8,15 @@ Converts a multivalued expression into a single-valued column containing the fir
 
 ### Parameters
 
-#### `field`
+#### field
 
-A multivalued expression.
+A multivalue expression to extract the first value from.
 
 ## Examples
 
-Extracting the first value from a multivalued column
+Extracts the first value from a semicolon-separated string by splitting the string and selecting the first element.
 
 ```esql
 ROW a="foo;bar;baz"
 | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
 ```
-
-This example splits the string `a` into multiple values using the `SPLIT` function and extracts the first value, resulting in `first_a = "foo"`.
-
-## Notes
-
-- The order in which multivalued fields are read from underlying storage is not guaranteed. While it is often ascending, this behavior should not be relied upon.
-- If you need the minimum value, use `MV_MIN` instead of `MV_FIRST`. The `MV_MIN` function is optimized for sorted values and offers no performance disadvantage compared to `MV_FIRST`.

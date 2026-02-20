@@ -16,7 +16,12 @@ import {
 } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+export const defaultUser = {
+  email: null,
+  full_name: null,
+  username: 'elastic',
+  profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

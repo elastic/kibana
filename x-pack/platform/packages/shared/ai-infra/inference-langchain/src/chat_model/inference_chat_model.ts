@@ -184,13 +184,22 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },

@@ -83,7 +83,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
       >
         {item.icon && (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" />
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
           </EuiFlexItem>
         )}
         <EuiFlexItem
@@ -96,10 +96,26 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
             <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
+        {item.serviceName && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color="hollow"
+              iconType="dot"
+              data-test-subj="apmBarDetailsServiceNameBadge"
+              css={css`
+                & .euiBadge__icon {
+                  color: ${item.color};
+                }
+              `}
+            >
+              {item.serviceName}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
+          <EuiBadge color="hollow" iconType="clock">
             {asDuration(item.duration)}
-          </EuiText>
+          </EuiBadge>
         </EuiFlexItem>
         {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
@@ -148,6 +164,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"
+                aria-hidden={true}
               />
             )}
           </EuiFlexItem>

@@ -8,13 +8,22 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
-  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.workplaceai,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
@@ -34,7 +43,7 @@ apiTest.describe(
         });
 
         expect(response.statusCode).toBe(200);
-        expect(response.body).toHaveProperty('steps');
+        expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
         for (const step of response.body.steps) {
@@ -44,9 +53,9 @@ apiTest.describe(
             message: `Step "${step.id}" is not in the approved list`,
           }).toBeDefined();
 
-          expect(approvedStep?.handlerHash, {
+          expect(step.handlerHash, {
             message: `Step "${step.id}" has an invalid handler hash`,
-          }).toBe(step.handlerHash);
+          }).toBe(approvedStep?.handlerHash);
         }
       }
     );

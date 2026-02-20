@@ -21,7 +21,8 @@ const apiToIntercept = {
   name: 'coldStartRequest',
 };
 
-describe('Service overview - aws lambda', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253586
+describe.skip('Service overview - aws lambda', () => {
   before(() => {
     synthtrace.index(
       generateData({

@@ -33,4 +33,9 @@ export const createStartServicesMock = () => ({
   triggersActionsUi: triggersActionsUiMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   licensing: licensingMock.createStart(),
+  workflowsManagement: {
+    telemetry: {
+      reportEvent: jest.fn(),
+    },
+  },
 });

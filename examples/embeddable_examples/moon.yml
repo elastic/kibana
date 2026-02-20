@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-util-plugin'
   - '@kbn/unified-field-list'
-  - '@kbn/presentation-containers'
   - '@kbn/developer-examples-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/discover-utils'

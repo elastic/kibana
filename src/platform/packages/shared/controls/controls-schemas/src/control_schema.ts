@@ -23,18 +23,18 @@ export const controlSchema = schema.object(
 );
 
 export const dataControlSchema = controlSchema.extends({
-  dataViewId: schema.string({
+  data_view_id: schema.string({
     meta: { description: 'The ID of the data view that the control is tied to' }, // this will generate a reference
   }),
-  fieldName: schema.string({
+  field_name: schema.string({
     meta: { description: 'The name of the field in the data view that the control is tied to' },
   }),
-  useGlobalFilters: schema.maybe(
+  use_global_filters: schema.maybe(
     schema.boolean({
       defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
     })
   ),
-  ignoreValidations: schema.maybe(
+  ignore_validations: schema.maybe(
     schema.boolean({
       defaultValue: DEFAULT_IGNORE_VALIDATIONS,
     })

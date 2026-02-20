@@ -12,12 +12,14 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { type LogsLocatorParams, getNodeQuery, getTimeRange } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { type AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import type {
   Action,
   SectionRecord,
 } from '../../../../shared/transaction_action_menu/sections_helper';
 import { getNonEmptySections } from '../../../../shared/transaction_action_menu/sections_helper';
+import { getPodMetricsLink } from '../../../../shared/transaction_action_menu/pod_metrics_utils';
 
 type InstaceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
@@ -42,6 +44,9 @@ export function getMenuSections({
   metricsHref,
   logsLocator,
   assetDetailsLocator,
+  discoverLocator,
+  infraLinksAvailable,
+  metricsIndices,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
@@ -49,6 +54,9 @@ export function getMenuSections({
   metricsHref: string;
   logsLocator: LocatorPublic<LogsLocatorParams>;
   assetDetailsLocator?: AssetDetailsLocator;
+  discoverLocator?: LocatorPublic<SerializableRecord>;
+  infraLinksAvailable: boolean;
+  metricsIndices?: string;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -73,8 +81,17 @@ export function getMenuSections({
     timeRange: getTimeRange(time),
   });
 
-  const hasPodLink = !!podId && !!assetDetailsLocator;
   const hasContainerLink = !!containerId && !!assetDetailsLocator;
+
+  const podMetricsLink = getPodMetricsLink({
+    podId,
+    agentName: instanceDetails.agent?.name,
+    infraMetricsQuery,
+    assetDetailsLocator,
+    discoverLocator,
+    infraLinksAvailable,
+    metricsIndices,
+  });
 
   const podActions: Action[] = [
     {
@@ -90,14 +107,8 @@ export function getMenuSections({
       label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics', {
         defaultMessage: 'Pod metrics',
       }),
-      href: hasPodLink
-        ? assetDetailsLocator.getRedirectUrl({
-            entityId: podId,
-            entityType: 'pod',
-            assetDetails: { dateRange: infraMetricsQuery },
-          })
-        : undefined,
-      condition: hasPodLink,
+      href: podMetricsLink,
+      condition: !!podMetricsLink,
     },
   ];
 

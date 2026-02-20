@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
-  ACTION_VISUALIZE_GEO_FIELD,
   ADD_PANEL_TRIGGER,
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { FILTER_BY_MAP_EXTENT } from './filter_by_map_extent/constants';
 import { SYNCHRONIZE_MOVEMENT_ACTION } from './synchronize_movement/constants';
@@ -33,11 +34,8 @@ export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDepen
     return getAddMapPanelAction(plugins);
   });
   plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMapPanelAction');
-  if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-    // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-    // the create action if the Canvas-specific trigger does indeed exist.
-    plugins.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addMapPanelAction');
-  }
+
+  plugins.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addMapPanelAction');
 
   plugins.uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, FILTER_BY_MAP_EXTENT, async () => {
     const { filterByMapExtentAction } = await import('./context_menu_actions_module');

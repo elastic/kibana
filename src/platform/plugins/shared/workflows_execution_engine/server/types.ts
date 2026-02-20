@@ -67,7 +67,7 @@ export type ExecuteWorkflowStep = (
   workflow: WorkflowExecutionEngineModel,
   stepId: string,
   contextOverride: Record<string, any>,
-  request?: KibanaRequest
+  request: KibanaRequest
 ) => Promise<ExecuteWorkflowStepResponse>;
 
 export type CancelWorkflowExecution = (

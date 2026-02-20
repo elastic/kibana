@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  type EuiFlyoutProps,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -103,6 +104,7 @@ interface InferenceFlyoutWrapperProps {
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
   enableEisPromoTour?: boolean;
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -114,6 +116,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   onSubmitSuccess,
   inferenceEndpoint,
   enableEisPromoTour,
+  focusTrapProps,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -160,6 +163,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     <EuiFlyout
       ownFocus
       onClose={onFlyoutClose}
+      focusTrapProps={focusTrapProps}
       aria-labelledby={inferenceCreationFlyoutId}
       data-test-subj="inference-flyout"
     >

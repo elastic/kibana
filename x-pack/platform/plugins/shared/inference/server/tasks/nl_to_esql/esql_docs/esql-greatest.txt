@@ -1,6 +1,6 @@
 # GREATEST
 
-Returns the maximum value from multiple columns. This function is similar to `MV_MAX` but is designed to operate on multiple columns simultaneously.
+The GREATEST function returns the maximum value from multiple columns. When used with string fields, it returns the last string in alphabetical order. For boolean columns, it returns `true` if any value is `true`.
 
 ## Syntax
 
@@ -8,26 +8,18 @@ Returns the maximum value from multiple columns. This function is similar to `MV
 
 ### Parameters
 
-#### `first`
+#### first
 
 The first column to evaluate.
 
-#### `rest`
+#### rest
 
 The remaining columns to evaluate.
 
 ## Examples
 
-Finding the maximum value between two columns
-
+Finds the maximum value between columns `a` and `b` and stores it in column `g`.
 ```esql
 ROW a = 10, b = 20
 | EVAL g = GREATEST(a, b)
 ```
-
-This example evaluates the maximum value between columns `a` and `b`, resulting in `g = 20`.
-
-## Notes
-
-- When applied to `keyword` or `text` fields, the function returns the last string in alphabetical order.
-- When applied to `boolean` columns, the function returns `true` if any of the values are `true`.

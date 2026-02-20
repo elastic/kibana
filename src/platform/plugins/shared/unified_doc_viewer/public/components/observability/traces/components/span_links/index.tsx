@@ -33,7 +33,6 @@ import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
@@ -58,7 +57,6 @@ const sorting: EuiInMemoryTableProps['sorting'] = {
 
 export function SpanLinks({ docId, traceId, processorEvent }: Props) {
   const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.traces });
   const [type, setType] = useState<SpanLinkType>('incoming');
   const { loading, error, value } = useFetchSpanLinks({ docId, traceId, processorEvent });
   const spanLinks = type === 'incoming' ? value.incomingSpanLinks : value.outgoingSpanLinks;
@@ -104,10 +102,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     [value]
   );
 
-  const columns = useMemo(
-    () => getColumns({ generateDiscoverLink, type }),
-    [generateDiscoverLink, type]
-  );
+  const columns = useMemo(() => getColumns({ type }), [type]);
 
   const whereClause = useMemo(() => {
     if (type === 'incoming') {
@@ -190,6 +185,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="s">
               <EuiInMemoryTable
+                tableCaption={sectionTitle}
                 responsiveBreakpoint={false}
                 items={spanLinks}
                 columns={columns}

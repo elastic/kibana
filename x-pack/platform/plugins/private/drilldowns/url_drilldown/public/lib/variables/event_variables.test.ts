@@ -8,7 +8,7 @@
 import type { ValueClickTriggerEventScope } from './event_variables';
 import { getEventScopeValues, getEventVariableList } from './event_variables';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createPoint, rowClickData } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
@@ -73,9 +73,7 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
 describe('ROW_CLICK_TRIGGER', () => {
   test('getEventVariableList() returns correct list of runtime variables', () => {
-    const vars = getEventVariableList({
-      triggers: [ROW_CLICK_TRIGGER],
-    });
+    const vars = getEventVariableList(ROW_CLICK_TRIGGER);
     expect(vars.map(({ label }) => label)).toEqual([
       'event.values',
       'event.keys',

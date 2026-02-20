@@ -27,9 +27,9 @@ import {
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
+import { VALUE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LegendItem } from './models';
 import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';

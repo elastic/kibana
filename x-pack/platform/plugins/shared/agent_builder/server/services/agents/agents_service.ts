@@ -17,7 +17,8 @@ import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentsServiceSetup, AgentsServiceStart } from './types';
+import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
+import type { AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
@@ -27,6 +28,7 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
+import { createClient } from './persisted/client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -84,6 +86,18 @@ export class AgentsService {
       logger,
     });
 
+    const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      return createClient({
+        elasticsearch,
+        logger,
+        request,
+        security,
+        space,
+        toolsService,
+      });
+    };
+
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
       const space = getCurrentSpaceId({ request, spaces });
       return createAgentRegistry({
@@ -96,11 +110,29 @@ export class AgentsService {
       });
     };
 
+    const removeToolRefsFromAgents = async ({
+      request,
+      toolIds,
+    }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removeToolRefsFromAgents({ toolIds });
+    };
+
+    const getAgentsUsingTools = async ({
+      request,
+      toolIds,
+    }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingTools({ toolIds });
+    };
+
     return {
       getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
+      removeToolRefsFromAgents,
+      getAgentsUsingTools,
     };
   }
 }

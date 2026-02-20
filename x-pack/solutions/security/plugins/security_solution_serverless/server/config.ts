@@ -54,6 +54,7 @@ export const serverConfigSchema = schema.object({
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usageApi: usageApiConfig,
 });
 const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);

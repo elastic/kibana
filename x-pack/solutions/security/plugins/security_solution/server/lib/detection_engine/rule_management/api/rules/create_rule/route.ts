@@ -9,6 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,
@@ -20,7 +21,6 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
@@ -93,7 +93,12 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             ruleId: undefined,
           });
 
-          await validateResponseActionsPermissions(ctx.securitySolution, request.body);
+          await validateRuleResponseActions({
+            endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
+            endpointService: ctx.securitySolution.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: ctx.securitySolution.getSpaceId(),
+          });
 
           const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,

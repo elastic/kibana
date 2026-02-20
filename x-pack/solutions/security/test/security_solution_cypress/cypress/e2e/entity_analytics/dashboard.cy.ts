@@ -27,7 +27,8 @@ import {
   waitForEntitiesListToAppear,
 } from '../../tasks/entity_analytics';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/248143
+describe.skip(
   'Entity analytics dashboard page',
   {
     tags: ['@ess', '@serverless'],

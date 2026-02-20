@@ -31,6 +31,7 @@ export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectM
 const migrationStatsToComboBoxOption = (
   stats: MigrationTaskStats
 ): EuiComboBoxOptionOption<string> => ({
+  key: stats.id,
   value: stats.id,
   label: stats.name,
   'data-test-subj': `migrationSelectionOption-${stats.id}`,
@@ -60,8 +61,10 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
     const migrationVendor = useMemo(() => selectedMigrationStats?.vendor, [selectedMigrationStats]);
 
     const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-      return selectedMigrationStats ? [migrationStatsToComboBoxOption(selectedMigrationStats)] : [];
-    }, [selectedMigrationStats]);
+      if (!selectedMigrationId) return [];
+      const selected = migrationOptions.find((opt) => opt.value === selectedMigrationId);
+      return selected ? [selected] : [];
+    }, [migrationOptions, selectedMigrationId]);
 
     const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
       onMigrationIdChange(selected[0].value);

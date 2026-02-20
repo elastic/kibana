@@ -11,13 +11,10 @@ import { UiActionsService } from './ui_actions_service';
 import type { ActionDefinition } from '../actions';
 import { ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import type { TriggerRegistry, ActionRegistry } from '../types';
+import type { ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-
-const FOO_TRIGGER = 'FOO_TRIGGER';
-const BAR_TRIGGER = 'BAR_TRIGGER';
-const MY_TRIGGER = 'MY_TRIGGER';
+import { CONTEXT_MENU_TRIGGER } from '../../common/trigger_ids';
+import { triggers } from '../triggers';
 
 const testAction1: ActionDefinition = {
   id: 'action1',
@@ -44,37 +41,19 @@ describe('UiActionsService', () => {
     new UiActionsService();
   });
 
-  describe('.registerTrigger()', () => {
-    test('can register a trigger', () => {
-      const service = new UiActionsService();
-      service.registerTrigger({
-        id: BAR_TRIGGER,
-      });
-    });
-  });
-
   describe('.getTrigger()', () => {
-    test('can get Trigger from registry', () => {
+    test('can get Trigger from lookup table', () => {
       const service = new UiActionsService();
-      service.registerTrigger({
-        description: 'foo',
-        id: BAR_TRIGGER,
-        title: 'baz',
-      });
 
-      const trigger = service.getTrigger(BAR_TRIGGER);
+      const trigger = service.getTrigger(CONTEXT_MENU_TRIGGER);
 
-      expect(trigger).toMatchObject({
-        description: 'foo',
-        id: BAR_TRIGGER,
-        title: 'baz',
-      });
+      expect(trigger).toMatchObject(triggers.CONTEXT_MENU_TRIGGER);
     });
 
     test('throws if trigger does not exist', () => {
       const service = new UiActionsService();
 
-      expect(() => service.getTrigger(FOO_TRIGGER)).toThrowError(
+      expect(() => service.getTrigger('FOO_TRIGGER')).toThrowError(
         'Trigger [triggerId = FOO_TRIGGER] does not exist.'
       );
     });
@@ -134,25 +113,20 @@ describe('UiActionsService', () => {
 
       service.registerAction(action1);
       service.registerAction(action2);
-      service.registerTrigger({
-        description: 'foo',
-        id: FOO_TRIGGER,
-        title: 'baz',
-      });
 
-      const list0 = await service.getTriggerActions(FOO_TRIGGER);
+      const list0 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
 
       expect(list0).toHaveLength(0);
 
-      service.addTriggerAction(FOO_TRIGGER, action1);
-      const list1 = await service.getTriggerActions(FOO_TRIGGER);
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action1);
+      const list1 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
 
       expect(list1).toHaveLength(1);
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
-      service.addTriggerAction(FOO_TRIGGER, action2);
-      const list2 = await service.getTriggerActions(FOO_TRIGGER);
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action2);
+      const list2 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
 
       expect(list2).toHaveLength(2);
       expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);
@@ -182,14 +156,9 @@ describe('UiActionsService', () => {
 
       service.registerAction(helloWorldAction);
 
-      const testTrigger: Trigger = {
-        id: MY_TRIGGER,
-        title: 'My trigger',
-      };
-      service.registerTrigger(testTrigger);
-      service.addTriggerAction(MY_TRIGGER, helloWorldAction);
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
 
-      const compatibleActions = await service.getTriggerCompatibleActions(MY_TRIGGER, {
+      const compatibleActions = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
         hi: 'there',
       });
 
@@ -208,21 +177,15 @@ describe('UiActionsService', () => {
 
       service.registerAction(action);
 
-      const testTrigger: Trigger = {
-        id: MY_TRIGGER,
-        title: 'My trigger',
-      };
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
-      service.registerTrigger(testTrigger);
-      service.addTriggerAction(testTrigger.id, action);
-
-      const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
+      const compatibleActions1 = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
         accept: true,
       });
 
       expect(compatibleActions1.length).toBe(1);
 
-      const compatibleActions2 = await service.getTriggerCompatibleActions(testTrigger.id, {
+      const compatibleActions2 = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
         accept: false,
       });
 
@@ -239,13 +202,8 @@ describe('UiActionsService', () => {
 
     test('returns empty list if trigger not attached to an action', async () => {
       const service = new UiActionsService();
-      const testTrigger: Trigger = {
-        id: '123',
-        title: '123',
-      };
-      service.registerTrigger(testTrigger);
 
-      const actions = await service.getTriggerCompatibleActions(testTrigger.id, {});
+      const actions = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {});
 
       expect(actions).toEqual([]);
     });
@@ -260,49 +218,16 @@ describe('UiActionsService', () => {
       expect(service2).toBeInstanceOf(UiActionsService);
     });
 
-    test('triggers registered in original service are available in original an forked services', () => {
-      const service1 = new UiActionsService();
-      service1.registerTrigger({
-        id: FOO_TRIGGER,
-      });
-      const service2 = service1.fork();
-
-      const trigger1 = service1.getTrigger(FOO_TRIGGER);
-      const trigger2 = service2.getTrigger(FOO_TRIGGER);
-
-      expect(trigger1.id).toBe(FOO_TRIGGER);
-      expect(trigger2.id).toBe(FOO_TRIGGER);
-    });
-
-    test('triggers registered in forked service are not available in original service', () => {
-      const service1 = new UiActionsService();
-      const service2 = service1.fork();
-
-      service2.registerTrigger({
-        id: FOO_TRIGGER,
-      });
-
-      expect(() => service1.getTrigger(FOO_TRIGGER)).toThrowErrorMatchingInlineSnapshot(
-        `"Trigger [triggerId = FOO_TRIGGER] does not exist."`
-      );
-
-      const trigger2 = service2.getTrigger(FOO_TRIGGER);
-      expect(trigger2.id).toBe(FOO_TRIGGER);
-    });
-
     test('forked service preserves trigger-to-actions mapping', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerTrigger({
-        id: FOO_TRIGGER,
-      });
       service1.registerAction(testAction1);
-      service1.addTriggerAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
-      const actions1 = await service1.getTriggerActions(FOO_TRIGGER);
-      const actions2 = await service2.getTriggerActions(FOO_TRIGGER);
+      const actions1 = await service1.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      const actions2 = await service2.getTriggerActions(CONTEXT_MENU_TRIGGER);
 
       expect(actions1).toHaveLength(1);
       expect(actions2).toHaveLength(1);
@@ -313,66 +238,42 @@ describe('UiActionsService', () => {
     test('new attachments in fork do not appear in original service', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerTrigger({
-        id: FOO_TRIGGER,
-      });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.addTriggerAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
-      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
 
-      service2.addTriggerAction(FOO_TRIGGER, testAction2);
+      service2.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction2);
 
-      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
+      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(2);
     });
 
     test('new attachments in original service do not appear in fork', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerTrigger({
-        id: FOO_TRIGGER,
-      });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.addTriggerAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
-      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
 
-      service1.addTriggerAction(FOO_TRIGGER, testAction2);
+      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction2);
 
-      expect(await service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
-      expect(await service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(2);
+      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
     });
   });
 
   describe('registries', () => {
     const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
-
-    test('can register trigger', () => {
-      const triggers: TriggerRegistry = new Map();
-      const service = new UiActionsService({ triggers });
-
-      service.registerTrigger({
-        description: 'foo',
-        id: BAR_TRIGGER,
-        title: 'baz',
-      });
-      const triggerContract = service.getTrigger(BAR_TRIGGER);
-
-      expect(triggerContract).toMatchObject({
-        description: 'foo',
-        id: BAR_TRIGGER,
-        title: 'baz',
-      });
-    });
 
     test('can register action', async () => {
       const actions: ActionRegistry = new Map();
@@ -392,18 +293,14 @@ describe('UiActionsService', () => {
     test('can attach an action to a trigger', async () => {
       const service = new UiActionsService();
 
-      const trigger: Trigger = {
-        id: MY_TRIGGER,
-      };
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerTrigger(trigger);
-      service.addTriggerAction(MY_TRIGGER, action);
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
-      const actions = await service.getTriggerActions(trigger.id);
+      const actions = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
 
       expect(actions.length).toBe(1);
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
@@ -412,20 +309,16 @@ describe('UiActionsService', () => {
     test('can detach an action from a trigger', async () => {
       const service = new UiActionsService();
 
-      const trigger: Trigger = {
-        id: MY_TRIGGER,
-      };
       const action = {
         id: ACTION_HELLO_WORLD,
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerTrigger(trigger);
       service.registerAction(action);
-      service.addTriggerAction(trigger.id, action);
-      service.detachAction(trigger.id, action.id);
+      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+      service.detachAction(CONTEXT_MENU_TRIGGER, action.id);
 
-      const actions2 = await service.getTriggerActions(trigger.id);
+      const actions2 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
       expect(actions2).toEqual([]);
     });
 
@@ -468,17 +361,6 @@ describe('UiActionsService', () => {
       service.registerAction(action);
       expect(() => service.registerAction(action)).toThrowError(
         'Action [action.id = ACTION_HELLO_WORLD] already registered.'
-      );
-    });
-
-    test('cannot register another trigger with the same ID', async () => {
-      const service = new UiActionsService();
-
-      const trigger = { id: 'MY-TRIGGER' } as unknown as Trigger;
-
-      service.registerTrigger(trigger);
-      expect(() => service.registerTrigger(trigger)).toThrowError(
-        'Trigger [trigger.id = MY-TRIGGER] already registered.'
       );
     });
   });

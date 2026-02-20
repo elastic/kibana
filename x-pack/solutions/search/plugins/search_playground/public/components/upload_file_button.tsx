@@ -8,8 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { type FileUploadResults, OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
+import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useKibana } from '../hooks/use_kibana';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 
@@ -25,7 +26,7 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
 
   const showFileUploadFlyout = React.useCallback(() => {
     if (uiActions !== null) {
-      uiActions.getTrigger(OPEN_FILE_UPLOAD_LITE_TRIGGER).exec({
+      uiActions.executeTriggerActions(OPEN_FILE_UPLOAD_LITE_TRIGGER, {
         autoAddInference: '.elser-2-elasticsearch',
         onUploadComplete: (results: FileUploadResults) => {
           setSelectedIndices([results.index]);

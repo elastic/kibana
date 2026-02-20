@@ -58,10 +58,10 @@ export const AlertDetailsRedirect = () => {
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
   const statusPageFilter: FilterControlConfig = {
-    fieldName: ALERT_WORKFLOW_STATUS,
+    field_name: ALERT_WORKFLOW_STATUS,
     title: 'Status',
-    selectedOptions: [],
-    existsSelected: false,
+    selected_options: [],
+    exists_selected: false,
   };
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));

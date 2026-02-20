@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/logging-mocks'
   - '@kbn/otel-semantic-conventions'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

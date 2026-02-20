@@ -37,8 +37,8 @@ export interface QuickSearchVisorProps {
   onToggleVisor: () => void;
 }
 
-const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Search...',
+export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
+  defaultMessage: 'Filter your data using KQL syntax',
 });
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {

@@ -46,6 +46,7 @@ export type LensProps = Pick<
   | 'executionContext'
   | 'onLoad'
   | 'lastReloadRequestTime'
+  | 'userMessages'
 >;
 
 export const useLensProps = ({
@@ -58,6 +59,7 @@ export const useLensProps = ({
   chartLayers,
   yBounds,
   error,
+  userMessages,
 }: {
   title: string;
   query: string;
@@ -66,13 +68,14 @@ export const useLensProps = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   error?: Error;
+  userMessages?: EmbeddableComponentProps['userMessages'];
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, error]);
+  }, [query, title, chartLayers, yBounds, error, userMessages]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -100,6 +103,7 @@ export const useLensProps = ({
         esqlVariables: fetchParams.esqlVariables,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+        userMessages,
       });
     },
     [
@@ -107,6 +111,7 @@ export const useLensProps = ({
       fetchParams.relativeTimeRange,
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
+      userMessages,
     ]
   );
 
@@ -204,12 +209,14 @@ const getLensProps = ({
   attributes,
   lastReloadRequestTime,
   esqlVariables,
+  userMessages,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
+  userMessages?: EmbeddableComponentProps['userMessages'];
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -222,4 +229,5 @@ const getLensProps = ({
     description: 'metrics experience chart data',
   },
   lastReloadRequestTime,
+  userMessages,
 });

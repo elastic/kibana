@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/response-ops-rules-apis'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod

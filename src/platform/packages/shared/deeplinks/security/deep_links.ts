@@ -98,6 +98,7 @@ export enum SecurityPageName {
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsLanding = 'entity_analytics-landing',
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
+  entityAnalyticsWatchlists = 'entity_analytics-watchlists',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
@@ -108,4 +109,10 @@ export enum SecurityPageName {
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
   configurationsBasicRules = 'configurations-basic_rules',
+
+  /**
+   * Detection Engine Health UI Pages
+   */
+  spaceRulesHealth = 'space-rules-health',
+  ruleHealth = 'rule-health',
 }

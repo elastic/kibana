@@ -175,6 +175,21 @@ export interface UpdateIngestSettingsAction {
   };
 }
 
+export interface UpsertEsqlViewAction {
+  type: 'upsert_esql_view';
+  request: {
+    name: string;
+    query: string;
+  };
+}
+
+export interface DeleteEsqlViewAction {
+  type: 'delete_esql_view';
+  request: {
+    name: string;
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -197,7 +212,9 @@ export type ElasticsearchAction =
   | UnlinkSystemsAction
   | UnlinkFeaturesAction
   | UpdateFailureStoreAction
-  | UpdateIngestSettingsAction;
+  | UpdateIngestSettingsAction
+  | UpsertEsqlViewAction
+  | DeleteEsqlViewAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -222,4 +239,6 @@ export interface ActionsByType {
   unlink_features: UnlinkFeaturesAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
+  upsert_esql_view: UpsertEsqlViewAction[];
+  delete_esql_view: DeleteEsqlViewAction[];
 }

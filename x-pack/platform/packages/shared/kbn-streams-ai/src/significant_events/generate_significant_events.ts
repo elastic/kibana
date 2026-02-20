@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
@@ -14,12 +13,22 @@ import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { fromKueryExpression } from '@kbn/es-query';
+import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
+import {
+  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+  getFeatureQueryFromToolArgs,
+  resolveFeatureTypeFilters,
+  toFeatureForLlmContext,
+} from './tools/features_tool';
+import {
+  createDefaultSignificantEventsToolUsage,
+  type SignificantEventsToolUsage,
+} from './tools/tool_usage';
 
 interface Query {
   kql: string;
@@ -28,6 +37,26 @@ interface Query {
   severity_score: number;
   evidence?: string[];
 }
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * Given a list of field names extracted from a KQL expression and a set of
+ * mapped fields, returns the subset of field names that do not match any
+ * mapped field. Wildcard patterns (e.g. `server.*`) are matched against all
+ * mapped fields using regex conversion.
+ */
+export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
+  return fieldNames.filter((fieldName) => {
+    if (fieldName.includes('*')) {
+      const regex = new RegExp('^' + fieldName.replace(/\*/g, '.*') + '$');
+      return !Array.from(mappedFields).some((mapped) => regex.test(mapped));
+    }
+    return !mappedFields.has(fieldName);
+  });
+};
 
 /**
  * Generate significant event definitions, based on:
@@ -38,10 +67,10 @@ interface Query {
 export async function generateSignificantEvents({
   stream,
   system,
-  features,
+  esClient,
   start,
   end,
-  esClient,
+  getFeatures,
   inferenceClient,
   signal,
   sampleDocsSize,
@@ -50,10 +79,14 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   system?: System;
-  features: Feature[];
+  esClient: ElasticsearchClient;
   start: number;
   end: number;
-  esClient: ElasticsearchClient;
+  getFeatures(params?: {
+    type?: string[];
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
@@ -62,9 +95,11 @@ export async function generateSignificantEvents({
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
+  toolUsage: SignificantEventsToolUsage;
 }> {
   logger.debug('Starting significant event generation');
 
+  const toolUsage = createDefaultSignificantEventsToolUsage();
   let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
   if (system?.filter) {
@@ -82,6 +117,23 @@ export async function generateSignificantEvents({
     formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
   }
 
+  const fieldCapsResponse = await esClient
+    .fieldCaps({
+      index: stream.name,
+      fields: '*',
+      index_filter: {
+        bool: {
+          filter: dateRangeQuery(start, end),
+        },
+      },
+    })
+    .catch((error) => {
+      throw new Error(
+        `Failure to retrieve mappings to determine field eligibility: ${error.message}`
+      );
+    });
+
+  const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
@@ -89,34 +141,100 @@ export async function generateSignificantEvents({
     executeAsReasoningAgent({
       input: {
         name: system?.name || stream.name,
-        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
-        features: JSON.stringify(
-          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
-        ),
+        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
+        available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,
       inferenceClient,
       toolCallbacks: {
+        get_stream_features: async (toolCall) => {
+          toolUsage.get_stream_features.calls += 1;
+          const startTime = Date.now();
+          try {
+            // Keep this intentionally permissive: ignore unknown tool args instead of failing generation.
+            const { featureTypes, minConfidence, limit } = getFeatureQueryFromToolArgs(
+              toolCall.function.arguments
+            );
+            const typeFilters = resolveFeatureTypeFilters(featureTypes);
+            const features = await withSpan('get_stream_features_for_significant_events', () =>
+              getFeatures({
+                type: typeFilters,
+                minConfidence,
+                limit,
+              })
+            );
+            const llmFeatures = features.map(toFeatureForLlmContext);
+
+            return {
+              response: {
+                features: llmFeatures,
+                count: llmFeatures.length,
+              },
+            };
+          } catch (error) {
+            toolUsage.get_stream_features.failures += 1;
+            const errorMessage = getErrorMessage(error);
+            logger.warn(`Failed to fetch stream features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          } finally {
+            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
+          }
+        },
         add_queries: async (toolCall) => {
+          toolUsage.add_queries.calls += 1;
+          const startTime = Date.now();
+
           const queries = toolCall.function.arguments.queries;
+          let hasFailures = false;
 
           const queryValidationResults = queries.map((query) => {
-            let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
             try {
               fromKueryExpression(query.kql);
+
+              const fieldNames = getKqlFieldNamesFromExpression(query.kql);
+              const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
+
+              if (unmappedFields.length > 0) {
+                hasFailures = true;
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add',
+                  error: `Query references unmapped fields: ${unmappedFields.join(
+                    ', '
+                  )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
+                };
+              }
+
+              return {
+                query,
+                valid: true,
+                status: 'Added',
+                error: undefined,
+              };
             } catch (error) {
-              validation = { valid: false, error };
+              hasFailures = true;
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: getErrorMessage(error),
+              };
             }
-            return {
-              query,
-              valid: validation.valid,
-              status: validation.valid ? 'Added' : 'Failed to add',
-              error: 'error' in validation ? validation.error.message : undefined,
-            };
           });
+          if (hasFailures) {
+            toolUsage.add_queries.failures += 1;
+          }
+          toolUsage.add_queries.latency_ms += Date.now() - startTime;
 
           return {
             response: {
@@ -130,14 +248,10 @@ export async function generateSignificantEvents({
   );
 
   const queries = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Tool) {
-      return message.response.queries.flatMap((query) => {
-        if (query.valid) {
-          return [query.query];
-        }
-        return [];
-      });
+    if (message.role === MessageRole.Tool && message.name === 'add_queries') {
+      return message.response.queries.flatMap(({ valid, query }) => (valid ? [query] : []));
     }
+
     return [];
   });
 
@@ -154,5 +268,6 @@ export async function generateSignificantEvents({
       },
       response.tokens
     ),
+    toolUsage,
   };
 }

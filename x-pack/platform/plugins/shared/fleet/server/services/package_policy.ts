@@ -3005,7 +3005,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -3027,7 +3028,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev')) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {
@@ -3050,7 +3055,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
           });
         }
-      } else {
+      } else if (policy.id.endsWith(':prev')) {
         if (!previousVersionPolicies[namespace]) {
           previousVersionPolicies[namespace] = [];
         }

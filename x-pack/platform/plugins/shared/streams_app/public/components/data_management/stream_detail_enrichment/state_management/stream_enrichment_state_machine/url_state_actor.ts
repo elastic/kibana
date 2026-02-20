@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fromCallback } from 'xstate5';
-import type { ActionArgs } from 'xstate5';
+import { fromCallback } from 'xstate';
+import type { ActionArgs } from 'xstate';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type {

@@ -27,7 +27,8 @@ export interface ToHaveStatusCodeOptions {
 export function toHaveStatusCode(
   obj: unknown,
   expected: number | ToHaveStatusCodeOptions,
-  isNegated = false
+  isNegated = false,
+  message?: string
 ): void {
   if (typeof obj !== 'object' || obj === null || (!('status' in obj) && !('statusCode' in obj))) {
     const expectedValue = typeof expected === 'number' ? expected : expected.oneOf;
@@ -38,6 +39,7 @@ export function toHaveStatusCode(
       matcherName: 'toHaveStatusCode',
       received: obj,
       isNegated,
+      message,
     });
   }
 
@@ -56,6 +58,7 @@ export function toHaveStatusCode(
       matcherName: 'toHaveStatusCode',
       received: actual,
       isNegated,
+      message,
     });
   }
 }

@@ -46,7 +46,8 @@
     "@kbn/ebt-tools",
     "@kbn/apm-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*"

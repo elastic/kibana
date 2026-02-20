@@ -333,6 +333,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         columns={columns}
         pagination={pagination}
         onChange={onTableChange}
+        tableCaption={i18n.translate(
+          'xpack.osquery.liveQueryActionResults.table.liveActionResultsCaption',
+          {
+            defaultMessage: 'Live action results',
+          }
+        )}
         tableLayout="auto"
       />
     </div>

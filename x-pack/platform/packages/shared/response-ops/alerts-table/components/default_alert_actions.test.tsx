@@ -39,6 +39,14 @@ jest.mock('./mute_alert_action', () => {
   return { MuteAlertAction: () => <div data-test-subj="muteAlertAction">{'MuteAlertAction'}</div> };
 });
 
+jest.mock('./acknowledge_alert_action', () => {
+  return {
+    AcknowledgeAlertAction: () => (
+      <div data-test-subj="acknowledgeAlertAction">{'AcknowledgeAlertAction'}</div>
+    ),
+  };
+});
+
 jest.mock('./mark_as_untracked_alert_action', () => {
   return {
     MarkAsUntrackedAlertAction: () => (
@@ -123,6 +131,7 @@ describe('DefaultAlertActions', () => {
         async (standardProps) => {
           render(<TestComponent {...standardProps} />);
 
+          expect(screen.queryByText('AcknowledgeAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('MuteAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();

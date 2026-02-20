@@ -125,6 +125,9 @@ export function TraceExplorerWaterfall() {
         serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        traceId={traceId}
       />
     </ResettingHeightRetainer>
   );

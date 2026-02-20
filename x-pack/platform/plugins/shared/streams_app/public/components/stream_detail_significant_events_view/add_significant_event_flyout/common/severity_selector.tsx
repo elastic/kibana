@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  scoreSeverity,
   SeverityBadge,
   SIGNIFICANT_EVENT_SEVERITY,
-} from '../../../significant_events_discovery/components/severity_badge';
+  scoreSeverity,
+} from '../../../significant_events_discovery/components/severity_badge/severity_badge';
 
 export function SeveritySelector({
   severityScore,

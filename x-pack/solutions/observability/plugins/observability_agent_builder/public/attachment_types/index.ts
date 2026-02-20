@@ -13,6 +13,8 @@ import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 
 type UnknownAttachmentWithLabel = Attachment<
@@ -54,6 +56,20 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
       defaultMessage: 'Log entry',
     }),
     icon: 'logPatternAnalysis',
+  },
+  {
+    type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+    label: i18n.translate('xpack.observabilityAgentBuilder.attachments.slo.label', {
+      defaultMessage: 'SLO',
+    }),
+    icon: 'chartGauge',
+  },
+  {
+    type: OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+    label: i18n.translate('xpack.observabilityAgentBuilder.attachments.service.label', {
+      defaultMessage: 'Service',
+    }),
+    icon: 'gear',
   },
 ];
 

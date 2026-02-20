@@ -10,8 +10,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { hasOpenTelemetryPrefix } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
+import { HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
 import { buildKqlFilter } from './build_kql_filter';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
@@ -29,12 +30,14 @@ export function useTabs({
   containerIds,
   podNames,
   hostNames,
+  agentName,
   start,
   end,
 }: {
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
+  agentName?: string;
   start: string;
   end: string;
 }) {
@@ -44,6 +47,11 @@ export function useTabs({
   const ContainerMetricsTable = metricsDataAccess?.ContainerMetricsTable;
   const PodMetricsTable = metricsDataAccess?.PodMetricsTable;
 
+  const isOtel = useMemo(
+    () => Boolean(agentName && hasOpenTelemetryPrefix(agentName)),
+    [agentName]
+  );
+
   const timerange = useMemo(
     () => ({
       from: start,
@@ -52,8 +60,16 @@ export function useTabs({
     [start, end]
   );
 
+  const k8sFilterFields = useMemo(
+    () => (isOtel ? 'k8s.pod.name' : 'kubernetes.pod.name'),
+    [isOtel]
+  );
+
   const hostsFilter = useMemo(() => buildKqlFilter(HOST_NAME, hostNames), [hostNames]);
-  const podsFilter = useMemo(() => buildKqlFilter(KUBERNETES_POD_NAME, podNames), [podNames]);
+  const podsFilter = useMemo(
+    () => buildKqlFilter(k8sFilterFields, podNames),
+    [k8sFilterFields, podNames]
+  );
   const containersFilter = useMemo(
     () => buildKqlFilter(CONTAINER_ID, containerIds),
     [containerIds]
@@ -66,6 +82,8 @@ export function useTabs({
         ContainerMetricsTable({
           timerange,
           kuery: containersFilter,
+          isOtel,
+          isK8sContainer: podNames.length > 0,
         })}
     </>
   );
@@ -77,6 +95,7 @@ export function useTabs({
         PodMetricsTable({
           timerange,
           kuery: podsFilter,
+          isOtel,
         })}
     </>
   );
@@ -88,6 +107,7 @@ export function useTabs({
         HostMetricsTable({
           timerange,
           kuery: hostsFilter,
+          isOtel,
         })}
     </>
   );

@@ -19,6 +19,8 @@ import { lastItem } from '../../../ast/visitor/utils';
 import type {
   FunctionDefinition,
   FunctionParameterType,
+  InlineCastingType,
+  PromQLFunctionParamType,
   Signature,
   SupportedDataType,
 } from '../types';
@@ -30,6 +32,8 @@ import { UnmappedFieldsStrategy } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
+import { getPromqlFunctionDefinition } from './promql';
+import type { PromQLAstExpression } from '../../../embedded_languages/promql/types';
 
 // #region type detection
 
@@ -64,7 +68,7 @@ export function getExpressionType(
   }
 
   if (isInlineCast(root)) {
-    const castFunction = getFunctionForInlineCast(root.castType);
+    const castFunction = getFunctionForInlineCast(root.castType as InlineCastingType);
     if (!castFunction) {
       return 'unknown';
     }
@@ -458,4 +462,30 @@ export function getAssignmentExpressionRoot(
   }
 
   return root;
+}
+
+export function getPromqlExpressionType(
+  expression: PromQLAstExpression
+): PromQLFunctionParamType | undefined {
+  switch (expression.type) {
+    case 'selector':
+      return expression.duration ? 'range_vector' : 'instant_vector';
+    case 'subquery':
+      return 'range_vector';
+    case 'literal':
+      return expression.literalType === 'string' ? 'string' : 'scalar';
+    case 'parens':
+      return getPromqlExpressionType(expression.child);
+    case 'unary-expression':
+      return getPromqlExpressionType(expression.arg);
+    case 'function':
+      return getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType;
+    case 'binary-expression': {
+      const bothScalar =
+        getPromqlExpressionType(expression.left) === 'scalar' &&
+        getPromqlExpressionType(expression.right) === 'scalar';
+
+      return bothScalar ? 'scalar' : 'instant_vector';
+    }
+  }
 }

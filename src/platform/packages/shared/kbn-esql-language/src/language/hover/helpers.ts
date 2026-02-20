@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { Walker, type WalkerAstNode } from '../../ast';
+import { Walker, within, type WalkerAstNode } from '../../ast';
+import type { PromQLFunction, PromQLLiteral, PromQLSelector } from '../../embedded_languages';
+import { getPromqlFunctionSignatureHover } from './get_function_signature_hover';
 
 export const getVariablesHoverContent = (
   node?: WalkerAstNode,
@@ -28,3 +30,50 @@ export const getVariablesHoverContent = (
 
   return hoverContents;
 };
+
+export function getPromqlHoverItem(
+  root: WalkerAstNode,
+  offset: number
+): { contents: Array<{ value: string }> } {
+  let functionNode: PromQLFunction | undefined;
+  let selectorNode: PromQLSelector | undefined;
+  let literalNode: PromQLLiteral | undefined;
+
+  Walker.walk(root, {
+    promql: {
+      visitPromqlFunction: (fn) => {
+        if (within(offset, fn)) {
+          functionNode = fn;
+        }
+      },
+      visitPromqlSelector: (selector) => {
+        if (selector.metric && within(offset, selector.metric)) {
+          selectorNode = selector;
+        }
+      },
+      visitPromqlLiteral: (literal) => {
+        if (literal.literalType !== 'string' && within(offset, literal)) {
+          literalNode = literal;
+        }
+      },
+    },
+  });
+
+  if (literalNode) {
+    const hoverType = literalNode.literalType === 'time' ? 'duration' : 'scalar';
+
+    return { contents: [{ value: `**${literalNode.name}**: ${hoverType}` }] };
+  }
+
+  if (selectorNode?.metric) {
+    const vectorType = selectorNode.duration ? 'range vector' : 'instant vector';
+
+    return { contents: [{ value: `**${selectorNode.metric.name}**: ${vectorType}` }] };
+  }
+
+  if (functionNode) {
+    return { contents: getPromqlFunctionSignatureHover(functionNode.name) };
+  }
+
+  return { contents: [] };
+}

@@ -129,6 +129,15 @@ describe('delete()', () => {
     },
   };
 
+  const existingDecryptedAlertWithUiam = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      uiamApiKey: Buffer.from('123:essu_uiam').toString('base64'),
+    },
+  };
+
   beforeEach(() => {
     rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
@@ -166,6 +175,29 @@ describe('delete()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  test('invalidate UIAM API keys as well', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(
+      existingDecryptedAlertWithUiam
+    );
+
+    const result = await rulesClient.delete({ id: '1' });
+    expect(result).toEqual({ success: true });
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      undefined
+    );
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw==', 'MTIzOmVzc3VfdWlhbQ=='],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   test('attempts to soft delete gaps', async () => {

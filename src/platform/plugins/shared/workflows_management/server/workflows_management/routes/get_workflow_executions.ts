@@ -13,8 +13,8 @@ import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
-import { MAX_PAGE_SIZE, parseExecutionStatuses, parseExecutionTypes } from './types';
 import type { RouteDependencies } from './types';
+import { MAX_PAGE_SIZE, parseExecutionStatuses, parseExecutionTypes } from './types';
 import { withLicenseCheck } from '../lib/with_license_check';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 
@@ -71,6 +71,11 @@ export function registerGetWorkflowExecutionsRoute({
               }
             )
           ),
+          executedBy: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+              defaultValue: [],
+            })
+          ),
           page: schema.maybe(schema.number({ min: 1 })),
           size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
@@ -79,10 +84,16 @@ export function registerGetWorkflowExecutionsRoute({
     withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
+        const executedBy = request.query.executedBy;
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
           statuses: parseExecutionStatuses(request.query.statuses),
           executionTypes: parseExecutionTypes(request.query.executionTypes),
+          executedBy: Array.isArray(executedBy)
+            ? executedBy
+            : executedBy
+            ? [executedBy]
+            : undefined,
           page: request.query.page,
           size: request.query.size,
         };

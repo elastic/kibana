@@ -7,7 +7,8 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/config-schema",

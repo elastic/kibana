@@ -14,7 +14,7 @@ For general information about writing evaluation tests, configuration, and usage
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 > The Scout server Kibana instance is accessible at <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
@@ -26,7 +26,7 @@ Run evaluations using the following base command:
 ```bash
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
 ```
 
 #### Configuration Options
@@ -52,7 +52,7 @@ USE_QUALITATIVE_EVALUATORS=true \
 SCENARIO_REPORTING=true \
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
     evals/alerts/alerts.spec.ts \
   --project="my-connector" \
 ```
@@ -118,7 +118,7 @@ EVALUATION_CLIENT="agent_builder" \
 AGENT_BUILDER_AGENT_ID="observability.agent" \
 EVALUATION_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
     evals/esql/esql.spec.ts \
   --project="your-connector" \
   --debug
@@ -219,44 +219,4 @@ FROM .kibana-evaluations
 
 ## AI Insights Evaluations
 
-The package includes evaluations for AI Insights, which assess the correctness of LLM-generated summaries for alerts.
-
-
-### Prerequisites
-
-Before running AI Insights evaluations, you need to set up snapshot data from Google Cloud Storage.
-
-#### Step 1: Install gcloud CLI
-
-Install the Google Cloud CLI by following the [official installation guide](https://cloud.google.com/sdk/docs/install-sdk).
-
-#### Step 2: Sync Snapshot Data to Local Repository
-
-The Scout server uses `/tmp/repo` as the default `path.repo` value for Elasticsearch snapshot repositories. Sync snapshot data from Google Cloud Storage to this local directory:
-
-```bash
-gcloud storage rsync --recursive gs://YOUR-BUCKET-NAME/snapshot-name /tmp/repo
-```
-
-Replace `YOUR-BUCKET-NAME` with the actual GCS bucket name (shared internally to avoid bucket-squatting). This command downloads the snapshot data locally, making it accessible to Elasticsearch.
-
-#### Step 3: Verify Setup
-
-Confirm that the snapshot data was synced successfully:
-
-```bash
-ls -la /tmp/repo
-```
-
-You should see snapshot metadata files (e.g., `index-*`, `meta-*`, `snap-*`) in the directory.
-
-Now you have datasets ready for executing the evals.
-
-### Running AI Insights Evaluations
-
-```bash
-EVALUATION_CONNECTOR_ID=your-connector-id \
-  node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-observability/ai_insights/playwright.config.ts \
-  --project="your-connector"
-```
+For setup, prerequisites, and instructions on running AI Insights evaluations, see the [AI Insights README](./ai_insights/README.md).

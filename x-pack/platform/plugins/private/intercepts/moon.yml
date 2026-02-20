@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
   - '@kbn/core-notifications-browser-internal'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -46,6 +47,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
+    - test/**/*
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'

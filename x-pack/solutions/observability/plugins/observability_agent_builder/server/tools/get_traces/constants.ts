@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  AT_TIMESTAMP,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  ERROR_LOG_MESSAGE,
+  EVENT_OUTCOME,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  PARENT_ID,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+  SPAN_ACTION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_ID,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_PAGE_URL,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
+  URL_FULL,
+} from '@kbn/apm-types';
+
+export const DEFAULT_TRACE_FIELDS = [
+  // Timeline + identity
+  '_index',
+  '_id',
+  AT_TIMESTAMP,
+  TRACE_ID,
+  'message',
+  'log.level',
+
+  // Error fields
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  ERROR_LOG_MESSAGE,
+
+  // Service fields
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+
+  // Transaction summary
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_RESULT,
+  TRANSACTION_DURATION,
+
+  // Span summary
+  SPAN_ID,
+  SPAN_NAME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_ACTION,
+  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  PARENT_ID,
+
+  // Outcome
+  EVENT_OUTCOME,
+
+  // HTTP fields
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_PAGE_URL,
+  URL_FULL,
+];
+
+export const DEFAULT_MAX_TRACES = 10;
+export const DEFAULT_MAX_DOCS_PER_TRACE = 100;
+
+export const DEFAULT_TIME_RANGE = {
+  start: 'now-1h',
+  end: 'now',
+};

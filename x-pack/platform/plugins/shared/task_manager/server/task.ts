@@ -11,9 +11,8 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency } from '@kbn/rrule';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
-import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
 
@@ -254,54 +253,8 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-export interface IntervalSchedule {
-  /**
-   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
-   * */
-  interval: Interval;
-  rrule?: never;
-}
 
-export type Rrule = RruleMonthly | RruleWeekly | RruleDaily | RruleHourly;
-export interface RruleSchedule {
-  rrule: Rrule;
-  interval?: never;
-}
-
-interface RruleCommon {
-  dtstart?: string;
-  freq: Frequency;
-  interval: number;
-  tzid: string;
-}
-interface RruleMonthly extends RruleCommon {
-  freq: Frequency.MONTHLY;
-  bymonthday?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: string[];
-}
-interface RruleWeekly extends RruleCommon {
-  freq: Frequency.WEEKLY;
-  byweekday?: string[];
-  byhour?: number[];
-  byminute?: number[];
-  bymonthday?: never;
-}
-interface RruleDaily extends RruleCommon {
-  freq: Frequency.DAILY;
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: string[];
-  bymonthday?: never;
-}
-interface RruleHourly extends RruleCommon {
-  freq: Frequency.HOURLY;
-  byhour?: never;
-  byminute?: number[];
-  byweekday?: never;
-  bymonthday?: never;
-}
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 
 export interface TaskUserScope {
   apiKeyId: string;

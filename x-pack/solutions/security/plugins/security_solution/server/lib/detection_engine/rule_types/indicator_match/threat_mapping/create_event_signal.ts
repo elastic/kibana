@@ -106,7 +106,7 @@ export const createEventSignal = async ({
     loadFields: true,
   });
 
-  ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
+  ruleExecutionLogger.debug(`Matched events found: ${ids?.length}`);
 
   const enrichment = threatEnrichmentFactory({
     signalIdToMatchedQueriesMap,
@@ -138,12 +138,12 @@ export const createEventSignal = async ({
   } else {
     createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
   }
-  ruleExecutionLogger.debug(
-    `${
+  ruleExecutionLogger.trace(
+    `Match checks completed\n${
       currentEventList.length
-    } items have completed match checks and the total times to search were ${
+    } items have completed match checks. Search times (ms): ${
       createResult.searchAfterTimes.length !== 0 ? createResult.searchAfterTimes : '(unknown) '
-    }ms`
+    }.`
   );
   return createResult;
 };

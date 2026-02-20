@@ -17,7 +17,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { type DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   FieldList,

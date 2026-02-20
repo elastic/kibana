@@ -31,6 +31,11 @@ describe('PROMQL summary', () => {
       expectedNewColumns: ['step', 'col0'],
     });
   });
+  it('returns the step column when buckets param is used', () => {
+    assertSummary('PROMQL index=metrics buckets=6 col0=(sum(bytes))', {
+      expectedNewColumns: ['step', 'col0'],
+    });
+  });
   it.todo('returns query text as column name when no label is provided');
   it.todo('collects columns derivated from grouping inside the query');
 });

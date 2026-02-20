@@ -32,16 +32,16 @@ export const MOCK_IDP_UIAM_COSMOS_DB_URL =
   process.env.MOCK_IDP_UIAM_COSMOS_DB_URL || 'https://localhost:8081';
 
 export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
-export const MOCK_IDP_UIAM_PROJECT_ID = 'abcde1234567890';
+export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 
 // Sometimes it is useful or required to point local UIAM service clients, or clients operating within the same Docker
 // network (i.e., Elasticsearch), to a different UIAM service URL. For example, http://host.docker.internal:8080 can be
 // used to route requests through the host network, making it easier to capture traffic with a network analyzer running
 // on the host.
 export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
-  process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'http://uiam:8080';
+  process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
-  process.env.MOCK_IDP_UIAM_SERVICE_URL || 'http://localhost:8080';
+  process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

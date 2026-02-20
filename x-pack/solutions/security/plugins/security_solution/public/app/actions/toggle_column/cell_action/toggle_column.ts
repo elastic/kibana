@@ -22,7 +22,7 @@ import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../../types';
 
-const ICON = 'listAdd';
+const ICON = 'indexOpen';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
   defaultMessage: 'Toggle column in table',
 });

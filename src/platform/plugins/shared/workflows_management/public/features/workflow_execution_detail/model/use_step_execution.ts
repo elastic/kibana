@@ -7,23 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { useKibana } from '../../../hooks/use_kibana';
 
-export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
+const REFETCH_INTERVAL_MS = 5000;
+
+/**
+ * Fetches a single step execution with full data (input/output).
+ * Polls while the step is still running, stops once it reaches a terminal status.
+ */
+export function useStepExecution(
+  workflowExecutionId: string,
+  stepExecutionId: string | undefined,
+  stepStatus: ExecutionStatus | undefined
+) {
   const { http } = useKibana().services;
+  const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
 
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http?.get<EsWorkflowStepExecution>(
+      const response = await http.get<EsWorkflowStepExecution>(
         `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
       );
       return response;
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: 5000, // Refresh every 5 seconds for real-time logs
-    refetchInterval: 5000, // Auto-refresh logs
+    staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
+    refetchInterval: isStepFinished ? false : REFETCH_INTERVAL_MS,
   });
 }

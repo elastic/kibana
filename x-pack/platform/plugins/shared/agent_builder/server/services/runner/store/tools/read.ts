@@ -15,6 +15,8 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import { isSkillFileEntry } from '../volumes/skills/utils';
+import { loadSkillTools } from '../utils/load_skill';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -40,12 +42,19 @@ export const readTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
-    handler: async ({ path, raw }, context) => {
+    handler: async (
+      { path, raw },
+      { skills: skillsService, toolManager, logger, toolProvider, request }
+    ) => {
       const entry = await filestore.read(path);
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
         };
+      }
+
+      if (isSkillFileEntry(entry)) {
+        await loadSkillTools({ skillsService, entry, toolProvider, request, toolManager, logger });
       }
 
       let content: string | object;

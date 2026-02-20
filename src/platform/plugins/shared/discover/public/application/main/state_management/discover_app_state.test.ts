@@ -61,7 +61,6 @@ describe('Test discover app state', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
       services,
     });
 

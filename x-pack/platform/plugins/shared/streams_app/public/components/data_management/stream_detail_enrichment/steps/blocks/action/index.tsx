@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React, { useEffect, useRef } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';

@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';

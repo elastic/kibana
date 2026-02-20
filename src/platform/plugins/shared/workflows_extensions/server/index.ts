@@ -19,6 +19,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  ServerTriggerDefinition,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
@@ -33,3 +34,5 @@ export type {
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';
+
+export { TriggerRegistry } from './trigger_registry';

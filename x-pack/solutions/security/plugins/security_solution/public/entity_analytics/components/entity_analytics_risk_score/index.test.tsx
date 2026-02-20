@@ -281,8 +281,8 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
             title: capitalize(riskEntity),
-            fieldName: EntityTypeToIdentifierField[riskEntity],
-            selectedOptions: [name],
+            field_name: EntityTypeToIdentifierField[riskEntity],
+            selected_options: [name],
           },
         ]);
       });

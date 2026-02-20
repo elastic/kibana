@@ -48,6 +48,7 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
@@ -115,6 +116,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 export interface CasesPublicSetup {
@@ -190,6 +192,6 @@ export type SupportedCaseAttachment =
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
-export type { LensProps } from './components/visualizations/types';
+export type { LensProps } from './components/attachments/lens/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

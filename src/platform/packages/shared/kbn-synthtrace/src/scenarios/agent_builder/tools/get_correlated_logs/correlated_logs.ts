@@ -16,7 +16,7 @@
  * CLI Usage:
  * ```
  * node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts \
- *   --from "now-1h" --to "now" --clean --workers=1
+ *   --from "now-1h" --to "now" --clean
  * ```
  *
  * API Test Usage:

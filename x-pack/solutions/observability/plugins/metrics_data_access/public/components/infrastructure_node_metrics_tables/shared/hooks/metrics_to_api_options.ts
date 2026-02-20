@@ -88,7 +88,7 @@ export function metricsToApiOptions<T extends string>(
 }
 
 function buildFilterKuery(sourceFilter: string, kuery?: string): string {
-  return !!kuery ? `${sourceFilter} AND (${kuery})` : sourceFilter;
+  return !!kuery ? `${sourceFilter ? `${sourceFilter} AND ` : ''}(${kuery})` : sourceFilter;
 }
 
 export function createMetricByFieldLookup<T extends string>(metricMap: MetricsMap<T>) {

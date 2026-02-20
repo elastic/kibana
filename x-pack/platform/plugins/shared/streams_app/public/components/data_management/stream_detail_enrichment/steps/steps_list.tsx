@@ -7,7 +7,7 @@
 
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React from 'react';
 import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UrlDrilldownConfig, UrlDrilldownScope } from './types';
+import type { UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
 const generalFormatError = i18n.translate(
@@ -52,10 +52,10 @@ export function validateUrl(url: string): {
 }
 
 export async function validateUrlTemplate(
-  urlTemplate: UrlDrilldownConfig['url'],
+  url: string,
   scope: UrlDrilldownScope
 ): Promise<{ isValid: boolean; error?: string; invalidUrl?: string }> {
-  if (!urlTemplate.template)
+  if (!url)
     return {
       isValid: false,
       error: generalFormatError,
@@ -64,12 +64,12 @@ export async function validateUrlTemplate(
   let compiledUrl: string;
 
   try {
-    compiledUrl = await compile(urlTemplate.template, scope);
+    compiledUrl = await compile(url, scope);
   } catch (e) {
     return {
       isValid: false,
       error: compileError(e.message),
-      invalidUrl: urlTemplate.template,
+      invalidUrl: url,
     };
   }
 

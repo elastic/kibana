@@ -90,7 +90,9 @@ describe('xy style settings', () => {
     );
   });
 
-  describe('Axis settings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/246652
+  // FLAKY: https://github.com/elastic/kibana/issues/246653
+  describe.skip('Axis settings', () => {
     it('should disable the popover if there is no right axis', () => {
       renderComponent();
       expect(screen.getByRole('button', { name: 'Right axis' })).toBeDisabled();

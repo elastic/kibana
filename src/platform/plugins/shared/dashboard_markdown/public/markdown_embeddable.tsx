@@ -10,14 +10,12 @@
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
   initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
-import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
-import {
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,

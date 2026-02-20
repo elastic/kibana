@@ -80,6 +80,7 @@ export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'integer',
   'long',
   'aggregate_metric_double',
+  'tdigest',
 ];
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
@@ -393,6 +394,7 @@ describe('STATS Autocomplete', () => {
               'date_nanos',
               'unsigned_long',
               'aggregate_metric_double',
+              'tdigest',
             ],
             {
               scalar: true,

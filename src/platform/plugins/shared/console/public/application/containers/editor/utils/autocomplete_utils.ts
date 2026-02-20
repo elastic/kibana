@@ -121,6 +121,10 @@ export const getUrlPathCompletionItems = (
 
   // flag to only suggest index names
   let onlyIndexNames = false;
+  // store the partial token for prefix filtering
+  let partialToken = '';
+  // store already selected indices to exclude from suggestions
+  let alreadySelectedIndices: string[] = [];
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
   // if the line ends with /, then we use all url path tokens for autocomplete suggestions
@@ -130,6 +134,14 @@ export const getUrlPathCompletionItems = (
     // if the last token contains a comma, only suggest index names
     if (lastToken?.includes(',')) {
       onlyIndexNames = true;
+      // For comma-separated indices, only filter by the part after the last comma
+      const parts = lastToken.split(',');
+      partialToken = parts.pop() || '';
+      // Track already selected indices to exclude from suggestions
+      alreadySelectedIndices = parts.filter((part) => part.length > 0);
+    } else {
+      // Store the partial token for prefix filtering
+      partialToken = lastToken || '';
     }
   }
   let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
@@ -138,25 +150,38 @@ export const getUrlPathCompletionItems = (
   if (onlyIndexNames) {
     autoCompleteSet = autoCompleteSet.filter((term) => term.meta === 'index');
   }
-  const wordUntilPosition = model.getWordUntilPosition(position);
   const range = {
     startLineNumber: lineNumber,
-    // replace the whole word with the suggestion
-    startColumn: lineContent.endsWith('.')
-      ? // if there is a dot at the end of the content, it's ignored in the wordUntilPosition
-        wordUntilPosition.startColumn - 1
-      : wordUntilPosition.startColumn,
+    // replace the partial token with the suggestion
+    startColumn: column - partialToken.length,
     endLineNumber: lineNumber,
     endColumn: column,
   };
   return (
     filterTermsWithoutName(autoCompleteSet)
-      .filter(
-        (term) =>
-          // Only keep dot-prefixed terms if the user typed in a dot
-          !(typeof term.name === 'string' && term.name.startsWith('.')) ||
-          lineContent.trim().endsWith('.')
-      )
+      .filter((term) => {
+        // Only keep dot-prefixed terms if the user typed a dot
+        const isDotPrefixed = typeof term.name === 'string' && term.name.startsWith('.');
+        if (isDotPrefixed && !partialToken.startsWith('.')) {
+          return false;
+        }
+
+        // Exclude indices that are already selected in comma-separated list
+        if (
+          alreadySelectedIndices.length > 0 &&
+          typeof term.name === 'string' &&
+          alreadySelectedIndices.includes(term.name)
+        ) {
+          return false;
+        }
+
+        // Filter by prefix: only show suggestions that start with what user typed
+        if (partialToken && typeof term.name === 'string') {
+          return term.name.toLowerCase().startsWith(partialToken.toLowerCase());
+        }
+
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         return {
@@ -313,15 +338,64 @@ const getSuggestions = (
   if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
+  // Check if we're typing a field name with a trailing dot
+  const lineContentBeforePosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+
+  // Check if we're typing a nested field name (contains a dot)
+  // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
+  const quotedFieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  // Also check for unquoted fields with dots (e.g., index.mode without quotes)
+  const unquotedFieldWithDotMatch = lineContentBeforePosition.match(
+    /(?:^|[\s{:,\[])([a-zA-Z_][\w]*(?:\.[\w]+)+)$/
+  );
+  const fieldBeingTyped = quotedFieldWithDotMatch
+    ? quotedFieldWithDotMatch[1]
+    : unquotedFieldWithDotMatch
+    ? unquotedFieldWithDotMatch[1]
+    : null;
+  const isQuotedField = !!quotedFieldWithDotMatch;
+
+  // Adjust the range start column if we have a field with a dot
+  let startColumn = wordUntilPosition.startColumn;
+  if (fieldBeingTyped) {
+    if (isQuotedField) {
+      // Find where the quoted field name starts
+      const fieldIndex = lineContentBeforePosition.lastIndexOf('"' + fieldBeingTyped);
+      if (fieldIndex >= 0) {
+        startColumn = fieldIndex + 2; // +2 to skip the quote and start at the field name
+      }
+    } else {
+      // Find where the unquoted field name starts
+      const fieldIndex = lineContentBeforePosition.lastIndexOf(fieldBeingTyped);
+      if (fieldIndex >= 0) {
+        startColumn = fieldIndex + 1; // +1 because column is 1-indexed
+      }
+    }
+  }
+
   const range = {
     startLineNumber: position.lineNumber,
     // replace the whole word with the suggestion
-    startColumn: wordUntilPosition.startColumn,
+    startColumn,
     endLineNumber: position.lineNumber,
     endColumn,
   };
+
   return (
     filterTermsWithoutName(autocompleteSet)
+      // Filter suggestions to only show nested fields when there's a field being typed with a dot
+      .filter((item) => {
+        if (fieldBeingTyped) {
+          // Only show fields that start with what the user has typed so far
+          return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
+        }
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {

@@ -44,7 +44,9 @@ const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: stri
   await screen.findByTestId('pipelineForm');
 };
 
-describe('<PipelinesCreate />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253406
+// FLAKY: https://github.com/elastic/kibana/issues/253362
+describe.skip('<PipelinesCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(() => {

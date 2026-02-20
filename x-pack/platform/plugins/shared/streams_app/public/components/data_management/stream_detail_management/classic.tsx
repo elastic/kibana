@@ -126,7 +126,9 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.processing = processing;
+    if (processing) {
+      tabs.processing = processing;
+    }
   }
 
   tabs.schema = {

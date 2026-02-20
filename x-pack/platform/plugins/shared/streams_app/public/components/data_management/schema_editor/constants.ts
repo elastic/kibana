@@ -58,6 +58,66 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: false,
   },
+  integer: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableIntegerType', {
+      defaultMessage: 'Number (integer)',
+    }),
+    readonly: false,
+  },
+  short: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableShortType', {
+      defaultMessage: 'Number (short)',
+    }),
+    readonly: false,
+  },
+  byte: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableByteType', {
+      defaultMessage: 'Number (byte)',
+    }),
+    readonly: false,
+  },
+  float: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFloatType', {
+      defaultMessage: 'Number (float)',
+    }),
+    readonly: false,
+  },
+  half_float: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableHalfFloatType', {
+      defaultMessage: 'Number (half_float)',
+    }),
+    readonly: false,
+  },
+  text: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFullTextType', {
+      defaultMessage: 'Text',
+    }),
+    readonly: false,
+  },
+  wildcard: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableWildcardType', {
+      defaultMessage: 'Wildcard',
+    }),
+    readonly: false,
+  },
+  version: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableVersionType', {
+      defaultMessage: 'Version',
+    }),
+    readonly: false,
+  },
+  unsigned_long: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableUnsignedLongType', {
+      defaultMessage: 'Number (unsigned_long)',
+    }),
+    readonly: false,
+  },
+  date_nanos: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDateNanosType', {
+      defaultMessage: 'Date (nanoseconds)',
+    }),
+    readonly: false,
+  },
   system: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSystemType', {
       defaultMessage: 'System managed',

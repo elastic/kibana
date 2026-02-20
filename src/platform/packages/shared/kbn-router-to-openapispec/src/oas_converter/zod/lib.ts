@@ -9,7 +9,7 @@
 
 import { z, isZod } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers';
-import zodToJsonSchema from 'zod-to-json-schema';
+import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
 import type { KnownParameters } from '../../type';
@@ -299,6 +299,7 @@ export const convert = (schema: z.ZodTypeAny) => {
     schema: zodToJsonSchema(schema, {
       target: 'openApi3',
       $refStrategy: 'none',
+      postProcess: jsonDescription,
     }) as OpenAPIV3.SchemaObject,
   };
 };

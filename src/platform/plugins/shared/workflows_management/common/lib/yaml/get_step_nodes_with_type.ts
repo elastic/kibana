@@ -10,6 +10,15 @@
 import type { Document, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar, visit } from 'yaml';
 
+export function isStepLikeMap(item: unknown): item is YAMLMap {
+  if (!item || !isMap(item)) return false;
+  const items = (item as YAMLMap).items;
+  if (!items) return false;
+  const hasName = items.some((p) => isPair(p) && isScalar(p.key) && p.key.value === 'name');
+  const hasType = items.some((p) => isPair(p) && isScalar(p.key) && p.key.value === 'type');
+  return hasName && hasType;
+}
+
 export function getStepNodesWithType(yamlDocument: Document): YAMLMap[] {
   const stepNodes: YAMLMap[] = [];
 

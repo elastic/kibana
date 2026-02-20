@@ -26,7 +26,6 @@ describe('transformDashboardIn', () => {
           config: { anyKey: 'some value' },
           grow: false,
           uid: 'foo',
-          order: 0,
           type: 'type1',
           width: 'small',
         } as unknown as PinnedControlState,
@@ -67,15 +66,25 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "controlGroupInput": Object {
-            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-          },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
           "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false,\\"autoApplyFilters\\":true}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "pinned_panels": Object {
+            "panels": Object {
+              "foo": Object {
+                "config": Object {
+                  "anyKey": "some value",
+                },
+                "grow": false,
+                "order": 0,
+                "type": "type1",
+                "width": "small",
+              },
+            },
+          },
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,

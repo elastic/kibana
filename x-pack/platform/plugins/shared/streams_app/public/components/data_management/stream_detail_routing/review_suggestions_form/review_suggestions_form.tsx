@@ -54,20 +54,20 @@ export function ReviewSuggestionsForm({
   onRegenerate,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
-  );
-  const editingSuggestion = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: 'editingSuggestedRule' }) ? snapshot.context.editedSuggestion : null
+    snapshot.matches({ ready: { ingestMode: 'reviewSuggestedRule' } })
+      ? snapshot.context.suggestedRuleId
+      : null
   );
 
   const isEditingOrReorderingStreams = useStreamsRoutingSelector(
     (snapshot) =>
-      snapshot.matches({ ready: 'editingRule' }) || snapshot.matches({ ready: 'reorderingRules' })
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   );
 
-  // For the confirmation modal, use edited suggestion if available, otherwise find by name
-  const partitionForModal =
-    editingSuggestion || suggestions.find(({ name }) => name === ruleUnderReview)!;
+  const partitionForModal = ruleUnderReview
+    ? suggestions.find(({ name }) => name === ruleUnderReview)
+    : undefined;
 
   const selectedPreviewName = useStreamSamplesSelector(
     ({ context }) =>
@@ -77,16 +77,6 @@ export function ReviewSuggestionsForm({
   );
 
   const { editSuggestion } = useStreamRoutingEvents();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-
-  const handleSave = () => {
-    const currentEditingIndex = routingSnapshot.context.editingSuggestionIndex;
-    const currentEditedSuggestion = routingSnapshot.context.editedSuggestion;
-
-    if (currentEditingIndex !== null && currentEditedSuggestion) {
-      updateSuggestion(currentEditingIndex, currentEditedSuggestion);
-    }
-  };
 
   return (
     <>
@@ -94,11 +84,7 @@ export function ReviewSuggestionsForm({
         <CreateStreamConfirmationModal
           partition={partitionForModal}
           onSuccess={() => {
-            acceptSuggestion(
-              editingSuggestion
-                ? routingSnapshot.context.editingSuggestionIndex!
-                : suggestions.findIndex(({ name }) => name === ruleUnderReview)!
-            );
+            acceptSuggestion(suggestions.findIndex(({ name }) => name === ruleUnderReview)!);
           }}
         />
       )}
@@ -147,7 +133,7 @@ export function ReviewSuggestionsForm({
                   onPreview={(toggle) => previewSuggestion(index, toggle)}
                   onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
                   onEdit={editSuggestion}
-                  onSave={handleSave}
+                  onSave={(updatedSuggestion) => updateSuggestion(index, updatedSuggestion)}
                 />
                 <EuiSpacer size="s" />
               </NestedView>

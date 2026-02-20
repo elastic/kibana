@@ -15,6 +15,8 @@ import {
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
+  OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
 import { getNormalizedDataStreams } from '../../../common/services';
@@ -27,8 +29,11 @@ import type {
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 import { PackagePolicyRequestError } from '../../errors';
 
-import type { PackagePolicy } from '../../types';
+import type { FullAgentPolicyInput, PackagePolicy, TemplateAgentPolicyInput } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
+import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
+
+import { extractSignalTypesFromPipelines } from './otel_collector';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -65,7 +70,8 @@ export const AGENTLESS_INDEX_PERMISSIONS = [
 export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyNamespace: string,
-  packagePolicies?: PackagePolicy[]
+  packagePolicies?: PackagePolicy[],
+  agentInputs?: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]
 ): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
@@ -85,7 +91,13 @@ export function storedPackagePoliciesToAgentPermissions(
       );
     }
 
-    const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
+    const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package));
+
+    if (!pkg) {
+      throw new PackagePolicyRequestError(
+        `Package ${packagePolicy.package.name}:${packagePolicy.package.version} not found in cache for package policy ${packagePolicy.id}`
+      );
+    }
 
     // Special handling for Universal Profiling packages, as it does not use data streams _only_,
     // but also indices that do not adhere to the convention.
@@ -104,9 +116,15 @@ export function storedPackagePoliciesToAgentPermissions(
       return connectorServicePermissions(packagePolicy.id);
     }
 
+    // For input packages with dynamic_signal_types, skip the dataStreams check
+    // as permissions will be determined dynamically from pipelines
+    const isDynamicInput =
+      (pkg as PackageInfo & { type?: string }).type === 'input' && hasDynamicSignalTypes(pkg);
+
     const dataStreams = getNormalizedDataStreams(pkg);
-    if (!dataStreams || dataStreams.length === 0) {
-      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy)];
+    if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
+      // Return empty object (not undefined) if no additional permissions
+      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy) ?? {}];
     }
 
     let dataStreamsForPermissions: DataStreamMeta[];
@@ -134,44 +152,95 @@ export function storedPackagePoliciesToAgentPermissions(
         break;
 
       default:
-        // - Normal packages store some of the `data_stream` metadata in
-        //   `packagePolicy.inputs[].streams[].data_stream`
-        // - The rest of the metadata needs to be fetched from the
-        //   `data_stream` object in the package. The link is
-        //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
-        // - Some packages (custom logs) have a compiled dataset, stored in
-        //   `input.streams.compiled_stream.data_stream.dataset`
-        dataStreamsForPermissions = packagePolicy.inputs
-          .filter((i) => i.enabled)
-          .flatMap((input) => {
-            if (!input.streams) {
-              return [];
-            }
+        // - Input packages with dynamic_signal_types produce data for signal types defined in the pipelines;
+        //   grant index permissions for each signal type pattern (e.g., logs-*-*, metrics-*-*) from agentInputs
+        if (
+          (pkg as PackageInfo & { type?: string }).type === 'input' &&
+          hasDynamicSignalTypes(pkg)
+        ) {
+          const otelcolPipelines = agentInputs?.find((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE)
+            ?.streams?.[0]?.service?.pipelines;
 
-            const dataStreams_: DataStreamMeta[] = [];
+          let signalTypes: string[];
+          if (otelcolPipelines) {
+            // Use pipelines if available
+            signalTypes = extractSignalTypesFromPipelines(otelcolPipelines);
+          } else {
+            // If no pipelines found, return empty array
+            signalTypes = [];
+          }
 
-            input.streams
-              .filter((s) => s.enabled)
-              .forEach((stream) => {
-                if (!('data_stream' in stream)) {
-                  return;
-                }
+          const baseMeta: DataStreamMeta = {
+            type: 'logs',
+            dataset: '',
+            elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+          };
+          dataStreamsForPermissions = signalTypes.map((type) => ({
+            ...baseMeta,
+            type,
+          }));
+        } else {
+          // - Normal packages store some of the `data_stream` metadata in
+          //   `packagePolicy.inputs[].streams[].data_stream`
+          // - The rest of the metadata needs to be fetched from the
+          //   `data_stream` object in the package. The link is
+          //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
+          // - Some packages (custom logs) have a compiled dataset, stored in
+          //   `input.streams.compiled_stream.data_stream.dataset`
+          dataStreamsForPermissions = packagePolicy.inputs
+            .filter((i) => i.enabled)
+            .flatMap((input) => {
+              if (!input.streams) {
+                return [];
+              }
 
-                const ds: DataStreamMeta = {
-                  type: stream.data_stream.type,
-                  dataset:
-                    stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
-                };
+              const dataStreams_: DataStreamMeta[] = [];
+              const isOtelInput = input.type === OTEL_COLLECTOR_INPUT_TYPE;
+              input.streams
+                .filter((s) => s.enabled)
+                .forEach((stream) => {
+                  if (!('data_stream' in stream)) {
+                    return;
+                  }
 
-                if (stream.data_stream.elasticsearch) {
-                  ds.elasticsearch = stream.data_stream.elasticsearch;
-                }
+                  const ds: DataStreamMeta = {
+                    type: stream.data_stream.type,
+                    dataset:
+                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                  };
 
-                dataStreams_.push(ds);
-              });
+                  if (stream.data_stream.elasticsearch) {
+                    ds.elasticsearch = stream.data_stream.elasticsearch;
+                  }
 
-            return dataStreams_;
-          });
+                  dataStreams_.push(ds);
+
+                  if (isOtelInput && stream.data_stream.type === 'traces') {
+                    // For traces allow to send span event to logs-generic.otel-{namespace}
+                    dataStreams_.push({
+                      type: 'logs',
+                      dataset: 'generic.otel',
+                      elasticsearch: {
+                        dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
+                      },
+                    });
+
+                    if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
+                      dataStreams_.push({
+                        type: 'metrics',
+                        dataset: 'generic',
+                        elasticsearch: {
+                          dynamic_dataset: true,
+                          dynamic_namespace: true,
+                        },
+                      });
+                    }
+                  }
+                });
+
+              return dataStreams_;
+            });
+        }
     }
 
     let clusterRoleDescriptor = {};

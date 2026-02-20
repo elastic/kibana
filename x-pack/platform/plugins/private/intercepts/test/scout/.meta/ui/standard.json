@@ -1,0 +1,44 @@
+{
+  "sha1": "7b3f2a853be9c3daf4653cb015c2961a05d037fa",
+  "tests": [
+    {
+      "id": "614e6351a14a9bc-7eda28ec0661f6a",
+      "title": "Standard Product intercept on initial page load - presents all available navigable steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercept_standard.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "614e6351a14a9bc-c9cd3d40f5c462a",
+      "title": "Standard Product intercept page transitions - transitions from one tab to another and back again will cause the intercept to be displayed if the intercept interval has elapsed on transitioning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercept_standard.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "738f1ebca94f4f6-a412f6dfe18fc71",
+      "title": "Product intercept for upgrade event displays the upgrade intercept if it's display condition is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/ui/tests/product_intercepts_upgrade.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    }
+  ]
+}

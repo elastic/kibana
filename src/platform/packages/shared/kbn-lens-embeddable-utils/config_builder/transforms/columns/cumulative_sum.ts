@@ -16,14 +16,13 @@ import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 export const fromCumulativeSumAPItoLensState = (
-  options: LensApiCumulativeSumOperation,
-  ref: { id: string; field: string }
+  options: LensApiCumulativeSumOperation
 ): CumulativeSumIndexPatternColumn => {
   const { format } = options;
 
   return {
     operationType: 'cumulative_sum',
-    references: [ref.id],
+    references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),

@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
@@ -30,14 +27,4 @@ export type CreateControlTypeAction<State extends DataControlState = DataControl
   }
 > & {
   getDisplayName: () => string; // remove context from `getDisplayName`
-};
-
-export const addControlMenuTrigger: Trigger = {
-  id: CONTROL_MENU_TRIGGER,
-  title: i18n.translate('controls.uiActions.triggers.controls.typeMenu.title', {
-    defaultMessage: 'Control type in control menu',
-  }),
-  description: i18n.translate('controls.uiActions.triggers.controls.typeMenu.description', {
-    defaultMessage: 'A new action will appear in the control type menu',
-  }),
 };

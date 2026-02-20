@@ -9,11 +9,12 @@ mapped_pages:
 
 The following table outlines possible test file locations and how to invoke them:
 
-| Test runner        | Test location                                    | Runner command (working directory is {{kib}} root)                                                                                                       |
-| ------------------ | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jest               | `**/*.test.{js,mjs,ts,tsx}`                      | `yarn test:jest [test path]`                                                                                                                             |
-| Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}` | `yarn test:jest_integration [test path]`                                                                                                                 |
-| Functional         | `test/**/config.js` `x-pack/**/test/**/config.ts`   | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
+| Test runner        | Test location                                     | Runner command (working directory is {{kib}} root)                                                                                                       |
+| ------------------ | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Jest               | `**/*.test.{js,mjs,ts,tsx}`                       | `yarn test:jest [test path]`                                                                                                                             |
+| Jest (integration) | `**/integration_tests/**/*.test.{js,mjs,ts,tsx}`  | `yarn test:jest_integration [test path]`                                                                                                                 |
+| Scout (Playwright) | `**/test/scout/**/*.spec.ts`                      | `node scripts/scout.js run-tests --config [directory]/playwright.config.ts --arch <stateful                                                              | serverless> --domain <domain>` (see [Run Scout tests](/extend/scout/run-tests.md)) |
+| FTR (Mocha)        | `test/**/config.js` `x-pack/**/test/**/config.ts` | `node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp` |
 
 Test runner arguments: - Where applicable, the optional arguments `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression. - `[test path]` is the relative path to the test file.
 
@@ -59,6 +60,7 @@ You can also look into the [Scripts README.md](https://github.com/elastic/kibana
 
 #### More testing information: [_more_testing_information]
 
+- [Scout](/extend/scout.md)
 - [Functional Testing](#development-functional-tests)
 - [Unit testing frameworks](#development-unit-tests)
 - [Automated Accessibility Testing](#development-accessibility-tests)
@@ -66,9 +68,20 @@ You can also look into the [Scripts README.md](https://github.com/elastic/kibana
 
 ## Functional Testing [development-functional-tests]
 
-We use functional tests to make sure the {{kib}} UI works as expected. It replaces hours of manual testing by automating user interaction. To have better control over our functional test environment, and to make it more accessible to plugin authors, {{kib}} uses a tool called the `FunctionalTestRunner`.
+We use functional tests to make sure the {{kib}} UI works as expected. It replaces hours of manual testing by automating user interaction.
 
-#### Running functional tests [_running_functional_tests]
+{{kib}} has two end-to-end test frameworks:
+
+- **Scout**: modern UI and API testing built on Playwright. See [Scout](/extend/scout.md).
+- **FunctionalTestRunner (FTR)**: legacy functional test framework built on Mocha + WebDriver. Many existing suites still use it.
+
+### Scout (Playwright-based)
+
+We recommend writing new functional tests with [Scout](/extend/scout.md), Kibana’s modern Playwright-based test framework.
+
+### `FunctionalTestRunner` (FTR)
+
+#### Running functional tests with FTR [_running_functional_tests]
 
 The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {{kib}} repo contains many FTR config files which use slightly different configurations for the {{kib}} server or {{es}}, have different test files, and potentially other config differences. FTR config files are organised in manifest files, based on testing area and type of distribution:
 

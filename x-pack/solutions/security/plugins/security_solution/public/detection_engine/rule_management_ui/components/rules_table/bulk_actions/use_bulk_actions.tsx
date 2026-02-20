@@ -52,7 +52,6 @@ import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
@@ -119,7 +118,6 @@ export const useBulkActions = ({
     };
   }, [kql, filterOptions]);
 
-  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
@@ -607,18 +605,14 @@ export const useBulkActions = ({
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
-            ...(isBulkFillRuleGapsEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_FILL_RULE_GAPS,
-                    name: i18n.BULK_ACTION_FILL_RULE_GAPS,
-                    'data-test-subj': 'scheduleFillGaps',
-                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
-                    onClick: handleScheduleFillGapsAction,
-                    icon: undefined,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              'data-test-subj': 'scheduleFillGaps',
+              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              onClick: handleScheduleFillGapsAction,
+              icon: undefined,
+            },
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -792,7 +786,6 @@ export const useBulkActions = ({
       alertSuppressionUpsellingMessage,
       globalQuery,
       showBulkFillRuleGapsConfirmation,
-      isBulkFillRuleGapsEnabled,
     ]
   );
 

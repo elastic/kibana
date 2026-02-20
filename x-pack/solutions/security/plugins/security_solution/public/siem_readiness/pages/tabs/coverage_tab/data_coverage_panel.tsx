@@ -26,6 +26,7 @@ import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
+import { ViewCasesButton } from '../../components/view_cases_button';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
@@ -39,6 +40,8 @@ const CATEGORY_TO_INTEGRATION_FILTER: Record<string, string[]> = {
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
+
+const DATA_COVERAGE_CREATE_CASE_TAGS = ['siem-readiness', 'data-coverage'];
 
 interface CategoryCoverageData {
   category: string;
@@ -147,7 +150,7 @@ export const DataCoveragePanel: React.FC = () => {
         }
       ),
       description: caseDescription,
-      tags: ['siem-readiness', 'data-coverage'],
+      tags: DATA_COVERAGE_CREATE_CASE_TAGS,
     });
   }, [openNewCaseFlyout, caseDescription]);
 
@@ -238,22 +241,32 @@ export const DataCoveragePanel: React.FC = () => {
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconSide="right"
-                size="s"
-                iconType="plusInCircle"
-                onClick={handleCreateCase}
-                data-test-subj="createNewCaseButton"
-              >
-                {i18n.translate(
-                  'xpack.securitySolution.siemReadiness.coverage.dataCoverage.createCase',
-                  {
-                    defaultMessage: 'Create new case',
-                  }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              justifyContent="flexEnd"
+            >
+              <EuiFlexItem grow={false}>
+                <ViewCasesButton caseTagsArray={DATA_COVERAGE_CREATE_CASE_TAGS} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconSide="right"
+                  size="s"
+                  iconType="plusInCircle"
+                  onClick={handleCreateCase}
+                  data-test-subj="createNewCaseButton"
+                >
+                  {i18n.translate(
+                    'xpack.securitySolution.siemReadiness.coverage.dataCoverage.createCase',
+                    {
+                      defaultMessage: 'Create new case',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiFlexItem>
 

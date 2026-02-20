@@ -62,402 +62,556 @@ let backfillClient: jest.Mocked<BackfillClient>;
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
 
-beforeEach(() => {
-  jest.clearAllMocks();
+describe('RulesClientFactory', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-  savedObjectsClient = savedObjectsClientMock.create();
-  savedObjectsClient.asScopedToNamespace = jest.fn().mockReturnValue(savedObjectsClient);
-  savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+    savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.asScopedToNamespace = jest.fn().mockReturnValue(savedObjectsClient);
+    savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 
-  securityPluginSetup = securityMock.createSetup();
+    securityPluginSetup = securityMock.createSetup();
 
-  securityPluginStart = securityMock.createStart();
+    securityPluginStart = securityMock.createStart();
 
-  securityService = securityServiceMock.createStart();
+    securityService = securityServiceMock.createStart();
 
-  alertingAuthorization = alertingAuthorizationMock.create();
+    alertingAuthorization = alertingAuthorizationMock.create();
 
-  alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
+    alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
 
-  actionsAuthorization = actionsAuthorizationMock.create();
+    actionsAuthorization = actionsAuthorizationMock.create();
 
-  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-  backfillClient = backfillClientMock.create();
+    const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+    backfillClient = backfillClientMock.create();
 
-  rulesClientFactoryParams = {
-    logger: loggingSystemMock.create().get(),
-    taskManager: taskManagerMock.createStart(),
-    ruleTypeRegistry: ruleTypeRegistryMock.create(),
-    getSpaceId: jest.fn(),
-    spaceIdToNamespace: jest.fn(),
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-    actions: actionsMock.createStart(),
-    eventLog: eventLogMock.createStart(),
-    kibanaVersion: '7.10.0',
-    authorization:
-      alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
-    backfillClient,
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    securityService: securityServiceMock.createStart(),
-    getAlertIndicesAlias: jest.fn(),
-    alertsService: null,
-  };
+    rulesClientFactoryParams = {
+      logger: loggingSystemMock.create().get(),
+      taskManager: taskManagerMock.createStart(),
+      ruleTypeRegistry: ruleTypeRegistryMock.create(),
+      getSpaceId: jest.fn(),
+      spaceIdToNamespace: jest.fn(),
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      actions: actionsMock.createStart(),
+      eventLog: eventLogMock.createStart(),
+      kibanaVersion: '7.10.0',
+      authorization:
+        alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+      backfillClient,
+      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      securityService: securityServiceMock.createStart(),
+      getAlertIndicesAlias: jest.fn(),
+      alertsService: null,
+      shouldGrantUiam: false,
+    };
 
-  rulesClientFactoryParams.actions = actionsMock.createStart();
-  (
-    rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>
-  ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
-  rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
-  rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
-  rulesClientFactoryParams.uiSettings.asScopedToClient =
-    uiSettingsServiceMock.createStartContract().asScopedToClient;
-});
-
-test('creates a rules client with proper constructor arguments when security is enabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize({
-    securityPluginSetup,
-    securityPluginStart,
-    ...rulesClientFactoryParams,
-  });
-  const request = mockRouter.createKibanaRequest();
-
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
-
-  await factory.create(request, savedObjectsService);
-
-  expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: [
-      RULE_SAVED_OBJECT_TYPE,
-      RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      API_KEY_PENDING_INVALIDATION_TYPE,
-      AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-    ],
+    rulesClientFactoryParams.actions = actionsMock.createStart();
+    (
+      rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>
+    ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
+    rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
+    rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
+    rulesClientFactoryParams.uiSettings.asScopedToClient =
+      uiSettingsServiceMock.createStartContract().asScopedToClient;
   });
 
-  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
-    request,
-    'default'
-  );
+  test('creates a rules client with proper constructor arguments when security is enabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      securityPluginSetup,
+      securityPluginStart,
+      ...rulesClientFactoryParams,
+    });
+    const request = mockRouter.createKibanaRequest();
 
-  expect(rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
-    request
-  );
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
 
-  expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
-    auditLogger: {
-      enabled: true,
-      includeSavedObjectNames: false,
-      log: expect.any(Function),
-    },
-    unsecuredSavedObjectsClient: savedObjectsClient,
-    authorization: alertingAuthorization,
-    actionsAuthorization,
-    logger: rulesClientFactoryParams.logger,
-    taskManager: rulesClientFactoryParams.taskManager,
-    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
-    spaceId: 'default',
-    namespace: 'default',
-    getUserName: expect.any(Function),
-    getActionsClient: expect.any(Function),
-    getEventLogClient: expect.any(Function),
-    createAPIKey: expect.any(Function),
-    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
-    kibanaVersion: '7.10.0',
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    isAuthenticationTypeAPIKey: expect.any(Function),
-    getAuthenticationAPIKey: expect.any(Function),
-    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
-    isSystemAction: expect.any(Function),
-    getAlertIndicesAlias: expect.any(Function),
-    alertsService: null,
-    backfillClient,
-    uiSettings: rulesClientFactoryParams.uiSettings,
+    await factory.create(request, savedObjectsService);
+
+    expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
+    });
+
+    expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+      request,
+      'default'
+    );
+
+    expect(
+      rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest
+    ).toHaveBeenCalledWith(request);
+
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
+      auditLogger: {
+        enabled: true,
+        includeSavedObjectNames: false,
+        log: expect.any(Function),
+      },
+      unsecuredSavedObjectsClient: savedObjectsClient,
+      authorization: alertingAuthorization,
+      actionsAuthorization,
+      logger: rulesClientFactoryParams.logger,
+      taskManager: rulesClientFactoryParams.taskManager,
+      ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: expect.any(Function),
+      getActionsClient: expect.any(Function),
+      getEventLogClient: expect.any(Function),
+      createAPIKey: expect.any(Function),
+      internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
+      kibanaVersion: '7.10.0',
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: expect.any(Function),
+      getAuthenticationAPIKey: expect.any(Function),
+      connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+      isSystemAction: expect.any(Function),
+      getAlertIndicesAlias: expect.any(Function),
+      alertsService: null,
+      backfillClient,
+      uiSettings: rulesClientFactoryParams.uiSettings,
+      shouldGrantUiam: false,
+    });
   });
-});
 
-test('creates a rules client with proper constructor arguments', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+  test('creates a rules client with proper constructor arguments', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
 
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
 
-  await factory.create(request, savedObjectsService);
+    await factory.create(request, savedObjectsService);
 
-  expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-    excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: [
-      RULE_SAVED_OBJECT_TYPE,
-      RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      API_KEY_PENDING_INVALIDATION_TYPE,
-      AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-    ],
+    expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
+    });
+
+    expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+      request,
+      'default'
+    );
+
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
+      unsecuredSavedObjectsClient: savedObjectsClient,
+      authorization: alertingAuthorization,
+      actionsAuthorization,
+      logger: rulesClientFactoryParams.logger,
+      taskManager: rulesClientFactoryParams.taskManager,
+      ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: expect.any(Function),
+      createAPIKey: expect.any(Function),
+      internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
+      getActionsClient: expect.any(Function),
+      getEventLogClient: expect.any(Function),
+      kibanaVersion: '7.10.0',
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: expect.any(Function),
+      getAuthenticationAPIKey: expect.any(Function),
+      connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+      isSystemAction: expect.any(Function),
+      getAlertIndicesAlias: expect.any(Function),
+      alertsService: null,
+      backfillClient,
+      uiSettings: rulesClientFactoryParams.uiSettings,
+      shouldGrantUiam: false,
+    });
   });
 
-  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
-    request,
-    'default'
-  );
+  test('getUserName() returns null when security is disabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
-    unsecuredSavedObjectsClient: savedObjectsClient,
-    authorization: alertingAuthorization,
-    actionsAuthorization,
-    logger: rulesClientFactoryParams.logger,
-    taskManager: rulesClientFactoryParams.taskManager,
-    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
-    spaceId: 'default',
-    namespace: 'default',
-    getUserName: expect.any(Function),
-    createAPIKey: expect.any(Function),
-    internalSavedObjectsRepository: rulesClientFactoryParams.internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: rulesClientFactoryParams.encryptedSavedObjectsClient,
-    getActionsClient: expect.any(Function),
-    getEventLogClient: expect.any(Function),
-    kibanaVersion: '7.10.0',
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    isAuthenticationTypeAPIKey: expect.any(Function),
-    getAuthenticationAPIKey: expect.any(Function),
-    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
-    isSystemAction: expect.any(Function),
-    getAlertIndicesAlias: expect.any(Function),
-    alertsService: null,
-    backfillClient,
-    uiSettings: rulesClientFactoryParams.uiSettings,
+    const userNameResult = await constructorCall.getUserName();
+    expect(userNameResult).toEqual(null);
   });
-});
 
-test('getUserName() returns null when security is disabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+  test('getUserName() returns a name when security is enabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  const userNameResult = await constructorCall.getUserName();
-  expect(userNameResult).toEqual(null);
-});
-
-test('getUserName() returns a name when security is enabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize({
-    ...rulesClientFactoryParams,
-    securityService,
+    securityService.authc.getCurrentUser.mockReturnValueOnce({
+      username: 'bob',
+    } as unknown as AuthenticatedUser);
+    const userNameResult = await constructorCall.getUserName();
+    expect(userNameResult).toEqual('bob');
   });
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityService.authc.getCurrentUser.mockReturnValueOnce({
-    username: 'bob',
-  } as unknown as AuthenticatedUser);
-  const userNameResult = await constructorCall.getUserName();
-  expect(userNameResult).toEqual('bob');
-});
+  test('getActionsClient() returns ActionsClient', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-test('getActionsClient() returns ActionsClient', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
-
-  const actionsClient = await constructorCall.getActionsClient();
-  expect(actionsClient).not.toBe(null);
-});
-
-test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
-
-  const createAPIKeyResult = await constructorCall.createAPIKey();
-  expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
-});
-
-test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
-
-  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
-  const createAPIKeyResult = await constructorCall.createAPIKey();
-  expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
-});
-
-test('createAPIKey() returns an API key when security is enabled', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize({
-    ...rulesClientFactoryParams,
-    securityService,
-    securityPluginSetup,
-    securityPluginStart,
+    const actionsClient = await constructorCall.getActionsClient();
+    expect(actionsClient).not.toBe(null);
   });
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
-    api_key: '123',
-    id: 'abc',
-    name: '',
+  test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const createAPIKeyResult = await constructorCall.createAPIKey();
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
-  const createAPIKeyResult = await constructorCall.createAPIKey('test');
-  expect(createAPIKeyResult).toEqual({
-    apiKeysEnabled: true,
-    result: { api_key: '123', id: 'abc', name: '' },
+
+  test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityPluginStart.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
+    const createAPIKeyResult = await constructorCall.createAPIKey();
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
-  expect(securityPluginStart.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
-    expect.any(Object),
-    {
-      metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-      name: 'test',
-      role_descriptors: {},
-    }
-  );
-});
 
-test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize({
-    ...rulesClientFactoryParams,
-    securityService,
-    securityPluginSetup,
-    securityPluginStart,
+  test('createAPIKey() invalidates UIAM API key when ES API key creation returns null', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce({
+        api_key: 'uiam-key',
+        id: 'uiam-id',
+        name: 'uiam-name',
+      }),
+      invalidate: jest.fn().mockResolvedValueOnce({}),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce(null);
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
+      id: 'uiam-id',
+    });
   });
-  await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
-    new Error('TLS disabled')
-  );
-  await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"TLS disabled"`
-  );
-});
+  test('createAPIKey() returns { apiKeysEnabled: false } when UIAM API key creation fails', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-test('create() calls getSpaceId to derive spaceId from request', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce(null),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
 
-  await factory.create(request, savedObjectsService);
+    expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
+      name: 'uiam-test',
+    });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
+  });
 
-  expect(rulesClientFactoryParams.getSpaceId).toHaveBeenCalledWith(request);
-  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
-    request,
-    'default'
-  );
-});
+  test('createAPIKey() returns an API key when security is enabled', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-test('createWithSpaceId() uses the provided spaceId instead of deriving from request', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+    });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      expect.any(Object),
+      {
+        metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+        name: 'test',
+        role_descriptors: {},
+      }
+    );
+  });
 
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
+  test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+    securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
+      new Error('TLS disabled')
+    );
+    await expect(constructorCall.createAPIKey()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"TLS disabled"`
+    );
+  });
 
-  // getSpaceId should NOT be called when using createWithSpaceId
-  expect(rulesClientFactoryParams.getSpaceId).not.toHaveBeenCalled();
+  test('createAPIKey() invalidates UIAM API key when ES API key creation throws', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    await factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  // createForSpace should be called with the provided spaceId
-  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
-    request,
-    'custom-space'
-  );
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce({
+        api_key: 'uiam-key',
+        id: 'uiam-id',
+        name: 'uiam-name',
+      }),
+      invalidate: jest.fn().mockResolvedValueOnce({
+        invalidated_api_keys: [{ id: 'uiam-id', invalidated: true }],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+        error_details: [],
+      }),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValueOnce(
+      new Error('TLS disabled')
+    );
 
-  // Saved objects client should be scoped to the custom namespace
-  expect(savedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('custom-space');
+    await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"TLS disabled"`
+    );
+    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
+      id: 'uiam-id',
+    });
+  });
 
-  // RulesClient should be created with the custom spaceId
-  expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
-    expect.objectContaining({
-      spaceId: 'custom-space',
-    })
-  );
-});
+  test('create() calls getSpaceId to derive spaceId from request', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
 
-test('create() uses request-derived client methods for actions and event log', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
 
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
+    await factory.create(request, savedObjectsService);
 
-  await factory.create(request, savedObjectsService);
+    expect(rulesClientFactoryParams.getSpaceId).toHaveBeenCalledWith(request);
+    expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+      request,
+      'default'
+    );
+  });
 
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+  test('createWithSpaceId() uses the provided spaceId instead of deriving from request', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
 
-  // Call getActionsClient and verify it uses the request-derived method
-  await constructorCall.getActionsClient();
-  expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
-    request
-  );
-  expect(
-    rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace
-  ).not.toHaveBeenCalled();
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
 
-  // Call getEventLogClient and verify it uses the request-derived method
-  await constructorCall.getEventLogClient();
-  expect(rulesClientFactoryParams.eventLog.getClient).toHaveBeenCalledWith(request);
-  expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).not.toHaveBeenCalled();
-});
+    await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
 
-test('createWithSpaceId() uses space-scoped client methods for actions and event log', async () => {
-  const factory = new RulesClientFactory();
-  factory.initialize(rulesClientFactoryParams);
-  const request = mockRouter.createKibanaRequest();
+    // getSpaceId should NOT be called when using createWithSpaceId
+    expect(rulesClientFactoryParams.getSpaceId).not.toHaveBeenCalled();
 
-  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
-  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
-    alertingAuthorization as unknown as AlertingAuthorization
-  );
+    // createForSpace should be called with the provided spaceId
+    expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+      request,
+      'custom-space'
+    );
 
-  await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+    // Saved objects client should be scoped to the custom namespace
+    expect(savedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('custom-space');
 
-  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    // RulesClient should be created with the custom spaceId
+    expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'custom-space',
+      })
+    );
+  });
 
-  // Call getActionsClient and verify it uses the space-scoped method
-  await constructorCall.getActionsClient();
-  expect(rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace).toHaveBeenCalledWith(
-    request,
-    'custom-space'
-  );
-  expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+  test('create() uses request-derived client methods for actions and event log', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
 
-  // Call getEventLogClient and verify it uses the space-scoped method
-  await constructorCall.getEventLogClient();
-  expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).toHaveBeenCalledWith(
-    request,
-    'custom-space'
-  );
-  expect(rulesClientFactoryParams.eventLog.getClient).not.toHaveBeenCalled();
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
+
+    await factory.create(request, savedObjectsService);
+
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    // Call getActionsClient and verify it uses the request-derived method
+    await constructorCall.getActionsClient();
+    expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
+      request
+    );
+    expect(
+      rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace
+    ).not.toHaveBeenCalled();
+
+    // Call getEventLogClient and verify it uses the request-derived method
+    await constructorCall.getEventLogClient();
+    expect(rulesClientFactoryParams.eventLog.getClient).toHaveBeenCalledWith(request);
+    expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).not.toHaveBeenCalled();
+  });
+
+  test('createWithSpaceId() uses space-scoped client methods for actions and event log', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize(rulesClientFactoryParams);
+    const request = mockRouter.createKibanaRequest();
+
+    savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+    alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+      alertingAuthorization as unknown as AlertingAuthorization
+    );
+
+    await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    // Call getActionsClient and verify it uses the space-scoped method
+    await constructorCall.getActionsClient();
+    expect(
+      rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace
+    ).toHaveBeenCalledWith(request, 'custom-space');
+    expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+
+    // Call getEventLogClient and verify it uses the space-scoped method
+    await constructorCall.getEventLogClient();
+    expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).toHaveBeenCalledWith(
+      request,
+      'custom-space'
+    );
+    expect(rulesClientFactoryParams.eventLog.getClient).not.toHaveBeenCalled();
+  });
+
+  test('getAuthenticationAPIKey() throws when a UIAM API key is used in a non-serverless environment', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: false,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from('id:essu_uiam_api_key').toString('base64')}`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(() => constructorCall.getAuthenticationAPIKey()).toThrowErrorMatchingInlineSnapshot(
+      `"UIAM API keys should only be used in serverless environments"`
+    );
+  });
+
+  test('getAuthenticationAPIKey() throws when API Key is invalid', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: false,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey a-broken-api-key`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(() =>
+      constructorCall.getAuthenticationAPIKey('test')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Failed to parse API key credentials from authorization header for alerting rule : test"`
+    );
+  });
 });

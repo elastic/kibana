@@ -290,6 +290,37 @@ export const labels = {
       }
     ),
 
+    deleteToolUsedByAgentsTitle: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.deleteToolUsedByAgentsTitle', {
+        defaultMessage: 'Tool "{toolId}" is used by agents',
+        values: { toolId },
+      }),
+    deleteToolUsedByAgentsDescription: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsDescription',
+      {
+        defaultMessage: 'Remove this tool from all agents that use it and delete the tool?',
+      }
+    ),
+    deleteToolUsedByAgentsAgentListLabel: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsAgentListLabel',
+      {
+        defaultMessage: 'Agents using this tool',
+      }
+    ),
+    deleteToolUsedByAgentsAgentList: (agentNames: string[]) => agentNames.join(', '),
+    deleteToolUsedByAgentsConfirmButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsConfirmButton',
+      {
+        defaultMessage: 'Yes, remove and delete',
+      }
+    ),
+    deleteToolUsedByAgentsCancelButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteToolUsedByAgentsCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+
     // Bulk delete modal
     bulkDeleteEsqlToolsTitle: (count: number) =>
       i18n.translate('xpack.agentBuilder.tools.bulkDeleteEsqlToolsTitle', {

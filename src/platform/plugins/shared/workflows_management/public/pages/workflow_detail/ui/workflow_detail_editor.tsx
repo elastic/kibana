@@ -10,16 +10,18 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import type { monaco } from '@kbn/monaco';
 import type { StepContext } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import { useContextOverrideData } from './use_context_override_data';
+import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
@@ -45,8 +47,8 @@ interface WorkflowDetailEditorProps {
 }
 
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
-  // Styles
   const styles = useMemoCss(componentStyles);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   // Redux selectors, only used in current workflow tab, not in executions tab
   const workflowYaml = useSelector(selectYamlString) ?? '';
@@ -132,7 +134,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
           <React.Suspense fallback={<EuiLoadingSpinner />}>
-            <WorkflowYAMLEditor highlightDiff={highlightDiff} onStepRun={handleStepRun} />
+            <WorkflowYAMLEditor
+              highlightDiff={highlightDiff}
+              onStepRun={handleStepRun}
+              editorRef={editorRef}
+            />
           </React.Suspense>
         </EuiFlexItem>
         {isVisualEditorEnabled && (
@@ -158,6 +164,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           onClose={closeModal}
         />
       )}
+      <WorkflowDetailConnectorFlyout editorRef={editorRef} />
     </>
   );
 });

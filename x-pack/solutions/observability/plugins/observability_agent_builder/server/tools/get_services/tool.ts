@@ -25,15 +25,16 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServicesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  environment: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Filter services by environment. Examples: "production", "staging".'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
     .describe('Filter by health status. Example: ["warning", "critical"].'),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
+    ),
 });
 
 export function createGetServicesTool({
@@ -69,7 +70,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const { start, end, environment, healthStatus } = toolParams;
+      const { start, end, healthStatus, kqlFilter } = toolParams;
       const { request, esClient } = context;
 
       try {
@@ -82,8 +83,8 @@ When to use:
           logger,
           start,
           end,
-          environment,
           healthStatus,
+          kqlFilter,
         });
 
         return {

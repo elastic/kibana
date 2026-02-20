@@ -59,7 +59,7 @@ export const createAttachmentUpdateTool = ({
     }
 
     const definition = attachmentsService?.getTypeDefinition(existing.type);
-    const typeReadonly = definition?.isReadonly ?? true;
+    const typeReadonly = definition?.isReadonly ?? false;
     const isReadonly = typeReadonly || existing.readonly === true;
     if (isReadonly) {
       return {

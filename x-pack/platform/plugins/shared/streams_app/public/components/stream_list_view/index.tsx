@@ -32,6 +32,7 @@ import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
+import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
@@ -63,7 +64,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { significantEventsDiscovery },
+    features: { significantEventsDiscovery, queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -184,6 +185,11 @@ export function StreamListView() {
                 })}
               </EuiButton>
             </EuiFlexItem>
+            {queryStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
       />

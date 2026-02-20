@@ -29,7 +29,7 @@ describe('ES|QL attributes creation', () => {
     return {
       ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
         visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'form_based' },
+        dataOverrides: { id: 'formBased' },
       }),
       uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
       ...servicesOverrides,
@@ -60,7 +60,7 @@ describe('ES|QL attributes creation', () => {
       {
         title: 'MyTitle',
         visualizationId: 'lnsXY',
-        datasourceId: 'form_based',
+        datasourceId: 'formBased',
         datasourceState: {},
         visualizationState: {},
         columns: 1,

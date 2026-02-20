@@ -25,6 +25,13 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
+export const TOOL_USED_BY_AGENTS_ERROR_CODE = 'TOOL_USED_BY_AGENTS';
+
+export interface AgentRef {
+  id: string;
+  name: string;
+}
+
 export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 

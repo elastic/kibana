@@ -62,7 +62,6 @@ function DimensionButtonImpl({
         border-radius: ${euiTheme.border.radius};
         position: relative;
         line-height: 1;
-        overflow: hidden;
         display: flex;
         align-items: center;
         gap: ${euiTheme.size.s};

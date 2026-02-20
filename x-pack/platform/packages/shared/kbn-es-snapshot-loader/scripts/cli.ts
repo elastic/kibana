@@ -9,6 +9,11 @@ import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient } from '@kbn/kibana-api-cli';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  createGcsRepository,
+  createUrlRepository,
+  type RepositoryStrategy,
+} from '../src/repository';
 import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
 
@@ -17,6 +22,10 @@ interface CommonFlags {
   'snapshot-name'?: string;
   'kibana-url'?: string;
   'es-url'?: string;
+  'repo-type'?: string;
+  'gcs-bucket'?: string;
+  'gcs-base-path'?: string;
+  'gcs-client'?: string;
 }
 
 function parseCommaSeparatedList(value: string | undefined): string[] | undefined {
@@ -61,10 +70,59 @@ async function getEsClient(flags: CommonFlags, log: ToolingLog): Promise<Client>
   return createEsClientFromKibana({ kibanaUrl, log, signal: new AbortController().signal });
 }
 
+function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
+  const snapshotUrl = flags['snapshot-url'];
+  const repoTypeFlag = flags['repo-type'];
+  const repoType =
+    typeof repoTypeFlag === 'string' && repoTypeFlag.length > 0 ? repoTypeFlag : 'url';
+  const gcsBucket = flags['gcs-bucket'];
+  const gcsBasePath = flags['gcs-base-path'];
+  const gcsClient = flags['gcs-client'];
+
+  if (repoType !== 'url' && repoType !== 'gcs') {
+    throw new Error(`--repo-type must be one of: url, gcs`);
+  }
+
+  const hasGcsFlag = Boolean(gcsBucket || gcsBasePath || gcsClient);
+  if (hasGcsFlag && snapshotUrl) {
+    throw new Error('Cannot use both --snapshot-url and --gcs-* flags');
+  }
+
+  if (repoType === 'gcs' && !gcsBucket) {
+    throw new Error('--gcs-bucket is required when using --repo-type gcs');
+  }
+
+  if (gcsBucket || repoType === 'gcs') {
+    return createGcsRepository({
+      bucket: gcsBucket!,
+      basePath: gcsBasePath,
+      client: gcsClient,
+    });
+  }
+
+  if (!snapshotUrl) {
+    throw new Error('--snapshot-url is required unless using --repo-type gcs');
+  }
+
+  return createUrlRepository(snapshotUrl);
+}
+
 const COMMON_FLAGS_HELP = `
-    --snapshot-url      URL to the snapshot directory (required)
-                        Currently only file:// URLs are supported
+    --repo-type         Repository type to use
+                        Options: url, gcs
+                        Default: url
+
+    --snapshot-url      URL to the snapshot directory (for --repo-type url)
+                        Supports file:// URLs
                         Example: file:///path/to/snapshot
+
+    --gcs-bucket        GCS bucket name (required for --repo-type gcs)
+
+    --gcs-base-path     Optional base path within the GCS bucket
+
+    --gcs-client        Optional Elasticsearch GCS client name
+
+                        Cannot use both --snapshot-url and --gcs-* flags
 
     --snapshot-name     Snapshot name to restore/replay
                         Default: latest SUCCESS snapshot in the repository
@@ -106,27 +164,24 @@ function runRestoreCli(): void {
 
   run(
     async ({ log, flags }) => {
-      const {
-        'snapshot-url': snapshotUrl,
-        'snapshot-name': snapshotName,
-        indices: indicesFlag,
-      } = flags as CommonFlags & { indices?: string };
+      const { 'snapshot-name': snapshotName, indices: indicesFlag } = flags as CommonFlags & {
+        indices?: string;
+      };
 
-      if (!snapshotUrl) throw new Error('--snapshot-url is required');
-
+      const repository = resolveRepositoryFromFlags(flags as CommonFlags);
       const esClient = await getEsClient(flags as CommonFlags, log);
       const indices = parseCommaSeparatedList(indicesFlag);
 
       log.info(`Snapshot Restore`);
       log.info(`================`);
-      log.info(`Snapshot URL: ${snapshotUrl}`);
+      log.info(`Repository type: ${repository.type}`);
       if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       if (indices) log.info(`Index patterns: ${indices.join(', ')}`);
 
       const result = await restoreSnapshot({
         esClient,
         log,
-        snapshotUrl,
+        repository,
         snapshotName,
         indices,
       });
@@ -144,7 +199,17 @@ function runRestoreCli(): void {
     {
       description: 'Restore an Elasticsearch snapshot directly',
       flags: {
-        string: ['snapshot-url', 'snapshot-name', 'kibana-url', 'es-url', 'indices'],
+        string: [
+          'repo-type',
+          'snapshot-url',
+          'snapshot-name',
+          'kibana-url',
+          'es-url',
+          'gcs-bucket',
+          'gcs-base-path',
+          'gcs-client',
+          'indices',
+        ],
         help: `
       Usage: node scripts/es_snapshot_loader restore [options]
       ${COMMON_FLAGS_HELP}
@@ -162,7 +227,6 @@ function runReplayCli(): void {
   run(
     async ({ log, flags }) => {
       const {
-        'snapshot-url': snapshotUrl,
         'snapshot-name': snapshotName,
         patterns: patternsFlag,
         concurrency: concurrencyFlag,
@@ -171,7 +235,7 @@ function runReplayCli(): void {
         concurrency?: string;
       };
 
-      if (!snapshotUrl) throw new Error('--snapshot-url is required');
+      const repository = resolveRepositoryFromFlags(flags as CommonFlags);
       if (!parseCommaSeparatedList(patternsFlag)) {
         throw new Error('--patterns is required');
       }
@@ -185,7 +249,7 @@ function runReplayCli(): void {
 
       log.info(`Snapshot Replay`);
       log.info(`===============`);
-      log.info(`Snapshot URL: ${snapshotUrl}`);
+      log.info(`Repository type: ${repository.type}`);
       if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       log.info(`Index patterns: ${patterns.join(', ')}`);
       if (concurrency) log.info(`Concurrency: ${concurrency}`);
@@ -193,7 +257,7 @@ function runReplayCli(): void {
       const result = await replaySnapshot({
         esClient,
         log,
-        snapshotUrl,
+        repository,
         snapshotName,
         patterns,
         concurrency,
@@ -215,10 +279,14 @@ function runReplayCli(): void {
         'Replay an Elasticsearch snapshot with timestamp transformation for data streams',
       flags: {
         string: [
+          'repo-type',
           'snapshot-url',
           'snapshot-name',
           'kibana-url',
           'es-url',
+          'gcs-bucket',
+          'gcs-base-path',
+          'gcs-client',
           'patterns',
           'concurrency',
         ],

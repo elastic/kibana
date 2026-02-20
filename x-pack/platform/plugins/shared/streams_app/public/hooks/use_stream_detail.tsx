@@ -74,7 +74,11 @@ export function StreamDetailContextProvider({
             };
           }
 
-          throw new Error('Stream detail only supports Ingest streams.');
+          if (Streams.QueryStream.GetResponse.is(response)) {
+            return response;
+          }
+
+          throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]

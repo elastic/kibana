@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
 

@@ -154,14 +154,28 @@ node scripts/otel_demo.js
 
 ## Accessing the Demo
 
-After deployment:
+After deployment, the frontend can be accessed via NodePort.
+
+### On macOS with Docker driver:
 
 ```bash
-# Access the web store frontend
-minikube service frontend-external -n otel-demo
+# Use minikube service command (keep terminal open)
+minikube service frontend-external -n online-boutique
 
-# Or use the NodePort directly (http://<minikube-ip>:30080)
+# Or for otel-demo:
+minikube service frontend-external -n otel-demo
+```
+
+**Note:** On macOS with the Docker driver, the `minikube service` command creates a tunnel and must be kept running in a separate terminal to maintain access to the service.
+
+### On Linux or with other drivers:
+
+```bash
+# Get the minikube IP
 minikube ip
+
+# Access directly via NodePort
+# http://<minikube-ip>:30080
 ```
 
 ## Viewing Logs

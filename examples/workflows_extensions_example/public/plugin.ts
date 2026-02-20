@@ -19,6 +19,7 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { registerStepDefinitions } from './step_types';
+import { registerTriggerDefinitions } from './triggers';
 import { ExampleExternalService } from '../common/external_service/external_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -63,6 +64,7 @@ export class WorkflowsExtensionsExamplePlugin
         'my-fifth-proxy': { name: 'Backup Proxy', url: 'https://example.com/fifth' },
       }),
     });
+    registerTriggerDefinitions(plugins.workflowsExtensions);
 
     return {};
   }

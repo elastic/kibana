@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';

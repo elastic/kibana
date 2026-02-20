@@ -24,8 +24,6 @@ import {
 import {
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
-import {
   apiAppliesFilters,
   apiAppliesTimeslice,
   apiHasSerializableState,

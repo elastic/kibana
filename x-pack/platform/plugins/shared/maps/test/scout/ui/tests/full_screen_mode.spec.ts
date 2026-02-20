@@ -17,7 +17,7 @@ import {
 test.describe(
   'Maps',
   {
-    tag: tags.DEPLOYMENT_AGNOSTIC,
+    tag: tags.deploymentAgnostic,
   },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {

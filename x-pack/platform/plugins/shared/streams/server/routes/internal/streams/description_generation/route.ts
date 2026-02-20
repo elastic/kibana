@@ -6,13 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '../../../../lib/tasks/types';
+import type { GenerateDescriptionResult, TaskResult } from '@kbn/streams-schema';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,
   getDescriptionGenerationTaskId,
   type DescriptionGenerationTaskParams,
-  type GenerateDescriptionResult,
 } from '../../../../lib/tasks/task_definitions/description_generation';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -78,25 +78,16 @@ export const descriptionGenerationTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule'),
-        from: dateFromString,
-        to: dateFromString,
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel'),
-      }),
-      z.object({
-        action: z.literal('acknowledge'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: dateFromString,
+      to: dateFromString,
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+    }),
   }),
   handler: async ({
     params,

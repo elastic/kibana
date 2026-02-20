@@ -12,6 +12,7 @@ import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { SideEffectContext } from '../side_effect_context';
 import {
   StyledLabelTitle,
@@ -28,11 +29,7 @@ import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
 import { useFormattedDate } from './use_formatted_date';
 import { userSelectedResolverNode } from '../../store/actions';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 import type { State } from '../../../common/store/types';
 
@@ -228,7 +225,7 @@ const NodeDetailTimestamp = memo(
           field: '@timestamp',
           value: eventDate,
         }}
-        triggerId={SecurityCellActionsTrigger.DEFAULT}
+        triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         visibleCellActions={5}
         mode={CellActionsMode.HOVER_DOWN}
         sourcererScopeId={getSourcererScopeId(id)}

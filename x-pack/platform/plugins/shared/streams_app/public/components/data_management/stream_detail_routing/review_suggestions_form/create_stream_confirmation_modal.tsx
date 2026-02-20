@@ -41,9 +41,11 @@ export function CreateStreamConfirmationModal({
   onSuccess: () => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const isForking = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: { reviewSuggestedRule: 'forking' } })
+    snapshot.matches({ ready: { ingestMode: { reviewSuggestedRule: 'forking' } } })
   );
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
@@ -56,10 +58,10 @@ export function CreateStreamConfirmationModal({
 
     return buildRequestPreviewCodeContent({
       method: 'POST',
-      url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_fork`,
+      url: `/api/streams/${streamName}/_fork`,
       body,
     });
-  }, [partition.condition, partition.name, routingSnapshot.context.definition.stream.name]);
+  }, [partition.condition, partition.name, streamName]);
 
   return (
     <EuiModal

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
   CONTAINER_COUNT,
@@ -34,7 +35,7 @@ import { globalSetupHook } from '../fixtures';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
     await infraSynthtraceEsClient.index(
       generateHostData({

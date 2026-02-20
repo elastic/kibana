@@ -32,6 +32,7 @@ import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
+import { HookLifecycle } from '@kbn/agent-builder-common';
 
 jest.mock('../agents/modes/create_handler');
 jest.mock('@kbn/agent-builder-server/tools/utils');
@@ -128,6 +129,26 @@ describe('AgentBuilder runner', () => {
         ],
       });
     });
+
+    it('executes beforeToolCall hook and aborts when it throws', async () => {
+      scopedRunnerDeps.hooks.run = jest.fn(async () => {
+        throw new Error('blocked by beforeToolCall');
+      });
+
+      const params: ScopedRunnerRunToolsParams = {
+        toolId: 'test-tool',
+        toolParams: { foo: 'bar' },
+      };
+
+      const runner = createScopedRunner(scopedRunnerDeps);
+      await expect(runner.runTool(params)).rejects.toMatchObject({
+        message: 'blocked by beforeToolCall',
+      });
+      expect(scopedRunnerDeps.hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.beforeToolCall,
+        expect.objectContaining({ toolId: 'test-tool' })
+      );
+    });
   });
 
   describe('runAgent', () => {
@@ -173,6 +194,7 @@ describe('AgentBuilder runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          abortSignal: undefined,
         },
         expect.any(Object)
       );
@@ -202,6 +224,7 @@ describe('AgentBuilder runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          abortSignal: undefined,
         },
         expect.any(Object)
       );

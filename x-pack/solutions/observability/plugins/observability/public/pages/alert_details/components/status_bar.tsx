@@ -53,17 +53,19 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
         )}
       </EuiFlexItem>
       <CaseLinks alert={alert} />
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.observability.pages.alertDetails.pageTitle.tags"
-              defaultMessage="Tags:"
-            />
-          </EuiText>
-          <TagsList tags={tags} ignoreEmpty color="default" />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {tags && tags.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.pageTitle.tags"
+                defaultMessage="Tags:"
+              />
+            </EuiText>
+            <TagsList tags={tags} ignoreEmpty color="default" />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       {workflowTags && workflowTags.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">

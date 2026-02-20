@@ -7,19 +7,14 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { lazy } from 'react';
 import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-const LazyIconAssets = lazy(() =>
-  import('./custom_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
-);
-
 export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({
   id: SecurityGroupName.assets,
-  icon: LazyIconAssets,
+  icon: 'display',
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
   children: [

@@ -121,6 +121,7 @@ export class MonitoringPlugin
           appMountParameters: params,
           dataViews: pluginsStart.dataViews,
           fieldsMetadata: pluginsStart.fieldsMetadata,
+          cloudConnect: pluginsStart.cloudConnect,
         };
 
         Legacy.init({
@@ -139,6 +140,7 @@ export class MonitoringPlugin
           dataViews: deps.dataViews,
           share: deps.share,
           fieldsMetadata: deps.fieldsMetadata,
+          cloudConnect: deps.cloudConnect,
         });
 
         const config = Object.fromEntries(externalConfig);

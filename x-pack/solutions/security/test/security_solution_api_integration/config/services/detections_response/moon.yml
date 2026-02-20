@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/test'
+  - '@kbn/spaces-plugin'
 tags:
   - test-helper
   - package

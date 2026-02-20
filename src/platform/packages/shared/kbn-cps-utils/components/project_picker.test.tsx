@@ -212,7 +212,7 @@ describe('ProjectPicker', () => {
       // Press Enter to open popover
       await userEvent.keyboard('{Enter}');
 
-      expect(screen.getByText('Cross-project search scope')).toBeInTheDocument();
+      expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
     });
   });
 });

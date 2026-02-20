@@ -8,43 +8,16 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
-import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
-import type { DiscoverServices } from '../../../../../build_services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
-import type { DiscoverAppState } from '../types';
-
-const createPersistedTab = ({
-  tabId,
-  appState,
-  dataView,
-  services,
-}: {
-  tabId: string;
-  appState?: DiscoverAppState;
-  dataView: DataView;
-  services: DiscoverServices;
-}) =>
-  fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: tabId,
-      initialInternalState: {
-        serializedSearchSource: { index: dataView.id },
-      },
-      ...(appState ? { appState } : {}),
-    }),
-    timeRestore: false,
-    services,
-  });
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -61,19 +34,19 @@ export const setup = async () => {
       services,
       persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
     });
-  const persistedTab1 = createPersistedTab({
+  const persistedTab1 = getPersistedTabMock({
     tabId: 'tab-1',
-    appState: { columns: ['tab-1-column'] },
     dataView: dataViewWithTimefieldMock,
+    appStateOverrides: { columns: ['tab-1-column'] },
     services,
   });
-  const persistedTab2 = createPersistedTab({
+  const persistedTab2 = getPersistedTabMock({
     tabId: 'tab-2',
-    appState: { columns: ['tab-2-column'] },
     dataView: dataViewWithNoTimefieldMock,
+    appStateOverrides: { columns: ['tab-2-column'] },
     services,
   });
-  const persistedTab3 = createPersistedTab({
+  const persistedTab3 = getPersistedTabMock({
     tabId: 'tab-3',
     dataView: dataViewWithTimefieldMock,
     services,

@@ -99,7 +99,7 @@ const SingleMonitorView = () => {
     }
   }, [dispatch, monitor, trendData]);
 
-  const style = { height: '100%' };
+  const style = { height: '100%', overflow: 'hidden' };
 
   if (!monitor) return <OverviewLoader rows={1} columns={1} style={style} />;
 

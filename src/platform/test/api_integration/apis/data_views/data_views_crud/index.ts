@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('index_pattern_crud', () => {
-    loadTestFile(require.resolve('./create_data_view'));
     loadTestFile(require.resolve('./get_data_view'));
     loadTestFile(require.resolve('./delete_data_view'));
     loadTestFile(require.resolve('./update_data_view'));

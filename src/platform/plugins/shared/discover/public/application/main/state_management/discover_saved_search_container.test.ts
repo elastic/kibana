@@ -49,7 +49,7 @@ describe('DiscoverSavedSearchContainer', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
+      overridenTimeRestore: false,
       services,
     });
 

@@ -51,7 +51,7 @@ describe(
       }
       deleteAlertsAndRules();
       createRule(getCustomQueryRuleParams(params)).then((rule) =>
-        visitRuleDetailsPage(rule.body.id)
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
       );
 
       waitForAlertsToPopulate();

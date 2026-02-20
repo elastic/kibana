@@ -7,9 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
-import { type IngestStreamLifecycle, type Streams } from '@kbn/streams-schema';
+import { type IngestStreamLifecycle, type Streams, type IlmPolicy } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -35,7 +34,7 @@ export const StreamDetailGeneralData = ({
   data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const {
-    core: { http, notifications },
+    core: { notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -51,10 +50,9 @@ export const StreamDetailGeneralData = ({
 
   const { signal } = useAbortController();
 
-  const getIlmPolicies = () =>
-    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
-      signal,
-    });
+  const getIlmPolicies = async (): Promise<IlmPolicy[]> => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/lifecycle/_policies', { signal });
+  };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
@@ -139,7 +137,11 @@ export const StreamDetailGeneralData = ({
         }
       >
         {definition.privileges.lifecycle ? (
-          <LifecycleSummary definition={definition} stats={data.stats?.ds.stats} />
+          <LifecycleSummary
+            definition={definition}
+            stats={data.stats?.ds.stats}
+            refreshDefinition={refreshDefinition}
+          />
         ) : null}
       </SectionPanel>
 

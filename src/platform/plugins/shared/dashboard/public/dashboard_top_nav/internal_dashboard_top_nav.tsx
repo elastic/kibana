@@ -305,8 +305,6 @@ export function InternalDashboardTopNav({
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
-        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
       } as TopNavMenuBadgeProps;
 
       allBadges.push({

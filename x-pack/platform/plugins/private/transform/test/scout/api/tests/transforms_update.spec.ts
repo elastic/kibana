@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   GetTransformsResponseSchema,
   PostTransformsUpdateResponseSchema,
@@ -38,7 +39,7 @@ function getTransformUpdateConfig() {
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId}/_update',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.all },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       const config = generateTransformConfig(TRANSFORM_ID);
@@ -64,7 +65,7 @@ apiTest.describe(
       );
       const originalBody = originalResponse.body as GetTransformsResponseSchema;
 
-      expect(originalResponse.statusCode).toBe(200);
+      expect(originalResponse).toHaveStatusCode(200);
 
       expect(originalBody.count).toBe(1);
       expect(originalBody.transforms).toHaveLength(1);
@@ -92,7 +93,7 @@ apiTest.describe(
       );
       const updatedTransform = updateResponse.body as PostTransformsUpdateResponseSchema;
 
-      expect(updateResponse.statusCode).toBe(200);
+      expect(updateResponse).toHaveStatusCode(200);
 
       const expectedConfig = getTransformUpdateConfig();
       expect(updatedTransform.id).toBe(TRANSFORM_ID);
@@ -113,7 +114,7 @@ apiTest.describe(
       });
       const verifyBody = verifyResponse.body as GetTransformsResponseSchema;
 
-      expect(verifyResponse.statusCode).toBe(200);
+      expect(verifyResponse).toHaveStatusCode(200);
 
       expect(verifyBody.count).toBe(1);
       expect(verifyBody.transforms).toHaveLength(1);

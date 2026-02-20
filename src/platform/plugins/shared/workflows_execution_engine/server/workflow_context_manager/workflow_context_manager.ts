@@ -10,7 +10,9 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import {
+  type EsWorkflowStepExecution,
   type SerializedError,
   type StackFrame,
   type StepContext,
@@ -23,7 +25,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, evaluateKql } from '../utils';
+import { buildStepExecutionId, isTemplateExpression } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -37,6 +39,11 @@ export interface ContextManagerInit {
   fakeRequest: KibanaRequest;
   coreStart: CoreStart; // For using Kibana's internal HTTP client
   dependencies: ContextDependencies;
+}
+
+interface ScopeEntry {
+  topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
+  stepExecution: EsWorkflowStepExecution | undefined;
 }
 
 export class WorkflowContextManager {
@@ -307,40 +314,126 @@ export class WorkflowContextManager {
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
 
+    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
+    const scopeEntries: Array<ScopeEntry> = [];
+    const foreachEntries: Array<ScopeEntry> = [];
+
     while (!scopeStack.isEmpty()) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const topFrame = scopeStack.getCurrentScope()!;
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
-        buildStepExecutionId(
-          this.workflowExecutionState.getWorkflowExecution().id,
-          topFrame.stepId,
-          scopeStack.stackFrames
-        )
+        buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
+      scopeEntries.push({ topFrame, stepExecution });
+      if (stepExecution?.stepType === 'foreach') {
+        foreachEntries.push({ topFrame, stepExecution });
+      }
+    }
 
+    // When there is only one foreach frame (e.g. single-step run with subgraph), use
+    // contextOverride.foreach as the parent so inner expressions like {{foreach.item}} resolve.
+    const contextOverride =
+      this.workflowExecutionState.getWorkflowExecution().context?.contextOverride;
+    if (foreachEntries.length === 1 && contextOverride?.foreach != null) {
+      stepContext.foreach = contextOverride.foreach;
+    }
+
+    // Build foreach context in outer-to-inner order so inner expressions like
+    // {{foreach.item}} resolve against the outer foreach context.
+    for (const { stepExecution } of foreachEntries.reverse()) {
       if (stepExecution) {
-        switch (stepExecution.stepType) {
-          case 'foreach':
-            if (!stepContext.foreach) {
-              stepContext.foreach = stepExecution.state as StepContext['foreach'];
-            }
-            break;
-        }
+        stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
+      }
+    }
 
-        if (topFrame.scopeId === 'fallback') {
-          // This is not good approach, but we can't do it better right now.
-          // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
-          // but here we are trying to mutate the static StepContext object.
-          // Proper solution would be to have dynamic context object that would resolve properties on demand,
-          // but it requires significant changes in the codebase.
-          // So for now, we just set the error on the context when we are in fallback scope.
-          const stepContextGeneric = stepContext as Record<string, unknown>;
-          if (!stepContextGeneric.error) {
-            stepContextGeneric.error = stepExecution.state?.error;
-          }
+    // Apply fallback scope error in original (innermost-first) order.
+    for (const { topFrame, stepExecution } of scopeEntries) {
+      if (topFrame.scopeId === 'fallback' && stepExecution) {
+        // This is not good approach, but we can't do it better right now.
+        // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
+        // but here we are trying to mutate the static StepContext object.
+        // Proper solution would be to have dynamic context object that would resolve properties on demand,
+        // but it requires significant changes in the codebase.
+        // So for now, we just set the error on the context when we are in fallback scope.
+        const stepContextGeneric = stepContext as Record<string, unknown>;
+        if (!stepContextGeneric.error) {
+          stepContextGeneric.error = stepExecution.state?.error;
         }
       }
+    }
+  }
+
+  /**
+   * Builds the foreach context by combining the persisted state (index, total)
+   * with items derived by re-evaluating the foreach expression at resolution time.
+   * This avoids storing the entire items array in the step execution state on every iteration.
+   */
+  private buildForeachContext(
+    stepExecution: EsWorkflowStepExecution,
+    stepContext: StepContext
+  ): StepContext['foreach'] {
+    const foreachState = stepExecution.state ?? {};
+    const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
+    const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
+
+    // Re-evaluate the foreach expression (stored in the step input at entry time)
+    // to derive the full items array and current item without persisting them in state.
+    const foreachExpression = this.extractForeachExpression(stepExecution.input);
+    const items = foreachExpression
+      ? this.resolveForeachItems(foreachExpression, stepContext)
+      : undefined;
+
+    const availableItems = items ?? [];
+
+    return {
+      items: availableItems,
+      item: availableItems[index],
+      index,
+      total,
+    };
+  }
+
+  /**
+   * Extracts the foreach expression string from a step execution's input.
+   * The input is typed as JsonValue, so we narrow it to a record and pull the `foreach` key.
+   */
+  private extractForeachExpression(input: EsWorkflowStepExecution['input']): string | undefined {
+    if (input !== null && typeof input === 'object' && !Array.isArray(input)) {
+      const { foreach: expression } = input;
+      return typeof expression === 'string' ? expression : undefined;
+    }
+    return undefined;
+  }
+
+  /**
+   * Evaluates a foreach expression against the given context and returns the resulting array.
+   * Mirrors the evaluation logic in EnterForeachNodeImpl.processForeachConfiguration / getItems.
+   */
+  private resolveForeachItems(
+    foreachExpression: string,
+    context: Record<string, unknown>
+  ): unknown[] | undefined {
+    try {
+      let resolvedValue: unknown;
+
+      if (isTemplateExpression(foreachExpression)) {
+        resolvedValue = this.templateEngine.evaluateExpression(foreachExpression, context);
+      } else {
+        resolvedValue = this.templateEngine.render(foreachExpression, context);
+      }
+
+      if (typeof resolvedValue === 'string') {
+        try {
+          resolvedValue = JSON.parse(resolvedValue);
+        } catch {
+          return undefined;
+        }
+      }
+
+      return Array.isArray(resolvedValue) ? resolvedValue : undefined;
+    } catch {
+      return undefined;
     }
   }
 

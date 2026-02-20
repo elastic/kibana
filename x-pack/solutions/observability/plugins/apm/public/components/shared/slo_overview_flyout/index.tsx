@@ -35,6 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -98,6 +99,8 @@ const STATUS_PRIORITY: Record<string, number> = {
   NO_DATA: 1,
   HEALTHY: 0,
 };
+const SEARCH_DEBOUNCE_MS = 300;
+const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
@@ -106,19 +109,29 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { link } = useApmRouter();
   const { query } = useApmParams('/services');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  useDebounce(
+    () => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(0);
+    },
+    SEARCH_DEBOUNCE_MS,
+    [searchQuery]
+  );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
+  const minItemsPerPage = ITEMS_PER_PAGE_OPTIONS[0];
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
   const { environment } = query;
 
   const kqlQuery = useMemo(() => {
-    const trimmed = searchQuery.trim();
+    const trimmed = debouncedSearchQuery.trim();
     return trimmed || undefined;
-  }, [searchQuery]);
+  }, [debouncedSearchQuery]);
 
   const { data, status: fetchStatus } = useFetcher(
     (callApmApi) => {
@@ -263,7 +276,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setPage(0);
   }, []);
 
   const handleSloClick = useCallback((sloId: string) => {
@@ -356,7 +368,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 fontWeight: euiTheme.font.weight.regular,
               }}
             >
-              <EuiIcon type="expand" color="subdued" />
+              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
               {name}
             </EuiLink>
           </EuiToolTip>
@@ -584,7 +596,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           data-test-subj="sloOverviewFlyoutTable"
         />
 
-        {totalSlos > perPage && (
+        {totalSlos > minItemsPerPage && (
           <>
             <EuiSpacer size="m" />
             <EuiTablePagination
@@ -592,7 +604,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               activePage={page}
               onChangePage={handlePageChange}
               itemsPerPage={perPage}
-              itemsPerPageOptions={[10, 25, 50]}
+              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
               onChangeItemsPerPage={handlePerPageChange}
               data-test-subj="sloOverviewFlyoutPagination"
             />

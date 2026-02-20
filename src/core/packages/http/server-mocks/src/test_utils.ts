@@ -17,6 +17,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import {
@@ -177,6 +178,7 @@ export const createHttpService = (): HttpIntegrationTestService => {
       return svc.setup({
         context: contextServiceMock.createSetupContract(),
         executionContext: executionContextServiceMock.createInternalSetupContract(),
+        userActivity: userActivityServiceMock.createInternalSetupContract(),
       });
     },
     start: async () => {

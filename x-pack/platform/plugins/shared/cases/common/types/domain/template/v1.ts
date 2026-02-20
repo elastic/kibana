@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { FieldSchema } from './fields';
 
 /**
  * Template schema for case templates
@@ -40,26 +41,69 @@ export const TemplateSchema = z.object({
    * Deletion date, used to indicate soft-deletion. Elastic uses strings, but will narrow it some more to actual dates here.
    */
   deletedAt: z.string().datetime().nullable(),
+
+  /**
+   * Template description
+   */
+  description: z.string().optional(),
+
+  /**
+   * Tags for categorization
+   */
+  tags: z.array(z.string()).optional(),
+
+  /**
+   * Template author
+   */
+  author: z.string().optional(),
+
+  /**
+   * Number of times this template has been used
+   */
+  usageCount: z.number().optional(),
+
+  /**
+   * Number of fields in the template
+   */
+  fieldCount: z.number().optional(),
+
+  /**
+   * Array of field names to display in a tooltip
+   */
+  fieldNames: z.array(z.string()).optional(),
+
+  /**
+   * Last time this template was used
+   */
+  lastUsedAt: z.string().datetime().optional(),
+
+  /**
+   * Whether this is the default template
+   */
+  isDefault: z.boolean().optional(),
+
+  /**
+   * Whether this is the latest version for a templateId
+   */
+  isLatest: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
 
 /**
- * Parsed template field definition
- */
-export const ParsedTemplateFieldSchema = z.object({
-  control: z.string(),
-  name: z.string(),
-  label: z.string().optional(),
-  type: z.literal('keyword'),
-  metadata: z.record(z.unknown()),
-});
-
-/**
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
-  fields: z.array(ParsedTemplateFieldSchema),
+  name: z.string().min(1).max(100),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  fields: z.array(FieldSchema).refine(
+    (fields) => {
+      const fieldNames = new Set(fields.map((field) => field.name));
+      return fieldNames.size === fields.length;
+    },
+    { message: 'Field names must be unique.' }
+  ),
 });
 
 /**
@@ -85,6 +129,7 @@ export const CreateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
+  name: true,
 });
 
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
@@ -96,6 +141,7 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
+  name: true,
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;

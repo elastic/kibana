@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/rison'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/es-query'
   - '@kbn/react-kibana-mount'
@@ -91,7 +90,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/datemath'
-  - '@kbn/presentation-containers'
   - '@kbn/dashboard-plugin'
   - '@kbn/monaco'
   - '@kbn/code-editor'
@@ -123,6 +121,8 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
   - '@kbn/observability-get-padded-alert-time-range-util'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod

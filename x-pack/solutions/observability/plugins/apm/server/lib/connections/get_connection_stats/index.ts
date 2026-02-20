@@ -14,7 +14,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../helpers/get_random_sampler';
 import { getDestinationMap } from './get_destination_map';
-import { getStats } from './get_stats';
+import { getConnectionStatsItems } from './get_connection_stats_items';
 
 export function getConnectionStats({
   apmEventClient,
@@ -39,7 +39,7 @@ export function getConnectionStats({
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, { nodesBydependencyName: destinationMap, sampled }] = await Promise.all([
-      getStats({
+      getConnectionStatsItems({
         apmEventClient,
         start,
         end,

@@ -1,0 +1,16 @@
+steps:
+#  - command: .buildkite/scripts/steps/checks/api_contracts.sh
+#    label: 'Check API Contracts'
+#    agents:
+#      machineType: c4d-standard-2
+#      diskType: hyperdisk-balanced
+#      preemptible: true
+#      spotZones: us-central1-c,us-central1-a
+#    key: check_api_contracts
+#    depends_on: check_oas_snapshot
+#    timeout_in_minutes: 30
+#    soft_fail: true
+#    retry:
+#      automatic:
+#        - exit_status: '-1'
+#          limit: 3

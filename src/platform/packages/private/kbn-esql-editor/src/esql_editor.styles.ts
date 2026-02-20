@@ -31,12 +31,12 @@ export const esqlEditorStyles = (
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
+      border: hasOutline ? euiTheme.border.thin : 'none',
     },
     resizableContainer: {
       display: 'flex',
       width: '100%',
       alignItems: 'flex-start',
-      border: hasOutline ? euiTheme.border.thin : 'none',
       borderBottom: 'none',
       overflow: 'hidden',
     },
@@ -55,7 +55,6 @@ export const esqlEditorStyles = (
     },
     historyContainer: {
       border: 'none',
-      backgroundColor: euiTheme.colors.lightestShade,
       width: '100%',
       position: 'relative' as const,
       marginTop: 0,

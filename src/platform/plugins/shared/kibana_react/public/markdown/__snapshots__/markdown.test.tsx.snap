@@ -2,7 +2,7 @@
 
 exports[`props markdown 1`] = `
 <div
-  className="kbnMarkdown__body"
+  css="unknown styles"
   dangerouslySetInnerHTML={
     Object {
       "__html": "<p>I am <em>some</em> <a href=\\"https://en.wikipedia.org/wiki/Content\\">content</a> with <code>markdown</code></p>
@@ -14,7 +14,7 @@ exports[`props markdown 1`] = `
 
 exports[`props openLinksInNewTab 1`] = `
 <div
-  className="kbnMarkdown__body"
+  css="unknown styles"
   dangerouslySetInnerHTML={
     Object {
       "__html": "<p>I am <em>some</em> <a href=\\"https://en.wikipedia.org/wiki/Content\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">content</a> with <code>markdown</code></p>
@@ -26,7 +26,7 @@ exports[`props openLinksInNewTab 1`] = `
 
 exports[`props whiteListedRules 1`] = `
 <div
-  className="kbnMarkdown__body"
+  css="unknown styles"
   dangerouslySetInnerHTML={
     Object {
       "__html": "<p>I am <em>some</em> [content](https://en.wikipedia.org/wiki/Content) with <code>markdown</code></p>
@@ -38,7 +38,7 @@ exports[`props whiteListedRules 1`] = `
 
 exports[`render 1`] = `
 <div
-  className="kbnMarkdown__body"
+  css="unknown styles"
   dangerouslySetInnerHTML={
     Object {
       "__html": "",
@@ -49,7 +49,7 @@ exports[`render 1`] = `
 
 exports[`should never render html tags 1`] = `
 <div
-  className="kbnMarkdown__body"
+  css="unknown styles"
   dangerouslySetInnerHTML={
     Object {
       "__html": "<p>&lt;div&gt;I may be dangerous if rendered as html&lt;/div&gt;</p>

@@ -30,7 +30,6 @@ export const createMaintenanceWindowRequestBodySchema = schema.object({
   }),
   scope: schema.maybe(
     schema.object({
-      // as we introduce more scopes, alerting will eventually become alerting: schema.maybe(schema.object({...
       alerting: schema.object({
         query: schema.object({
           kql: schema.string({

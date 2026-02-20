@@ -81,6 +81,20 @@ describe('ESQL routes', () => {
     );
   });
 
+  it('can load ES|QL views (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
+  });
+
   it('can load the inference endpoints by type', async () => {
     const url = '/internal/esql/autocomplete/inference_endpoints/rerank';
     const result = await testbed.GET(url).send().expect(200);

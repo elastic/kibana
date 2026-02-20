@@ -12,7 +12,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { RunRuleParams, TaskRunnerContext } from './types';
+import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
 import { RuleExecutionStatusErrorReasons } from '../types';
@@ -56,7 +56,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
   } = params;
 
-  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
+  const { enabled, apiKey, uiamApiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -68,7 +68,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
   const rule = getAlertFromRaw({
     id: ruleId,
     includeLegacyId: false,
@@ -109,6 +109,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 
   return {
     apiKey,
+    uiamApiKey,
     fakeRequest,
     rule,
     validatedParams,
@@ -152,11 +153,24 @@ export async function getDecryptedRule(
 export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
-  apiKey: RawRule['apiKey']
+  apiKey: RawRule['apiKey'],
+  uiamApiKey?: RawRule['uiamApiKey']
 ) {
   const requestHeaders: Headers = {};
 
-  if (apiKey) {
+  const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
+
+  if (shouldUseUiamApiKey) {
+    if (!uiamApiKey) {
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+      context.logger.warn(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.'
+      );
+    } else {
+      const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
+      requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
+    }
+  } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 
