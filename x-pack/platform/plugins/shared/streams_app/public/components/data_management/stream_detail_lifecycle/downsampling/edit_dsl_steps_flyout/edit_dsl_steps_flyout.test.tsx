@@ -278,6 +278,83 @@ describe('EditDslStepsFlyout', () => {
       expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
     });
 
+    it('keeps Save disabled when adding a step while an existing step has errors', async () => {
+      const { onSave } = renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '30d', fixed_interval: '1h' }],
+          },
+        },
+      });
+
+      await tick();
+
+      const panel = withinStep(0);
+      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled();
+
+      // Add another step while the first one is still invalid.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}AddTabButton`));
+      await waitFor(() => expect(getTab(2)).toBeInTheDocument());
+
+      // Save should remain disabled because there are still form errors.
+      await waitFor(() => expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled());
+    });
+
+    it('re-enables Save after removing the invalid step', async () => {
+      const { onSave } = renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [
+                { after: '30d', fixed_interval: '1h' },
+                { after: '40d', fixed_interval: '5d' },
+              ],
+            },
+          },
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+
+      await tick();
+
+      const invalidPanel = withinStep(1);
+      fireEvent.change(invalidPanel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).toBeDisabled();
+
+      // Remove the invalid step -> save should become enabled again.
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}RemoveStepButton-step-2`));
+      await waitFor(() => expect(queryTab(2)).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`)).not.toBeDisabled()
+      );
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave).toHaveBeenCalledWith({
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '30d', fixed_interval: '1h' }],
+        },
+      });
+    });
+
     it('prevents saving when fixed_interval is less than 5 minutes', async () => {
       const { onSave } = renderFlyout({
         initialSteps: {
