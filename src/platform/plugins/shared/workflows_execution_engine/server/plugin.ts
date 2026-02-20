@@ -258,6 +258,7 @@ export class WorkflowsExecutionEnginePlugin
           return {
             run: async () => {
               try {
+                logger.debug('Migrating workflow/step executions to history');
                 const [coreStart] = await core.getStartServices();
                 const workflowExecutionRepository = await createWorkflowExecutionRepository(
                   coreStart.dataStreams,
@@ -288,9 +289,7 @@ export class WorkflowsExecutionEnginePlugin
                 ]);
 
                 await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
-                logger.info(
-                  `Scheduled workflow/step execution migration older than ${migrationOlderThan.toISOString()} and cleanup older than ${cleanupOlderThan.toISOString()}`
-                );
+                logger.debug('Completed workflow/step execution migration and cleanup');
               } catch (error) {
                 logger.error(`Error during workflow/step execution migration: ${error}`);
                 throw error;
