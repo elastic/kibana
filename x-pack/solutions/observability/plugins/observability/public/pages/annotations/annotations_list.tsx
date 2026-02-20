@@ -45,6 +45,7 @@ export function AnnotationsList() {
       await deleteAnnotation({ annotations: selection });
       setSelection([]);
     }
+    setIsDeleteModalVisible(false);
     refetch();
   };
 
