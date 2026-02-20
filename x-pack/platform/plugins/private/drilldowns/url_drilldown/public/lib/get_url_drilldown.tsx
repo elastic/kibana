@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   UrlDrilldownConfig,
   UrlDrilldownGlobalScope,
-} from '@kbn/ui-actions-enhanced-plugin/public';
+} from './types';
 import {
   UrlDrilldownCollectConfig,
   urlDrilldownCompileUrl,
