@@ -21,21 +21,17 @@ import {
   computeRemovalRange,
   getLocatedSourceItemsFromQuery,
   getSourceCommandContextFromQuery,
+  getRangeFromOffsets,
 } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import type { BrowserPopoverPosition } from './types';
+import { IndicesBrowserOpenMode } from './types';
+import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
 }
-
-interface BrowserPopoverPosition {
-  top?: number;
-  left?: number;
-}
-
-const BROWSER_POPOVER_VERTICAL_OFFSET = 20; // 20px to account for the line height
 
 const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {
   return (
@@ -46,21 +42,6 @@ const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSour
       hidden: false,
     })) ?? []
   );
-};
-
-const getRangeFromOffsets = (
-  model: monaco.editor.ITextModel,
-  startOffset: number,
-  endOffset: number
-): monaco.IRange => {
-  const start = model.getPositionAt(startOffset);
-  const end = model.getPositionAt(endOffset);
-  return {
-    startLineNumber: start.lineNumber,
-    startColumn: start.column,
-    endLineNumber: end.lineNumber,
-    endColumn: end.column,
-  };
 };
 
 export function useDataSourceBrowser({

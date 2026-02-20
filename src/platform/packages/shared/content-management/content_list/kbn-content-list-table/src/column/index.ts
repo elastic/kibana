@@ -10,6 +10,12 @@
 // Declarative components and props.
 export { Column, type ColumnProps } from './part';
 export { NameColumn, type NameColumnProps, NameCell, type NameCellProps } from './name';
+export {
+  UpdatedAtColumn,
+  type UpdatedAtColumnProps,
+  UpdatedAtCell,
+  type UpdatedAtCellProps,
+} from './updated_at';
 
 // Namespace type for TypeScript typing of `Column`.
 export type { ColumnNamespace } from './part';

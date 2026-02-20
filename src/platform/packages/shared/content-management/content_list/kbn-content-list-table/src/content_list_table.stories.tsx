@@ -24,6 +24,8 @@ import {
   ContentListProvider,
   useContentListItems,
   useContentListSort,
+  useContentListSearch,
+  useContentListPagination,
   useContentListConfig,
 } from '@kbn/content-list-provider';
 import type { ContentListItem, FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
@@ -105,8 +107,10 @@ const StateDiagnosticPanel = ({
   showTypeColumn = true,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const { items, totalItems, isLoading, error } = useContentListItems();
+  const { items, totalItems, isLoading, isFetching, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { search } = useContentListSearch();
+  const pagination = useContentListPagination();
   const config = useContentListConfig();
 
   // Generate JSX code based on current configuration.
@@ -165,6 +169,11 @@ ${columnChildren.join('\n')}
                   <EuiBadge color="primary">Loading…</EuiBadge>
                 </EuiFlexItem>
               )}
+              {isFetching && !isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Fetching…</EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -197,6 +206,32 @@ ${columnChildren.join('\n')}
                   {JSON.stringify({ field: sortField, direction: sortDirection }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Search</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ search, isFetching }, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              {pagination.isSupported && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Pagination</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                    {JSON.stringify(
+                      {
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                        totalItems,
+                      },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={2} style={{ minWidth: 300 }}>
                 <EuiTitle size="xxs">
                   <h3>Table JSX</h3>
@@ -252,6 +287,7 @@ interface PlaygroundArgs {
   hasItems: boolean;
   isLoading: boolean;
   isReadOnly: boolean;
+  hasPagination: boolean;
   compressed: boolean;
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
@@ -292,7 +328,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   }, [args.hasClickableRows, args.entityName]);
 
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}`;
 
   return (
     <ContentListProvider
@@ -306,6 +342,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         sorting: {
           initialSort: { field: 'title', direction: 'asc' },
         },
+        pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
       }}
     >
       <ContentListTable
@@ -314,6 +351,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         tableLayout={args.tableLayout}
       >
         <Column.Name showDescription={args.showDescription} />
+        <Column.UpdatedAt />
         {args.showTypeColumn && (
           <Column
             id="type"
@@ -343,6 +381,7 @@ export const Table: PlaygroundStory = {
     hasItems: true,
     isLoading: false,
     isReadOnly: false,
+    hasPagination: true,
     showTypeColumn: false,
     hasClickableRows: true,
     showDescription: true,
@@ -377,6 +416,11 @@ export const Table: PlaygroundStory = {
       control: 'boolean',
       description: 'Disable all editing and selection.',
       table: { category: 'State' },
+    },
+    hasPagination: {
+      control: 'boolean',
+      description: 'Enable pagination in provider config.',
+      table: { category: 'Features' },
     },
     compressed: {
       control: 'boolean',

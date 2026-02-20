@@ -24,10 +24,8 @@
     ],
     "requiredBundles": [
       "dashboard",
-      "embeddable",
       "embeddableEnhanced",
       "kibanaUtils",
-      "imageEmbeddable",
       "uiActions"
     ]
   }

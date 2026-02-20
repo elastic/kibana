@@ -28,6 +28,7 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
+import { registerTaskDefinitions } from './services/execution';
 
 export class AgentBuilderPlugin
   implements
@@ -82,6 +83,17 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
+    registerTaskDefinitions({
+      taskManager: setupDeps.taskManager,
+      getTaskHandler: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getTaskHandler called before service init');
+        }
+        return services.taskHandler;
+      },
+    });
+
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -122,8 +134,8 @@ export class AgentBuilderPlugin
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
-      skill: {
-        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      skills: {
+        register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
 
@@ -139,8 +151,8 @@ export class AgentBuilderPlugin
   }
 
   start(
-    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces, actions }: AgentBuilderStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects, dataStreams }: CoreStart,
+    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
@@ -151,6 +163,8 @@ export class AgentBuilderPlugin
       actions,
       uiSettings,
       savedObjects,
+      dataStreams,
+      taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });

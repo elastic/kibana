@@ -32,7 +32,7 @@ import { UnmappedFieldsStrategy } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
-import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
+import { getPromqlFunctionDefinition } from './promql';
 import type { PromQLAstExpression } from '../../../embedded_languages/promql/types';
 
 // #region type detection
@@ -479,9 +479,7 @@ export function getPromqlExpressionType(
     case 'unary-expression':
       return getPromqlExpressionType(expression.arg);
     case 'function':
-      return normalizePromqlReturnType(
-        getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType
-      );
+      return getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType;
     case 'binary-expression': {
       const bothScalar =
         getPromqlExpressionType(expression.left) === 'scalar' &&

@@ -93,6 +93,7 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
 | `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
+| `evaluationsEsClient`       | Dedicated ES client for storing evaluation results. Defaults to `esClient` Scout fixture. See [Using a Separate Cluster for Evaluation Results](#using-a-separate-cluster-for-evaluation-results)        |
 
 ## Running the suite
 
@@ -130,6 +131,54 @@ To see all supported environment variables:
 
 ```bash
 node scripts/evals env
+```
+
+### CI labels
+
+Eval suites can be triggered in PR CI by adding GitHub labels:
+
+- `evals:<suite-id>` (or the explicit `ciLabels` value from `evals.suites.json`)
+- `evals:all` to run **all** eval suites
+
+### CI ops: sharing a Vault update command
+
+If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
+edit your local config and generate a Vault write command:
+
+```bash
+# 1) Copy the example (first time only)
+cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json \
+  x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
+# 2) Edit config.json with the desired values (includes secrets)
+
+# 3) Print a vault write command (contains base64-encoded config)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
+```
+
+Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
+
+The Vault config supports an optional `tracingExporters` array that configures OTel trace exporters for the eval Playwright worker process in CI. This is exported as the `TRACING_EXPORTERS` environment variable. See `config.example.json` for the full schema and [Configuring Trace Exporters via Environment Variable](#configuring-trace-exporters-via-environment-variable) for usage details.
+
+### Local dev: LiteLLM (SSO)
+
+If you have access to the internal LiteLLM gateway, you can generate a short-lived virtual key via SSO and export the connector payload needed by `@kbn/evals`:
+
+```bash
+bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
+```
+
+This script:
+
+- logs you in with `litellm-proxy login` (SSO)
+- if required by the deployment, expects `LITELLM_PROXY_API_KEY` (an `sk-...` key) to be set for `/key/*` management routes
+- generates (or reuses) a LiteLLM virtual key (`sk-...`)
+- exports `KIBANA_TESTING_AI_CONNECTORS` by discovering all models available to your team
+
+After running it, pick an `EVALUATION_CONNECTOR_ID` from the generated connector ids and run a suite:
+
+```bash
+EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite agent-builder
 ```
 
 #### Local flow (trace capture)
@@ -245,6 +294,27 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright te
 
 This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
 
+#### Configuring Trace Exporters via Environment Variable
+
+Instead of configuring trace exporters in `kibana.dev.yml`, you can set the `TRACING_EXPORTERS` environment variable to a JSON array of exporter configs. This is useful in CI or when you want to override the local config without editing YAML files.
+
+The JSON array uses the same structure as `telemetry.tracing.exporters` in `kibana.dev.yml` and supports all exporter types: `http`, `grpc`, `phoenix`, and `langfuse`.
+
+```bash
+# HTTP exporter (e.g. to a remote OTLP ingest endpoint)
+TRACING_EXPORTERS='[{"http":{"url":"https://ingest.elastic.cloud:443/v1/traces","headers":{"Authorization":"ApiKey ..."}}}]'
+
+# Phoenix exporter
+TRACING_EXPORTERS='[{"phoenix":{"base_url":"https://my-phoenix","api_key":"..."}}]'
+
+# Multiple exporters
+TRACING_EXPORTERS='[{"http":{"url":"https://ingest.elastic.cloud:443/v1/traces"}},{"phoenix":{"base_url":"https://my-phoenix"}}]'
+```
+
+When `TRACING_EXPORTERS` is set, it takes priority over any `telemetry.tracing.exporters` configured in `kibana.dev.yml`. When unset, `kibana.dev.yml` is used as before.
+
+In CI, this is automatically extracted from the `tracingExporters` field in the vault config (see [CI ops: sharing a Vault update command](#ci-ops-sharing-a-vault-update-command)).
+
 ### RAG Evaluators
 
 RAG (Retrieval-Augmented Generation) evaluators measure the quality of document retrieval in your system. They calculate Precision@K, Recall@K, and F1@K metrics by comparing retrieved documents against a ground truth.
@@ -312,6 +382,16 @@ RAG_EVAL_K=5 node scripts/playwright test --config ...
 
 The environment variable takes priority over the value passed to `createRagEvaluators()`.
 
+#### Using a Separate Cluster for Evaluation Results
+
+If you want to store evaluation results (exported to `kibana-evaluations` datastream) in a different Elasticsearch cluster than your test environment, specify the cluster URL with the `EVALUATIONS_ES_URL` environment variable:
+
+```bash
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+This creates a dedicated `evaluationsEsClient` that connects to your evaluations cluster while `esClient` continues to use your test environment cluster.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -358,7 +438,45 @@ evaluate('my test', async ({ executorClient }) => {
 
 ## Elasticsearch Export
 
-The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+The evaluation results are automatically exported to Elasticsearch in datastream called `kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+
+### Golden cluster API key privileges (required)
+
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `kibana-evaluations*` pattern.
+
+Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
+
+```http
+POST /_security/api_key
+{
+  "name": "kbn-evals-golden-cluster-writer",
+  "expiration": "365d",
+  "role_descriptors": {
+    "kbn-evals-evaluations-writer": {
+      "cluster": ["manage_index_templates"],
+      "indices": [
+        {
+          "names": ["kibana-evaluations*"],
+          "privileges": [
+            "auto_configure",
+            "create_index",
+            "create_doc",
+            "read",
+            "view_index_metadata"
+          ]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "application": "kbn-evals",
+    "purpose": "export evaluation results",
+    "environment": "ci"
+  }
+}
+```
+
+Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
 
 ### Exporting to a separate Elasticsearch cluster
 
@@ -373,50 +491,81 @@ EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwrigh
 
 The evaluation data is stored with the following structure:
 
-- **Index Pattern**: `.kibana-evaluations*`
-- **Datastream**: `.kibana-evaluations`
+- **Index Pattern**: `kibana-evaluations*`
+- **Datastream**: `kibana-evaluations`
 - **Document Structure**:
 
   ```json
   {
     "@timestamp": "2025-08-28T14:21:35.886Z",
-    "run_id": "026c5060fbfc7dcb",
-    "model": {
-      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-      "family": "anthropic",
-      "provider": "bedrock"
+    "run_id": "run_123",
+    "experiment_id": "exp_456",
+    "suite": {
+      "id": "my-suite"
     },
-    "dataset": {
-      "id": "dataset_id",
-      "name": "my-dataset",
-      "examples_count": 10
+    "ci": {
+      "buildkite": {
+        "build_id": "bk-build-1",
+        "job_id": "bk-job-1",
+        "build_url": "https://buildkite.example/builds/1",
+        "pipeline_slug": "my-pipeline",
+        "pull_request": "123",
+        "branch": "feature-branch",
+        "commit": "deadbeef"
+      }
+    },
+    "example": {
+      "id": "example-1",
+      "index": 0,
+      "dataset": {
+        "id": "dataset_id",
+        "name": "my-dataset"
+      }
+    },
+    "task": {
+      "trace_id": "trace-task-123",
+      "repetition_index": 0,
+      "model": {
+        "id": "gpt-4",
+        "family": "gpt",
+        "provider": "openai"
+      }
     },
     "evaluator": {
-      "name": "Factuality",
-      "stats": {
-        "mean": 0.85,
-        "median": 1.0,
-        "std_dev": 0.37,
-        "min": 0.0,
-        "max": 1.0,
-        "count": 10,
-        "percentage": 85.0
+      "name": "Correctness",
+      "score": 0.85,
+      "label": "PASS",
+      "explanation": "The response was correct.",
+      "metadata": {
+        "successful": 3,
+        "failed": 0
       },
-      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
+      "trace_id": "trace-eval-456",
+      "model": {
+        "id": "claude-3",
+        "family": "claude",
+        "provider": "anthropic"
+      }
     },
-    "experiments": [{ "id": "experiment_id_1" }],
+    "run_metadata": {
+      "git_branch": "main",
+      "git_commit_sha": "abc123",
+      "total_repetitions": 1
+    },
     "environment": {
       "hostname": "your-hostname"
     }
   }
   ```
 
+Each document represents a single evaluator score for a single example (and repetition) within a `run_id`.
+
 ### Querying Evaluation Data
 
 After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
 
 ```kql
-environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
+environment.hostname:"your-hostname" AND task.model.id:"model-id" AND run_id:"run-id"
 ```
 
 ### Using the Evaluation Analysis Service
@@ -436,7 +585,7 @@ evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
 Some of the evals will use LLM-as-a-judge. For consistent results, you should specify `EVALUATION_CONNECTOR_ID` as an environment variable, in order for the evaluations to always be judged by the same LLM:
 
 ```bash
-EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
 ```
 
 ### Testing a specific connector
@@ -444,7 +593,7 @@ EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-p
 The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id. To run the evaluations only for a specific connector, use `--project`:
 
 ```bash
-node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
+node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts --project azure-gpt4o
 ```
 
 ### Selecting specific evaluators
@@ -469,7 +618,7 @@ await executorClient.runExperiment(
 Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
 
 ```bash
-SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 ```
 
 **RAG Evaluator Patterns:** For RAG metrics, use pattern names (`Precision@K`, `Recall@K`, `F1@K`) to select evaluators. The actual K values are controlled by `RAG_EVAL_K`:
@@ -509,7 +658,7 @@ To override the repetitions at runtime without modifying your configuration, use
 
 ```bash
 # Run each example 3 times
-EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
 ```
 
 ### Running evaluations against your local/development Kibana instance

@@ -57,7 +57,6 @@ import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
-import type { UiamServicePublic } from './uiam';
 import { UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
@@ -175,8 +174,6 @@ export class SecurityPlugin
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
 
-  private uiamService?: UiamServicePublic;
-
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -286,7 +283,6 @@ export class SecurityPlugin
       kibanaIndexName,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: () => spaces?.spacesService,
-      getUiamService: () => this.uiamService,
       features,
       getCurrentUser,
       customBranding: core.customBranding,
@@ -419,10 +415,6 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
-    this.uiamService = config.uiam?.enabled
-      ? new UiamService(this.logger.get('uiam'), config.uiam)
-      : undefined;
-
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -432,7 +424,9 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
-      uiam: this.uiamService,
+      uiam: config.uiam?.enabled
+        ? new UiamService(this.logger.get('uiam'), config.uiam)
+        : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,

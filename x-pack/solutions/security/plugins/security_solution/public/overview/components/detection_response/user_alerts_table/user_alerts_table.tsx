@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -158,7 +158,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
               field: 'user.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
             sourcererScopeId={PageScope.alerts}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
@@ -189,7 +189,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -223,7 +223,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -254,7 +254,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -285,7 +285,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'user.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [

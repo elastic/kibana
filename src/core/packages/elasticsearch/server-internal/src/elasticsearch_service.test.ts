@@ -8,6 +8,8 @@
  */
 
 // Mocking the module to avoid waiting for a valid ES connection during these unit tests
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+
 jest.mock('./is_valid_connection', () => ({
   isValidConnection: jest.fn(),
 }));
@@ -69,6 +71,7 @@ beforeEach(() => {
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    security: securityServiceMock.createInternalSetup(),
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());

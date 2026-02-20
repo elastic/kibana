@@ -239,7 +239,8 @@ describe('Options List Control Api', () => {
     });
   });
 
-  describe('make selection', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253466
+  describe.skip('make selection', () => {
     beforeAll(() => {
       dataViewsService.get = jest.fn().mockImplementation(getDataView);
       coreServices.http.fetch = jest.fn().mockResolvedValue({

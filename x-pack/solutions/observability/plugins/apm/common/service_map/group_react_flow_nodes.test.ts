@@ -324,6 +324,114 @@ describe('groupReactFlowNodes', () => {
     });
   });
 
+  describe('outgoing edges from grouped nodes', () => {
+    it('replaces outgoing edges from grouped nodes with edges from the group node', () => {
+      const nodes = [
+        createServiceNode('order-service'),
+        createServiceNode('consumer-service'),
+        createDependencyNode('kafka/orders', 'messaging', 'kafka'),
+        createDependencyNode('kafka/payments', 'messaging', 'kafka'),
+        createDependencyNode('kafka/notifications', 'messaging', 'kafka'),
+        createDependencyNode('kafka/analytics', 'messaging', 'kafka'),
+      ];
+      const edges = [
+        // Incoming edges: service -> kafka topics (these trigger grouping)
+        createEdge('order-service', 'kafka/orders'),
+        createEdge('order-service', 'kafka/payments'),
+        createEdge('order-service', 'kafka/notifications'),
+        createEdge('order-service', 'kafka/analytics'),
+        // Outgoing messaging edges: kafka topics -> downstream consumer
+        createEdge('kafka/orders', 'consumer-service'),
+        createEdge('kafka/payments', 'consumer-service'),
+      ];
+
+      const result = groupReactFlowNodes(nodes, edges);
+
+      // The kafka topics should be grouped
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(1);
+
+      // No edge should reference a non-existent node
+      const nodeIds = new Set(result.nodes.map((n) => n.id));
+      for (const edge of result.edges) {
+        expect(nodeIds.has(edge.source)).toBe(true);
+        expect(nodeIds.has(edge.target)).toBe(true);
+      }
+
+      // The group node should have an outgoing edge to consumer-service
+      const groupId = groupedNodes[0].id;
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupId && e.target === 'consumer-service'
+      );
+      expect(outgoingFromGroup).toHaveLength(1);
+    });
+
+    it('creates outgoing edges from group node when a grouped node has downstream connections', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createServiceNode('downstream'),
+        createDependencyNode('resource-0', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        // Incoming edges (will trigger grouping)
+        createEdge('api-service', 'resource-0'),
+        createEdge('api-service', 'resource-1'),
+        createEdge('api-service', 'resource-2'),
+        createEdge('api-service', 'resource-3'),
+        // Outgoing edge from a node that will be grouped
+        createEdge('resource-0', 'downstream'),
+      ];
+
+      const result = groupReactFlowNodes(nodes, edges);
+
+      // Verify no orphaned edges exist
+      const nodeIds = new Set(result.nodes.map((n) => n.id));
+      const orphanedEdges = result.edges.filter(
+        (e) => !nodeIds.has(e.source) || !nodeIds.has(e.target)
+      );
+      expect(orphanedEdges).toHaveLength(0);
+
+      // The group node should connect to downstream
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(1);
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupedNodes[0].id && e.target === 'downstream'
+      );
+      expect(outgoingFromGroup).toHaveLength(1);
+    });
+
+    it('preserves outgoing edges from non-grouped nodes', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createServiceNode('downstream'),
+        createDependencyNode('resource-0', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        // Incoming edges (trigger grouping for resource-*)
+        createEdge('api-service', 'resource-0'),
+        createEdge('api-service', 'resource-1'),
+        createEdge('api-service', 'resource-2'),
+        createEdge('api-service', 'resource-3'),
+        // Edge between two non-grouped nodes should be preserved
+        createEdge('api-service', 'downstream'),
+      ];
+
+      const result = groupReactFlowNodes(nodes, edges);
+
+      // The api-service -> downstream edge should survive
+      const serviceToDownstream = result.edges.find(
+        (e) => e.source === 'api-service' && e.target === 'downstream'
+      );
+      expect(serviceToDownstream).toBeDefined();
+    });
+  });
+
   describe('mixed groupable and non-groupable nodes', () => {
     it('only groups eligible external nodes', () => {
       const nodes = [

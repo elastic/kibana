@@ -126,15 +126,6 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
       });
-
-      it('should properly delegate getScopedClusterClientWithApiKey to the service', () => {
-        const apiKey = 'test-api-key';
-
-        api.authc.apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey);
-
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledTimes(1);
-        expect(authc.apiKeys.uiam!.getScopedClusterClientWithApiKey).toHaveBeenCalledWith(apiKey);
-      });
     });
 
     describe('when uiam is disabled', () => {

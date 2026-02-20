@@ -18,9 +18,9 @@ import type {
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EventTypeIndicator } from '../basic/indicators/event_type_indicator';
 import { LogLevelIndicator } from '../basic/indicators/log_level_indicator';
-import { TruncatedText } from '../basic/text/truncated_text';
 
 import * as i18n from './translations';
+import { ExecutionEventsTableSummaryCell } from './execution_events_table_row_summary';
 
 type TableColumn = EuiBasicTableColumn<RuleExecutionEvent>;
 
@@ -37,7 +37,7 @@ export const useColumns = (args: UseColumnsArgs): TableColumn[] => {
       timestampColumn,
       logLevelColumn,
       eventTypeColumn,
-      messageColumn,
+      summaryColumn,
       expanderColumn({ toggleRowExpanded, isRowExpanded }),
     ];
   }, [toggleRowExpanded, isRowExpanded]);
@@ -50,6 +50,7 @@ const timestampColumn: TableColumn = {
   sortable: true,
   truncateText: false,
   width: '20%',
+  'data-test-subj': 'executionEventsTable-timestampColumn',
 };
 
 const logLevelColumn: TableColumn = {
@@ -59,6 +60,7 @@ const logLevelColumn: TableColumn = {
   sortable: false,
   truncateText: false,
   width: '8%',
+  'data-test-subj': 'executionEventsTable-logLevelColumn',
 };
 
 const eventTypeColumn: TableColumn = {
@@ -68,13 +70,12 @@ const eventTypeColumn: TableColumn = {
   sortable: false,
   truncateText: false,
   width: '8%',
+  'data-test-subj': 'executionEventsTable-eventTypeColumn',
 };
 
-const messageColumn: TableColumn = {
-  field: 'message',
-  name: i18n.COLUMN_MESSAGE,
-  render: (value: string) => <TruncatedText text={value} />,
-  sortable: false,
+const summaryColumn: TableColumn = {
+  name: i18n.COLUMN_SUMMARY,
+  render: (item: RuleExecutionEvent) => <ExecutionEventsTableSummaryCell event={item} />,
   truncateText: true,
   width: '64%',
 };
@@ -94,6 +95,11 @@ const expanderColumn = ({ toggleRowExpanded, isRowExpanded }: UseColumnsArgs): T
         onClick={() => toggleRowExpanded(item)}
         aria-label={isRowExpanded(item) ? 'Collapse' : 'Expand'}
         iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+        data-test-subj={
+          isRowExpanded(item)
+            ? 'executionEventsTable-collapseButton'
+            : 'executionEventsTable-expandButton'
+        }
       />
     ),
   };

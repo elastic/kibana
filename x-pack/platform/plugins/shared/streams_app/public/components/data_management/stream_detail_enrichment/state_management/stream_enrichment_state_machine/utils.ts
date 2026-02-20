@@ -8,7 +8,7 @@
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { AssignArgs } from 'xstate5';
+import type { AssignArgs } from 'xstate';
 import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,

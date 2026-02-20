@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/sse-utils-client'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -96,6 +97,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - server/**/*.json

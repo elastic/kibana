@@ -166,5 +166,29 @@ describe('PROMQL Validation', () => {
     test('nested function return type is normalized for signature matching', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (quantile(0.5, vector(1)))', []);
     });
+
+    test('type mismatch: binary operator with incompatible types', () => {
+      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend ("string" + "string")', [
+        '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+      ]);
+    });
+
+    test('type mismatch: range_vector arithmetic not supported', () => {
+      promqlExpectErrors(
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField[5m] + doubleField[5m])',
+        [
+          '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+        ]
+      );
+    });
+
+    test('type mismatch: instant_vector with range_vector operand', () => {
+      promqlExpectErrors(
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField + doubleField[5m])',
+        [
+          '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
+        ]
+      );
+    });
   });
 });

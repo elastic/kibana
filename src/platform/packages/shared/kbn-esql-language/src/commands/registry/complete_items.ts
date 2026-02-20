@@ -19,7 +19,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
-import { getPromqlParamDefinitions } from './promql/utils';
+import { PROMQL_PARAMS } from './promql/utils';
 
 function buildCharCompleteItem(
   label: string,
@@ -173,7 +173,7 @@ export function buildMapValueCompleteItem(value: string): ISuggestionItem {
 }
 
 export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
-  return getPromqlParamDefinitions().map(({ name, description }) =>
+  return PROMQL_PARAMS.map(({ name, description }) =>
     withAutoSuggest({
       label: name,
       text: `${name} = `,
@@ -199,9 +199,36 @@ export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'by ($0) ',
   asSnippet: true,
   kind: 'Reference',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
     defaultMessage: 'Group by labels',
   }),
+});
+
+export const promqlLabelSelectorItem: ISuggestionItem = withAutoSuggest({
+  label: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addLabelSelector', {
+    defaultMessage: 'Add selector',
+  }),
+  text: '{$0}',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.labelSelectorDoc', {
+    defaultMessage: 'Filter by labels',
+  }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
+});
+
+export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
+  label: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addRangeSelector', {
+    defaultMessage: 'Add time range',
+  }),
+  text: '[${0:5m}]',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.rangeSelectorDoc', {
+    defaultMessage: 'Range selector (duration)',
+  }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -602,10 +629,8 @@ export function createResourceBrowserSuggestion(options: {
 }
 
 export function createIndicesBrowserSuggestion(
-  rangeToReplace?: { start: number; end: number },
-  filterText?: string,
-  insertText?: string,
-  commandArgs?: Record<string, string>
+  commandArgs?: Record<string, string>,
+  innerText?: string
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
@@ -618,9 +643,32 @@ export function createIndicesBrowserSuggestion(
       }
     ),
     commandId: 'esql.indicesBrowser.open',
-    rangeToReplace,
-    filterText,
-    insertText,
+    commandArgs,
+    rangeToReplace: innerText
+      ? {
+          start: 0,
+          end: innerText.length + 1,
+        }
+      : undefined,
+    filterText: innerText,
+    insertText: innerText,
+  });
+}
+
+export function createFieldsBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionLabel', {
+      defaultMessage: 'Browse fields',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open fields browser',
+      }
+    ),
+    commandId: 'esql.fieldsBrowser.open',
     commandArgs,
   });
 }

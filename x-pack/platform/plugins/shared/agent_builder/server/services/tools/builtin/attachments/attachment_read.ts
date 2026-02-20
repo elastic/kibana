@@ -36,10 +36,9 @@ export const createAttachmentReadTool = ({
     'Read the content of a conversation attachment by ID. Use this to retrieve data you previously stored or to check the current state of an attachment.',
   schema: attachmentReadSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, version }, context) => {
-    const attachment = await attachmentManager.get(attachmentId, {
+  handler: async ({ attachment_id: attachmentId, version }) => {
+    const attachment = attachmentManager.get(attachmentId, {
       version,
-      context,
     });
 
     if (!attachment) {
@@ -56,7 +55,6 @@ export const createAttachmentReadTool = ({
     const { data: versionData, type } = attachment;
 
     let formattedData: unknown = versionData.data;
-    const rawData = (versionData as { raw_data?: unknown }).raw_data;
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       const typeReadonly = definition?.isReadonly ?? true;
@@ -93,7 +91,6 @@ export const createAttachmentReadTool = ({
             type,
             version: attachment.version,
             data: formattedData,
-            ...(rawData !== undefined ? { raw_data: rawData } : {}),
           },
         },
       ],

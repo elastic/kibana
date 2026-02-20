@@ -15,7 +15,7 @@
 
 ## Critical Thinking
 - Fix root cause (not band-aid).
-- Unsure: read more code; if still stuck, ask w/ short options.
+- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Conflicts: call out; pick safer path.
 - Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
@@ -32,12 +32,6 @@
 `yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
 - Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
-### Type check
-`yarn test:type_check [--project path/to/tsconfig.json]`
-- Without `--project` it checks **all** projects (very slow). Always scope to a single project:
-  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
-- Only one `--project` per run. To check multiple packages, run separate commands.
-
 ### Function Test Runner (FTR)
 `yarn test:ftr [--config <file1> [--config <file2> ...]]`
 - For new tests, prefer using Scout
@@ -48,8 +42,14 @@
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
 
+### Type check
+`yarn test:type_check [--project path/to/tsconfig.json]`
+- Without `--project` it checks **all** projects (very slow). Always scope to a single project:
+  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+- Only one `--project` per run. To check multiple packages, run separate commands.
+
 ### TypeScript & Types
-- Use TypeScript for all new code; avoid `any`.
+- Use TypeScript for all new code; avoid `any` and `unknown`.
 - Prefer explicit return types for public APIs and exported functions.
 - Use `import type` for type-only imports.
 - Avoid non-null assertions (`!`) unless locally justified.
@@ -57,6 +57,11 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer const arrow functions
 - Prefer explicit import/exports over "*"
 - Prefer destructuring of variables, rather than property access
+- Never suppress type errors with `@ts-ignore`, `@ts-expect-error`; fix the root cause.
+
+### Linting
+`node scripts/eslint --fix $(git diff --name-only)`
+- Never suppress linting errors with `eslint-disable`; fix the root cause.
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
@@ -81,4 +86,5 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ## Contribution Hygiene
 - Make focused changes; avoid unrelated refactors.
-- Update docs when behavior or usage changes.
+- Update docs and tests when behavior or usage changes.
+- Never remove, skip, or comment out tests to make them pass; fix the underlying code.

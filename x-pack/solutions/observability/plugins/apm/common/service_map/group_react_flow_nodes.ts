@@ -109,7 +109,7 @@ function createGroupedNode(
 /**
  * Create edges from sources to a grouped node
  */
-function createGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
+function createIncomingGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
   return group.sources.map((source) => ({
     id: `${source}~>${group.id}`,
     source,
@@ -119,6 +119,43 @@ function createGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
     markerEnd: createEdgeMarker(),
     data: { isBidirectional: false },
   }));
+}
+
+function createOutgoingGroupedEdges(
+  groups: GroupInfo[],
+  edges: ServiceMapEdge[],
+  groupedNodeIds: Set<string>
+): ServiceMapEdge[] {
+  const nodeToGroup = new Map<string, string>();
+  const outgoingEdgeKeys = new Set<string>();
+  const outgoingEdges: ServiceMapEdge[] = [];
+
+  for (const group of groups) {
+    for (const target of group.targets) {
+      nodeToGroup.set(target, group.id);
+    }
+  }
+
+  for (const edge of edges) {
+    const groupId = nodeToGroup.get(edge.source);
+    if (groupId && !groupedNodeIds.has(edge.target)) {
+      const edgeKey = `${groupId}~>${edge.target}`;
+      if (!outgoingEdgeKeys.has(edgeKey)) {
+        outgoingEdgeKeys.add(edgeKey);
+        outgoingEdges.push({
+          id: edgeKey,
+          source: groupId,
+          target: edge.target,
+          type: 'default' as const,
+          style: DEFAULT_EDGE_STYLE,
+          markerEnd: createEdgeMarker(),
+          data: { isBidirectional: false },
+        });
+      }
+    }
+  }
+
+  return outgoingEdges;
 }
 
 /**
@@ -149,17 +186,19 @@ export function groupReactFlowNodes(
     }
   }
 
-  // Keep ungrouped nodes and edges
   const ungroupedNodes = nodes.filter((n) => !groupedNodeIds.has(n.id));
-  const ungroupedEdges = edges.filter((e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)));
+  const ungroupedEdges = edges.filter(
+    (e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)) && !groupedNodeIds.has(e.source)
+  );
 
   // Create grouped nodes and edges
   const groupedNodes = groups.map((g) => createGroupedNode(g, nodesById));
-  const groupedEdges = groups.flatMap((g) => createGroupedEdges(g));
+  const incomingGroupedEdges = groups.flatMap((g) => createIncomingGroupedEdges(g));
+  const outgoingGroupedEdges = createOutgoingGroupedEdges(groups, edges, groupedNodeIds);
 
   return {
     nodes: [...ungroupedNodes, ...groupedNodes],
-    edges: [...ungroupedEdges, ...groupedEdges],
+    edges: [...ungroupedEdges, ...incomingGroupedEdges, ...outgoingGroupedEdges],
     nodesCount: ungroupedNodes.length,
   };
 }
