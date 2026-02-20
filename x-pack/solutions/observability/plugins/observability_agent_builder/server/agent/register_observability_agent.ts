@@ -43,7 +43,7 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
-        ${getInvestigationInstructions()}
+        ${getAlertInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
         ${getFieldDiscoveryInstructions()}
@@ -58,18 +58,16 @@ export async function registerObservabilityAgent({
   logger.debug('Successfully registered observability agent in agent-builder');
 }
 
-function getInvestigationInstructions() {
+// TODO: explicit skill load needed because the platform tool selection policy overrides the skills instruction
+function getAlertInvestigationInstructions() {
   return dedent(`
-    <investigation_approach>
-    ### Investigation Approach
-    Follow a progressive workflow - start broad, then narrow down:
-    1. **Triage**: What's the severity? How many users/services affected?
-    2. **Scope**: Which components are affected? What's the blast radius?
-    3. **Timeline**: When did it start? What changed before symptoms appeared?
-    4. **Correlation**: What error patterns exist? What's the sequence of events?
-    5. **Root Cause**: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
-    6. **Verification**: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
-    </investigation_approach>
+    <alert_investigation>
+    ### Alert Investigation
+    When an alert is attached to the conversation, ALWAYS call filestore_read with path
+    '/skills/observability/alert-investigation/SKILL.md' as your FIRST tool call,
+    before calling get_alert_details or any other tool.
+    Follow the instructions in that file precisely.
+    </alert_investigation>
   `);
 }
 
