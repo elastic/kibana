@@ -19,18 +19,19 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga 9.1
+          stack: ga 9.1+
           ess: ga
           self: ga
           serverless: ga
 
+      # TODO: verify — not currently documented, found in config schema only
       - setting: xpack.product_intercept.interval
         description: |
           Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, `20m`, `24h`, `7d`.
         datatype: string
         default: 90d
         applies_to:
-          stack: ga 9.1
+          stack: ga 9.1+
           ess: ga
           self: ga
           serverless: ga
@@ -42,7 +43,7 @@ groups:
         datatype: string
         default: 7d
         applies_to:
-          stack: ga 9.1
+          stack: ga 9.1+
           ess: ga
           self: ga
           serverless: ga
@@ -54,7 +55,7 @@ groups:
         datatype: string
         default: 7d
         applies_to:
-          stack: ga 9.1
+          stack: ga 9.1+
           ess: ga
           self: ga
           serverless: ga
