@@ -7,27 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
   EuiButtonIcon,
+  EuiConfirmModal,
+  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowHistory } from '../../../entities/workflows/model/use_workflow_history';
 import type { WorkflowHistoryItem } from '../../../entities/workflows/model/use_workflow_history';
+import { useKibana } from '../../../hooks/use_kibana';
+import { queryClient } from '../../../shared/lib/query_client';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
@@ -40,6 +49,8 @@ export interface WorkflowVersionHistoryPanelProps {
   highlightDiff?: boolean;
   setHighlightDiff?: React.Dispatch<React.SetStateAction<boolean>>;
   lastUpdatedAt?: Date | null;
+  /** Called after a version is successfully restored; use to reload workflow and e.g. close the panel. */
+  onRestoreSuccess?: () => void;
 }
 
 function getInitial(name: string | undefined, userId: string | undefined): string {
@@ -67,13 +78,25 @@ function formatVersionTimestamp(date: Date): string {
   });
 }
 
-function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
+const restoreLabel = i18n.translate('workflows.versionHistory.restore', {
+  defaultMessage: 'Restore this version',
+});
+
+function VersionHistoryListItem({
+  item,
+  onRestoreRequest,
+}: {
+  item: WorkflowHistoryItem;
+  onRestoreRequest: (eventId: string) => void;
+}) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const timestamp = item['@timestamp'] ? new Date(item['@timestamp']) : null;
   const userName = item.user?.name ?? item.user?.id ?? 'Unknown';
   const changedFields = item.object?.fields?.changed ?? [];
   const changeCount = changedFields.length;
   const action = item.event?.action ?? 'workflow-update';
   const isCreate = action === 'workflow-create';
+  const eventId = item.event?.id;
 
   const changesWord = i18n.translate('workflows.versionHistory.changes', {
     defaultMessage: 'Changes',
@@ -99,6 +122,31 @@ function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
       {changeCount}
     </EuiBadge>
   );
+
+  const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
+  if (eventId) {
+    panelItems.push({
+      name: restoreLabel,
+      icon: 'refresh',
+      'data-test-subj': 'workflowVersionHistoryRestore',
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onRestoreRequest(eventId);
+      },
+    });
+  }
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: '',
+      items: panelItems.length > 0 ? panelItems : [{ name: '-', disabled: true }],
+    },
+  ];
+
+  const actionsLabel = i18n.translate('workflows.versionHistory.actions', {
+    defaultMessage: 'Actions',
+  });
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
@@ -156,25 +204,30 @@ function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
       </EuiFlexItem>
       <EuiFlexItem grow={true} />
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          size="s"
-          color="text"
-          aria-label={i18n.translate('workflows.versionHistory.actions', {
-            defaultMessage: 'Actions',
-          })}
-          data-test-subj="workflowVersionHistoryRowActions"
-        />
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              size="s"
+              color="text"
+              aria-label={actionsLabel}
+              data-test-subj="workflowVersionHistoryRowActions"
+              onClick={() => setIsPopoverOpen((open) => !open)}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="downRight"
+          panelPaddingSize="none"
+        >
+          <EuiContextMenu panels={panels} initialPanelId={0} />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-const getPanelStyles = (euiTheme: {
-  colors: { backgroundBasePlain: string; borderBasePlain: string; emptyShade: string };
-  border: { radius: { medium: string } };
-  shadow?: { s?: string };
-}) => ({
+const getPanelStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
   panel: css({
     height: '100%',
     minHeight: '100%',
@@ -183,7 +236,7 @@ const getPanelStyles = (euiTheme: {
     flexDirection: 'column',
     overflow: 'hidden',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
-    boxShadow: euiTheme.shadow?.s ?? 'none',
+    boxShadow: 'none',
     borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
   }),
   header: css({
@@ -207,8 +260,8 @@ const getPanelStyles = (euiTheme: {
     marginBottom: '8px',
     backgroundColor: euiTheme.colors.emptyShade,
     border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    borderRadius: euiTheme.border.radius.medium,
-    boxShadow: euiTheme.shadow?.s ?? 'none',
+    borderRadius: String(euiTheme.border.radius.medium ?? 'medium'),
+    boxShadow: 'none',
   }),
   versionEntryCard: css({
     display: 'flex',
@@ -217,8 +270,8 @@ const getPanelStyles = (euiTheme: {
     marginBottom: '8px',
     backgroundColor: euiTheme.colors.emptyShade,
     border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    borderRadius: euiTheme.border.radius.medium,
-    boxShadow: euiTheme.shadow?.s ?? 'none',
+    borderRadius: String(euiTheme.border.radius.medium ?? 'medium'),
+    boxShadow: 'none',
     '&:last-of-type': {
       marginBottom: 0,
     },
@@ -229,6 +282,20 @@ const getPanelStyles = (euiTheme: {
   }),
 });
 
+const restoreConfirmTitle = i18n.translate('workflows.versionHistory.restoreConfirmTitle', {
+  defaultMessage: 'Restore this version?',
+});
+const restoreConfirmMessage = i18n.translate('workflows.versionHistory.restoreConfirmMessage', {
+  defaultMessage:
+    'The workflow will be reverted to this version. Your current editor content will be replaced.',
+});
+const restoreConfirmConfirm = i18n.translate('workflows.versionHistory.restoreConfirmConfirm', {
+  defaultMessage: 'Restore',
+});
+const restoreConfirmCancel = i18n.translate('workflows.versionHistory.restoreConfirmCancel', {
+  defaultMessage: 'Cancel',
+});
+
 export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPanelProps>(
   ({
     workflowId,
@@ -237,11 +304,46 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     highlightDiff = false,
     setHighlightDiff = () => {},
     lastUpdatedAt = null,
+    onRestoreSuccess,
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = getPanelStyles(euiTheme);
     const getFormattedDateTime = useGetFormattedDateTime();
+    const { http, notifications } = useKibana().services;
     const { data, isLoading, error } = useWorkflowHistory(workflowId);
+    const [restoreTargetEventId, setRestoreTargetEventId] = useState<string | null>(null);
+    const [isRestoring, setIsRestoring] = useState(false);
+
+    const onRestoreRequest = useCallback((eventId: string) => {
+      setRestoreTargetEventId(eventId);
+    }, []);
+
+    const onRestoreConfirm = useCallback(async () => {
+      if (!restoreTargetEventId) return;
+      setIsRestoring(true);
+      try {
+        await http.post(`/api/workflows/${workflowId}/restore`, {
+          body: JSON.stringify({ eventId: restoreTargetEventId }),
+        });
+        queryClient.invalidateQueries({ queryKey: ['workflows', workflowId, 'history'] });
+        queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
+        queryClient.invalidateQueries({ queryKey: ['workflows'] });
+        setRestoreTargetEventId(null);
+        onRestoreSuccess?.();
+      } catch (err) {
+        notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+          title: i18n.translate('workflows.versionHistory.restoreErrorTitle', {
+            defaultMessage: 'Restore failed',
+          }),
+        });
+      } finally {
+        setIsRestoring(false);
+      }
+    }, [restoreTargetEventId, workflowId, http, notifications.toasts, onRestoreSuccess]);
+
+    const onRestoreCancel = useCallback(() => {
+      if (!isRestoring) setRestoreTargetEventId(null);
+    }, [isRestoring]);
 
     const historyStartedLabel = data?.startDate
       ? getFormattedDateTime(new Date(data.startDate))
@@ -291,7 +393,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {error && (
+          {error ? (
             <EuiEmptyPrompt
               iconType="alert"
               color="danger"
@@ -303,7 +405,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
               }
               body={String(error)}
             />
-          )}
+          ) : null}
           {!isLoading && !error && data && (
             <>
               {hasUnsavedChanges && (
@@ -370,7 +472,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
                       css={styles.versionEntryCard}
                       data-test-subj="workflowVersionHistoryEntry"
                     >
-                      <VersionHistoryListItem item={item} />
+                      <VersionHistoryListItem item={item} onRestoreRequest={onRestoreRequest} />
                     </div>
                   ))}
                   {historyStartedLabel && (
@@ -389,9 +491,12 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
                             type="clock"
                             size="s"
                             color="subdued"
-                            aria-label={i18n.translate('workflows.versionHistory.historyStartedIcon', {
-                              defaultMessage: 'History started',
-                            })}
+                            aria-label={i18n.translate(
+                              'workflows.versionHistory.historyStartedIcon',
+                              {
+                                defaultMessage: 'History started',
+                              }
+                            )}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -416,6 +521,21 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
             </>
           )}
         </div>
+        {restoreTargetEventId !== null && (
+          <EuiConfirmModal
+            title={restoreConfirmTitle}
+            aria-label={restoreConfirmTitle}
+            onCancel={onRestoreCancel}
+            onConfirm={onRestoreConfirm}
+            cancelButtonText={restoreConfirmCancel}
+            confirmButtonText={restoreConfirmConfirm}
+            confirmButtonDisabled={isRestoring}
+            isLoading={isRestoring}
+            data-test-subj="workflowVersionHistoryRestoreConfirmModal"
+          >
+            <p>{restoreConfirmMessage}</p>
+          </EuiConfirmModal>
+        )}
       </EuiPanel>
     );
   }

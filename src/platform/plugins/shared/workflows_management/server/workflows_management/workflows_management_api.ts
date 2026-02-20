@@ -164,6 +164,30 @@ export class WorkflowsManagementApi {
     };
   }
 
+  /**
+   * Returns a single version (change history event) for a workflow by event id.
+   * Used for diff view and restore.
+   */
+  public async getWorkflowVersion(
+    workflowId: string,
+    spaceId: string,
+    eventId: string
+  ): Promise<Record<string, unknown> | null> {
+    const client = this.getChangeHistoryClient();
+    if (!client?.isInitialized()) {
+      return null;
+    }
+    const result = await client.getHistory('workflow', workflowId, {
+      additionalFilters: [
+        { term: { 'kibana.space_id': spaceId } },
+        { term: { 'event.id': eventId } },
+      ],
+      size: 1,
+    });
+    const item = result.items[0];
+    return item ? (item as unknown as Record<string, unknown>) : null;
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
@@ -222,6 +246,45 @@ export class WorkflowsManagementApi {
       throw new Error(`Workflow with id ${id} not found`);
     }
     return this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
+  }
+
+  /**
+   * Restore a workflow to a previous version from change history.
+   * Fetches the version by eventId and updates the workflow with the snapshot's yaml.
+   */
+  public async restoreWorkflow(
+    workflowId: string,
+    spaceId: string,
+    eventId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto> {
+    const version = await this.getWorkflowVersion(workflowId, spaceId, eventId);
+    if (!version || typeof version !== 'object') {
+      throw new WorkflowNotFoundError(
+        i18n.translate('workflowsManagement.restore.versionNotFound', {
+          defaultMessage: 'Version not found',
+        })
+      );
+    }
+    const object = version.object as { snapshot?: Record<string, unknown> } | undefined;
+    const snapshot = object?.snapshot;
+    if (!snapshot || typeof snapshot !== 'object' || typeof (snapshot as { yaml?: unknown }).yaml !== 'string') {
+      throw new WorkflowValidationError(
+        i18n.translate('workflowsManagement.restore.invalidSnapshot', {
+          defaultMessage: 'Version snapshot is invalid or missing yaml',
+        })
+      );
+    }
+    const result = await this.updateWorkflow(
+      workflowId,
+      { yaml: (snapshot as { yaml: string }).yaml },
+      spaceId,
+      request
+    );
+    if (!result) {
+      throw new Error(`Failed to restore workflow ${workflowId}`);
+    }
+    return result;
   }
 
   public async deleteWorkflows(

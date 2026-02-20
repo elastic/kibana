@@ -89,6 +89,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     setSelectedExecution(null);
   }, [setSelectedExecution]);
 
+  const onVersionHistoryRestoreSuccess = useCallback(() => {
+    if (id) {
+      dispatch(loadWorkflowThunk({ id }));
+    }
+    setIsVersionHistoryOpen(false);
+  }, [dispatch, id]);
+
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -163,6 +170,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                     highlightDiff={highlightDiff}
                     setHighlightDiff={setHighlightDiff}
                     lastUpdatedAt={lastUpdatedAt}
+                    onRestoreSuccess={onVersionHistoryRestoreSuccess}
                   />
                 </div>
               ) : null
