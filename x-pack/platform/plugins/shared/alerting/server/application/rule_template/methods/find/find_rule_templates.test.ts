@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { findRuleTemplates } from './find_rule_templates';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { toKqlExpression } from '@kbn/es-query';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const authorization = alertingAuthorizationMock.create();
+const auditLogger = auditLoggerMock.create();
 
 const rulesClientContext = {
   unsecuredSavedObjectsClient,
@@ -24,15 +27,24 @@ const rulesClientContext = {
   logger: loggingSystemMock.create().get(),
 } as unknown as RulesClientContext;
 
+const rulesClientContextWithAuditLogger = {
+  ...rulesClientContext,
+  auditLogger,
+} as unknown as RulesClientContext;
+
+const buildRuleTypeFilter = (...ruleTypeIds: string[]) =>
+  nodeBuilder.or(
+    ruleTypeIds.map((id) =>
+      nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`, id)
+    )
+  );
+
 beforeEach(() => {
   jest.resetAllMocks();
-  // Default: user has access to all rule types
-  authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-    new Map([
-      ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-      ['another.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-    ])
-  );
+  authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+    filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
+    ensureRuleTypeIsAuthorized: jest.fn(),
+  });
 });
 
 describe('findRuleTemplates', () => {
@@ -132,18 +144,15 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
-      filter: expect.any(Object), // filter tested below
+      filter: expect.any(Object),
     });
 
-    // filter is the authorized rule types by default
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
         'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
     );
 
-    expect(authorization.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
-      authorizationEntity: 'rule',
-    });
+    expect(authorization.getByRuleTypeFindAuthorization).toHaveBeenCalled();
   });
 
   test('filters by specific rule type', async () => {
@@ -163,7 +172,6 @@ describe('findRuleTemplates', () => {
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
 
-    // filter is the ruleTypeId combined with the authorized rule types
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
@@ -189,7 +197,6 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0].tags).toContain('tag1');
 
-    // filter is the tags combined with the authorized rule types
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '(alerting_rule_template.attributes.tags: tag1 AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
@@ -211,7 +218,6 @@ describe('findRuleTemplates', () => {
       tags: ['tag1', 'tag2'],
     });
 
-    // filter is the tags combined with the authorized rule types
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '((alerting_rule_template.attributes.tags: tag1 OR ' +
         'alerting_rule_template.attributes.tags: tag2) AND ' +
@@ -235,7 +241,6 @@ describe('findRuleTemplates', () => {
       tags: ['tag1'],
     });
 
-    // filter is the ruleTypeId and tags combined with the authorized rule types
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
       '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
         'alerting_rule_template.attributes.tags: tag1) AND ' +
@@ -270,7 +275,7 @@ describe('findRuleTemplates', () => {
       defaultSearchOperator: 'AND',
       sortField: 'name.keyword',
       sortOrder: 'desc',
-      filter: expect.any(Object), // Authorization filter (not tested here)
+      filter: expect.any(Object),
     });
   });
 
@@ -353,9 +358,37 @@ describe('findRuleTemplates', () => {
     });
   });
 
+  test('does not apply authorization filter when security is disabled', async () => {
+    authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      filter: undefined as never,
+      ensureRuleTypeIsAuthorized: jest.fn(),
+    });
+
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [mockTemplate1, mockTemplate2],
+    });
+
+    const result = await findRuleTemplates(rulesClientContext, {
+      perPage: 10,
+      page: 1,
+    });
+
+    expect(result.data).toHaveLength(2);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: undefined,
+      })
+    );
+  });
+
   describe('authorization', () => {
     test('throws 403 when user has no access to any rule types', async () => {
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(new Map());
+      authorization.getByRuleTypeFindAuthorization.mockRejectedValueOnce(
+        Boom.forbidden('Unauthorized to find rules for any rule types')
+      );
 
       await expect(
         findRuleTemplates(rulesClientContext, {
@@ -373,12 +406,10 @@ describe('findRuleTemplates', () => {
     });
 
     test('filters templates to only authorized rule types', async () => {
-      // User only has access to test.rule.type
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([
-          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-        ])
-      );
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type'),
+        ensureRuleTypeIsAuthorized: jest.fn(),
+      });
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
@@ -395,24 +426,29 @@ describe('findRuleTemplates', () => {
       expect(result.data).toHaveLength(1);
       expect(result.data[0].ruleTypeId).toBe('test.rule.type');
 
-      // Verify authorization filter was applied
       const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
       expect(findCall.filter).toBeDefined();
     });
 
     test('throws 403 if unauthorized template slips through filter', async () => {
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([
-          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-        ])
-      );
+      const ensureRuleTypeIsAuthorized = jest
+        .fn()
+        .mockImplementation((ruleTypeId: string, _authType: string) => {
+          if (ruleTypeId === 'another.rule.type') {
+            throw Boom.forbidden(`Unauthorized to find rule for rule type "${ruleTypeId}"`);
+          }
+        });
 
-      // Simulating a template with unauthorized rule type slipping through
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type'),
+        ensureRuleTypeIsAuthorized,
+      });
+
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
         per_page: 10,
         page: 1,
-        saved_objects: [mockTemplate2], // another.rule.type - not authorized
+        saved_objects: [mockTemplate2],
       });
 
       await expect(
@@ -429,11 +465,10 @@ describe('findRuleTemplates', () => {
     });
 
     test('applies authorization filter combined with user filters', async () => {
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([
-          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-        ])
-      );
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type'),
+        ensureRuleTypeIsAuthorized: jest.fn(),
+      });
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
@@ -449,18 +484,16 @@ describe('findRuleTemplates', () => {
         tags: ['tag1'],
       });
 
-      // Verify that authorization filter is combined with ruleTypeId and tags filters
       const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0];
       expect(findCall.filter).toBeDefined();
     });
 
     test('verifies all returned templates are authorized', async () => {
-      authorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(
-        new Map([
-          ['test.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-          ['another.rule.type', { authorizedConsumers: { alerts: { read: true, all: true } } }],
-        ])
-      );
+      const ensureRuleTypeIsAuthorized = jest.fn();
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
+        ensureRuleTypeIsAuthorized,
+      });
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
@@ -474,10 +507,128 @@ describe('findRuleTemplates', () => {
         page: 1,
       });
 
-      // Both templates should pass authorization check
       expect(result.data).toHaveLength(2);
       expect(result.data[0].ruleTypeId).toBe('test.rule.type');
       expect(result.data[1].ruleTypeId).toBe('another.rule.type');
+      expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('test.rule.type', 'rule');
+      expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('another.rule.type', 'rule');
+    });
+  });
+
+  describe('audit logging', () => {
+    test('logs audit event for each found template', async () => {
+      const ensureRuleTypeIsAuthorized = jest.fn();
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
+        ensureRuleTypeIsAuthorized,
+      });
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate1, mockTemplate2],
+      });
+
+      await findRuleTemplates(rulesClientContextWithAuditLogger, {
+        perPage: 10,
+        page: 1,
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_template_find',
+            outcome: 'success',
+          }),
+          kibana: {
+            saved_object: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              id: 'template-1',
+              name: 'Template 1',
+            },
+          },
+        })
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_template_find',
+            outcome: 'success',
+          }),
+          kibana: {
+            saved_object: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              id: 'template-2',
+              name: 'Template 2',
+            },
+          },
+        })
+      );
+    });
+
+    test('throws on authorization failure without audit logging', async () => {
+      authorization.getByRuleTypeFindAuthorization.mockRejectedValueOnce(
+        Boom.forbidden('Unauthorized to find rules for any rule types')
+      );
+
+      await expect(
+        findRuleTemplates(rulesClientContextWithAuditLogger, {
+          perPage: 10,
+          page: 1,
+        })
+      ).rejects.toThrow('Unauthorized to find rules for any rule types');
+
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    test('logs audit event when unauthorized template slips through filter', async () => {
+      const ensureRuleTypeIsAuthorized = jest
+        .fn()
+        .mockImplementation((ruleTypeId: string, _authType: string) => {
+          if (ruleTypeId === 'another.rule.type') {
+            throw Boom.forbidden(`Unauthorized to find rule for rule type "${ruleTypeId}"`);
+          }
+        });
+
+      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+        filter: buildRuleTypeFilter('test.rule.type'),
+        ensureRuleTypeIsAuthorized,
+      });
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [mockTemplate2],
+      });
+
+      await expect(
+        findRuleTemplates(rulesClientContextWithAuditLogger, {
+          perPage: 10,
+          page: 1,
+        })
+      ).rejects.toThrow();
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_template_find',
+            outcome: 'failure',
+          }),
+          error: expect.objectContaining({
+            message: 'Unauthorized to find rule for rule type "another.rule.type"',
+          }),
+          kibana: {
+            saved_object: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              id: 'template-2',
+              name: 'Template 2',
+            },
+          },
+        })
+      );
     });
   });
 });

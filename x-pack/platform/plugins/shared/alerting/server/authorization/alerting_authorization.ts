@@ -69,6 +69,12 @@ interface GetAuthorizationFilterParams {
   operation: WriteOperations | ReadOperations;
 }
 
+interface GetByRuleTypeFindAuthorizationParams {
+  authorizationEntity: AlertingAuthorizationEntity;
+  filterOpts: AlertingAuthorizationFilterOpts;
+  operation: WriteOperations | ReadOperations;
+}
+
 interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
   ruleTypeIds?: string[];
   operations: Array<ReadOperations | WriteOperations>;
@@ -386,6 +392,82 @@ export class AlertingAuthorization {
     return {
       filter: asFiltersBySpaceId(params.filterOpts, this.spaceId) as JsonObject,
       ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
+    };
+  }
+
+  /**
+   * Like `ensureAuthorized` but without a consumer. Checks authorization by ruleTypeId only,
+   * succeeding if the user is authorized under any registered consumer. Useful for entities
+   * like rule templates that have a ruleTypeId but no consumer.
+   * When security is disabled, this is a no-op.
+   */
+  public async ensureAuthorizedByRuleType({
+    ruleTypeId,
+    operation,
+    entity,
+    consumerRequiredPrivilege,
+  }: {
+    ruleTypeId: string;
+    operation: ReadOperations | WriteOperations;
+    entity: AlertingAuthorizationEntity;
+    consumerRequiredPrivilege: keyof HasPrivileges;
+  }): Promise<void> {
+    if (!this.authorization || !this.shouldCheckAuthorization()) {
+      return;
+    }
+
+    const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+      operations: [operation],
+      authorizationEntity: entity,
+    });
+
+    const authorizedConsumers = authorizedRuleTypes.get(ruleTypeId)?.authorizedConsumers ?? {};
+    const isAuthorized = Object.values(authorizedConsumers).some(
+      (consumer) => consumer[consumerRequiredPrivilege]
+    );
+
+    if (!isAuthorized) {
+      throw Boom.forbidden(`Unauthorized to ${operation} "${ruleTypeId}" ${entity}`);
+    }
+  }
+
+  /**
+   * Like `getAuthorizationFilter` but without consumers. Returns a filter scoped to authorized
+   * rule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation. Useful for
+   * entities like rule templates that have a ruleTypeId but no consumer.
+   */
+  public async getByRuleTypeFindAuthorization(params: GetByRuleTypeFindAuthorizationParams) {
+    if (this.authorization && this.shouldCheckAuthorization()) {
+      const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        operations: [params.operation],
+        authorizationEntity: params.authorizationEntity,
+      });
+
+      if (!authorizedRuleTypes.size) {
+        throw Boom.forbidden(
+          `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types`
+        );
+      }
+
+      return {
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          params.filterOpts,
+          this.spaceId
+        ) as JsonObject,
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {
+          if (!authorizedRuleTypes.has(ruleTypeId) || authType !== params.authorizationEntity) {
+            throw Boom.forbidden(
+              getUnauthorizedMessage([{ ruleTypeId, consumers: [] }], params.operation, authType)
+            );
+          }
+        },
+      };
+    }
+
+    return {
+      filter: asFiltersBySpaceId(params.filterOpts, this.spaceId) as JsonObject,
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {},
     };
   }
 
