@@ -132,6 +132,8 @@ dependsOn:
   - '@kbn/es-query-constants'
   - '@kbn/esql'
   - '@kbn/controls-schemas'
+  - '@kbn/scout'
+  - '@kbn/synthtrace-client'
 tags:
   - plugin
   - prod
@@ -143,6 +145,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - .storybook/**/*
     - '!target/**/*'
 tasks:
