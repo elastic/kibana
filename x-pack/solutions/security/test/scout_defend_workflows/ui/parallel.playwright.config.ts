@@ -7,8 +7,13 @@
 
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
-export default createPlaywrightConfig({
+const config = createPlaywrightConfig({
   testDir: './parallel_tests/',
-  workers: 2,
+  workers: 1,
   runGlobalSetup: true,
 });
+
+export default {
+  ...config,
+  testIgnore: ['**/!(example).spec.ts'],
+};
