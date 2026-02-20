@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "fixtures/**/*",
+    "common/**/*",
+    "tests/**/*",
+    "playwright.config.ts",
+    "global.setup.ts"
+  ],
+  "kbn_references": [
+    "@kbn/scout-security",
+    "@kbn/scout",
+    "@kbn/test",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/security-solution-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}

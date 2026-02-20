@@ -9192,6 +9192,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-security-scout@link:x-pack/solutions/security/test/scout_security_solution":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
   version "0.0.0"
   uid ""
