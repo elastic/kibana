@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -28,16 +28,21 @@ export const RunningQueriesApp: React.FC = () => {
   const { data, isLoading, error, resendRequest } = apiService.useLoadRunningQueries();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
   const [secondsAgo, setSecondsAgo] = useState(0);
 
-  const lastRefreshTime = React.useRef(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsAgo(Math.floor((Date.now() - lastRefreshTime) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastRefreshTime]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
     resendRequest();
     setIsRefreshing(false);
-    setSecondsAgo(Math.floor((Date.now() - lastRefreshTime.current) / 1000));
-    lastRefreshTime.current = Date.now();
+    setLastRefreshTime(Date.now());
   }, [resendRequest]);
 
   const handleCancelQuery = useCallback(
@@ -80,10 +85,15 @@ export const RunningQueriesApp: React.FC = () => {
           <EuiFlexGroup key="refresh-group" alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.runningQueries.lastUpdated', {
-                  defaultMessage: 'Updated {seconds}s ago',
-                  values: { seconds: secondsAgo },
-                })}
+                {secondsAgo < 60
+                  ? i18n.translate('xpack.runningQueries.lastUpdatedSeconds', {
+                      defaultMessage: 'Updated {seconds}s ago',
+                      values: { seconds: secondsAgo },
+                    })
+                  : i18n.translate('xpack.runningQueries.lastUpdatedMinutes', {
+                      defaultMessage: 'Updated {minutes}m ago',
+                      values: { minutes: Math.floor(secondsAgo / 60) },
+                    })}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

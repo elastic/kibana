@@ -67,10 +67,12 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onClose,
   onStopQuery,
 }) => {
-  const sourceInitial = query.source.charAt(0).toUpperCase();
-
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      maxWidth={691}
+    >
       <EuiFlyoutBody>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -90,9 +92,6 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               {query.queryType === 'ES|QL' ? 'ESQL' : query.queryType}
             </EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="#d3dae6">{sourceInitial}</EuiBadge>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
@@ -106,16 +105,19 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           <EuiLink>{query.source}</EuiLink>
         </EuiText>
 
-        <EuiSpacer size="s" />
-
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('xpack.runningQueries.flyout.remoteSearchLabel', {
-              defaultMessage: 'Remote search',
-            })}
-          </strong>{' '}
-          {query.remoteSearch}
-        </EuiText>
+        {query.remoteSearch && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <strong>
+                {i18n.translate('xpack.runningQueries.flyout.remoteSearchLabel', {
+                  defaultMessage: 'Remote search',
+                })}
+              </strong>{' '}
+              {query.remoteSearch}
+            </EuiText>
+          </>
+        )}
 
         <EuiSpacer size="l" />
 
@@ -129,7 +131,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiText size="s">
-                <strong>{moment(query.startTime).format('MMM D YYYY, HH:mm:ss.SSS')}</strong>
+                <strong>{moment(query.startTime).format('MMM D YYYY, HH:mm:ss')}</strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -174,6 +176,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           lineNumbers
           overflowHeight={300}
           isCopyable
+          isVirtualized
         >
           {query.query}
         </EuiCodeBlock>

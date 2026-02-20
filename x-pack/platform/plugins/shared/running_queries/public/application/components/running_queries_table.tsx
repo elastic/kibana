@@ -44,6 +44,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.taskIdColumn', {
           defaultMessage: 'Task ID',
         }),
+        width: '250px',
         sortable: true,
         render: (taskId: string, query: RunningQuery) => (
           <EuiLink onClick={() => setSelectedQuery(query)}>{taskId}</EuiLink>
@@ -54,6 +55,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.queryTypeColumn', {
           defaultMessage: 'Query type',
         }),
+        width: '150px',
         sortable: true,
       },
       {
@@ -61,6 +63,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.sourceColumn', {
           defaultMessage: 'Source',
         }),
+        width: '150px',
         sortable: true,
       },
       {
@@ -68,8 +71,17 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.startTimeColumn', {
           defaultMessage: 'Start time',
         }),
+        width: '220px',
         sortable: true,
-        render: (startTime: number) => moment(startTime).fromNow(),
+        render: (startTime: number) => moment(startTime).format('MMM D YYYY, HH:mm:ss'),
+      },
+      {
+        field: 'startTime',
+        name: i18n.translate('xpack.runningQueries.table.runTimeColumn', {
+          defaultMessage: 'Run time',
+        }),
+        sortable: true,
+        render: (startTime: number) => moment(startTime).fromNow(true),
       },
       {
         name: i18n.translate('xpack.runningQueries.table.actionsColumn', {

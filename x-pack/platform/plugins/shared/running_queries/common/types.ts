@@ -13,6 +13,8 @@ export interface RunningQuery {
   source: string;
   startTime: number;
   indices: number;
-  remoteSearch: string;
+  remoteSearch?: string;
   query: string;
+  cancellable: boolean;
+  cancelled: boolean;
 }
