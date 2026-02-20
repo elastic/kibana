@@ -13,7 +13,7 @@ import type {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from './types';
-import type { EdgeMarker } from './react_flow_types';
+import type { EdgeMarker } from './types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -81,7 +81,10 @@ export function getLegacyNodeId(node: ConnectionNodeLegacy) {
   if (isExitSpan(node)) {
     return getExitSpanNodeId(node);
   }
-  return `${node[SERVICE_NAME]}`;
+  if (SERVICE_NAME in node) {
+    return `${node[SERVICE_NAME]}`;
+  }
+  return '';
 }
 
 export function getServiceConnectionNode(event: ServiceMapService): ServiceConnectionNode {
@@ -108,6 +111,10 @@ export function getEdgeId(sourceId: string, destinationId: string) {
 
 export function getExitSpanNodeId(span: ExternalConnectionNode) {
   return `>${span[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+}
+
+export function toDisplayName(id: string): string {
+  return id.startsWith('>') ? id.slice(1) : id;
 }
 
 /**

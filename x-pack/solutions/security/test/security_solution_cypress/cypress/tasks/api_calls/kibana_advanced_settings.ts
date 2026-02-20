@@ -9,6 +9,7 @@ import {
   SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
@@ -29,4 +30,12 @@ export const disableRelatedIntegrations = () => {
 
 export const setPreferredChatExperienceToAgent = () => {
   setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'agent');
+};
+
+export const enableExtendedRuleExecutionLogging = () => {
+  setKibanaSetting(EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING, true);
+};
+
+export const disableExtendedRuleExecutionLogging = () => {
+  setKibanaSetting(EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING, false);
 };

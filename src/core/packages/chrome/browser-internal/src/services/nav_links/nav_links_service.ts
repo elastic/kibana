@@ -43,13 +43,12 @@ export class NavLinksService {
                 return navLinks;
               }, [])
           );
-        })
+        }),
+        takeUntil(this.stop$)
       )
       .subscribe((navlinks) => {
         navLinks$.next(navlinks);
       });
-
-    const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
       getNavLinks$: () => {
@@ -67,14 +66,6 @@ export class NavLinksService {
 
       has(id: string) {
         return navLinks$.value.has(id);
-      },
-
-      enableForcedAppSwitcherNavigation() {
-        forceAppSwitcherNavigation$.next(true);
-      },
-
-      getForceAppSwitcherNavigation$() {
-        return forceAppSwitcherNavigation$.asObservable();
       },
     };
   }

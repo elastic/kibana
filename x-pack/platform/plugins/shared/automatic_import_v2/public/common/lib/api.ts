@@ -127,3 +127,57 @@ export const deleteDataStream = async ({
       version: '1',
     }
   );
+
+export interface ReanalyzeDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+  connectorId: string;
+}
+
+export interface ReanalyzeDataStreamResponse {
+  success: boolean;
+}
+
+export const reanalyzeDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  connectorId,
+}: RequestDeps & ReanalyzeDataStreamRequest): Promise<ReanalyzeDataStreamResponse> =>
+  http.put<ReanalyzeDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/reanalyze`,
+    {
+      version: '1',
+      body: JSON.stringify({ connectorId }),
+      signal: abortSignal,
+    }
+  );
+
+export interface GetDataStreamResultsRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export interface GetDataStreamResultsResponse {
+  ingest_pipeline: Record<string, unknown>;
+  results: Array<Record<string, unknown>>;
+}
+
+export const getDataStreamResults = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & GetDataStreamResultsRequest): Promise<GetDataStreamResultsResponse> =>
+  http.get<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
+    {
+      version: '1',
+      signal: abortSignal,
+    }
+  );

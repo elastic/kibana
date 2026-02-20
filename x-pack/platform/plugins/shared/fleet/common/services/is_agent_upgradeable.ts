@@ -194,7 +194,7 @@ export function isAgentInWatchingState(agent: Agent) {
 
 export function isAgentUpgrading(agent: Agent) {
   if (agent.upgrade_details) {
-    return agent.upgrade_details.state !== 'UPG_FAILED';
+    return !['UPG_FAILED', 'UPG_ROLLBACK'].includes(agent.upgrade_details.state);
   }
   return agent.upgrade_started_at && !agent.upgraded_at;
 }

@@ -242,7 +242,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     if (!formData) return;
 
     const integrationId = currentIntegrationId ?? generateId();
-    const dataStreamId = integrationId + '-' + generateId();
+    const dataStreamId = generateId();
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
@@ -416,7 +416,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               initialPromptText={i18n.FILE_PICKER_PROMPT}
               onChange={onChangeLogFile}
               display="large"
-              aria-label="Upload log file"
+              aria-label={i18n.ARIA_LABELS.uploadLogFile}
               isLoading={isParsing}
               isInvalid={fileError != null}
               disabled={logsSourceOption !== 'upload'}
@@ -442,7 +442,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   fullWidth
                   isInvalid={!!indexValidationError}
                   error={indexValidationError}
-                  aria-label="Select an index"
+                  aria-label={i18n.ARIA_LABELS.selectIndex}
                 >
                   <EuiComboBox
                     key={field.value ?? ''}
