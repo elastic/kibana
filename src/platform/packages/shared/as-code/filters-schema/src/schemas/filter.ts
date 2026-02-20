@@ -144,9 +144,9 @@ const oneOfConditionSchema = baseConditionSchema.extends(
     operator: schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
     value: schema.oneOf(
       [
-        schema.arrayOf(schema.string()),
-        schema.arrayOf(schema.number()),
-        schema.arrayOf(schema.boolean()),
+        schema.arrayOf(schema.string(), { maxSize: 10000 }),
+        schema.arrayOf(schema.number(), { maxSize: 10000 }),
+        schema.arrayOf(schema.boolean(), { maxSize: 10000 }),
       ],
       { meta: { description: 'Homogeneous array of values' } }
     ),

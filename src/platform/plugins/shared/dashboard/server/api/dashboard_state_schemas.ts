@@ -169,7 +169,7 @@ export function getDashboardStateSchema() {
   return schema.object({
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
+    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
       schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
