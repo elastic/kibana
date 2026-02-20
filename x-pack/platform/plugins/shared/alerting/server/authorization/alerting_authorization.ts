@@ -69,12 +69,6 @@ interface GetAuthorizationFilterParams {
   operation: WriteOperations | ReadOperations;
 }
 
-interface GetByRuleTypeFindAuthorizationParams {
-  authorizationEntity: AlertingAuthorizationEntity;
-  filterOpts: AlertingAuthorizationFilterOpts;
-  operation: WriteOperations | ReadOperations;
-}
-
 interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
   ruleTypeIds?: string[];
   operations: Array<ReadOperations | WriteOperations>;
@@ -397,9 +391,7 @@ export class AlertingAuthorization {
 
   /**
    * Like `ensureAuthorized` but without a consumer. Checks authorization by ruleTypeId only,
-   * succeeding if the user is authorized under any registered consumer. Useful for entities
-   * like rule templates that have a ruleTypeId but no consumer.
-   * When security is disabled, this is a no-op.
+   * succeeding if the user is authorized under any registered consumer.
    */
   public async ensureAuthorizedByRuleType({
     ruleTypeId,
@@ -433,10 +425,9 @@ export class AlertingAuthorization {
 
   /**
    * Like `getAuthorizationFilter` but without consumers. Returns a filter scoped to authorized
-   * rule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation. Useful for
-   * entities like rule templates that have a ruleTypeId but no consumer.
+   * rule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation.
    */
-  public async getByRuleTypeFindAuthorization(params: GetByRuleTypeFindAuthorizationParams) {
+  public async getByRuleTypeAuthorizationFilter(params: GetAuthorizationFilterParams) {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
         operations: [params.operation],

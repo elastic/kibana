@@ -46,13 +46,12 @@ export async function findRuleTemplates(
   }
 
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } =
-    await context.authorization.getByRuleTypeFindAuthorization({
+    await context.authorization.getByRuleTypeAuthorizationFilter({
       authorizationEntity: AlertingAuthorizationEntity.Rule,
       filterOpts: {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`,
-          spaceIds: 'spaceIds',
         },
       },
       operation: ReadOperations.Find,

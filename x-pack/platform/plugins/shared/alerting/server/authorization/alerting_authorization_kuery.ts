@@ -51,14 +51,16 @@ export function asFiltersByRuleTypeAndConsumer(
 
         const andNodes: KueryNode[] = [nodeBuilder.is(opts.fieldNames.ruleTypeId, id)];
 
-        if (opts.fieldNames.consumer != null) {
+        const consumerFieldName = opts.fieldNames.consumer;
+
+        if (consumerFieldName != null) {
           const authorizedConsumersKeys = Object.keys(authorizedConsumers);
           if (authorizedConsumersKeys.length) {
             andNodes.push(
               nodeBuilder.or(
                 authorizedConsumersKeys.map((consumer) => {
                   ensureFieldIsSafeForQuery('consumer', consumer);
-                  return nodeBuilder.is(opts.fieldNames.consumer!, consumer);
+                  return nodeBuilder.is(consumerFieldName, consumer);
                 })
               )
             );

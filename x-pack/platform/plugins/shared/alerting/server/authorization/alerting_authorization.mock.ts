@@ -30,7 +30,7 @@ const createAlertingAuthorizationMock = () => {
       ensureRuleTypeIsAuthorized: () => {},
     }),
     ensureAuthorizedByRuleType: jest.fn(),
-    getByRuleTypeFindAuthorization: jest.fn().mockResolvedValue({
+    getByRuleTypeAuthorizationFilter: jest.fn().mockResolvedValue({
       filter: undefined,
       ensureRuleTypeIsAuthorized: () => {},
     }),

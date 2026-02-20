@@ -2539,7 +2539,7 @@ describe('AlertingAuthorization', () => {
     });
   });
 
-  describe('getByRuleTypeFindAuthorization', () => {
+  describe('getByRuleTypeAuthorizationFilter', () => {
     const findAuthParams = {
       authorizationEntity: AlertingAuthorizationEntity.Rule as AlertingAuthorizationEntity,
       filterOpts: {
@@ -2561,7 +2561,7 @@ describe('AlertingAuthorization', () => {
         getSpace,
       });
 
-      const result = await auth.getByRuleTypeFindAuthorization(findAuthParams);
+      const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(result.filter).toBeDefined();
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
@@ -2580,7 +2580,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const result = await auth.getByRuleTypeFindAuthorization(findAuthParams);
+      const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       expect(result.filter).toBeDefined();
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
@@ -2614,7 +2614,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const result = await auth.getByRuleTypeFindAuthorization(findAuthParams);
+      const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
 
       const kql = toKqlExpression(result.filter as KueryNode);
       expect(kql).toContain('rule-type-id-1');
@@ -2640,7 +2640,7 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        auth.getByRuleTypeFindAuthorization(findAuthParams)
+        auth.getByRuleTypeAuthorizationFilter(findAuthParams)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to find rules for any rule types"`
       );
@@ -2669,7 +2669,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeFindAuthorization(
+      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
         findAuthParams
       );
 
@@ -2701,7 +2701,7 @@ describe('AlertingAuthorization', () => {
         authorization: securityStart.authz,
       });
 
-      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeFindAuthorization(
+      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
         findAuthParams
       );
 
@@ -2710,6 +2710,128 @@ describe('AlertingAuthorization', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized by \\"any consumer\\" to find \\"rule-type-id-2\\" rule"`
       );
+    });
+
+    it('ensureRuleTypeIsAuthorized throws when the entity type does not match', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'find'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
+        findAuthParams
+      );
+
+      expect(() =>
+        ensureRuleTypeIsAuthorized('rule-type-id-1', AlertingAuthorizationEntity.Alert)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized by \\"any consumer\\" to find \\"rule-type-id-1\\" alert"`
+      );
+    });
+
+    it('returns undefined filter when no spaceIds in fieldNames and no authorization api', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+      });
+
+      const result = await auth.getByRuleTypeAuthorizationFilter({
+        ...findAuthParams,
+        filterOpts: {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'alert.attributes.ruleTypeId',
+          },
+        },
+      });
+
+      expect(result.filter).toBeUndefined();
+      expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
+    });
+
+    it('returns a filter without consumer clauses when consumer is not in fieldNames', async () => {
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'alerts', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'find'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      const result = await auth.getByRuleTypeAuthorizationFilter({
+        ...findAuthParams,
+        filterOpts: {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'alert.attributes.ruleTypeId',
+          },
+        },
+      });
+
+      const kql = toKqlExpression(result.filter as KueryNode);
+      expect(kql).toContain('rule-type-id-1');
+      expect(kql).not.toContain('alerts');
+      expect(kql).not.toContain('consumer-a');
+    });
+
+    it('ensureRuleTypeIsAuthorized is a no-op for any input when security is disabled', async () => {
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(false);
+
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      const { ensureRuleTypeIsAuthorized } = await auth.getByRuleTypeAuthorizationFilter(
+        findAuthParams
+      );
+
+      expect(() => ensureRuleTypeIsAuthorized('non-existent-type', 'rule')).not.toThrow();
+      expect(() =>
+        ensureRuleTypeIsAuthorized('non-existent-type', AlertingAuthorizationEntity.Alert)
+      ).not.toThrow();
     });
   });
 });

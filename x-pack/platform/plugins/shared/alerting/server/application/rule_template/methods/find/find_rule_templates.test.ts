@@ -41,7 +41,7 @@ const buildRuleTypeFilter = (...ruleTypeIds: string[]) =>
 
 beforeEach(() => {
   jest.resetAllMocks();
-  authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+  authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
     filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
     ensureRuleTypeIsAuthorized: jest.fn(),
   });
@@ -152,7 +152,16 @@ describe('findRuleTemplates', () => {
         'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
     );
 
-    expect(authorization.getByRuleTypeFindAuthorization).toHaveBeenCalled();
+    expect(authorization.getByRuleTypeAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        type: 'kql',
+        fieldNames: {
+          ruleTypeId: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`,
+        },
+      },
+      operation: 'find',
+    });
   });
 
   test('filters by specific rule type', async () => {
@@ -358,35 +367,9 @@ describe('findRuleTemplates', () => {
     });
   });
 
-  test('does not apply authorization filter when security is disabled', async () => {
-    authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
-      filter: undefined as never,
-      ensureRuleTypeIsAuthorized: jest.fn(),
-    });
-
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
-      per_page: 10,
-      page: 1,
-      saved_objects: [mockTemplate1, mockTemplate2],
-    });
-
-    const result = await findRuleTemplates(rulesClientContext, {
-      perPage: 10,
-      page: 1,
-    });
-
-    expect(result.data).toHaveLength(2);
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: undefined,
-      })
-    );
-  });
-
   describe('authorization', () => {
     test('throws 403 when user has no access to any rule types', async () => {
-      authorization.getByRuleTypeFindAuthorization.mockRejectedValueOnce(
+      authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
         Boom.forbidden('Unauthorized to find rules for any rule types')
       );
 
@@ -406,7 +389,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('filters templates to only authorized rule types', async () => {
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
         ensureRuleTypeIsAuthorized: jest.fn(),
       });
@@ -439,7 +422,7 @@ describe('findRuleTemplates', () => {
           }
         });
 
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
         ensureRuleTypeIsAuthorized,
       });
@@ -465,7 +448,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('applies authorization filter combined with user filters', async () => {
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
         ensureRuleTypeIsAuthorized: jest.fn(),
       });
@@ -490,7 +473,7 @@ describe('findRuleTemplates', () => {
 
     test('verifies all returned templates are authorized', async () => {
       const ensureRuleTypeIsAuthorized = jest.fn();
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
         ensureRuleTypeIsAuthorized,
       });
@@ -518,7 +501,7 @@ describe('findRuleTemplates', () => {
   describe('audit logging', () => {
     test('logs audit event for each found template', async () => {
       const ensureRuleTypeIsAuthorized = jest.fn();
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type', 'another.rule.type'),
         ensureRuleTypeIsAuthorized,
       });
@@ -569,7 +552,7 @@ describe('findRuleTemplates', () => {
     });
 
     test('throws on authorization failure without audit logging', async () => {
-      authorization.getByRuleTypeFindAuthorization.mockRejectedValueOnce(
+      authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
         Boom.forbidden('Unauthorized to find rules for any rule types')
       );
 
@@ -592,7 +575,7 @@ describe('findRuleTemplates', () => {
           }
         });
 
-      authorization.getByRuleTypeFindAuthorization.mockResolvedValue({
+      authorization.getByRuleTypeAuthorizationFilter.mockResolvedValue({
         filter: buildRuleTypeFilter('test.rule.type'),
         ensureRuleTypeIsAuthorized,
       });
