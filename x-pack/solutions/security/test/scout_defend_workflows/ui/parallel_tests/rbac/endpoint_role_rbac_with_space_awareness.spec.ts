@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
+import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
 
 spaceTest.describe(
   'Defend Workflows - endpoint role rbac with space awareness cy',
@@ -15,11 +18,12 @@ spaceTest.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip(
-      'endpoint role rbac with space awareness cy (Cypress migration placeholder)',
-      async () => {
-        // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
-      }
-    );
+    spaceTest('loads page', async ({ page }) => {
+      await page.goto(DEFEND_WORKFLOWS_ROUTES.policies);
+      await page
+        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
+        .waitFor({ state: 'visible' });
+      await expect(page.locator(testSubjSelector('policyListPage'))).toBeVisible();
+    });
   }
 );

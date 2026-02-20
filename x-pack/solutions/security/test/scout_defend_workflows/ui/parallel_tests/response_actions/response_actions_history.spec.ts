@@ -5,18 +5,42 @@
  * 2.0.
  */
 
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
+import {
+  DEFEND_WORKFLOWS_ROUTES,
+  indexEndpointHostsData,
+  deleteIndexedEndpointHostsData,
+} from '../../fixtures';
+import type { IndexedHostsAndAlertsResponse } from '../../fixtures';
 
 spaceTest.describe(
-  'Defend Workflows - response actions history cy',
+  'Defend Workflows - response actions history',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
+    let indexedHosts: IndexedHostsAndAlertsResponse | null = null;
+
+    spaceTest.beforeAll(async ({ esClient, kbnClient, log }) => {
+      indexedHosts = await indexEndpointHostsData(esClient, kbnClient, { numHosts: 2, log });
+    });
+
+    spaceTest.afterAll(async ({ esClient, kbnClient }) => {
+      if (indexedHosts) {
+        await deleteIndexedEndpointHostsData(esClient, kbnClient, indexedHosts);
+      }
+    });
+
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    spaceTest.skip('response actions history cy (Cypress migration placeholder)', async () => {
-      // Migrated from Cypress; requires Fleet/Endpoint setup or API data loaders.
+    spaceTest('loads response actions history page', async ({ page }) => {
+      await page.goto(DEFEND_WORKFLOWS_ROUTES.responseActionsHistory);
+      await page
+        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
+        .waitFor({ state: 'visible' });
+      await expect(page.locator(testSubjSelector('responseActionsPage'))).toBeVisible();
     });
   }
 );

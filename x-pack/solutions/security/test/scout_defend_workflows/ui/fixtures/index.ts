@@ -7,3 +7,13 @@
 
 export { DEFEND_WORKFLOWS_ROUTES } from './constants';
 export { getByTestSubj, waitForPageToBeLoaded } from './helpers';
+export {
+  createFleetEndpointPolicy,
+  deleteFleetEndpointPolicies,
+  getEndpointIntegrationVersion,
+  indexEndpointHostsData,
+  deleteIndexedEndpointHostsData,
+  type IndexedFleetEndpointPolicyResponse,
+  type IndexedHostsAndAlertsResponse,
+  type IndexEndpointHostsOptions,
+} from './api_helpers';
