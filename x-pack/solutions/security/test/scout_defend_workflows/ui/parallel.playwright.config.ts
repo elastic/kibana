@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { defineConfig } from '@playwright/test';
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
-const config = createPlaywrightConfig({
+const baseConfig = createPlaywrightConfig({
   testDir: './parallel_tests/',
   workers: 1,
   runGlobalSetup: true,
 });
 
-export default {
-  ...config,
+export default defineConfig({
+  ...baseConfig,
   testIgnore: ['**/!(example).spec.ts'],
-};
+});
