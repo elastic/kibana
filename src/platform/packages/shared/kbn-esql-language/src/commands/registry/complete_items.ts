@@ -231,6 +231,16 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
   category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
+export const promqlOpenParensCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '()',
+  text: '($0) ',
+  asSnippet: true,
+  kind: 'Snippet',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addFunctionArguments', {
+    defaultMessage: 'Add function arguments',
+  }),
+});
+
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
   text: 'BY ',
