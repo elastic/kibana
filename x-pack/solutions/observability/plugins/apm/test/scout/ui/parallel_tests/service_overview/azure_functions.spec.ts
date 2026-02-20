@@ -21,7 +21,9 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const serviceOverviewHref = `${kbnUrl.app('apm')}/services/synth-dotnet/overview?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`;
+      const serviceOverviewHref = `${kbnUrl.app('apm')}/services/synth-dotnet/overview?rangeFrom=${
+        testData.START_DATE
+      }&rangeTo=${testData.END_DATE}`;
       await page.goto(serviceOverviewHref);
       await page.waitForResponse((res) =>
         res.url().includes('/internal/apm/services/synth-dotnet/transactions/charts/coldstart_rate')

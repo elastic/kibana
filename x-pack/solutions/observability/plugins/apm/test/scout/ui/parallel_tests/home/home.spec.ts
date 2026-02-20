@@ -30,9 +30,17 @@ test.describe(
     });
 
     test('includes services with only metric documents', async ({ page, kbnUrl }) => {
-      const serviceInventoryHref = `${kbnUrl.app('apm')}/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}&offset=1d&kuery=${encodeURIComponent('not (processor.event:"transaction")')}`;
+      const serviceInventoryHref = `${kbnUrl.app(
+        'apm'
+      )}/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${
+        testData.START_DATE
+      }&rangeTo=${testData.END_DATE}&offset=1d&kuery=${encodeURIComponent(
+        'not (processor.event:"transaction")'
+      )}`;
       await page.goto(serviceInventoryHref);
-      await page.getByTestId('apmUnifiedSearchBar').waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await page
+        .getByTestId('apmUnifiedSearchBar')
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
       await expect(page.getByText(testData.SERVICE_OPBEANS_NODE)).toBeVisible();
     });
@@ -42,9 +50,15 @@ test.describe(
       pageObjects: { serviceInventoryPage },
       kbnUrl,
     }) => {
-      const serviceInventoryHref = `${kbnUrl.app('apm')}/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}&offset=1d`;
+      const serviceInventoryHref = `${kbnUrl.app(
+        'apm'
+      )}/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${
+        testData.START_DATE
+      }&rangeTo=${testData.END_DATE}&offset=1d`;
       await page.goto(serviceInventoryHref);
-      await page.getByRole('heading', { name: 'Service inventory', level: 1 }).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await page
+        .getByRole('heading', { name: 'Service inventory', level: 1 })
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       await page.getByText(testData.SERVICE_OPBEANS_RUM).first().click();
       await expect(page.getByTestId('headerFilterTransactionType')).toBeVisible();
       await expect(page.getByTestId('headerFilterTransactionType')).toHaveValue('page-load');

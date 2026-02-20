@@ -21,7 +21,11 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const mobileTransactionDetailsPageHref = `${kbnUrl.app('apm')}/mobile-services/synth-android/transactions/view?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}&transactionName=${encodeURIComponent('Start View - View Appearing')}`;
+      const mobileTransactionDetailsPageHref = `${kbnUrl.app(
+        'apm'
+      )}/mobile-services/synth-android/transactions/view?rangeFrom=${testData.START_DATE}&rangeTo=${
+        testData.END_DATE
+      }&transactionName=${encodeURIComponent('Start View - View Appearing')}`;
       await page.goto(mobileTransactionDetailsPageHref);
       await page.getByTestId('apmActionMenuButtonInvestigateButton').click();
       await expect(page.getByTestId('apmActionMenuInvestigateButtonPopup')).toBeVisible();

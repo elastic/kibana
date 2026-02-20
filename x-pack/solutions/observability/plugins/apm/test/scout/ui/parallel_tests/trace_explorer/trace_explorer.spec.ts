@@ -21,7 +21,11 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const traceExplorerHref = `${kbnUrl.app('apm')}/traces/explorer?environment=ENVIRONMENT_ALL&rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`;
+      const traceExplorerHref = `${kbnUrl.app(
+        'apm'
+      )}/traces/explorer?environment=ENVIRONMENT_ALL&rangeFrom=${testData.START_DATE}&rangeTo=${
+        testData.END_DATE
+      }`;
       await page.goto(traceExplorerHref);
       await page.getByTestId('apmActionMenuButtonInvestigateButton').click();
       await expect(page.getByTestId('apmActionMenuInvestigateButtonPopup')).toBeVisible();

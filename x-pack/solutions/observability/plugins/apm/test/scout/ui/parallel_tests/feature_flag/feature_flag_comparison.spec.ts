@@ -21,8 +21,7 @@ async function setAdvancedSetting(
     headers: {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'e2e_test',
-      Authorization:
-        'Basic ' + Buffer.from(`${auth.username}:${auth.password}`).toString('base64'),
+      Authorization: 'Basic ' + Buffer.from(`${auth.username}:${auth.password}`).toString('base64'),
     },
     body: JSON.stringify({ changes: { [key]: value } }),
   });

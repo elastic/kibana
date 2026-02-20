@@ -33,7 +33,11 @@ test.describe(
             .scrollIntoViewIfNeeded();
           await expect(page.getByText('Applications / Traces')).toBeVisible();
           await expect(page.getByText('Applications / Service map')).toBeVisible();
-          await page.getByTestId('euiSelectableList').locator('div > div').last().scrollIntoViewIfNeeded();
+          await page
+            .getByTestId('euiSelectableList')
+            .locator('div > div')
+            .last()
+            .scrollIntoViewIfNeeded();
           await expect(page.getByText('Applications / Dependencies')).toBeVisible();
           await expect(page.getByText('Applications / Settings')).toBeVisible();
         });

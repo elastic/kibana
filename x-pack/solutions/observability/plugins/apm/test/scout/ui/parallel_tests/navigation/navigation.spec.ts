@@ -23,7 +23,11 @@ test.describe(
       kbnUrl,
       pageObjects: { serviceDetailsPage },
     }) => {
-      const serviceOverviewHref = `${kbnUrl.app('apm')}/services/${testData.SERVICE_OPBEANS_JAVA}/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}&offset=1d`;
+      const serviceOverviewHref = `${kbnUrl.app('apm')}/services/${
+        testData.SERVICE_OPBEANS_JAVA
+      }/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=${
+        testData.START_DATE
+      }&rangeTo=${testData.END_DATE}&offset=1d`;
 
       const hasDataRequests: string[] = [];
       const serviceIconsRequests: string[] = [];
@@ -47,17 +51,19 @@ test.describe(
         timeout: EXTENDED_TIMEOUT,
       });
 
-      expect(hasDataRequests.length).toBe(1);
-      expect(serviceIconsRequests.length).toBe(1);
-      expect(apmPoliciesRequests.length).toBe(1);
+      expect(hasDataRequests).toHaveLength(1);
+      expect(serviceIconsRequests).toHaveLength(1);
+      expect(apmPoliciesRequests).toHaveLength(1);
 
       await page.getByRole('tab', { name: 'Errors' }).click();
       await expect(page.getByRole('tab', { name: 'Errors', selected: true })).toBeVisible();
-      await expect(page.getByTestId('errorDistribution')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(page.getByTestId('errorDistribution')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
 
-      expect(hasDataRequests.length).toBe(1);
-      expect(serviceIconsRequests.length).toBe(1);
-      expect(apmPoliciesRequests.length).toBe(1);
+      expect(hasDataRequests).toHaveLength(1);
+      expect(serviceIconsRequests).toHaveLength(1);
+      expect(apmPoliciesRequests).toHaveLength(1);
     });
   }
 );

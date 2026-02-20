@@ -74,9 +74,9 @@ test.describe(
           await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
           await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
           await page.getByTestId('indices-tab').click();
-          await expect(
-            page.getByTestId('indicedWithProblems').locator('.euiTableRow')
-          ).toHaveCount(138);
+          await expect(page.getByTestId('indicedWithProblems').locator('.euiTableRow')).toHaveCount(
+            138
+          );
           await expect(
             page.getByTestId('indicedWithoutProblems').locator('.euiTableRow')
           ).toHaveCount(27);
@@ -96,14 +96,18 @@ test.describe(
         }) => {
           await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
           await expect(
-            page.locator('.euiPanel > .euiText').filter({ hasText: 'Not all features are available' })
+            page
+              .locator('.euiPanel > .euiText')
+              .filter({ hasText: 'Not all features are available' })
           ).toBeVisible();
         });
 
         test('hides the tabs that require cluster privileges', async ({ page, kbnUrl }) => {
           await page.goto(`${kbnUrl.app('apm')}/diagnostics`);
           const tabs = ['Summary', 'Documents', 'Import/Export'];
-          const tabElements = page.getByTestId('apmDiagnosticsTemplate').locator('.euiTabs .euiTab');
+          const tabElements = page
+            .getByTestId('apmDiagnosticsTemplate')
+            .locator('.euiTabs .euiTab');
           for (let i = 0; i < tabs.length; i++) {
             await expect(tabElements.nth(i)).toHaveText(tabs[i]);
           }
@@ -115,9 +119,7 @@ test.describe(
           await page.goto(`${kbnUrl.app('apm')}/diagnostics/import-export`);
           await page.locator('#file-picker').setInputFiles(DIAGNOSTICS_BUNDLE_PATH);
           await page.getByTestId('documents-tab').click();
-          await expect(
-            page.getByTestId('documents-table').locator('.euiTableRow')
-          ).toHaveCount(10);
+          await expect(page.getByTestId('documents-table').locator('.euiTableRow')).toHaveCount(10);
         });
       });
     });

@@ -3,6 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  *
  * See details: https://github.com/elastic/kibana/issues/191961
  */
@@ -30,7 +37,9 @@ test.describe(
 
     test.skip('changes comparison type', async ({ page, kbnUrl }) => {
       await page.goto(
-        `${kbnUrl.app('apm')}/services/opbeans-java/overview?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`
+        `${kbnUrl.app('apm')}/services/opbeans-java/overview?rangeFrom=${
+          testData.START_DATE
+        }&rangeTo=${testData.END_DATE}`
       );
       await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible();
       await expect(page.getByTestId('comparisonSelect')).toHaveValue('1d');

@@ -21,7 +21,11 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const goServiceInfraPageHref = `${kbnUrl.app('apm')}/services/synth-go/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`;
+      const goServiceInfraPageHref = `${kbnUrl.app(
+        'apm'
+      )}/services/synth-go/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${
+        testData.END_DATE
+      }`;
       await page.goto(goServiceInfraPageHref);
       await expect(page.getByText('Infrastructure')).toBeVisible();
       await expect(page.getByText('Containers')).toBeVisible();
@@ -29,11 +33,12 @@ test.describe(
       await expect(page.getByText('Hosts')).toBeVisible();
     });
 
-    test('when only host names are returned shows only Hosts tab', async ({
-      page,
-      kbnUrl,
-    }) => {
-      const javaServiceInfraPageHref = `${kbnUrl.app('apm')}/services/synth-java/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`;
+    test('when only host names are returned shows only Hosts tab', async ({ page, kbnUrl }) => {
+      const javaServiceInfraPageHref = `${kbnUrl.app(
+        'apm'
+      )}/services/synth-java/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${
+        testData.END_DATE
+      }`;
       await page.goto(javaServiceInfraPageHref);
       await expect(page.getByText('Infrastructure')).toBeVisible();
       await expect(page.getByText('Hosts')).toBeVisible();
@@ -43,7 +48,11 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      const nodeServiceInfraPageHref = `${kbnUrl.app('apm')}/services/synth-node/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${testData.END_DATE}`;
+      const nodeServiceInfraPageHref = `${kbnUrl.app(
+        'apm'
+      )}/services/synth-node/infrastructure?rangeFrom=${testData.START_DATE}&rangeTo=${
+        testData.END_DATE
+      }`;
       await page.goto(nodeServiceInfraPageHref);
       await expect(page.getByText('Infrastructure')).toBeVisible();
       await expect(page.getByText('No results match your search criteria.')).toBeVisible();

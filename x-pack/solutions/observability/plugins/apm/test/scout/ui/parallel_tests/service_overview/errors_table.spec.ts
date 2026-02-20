@@ -28,10 +28,7 @@ test.describe(
       await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
     });
 
-    test('navigates to the errors page', async ({
-      page,
-      pageObjects: { serviceDetailsPage },
-    }) => {
+    test('navigates to the errors page', async ({ page, pageObjects: { serviceDetailsPage } }) => {
       await serviceDetailsPage.overviewTab.goToTab({
         serviceName: testData.SERVICE_OPBEANS_JAVA,
         rangeFrom: testData.START_DATE,
