@@ -17,6 +17,10 @@ export {
   type SuggestProcessingPipelineResult,
 } from './src/stream_management/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/sig_events/significant_events/generate_significant_events';
+export {
+  createDefaultSignificantEventsToolUsage,
+  type SignificantEventsToolUsage,
+} from './src/sig_events/significant_events/tools/tool_usage';
 export { sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,

@@ -89,14 +89,13 @@ export const DownsamplingPhase = ({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: '100%',
+            fontWeight: euiTheme.font.weight.semiBold,
           }}
         >
-          <b>
-            {downsample.fixed_interval}{' '}
-            {i18n.translate('xpack.streams.downsamplingPhaseBar.b.intervalLabel', {
-              defaultMessage: 'interval',
-            })}
-          </b>
+          {downsample.fixed_interval}{' '}
+          {i18n.translate('xpack.streams.downsamplingPhaseBar.b.intervalLabel', {
+            defaultMessage: 'interval',
+          })}
         </EuiText>
       </EuiFlexGroup>
     </EuiPanel>

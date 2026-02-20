@@ -138,7 +138,7 @@ export interface UpdateFailureStoreAction {
 export interface DeleteQueriesAction {
   type: 'delete_queries';
   request: {
-    name: string;
+    definition: Streams.all.Definition;
   };
 }
 

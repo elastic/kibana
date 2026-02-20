@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '../../sig_events/queries';
+import type { StreamQuery } from '../../sig_events/queries';
 
 export const emptyAssets = {
   dashboards: [] as string[],
   rules: [] as string[],
-  queries: [] as StreamQueryKql[],
+  queries: [] as StreamQuery[],
 } as const;

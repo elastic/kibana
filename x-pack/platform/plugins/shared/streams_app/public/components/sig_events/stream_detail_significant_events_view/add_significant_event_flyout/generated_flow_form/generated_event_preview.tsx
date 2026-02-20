@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -31,8 +31,8 @@ import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
-  onSave: (query: StreamQueryKql) => void;
+  query: StreamQuery;
+  onSave: (query: StreamQuery) => void;
   systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
@@ -50,7 +50,7 @@ export function GeneratedEventPreview({
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
-  const [query, setQuery] = useState<StreamQueryKql>(initialQuery);
+  const [query, setQuery] = useState<StreamQuery>(initialQuery);
 
   const options = [
     { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },

@@ -208,6 +208,9 @@ const expectedQueriesResponse = {
       id: '12345',
       title: 'Test',
       kql: { query: 'atest' },
+      esql: {
+        query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* | WHERE KQL("atest")`,
+      },
     },
   ],
 };

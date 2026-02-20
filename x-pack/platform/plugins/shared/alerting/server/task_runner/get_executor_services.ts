@@ -26,7 +26,7 @@ import type {
   PublicRuleResultService,
 } from '../types';
 import { withAlertingSpan } from './lib';
-import type { AsyncSearchClient, TaskRunnerContext } from './types';
+import { type AsyncSearchClient, type TaskRunnerContext } from './types';
 import { wrapAsyncSearchClient } from '../lib/wrap_async_search_client';
 
 interface GetExecutorServicesOpts {
@@ -38,6 +38,7 @@ interface GetExecutorServicesOpts {
   ruleResultService: RuleResultService;
   ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
+  uiamApiKey?: string | null;
 }
 
 export interface ExecutorServices {

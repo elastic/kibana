@@ -216,14 +216,14 @@ evaluate.describe(
                     const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
                     const { queries } = await generateSignificantEvents({
                       stream,
+                      esClient,
                       start: kbnDatemath.parse('now-24h')!.valueOf(),
                       end: kbnDatemath.parse('now')!.valueOf(),
-                      esClient,
                       inferenceClient,
                       logger,
                       signal: new AbortController().signal,
                       systemPrompt: significantEventsPrompt,
-                      features: example.input.features,
+                      getFeatures: async () => example.input.features,
                     });
 
                     // The task should return the array of generated queries
@@ -285,14 +285,14 @@ evaluate.describe(
               const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
               const { queries } = await generateSignificantEvents({
                 stream,
+                esClient,
                 start: kbnDatemath.parse('now-24h')!.valueOf(),
                 end: kbnDatemath.parse('now')!.valueOf(),
-                esClient,
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
                 systemPrompt: significantEventsPrompt,
-                features: [],
+                getFeatures: async () => [],
               });
 
               return queries;

@@ -58,7 +58,6 @@ import {
   selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
-  selectSamplesForSimulation,
 } from './state_management/simulation_state_machine/selectors';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
 import {
@@ -121,29 +120,51 @@ const PreviewDocumentsGroupBy = () => {
     useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
-  const simulationFailedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
+  const derivedDocumentMetrics = useSimulatorSelector((state) => {
+    const docs = state.context.simulation?.documents;
+    if (!docs) return undefined;
+
+    const selectedConditionId = state.context.selectedConditionId;
+    const filteredDocs = selectedConditionId
+      ? docs.filter((doc) => doc.processed_by?.includes(selectedConditionId) ?? false)
+      : docs;
+
+    const total = filteredDocs.length;
+    if (total === 0) return undefined;
+
+    const counts = filteredDocs.reduce((acc, doc) => {
+      acc[doc.status] = (acc[doc.status] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      failed_rate: (counts.failed ?? 0) / total,
+      partially_parsed_rate: (counts.partially_parsed ?? 0) / total,
+      skipped_rate: (counts.skipped ?? 0) / total,
+      parsed_rate: (counts.parsed ?? 0) / total,
+      dropped_rate: (counts.dropped ?? 0) / total,
+    };
+  });
+
+  const hasMetrics = Boolean(derivedDocumentMetrics);
+  const simulationFailedRate = formatRateToPercentage(derivedDocumentMetrics?.failed_rate);
+  const simulationSkippedRate = formatRateToPercentage(derivedDocumentMetrics?.skipped_rate);
+  const simulationPartiallyParsedRate = formatRateToPercentage(
+    derivedDocumentMetrics?.partially_parsed_rate
   );
-  const simulationSkippedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.skipped_rate)
-  );
-  const simulationPartiallyParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.partially_parsed_rate)
-  );
-  const simulationParsedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
-  );
-  const simulationDroppedRate = useSimulatorSelector((state) =>
-    formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
-  );
+  const simulationParsedRate = formatRateToPercentage(derivedDocumentMetrics?.parsed_rate);
+  const simulationDroppedRate = formatRateToPercentage(derivedDocumentMetrics?.dropped_rate);
   const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
-  const totalSamples = useSimulatorSelector((state) => state.context.samples.length);
-  const activeSamples = useSimulatorSelector(
-    (state) => selectSamplesForSimulation(state.context).length
-  );
-  const conditionPercentage =
-    totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
+  const conditionPercentage = useSimulatorSelector((state) => {
+    const conditionId = state.context.selectedConditionId;
+    if (!conditionId) return 0;
+    const metrics = state.context.simulation?.processors_metrics?.[conditionId];
+    if (!metrics) return 0;
+    // Condition match rate is tracked via the simulation-only condition noop processor:
+    // it is skipped when the condition doesn't match.
+    const matchedRate = 1 - (metrics.skipped_rate ?? 0);
+    return Math.round(matchedRate * 100);
+  });
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,

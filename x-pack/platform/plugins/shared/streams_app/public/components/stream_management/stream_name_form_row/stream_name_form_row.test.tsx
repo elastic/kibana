@@ -107,26 +107,20 @@ describe('StreamNameFormRow', () => {
 
   describe('getHelpText', () => {
     it('should return empty error help text when stream name is shorter than the prefix', () => {
-      const result = getHelpText(true, false, false);
+      const result = getHelpText(true, false);
       expect(result).toBe('Stream name is required.');
     });
 
-    it('should return name too long error help text when stream name is longer than 200 characters', () => {
-      const result = getHelpText(false, true, false);
-      expect(result).toBe('Stream name cannot be longer than 200 characters.');
-    });
-
     it('should return undefined help text when input is valid', () => {
-      const result = getHelpText(false, false, false);
+      const result = getHelpText(false, false);
       expect(result).toBeUndefined();
     });
   });
 
   describe('getErrorMessage', () => {
-    it('should return uppercase chars error message when stream name contains uppercase characters', () => {
+    it('should return the base validation error message when provided', () => {
       const result = getErrorMessage(
-        true,
-        false,
+        'Stream name cannot contain uppercase characters.',
         false,
         false,
         false,
@@ -137,66 +131,25 @@ describe('StreamNameFormRow', () => {
       expect(result).toBe('Stream name cannot contain uppercase characters.');
     });
 
-    it('should return spaces error message when stream name contains spaces', () => {
-      const result = getErrorMessage(
-        false,
-        true,
-        false,
-        false,
-        false,
-        'logs.',
-        'linux',
-        mockRouter
-      );
-      expect(result).toBe('Stream name cannot contain spaces.');
-    });
-
     it('should return name conflict error message when stream name is duplicated', () => {
-      const result = getErrorMessage(
-        false,
-        false,
-        true,
-        false,
-        false,
-        'logs.',
-        'linux',
-        mockRouter
-      );
+      const result = getErrorMessage(undefined, true, false, false, 'logs.', 'linux', mockRouter);
       expect(result).toBe('A stream with this name already exists');
     });
 
     it('should return root child does not exist error message when root child stream does not exist', () => {
-      const result = getErrorMessage(
-        false,
-        false,
-        false,
-        false,
-        true,
-        'logs.',
-        'linux',
-        mockRouter
-      );
+      const result = getErrorMessage(undefined, false, false, true, 'logs.', 'linux', mockRouter);
       expect(result).toBe('The child stream logs.linux does not exist. Please create it first.');
     });
 
     it('should return name contains dot error message component when stream name contains a dot', () => {
-      const result = getErrorMessage(false, false, false, true, true, 'logs.', 'linux', mockRouter);
+      const result = getErrorMessage(undefined, false, true, true, 'logs.', 'linux', mockRouter);
       render(<I18nProvider>{result}</I18nProvider>);
       expect(screen.getByText(/Stream name cannot contain the "." character/)).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppChildStreamLink')).toHaveTextContent('logs.linux');
     });
 
     it('should return undefined error message when input is valid', () => {
-      const result = getErrorMessage(
-        false,
-        false,
-        false,
-        false,
-        false,
-        'logs.',
-        'linux',
-        mockRouter
-      );
+      const result = getErrorMessage(undefined, false, false, false, 'logs.', 'linux', mockRouter);
       expect(result).toBeUndefined();
     });
   });

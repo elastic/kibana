@@ -8,13 +8,14 @@
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../../hooks/use_fetch_discovery_queries';
 import { useFetchErrorToast } from '../../../../../hooks/common/use_fetch_error_toast';
-import { type SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
+import { type SignificantEventQueryRow } from '../../../../../hooks/use_fetch_discovery_queries';
 import { useKibana } from '../../../../../hooks/common/use_kibana';
 import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
 import { PROMOTE_QUERY_ACTION_TITLE, getPromoteQuerySuccessToast } from './translations';
 
-export function PromoteAction({ item }: { item: SignificantEventItem }) {
+export function PromoteAction({ item }: { item: SignificantEventQueryRow }) {
   const queryClient = useQueryClient();
   const { promote } = useQueriesApi();
   const {
@@ -30,7 +31,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
       if (promotedQueryCount === 1) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
       }
-      queryClient.invalidateQueries({ queryKey: ['significantEvents'] });
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['unbackedQueriesCount'] });
     },
     onError: showFetchErrorToast,

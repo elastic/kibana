@@ -51,14 +51,22 @@ test.describe(
     });
 
     test('should recover from API errors during rule updates', async ({ context, pageObjects }) => {
-      // Create a rule first
+      // Create a rule first with a field condition (not the default "always" condition)
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('error-test');
+      await pageObjects.streams.fillConditionEditor({
+        field: 'log.level',
+        value: 'error',
+        operator: 'equals',
+      });
       await pageObjects.streams.saveRoutingRule();
       await pageObjects.toasts.closeAll();
 
       // Edit the rule
       await pageObjects.streams.clickEditRoutingRule('logs.error-test');
+
+      // Make a change to enable the Update button (hasRoutingChanges guard)
+      await pageObjects.streams.fillConditionEditor({ value: 'info' });
 
       // Simulate network failure
       await context.setOffline(true);

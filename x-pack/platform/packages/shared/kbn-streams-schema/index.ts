@@ -81,10 +81,12 @@ export {
 
 export {
   type StreamQuery,
-  type StreamQueryKql,
+  type StreamQueryInput,
+  type QueriesGetResponse,
+  type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
-  streamQueryKqlSchema,
   streamQuerySchema,
+  streamQueryInputSchema,
 } from './src/sig_events/queries';
 
 export {
@@ -148,6 +150,11 @@ export type {
 } from './src/sig_events/api/significant_events';
 
 export { emptyAssets } from './src/stream_management/helpers/empty_assets';
+export {
+  validateStreamName,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from './src/stream_management/helpers/stream_name_validation';
 
 export {
   type Feature,
@@ -157,6 +164,7 @@ export {
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
+  COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
   featureSchema,
