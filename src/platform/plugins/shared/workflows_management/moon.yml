@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/sse-utils-client'
   - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
