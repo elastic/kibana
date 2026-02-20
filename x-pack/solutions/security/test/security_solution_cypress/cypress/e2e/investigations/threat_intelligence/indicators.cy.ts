@@ -71,6 +71,7 @@ const URL_WITH_CONTRADICTORY_FILTERS =
 
 // Failing: See https://github.com/elastic/kibana/issues/246404
 // Failing: See https://github.com/elastic/kibana/issues/246885
+// Failing: See https://github.com/elastic/kibana/issues/246405
 describe.skip('Single indicator', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));
 

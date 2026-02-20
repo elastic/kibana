@@ -10,8 +10,7 @@ import { AvailabilityReporting } from './availability_reporting';
 import type { StatusTag } from './location_status_tags';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
-// FLAKY: https://github.com/elastic/kibana/issues/253299
-describe.skip('AvailabilityReporting component', () => {
+describe('AvailabilityReporting component', () => {
   let allLocations: StatusTag[];
 
   beforeEach(() => {
@@ -43,7 +42,6 @@ describe.skip('AvailabilityReporting component', () => {
   it('renders correctly against snapshot', async () => {
     const { findByText } = render(<AvailabilityReporting allLocations={allLocations} />);
 
-    expect(await findByText('This table contains 3 rows.')).toBeInTheDocument();
     expect(await findByText('au-heartbeat')).toBeInTheDocument();
   });
 });

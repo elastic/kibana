@@ -26,6 +26,15 @@ function truncateFailureBody(failure: string, maxCharacters: number = 8192): str
       ].join('\n');
 }
 
+function getFailureBodyFromIssueBody(body: string): string | undefined {
+  const match = body.match(/```[\r\n]+([\s\S]*?)[\r\n]+```/);
+  if (!match) {
+    return undefined;
+  }
+
+  return match[1].trim();
+}
+
 function createFTRTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
@@ -186,11 +195,48 @@ function createScoutComment(
   failure: ScoutTestFailureExtended,
   buildUrl: string,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  newErrorMessage?: string
 ): string {
-  return `New failure for "${failure.target}" target: [${
+  const base = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
   } - ${branch}](${buildUrl})`;
+  if (!newErrorMessage) {
+    /*
+     * If there's a failure with the same error message as before, just post a comment
+     * with pipeline link and failure target.
+     *
+     * Example:
+     *
+     * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+     */
+    return base;
+  }
+
+  /*
+   * If there's a new error message, include it in the comment. This provides more
+   * context on how the failure has changed since the issue was opened or last updated.
+   *
+   * Example:
+   *
+   * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
+   *
+   * New error message:
+   * ```
+   * Error: expect(locator).toBeEnabled() failed
+   *
+   * Locator: locator('notExist')
+   * Expected: enabled
+   * Timeout: 10000ms
+   * Error: element(s) not found
+   *
+   * Call log:
+   *   - Expect "toBeEnabled" with timeout 10000ms
+   *   - waiting for locator('notExist')
+   * ```
+   */
+
+  return `${base}\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
 }
 
 async function updateFTRFailureIssue(
@@ -228,7 +274,16 @@ async function updateScoutFailureIssue(
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createScoutComment(failure, buildUrl, branch, pipeline);
+  const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
+  let newErrorMessage: string | undefined;
+  if (failure.errorMessage && previousFailureBody) {
+    const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
+    if (!previousFailureBody.includes(currentErrorMsg)) {
+      newErrorMessage = currentErrorMsg;
+    }
+  }
+
+  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };

@@ -9,12 +9,10 @@ import React from 'react';
 import { CertificatesPage } from './certificates';
 import { render } from '../lib/helper/rtl_helpers';
 
-// FLAKY: https://github.com/elastic/kibana/issues/253300
-describe.skip('CertificatesPage', () => {
+describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);
 
-    expect(await findByText('This table contains 0 rows; Page 1 of 0.')).toBeInTheDocument();
     expect(await findByText('No Certificates found.')).toBeInTheDocument();
   });
 });

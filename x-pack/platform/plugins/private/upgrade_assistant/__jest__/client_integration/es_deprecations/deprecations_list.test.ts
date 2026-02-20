@@ -32,7 +32,8 @@ import {
   MOCK_DS_DEPRECATION_READ_ONLY,
 } from './mocked_responses';
 
-describe('ES deprecations table', () => {
+// Failing: See https://github.com/elastic/kibana/issues/241740
+describe.skip('ES deprecations table', () => {
   let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

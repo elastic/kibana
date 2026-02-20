@@ -1689,8 +1689,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
-/src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
@@ -3148,6 +3146,9 @@ src/platform/test/moon.yml @elastic/kibana-operations
 x-pack/platform/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
+
+# Leads approval
+/AGENTS.md @elastic/kibana-tech-leads
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
