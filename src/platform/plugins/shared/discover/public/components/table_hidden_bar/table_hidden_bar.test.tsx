@@ -13,16 +13,16 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import type { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
-import { FetchStatus } from '../../application/types';
+import { FetchStatus, type SidebarToggleState } from '../../application/types';
 import { TableHiddenBar } from './table_hidden_bar';
 import { PanelsToggle } from '../panels_toggle';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { internalStateActions } from '../../application/main/state_management/redux';
 
 describe('TableHiddenBar', () => {
-  const sidebarToggleState$ = new BehaviorSubject({
+  const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
     isCollapsed: false,
-    toggle: () => {},
+    toggle: (_isCollapsed: boolean) => {},
   });
 
   const mountComponent = (props?: { panelsToggle?: React.ReactElement }) => {

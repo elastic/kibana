@@ -35,6 +35,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -49,6 +50,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -64,6 +66,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: true,
+          hideDataTable: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -78,6 +81,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -95,6 +99,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -122,6 +127,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -152,6 +158,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: true,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -172,6 +179,7 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

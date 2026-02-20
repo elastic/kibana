@@ -638,6 +638,7 @@ describe('buildEsqlFetchSubscribe', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
+          hideDataTable: false,
         },
       })
     );

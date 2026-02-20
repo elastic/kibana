@@ -256,6 +256,7 @@ describe('test getDataStateContainer', () => {
             rowHeight: false,
             breakdownField: false,
             hideChart: false,
+            hideDataTable: false,
           },
         })
       );

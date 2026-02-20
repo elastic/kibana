@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -72,17 +72,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isChartAvailable) {
         expect(await discover.isChartVisible()).to.be(shouldHistogramBeOpen);
-        if (shouldHistogramBeOpen) {
-          await testSubjects.existOrFail('dscPanelsToggleInHistogram');
-          await testSubjects.existOrFail('dscHideHistogramButton');
 
-          await testSubjects.missingOrFail('dscPanelsToggleInPage');
+        // Chart toggle always stays in the histogram area (expanded toolbar or collapsed bar)
+        await testSubjects.existOrFail('dscPanelsToggleInHistogram');
+        // Table toggle is always present in the page area when chart is available
+        await testSubjects.existOrFail('dscPanelsToggleInPage');
+
+        if (shouldHistogramBeOpen) {
+          await testSubjects.existOrFail('dscHideHistogramButton');
           await testSubjects.missingOrFail('dscShowHistogramButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInPage');
           await testSubjects.existOrFail('dscShowHistogramButton');
-
-          await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
           await testSubjects.missingOrFail('dscHideHistogramButton');
         }
       } else {
