@@ -254,7 +254,7 @@ describe('AlertsPage with all capabilities', () => {
       await waitFor(() => {
         const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
         expect(manageRulesLink).toBeInTheDocument();
-        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
       });
     });
   });

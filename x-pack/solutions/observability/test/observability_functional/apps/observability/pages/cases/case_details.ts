@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await (await find.byCssSelector('[data-test-subj*="alert-rule-link"]')).click();
 
         const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/observability/alerts/rules')).to.be(true);
+        expect(url.includes('/app/rules')).to.be(true);
       });
     });
   });
