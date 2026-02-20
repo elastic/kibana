@@ -22,13 +22,14 @@ import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
-import type { DockerOptions, ServerlessOptions } from './utils';
+import type { DockerOptions, DockerSnapshotOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
   log as defaultLog,
   NativeRealm,
   parseEsLog,
   runDockerContainer,
+  runDockerSnapshotContainer,
   runServerlessCluster,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -357,7 +358,7 @@ export class Cluster {
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
       skipSecuritySetup = false,
-      reportTime = () => {},
+      reportTime = () => { },
       startTime,
       skipReadyCheck,
       readyTimeout,
@@ -466,9 +467,9 @@ export class Cluster {
         },
         tls: caCert
           ? {
-              ca: caCert,
-              rejectUnauthorized: true,
-            }
+            ca: caCert,
+            rejectUnauthorized: true,
+          }
           : undefined,
         Connection: HttpConnection,
         requestTimeout: 30_000,
@@ -487,11 +488,11 @@ export class Cluster {
       if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
-          elasticPassword: options.password,
+          elasticPassword: options.password ?? 'changeme',
           client,
         });
 
-        await nativeRealm.setPasswords(options);
+        await nativeRealm.setPasswords(options as Record<string, unknown>);
 
         const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
         if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
@@ -641,5 +642,17 @@ export class Cluster {
     }
 
     await runDockerContainer(this.log, options);
+  }
+
+  /**
+   * Run an Elasticsearch Docker container with snapshot-equivalent semantics.
+   * Same defaults and native realm setup as the local snapshot flow.
+   */
+  async runDockerSnapshot(options: DockerSnapshotOptions) {
+    if (this.process || this.outcome) {
+      throw new Error('ES stateful cluster has already been started');
+    }
+
+    await runDockerSnapshotContainer(this.log, options);
   }
 }

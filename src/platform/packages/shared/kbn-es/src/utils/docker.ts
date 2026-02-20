@@ -56,7 +56,7 @@ import {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from './serverless_file_realm';
-import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
+import { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
 interface ImageOptions {
@@ -195,16 +195,9 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
   ['discovery.type', 'single-node'],
 
   ['xpack.security.enabled', 'false'],
+
+  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
-// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
-if (process.arch === 'arm64') {
-  DEFAULT_DOCKER_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
-    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
-  );
-} else {
-  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m']);
-}
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
@@ -293,16 +286,9 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ],
   ['xpack.security.remote_cluster_server.ssl.verification_mode', 'certificate'],
   ['xpack.security.remote_cluster_server.ssl.client_authentication', 'required'],
+
+  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
 ];
-// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
-if (process.arch === 'arm64') {
-  DEFAULT_SERVERLESS_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
-    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
-  );
-} else {
-  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
-}
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.http.ssl.enabled', 'true'],
@@ -820,9 +806,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   const resourceFileOverrides: Record<string, string> = resources
     ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
-        acc[basename(filePath)] = resolve(process.cwd(), filePath);
-        return acc;
-      }, {} as Record<string, string>)
+      acc[basename(filePath)] = resolve(process.cwd(), filePath);
+      return acc;
+    }, {} as Record<string, string>)
     : {};
 
   const tierSpecificRolesFileExists = (filePath: string): boolean => {
@@ -884,8 +870,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     ...(await getOperatorVolume(esProjectTypeFromKbn.get(projectType)!)),
 
     '--volume',
-    `${
-      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    `${ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`
@@ -1006,17 +991,17 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     },
     ...(options.ssl
       ? {
-          tls: {
-            ca: [fs.readFileSync(CA_CERT_PATH)],
-            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-            // for the ip which is not validated. As such we are getting the error
-            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-            // To work around that we are overriding the function checkServerIdentity too
-            checkServerIdentity: () => {
-              return undefined;
-            },
+        tls: {
+          ca: [fs.readFileSync(CA_CERT_PATH)],
+          // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+          // for the ip which is not validated. As such we are getting the error
+          // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+          // To work around that we are overriding the function checkServerIdentity too
+          checkServerIdentity: () => {
+            return undefined;
           },
-        }
+        },
+      }
       : {}),
   });
 
@@ -1174,4 +1159,175 @@ async function getOperatorVolume(projectType: string) {
     )
   );
   return ['--volume', `${SERVERLESS_OPERATOR_PATH}:${SERVERLESS_CONFIG_PATH}operator`];
+}
+
+// ---------------------------------------------------------------------------
+// Docker Snapshot Mode
+// ---------------------------------------------------------------------------
+
+export interface DockerSnapshotOptions extends EsClusterExecOptions {
+  license?: string;
+  version?: string;
+  port?: number;
+  ssl?: boolean;
+  kill?: boolean;
+  tag?: string;
+  image?: string;
+}
+
+/**
+ * Default esArgs for Docker snapshot mode.
+ * Mirrors the defaults applied by Cluster.exec() for the local snapshot flow,
+ * plus the Docker-specific settings required for single-node operation.
+ */
+const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
+  ['ES_LOG_STYLE', 'file'],
+  ['discovery.type', 'single-node'],
+  ['action.destructive_requires_name', 'true'],
+  ['cluster.routing.allocation.disk.threshold_enabled', 'false'],
+  ['ingest.geoip.downloader.enabled', 'false'],
+  ['search.check_ccs_compatibility', 'true'],
+
+  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+];
+
+/**
+ * Runs an Elasticsearch Docker container with the same semantics as `yarn es snapshot`.
+ *
+ * - Applies the same default esArgs as the local snapshot flow
+ * - Maps `--license=trial` → `xpack.license.self_generated.type=trial`
+ * - Maps `-E path.data=<relative>` → a Docker volume mount
+ * - Waits for cluster readiness and sets up the native realm (passwords)
+ */
+export async function runDockerSnapshotContainer(log: ToolingLog, options: DockerSnapshotOptions) {
+  await setupDocker({ log, options });
+
+  const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+  const image = resolveDockerImage({ image: options.image, tag, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+  await setupDockerImage({ log, image });
+
+  const port = options.port || DEFAULT_PORT;
+  const password = options.password || 'changeme';
+
+  const esArgsMap = new Map<string, string>(DEFAULT_DOCKER_SNAPSHOT_ESARGS);
+
+  if (options.license === 'trial') {
+    esArgsMap.set('xpack.license.self_generated.type', 'trial');
+  }
+
+  esArgsMap.set('ELASTIC_PASSWORD', password);
+
+  // Process user-supplied -E args; extract path.data for a volume mount
+  const volumeMounts: string[] = [];
+  const userEsArgs: string[] = options.esArgs
+    ? Array.isArray(options.esArgs)
+      ? options.esArgs
+      : [options.esArgs]
+    : [];
+
+  for (const arg of userEsArgs) {
+    const [key, ...rest] = arg.split('=');
+    const k = key.trim();
+    const v = rest.join('=').trim();
+
+    if (k === 'path.data') {
+      const hostPath = resolve(process.cwd(), v);
+      volumeMounts.push('--volume', `${hostPath}:/usr/share/elasticsearch/data`);
+      continue;
+    }
+
+    esArgsMap.set(k, v);
+  }
+
+  if (options.ssl) {
+    esArgsMap.set('xpack.security.http.ssl.enabled', 'true');
+    esArgsMap.set(
+      'xpack.security.http.ssl.keystore.path',
+      `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`
+    );
+    esArgsMap.set('xpack.security.http.ssl.keystore.password', ES_P12_PASSWORD);
+    esArgsMap.set('xpack.security.transport.ssl.enabled', 'true');
+    esArgsMap.set(
+      'xpack.security.transport.ssl.keystore.path',
+      `${SERVERLESS_CONFIG_PATH}certs/elasticsearch.p12`
+    );
+    esArgsMap.set('xpack.security.transport.ssl.verification_mode', 'certificate');
+    esArgsMap.set('xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD);
+    volumeMounts.push(...getESp12Volume());
+  }
+
+  const envArgs = Array.from(esArgsMap).flatMap(([k, v]) => ['--env', `${k}=${v}`]);
+
+  const dockerCmd = [
+    'run',
+    '--detach',
+    '-t',
+    '--net',
+    'elastic',
+    '--name',
+    'es01',
+    '-p',
+    `127.0.0.1:${port}:${port}`,
+    '-p',
+    '127.0.0.1:9300:9300',
+    ...envArgs,
+    ...volumeMounts,
+    image,
+  ];
+
+  log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
+  const { stdout: containerId } = await execa('docker', dockerCmd);
+
+  log.info(`Container started: ${containerId.substring(0, 12)}`);
+
+  process.on('SIGINT', () => {
+    try {
+      execa.commandSync('docker kill es01');
+    } catch {
+      // container may already be stopped
+    }
+  });
+
+  const esUrl = `${options.ssl ? 'https' : 'http'}://127.0.0.1:${port}`;
+  const client = new Client({
+    node: esUrl,
+    auth: { username: 'elastic', password },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
+    ...(options.ssl
+      ? {
+        tls: {
+          ca: [fs.readFileSync(CA_CERT_PATH)],
+          checkServerIdentity: () => undefined,
+        },
+      }
+      : {}),
+  });
+
+  if (!options.skipReadyCheck) {
+    log.info('Waiting for ES to be ready...');
+    await waitUntilClusterReady({
+      client,
+      expectedStatus: 'yellow',
+      log,
+      readyTimeout: options.readyTimeout,
+    });
+  }
+
+  const securityExplicitlyDisabled = esArgsMap.get('xpack.security.enabled') === 'false';
+  if (!securityExplicitlyDisabled && !options.skipSecuritySetup) {
+    const nativeRealm = new NativeRealm({ elasticPassword: password, client, log });
+    await nativeRealm.setPasswords(options as Record<string, unknown>);
+  }
+
+  log.success('ES is ready and native realm is set up');
+  log.info(`  View logs:    ${chalk.bold('docker logs -f es01')}`);
+  log.info(`  Shell:        ${chalk.bold('docker exec -it es01 /bin/bash')}`);
+  log.info(`  Stop:         ${chalk.bold('docker container stop es01')}`);
+
+  await execa('docker', ['logs', '-f', 'es01'], {
+    stdio: ['ignore', 'inherit', 'inherit'],
+  }).catch(() => {
+    // docker logs exits when the container stops
+  });
 }
