@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ON_APPLY_FILTER, ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { transformEnhancementsOut } from './transform_enhancements_out';
 
 describe('transformEnhancementsOut', () => {
@@ -27,7 +27,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'Go to Dashboard',
               },
               eventId: '8aeddba7-a7ed-42e2-988e-794c8435028d',
-              triggers: [ON_APPLY_FILTER],
+              triggers: ['FILTER_TRIGGER'],
             },
           ],
         },
@@ -40,7 +40,7 @@ describe('transformEnhancementsOut', () => {
             "dashboardRefName": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:8aeddba7-a7ed-42e2-988e-794c8435028d:dashboardId",
             "label": "Go to Dashboard",
             "open_in_new_tab": false,
-            "trigger": "on_apply_filter",
+            "trigger": "FILTER_TRIGGER",
             "type": "dashboard_drilldown",
             "use_filters": true,
             "use_time_range": true,
@@ -89,7 +89,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'Open in Discover',
               },
               eventId: '8b3b25b4-1691-4826-82c4-fb6c0478f669',
-              triggers: [ON_APPLY_FILTER],
+              triggers: ['FILTER_TRIGGER'],
             },
           ],
         },
@@ -101,7 +101,7 @@ describe('transformEnhancementsOut', () => {
           Object {
             "label": "Open in Discover",
             "open_in_new_tab": false,
-            "trigger": "on_apply_filter",
+            "trigger": "FILTER_TRIGGER",
             "type": "discover_drilldown",
           },
         ],
@@ -127,7 +127,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'Go to URL',
               },
               eventId: 'c29b72e0-8a32-4214-abe0-6c54c6f804b7',
-              triggers: [ON_CLICK_VALUE],
+              triggers: ['VALUE_CLICK_TRIGGER'],
             },
           ],
         },
@@ -140,7 +140,7 @@ describe('transformEnhancementsOut', () => {
             "encode_url": true,
             "label": "Go to URL",
             "open_in_new_tab": true,
-            "trigger": "on_click_value",
+            "trigger": "VALUE_CLICK_TRIGGER",
             "type": "url_drilldown",
             "url": "https://localhost/?{{event.key}}",
           },

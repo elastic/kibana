@@ -112,7 +112,7 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
     },
     "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[{\"version\":\"7.7.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\"},\"panelIndex\":\"e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"ffd3e4dc-cb1a-419f-afeb-03e8c7742bbf\",\"triggers\":[\"on_click_value\",\"on_select_range\"],\"action\":{\"name\":\"Go to pie chart dashboard\",\"config\":{\"useCurrentDateRange\":true,\"useCurrentFilters\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\"}]",
+    "panelsJSON": "[{\"version\":\"7.7.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\"},\"panelIndex\":\"e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"ffd3e4dc-cb1a-419f-afeb-03e8c7742bbf\",\"triggers\":[\"VALUE_CLICK_TRIGGER\",\"SELECT_RANGE_TRIGGER\"],\"action\":{\"name\":\"Go to pie chart dashboard\",\"config\":{\"useCurrentDateRange\":true,\"useCurrentFilters\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_e637d5f0-a7e6-4635-81ed-39f2b1aac6f4\"}]",
     "refreshInterval": {
       "pause": true,
       "value": 0
