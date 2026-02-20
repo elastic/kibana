@@ -98,7 +98,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     if (id) {
       dispatch(loadWorkflowThunk({ id }));
     }
-    setIsVersionHistoryOpen(false);
+    setSelectedVersionForDiff(null);
+    setDiffViewMode('unified');
+    setHighlightDiff(false);
   }, [dispatch, id]);
 
   const onCloseVersionHistoryPanel = useCallback(() => {
@@ -109,6 +111,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const onToggleVersionHistory = useCallback(() => {
     setSelectedVersionForDiff(null);
     setIsVersionHistoryOpen((prev) => !prev);
+  }, []);
+
+  const onSaveSuccessExitDiffView = useCallback(() => {
+    setSelectedVersionForDiff(null);
+    setDiffViewMode('unified');
+    setHighlightDiff(false);
   }, []);
 
   const onSelectVersionForDiff = useCallback(
@@ -153,6 +161,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           setHighlightDiff={setHighlightDiff}
           onToggleVersionHistory={onToggleVersionHistory}
           isVersionHistoryOpen={isVersionHistoryOpen}
+          onSaveSuccess={onSaveSuccessExitDiffView}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>

@@ -32,7 +32,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowHistory } from '../../../entities/workflows/model/use_workflow_history';
@@ -377,6 +377,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
     const [restoreTargetEventId, setRestoreTargetEventId] = useState<string | null>(null);
     const [isRestoring, setIsRestoring] = useState(false);
     const [isDiffSettingsOpen, setIsDiffSettingsOpen] = useState(false);
+    const bodyScrollRef = useRef<HTMLDivElement>(null);
 
     const onRestoreRequest = useCallback((eventId: string) => {
       setRestoreTargetEventId(eventId);
@@ -427,6 +428,12 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
         queryClient.invalidateQueries({ queryKey: ['workflows'] });
         setRestoreTargetEventId(null);
         onRestoreSuccess?.();
+        setTimeout(() => {
+          const el = bodyScrollRef.current;
+          if (el && el.scrollTop > 0) {
+            el.scrollTo({ top: 0 });
+          }
+        }, 100);
       } catch (err) {
         notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('workflows.versionHistory.restoreErrorTitle', {
@@ -531,7 +538,7 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <div css={styles.body}>
+        <div ref={bodyScrollRef} css={styles.body}>
           {isLoading && (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>

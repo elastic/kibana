@@ -265,15 +265,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
             {isSplitDiffView && splitLineTypes ? (
               <EuiFlexGroup gutterSize="none" css={styles.splitDiffContainer} alignItems="stretch">
                 <EuiFlexItem grow={1} css={styles.splitDiffPane}>
-                  <div
-                    css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
-                    data-test-subj="workflowDiffSplitCurrentLabel"
-                  >
-                    <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                      {i18n.translate('workflows.diffView.split.currentVersionLabel', {
-                        defaultMessage: 'Current version',
-                      })}
-                    </EuiText>
+                  <div css={styles.splitDiffPaneLabelWrapper}>
+                    <div
+                      css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelCurrent]}
+                      data-test-subj="workflowDiffSplitCurrentLabel"
+                    >
+                      <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                        {i18n.translate('workflows.diffView.split.currentVersionLabel', {
+                          defaultMessage: 'Current version',
+                        })}
+                      </EuiText>
+                    </div>
                   </div>
                   <div css={styles.splitDiffEditor}>
                     <SplitDiffPaneEditor
@@ -284,15 +286,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem grow={1} css={styles.splitDiffPane}>
-                  <div
-                    css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
-                    data-test-subj="workflowDiffSplitPreviousLabel"
-                  >
-                    <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
-                      {i18n.translate('workflows.diffView.split.previousVersionLabel', {
-                        defaultMessage: 'Previous version',
-                      })}
-                    </EuiText>
+                  <div css={styles.splitDiffPaneLabelWrapper}>
+                    <div
+                      css={[styles.splitDiffPaneLabel, styles.splitDiffPaneLabelPrevious]}
+                      data-test-subj="workflowDiffSplitPreviousLabel"
+                    >
+                      <EuiText size="xs" css={styles.splitDiffPaneLabelText}>
+                        {i18n.translate('workflows.diffView.split.previousVersionLabel', {
+                          defaultMessage: 'Previous version',
+                        })}
+                      </EuiText>
+                    </div>
                   </div>
                   <div css={styles.splitDiffEditor}>
                     <SplitDiffPaneEditor
@@ -367,26 +371,35 @@ const componentStyles = {
         borderRight: 'none',
       },
     }),
+  splitDiffPaneLabelWrapper: css({
+    flex: '0 0 auto',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '10px 12px 8px',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+    backgroundColor: 'transparent',
+  }),
   splitDiffPaneLabel: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flex: '0 0 auto',
-      padding: '8px 12px',
+      padding: '6px 14px',
       borderRadius: euiTheme.border.radius.medium,
-      margin: '8px 12px 0',
-      alignSelf: 'flex-start',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
     }),
   splitDiffPaneLabelText: css({
     fontWeight: 600,
+    fontSize: '13px',
   }),
   splitDiffPaneLabelCurrent: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBasePrimary ?? euiTheme.colors.lightestShade,
-      color: euiTheme.colors.primaryText ?? euiTheme.colors.text,
+      backgroundColor: euiTheme.colors.backgroundBasePrimary,
+      color: euiTheme.colors.primary,
     }),
   splitDiffPaneLabelPrevious: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning ?? euiTheme.colors.backgroundBasePlain,
-      color: euiTheme.colors.warningText ?? euiTheme.colors.text,
+      backgroundColor: euiTheme.colors.backgroundLightWarning,
+      color: euiTheme.colors.warningText,
     }),
   splitDiffEditor: css({
     flex: 1,

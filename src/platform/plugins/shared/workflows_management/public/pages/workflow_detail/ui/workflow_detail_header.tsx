@@ -33,7 +33,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_ID } from '../../../../common';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
@@ -43,6 +42,7 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -92,6 +92,8 @@ export interface WorkflowDetailHeaderProps {
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
   onToggleVersionHistory?: () => void;
   isVersionHistoryOpen?: boolean;
+  /** Called when save completes successfully; use e.g. to exit diff view. */
+  onSaveSuccess?: () => void;
 }
 
 const historyButtonLabel = i18n.translate('workflows.workflowDetailHeader.versionHistory', {
@@ -105,6 +107,7 @@ export const WorkflowDetailHeader = React.memo(
     setHighlightDiff,
     onToggleVersionHistory,
     isVersionHistoryOpen = false,
+    onSaveSuccess,
   }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
@@ -128,11 +131,14 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
     const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
-      saveYaml();
-    }, [saveYaml]);
+      dispatch(saveYamlThunk()).then((action) => {
+        if (saveYamlThunk.fulfilled.match(action)) {
+          onSaveSuccess?.();
+        }
+      });
+    }, [dispatch, onSaveSuccess]);
 
     const updateWorkflow = useUpdateWorkflow();
     const handleToggleWorkflow = useCallback(() => {
