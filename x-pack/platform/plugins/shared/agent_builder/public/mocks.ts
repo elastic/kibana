@@ -74,6 +74,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
           flyoutRef: mockSidebarRef,
         };
       }),
+    addAttachment: jest.fn(),
   };
 };
 
