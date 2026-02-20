@@ -34,9 +34,7 @@ describe('getAlertMutedStatus', () => {
   });
 
   test('should return true when alert document is conditionally snoozed with expiry', () => {
-    const alert = createTimeOnlySnoozeAlert(
-      new Date(Date.now() + 60_000).toISOString()
-    );
+    const alert = createTimeOnlySnoozeAlert(new Date(Date.now() + 60_000).toISOString());
     expect(getAlertMutedStatus('alert-1', undefined, alert)).toBe(true);
   });
 

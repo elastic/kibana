@@ -18,9 +18,7 @@ import {
  * (time-based expiry and/or condition-based). Used to distinguish simple rule-SO mute
  * from AAD-stored snooze when determining muted status and when preserving snooze fields.
  */
-export const hasConditionalSnooze = (
-  existingAlert?: Record<string, unknown>
-): boolean => {
+export const hasConditionalSnooze = (existingAlert?: Record<string, unknown>): boolean => {
   if (!existingAlert) {
     return false;
   }

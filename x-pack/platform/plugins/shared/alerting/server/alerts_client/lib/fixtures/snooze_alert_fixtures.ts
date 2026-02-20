@@ -25,9 +25,7 @@ export interface SnoozeConditionFixture {
  * Returns a partial alert document with time-only snooze (expires_at, no conditions).
  * Useful for tests that need an existingAlert or alert with time-based snooze.
  */
-export const createTimeOnlySnoozeAlert = (
-  expiresAt: string
-): Record<string, unknown> => ({
+export const createTimeOnlySnoozeAlert = (expiresAt: string): Record<string, unknown> => ({
   [ALERT_MUTED]: true,
   [ALERT_SNOOZE_EXPIRES_AT]: expiresAt,
 });
