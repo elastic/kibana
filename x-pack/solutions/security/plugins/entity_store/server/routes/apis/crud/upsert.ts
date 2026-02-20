@@ -8,12 +8,12 @@
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
-import type { EntityStorePluginRouter } from '../../types';
-import { wrapMiddlewares } from '../middleware';
-import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../domain/errors';
-import { Entity } from '../../../common/domain/definitions/entity.gen';
-import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import type { EntityStorePluginRouter } from '../../../types';
+import { wrapMiddlewares } from '../../middleware';
+import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
+import { Entity } from '../../../../common/domain/definitions/entity.gen';
+import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 const paramsSchema = z
   .object({
