@@ -27,11 +27,16 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * This config is automatically used when running tests from:
  * osquery/test/scout_osquery/
  */
-// Filter out default Fleet host settings that use localhost — Docker containers cannot
-// resolve localhost back to the host machine, so we replace them with host.docker.internal.
-const kbnServerArgsWithoutFleetHosts = defaultConfig.kbnTestServer.serverArgs.filter(
+// Filter out default settings that we override:
+// - Fleet host settings: Docker containers cannot resolve localhost back to the host machine
+// - Auth provider/selector settings: use basic auth as primary so localhost:5620 doesn't
+//   enter a SAML redirect loop when accessed manually in a browser
+const kbnServerArgsFiltered = defaultConfig.kbnTestServer.serverArgs.filter(
   (arg: string) =>
-    !arg.startsWith('--xpack.fleet.fleetServerHosts=') && !arg.startsWith('--xpack.fleet.outputs=')
+    !arg.startsWith('--xpack.fleet.fleetServerHosts=') &&
+    !arg.startsWith('--xpack.fleet.outputs=') &&
+    !arg.startsWith('--xpack.security.authc.selector.enabled=') &&
+    !arg.startsWith('--xpack.security.authc.providers=')
 );
 
 export const servers: ScoutServerConfig = {
@@ -49,7 +54,12 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
-      ...kbnServerArgsWithoutFleetHosts,
+      ...kbnServerArgsFiltered,
+      // Basic auth as primary provider so localhost:5620 is accessible without SAML redirect loop
+      `--xpack.security.authc.providers=${JSON.stringify({
+        basic: { 'cloud-basic': { order: 0 } },
+        saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
+      })}`,
       // Fleet Server hosts pointing to host.docker.internal so Docker agents can reach it
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
