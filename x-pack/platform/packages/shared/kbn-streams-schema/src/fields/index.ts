@@ -27,6 +27,7 @@ import type {
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { recursiveRecord } from '../shared/record_types';
 
@@ -74,12 +75,7 @@ export const fieldDefinitionConfigSchema = z.intersection(
   z.union([
     z.object({
       type: z.enum(FIELD_DEFINITION_TYPES),
-      format: z.optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      ),
+      format: z.optional(NonEmptyString),
     }),
     z.object({
       type: z.literal('system'),
@@ -136,16 +132,8 @@ export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> 
   z.intersection(
     fieldDefinitionConfigSchema,
     z.object({
-      from: z
-        .string()
-        .nonempty()
-        .refine((val) => val.trim() !== '', 'No empty strings allowed'),
-      alias_for: z.optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      ),
+      from: NonEmptyString,
+      alias_for: z.optional(NonEmptyString),
     })
   )
 );
@@ -158,9 +146,6 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
   z.intersection(
     fieldDefinitionConfigSchema,
     z.object({
-      name: z
-        .string()
-        .nonempty()
-        .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+      name: NonEmptyString,
     })
   );

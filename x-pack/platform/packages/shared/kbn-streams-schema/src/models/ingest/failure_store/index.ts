@@ -7,6 +7,7 @@
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { isSchema } from '../../../shared/type_guards';
 
 export interface FailureStoreStatsResponse {
@@ -60,11 +61,7 @@ const disabledFailureStoreSchema = z.object({ disabled: z.strictObject({}) });
 export const enabledWithLifecycleFailureStoreSchema = z.object({
   lifecycle: z.object({
     enabled: z.object({
-      data_retention: z
-        .string()
-        .nonempty()
-        .refine((val) => val.trim() !== '', 'No empty strings allowed')
-        .optional(),
+      data_retention: NonEmptyString.optional(),
     }),
   }),
 });
@@ -77,11 +74,7 @@ const effectiveWithLifecycleFailureStoreSchema: z.Schema<EffectiveFailureStoreEn
   z.object({
     lifecycle: z.object({
       enabled: z.object({
-        data_retention: z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-          .optional(),
+        data_retention: NonEmptyString.optional(),
         is_default_retention: z.boolean(),
       }),
     }),
@@ -117,10 +110,7 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
   effectiveFailureStoreSchema.and(
     z.object({
-      from: z
-        .string()
-        .nonempty()
-        .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+      from: NonEmptyString,
     })
   );
 

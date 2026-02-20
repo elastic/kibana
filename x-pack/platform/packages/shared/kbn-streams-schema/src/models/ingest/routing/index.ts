@@ -8,7 +8,7 @@
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const routingStatus = z.enum(['enabled', 'disabled']);
 export type RoutingStatus = z.infer<typeof routingStatus>;
@@ -20,10 +20,7 @@ export interface RoutingDefinition {
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
-  destination: z
-    .string()
-    .nonempty()
-    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  destination: NonEmptyString,
   where: conditionSchema,
   status: routingStatus.optional(),
 });

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
@@ -60,43 +61,26 @@ export type IngestStreamEffectiveLifecycle =
   | ClassicIngestStreamEffectiveLifecycle;
 
 const downsampleStepSchema = z.object({
-  after: z
-    .string()
-    .nonempty()
-    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
-  fixed_interval: z
-    .string()
-    .nonempty()
-    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  after: NonEmptyString,
+  fixed_interval: NonEmptyString,
 });
 
 const dslLifecycleSchema = z.object({
   dsl: z.object({
-    data_retention: z.optional(
-      z
-        .string()
-        .nonempty()
-        .refine((val) => val.trim() !== '', 'No empty strings allowed')
-    ),
+    data_retention: z.optional(NonEmptyString),
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });
 const ilmLifecycleSchema = z.object({
   ilm: z.object({
-    policy: z
-      .string()
-      .nonempty()
-      .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+    policy: NonEmptyString,
   }),
 });
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
 const errorLifecycleSchema = z.object({
   error: z.strictObject({
-    message: z
-      .string()
-      .nonempty()
-      .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+    message: NonEmptyString,
   }),
 });
 
@@ -109,15 +93,10 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
 export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
   z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
-const nonEmptyStringSchema = z
-  .string()
-  .nonempty()
-  .refine((val) => val.trim() !== '', 'No empty strings allowed');
-
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   z.union([
-    dslLifecycleSchema.extend({ from: nonEmptyStringSchema }),
-    ilmLifecycleSchema.extend({ from: nonEmptyStringSchema }),
+    dslLifecycleSchema.extend({ from: NonEmptyString }),
+    ilmLifecycleSchema.extend({ from: NonEmptyString }),
   ]);
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =

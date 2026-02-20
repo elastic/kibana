@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Condition } from '../conditions';
 import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
@@ -37,12 +37,7 @@ export interface ProcessorBase {
 const processorBaseSchema = z
   .object({
     customIdentifier: z
-      .optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
+      .optional(NonEmptyString)
       .describe('Custom identifier to correlate this processor across outputs'),
     description: z.optional(z.string()).describe('Human-readable notes about this processor step'),
     ignore_failure: z
@@ -125,12 +120,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema
     action: z.literal('grok'),
     from: StreamlangSourceField.describe('Source field to parse with grok patterns'),
     patterns: z
-      .array(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
+      .array(NonEmptyString)
       .nonempty()
       .describe('Grok patterns applied in order to extract fields'),
     pattern_definitions: z.optional(z.record(z.string(), z.string())),
@@ -158,11 +148,7 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('dissect'),
     from: StreamlangSourceField.describe('Source field to parse with dissect pattern'),
-    pattern: z
-      .string()
-      .nonempty()
-      .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      .describe('Dissect pattern describing field boundaries'),
+    pattern: NonEmptyString.describe('Dissect pattern describing field boundaries'),
     append_separator: z
       .optional(StreamlangSeparator)
       .describe('Separator inserted when target fields are concatenated'),
@@ -195,38 +181,12 @@ export const dateProcessorSchema = processorBaseWithWhereSchema
     to: z
       .optional(StreamlangTargetField)
       .describe('Target field for the parsed date (defaults to source)'),
-    formats: z
-      .array(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
-      .describe('Accepted input date formats, tried in order'),
+    formats: z.array(NonEmptyString).describe('Accepted input date formats, tried in order'),
     output_format: z
-      .optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
+      .optional(NonEmptyString)
       .describe('Optional output format for storing the parsed date as text'),
-    timezone: z
-      .optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
-      .describe('Optional timezone for date parsing'),
-    locale: z
-      .optional(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
-      .describe('Optional locale for date parsing'),
+    timezone: z.optional(NonEmptyString).describe('Optional timezone for date parsing'),
+    locale: z.optional(NonEmptyString).describe('Optional locale for date parsing'),
   })
   .describe(
     'Date processor - Parse dates from strings using one or more expected formats'
@@ -460,12 +420,7 @@ export const redactProcessorSchema = processorBaseWithWhereSchema
     action: z.literal('redact'),
     from: StreamlangSourceField.describe('Source field to redact sensitive data from'),
     patterns: z
-      .array(
-        z
-          .string()
-          .nonempty()
-          .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      )
+      .array(NonEmptyString)
       .nonempty()
       .describe(
         'Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")'
@@ -500,10 +455,7 @@ export interface MathProcessor extends ProcessorBaseWithWhere {
 
 export const mathProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('math'),
-  expression: z
-    .string()
-    .nonempty()
-    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  expression: NonEmptyString,
   to: StreamlangTargetField,
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<MathProcessor>;

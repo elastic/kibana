@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { createIsNarrowSchema } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])
@@ -88,11 +88,7 @@ export const rangeConditionSchema = z
 // Shorthand binary: field + one of the operator keys
 export const shorthandBinaryFilterConditionSchema = z
   .object({
-    field: z
-      .string()
-      .nonempty()
-      .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      .describe('The document field to filter on.'),
+    field: NonEmptyString.describe('The document field to filter on.'),
     eq: stringOrNumberOrBoolean.optional().describe('Equality comparison value.'),
     neq: stringOrNumberOrBoolean.optional().describe('Inequality comparison value.'),
     lt: stringOrNumberOrBoolean.optional().describe('Less-than comparison value.'),
@@ -123,11 +119,7 @@ export interface ShorthandUnaryFilterCondition {
 // Shorthand unary
 export const shorthandUnaryFilterConditionSchema = z
   .object({
-    field: z
-      .string()
-      .nonempty()
-      .refine((val) => val.trim() !== '', 'No empty strings allowed')
-      .describe('The document field to check.'),
+    field: NonEmptyString.describe('The document field to check.'),
     exists: z.boolean().optional().describe('Indicates whether the field exists or not.'),
   })
   .describe('A condition that checks for the existence or non-existence of a field.');
