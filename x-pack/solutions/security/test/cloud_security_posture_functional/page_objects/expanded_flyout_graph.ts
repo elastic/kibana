@@ -204,7 +204,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async addFilter(filter: Filter): Promise<void> {
+    await this.showSearchBar();
     await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > addFilter`);
+    await this.testSubjects.existOrFail('filter-0', { timeout: 5000 });
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
