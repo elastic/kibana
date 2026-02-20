@@ -20,7 +20,6 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  checkForNoReadableIndices,
   getExceptions,
   getRuleRangeTuples,
   hasTimestampFields,
@@ -308,6 +307,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (indexPatternsWithMatches.length === 0) {
                 const warningMessage = `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`;
                 wrapperWarnings.push(warningMessage);
+                skipExecution = true;
               } else {
                 ruleExecutionLogger.debug(
                   `Number of indices found: ${indexPatternsWithMatches.length}`
@@ -327,34 +327,23 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
             }
 
-            try {
-              const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
-                services.scopedClusterClient.asCurrentUser.fieldCaps(
-                  {
-                    index: inputIndex,
-                    fields: secondaryTimestamp
-                      ? [primaryTimestamp, secondaryTimestamp]
-                      : [primaryTimestamp],
-                    include_unmapped: true,
-                    runtime_mappings: runtimeMappings,
-                    ignore_unavailable: true,
-                  },
-                  { meta: true }
-                )
-              );
+            if (!skipExecution) {
+              try {
+                const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
+                  services.scopedClusterClient.asCurrentUser.fieldCaps(
+                    {
+                      index: inputIndex,
+                      fields: secondaryTimestamp
+                        ? [primaryTimestamp, secondaryTimestamp]
+                        : [primaryTimestamp],
+                      include_unmapped: true,
+                      runtime_mappings: runtimeMappings,
+                      ignore_unavailable: true,
+                    },
+                    { meta: true }
+                  )
+                );
 
-              const { foundNoIndices, warningMessage: noIndicesWarning } =
-                await checkForNoReadableIndices({
-                  fieldCapsResponse,
-                  inputIndices: inputIndex,
-                  ruleExecutionLogger,
-                });
-              if (noIndicesWarning) {
-                wrapperWarnings.push(noIndicesWarning);
-              }
-              skipExecution = foundNoIndices;
-
-              if (!foundNoIndices) {
                 const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
                   timestampField: primaryTimestamp,
                   timestampFieldCapsResponse: fieldCapsResponse,
@@ -363,9 +352,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 if (missingTimestampWarning) {
                   wrapperWarnings.push(missingTimestampWarning);
                 }
+              } catch (exc) {
+                wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
               }
-            } catch (exc) {
-              wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
 
             if (!isServerless) {
