@@ -71,8 +71,14 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       })
       .nullish(),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ promoted: number }> => {
+    const { queryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
 
@@ -96,9 +102,19 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
       return acc;
     }, {});
 
+    const streamDefinitions = await streamsClient.listStreams();
+    const streamDefinitionsByName = new Map(
+      streamDefinitions.map((streamDefinition) => [streamDefinition.name, streamDefinition])
+    );
+
     let promoted = 0;
     for (const [streamName, queryIds] of Object.entries(byStream)) {
-      const result = await queryClient.promoteQueries(streamName, queryIds);
+      const definition = streamDefinitionsByName.get(streamName);
+      if (!definition) {
+        logger.warn(`Skipping promotion for missing stream ${streamName}`);
+        continue;
+      }
+      const result = await queryClient.promoteQueries(definition, queryIds);
       promoted += result.promoted;
     }
     return { promoted };
