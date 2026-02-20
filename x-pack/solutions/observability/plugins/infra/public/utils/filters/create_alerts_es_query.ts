@@ -17,7 +17,7 @@ import {
 import { buildCombinedAssetFilter } from './build';
 import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 
-export type AlertsEsQuery = QueryDslQueryContainer;
+export type AlertsEsQuery = NonNullable<QueryDslQueryContainer>;
 
 export const createAlertsEsQuery = ({
   dateRange,

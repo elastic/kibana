@@ -156,13 +156,7 @@ async function refreshFieldsInDocs(
   freshResponses: MgetResponseItem[]
 ) {
   for (const [conflictRequest, freshResponse] of zip(conflictRequests, freshResponses)) {
-    if (
-      !conflictRequest?.op ||
-      !('index' in conflictRequest.op) ||
-      !conflictRequest.op.index ||
-      !freshResponse
-    )
-      continue;
+    if (!conflictRequest?.op?.index || !freshResponse) continue;
 
     // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
@@ -133,11 +132,7 @@ export const AlertsOverview = ({
           id={'assetDetailsAlertsTable'}
           ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
           consumers={INFRA_ALERT_CONSUMERS}
-          query={
-            alertsEsQueryByStatus as Partial<
-              Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>
-            >
-          }
+          query={alertsEsQueryByStatus}
           pageSize={5}
           services={{
             data,

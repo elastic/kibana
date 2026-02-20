@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { estypes } from '@elastic/elasticsearch';
 import { EuiLoadingSpinner, EuiBadge, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
@@ -19,7 +18,7 @@ export const AlertsTabBadge = () => {
   const { alertsCount, loading, error } = useAlertsCount({
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
     consumers: INFRA_ALERT_CONSUMERS,
-    query: alertsEsQuery as estypes.QueryDslQueryContainer | undefined,
+    query: alertsEsQuery,
   });
 
   if (loading) {

@@ -34,8 +34,7 @@ export const detachMlInferencePipeline = async (
     // remove sub-pipeline from parent pipeline
     if (parentPipeline.processors !== undefined) {
       const updatedProcessors = parentPipeline.processors.filter(
-        (p) =>
-          !(p != null && 'pipeline' in p && p.pipeline != null && p.pipeline.name === pipelineName)
+        (p) => !(p?.pipeline?.name === pipelineName)
       );
       // only update if we changed something
       if (updatedProcessors.length !== parentPipeline.processors.length) {
