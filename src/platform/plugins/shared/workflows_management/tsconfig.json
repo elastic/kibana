@@ -84,7 +84,6 @@
     "@kbn/scout",
     "@kbn/repo-info",
     "@kbn/agent-builder-server",
-    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }
