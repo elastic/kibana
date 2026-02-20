@@ -43,13 +43,16 @@ echo "Config: $CONFIG_PATH"
 for mode in "${RUN_MODES[@]}"; do
   echo "--- Running Defend Workflows Scout: $mode"
   set +e
-  node scripts/scout.js run-tests --location local $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
-  EXIT_CODE=$?
+  node scripts/scout.js run-tests --location local $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION" 2>&1 | tee /tmp/scout_output.log
+  EXIT_CODE=${PIPESTATUS[0]}
   set -e
 
   if [[ $EXIT_CODE -eq 2 ]]; then
     echo "No tests found for Defend Workflows Scout ($mode)"
   elif [[ $EXIT_CODE -ne 0 ]]; then
+    if command -v buildkite-agent &> /dev/null; then
+      echo "<details><summary>Defend Workflows Scout failure log (last 200 lines)</summary><pre>$(tail -200 /tmp/scout_output.log)</pre></details>" | buildkite-agent annotate --style 'error' --context 'defend-workflows-scout' --append || true
+    fi
     upload_events_if_available "$mode"
     failedConfigs+=("Defend Workflows Scout ($mode)")
     FINAL_EXIT_CODE=10
