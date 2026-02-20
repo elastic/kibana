@@ -19,6 +19,7 @@ import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import {
   DispatcherServiceInternalToken,
   DispatcherServiceScopedToken,
+  NotificationPolicySavedObjectServiceInternalToken,
   RulesSavedObjectServiceInternalToken,
 } from '../lib/dispatcher/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
@@ -45,7 +46,7 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -93,6 +94,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
+  bind(NotificationPolicySavedObjectServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const internalClient = savedObjects.createInternalRepository([
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+      ]) as unknown as SavedObjectsClientContract;
+      return new NotificationPolicySavedObjectService(() => internalClient, spaces);
+    })
+    .inSingletonScope();
 
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
@@ -135,13 +146,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
       const rulesSoService = get(RulesSavedObjectServiceInternalToken);
+      const npSoService = get(NotificationPolicySavedObjectServiceInternalToken);
 
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
         workflowsManagement.management,
-        rulesSoService
+        rulesSoService,
+        npSoService
       );
     })
     .inRequestScope();
@@ -155,12 +168,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       const storageService = get(StorageServiceInternalToken);
       const rulesSoService = get(RulesSavedObjectServiceInternalToken);
+      const npSoService = get(NotificationPolicySavedObjectServiceInternalToken);
       return new DispatcherService(
         queryService,
         loggerService,
         storageService,
         workflowsManagement.management,
-        rulesSoService
+        rulesSoService,
+        npSoService
       );
     })
     .inSingletonScope();

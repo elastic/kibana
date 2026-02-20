@@ -7,6 +7,7 @@
 
 import type { ServiceIdentifier } from 'inversify';
 import type { DispatcherService } from './dispatcher';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 
 /**
@@ -29,3 +30,10 @@ export const DispatcherServiceInternalToken = Symbol.for(
 export const RulesSavedObjectServiceInternalToken = Symbol.for(
   'alerting_v2.RulesSavedObjectServiceInternal'
 ) as ServiceIdentifier<RulesSavedObjectServiceContract>;
+
+/**
+ * NotificationPolicySavedObjectService singleton (internal user, no request scope)
+ */
+export const NotificationPolicySavedObjectServiceInternalToken = Symbol.for(
+  'alerting_v2.NotificationPolicySavedObjectServiceInternal'
+) as ServiceIdentifier<NotificationPolicySavedObjectServiceContract>;

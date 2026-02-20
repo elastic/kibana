@@ -14,6 +14,7 @@ import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
@@ -61,6 +62,30 @@ const createMockRulesSoService = (
   find: jest.fn(),
 });
 
+const createMockNpSoService = (
+  policyIds: string[]
+): NotificationPolicySavedObjectServiceContract => ({
+  bulkGetByIds: jest.fn().mockResolvedValue(
+    policyIds.map((id) => ({
+      id,
+      attributes: {
+        name: `Policy ${id}`,
+        description: `Description for ${id}`,
+        workflow_id: 'workflow-test-id',
+        apiKey: null,
+        createdBy: null,
+        updatedBy: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    }))
+  ),
+  create: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+});
+
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
   let queryService: QueryServiceContract;
@@ -68,18 +93,21 @@ describe('DispatcherService', () => {
   let queryEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let storageEsClient: jest.Mocked<ElasticsearchClient>;
   let rulesSoService: RulesSavedObjectServiceContract;
+  let npSoService: NotificationPolicySavedObjectServiceContract;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
     ({ storageService, mockEsClient: storageEsClient } = createStorageService());
     const { loggerService } = createLoggerService();
     rulesSoService = createMockRulesSoService(['rule-1', 'rule-2']);
+    npSoService = createMockNpSoService(['policy_456']);
     dispatcherService = new DispatcherService(
       queryService,
       loggerService,
       storageService,
       undefined as any,
-      rulesSoService
+      rulesSoService,
+      npSoService
     );
   });
 
@@ -300,13 +328,15 @@ describe('DispatcherService', () => {
         'rule-004',
         'rule-005',
       ]);
+      npSoService = createMockNpSoService(['policy_456']);
       const { loggerService } = createLoggerService();
       dispatcherService = new DispatcherService(
         queryService,
         loggerService,
         storageService,
         undefined as any,
-        rulesSoService
+        rulesSoService,
+        npSoService
       );
 
       // Dataset: 5 rules, 9 episodes total

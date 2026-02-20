@@ -22,9 +22,9 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
-import { getFakeNotificationPoliciesByIds } from './faker_service';
 import {
   getAlertEpisodeSuppressionsQuery,
   getDispatchableAlertEventsQuery,
@@ -57,7 +57,8 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     private readonly workflowsManagement: WorkflowsManagementApi,
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
+    private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
   ) {}
 
   public async run({
@@ -78,7 +79,7 @@ export class DispatcherService implements DispatcherServiceContract {
     const rules = await this.fetchRules(uniqueRuleIds);
 
     const uniquePolicyIds = [...new Set(rules.values().flatMap((r) => r.notificationPolicyIds))];
-    const policies = await getFakeNotificationPoliciesByIds(uniquePolicyIds);
+    const policies = await this.fetchNotificationPolicies(uniquePolicyIds);
 
     const matched = this.evaluateMatchers(active, rules, policies);
     const notificationGroups = this.buildNotificationGroups(matched);
@@ -331,6 +332,29 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     return rules;
+  }
+
+  private async fetchNotificationPolicies(
+    policyIds: NotificationPolicyId[]
+  ): Promise<Map<NotificationPolicyId, NotificationPolicy>> {
+    const result = await this.notificationPolicySavedObjectService.bulkGetByIds(policyIds);
+    const policies = new Map<NotificationPolicyId, NotificationPolicy>();
+
+    for (const doc of result) {
+      if ('error' in doc) continue;
+
+      policies.set(doc.id, {
+        id: doc.id,
+        name: doc.attributes.name,
+        workflowId: doc.attributes.workflow_id,
+        apiKey: doc.attributes.apiKey ?? undefined,
+        matcher: undefined,
+        groupBy: [],
+        throttle: undefined,
+      });
+    }
+
+    return policies;
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {

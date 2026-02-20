@@ -12,10 +12,22 @@ import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core/types';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+
+export type NotificationPolicySavedObjectsBulkGetResultItem =
+  | {
+      id: string;
+      attributes: NotificationPolicySavedObjectAttributes;
+      version?: string;
+    }
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
 
 export interface NotificationPolicySavedObjectServiceContract {
   create(params: {
@@ -26,6 +38,7 @@ export interface NotificationPolicySavedObjectServiceContract {
     id: string,
     spaceId?: string
   ): Promise<{ id: string; attributes: NotificationPolicySavedObjectAttributes; version?: string }>;
+  bulkGetByIds(ids: string[]): Promise<NotificationPolicySavedObjectsBulkGetResultItem[]>;
   update(params: {
     id: string;
     attrs: NotificationPolicySavedObjectAttributes;
@@ -86,6 +99,25 @@ export class NotificationPolicySavedObjectService
       namespace ? { namespace } : undefined
     );
     return { id: doc.id, attributes: doc.attributes, version: doc.version };
+  }
+
+  public async bulkGetByIds(
+    ids: string[]
+  ): Promise<NotificationPolicySavedObjectsBulkGetResultItem[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkGet<NotificationPolicySavedObjectAttributes>(
+      ids.map((id) => ({ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id }))
+    );
+
+    return result.saved_objects.map((doc) => {
+      if ('error' in doc && doc.error) {
+        return { id: doc.id, error: doc.error };
+      }
+      return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    });
   }
 
   public async update({
