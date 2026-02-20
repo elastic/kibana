@@ -34,7 +34,6 @@ export function CreateESQLRuleFlyout({
   );
 
   const { http, data, dataViews, notifications, history } = services;
-  const [queryError, setQueryError] = useState<Error | undefined>(undefined);
 
   // Use a ref to avoid stale closure issues with onClose
   const onCloseRef = useRef(onClose);
@@ -53,11 +52,6 @@ export function CreateESQLRuleFlyout({
         setQuery(esqlQuery || '');
       }
     });
-    const queryErrorSubscription = stateContainer.dataState.data$.main$.subscribe((dataState) => {
-      if (dataState.error !== queryError) {
-        setQueryError(dataState.error);
-      }
-    });
 
     // Listen for route changes to close the flyout
     // Only close on actual navigation (pathname change), not query param changes
@@ -69,10 +63,9 @@ export function CreateESQLRuleFlyout({
 
     return () => {
       querySubscription.unsubscribe();
-      queryErrorSubscription.unsubscribe();
       unlisten();
     };
-  }, [appState$, stateContainer.dataState.data$.main$, history, queryError]);
+  }, [appState$, history]);
 
   return (
     <DynamicRuleFormFlyout
@@ -84,7 +77,6 @@ export function CreateESQLRuleFlyout({
       }}
       query={query}
       onClose={onClose}
-      isQueryInvalid={Boolean(queryError)}
     />
   );
 }

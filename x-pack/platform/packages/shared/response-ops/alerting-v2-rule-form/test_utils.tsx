@@ -47,7 +47,7 @@ export const defaultTestFormValues: FormValues = {
     enabled: true,
   },
   timeField: '@timestamp',
-  schedule: { every: '5m' },
+  schedule: { every: '5m', lookback: '1m' },
   evaluation: {
     query: {
       base: '',
