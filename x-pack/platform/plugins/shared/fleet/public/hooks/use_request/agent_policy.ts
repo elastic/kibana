@@ -125,11 +125,16 @@ export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
   } as SendConditionalRequestConfig);
 };
 
-export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
-  return useRequest<GetFullAgentPolicyResponse>({
-    path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
-    method: 'get',
-    version: API_VERSIONS.public.v1,
+export const useGetOneAgentPolicyFull = (agentPolicyId: string, query?: { revision?: number }) => {
+  return useQuery<GetFullAgentPolicyResponse, RequestError>({
+    queryKey: ['agentPolicyFull', agentPolicyId, query],
+    queryFn: () =>
+      sendRequestForRq<GetFullAgentPolicyResponse>({
+        path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
   });
 };
 
