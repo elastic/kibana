@@ -87,3 +87,33 @@ export interface LastNotifiedRecord {
   notification_group_id: NotificationGroupId;
   last_notified: string;
 }
+
+export interface DispatcherPipelineInput {
+  readonly startedAt: Date;
+  readonly previousStartedAt: Date;
+}
+
+export interface DispatcherPipelineState {
+  readonly input: DispatcherPipelineInput;
+  readonly episodes?: AlertEpisode[];
+  readonly suppressions?: AlertEpisodeSuppression[];
+  readonly active?: AlertEpisode[];
+  readonly suppressed?: Array<AlertEpisode & { reason: string }>;
+  readonly rules?: Map<RuleId, Rule>;
+  readonly policies?: Map<NotificationPolicyId, NotificationPolicy>;
+  readonly matched?: MatchedPair[];
+  readonly groups?: NotificationGroup[];
+  readonly dispatch?: NotificationGroup[];
+  readonly throttled?: NotificationGroup[];
+}
+
+export type DispatcherHaltReason = 'no_episodes';
+
+export type DispatcherStepOutput =
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
+  | { type: 'halt'; reason: DispatcherHaltReason };
+
+export interface DispatcherStep {
+  readonly name: string;
+  execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput>;
+}
