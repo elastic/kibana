@@ -112,7 +112,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       const candidates = await testSubjects.findAll(selector, TIMEOUT_CHECK);
       for (const candidate of candidates) {
         if ((await candidate.isDisplayed()) && (await candidate.isEnabled())) {
-          await candidate.scrollIntoViewIfNecessary();
           await candidate.click();
           return;
         }
