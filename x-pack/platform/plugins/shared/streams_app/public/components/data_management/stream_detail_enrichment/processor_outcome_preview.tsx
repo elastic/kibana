@@ -37,6 +37,7 @@ import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
+  hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
 import {
   NoPreviewDocumentsEmptyPrompt,
@@ -287,23 +288,40 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const isInteractiveMode = selectIsInteractiveMode(state);
-    if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
-
-    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
-
-    for (const stepRef of stepRefs) {
-      const snapshot = stepRef.getSnapshot();
-      const step = snapshot.context.step;
-
-      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
-        return getSourceField(step);
+  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
+    (state) => {
+      const isInteractiveMode = selectIsInteractiveMode(state);
+      if (!isInteractiveMode || !state.context.interactiveModeRef) {
+        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
       }
-    }
 
-    return undefined;
-  });
+      const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
+      const allStepIds = stepRefs.map((ref) => ref.id);
+
+      for (const stepRef of stepRefs) {
+        const snapshot = stepRef.getSnapshot();
+        const step = snapshot.context.step;
+
+        if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+          return {
+            currentProcessorSourceField: getSourceField(step),
+            currentStepId: stepRef.id,
+            stepIds: allStepIds,
+          };
+        }
+      }
+
+      return {
+        currentProcessorSourceField: undefined,
+        currentStepId: undefined,
+        stepIds: allStepIds,
+      };
+    }
+  );
+
+  const processorsMetrics = useSimulatorSelector(
+    (snapshot) => snapshot.context.simulation?.processors_metrics
+  );
 
   const docViewsRegistry = useDocViewerSetup(true);
 
@@ -398,15 +416,40 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   /**
+   * Check if any preceding processor in the current simulation has touched the grok source field.
+   * If so, we should NOT use the original values for highlighting, since those values don't reflect
+   * the transformations applied by preceding processors.
+   */
+  const precedingProcessorTouchedGrokField = useMemo(() => {
+    if (!validGrokField) return false;
+    return hasPrecedingProcessorTouchedField(
+      stepIds,
+      currentStepId,
+      processorsMetrics,
+      validGrokField
+    );
+  }, [stepIds, currentStepId, processorsMetrics, validGrokField]);
+
+  /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
    * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
    * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
+   *
+   * IMPORTANT: We only create this map if no preceding processor has touched the grok source field.
+   * If a preceding processor modified the field, using the original value would be incorrect.
    */
   const originalGrokFieldValues = useMemo(() => {
     if (!grokMode || !validGrokField || !originalSamples) return undefined;
+    if (precedingProcessorTouchedGrokField) return undefined;
 
     return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
-  }, [grokMode, validGrokField, originalSamples, previewDocuments]);
+  }, [
+    grokMode,
+    validGrokField,
+    originalSamples,
+    previewDocuments,
+    precedingProcessorTouchedGrokField,
+  ]);
 
   const previewColumns = grokColumns ?? availableColumns;
 

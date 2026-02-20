@@ -6,7 +6,7 @@
  */
 
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 
 /**
  * Sample with data source ID (returned from simulation state machine)
@@ -78,4 +78,41 @@ export function getGrokFieldDisplayValue(
   // Fall back to the document's value
   const value = document[columnId];
   return typeof value === 'string' ? value : undefined;
+}
+
+/**
+ * Checks if any processor preceding the current grok processor has modified the grok source field.
+ * This is used to determine whether we should use the original (pre-transformation) value for
+ * grok highlighting or not.
+ *
+ * When a preceding processor modifies the grok source field, using the original value would be
+ * incorrect as it doesn't account for the transformations applied by those processors.
+ *
+ * @param stepIds - Array of step/processor IDs in order of execution
+ * @param currentStepId - The ID of the current grok processor being edited
+ * @param processorsMetrics - Map of processor ID to its metrics (includes detected_fields)
+ * @param grokSourceField - The field that the grok processor reads from
+ * @returns true if a preceding processor touched the grok source field, false otherwise
+ */
+export function hasPrecedingProcessorTouchedField(
+  stepIds: string[],
+  currentStepId: string | undefined,
+  processorsMetrics: Record<string, ProcessorMetrics> | undefined,
+  grokSourceField: string
+): boolean {
+  if (!currentStepId || !processorsMetrics) {
+    return false;
+  }
+
+  const currentStepIndex = stepIds.indexOf(currentStepId);
+  if (currentStepIndex <= 0) {
+    return false;
+  }
+
+  const precedingStepIds = stepIds.slice(0, currentStepIndex);
+
+  return precedingStepIds.some((stepId) => {
+    const metrics = processorsMetrics[stepId];
+    return metrics?.detected_fields?.includes(grokSourceField) ?? false;
+  });
 }

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
+  hasPrecedingProcessorTouchedField,
   type SampleWithDataSource,
 } from './processor_outcome_preview_helpers';
 
@@ -293,6 +294,188 @@ describe('processor_outcome_preview_helpers', () => {
         // Empty string is still a valid string value, should be returned
         expect(result).toBe('');
       });
+    });
+  });
+
+  describe('hasPrecedingProcessorTouchedField', () => {
+    const createProcessorMetrics = (detectedFields: string[]): ProcessorMetrics => ({
+      detected_fields: detectedFields,
+      errors: [],
+      failed_rate: 0,
+      skipped_rate: 0,
+      parsed_rate: 1,
+      dropped_rate: 0,
+    });
+
+    it('returns false when currentStepId is undefined', () => {
+      const stepIds = ['step-1', 'step-2'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message']),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        undefined,
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when processorsMetrics is undefined', () => {
+      const stepIds = ['step-1', 'step-2'];
+
+      const result = hasPrecedingProcessorTouchedField(stepIds, 'step-2', undefined, 'message');
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when current step is the first step', () => {
+      const stepIds = ['step-1', 'step-2'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message']),
+        'step-2': createProcessorMetrics([]),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-1',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when no preceding processor touched the field', () => {
+      const stepIds = ['step-1', 'step-2', 'step-3'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['other_field']),
+        'step-2': createProcessorMetrics(['another_field']),
+        'step-3': createProcessorMetrics(['message']),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-3',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true when a preceding processor touched the field', () => {
+      const stepIds = ['step-1', 'step-2', 'step-3'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message', 'other_field']),
+        'step-2': createProcessorMetrics(['another_field']),
+        'step-3': createProcessorMetrics(['message']),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-3',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('returns true when the immediately preceding processor touched the field', () => {
+      const stepIds = ['step-1', 'step-2'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message']),
+        'step-2': createProcessorMetrics([]),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-2',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('does not consider processors after the current step', () => {
+      const stepIds = ['step-1', 'step-2', 'step-3'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['other_field']),
+        'step-2': createProcessorMetrics([]),
+        'step-3': createProcessorMetrics(['message']),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-2',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when current step is not in the stepIds array', () => {
+      const stepIds = ['step-1', 'step-2'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message']),
+        'step-2': createProcessorMetrics(['message']),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'unknown-step',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('handles missing processor metrics for some steps gracefully', () => {
+      const stepIds = ['step-1', 'step-2', 'step-3'];
+      const processorsMetrics = {
+        'step-1': createProcessorMetrics(['message']),
+        // step-2 has no metrics entry
+        'step-3': createProcessorMetrics([]),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-3',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('handles processor metrics with undefined detected_fields gracefully', () => {
+      const stepIds = ['step-1', 'step-2'];
+      const processorsMetrics = {
+        'step-1': {
+          detected_fields: undefined as unknown as string[],
+          errors: [],
+          failed_rate: 0,
+          skipped_rate: 0,
+          parsed_rate: 1,
+          dropped_rate: 0,
+        },
+        'step-2': createProcessorMetrics([]),
+      };
+
+      const result = hasPrecedingProcessorTouchedField(
+        stepIds,
+        'step-2',
+        processorsMetrics,
+        'message'
+      );
+
+      expect(result).toBe(false);
     });
   });
 });
