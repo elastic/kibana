@@ -48,8 +48,7 @@ export type EmbeddableTransformsSetup<
   EmbeddableState extends object = object
 > = {
   getTransforms?: (
-    drilldownTransforms: DrilldownTransforms,
-    legacyMode: boolean
+    drilldownTransforms: DrilldownTransforms
   ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,

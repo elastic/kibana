@@ -61,10 +61,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
    */
   getAllEmbeddableSchemas: () => ObjectType[];
 
-  getTransforms: (
-    type: string,
-    legacyMode: boolean
-  ) =>
+  getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
         schema?: Type<object>;
         throwOnUnmappedPanel?: EmbeddableTransformsSetup['throwOnUnmappedPanel'];

@@ -24,7 +24,7 @@ import type { LensSerializedState } from '../../public';
 export const getTransformIn = (
   builder: LensConfigBuilder,
   transformDrilldownsIn: DrilldownTransforms['transformIn'],
-  legacyMode: boolean
+  isDashboardAppRequest: boolean
 ): LensTransformIn => {
   return function transformIn(config) {
     const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
@@ -44,7 +44,7 @@ export const getTransformIn = (
       } satisfies LensByRefTransformInResult;
     }
 
-    if (legacyMode && !builder.isEnabled) {
+    if (isDashboardAppRequest && !builder.isEnabled) {
       const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
       return {
         state,

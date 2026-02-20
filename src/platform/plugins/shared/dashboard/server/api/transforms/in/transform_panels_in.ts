@@ -22,7 +22,7 @@ import { embeddableService, logger } from '../../../kibana_services';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
@@ -38,7 +38,7 @@ export function transformPanelsIn(
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
-        const { storedPanel, references } = transformPanelIn(panel, legacyMode);
+        const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
         panels.push({
           ...storedPanel,
           gridData: { ...storedPanel.gridData, sectionId: idx },
@@ -47,7 +47,7 @@ export function transformPanelsIn(
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget);
+      const { storedPanel, references } = transformPanelIn(widget, isDashboardAppRequest);
       panels.push(storedPanel);
       panelReferences.push(...references);
     }
@@ -57,7 +57,7 @@ export function transformPanelsIn(
 
 function transformPanelIn(
   panel: DashboardPanel,
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
@@ -65,7 +65,8 @@ function transformPanelIn(
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
-  const transforms = embeddableService?.getTransforms(panel.type, legacyMode);
+  const type = panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+  const transforms = embeddableService?.getTransforms(type);
   const panelSchema = transforms?.schema;
 
   if (panelSchema) {

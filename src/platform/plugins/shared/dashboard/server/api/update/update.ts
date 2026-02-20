@@ -19,7 +19,7 @@ export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
   updateBody: DashboardUpdateRequestBody,
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = updateBody.data;
@@ -28,7 +28,7 @@ export async function update(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData, legacyMode);
+  } = transformDashboardIn(restOfData, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -44,5 +44,5 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'update');
+  return getDashboardCRUResponseBody(savedObject, 'update', isDashboardAppRequest);
 }

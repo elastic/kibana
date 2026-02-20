@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { schema } from '@kbn/config-schema';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { isByRefLensConfig } from '../common/transforms/utils';
-import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
+import { LENS_DASHBOARD_APP_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
+import { lensPanelSchema } from './transforms';
 
-export function registerLensEmbeddableTransforms(
+export function registerLensEmbeddableTransformsForDashboardApp(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
-  embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+  embeddableSetup.registerTransforms(LENS_DASHBOARD_APP_TYPE, {
     getTransforms: (drilldownTransforms: DrilldownTransforms) =>
       ({
-        transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
-        transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
+        transformIn: getTransformIn(builder, drilldownTransforms.transformIn, true),
+        transformOut: getTransformOut(builder, drilldownTransforms.transformOut, true),
       } satisfies LensTransforms),
-    getSchema: () => lensPanelSchema,
+    getSchema: () => (builder.isEnabled ? lensPanelSchema : undefined),
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
 
@@ -39,21 +39,3 @@ export function registerLensEmbeddableTransforms(
     },
   });
 }
-
-const lensByValuePanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    attributes: lensApiStateSchema,
-  },
-  { unknowns: 'allow' }
-);
-
-const lensByRefPanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    savedObjectId: schema.string(),
-  },
-  { unknowns: 'allow' }
-);
-
-export const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);

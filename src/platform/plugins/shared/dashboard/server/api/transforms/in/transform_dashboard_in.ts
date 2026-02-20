@@ -18,7 +18,7 @@ import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState,
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ):
   | {
       attributes: DashboardSavedObjectAttributes;
@@ -51,7 +51,7 @@ export const transformDashboardIn = (
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels, legacyMode)
+      ? transformPanelsIn(panels, isDashboardAppRequest)
       : {
           panelsJSON: '',
           sections: undefined,

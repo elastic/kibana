@@ -19,7 +19,7 @@ export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences?: SavedObjectReference[],
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ): DashboardState['panels'] {
   const topLevelPanels: DashboardPanel[] = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -39,11 +39,11 @@ export function transformPanelsOut(
     const { sectionId } = panel.gridData;
     if (sectionId) {
       sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences, legacyMode)
+        transformPanelProperties(panel, panelReferences, containerReferences, isDashboardAppRequest)
       );
     } else {
       topLevelPanels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences, legacyMode)
+        transformPanelProperties(panel, panelReferences, containerReferences, isDashboardAppRequest)
       );
     }
   });
@@ -58,20 +58,37 @@ function transformPanelProperties(
   storedPanel: SavedDashboardPanel,
   storedPanelReferences?: SavedObjectReference[],
   containerReferences?: SavedObjectReference[],
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
   const { embeddableConfig, gridData, panelIndex, type, version } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const transforms = embeddableService?.getTransforms(type, legacyMode);
+  const transforms = embeddableService?.getTransforms(type);
 
   let transformedPanelConfig;
   try {
-    transformedPanelConfig =
-      transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
-      defaultTransform(embeddableConfig);
+    // Temporary escape hatch for lens as code
+    // TODO remove when lens as code transforms are ready for production
+    if (type === 'lens' && isDashboardAppRequest) {
+      const lensDashboardTransformOut =
+        embeddableService?.getTransforms('lens-dashboard-app')?.transformOut;
+
+      if (!lensDashboardTransformOut) {
+        throw new Error('Must have lens dashboard transforms');
+      }
+
+      transformedPanelConfig = lensDashboardTransformOut(
+        embeddableConfig,
+        panelReferences,
+        containerReferences
+      );
+    } else {
+      transformedPanelConfig =
+        transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+        defaultTransform(embeddableConfig);
+    }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(

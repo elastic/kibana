@@ -43,6 +43,7 @@ import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
 import { registerLensEmbeddableTransforms } from './transforms';
+import { registerLensEmbeddableTransformsForDashboardApp } from './dashboard_app_transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -84,7 +85,7 @@ export class LensServerPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
+  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract): LensServerPluginSetup {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
       plugins.data.query.filterManager
     );
@@ -115,6 +116,7 @@ export class LensServerPlugin
     plugins.embeddable.registerEmbeddableFactory(
       lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
     );
+
     const builder = new LensConfigBuilder();
 
     registerLensAPIRoutes({
@@ -132,6 +134,9 @@ export class LensServerPlugin
 
         // Need to wait for feature flags to be set before registering transforms
         registerLensEmbeddableTransforms(plugins.embeddable, builder);
+
+        // Transforms for Lens used in Dashboard App only
+        registerLensEmbeddableTransformsForDashboardApp(plugins.embeddable, builder);
 
         flags.apiFormat$.subscribe((value) => {
           builder.setEnabled(value);

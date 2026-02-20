@@ -29,7 +29,7 @@ import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/ut
 export const getTransformOut = (
   builder: LensConfigBuilder,
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
-  legacyMode: boolean
+  isDashboardAppRequest: boolean
 ): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
     const transformsFlow = flow(
@@ -56,7 +56,7 @@ export const getTransformOut = (
       panelReferences
     );
 
-    if (legacyMode && !builder.isEnabled) {
+    if (isDashboardAppRequest && !builder.isEnabled) {
       return injectedState as LensByValueTransformOutResult;
     }
 

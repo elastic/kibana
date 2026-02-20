@@ -19,7 +19,7 @@ import type { DashboardCreateResponseBody } from './types';
 export async function create(
   requestCtx: RequestHandlerContext,
   createBody: DashboardCreateRequestBody,
-  legacyMode: boolean = false
+  isDashboardAppRequest: boolean = false
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody.data;
@@ -28,7 +28,7 @@ export async function create(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData, legacyMode);
+  } = transformDashboardIn(restOfData, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -53,5 +53,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'create');
+  return getDashboardCRUResponseBody(savedObject, 'create', isDashboardAppRequest);
 }
