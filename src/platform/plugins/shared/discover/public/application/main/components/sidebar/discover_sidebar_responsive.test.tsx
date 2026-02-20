@@ -270,7 +270,9 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
-describe('discover responsive sidebar', function () {
+// FLAKY: https://github.com/elastic/kibana/issues/217005
+// FLAKY: https://github.com/elastic/kibana/issues/225125
+describe.skip('discover responsive sidebar', function () {
   let props: TestWrapperProps;
 
   beforeEach(async () => {
@@ -835,7 +837,8 @@ describe('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(0);
   }, 10000);
 
-  describe('search bar customization', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/225126
+  describe.skip('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {
       mockUseCustomizations = false;
       const comp = await mountComponent({
@@ -880,7 +883,8 @@ describe('discover responsive sidebar', function () {
     });
   });
 
-  describe('recommended fields', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253542
+  describe.skip('recommended fields', () => {
     it('should call getRecommendedFieldsAccessor on component mount', async () => {
       await mountComponent(props);
 
