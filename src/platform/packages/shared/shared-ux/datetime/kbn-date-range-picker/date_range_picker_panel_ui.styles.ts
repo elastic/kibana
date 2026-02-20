@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { euiFontSizeFromScale, euiLineHeightFromBaseline, euiScrollBarStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
-const CONTAINER_WIDTH = 400; // use token?
 const CONTAINER_HEIGHT = 500;
 
 export const panelContainerStyles = ({ euiTheme }: UseEuiTheme) => {
@@ -19,7 +18,7 @@ export const panelContainerStyles = ({ euiTheme }: UseEuiTheme) => {
     display: flex;
     flex-direction: column;
     block-size: ${CONTAINER_HEIGHT}px;
-    inline-size: ${CONTAINER_WIDTH}px;
+    inline-size: ${euiTheme.components.forms.maxWidth}px;
     max-inline-size: 100%;
   `;
 
@@ -120,6 +119,7 @@ export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
     cursor: pointer;
     outline-offset: -${euiTheme.focus.width};
 
+    /* Adjust spacing when extra actions are present */
     .css-${root.name}:has(:nth-child(2)):hover > &,
     .css-${root.name}:has(:nth-child(2)):focus-within > & {
       padding-inline-end: ${euiTheme.size.s};

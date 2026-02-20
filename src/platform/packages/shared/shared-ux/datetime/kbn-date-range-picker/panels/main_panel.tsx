@@ -27,9 +27,9 @@ import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '.
 import { mainPanelTexts } from '../translations';
 
 interface OptionsListProps {
-  /** Options to render as selectable list items. */
+  /** Options to render as list items. */
   options: TimeRangeBoundsOption[];
-  /** When true, show an offset shorthand suffix on each item. */
+  /** When true, show the shorthand of the time range. */
   showShorthand?: boolean;
 }
 
@@ -87,14 +87,14 @@ const PresetsRecentTabs = () => {
           isSelected={selectedTabId === 'presets'}
           onClick={() => setSelectedTabId('presets')}
         >
-          {mainPanelTexts.presetsTab}
+          {mainPanelTexts.presetsLabel}
         </EuiTab>
         <EuiTab
           isSelected={selectedTabId === 'recent'}
           disabled={!hasRecent}
           onClick={() => setSelectedTabId('recent')}
         >
-          {mainPanelTexts.recentTab}
+          {mainPanelTexts.recentLabel}
         </EuiTab>
       </EuiTabs>
 
@@ -134,7 +134,8 @@ export function MainPanel() {
     onPresetSave({ start: timeRange.start, end: timeRange.end, label: timeRange.value });
   }, [onPresetSave, timeRange]);
 
-  // dev-only flag, will remove as we make progress
+  // temporary dev-only flag to show the footer conditionally
+  // TODO remove as we make progress and add content to it
   const _showFooter = typeof onPresetSave === 'function';
 
   return (
@@ -165,11 +166,7 @@ export function MainPanel() {
               </EuiToolTip>
             ) : undefined
           }
-        >
-          <EuiText size="xs" component="p">
-            Time zone information goes here.
-          </EuiText>
-        </PanelFooter>
+        />
       )}
     </PanelContainer>
   );

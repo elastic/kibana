@@ -20,9 +20,9 @@ import type { IconType } from '@elastic/eui';
 
 /** Metadata describing a navigatable panel inside the date range picker dialog. */
 export interface DateRangePickerPanelDescriptor {
-  /** Unique panel identifier */
+  /** Unique panel identifier, used for navigation */
   id: string;
-  /** Title shown in panel header or breadcrumb */
+  /** Title shown in panel header or navigation button */
   title: string;
   /** Icon type passed to `EuiIcon` for the panel navigation item */
   icon?: IconType;
@@ -30,13 +30,13 @@ export interface DateRangePickerPanelDescriptor {
 
 /** Context value exposed via `useDateRangePickerPanelNavigation()`. */
 export interface DateRangePickerPanelNavigationContextValue {
-  /** ID of the currently visible panel */
+  /** Id of the currently visible panel */
   activePanelId: string;
   /** Descriptors for all registered panels */
   panelDescriptors: DateRangePickerPanelDescriptor[];
-  /** Push a panel onto the history stack */
+  /** Push a panel onto the history stack and navigate to it */
   navigateTo: (panelId: string) => void;
-  /** Pop back to the previous panel */
+  /** Pop back to the previous panel and navigate back */
   goBack: () => void;
   /** Whether there is a previous panel to go back to */
   canGoBack: boolean;

@@ -31,6 +31,9 @@ import {
 import type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 
+// TODO agree on the final list
+const DEFAULT_PRESETS: TimeRangeBoundsOption[] = [{ start: 'now/d', end: 'now/d', label: 'Today' }];
+
 /** Public context value exposed to consumers via `useDateRangePickerContext`. */
 export interface DateRangePickerContextValue {
   /** Current input text */
@@ -56,9 +59,9 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   setIsEditing: (value: boolean) => void;
   /** Whether to use EUI compressed form styling. */
   compressed: boolean;
-  /** Predefined time range options shown in the Presets tab. */
+  /** Predefined time range options shown in the Presets section. */
   presets: TimeRangeBoundsOption[];
-  /** Recently used time ranges shown in the Recent tab. */
+  /** Recently used time ranges shown in the Recent section. */
   recent: TimeRangeBoundsOption[];
   /** Maximum width for the picker control, derived from EUI theme. */
   maxWidth: string;
@@ -103,8 +106,6 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
   }
   return context;
 }
-
-const DEFAULT_PRESETS: TimeRangeBoundsOption[] = [{ start: 'now/d', end: 'now/d', label: 'Today' }];
 
 /**
  * Provider component that owns all DateRangePicker state.

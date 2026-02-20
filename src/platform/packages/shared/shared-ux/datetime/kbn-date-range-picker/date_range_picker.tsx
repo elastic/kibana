@@ -29,9 +29,9 @@ export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_bu
 
 /** Configuration for a consumer-provided panel inside the date range picker dialog. */
 export interface DateRangePickerPanelConfig {
-  /** Unique panel identifier */
+  /** Unique panel identifier, used for navigation */
   id: string;
-  /** Title shown in panel header or breadcrumb */
+  /** Title shown in panel header and navigation button */
   title: string;
   /** Icon type passed to `EuiIcon` for the panel navigation item */
   icon?: IconType;
@@ -44,56 +44,43 @@ export interface DateRangePickerPanelConfig {
 }
 
 export interface DateRangePickerProps {
-  /** Text representation of the time range */
+  /** Initial text representation of the time range */
   defaultValue?: string;
-
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-
   /** Custom format for displaying (and parsing?) dates */
   dateFormat?: string;
-
   /** Show invalid state */
   isInvalid?: boolean;
-
   /** Called when the editing input text changes. */
   _onInputChange?: (value: string) => void;
-
   /**
    * Reduce input height and padding
    * @default true
    */
   compressed?: boolean;
-
   /**
    * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
    * Pass `true` for defaults, or a config object for fine-grained control.
    * @default false
    */
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
-
   /**
    * Additional panels rendered inside the dialog popover.
    * Each panel is navigatable via `useDateRangePickerPanelNavigation().navigateTo(id)`.
    */
   panels?: DateRangePickerPanelConfig[];
-
   /**
-   * Predefined time range options shown in the Presets tab.
-   * @default [{ start: 'now/d', end: 'now/d', label: 'Today' }]
+   * Predefined time range options shown in the Presets section.
    */
   presets?: TimeRangeBoundsOption[];
-
   /**
-   * Recently used time ranges shown in the Recent tab.
-   * When empty, the Recent tab is disabled.
+   * Recently used time ranges shown in the Recent section.
    * @default []
    */
   recent?: TimeRangeBoundsOption[];
-
   /** Called when the user wants to save the current input time range as a preset. */
   onPresetSave?: (option: TimeRangeBoundsOption) => void;
-
   /** Called when the user wants to delete a saved preset. */
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
 }

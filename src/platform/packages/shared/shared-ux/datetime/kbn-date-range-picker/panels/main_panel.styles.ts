@@ -8,7 +8,6 @@
  */
 
 import { css } from '@emotion/react';
-// import { euiFontSizeFromScale, euiLineHeightFromBaseline, euiScrollBarStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {

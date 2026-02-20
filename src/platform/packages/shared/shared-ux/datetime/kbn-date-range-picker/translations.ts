@@ -64,10 +64,10 @@ export const timeWindowButtonsTexts = {
 };
 
 export const mainPanelTexts = {
-  presetsTab: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsTab', {
+  presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',
   }),
-  recentTab: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.recentTab', {
+  recentLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.recentLabel', {
     defaultMessage: 'Recent',
   }),
   calendarPanelTitle: i18n.translate(
