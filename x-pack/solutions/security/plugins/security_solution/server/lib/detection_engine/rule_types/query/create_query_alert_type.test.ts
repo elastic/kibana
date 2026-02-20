@@ -17,8 +17,16 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
-import { hasTimestampFields, checkForNoReadableIndices } from '../utils/utils';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
+
+jest.mock('@kbn/data-views-plugin/server', () => ({
+  ...jest.requireActual('@kbn/data-views-plugin/server'),
+  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
+    getIndexPatternsWithMatches: jest.fn().mockResolvedValue(['some-index']),
+  })),
+}));
 
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
@@ -29,10 +37,6 @@ jest.mock('../utils/utils', () => ({
       warningMessage: undefined,
     };
   }),
-  checkForNoReadableIndices: jest.fn(async () => ({
-    foundNoIndices: false,
-    warningMessage: undefined,
-  })),
   checkForFrozenIndices: jest.fn(async () => []),
 }));
 
@@ -121,10 +125,8 @@ describe('Custom Query Alerts', () => {
   });
 
   it('short-circuits and writes a warning if no indices are found', async () => {
-    (checkForNoReadableIndices as jest.Mock).mockImplementationOnce(async () => ({
-      foundNoIndices: true,
-      warningMessage:
-        'Unable to find indices matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.',
+    (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
+      getIndexPatternsWithMatches: jest.fn().mockResolvedValue([]),
     }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
@@ -163,7 +165,7 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message: expect.stringContaining(
-          'Unable to find indices matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"]. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
+          'Unable to find matching indices for rule ALERT_RULE_NAME. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
         ),
       })
     );
