@@ -18,6 +18,7 @@ const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 interface AvailableConnector {
   name: string;
   actionTypeId: string;
+  exposeConfig?: boolean;
   config: Record<string, unknown>;
   secrets?: Record<string, unknown>;
 }
@@ -45,7 +46,10 @@ function getPreconfiguredEisConnectorsArg(): string | undefined {
     if (!connector || typeof connector !== 'object') continue;
     if (connector.actionTypeId !== '.inference') continue;
     if (connector.config?.provider !== 'elastic') continue;
-    eisConnectors[id] = connector;
+    // Preconfigured connectors do not expose `config` unless `exposeConfig: true` is set.
+    // The inference plugin relies on `.inference` connector config (taskType, inferenceId, ...)
+    // to validate compatibility.
+    eisConnectors[id] = { ...connector, exposeConfig: true };
   }
 
   if (Object.keys(eisConnectors).length === 0) return;
