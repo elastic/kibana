@@ -20,10 +20,11 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
-import { isTabRuntimeStateInitialized, selectTabRuntimeState } from '../runtime_state';
+import { selectTabRuntimeState } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
+import { TabInitializationStatus } from '../types';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -83,7 +84,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         // For non-initialized tabs, assign the current time range of the selected tab
         // if time restore is enabled and no time range was set yet for this tab
         if (
-          !isTabRuntimeStateInitialized(tabRuntimeState) &&
+          tab.initializationState.initializationStatus === TabInitializationStatus.NotStarted &&
           newTimeRestore &&
           !updatedTab.timeRange &&
           selectedTab?.globalState.timeRange
