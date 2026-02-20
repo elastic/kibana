@@ -140,9 +140,19 @@ const generateRuntimeCode = (config: SandboxConfig): string => `
         if (typeof html !== 'string') {
           return Promise.reject(new Error('render.setContent requires a string'));
         }
+        var root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = html;
+        }
         return sendRequest('render.setContent', { html: html });
       },
       setError: function(message) {
+        var root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = '<div class="script-panel-error"><h4>Error</h4><pre>' +
+            String(message).replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+            '</pre></div>';
+        }
         return sendRequest('render.setError', { message: String(message) });
       }
     }),
@@ -174,13 +184,11 @@ const generateRuntimeCode = (config: SandboxConfig): string => `
 /**
  * Generates the complete iframe srcDoc HTML with CSP and runtime.
  */
-export const generateIframeSrcDoc = (userCode: string, config: SandboxConfig): string => {
-  // Escape the user code for safe embedding in script tag
-  // We use a script element with textContent approach which is safer than string interpolation
-  const escapedUserCode = userCode
-    .replace(/\\/g, '\\\\')
-    .replace(/`/g, '\\`')
-    .replace(/\$/g, '\\$');
+export const generateIframeSrcDoc = (userCode: string, config: SandboxConfig, nonce?: string): string => {
+  const nonceAttr = nonce ? ` nonce="${nonce}"` : '';
+  // Escape </script> in user code to prevent the HTML parser from
+  // interpreting it as the end of the script element
+  const escapedUserCode = userCode.replace(/<\/script>/gi, '<\\/script>');
 
   return `<!DOCTYPE html>
 <html>
@@ -235,10 +243,10 @@ export const generateIframeSrcDoc = (userCode: string, config: SandboxConfig): s
 </head>
 <body>
   <div id="root"></div>
-  <script>
+  <script${nonceAttr}>
     ${generateRuntimeCode(config)}
   </script>
-  <script>
+  <script${nonceAttr}>
     // User code execution with error handling
     (function() {
       'use strict';

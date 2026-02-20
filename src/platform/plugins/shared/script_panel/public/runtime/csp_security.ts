@@ -31,25 +31,14 @@
  *    - `connect-src 'none'`: Block all network requests (fetch, XHR, WebSocket)
  *    - `img-src data: blob:`: Allow data URIs and blob URLs for images only
  *
- * 3. **Parent CSP is Independent**: The parent Kibana page has its own CSP
- *    - Kibana uses `script-src 'self'` (no nonces) with `csp.strict: true` by default
- *    - The iframe's null origin means parent CSP doesn't apply to iframe content
- *    - No nonce propagation is required - iframe has its own CSP context
- *
- * ## Why No Nonce Required
- *
- * Kibana's CSP configuration explicitly disallows user-configured nonces:
- * ```typescript
- * validate: getDirectiveValidator({ allowNone: false, allowNonce: false })
- * ```
- *
- * This is intentional - Kibana uses `'self'` based CSP rather than nonce-based CSP.
- * Sandboxed iframes with `srcDoc` operate with their own CSP context:
- *
- * 1. The iframe has a unique null origin (due to no `allow-same-origin`)
- * 2. The CSP meta tag in srcDoc defines the iframe's own security policy
- * 3. Parent CSP headers don't apply to content delivered via srcDoc
- * 4. No nonce propagation needed between parent and iframe
+ * 3. **Nonce-Based CSP for Inline Scripts**: `srcdoc` iframes inherit the
+ *    parent page's CSP headers. Since Kibana's default CSP has `script-src 'self'`,
+ *    inline `<script>` tags in the srcdoc would be blocked. To solve this:
+ *    - The server generates a per-request cryptographic nonce
+ *    - The nonce is added to the page's `Content-Security-Policy` header (`script-src 'nonce-xxx'`)
+ *    - The nonce is passed to the client via injected metadata (`csp.nonce`)
+ *    - All `<script>` tags in the iframe srcdoc include the `nonce` attribute
+ *    - This allows inline scripts without broadly enabling `unsafe-inline` on the parent
  *
  * ## Security Guarantees
  *

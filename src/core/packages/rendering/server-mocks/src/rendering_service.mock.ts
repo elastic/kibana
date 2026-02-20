@@ -18,14 +18,14 @@ export type RenderingServiceMock = jest.Mocked<PublicMethodsOf<RenderingService>
 
 function createRenderingPreboot() {
   const mocked: jest.Mocked<InternalRenderingServicePreboot> = {
-    render: jest.fn().mockResolvedValue('<body />'),
+    render: jest.fn().mockResolvedValue({ html: '<body />', cspNonce: 'mock-nonce' }),
   };
   return mocked;
 }
 
 function createRenderingSetup() {
   const mocked: jest.Mocked<InternalRenderingServiceSetup> = {
-    render: jest.fn().mockResolvedValue('<body />'),
+    render: jest.fn().mockResolvedValue({ html: '<body />', cspNonce: 'mock-nonce' }),
   };
   return mocked;
 }

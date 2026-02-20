@@ -27,7 +27,7 @@ import { SCRIPT_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 import type { ScriptPanelApi } from './types';
 import type { ScriptPanelServices } from './plugin';
 import { createScriptPanelBrowserTools } from './browser_tools';
-import { createScriptPanelBridge, createEsqlExecutor, createPanelCapabilities } from './runtime';
+import { createScriptPanelBridge, createEsqlExecutor, createPanelCapabilities, getKibanaCspNonce } from './runtime';
 import type {
   ScriptPanelBridge,
   LogEntry,
@@ -220,6 +220,7 @@ export const getScriptPanelEmbeddableFactory = (
             const bridge = createScriptPanelBridge({
               container: containerRef.current,
               scriptCode,
+              cspNonce: getKibanaCspNonce(),
               handlers: capabilities.handlers,
               onStateChange: handleStateChange,
               onLog: handleLog,

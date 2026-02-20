@@ -9,6 +9,32 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ZodSchema } from '@kbn/zod';
+
+/**
+ * Minimal interface for the agent builder plugin start contract.
+ * Defined locally to avoid a direct import from the x-pack agent_builder plugin.
+ */
+export interface AgentBuilderLike {
+  setConversationFlyoutActiveConfig: (config: {
+    sessionTag?: string;
+    agentId?: string;
+    initialMessage?: string;
+    attachments?: Array<{
+      id?: string;
+      type: string;
+      data: Record<string, unknown>;
+      hidden?: boolean;
+    }>;
+    browserApiTools?: Array<{
+      id: string;
+      description: string;
+      schema: ZodSchema;
+      handler: (params: never) => void | Promise<void>;
+    }>;
+  }) => void;
+  clearConversationFlyoutActiveConfig: () => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MiniAppsPluginSetup {}
@@ -22,4 +48,5 @@ export interface SetupDeps {}
 export interface StartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  agentBuilder?: AgentBuilderLike;
 }

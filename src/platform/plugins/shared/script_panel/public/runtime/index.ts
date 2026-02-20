@@ -40,6 +40,8 @@ export {
   generateErrorSrcDoc,
 } from './iframe_template';
 
+export { getKibanaCspNonce } from './get_csp_nonce';
+
 export type { SandboxValidationResult } from './csp_security';
 export {
   IFRAME_CSP_DIRECTIVES,

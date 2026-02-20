@@ -13,6 +13,9 @@
       "scriptPanel",
       "data",
       "expressions"
+    ],
+    "optionalPlugins": [
+      "agentBuilder"
     ]
   }
 }

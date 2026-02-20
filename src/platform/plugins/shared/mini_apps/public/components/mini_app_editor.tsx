@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,14 +22,27 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiResizableContainer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
+import {
+  createScriptPanelBridge,
+  createEsqlExecutor,
+  createPanelCapabilities,
+  getKibanaCspNonce,
+  type ScriptPanelBridge,
+  type PanelSize,
+  type LogEntry,
+  type RuntimeState,
+} from '@kbn/script-panel/public';
 import type { MiniApp } from '../../common';
 import { useMiniAppsContext } from '../context';
+import { useAgentBuilder } from '../hooks/use_agent_builder';
 
 const DEFAULT_SCRIPT = `// Welcome to Mini Apps!
 // Use Kibana.render.setContent() to display content
@@ -46,6 +61,29 @@ async function main() {
 main();
 `;
 
+const previewContainerCss = css({
+  width: '100%',
+  height: '100%',
+  position: 'relative',
+  overflow: 'hidden',
+  minHeight: 0,
+  flex: 1,
+});
+
+const previewPanelCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: 0,
+});
+
+const editorPanelCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: 0,
+});
+
 interface EditorFormState {
   name: string;
   script_code: string;
@@ -55,7 +93,7 @@ export const MiniAppEditor: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const isEditing = Boolean(id);
 
-  const { apiClient, history, coreStart } = useMiniAppsContext();
+  const { apiClient, history, coreStart, depsStart, agentBuilder } = useMiniAppsContext();
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<EditorFormState>({
@@ -63,6 +101,31 @@ export const MiniAppEditor: React.FC = () => {
     script_code: DEFAULT_SCRIPT,
   });
   const [errors, setErrors] = useState<{ name?: string }>({});
+
+  // Preview state
+  const [previewState, setPreviewState] = useState<RuntimeState>('idle');
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const bridgeRef = useRef<ScriptPanelBridge | null>(null);
+  const panelSizeRef = useRef<PanelSize>({ width: 0, height: 0 });
+
+  // When the agent updates code, update the form and re-run preview
+  const handleAgentUpdateCode = useCallback(
+    (code: string) => {
+      setForm((prev) => ({ ...prev, script_code: code }));
+    },
+    []
+  );
+
+  // Wire up agent builder with browser tools and screen context
+  useAgentBuilder({
+    agentBuilder,
+    name: form.name,
+    scriptCode: form.script_code,
+    runtimeState: previewState,
+    runtimeError: previewError,
+    onUpdateCode: handleAgentUpdateCode,
+  });
 
   useEffect(() => {
     if (isEditing && id) {
@@ -164,6 +227,95 @@ export const MiniAppEditor: React.FC = () => {
     await handleSave();
   }, [handleSave]);
 
+  // --- Preview bridge helpers ---
+
+  const getPanelSize = useCallback((): PanelSize => {
+    if (previewContainerRef.current) {
+      const rect = previewContainerRef.current.getBoundingClientRect();
+      panelSizeRef.current = { width: rect.width, height: rect.height };
+    }
+    return panelSizeRef.current;
+  }, []);
+
+  const destroyBridge = useCallback(() => {
+    if (bridgeRef.current) {
+      bridgeRef.current.destroy();
+      bridgeRef.current = null;
+    }
+  }, []);
+
+  const runPreview = useCallback(() => {
+    if (!previewContainerRef.current || !form.script_code.trim()) return;
+
+    destroyBridge();
+    setPreviewError(null);
+    setPreviewState('loading');
+
+    const esqlExecutor = createEsqlExecutor({
+      deps: { data: depsStart.data, expressions: depsStart.expressions },
+      getContext: () => ({
+        timeRange: depsStart.data.query.timefilter.timefilter.getTime(),
+      }),
+    });
+
+    const capabilities = createPanelCapabilities({
+      esqlExecutor,
+      getPanelSize,
+      setContent: () => {},
+      setError: (message: string) => setPreviewError(message),
+      onLog: (_entry: LogEntry) => {},
+    });
+
+    const bridge = createScriptPanelBridge({
+      container: previewContainerRef.current,
+      scriptCode: form.script_code,
+      cspNonce: getKibanaCspNonce(),
+      handlers: capabilities.handlers,
+      onStateChange: (state: RuntimeState) => setPreviewState(state),
+      onLog: (_entry: LogEntry) => {},
+      onError: (err: Error) => {
+        setPreviewError(err.message);
+        setPreviewState('error');
+      },
+    });
+
+    bridgeRef.current = bridge;
+    bridge.start().catch((err: Error) => {
+      setPreviewError(err.message);
+      setPreviewState('error');
+    });
+  }, [form.script_code, depsStart.data, depsStart.expressions, getPanelSize, destroyBridge]);
+
+  // Resize observer for the preview container
+  useEffect(() => {
+    if (!previewContainerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      const size = getPanelSize();
+      if (bridgeRef.current) {
+        bridgeRef.current.sendEvent('resize', size);
+      }
+    });
+
+    resizeObserver.observe(previewContainerRef.current);
+    return () => resizeObserver.disconnect();
+  }, [getPanelSize]);
+
+  // Cleanup bridge on unmount
+  useEffect(() => destroyBridge, [destroyBridge]);
+
+  // Keyboard shortcut: Cmd/Ctrl+Enter to run preview
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runPreview();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [runPreview]);
+
   if (loading) {
     return (
       <EuiPageTemplate.EmptyPrompt>
@@ -198,7 +350,11 @@ export const MiniAppEditor: React.FC = () => {
           </EuiFlexGroup>,
         ]}
       />
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section
+        grow
+        paddingSize="s"
+        css={css({ display: 'flex', flexDirection: 'column', minHeight: 0 })}
+      >
         <EuiForm component="form">
           <EuiFormRow
             label={i18n.translate('miniApps.editor.nameLabel', { defaultMessage: 'Name' })}
@@ -217,44 +373,152 @@ export const MiniAppEditor: React.FC = () => {
               data-test-subj="miniAppNameInput"
             />
           </EuiFormRow>
-
-          <EuiSpacer size="l" />
-
-          <EuiFormRow
-            label={i18n.translate('miniApps.editor.codeLabel', {
-              defaultMessage: 'JavaScript Code',
-            })}
-            helpText={i18n.translate('miniApps.editor.codeHelpText', {
-              defaultMessage:
-                'Write JavaScript code that uses the Kibana API to render content and query data.',
-            })}
-            fullWidth
-          >
-            <EuiPanel
-              paddingSize="none"
-              css={css`
-                overflow: hidden;
-              `}
-            >
-              <CodeEditor
-                languageId="javascript"
-                value={form.script_code}
-                onChange={handleCodeChange}
-                height={500}
-                options={{
-                  fontSize: 14,
-                  lineNumbers: 'on',
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  automaticLayout: true,
-                  tabSize: 2,
-                }}
-                data-test-subj="miniAppCodeEditor"
-              />
-            </EuiPanel>
-          </EuiFormRow>
         </EuiForm>
+
+        <EuiSpacer size="m" />
+
+        <EuiResizableContainer
+          direction="horizontal"
+          css={css({ flex: 1, minHeight: '500px' })}
+        >
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={50}
+                minSize="300px"
+                paddingSize="none"
+                css={editorPanelCss}
+              >
+                <EuiPanel
+                  paddingSize="none"
+                  css={css({ overflow: 'hidden', height: '100%' })}
+                  borderRadius="none"
+                >
+                  <CodeEditor
+                    languageId="javascript"
+                    value={form.script_code}
+                    onChange={handleCodeChange}
+                    height="100%"
+                    options={{
+                      fontSize: 14,
+                      lineNumbers: 'on',
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      tabSize: 2,
+                    }}
+                    data-test-subj="miniAppCodeEditor"
+                  />
+                </EuiPanel>
+              </EuiResizablePanel>
+
+              <EuiResizableButton indicator="border" />
+
+              <EuiResizablePanel
+                initialSize={50}
+                minSize="200px"
+                paddingSize="none"
+                css={previewPanelCss}
+              >
+                <EuiPanel
+                  css={css({ display: 'flex', flexDirection: 'column', height: '100%' })}
+                  paddingSize="s"
+                  borderRadius="none"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    css={css({ flexShrink: 0 })}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xxs">
+                        <h3>
+                          <FormattedMessage
+                            id="miniApps.editor.previewTitle"
+                            defaultMessage="Preview"
+                          />
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="playFilled"
+                        onClick={runPreview}
+                        aria-label={i18n.translate('miniApps.editor.runPreviewAriaLabel', {
+                          defaultMessage: 'Run preview',
+                        })}
+                        display="base"
+                        size="s"
+                        color="success"
+                        isDisabled={!form.script_code.trim()}
+                        data-test-subj="miniAppRunPreviewButton"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <span
+                        css={css({
+                          fontSize: '12px',
+                          color: '#69707d',
+                        })}
+                      >
+                        {previewState === 'idle' && (
+                          <FormattedMessage
+                            id="miniApps.editor.previewHint"
+                            defaultMessage="Press {shortcut} or click play"
+                            values={{
+                              shortcut: navigator.platform?.includes('Mac') ? '⌘↵' : 'Ctrl+↵',
+                            }}
+                          />
+                        )}
+                        {previewState === 'loading' && (
+                          <FormattedMessage
+                            id="miniApps.editor.previewLoading"
+                            defaultMessage="Loading..."
+                          />
+                        )}
+                        {previewState === 'running' && (
+                          <FormattedMessage
+                            id="miniApps.editor.previewRunning"
+                            defaultMessage="Running"
+                          />
+                        )}
+                        {previewState === 'error' && (
+                          <FormattedMessage
+                            id="miniApps.editor.previewError"
+                            defaultMessage="Error"
+                          />
+                        )}
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  {previewError && (
+                    <>
+                      <EuiSpacer size="xs" />
+                      <EuiCallOut
+                        color="danger"
+                        size="s"
+                        iconType="error"
+                        title={previewError}
+                        css={css({ flexShrink: 0 })}
+                      />
+                    </>
+                  )}
+
+                  <EuiSpacer size="xs" />
+
+                  <div
+                    ref={previewContainerRef}
+                    css={previewContainerCss}
+                    data-test-subj="miniAppPreviewContainer"
+                  />
+                </EuiPanel>
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
       </EuiPageTemplate.Section>
     </>
   );

@@ -133,7 +133,7 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     csp: { header: cspHeader, reportOnlyHeader: cspReportOnlyHeader },
   } = config;
 
-  const additionalHeaders = {
+  const baseHeaders = {
     ...securityResponseHeaders,
     ...customResponseHeaders,
     'Content-Security-Policy': cspHeader,
@@ -142,7 +142,13 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 
   return (request, response, toolkit) => {
-    return toolkit.next({ headers: additionalHeaders });
+    // If the response already has a CSP header (e.g. page renders that include
+    // a per-request nonce), preserve it instead of overwriting with the static one.
+    const headers = response.headers?.['content-security-policy']
+      ? { ...baseHeaders, 'Content-Security-Policy': response.headers['content-security-policy'] }
+      : baseHeaders;
+
+    return toolkit.next({ headers });
   };
 };
 

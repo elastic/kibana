@@ -114,26 +114,32 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { html, cspNonce } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
-          body,
-          headers: options.headers,
+          body: html,
+          headers: {
+            ...options.headers,
+            'content-security-policy': buildCspWithNonce(deps, cspNonce),
+          },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { html, cspNonce } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
-          body,
-          headers: options.headers,
+          body: html,
+          headers: {
+            ...options.headers,
+            'content-security-policy': buildCspWithNonce(deps, cspNonce),
+          },
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -166,3 +172,15 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     };
   }
 }
+
+/**
+ * Takes the base CSP header and adds a per-request nonce to the script-src directive.
+ * This allows sandboxed iframes using srcdoc to execute inline scripts tagged with
+ * the nonce, without broadly enabling 'unsafe-inline'.
+ */
+const buildCspWithNonce = (deps: SetupDeps | PrebootDeps, nonce: string): string => {
+  const baseCsp = deps.http.csp.header;
+  const nonceToken = `'nonce-${nonce}'`;
+  // Inject the nonce into the script-src directive
+  return baseCsp.replace(/script-src\s/, `script-src ${nonceToken} `);
+};

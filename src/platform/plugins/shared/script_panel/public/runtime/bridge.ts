@@ -45,6 +45,8 @@ export interface BridgeOptions {
   container: HTMLElement;
   /** User script code to execute */
   scriptCode: string;
+  /** CSP nonce from the parent page, required for inline scripts in srcdoc */
+  cspNonce?: string;
   /** Sandbox configuration */
   config?: Partial<SandboxConfig>;
   /** Capability handlers provided by the host */
@@ -65,6 +67,7 @@ export class ScriptPanelBridge {
   private iframe: HTMLIFrameElement | null = null;
   private container: HTMLElement;
   private scriptCode: string;
+  private cspNonce?: string;
   private config: SandboxConfig;
   private handlers: CapabilityHandlers;
   private onStateChange?: (state: RuntimeState) => void;
@@ -79,6 +82,7 @@ export class ScriptPanelBridge {
   constructor(options: BridgeOptions) {
     this.container = options.container;
     this.scriptCode = options.scriptCode;
+    this.cspNonce = options.cspNonce;
     this.config = { ...DEFAULT_SANDBOX_CONFIG, ...options.config };
     this.handlers = options.handlers;
     this.onStateChange = options.onStateChange;
@@ -106,7 +110,6 @@ export class ScriptPanelBridge {
 
     // Create iframe with sandbox restrictions
     this.iframe = document.createElement('iframe');
-    // Set sandbox attribute directly for better compatibility
     // Explicitly only 'allow-scripts' - NOT 'allow-same-origin' which is critical for security
     // See csp_security.ts for full security model documentation
     this.iframe.setAttribute('sandbox', 'allow-scripts');
@@ -143,8 +146,8 @@ export class ScriptPanelBridge {
 
     if (this.destroyed || !this.iframe) return;
 
-    // Inject the actual script content
-    this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config);
+    // Inject the actual script content (nonce allows inline scripts under parent CSP)
+    this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config, this.cspNonce);
 
     // Set up script timeout
     this.scriptTimeout = setTimeout(() => {
@@ -194,7 +197,7 @@ export class ScriptPanelBridge {
     });
 
     if (this.iframe) {
-      this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config);
+      this.iframe.srcdoc = generateIframeSrcDoc(this.scriptCode, this.config, this.cspNonce);
     }
 
     // Set up new script timeout

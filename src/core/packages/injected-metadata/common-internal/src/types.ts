@@ -76,6 +76,7 @@ export interface InjectedMetadata {
   theme: InjectedMetadataTheme;
   csp: {
     warnLegacyBrowsers: boolean;
+    nonce?: string;
   };
   externalUrl: { policy: InjectedMetadataExternalUrlPolicy[] };
   apmConfig: Record<string, unknown> | null;

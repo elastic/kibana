@@ -25,6 +25,7 @@ export type { EsqlExecutorDependencies, EsqlExecutorOptions, EsqlExecutor } from
 export { createEsqlExecutor } from './runtime';
 export type { CapabilitiesOptions, PanelCapabilities } from './runtime';
 export { createPanelCapabilities } from './runtime';
+export { getKibanaCspNonce } from './runtime';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ScriptPanelPlugin();

@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
-import type { StartDeps } from './types';
+import type { AgentBuilderLike, StartDeps } from './types';
 import { createMiniAppsApiClient } from './services';
 import type { MiniAppsApiClient } from './services';
 
@@ -18,6 +18,7 @@ export interface MiniAppsContextValue {
   depsStart: StartDeps;
   apiClient: MiniAppsApiClient;
   history: AppMountParameters['history'];
+  agentBuilder?: AgentBuilderLike;
 }
 
 const MiniAppsContext = createContext<MiniAppsContextValue | null>(null);
@@ -41,6 +42,7 @@ export const MiniAppsProvider: React.FC<MiniAppsProviderProps> = ({
       depsStart,
       apiClient: createMiniAppsApiClient(coreStart.http),
       history,
+      agentBuilder: depsStart.agentBuilder,
     }),
     [coreStart, depsStart, history]
   );

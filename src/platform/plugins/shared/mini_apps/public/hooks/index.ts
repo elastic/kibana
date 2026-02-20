@@ -8,4 +8,5 @@
  */
 
 export { useMiniAppBrowserTools, createMiniAppBrowserTools } from './use_browser_tools';
-export type { MiniAppBrowserToolDefinition } from './use_browser_tools';
+export type { MiniAppBrowserToolDefinition, MiniAppScreenState } from './use_browser_tools';
+export { useAgentBuilder, buildScreenContextDescription } from './use_agent_builder';
