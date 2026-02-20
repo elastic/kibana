@@ -42,6 +42,7 @@ export function registerUserStatusPrivilegeRoutes({
           body: {
             privileges: {
               canManageIndex: securityCheck?.index?.[indexName]?.manage ?? false,
+              canDeleteDocuments: securityCheck?.index?.[indexName]?.delete ?? false,
             },
           },
           headers: { 'content-type': 'application/json' },

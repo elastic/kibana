@@ -15,7 +15,12 @@ import type {
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import {
+  isIlmLifecycle,
+  isInheritLifecycle,
+  Streams,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
@@ -197,6 +202,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    // Validate the stream's name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
     if (this.dependencies.isServerless) {
       if (isIlmLifecycle(this.getLifecycle())) {
         return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
