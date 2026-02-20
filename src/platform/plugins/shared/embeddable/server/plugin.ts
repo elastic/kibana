@@ -34,6 +34,9 @@ import { enhancementsPersistableState } from '../common/bwc/enhancements/enhance
 import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
+  /**
+   * @deprecated Do not use. Register transforms instead.
+   */
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
@@ -44,6 +47,11 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
+
+  /**
+   * @deprecated returns all migrate functions as registered in the legacy serverside embeddable framework.
+   * Do not use. Remove when all Embeddable types have their migrations moved to kbn-embeddable-bwc-migrations
+   */
   getAllMigrations: () => MigrateFunctionsObject;
   transformEnhancementsIn: TransformEnhancementsIn;
   transformEnhancementsOut: TransformEnhancementsOut;

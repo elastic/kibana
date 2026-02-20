@@ -10,14 +10,11 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { getLegacyVisualizationSavedObjectMigrations } from '@kbn/embeddable-bwc-migrations';
 import { CONTENT_ID } from '../../common/content_management';
-import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 import { getInAppUrl } from './get_in_app_url';
 
-export const getVisualizationSavedObjectType = (
-  getSearchSourceMigrations: () => MigrateFunctionsObject
-): SavedObjectsType => ({
+export const getVisualizationSavedObjectType = (): SavedObjectsType => ({
   name: CONTENT_ID,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
@@ -54,5 +51,5 @@ export const getVisualizationSavedObjectType = (
       savedSearchRefName: schema.maybe(schema.string()),
     }),
   },
-  migrations: () => getAllMigrations(getSearchSourceMigrations()),
+  migrations: () => getLegacyVisualizationSavedObjectMigrations(),
 });

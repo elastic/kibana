@@ -9,6 +9,9 @@
 
 import type { EmbeddablePersistableStateService } from '.';
 
+/**
+ * @deprecated part of the legacy embeddable PersistableState ecosystem which is in the process of being removed.
+ */
 export const createEmbeddablePersistableStateServiceMock =
   (): jest.Mocked<EmbeddablePersistableStateService> => {
     return {

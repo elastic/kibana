@@ -9,19 +9,17 @@
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-
+import { getDashboardSavedObjectMigrations } from '@kbn/embeddable-bwc-migrations';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
 
-import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
-import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-
 export const createDashboardSavedObjectType = ({
   migrationDeps,
 }: {
-  migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
+  migrationDeps: { embeddable: EmbeddableSetup };
 }): SavedObjectsType => ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
@@ -126,5 +124,5 @@ export const createDashboardSavedObjectType = ({
   schemas: {
     '8.9.0': dashboardAttributesSchemaV1,
   },
-  migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
+  migrations: () => getDashboardSavedObjectMigrations(migrationDeps.embeddable),
 });
