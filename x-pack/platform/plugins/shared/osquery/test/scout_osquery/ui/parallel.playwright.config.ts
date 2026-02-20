@@ -23,11 +23,11 @@ const config: ReturnType<typeof createPlaywrightConfig> = {
   timeout: 300_000,
   ...(parallelJobCount && parallelJobIndex !== undefined
     ? {
-      shard: {
-        total: parallelJobCount,
-        current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
-      },
-    }
+        shard: {
+          total: parallelJobCount,
+          current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
+        },
+      }
     : {}),
 };
 
