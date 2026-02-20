@@ -1,0 +1,70 @@
+{
+  "job_id": "v3_windows_rare_user_type10_remote_login_euid",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "winlog.event_data.LogonType": "10"
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "event.type": {
+                    "query": "authentication_success",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "event.action": {
+                    "query": "logged-in",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": [
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
+          ]
+        }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
+      }
+    }
+  }
+}
