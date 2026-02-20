@@ -6,8 +6,9 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useKibana } from '../../../common';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export interface ConnectorOAuthDisconnectProps {
   connectorId: string;
@@ -31,7 +32,7 @@ export const useConnectorOAuthDisconnect = ({
 }: ConnectorOAuthDisconnectProps): ConnectorOAuthDisconnect => {
   const {
     services: { http },
-  } = useKibana();
+  } = useKibana<{ http: HttpStart }>();
 
   const { mutate: disconnect, isLoading: isDisconnecting } = useMutation<void, Error>({
     mutationFn: () =>

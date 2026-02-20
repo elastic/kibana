@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { useSubAction } from './use_sub_action';
-
 export {
   useConnectorOAuthConnect,
   OAuthRedirectMode,
@@ -17,4 +15,4 @@ export {
   type ConnectorOAuthDisconnect,
   useOAuthRedirectResult,
   type OAuthRedirectResultProps,
-} from './oauth';
+} from './hooks';

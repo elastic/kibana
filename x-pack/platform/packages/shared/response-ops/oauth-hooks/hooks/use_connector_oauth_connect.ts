@@ -9,11 +9,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation } from '@kbn/react-query';
 import { isError } from 'lodash';
 import type { StartOAuthFlowRequestBody, StartOAuthFlowResponse } from '@kbn/actions-plugin/common';
-import { OAUTH_CALLBACK_QUERY_PARAMS, OAuthAuthorizationStatus } from '@kbn/actions-plugin/common';
+import {
+  OAUTH_CALLBACK_QUERY_PARAMS,
+  OAuthAuthorizationStatus,
+  INTERNAL_BASE_ACTION_API_PATH,
+} from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../common';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
-import { OAUTH_BROADCAST_CHANNEL_NAME, type OAuthFlowCompletedMessage } from './oauth';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OAUTH_BROADCAST_CHANNEL_NAME, type OAuthFlowCompletedMessage } from '../oauth';
 
 export enum OAuthRedirectMode {
   NewTab = 'new_tab',
@@ -44,11 +48,12 @@ export type ConnectorOAuthConnectProps =
 
 export interface ConnectorOAuthConnect {
   connect: () => void;
+  cancelConnect: () => void;
   isConnecting: boolean;
   isAwaitingCallback: boolean;
 }
 
-const DEFAULT_TIMEOUT_MS = 60 * 1000 * 10; // 10 minutes
+const DEFAULT_TIMEOUT_MS = 60 * 1000 * 10;
 
 /**
  * Initiates the OAuth authorization code grant flow for a connector
@@ -76,7 +81,7 @@ export const useConnectorOAuthConnect = ({
 }: ConnectorOAuthConnectProps): ConnectorOAuthConnect => {
   const {
     services: { http },
-  } = useKibana();
+  } = useKibana<{ http: HttpStart }>();
 
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
@@ -133,6 +138,10 @@ export const useConnectorOAuthConnect = ({
     startOAuthFlow({ returnUrl: resolvedReturnUrl });
   }, [startOAuthFlow, redirectMode, returnUrl]);
 
+  const cancelConnect = useCallback(() => {
+    setIsAwaitingCallback(false);
+  }, []);
+
   // Handle OAuth callback timeout
   useEffect(() => {
     if (redirectMode !== OAuthRedirectMode.NewTab || !isAwaitingCallback) {
@@ -143,7 +152,7 @@ export const useConnectorOAuthConnect = ({
       setIsAwaitingCallback(false);
       onErrorRef.current?.(
         new Error(
-          i18n.translate('xpack.triggersActionsUI.hooks.oauth.timeoutError', {
+          i18n.translate('xpack.responseOpsOAuthHooks.timeoutError', {
             defaultMessage: 'OAuth authorization timed out',
           })
         )
@@ -176,6 +185,7 @@ export const useConnectorOAuthConnect = ({
 
   return {
     connect,
+    cancelConnect,
     isConnecting,
     isAwaitingCallback,
   };

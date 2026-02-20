@@ -14,7 +14,7 @@ jest.mock('react-router-dom', () => ({
 import { renderHook } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useOAuthRedirectResult } from './use_oauth_redirect_result';
-import { OAUTH_BROADCAST_CHANNEL_NAME } from './oauth';
+import { OAUTH_BROADCAST_CHANNEL_NAME } from '../oauth';
 
 const useLocationMock = useLocation as jest.MockedFunction<typeof useLocation>;
 

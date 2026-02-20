@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('@kbn/kibana-react-plugin/public');
 
 const mockUseMutation = jest.fn();
 jest.mock('@kbn/react-query', () => ({
@@ -13,12 +13,13 @@ jest.mock('@kbn/react-query', () => ({
 }));
 
 import { renderHook, act } from '@testing-library/react';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useConnectorOAuthConnect, OAuthRedirectMode } from './use_connector_oauth_connect';
 import { OAuthAuthorizationStatus } from '@kbn/actions-plugin/common';
-import { OAUTH_BROADCAST_CHANNEL_NAME } from './oauth';
+import { OAUTH_BROADCAST_CHANNEL_NAME } from '../oauth';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockHttpPost = jest.fn();
+(useKibana as jest.Mock).mockReturnValue({ services: { http: { post: mockHttpPost } } });
 
 class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = [];
@@ -59,7 +60,7 @@ describe('useConnectorOAuthConnect', () => {
       return { mutate: mockMutate, isLoading: false };
     });
 
-    useKibanaMock().services.http.post = jest.fn().mockResolvedValue({
+    mockHttpPost.mockResolvedValue({
       authorizationUrl: 'https://oauth.provider/authorize?code=abc',
     });
   });
@@ -148,7 +149,7 @@ describe('useConnectorOAuthConnect', () => {
     }) => Promise<unknown>;
     mutationFn({ returnUrl: 'http://localhost/app' });
 
-    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+    expect(mockHttpPost).toHaveBeenCalledWith(
       expect.stringContaining(encodeURIComponent('id/with special&chars')),
       expect.anything()
     );

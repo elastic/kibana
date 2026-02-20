@@ -32,6 +32,11 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import {
+  useConnectorOAuthConnect,
+  OAuthRedirectMode,
+  useConnectorOAuthDisconnect,
+} from '@kbn/response-ops-oauth-hooks';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -40,11 +45,6 @@ import {
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { usesOAuthAuthorizationCode } from '../../../lib/check_oauth_auth_code';
-import {
-  useConnectorOAuthConnect,
-  OAuthRedirectMode,
-} from '../../../hooks/oauth/use_connector_oauth_connect';
-import { useConnectorOAuthDisconnect } from '../../../hooks/oauth/use_connector_oauth_disconnect';
 
 import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
@@ -676,7 +676,7 @@ const OAuthOperations: React.FunctionComponent<{
 
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
-  const { connect, isConnecting, isAwaitingCallback } = useConnectorOAuthConnect({
+  const { connect, cancelConnect, isConnecting, isAwaitingCallback } = useConnectorOAuthConnect({
     connectorId: item.id,
     redirectMode: OAuthRedirectMode.NewTab,
     onSuccess: () => {
@@ -727,29 +727,49 @@ const OAuthOperations: React.FunctionComponent<{
     },
   });
 
-  const isAuthorizeBusy = isConnecting || isAwaitingCallback;
-
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription',
-            { defaultMessage: 'Authorize connector' }
-          )}
-        >
-          <EuiButtonIcon
-            data-test-subj="authorizeConnector"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName',
-              { defaultMessage: 'Authorize' }
+        {isAwaitingCallback ? (
+          <EuiToolTip
+            key="cancel"
+            content={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription',
+              { defaultMessage: 'Cancel authorization' }
             )}
-            isLoading={isAuthorizeBusy}
-            disabled={isDisconnecting}
-            onClick={connect}
-            iconType="link"
-          />
-        </EuiToolTip>
+          >
+            <EuiButtonIcon
+              data-test-subj="cancelAuthorizeConnector"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName',
+                { defaultMessage: 'Cancel authorization' }
+              )}
+              onClick={cancelConnect}
+              iconType="cross"
+              color="danger"
+            />
+          </EuiToolTip>
+        ) : (
+          <EuiToolTip
+            key="authorize"
+            content={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription',
+              { defaultMessage: 'Authorize connector' }
+            )}
+          >
+            <EuiButtonIcon
+              data-test-subj="authorizeConnector"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName',
+                { defaultMessage: 'Authorize' }
+              )}
+              isLoading={isConnecting}
+              disabled={isDisconnecting}
+              onClick={connect}
+              iconType="link"
+            />
+          </EuiToolTip>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
@@ -765,7 +785,7 @@ const OAuthOperations: React.FunctionComponent<{
               { defaultMessage: 'Disconnect' }
             )}
             isLoading={isDisconnecting}
-            disabled={isAuthorizeBusy}
+            disabled={isConnecting || isAwaitingCallback}
             onClick={() => setShowDisconnectConfirm(true)}
             iconType="linkSlash"
           />

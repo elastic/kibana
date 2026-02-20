@@ -14,7 +14,7 @@ import {
   stripOAuthCallbackQueryParams,
   type OAuthFlowCompletedErrorMessage,
   type OAuthFlowCompletedSuccessMessage,
-} from './oauth';
+} from '../oauth';
 
 export interface OAuthRedirectResultProps {
   onSuccess?: (connectorId: string) => void;
@@ -60,7 +60,7 @@ export const useOAuthRedirectResult = ({
       const error = searchParams.get(OAUTH_CALLBACK_QUERY_PARAMS.ERROR);
       const errorMessage =
         error ||
-        i18n.translate('xpack.triggersActionsUI.hooks.oauth.redirectResultError', {
+        i18n.translate('xpack.responseOpsOAuthHooks.redirectResultError', {
           defaultMessage: 'OAuth authorization failed',
         });
       onErrorRef.current?.(connectorId, new Error(errorMessage));
