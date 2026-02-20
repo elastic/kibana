@@ -152,7 +152,7 @@ export const AdvancedSettingsForm = () => {
               setSyncInterval(
                 settings?.privateLocationsSyncInterval ??
                   DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ??
-                  5
+                  MIN_SYNC_INTERVAL
               );
             }}
             flush="left"
