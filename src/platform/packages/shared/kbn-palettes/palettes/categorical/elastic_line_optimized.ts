@@ -25,7 +25,7 @@ const COLOR_SWAP_PAIRS: Array<[number, number]> = [
  * Swaps color pairs within each group of 10 to increase contrast
  * between adjacent hues (e.g., separating pink and red).
  */
-function swapColorPairs(colors: string[]): string[] {
+export function swapColorPairs(colors: string[]): string[] {
   const result = [...colors];
   for (let groupStart = 0; groupStart < result.length; groupStart += 10) {
     if (groupStart + 9 < result.length) {
@@ -44,7 +44,7 @@ function swapColorPairs(colors: string[]): string[] {
  * Reorders colors so dark tones (even indices) come before light tones (odd indices)
  * within each group of 10 colors.
  */
-function reorderDarkFirst(colors: string[]): string[] {
+export function reorderDarkFirst(colors: string[]): string[] {
   const result: string[] = [];
   for (let i = 0; i < colors.length; i += 10) {
     const group = colors.slice(i, i + 10);
