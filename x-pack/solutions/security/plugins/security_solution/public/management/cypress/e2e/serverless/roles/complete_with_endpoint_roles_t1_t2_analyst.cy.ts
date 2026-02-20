@@ -10,7 +10,6 @@ import {
   ensureEndpointListPageAuthzAccess,
   ensureFleetPermissionDeniedScreen,
   getEndpointManagementPageList,
-  getEndpointManagementPageMap,
   getNoPrivilegesPage,
   openRowActionMenu,
   visitEndpointList,
