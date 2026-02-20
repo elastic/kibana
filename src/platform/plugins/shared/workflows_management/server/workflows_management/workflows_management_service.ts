@@ -319,6 +319,18 @@ export class WorkflowsService {
             action: 'workflow-create',
             userId: authenticatedUser,
             spaceId,
+            ignoreFields: {
+              yaml: true,
+              updated_at: true,
+              enabled: true,
+              description: true,
+              name: true,
+              lastUpdatedBy: true,
+              valid: true,
+              tags: true,
+              createdBy: true,
+              created_at: true,
+            },
           }
         );
       } catch (err) {
@@ -597,6 +609,18 @@ export class WorkflowsService {
               action: 'workflow-update',
               userId: authenticatedUser,
               spaceId,
+              ignoreFields: {
+                yaml: true,
+                updated_at: true,
+                enabled: true,
+                description: true,
+                name: true,
+                lastUpdatedBy: true,
+                valid: true,
+                tags: true,
+                createdBy: true,
+                created_at: true,
+              },
             }
           );
         } catch (err) {

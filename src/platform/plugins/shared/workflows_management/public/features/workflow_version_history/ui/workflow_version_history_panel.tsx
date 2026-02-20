@@ -14,18 +14,21 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowHistory } from '../../../entities/workflows/model/use_workflow_history';
 import type { WorkflowHistoryItem } from '../../../entities/workflows/model/use_workflow_history';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 export interface WorkflowVersionHistoryPanelProps {
@@ -67,7 +70,8 @@ function formatVersionTimestamp(date: Date): string {
 function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
   const timestamp = item['@timestamp'] ? new Date(item['@timestamp']) : null;
   const userName = item.user?.name ?? item.user?.id ?? 'Unknown';
-  const changeCount = item.object?.fields?.changed?.length ?? 0;
+  const changedFields = item.object?.fields?.changed ?? [];
+  const changeCount = changedFields.length;
   const action = item.event?.action ?? 'workflow-update';
   const isCreate = action === 'workflow-create';
 
@@ -81,14 +85,25 @@ function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
     defaultMessage: 'made ',
   });
 
+  const changesTooltipContent =
+    changedFields.length > 0 ? (
+      <ul style={{ margin: 0, paddingLeft: 16 }}>
+        {changedFields.map((field) => (
+          <li key={field}>{field.replace('definition.', '')}</li>
+        ))}
+      </ul>
+    ) : null;
+
+  const changeCountBadge = (
+    <EuiBadge color="hollow" data-test-subj="workflowVersionHistoryChangeCount">
+      {changeCount}
+    </EuiBadge>
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
       <EuiFlexItem grow={false}>
-        <EuiAvatar
-          name={userName}
-          size="s"
-          initials={getInitial(item.user?.name, item.user?.id)}
-        />
+        <EuiAvatar name={userName} size="s" initials={getInitial(item.user?.name, item.user?.id)} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
@@ -123,7 +138,18 @@ function VersionHistoryListItem({ item }: { item: WorkflowHistoryItem }) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{changeCount}</EuiBadge>
+              {changesTooltipContent ? (
+                <EuiToolTip
+                  content={changesTooltipContent}
+                  title={i18n.translate('workflows.versionHistory.changedFieldsTitle', {
+                    defaultMessage: 'Changed fields',
+                  })}
+                >
+                  {changeCountBadge}
+                </EuiToolTip>
+              ) : (
+                changeCountBadge
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
@@ -214,7 +240,12 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = getPanelStyles(euiTheme);
+    const getFormattedDateTime = useGetFormattedDateTime();
     const { data, isLoading, error } = useWorkflowHistory(workflowId);
+
+    const historyStartedLabel = data?.startDate
+      ? getFormattedDateTime(new Date(data.startDate))
+      : null;
 
     const title = i18n.translate('workflows.versionHistory.panelTitle', {
       defaultMessage: 'Version history',
@@ -332,15 +363,55 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
                   }
                 />
               ) : (
-                data.items.map((item) => (
-                  <div
-                    key={item.event?.id ?? item['@timestamp'] ?? Math.random()}
-                    css={styles.versionEntryCard}
-                    data-test-subj="workflowVersionHistoryEntry"
-                  >
-                    <VersionHistoryListItem item={item} />
-                  </div>
-                ))
+                <>
+                  {data.items.map((item) => (
+                    <div
+                      key={item.event?.id ?? item['@timestamp'] ?? Math.random()}
+                      css={styles.versionEntryCard}
+                      data-test-subj="workflowVersionHistoryEntry"
+                    >
+                      <VersionHistoryListItem item={item} />
+                    </div>
+                  ))}
+                  {historyStartedLabel && (
+                    <div
+                      css={styles.versionEntryCard}
+                      data-test-subj="workflowVersionHistoryStartDateEntry"
+                    >
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="m"
+                        responsive={false}
+                        wrap={false}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            type="clock"
+                            size="s"
+                            color="subdued"
+                            aria-label={i18n.translate('workflows.versionHistory.historyStartedIcon', {
+                              defaultMessage: 'History started',
+                            })}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            {historyStartedLabel}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            <FormattedMessage
+                              id="workflows.versionHistory.historyStarted"
+                              defaultMessage="History started"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true} />
+                      </EuiFlexGroup>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
