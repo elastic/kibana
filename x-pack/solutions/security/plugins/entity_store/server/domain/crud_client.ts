@@ -45,13 +45,13 @@ function validateAndTransformDoc(
   doc: Entity,
   force: boolean
 ): Record<string, unknown> {
-    const definition = getEntityDefinition(entityType, namespace);
-    if (!force) {
-      const flat = getFlattenedObject(doc);
-      const fieldDescriptions = getFieldDescriptions(flat, definition);
-      assertOnlyNonForcedAttributesInReq(fieldDescriptions);
-    }
-    return transformDocForUpsert(entityType, doc);
+  const definition = getEntityDefinition(entityType, namespace);
+  if (!force) {
+    const flat = getFlattenedObject(doc);
+    const fieldDescriptions = getFieldDescriptions(flat, definition);
+    assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+  }
+  return transformDocForUpsert(entityType, doc);
 }
 
 export class CRUDClient {
@@ -65,10 +65,7 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
-  private async createEntity(
-    hashedId: string,
-    doc: Record<string, unknown>
-  ): Promise<void> {
+  private async createEntity(hashedId: string, doc: Record<string, unknown>): Promise<void> {
     this.logger.debug(`Creating entity ID: ${hashedId}`);
     await this.esClient.create({
       index: getLatestEntitiesIndexName(this.namespace),
@@ -82,7 +79,7 @@ export class CRUDClient {
   private async updateEntity(
     hashedId: string,
     entityType: EntityType,
-    doc: Record<string,unknown>,
+    doc: Record<string, unknown>
   ): Promise<void> {
     this.logger.debug(`Updating entity ID: ${hashedId}`);
     const definition = getEntityDefinition(entityType, this.namespace);
@@ -104,11 +101,7 @@ export class CRUDClient {
     }
   }
 
-  public async upsertEntity(
-    entityType: EntityType,
-    doc: Entity,
-    force: boolean
-  ): Promise<void> {
+  public async upsertEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     const id = getEuidFromObject(entityType, doc);
     if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
@@ -118,14 +111,13 @@ export class CRUDClient {
     const hashedId: string = createHash('md5').update(id).digest('hex');
     this.logger.debug(`Upserting entity ID ${id}`);
 
-
     if (!doc.entity?.id) {
       doc.entity.id = id;
     }
-    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
+    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
 
     try {
-      await this.createEntity(hashedId, readyDoc)
+      await this.createEntity(hashedId, readyDoc);
     } catch (error) {
       if (error.statusCode !== 409) {
         throw error;
@@ -133,7 +125,7 @@ export class CRUDClient {
       this.logger.debug(`Conflict while creating entity ID ${id}, updating instead`);
     }
 
-    await this.updateEntity(hashedId, entityType, readyDoc)
+    await this.updateEntity(hashedId, entityType, readyDoc);
     return;
   }
 
@@ -142,7 +134,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
+      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force);
       operations.push({ create: {} }, readyDoc);
     }
 
@@ -228,10 +220,7 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(
-  type: EntityType,
-  data: Partial<Entity>
-): Record<string, unknown> {
+function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
   const now = new Date().toISOString();
   if (type === 'generic') {
     return {
