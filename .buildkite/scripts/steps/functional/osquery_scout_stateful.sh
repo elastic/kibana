@@ -26,7 +26,8 @@ SCOUT_CONFIG="x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/paral
 echo "--- Running Scout tests (stateful): $SCOUT_CONFIG"
 
 set +e
-node scripts/scout.js run-tests \
+node scripts/scout run-tests \
+  --location local \
   --arch stateful \
   --domain classic \
   --config "$SCOUT_CONFIG" \
