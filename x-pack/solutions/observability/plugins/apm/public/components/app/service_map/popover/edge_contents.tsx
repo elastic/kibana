@@ -19,7 +19,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
-import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { isEdge } from './utils';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
@@ -38,7 +37,6 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
   const { offset, comparisonEnabled, rangeFrom, rangeTo, kuery } = query;
 
   const isEdgeSelection = isEdge(selection);
-  const { indexSettings, indexSettingsStatus } = useApmIndexSettingsContext();
   const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
 
   const sourceData = edgeSelectionData?.sourceData;
@@ -96,8 +94,6 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
               })}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
-              indexSettings={indexSettings}
-              indexSettingsStatus={indexSettingsStatus}
               queryParams={{
                 kuery,
                 serviceName: sourceServiceName,
