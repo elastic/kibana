@@ -78,6 +78,12 @@ pivot:
   # Multiple labels can be comma-separated
   areas:
     "Agent Builder": "feature:agent-builder"
+    "AI for security":
+      - "Feature:AutomaticImport"
+      - "Feature:SIEMMigrations"
+      - "Team:Automatic Migrations"
+      - "Team:Security Generative AI"
+      - "Team:Security-Scalability"
     Alerting:
       - "Feature:Alerting"
       - "Team:Alerting Services"
@@ -85,6 +91,8 @@ pivot:
       - "Team:ResponseOps"
       - "Team:Cases"
       - "Feature:Cases"
+    "Cloud security":
+      - "Team:Cloud Security"
     Connectivity: "Feature:Actions/ConnectorTypes"
     "Dashboards and Visualizations":
       - "Feature:Dashboard"
@@ -126,6 +134,14 @@ pivot:
       - "Feature:FieldFormatters"
       - "Feature:ILM"
       - "Feature:Transforms"
+    "Detection rules and alerts":
+      - "Feature:Detection Rules"
+      - "Feature:Detection Alerts"
+      - "Team:Detections and Resp"
+      - "Team:Detection Rule Management"
+      - "Feature:Rule Exceptions"
+      - "Team:Detection Engine"
+      - "Team:Detection Alerts"
     "Developer tools":
       - "Feature:Console"
       - "Feature:Dev Tools"
@@ -138,9 +154,20 @@ pivot:
       - "Feature:UnifiedDataTable"
       - "Feature:UnifiedDocViewer"
       - "Feature:UnifiedFieldList"
+    "Endpoint security":
+      - "Team:Defend Workflows"
+    "Entity analytics":
+      - "Feature:Entity Analytics"
+      - "Team:Entity Analytics"
     "ES|QL editor":
       - "Team:ESQL"
-      - "Feature:ESQL Editor"
+      # - "Feature:ESQL Editor"
+    "Investigations":
+      - "Feature:Osquery"
+      - "Feature:Timeline"
+      - "Team:Threat Hunting:Investigations"
+      - "Team:Cases"
+      - "Osquery"
     "Kibana platform":
       - "Team:SharedUX"
       - "Team:Design"
@@ -196,7 +223,7 @@ pivot:
       - "Feature:Reporting"
       - "Team:Reporting Services"
     Workflows:
-      - "Feature:Workflows"
+      # - "Feature:Workflows"
       - "Team:One Workflow" 
     "Elastic Observability solution":
       - "Feature:Observability Home"
@@ -219,33 +246,8 @@ pivot:
       - "Feature:Service Maps"
       - "Feature:Streams"
     "Elastic Security solution":
-      - "Team:SIEM"
-      - "Team:SecuritySolution"
       - "Team: SecuritySolution"
-      - "Team:Endpoint Response"
-      - "Team:Entity Analytics"
-      - "Team:Security Generative AI"
       - "Team:Threat Hunting"
-      - "Team:Threat Hunting:Explore"
-      - "Team:Threat Hunting:Investigations"
-      - "Team:Detections and Resp"
-      - "Team:Asset Management"
-      - "Team:Onboarding and Lifecycle Mgt"
-      - "Team:Security Solution Platform"
-      - "Team:Detection Alerts"
-      - "Team: CTI"
-      - "Team:Threat Hunting:Cases"
-      - "Team:Cloud Security"
-      - "Team:Detection Engine"
-      - "Team:Defend Workflows"
-      - "Team:Detection Rules"
-      - "Team:Security-Scalability"
-      - "Feature:Timeline"
-      - "Feature:Detection Rules"
-      - "Feature:Detection Alerts"
-      - "Feature:Entity Analytics"
-      - "Feature:Rule Exceptions"
-      - "Feature:AutomaticImport"
     "Elasticsearch solution":
       - "Team:Search"
       - "Feature:Search Profiler"
@@ -306,11 +308,17 @@ rules:
       'kibana':
         exclude_types:
           - docs
-        # Exclude changelogs that have only one or both of the following areas:
+        # Exclude changelogs that have only one or more of the following areas:
         match_areas: all
         exclude_areas:
+         - "AI for security"
+         - "Cloud security"
+         - "Detection rules and alerts"
+         - "Endpoint security"
+         - "Entity analytics"
          - "Elastic Observability solution"
          - "Elastic Security solution"
+         - "Investigations"
       'observability':
         exclude_types:
           - docs
@@ -324,7 +332,13 @@ rules:
         # Include changelogs that have (at least) the following areas:
         match_areas: any
         include_areas:
+          - "AI for security"
+          - "Cloud security"
+          - "Detection rules and alerts"
+          - "Endpoint security"
           - "Elastic Security solution"   
+          - "Entity analytics"
+          - "Investigations"
 
 # Bundle configuration (profiles and defaults)
 bundle:
