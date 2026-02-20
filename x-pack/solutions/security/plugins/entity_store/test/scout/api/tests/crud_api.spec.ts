@@ -160,7 +160,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       entities: [
         {
           type: 'generic',
-          document: {
+          doc: {
             entity: {
               id: 'required-id-1-bulk',
             },
@@ -168,7 +168,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         },
         {
           type: 'generic',
-          document: {
+          doc: {
             entity: {
               id: 'required-id-2-bulk',
             },

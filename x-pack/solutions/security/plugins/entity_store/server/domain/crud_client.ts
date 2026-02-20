@@ -36,7 +36,22 @@ interface CRUDClientDependencies {
 
 interface BulkObject {
   type: EntityType;
-  document: Entity;
+  doc: Entity;
+}
+
+function validateAndTransformDoc(
+  entityType: EntityType,
+  namespace: string,
+  doc: Entity,
+  force: boolean
+): Record<string, unknown> {
+    const definition = getEntityDefinition(entityType, namespace);
+    if (!force) {
+      const flat = getFlattenedObject(doc);
+      const fieldDescriptions = getFieldDescriptions(flat, definition);
+      assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+    }
+    return transformDocForUpsert(entityType, doc);
 }
 
 export class CRUDClient {
@@ -50,12 +65,53 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
+  private async createEntity(
+    hashedId: string,
+    doc: Record<string, unknown>
+  ): Promise<void> {
+    this.logger.debug(`Creating entity ID: ${hashedId}`);
+    await this.esClient.create({
+      index: getLatestEntitiesIndexName(this.namespace),
+      id: hashedId,
+      document: doc,
+      refresh: 'wait_for',
+    });
+    this.logger.debug(`Created entity ID ${hashedId}`);
+  }
+
+  private async updateEntity(
+    hashedId: string,
+    entityType: EntityType,
+    doc: Record<string,unknown>,
+  ): Promise<void> {
+    this.logger.debug(`Updating entity ID: ${hashedId}`);
+    const definition = getEntityDefinition(entityType, this.namespace);
+    removeEUIDFields(definition, doc);
+    const { result } = await this.esClient.update({
+      index: getLatestEntitiesIndexName(this.namespace),
+      id: hashedId,
+      doc,
+    });
+
+    switch (result as Result) {
+      case 'deleted':
+      case 'not_found':
+        throw new Error(`Could not update entity ID ${hashedId}`);
+      case 'updated':
+        this.logger.debug(`Updated entity ID ${hashedId}`);
+        break;
+      case 'noop':
+        this.logger.debug(`Updated entity ID ${hashedId} (no change)`);
+        break;
+    }
+  }
+
   public async upsertEntity(
     entityType: EntityType,
-    document: Entity,
+    doc: Entity,
     force: boolean
   ): Promise<void> {
-    const id = getEuidFromObject(entityType, document);
+    const id = getEuidFromObject(entityType, doc);
     if (id === undefined) {
       throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
     }
@@ -63,77 +119,45 @@ export class CRUDClient {
     // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
     const hashedId: string = createHash('md5').update(id).digest('hex');
     this.logger.debug(`Upserting entity ID ${id}`);
-    if (!document.entity.id) {
-      document.entity.id = id;
-    }
 
-    const definition = getEntityDefinition(entityType, this.namespace);
-    if (!force) {
-      const flat = getFlattenedObject(document);
-      const fieldDescriptions = getFieldDescriptions(flat, definition);
-      assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+
+    if (!doc.entity?.id) {
+      doc.entity.id = id;
     }
-    const preparedDoc = prepareDocumentForUpsert(entityType, document);
+    const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
 
     try {
-      await this.esClient.create({
-        index: getLatestEntitiesIndexName(this.namespace),
-        id: hashedId,
-        document: preparedDoc,
-        refresh: 'wait_for',
-      });
-      this.logger.debug(`Created entity ID ${id}`);
-      return;
+      await this.createEntity(hashedId, readyDoc)
     } catch (error) {
       if (error.statusCode !== 409) {
         throw error;
       }
+      this.logger.debug(`Conflict while creating entity ID ${id}, updating instead`);
     }
 
-    removeEUIDFields(definition, preparedDoc);
-    const { result } = await this.esClient.update({
-      index: getLatestEntitiesIndexName(this.namespace),
-      id: hashedId,
-      doc: preparedDoc,
-    });
-
-    switch (result as Result) {
-      case 'deleted':
-      case 'not_found':
-        throw new Error(`Could not upsert entity ID ${id}`);
-      case 'updated':
-        this.logger.debug(`Entity ID ${id} updated`);
-        break;
-      case 'noop':
-        this.logger.debug(`Entity ID ${id} updated (no change)`);
-        break;
-    }
+    await this.updateEntity(hashedId, entityType, readyDoc)
+    return;
   }
 
-  public async upsertEntitiesBulk(objects: BulkObject[], force: boolean) {
+  public async upsertEntitiesBulk(objects: BulkObject[], force: boolean): Promise<void> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
-    for (const { type: entityType, document } of objects) {
-      const definition = getEntityDefinition(entityType, this.namespace);
-      if (!force) {
-        const flat = getFlattenedObject(document);
-        const fieldDescriptions = getFieldDescriptions(flat, definition);
-        assertOnlyNonForcedAttributesInReq(fieldDescriptions);
-      }
-      const preparedDoc = prepareDocumentForUpsert(entityType, document);
-
-      operations.push({ create: {} }, preparedDoc);
+    this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
+    for (const { type: entityType, doc } of objects) {
+      const readyDoc = validateAndTransformDoc(entityType, this.namespace, doc, force)
+      operations.push({ create: {} }, readyDoc);
     }
 
-    this.logger.debug(`Upserting ${operations.length / 2} entities`);
+    this.logger.debug(`Bulk upserting ${objects.length} entities`);
     await this.esClient.bulk({
       index: getUpdatesEntitiesDataStreamName(this.namespace),
       operations,
       refresh: 'wait_for',
     });
+    return;
   }
 
-  public async deleteEntity(id: string) {
+  public async deleteEntity(id: string): Promise<void> {
     try {
       this.logger.debug(`Deleting Entity ID ${id}`);
       await this.esClient.delete({
@@ -146,7 +170,6 @@ export class CRUDClient {
       }
       throw error;
     }
-    return { deleted: true };
   }
 }
 
@@ -207,12 +230,11 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function prepareDocumentForUpsert(
+function transformDocForUpsert(
   type: EntityType,
   data: Partial<Entity>
 ): Record<string, unknown> {
   const now = new Date().toISOString();
-
   if (type === 'generic') {
     return {
       '@timestamp': now,
@@ -243,8 +265,8 @@ function prepareDocumentForUpsert(
   return doc;
 }
 
-function removeEUIDFields(definition: ManagedEntityDefinition, document: Record<string, unknown>) {
+function removeEUIDFields(definition: ManagedEntityDefinition, doc: Record<string, unknown>) {
   for (const euidField of definition.identityField.requiresOneOfFields) {
-    unset(document, euidField);
+    unset(doc, euidField);
   }
 }

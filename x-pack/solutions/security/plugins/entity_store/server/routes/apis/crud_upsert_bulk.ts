@@ -19,7 +19,7 @@ const bodySchema = z.object({
   entities: z.array(
     z.object({
       type: EntityType,
-      document: Entity,
+      doc: Entity,
     })
   ),
 });
