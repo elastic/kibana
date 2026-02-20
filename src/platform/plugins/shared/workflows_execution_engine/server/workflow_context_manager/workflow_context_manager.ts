@@ -10,7 +10,13 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { EsWorkflowStepExecution, SerializedError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import type {
+  EsWorkflowStepExecution,
+  SerializedError,
+  StackFrame,
+  StepContext,
+  WorkflowContext,
+} from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
