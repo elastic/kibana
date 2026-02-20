@@ -24,8 +24,8 @@ import {
   type DslStepMetaFields,
   type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
-  toMilliseconds,
 } from '../form';
+import { getDoubledDurationFromPrevious } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
@@ -111,22 +111,25 @@ export const DslStepsFlyoutArrayView = ({
       }
 
       const previousAfterUnit = previousStep.afterUnit ?? 'd';
-      const previousAfterNum = Number(previousStep.afterValue);
-      const safePreviousAfterNum =
-        Number.isFinite(previousAfterNum) && previousAfterNum >= 0 ? previousAfterNum : 0;
-      const nextAfterValue = String(safePreviousAfterNum * 2);
-      const nextAfterMs = toMilliseconds(nextAfterValue, previousAfterUnit);
+      const { value: nextAfterValue, ms: nextAfterMs } = getDoubledDurationFromPrevious({
+        previousValue: previousStep.afterValue,
+        previousUnit: previousAfterUnit,
+        previousValueFallback: 0,
+        previousValueMinInclusive: 0,
+      });
 
       const previousFixedUnit = previousStep.fixedIntervalUnit ?? 'd';
-      const previousFixedNum = Number(previousStep.fixedIntervalValue);
-      const safePreviousFixedNum =
-        Number.isFinite(previousFixedNum) && previousFixedNum > 0 ? previousFixedNum : 1;
-      const nextFixedIntervalValue = String(safePreviousFixedNum * 2);
+      const { value: nextFixedIntervalValue } = getDoubledDurationFromPrevious({
+        previousValue: previousStep.fixedIntervalValue,
+        previousUnit: previousFixedUnit,
+        previousValueFallback: 1,
+        previousValueMinExclusive: 0,
+      });
 
       return {
         afterValue: nextAfterValue,
         afterUnit: previousAfterUnit,
-        afterToMilliSeconds: Number.isFinite(nextAfterMs) ? nextAfterMs : -1,
+        afterToMilliSeconds: nextAfterMs,
         fixedIntervalValue: nextFixedIntervalValue,
         fixedIntervalUnit: previousFixedUnit,
       };
