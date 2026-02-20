@@ -14,7 +14,7 @@ import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { extractEsqlQueries, executeEsql } from '../utils/esql';
-import { resolveResourceWithSamplingStats } from '../utils/resources';
+import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
@@ -66,11 +66,10 @@ export const createNlToEsqlGraph = ({
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
-    const resolvedResource = await resolveResourceWithSamplingStats({
+    const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
       esClient,
-      allowPatterns: true,
     });
 
     return { resource: resolvedResource };

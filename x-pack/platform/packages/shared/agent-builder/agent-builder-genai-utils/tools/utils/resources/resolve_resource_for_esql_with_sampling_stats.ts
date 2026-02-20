@@ -9,30 +9,26 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingFieldWithStats } from '../sampling';
 import { getSampleDocs, createStatsFromSamples, combineFieldsWithStats } from '../sampling';
 import type { ResolveResourceResponse } from './resolve_resource';
-import { resolveResource, resolveResourceForEsql } from './resolve_resource';
+import { resolveResourceForEsql } from './resolve_resource';
 
 export type ResolvedResourceWithSampling = Omit<ResolveResourceResponse, 'fields'> & {
   fields: MappingFieldWithStats[];
 };
 
 /**
- * Resolve a resource and generate field stats based on sampling
+ * Resolve an ES|QL target and generate field stats based on sampling.
  */
-export const resolveResourceWithSamplingStats = async ({
+export const resolveResourceForEsqlWithSamplingStats = async ({
   resourceName,
   esClient,
   samplingSize,
-  allowPatterns = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   samplingSize?: number;
-  allowPatterns?: boolean;
 }) => {
-  const resourceResolver = allowPatterns ? resolveResourceForEsql : resolveResource;
-
   const [resource, stats] = await Promise.all([
-    resourceResolver({ resourceName, esClient }),
+    resolveResourceForEsql({ resourceName, esClient }),
     getSampleDocs({ esClient, index: resourceName, size: samplingSize }).then(({ samples }) => {
       return createStatsFromSamples({ samples });
     }),
