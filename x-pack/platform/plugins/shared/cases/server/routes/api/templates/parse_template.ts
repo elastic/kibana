@@ -23,7 +23,15 @@ export const parseTemplate = (template: Template): ParsedTemplate => {
     definition: parsedDefinition,
     templateVersion: template.templateVersion,
     deletedAt: template.deletedAt,
-    isLatest: true,
+    description: template.description,
+    tags: template.tags,
+    author: template.author,
+    usageCount: template.usageCount,
+    fieldCount: template.fieldCount,
+    fieldNames: template.fieldNames,
+    lastUsedAt: template.lastUsedAt,
+    isDefault: template.isDefault,
+    isLatest: template.isLatest ?? false,
     latestVersion: 1,
   };
 };

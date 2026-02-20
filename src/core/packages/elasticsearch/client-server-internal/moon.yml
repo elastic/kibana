@@ -30,6 +30,9 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-metrics-server'
   - '@kbn/config-schema'
+  - '@kbn/core-security-server'
+  - '@kbn/core-security-server-internal'
+  - '@kbn/core-security-server-mocks'
 tags:
   - shared-server
   - package

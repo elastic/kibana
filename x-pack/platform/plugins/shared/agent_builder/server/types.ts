@@ -10,6 +10,10 @@ import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -22,6 +26,7 @@ import type {
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
@@ -34,6 +39,7 @@ export interface AgentBuilderSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
 }
@@ -44,6 +50,7 @@ export interface AgentBuilderStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {
@@ -68,6 +75,22 @@ export interface ToolsSetup {
    * Register a built-in tool to be available in agentBuilder.
    */
   register: ToolsServiceSetup['register'];
+}
+
+/**
+ * AgentBuilder skills service's start contract
+ */
+export interface SkillsStart {
+  /**
+   * Register a skill dynamically after plugin start.
+   * Only affects future conversations (existing ones snapshot skills at creation time).
+   */
+  register: (skill: SkillDefinition) => Promise<void>;
+  /**
+   * Unregister a previously registered skill by ID.
+   * Returns true if the skill was found and removed.
+   */
+  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**
@@ -131,4 +154,8 @@ export interface AgentBuilderPluginStart {
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * Skills service, to register or unregister skills dynamically.
+   */
+  skills: SkillsStart;
 }

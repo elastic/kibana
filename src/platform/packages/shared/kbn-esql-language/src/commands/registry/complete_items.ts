@@ -211,10 +211,11 @@ export const promqlLabelSelectorItem: ISuggestionItem = withAutoSuggest({
   }),
   text: '{$0}',
   asSnippet: true,
-  kind: 'Operator',
+  kind: 'Reference',
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.labelSelectorDoc', {
     defaultMessage: 'Filter by labels',
   }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
@@ -223,10 +224,11 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
   }),
   text: '[${0:5m}]',
   asSnippet: true,
-  kind: 'Operator',
+  kind: 'Reference',
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.rangeSelectorDoc', {
     defaultMessage: 'Range selector (duration)',
   }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -627,10 +629,8 @@ export function createResourceBrowserSuggestion(options: {
 }
 
 export function createIndicesBrowserSuggestion(
-  rangeToReplace?: { start: number; end: number },
-  filterText?: string,
-  insertText?: string,
-  commandArgs?: Record<string, string>
+  commandArgs?: Record<string, string>,
+  innerText?: string
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
@@ -643,9 +643,32 @@ export function createIndicesBrowserSuggestion(
       }
     ),
     commandId: 'esql.indicesBrowser.open',
-    rangeToReplace,
-    filterText,
-    insertText,
+    commandArgs,
+    rangeToReplace: innerText
+      ? {
+          start: 0,
+          end: innerText.length + 1,
+        }
+      : undefined,
+    filterText: innerText,
+    insertText: innerText,
+  });
+}
+
+export function createFieldsBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionLabel', {
+      defaultMessage: 'Browse fields',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open fields browser',
+      }
+    ),
+    commandId: 'esql.fieldsBrowser.open',
     commandArgs,
   });
 }

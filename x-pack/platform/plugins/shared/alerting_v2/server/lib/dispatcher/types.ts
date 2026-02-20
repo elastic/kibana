@@ -21,6 +21,13 @@ export interface AlertEpisode {
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
 }
 
+export interface AlertEpisodeSuppression {
+  rule_id: RuleId;
+  group_hash: string;
+  episode_id: string | null;
+  should_suppress: boolean;
+}
+
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
   abortController?: AbortController;

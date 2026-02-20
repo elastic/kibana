@@ -47,13 +47,6 @@ const imageSets = {
       defaultMessage: 'Add streams image for the streams app',
     }),
   },
-  quickLinksEmpty: {
-    light: () => import('./quick_links_empty_light.svg'),
-    dark: () => import('./quick_links_empty_dark.svg'),
-    alt: i18n.translate('xpack.streams.streamDetailView.quickLinksEmptyImage', {
-      defaultMessage: 'Quick links empty image for the streams app',
-    }),
-  },
   unableToGeneratePreview: {
     light: () => import('./unable_to_generate_preview_light.svg'),
     dark: () => import('./unable_to_generate_preview_dark.svg'),
