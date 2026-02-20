@@ -12,6 +12,7 @@ import type {
 import {
   findQuerySchemaV1,
   findResponseSchemaV1,
+  findBackfillExamplesV1,
 } from '../../../../../common/routes/backfill/apis/find';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -98,5 +99,6 @@ export const findBackfillPublicRoute = (
       access: 'public',
       summary: 'Find backfills for rules',
       tags: ['oas-tag:alerting'],
+      oasOperationObject: findBackfillExamplesV1,
     },
   });

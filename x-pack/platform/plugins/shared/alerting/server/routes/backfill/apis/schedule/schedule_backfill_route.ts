@@ -12,6 +12,7 @@ import type {
 import {
   scheduleBodySchemaV1,
   scheduleResponseSchemaV1,
+  scheduleBackfillExamplesV1,
 } from '../../../../../common/routes/backfill/apis/schedule';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -101,5 +102,6 @@ export const scheduleBackfillPublicRoute = (
       access: 'public',
       summary: 'Schedule a backfill for rules',
       tags: ['oas-tag:alerting'],
+      oasOperationObject: scheduleBackfillExamplesV1,
     },
   });

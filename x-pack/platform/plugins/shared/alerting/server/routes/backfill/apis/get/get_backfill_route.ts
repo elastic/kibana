@@ -12,6 +12,7 @@ import type {
 import {
   getParamsSchemaV1,
   getResponseSchemaV1,
+  getBackfillExamplesV1,
 } from '../../../../../common/routes/backfill/apis/get';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -98,5 +99,6 @@ export const getBackfillPublicRoute = (
       access: 'public',
       summary: 'Get a backfill by ID',
       tags: ['oas-tag:alerting'],
+      oasOperationObject: getBackfillExamplesV1,
     },
   });
