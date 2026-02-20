@@ -20,7 +20,7 @@ describe('RulesLocator', () => {
     mockGetIsExperimentalFeatureEnabled.mockClear();
   });
 
-  describe('when unifiedRulesPage feature flag is enabled', () => {
+  describe('observability links to unified rules', () => {
     beforeEach(() => {
       mockGetIsExperimentalFeatureEnabled.mockReturnValue(true);
     });
@@ -70,20 +70,6 @@ describe('RulesLocator', () => {
       expect(location.app).toEqual('rules');
       expect(location.path).toEqual(
         `/?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!(foo))`
-      );
-    });
-  });
-
-  describe('when unifiedRulesPage feature flag is disabled', () => {
-    beforeEach(() => {
-      mockGetIsExperimentalFeatureEnabled.mockReturnValue(false);
-    });
-
-    it('should return correct app and url when empty params are provided', async () => {
-      const location = await locator.getLocation({});
-      expect(location.app).toEqual('observability');
-      expect(location.path).toEqual(
-        `/alerts/rules?_a=(lastResponse:!(),params:(),search:'',status:!(),type:!())`
       );
     });
   });

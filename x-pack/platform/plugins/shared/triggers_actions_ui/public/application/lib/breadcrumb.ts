@@ -13,7 +13,6 @@ import {
   routeToLogs,
   legacyRouteToAlerts,
 } from '../constants';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
@@ -98,11 +97,7 @@ export const getRulesBreadcrumbWithHref = (
   getUrlForApp: (appId: string, options?: { path?: string }) => string
 ) => {
   const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-
-  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-  const breadcrumbHref = useUnifiedRulesPage
-    ? getUrlForApp('rules', { path: '/' })
-    : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+  const breadcrumbHref = getUrlForApp('rules', { path: '/' });
 
   return {
     ...rulesBreadcrumb,

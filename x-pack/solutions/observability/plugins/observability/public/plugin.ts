@@ -43,7 +43,6 @@ import type {
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  getIsExperimentalFeatureEnabled,
   type TriggersAndActionsUIPublicPluginSetup,
   type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -506,12 +505,10 @@ export class Plugin
       )
     );
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -535,12 +532,10 @@ export class Plugin
       );
     });
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
     };
   }
 }
