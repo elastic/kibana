@@ -109,6 +109,8 @@ interface OAuthCallbackBroadcast {
   error?: string;
 }
 
+const AUTO_CLOSE_DELAY_SECONDS = 3;
+
 /**
  * Path for the companion JS served by {@link oauthCallbackScriptRoute}.
  * Loaded via `<script src>` to satisfy Kibana's `script-src 'self'` CSP.
@@ -227,7 +229,11 @@ function generateOAuthCallbackPage({
           ${sanitisedDetails ? `<div class="details">${sanitisedDetails}</div>` : ''}
           ${
             autoClose
-              ? '<p style="display: none; margin-top: 16px;" class="auto-close-message">This window will close automatically, or you can close it manually.</p>'
+              ? `<p style="display: none; margin-top: 16px;" class="auto-close-message">${escape(
+                  i18n.translate('xpack.actions.oauthCallback.page.manualCloseMessage', {
+                    defaultMessage: 'You can close this window manually.',
+                  })
+                )}</p>`
               : ''
           }
         </div>
@@ -237,7 +243,9 @@ function generateOAuthCallbackPage({
   `;
 }
 
-const GENERIC_OAUTH_ERROR = 'OAuth authorization failed';
+const GENERIC_OAUTH_ERROR = i18n.translate('xpack.actions.oauthCallback.error.generic', {
+  defaultMessage: 'OAuth authorization failed',
+});
 
 const buildOAuthReturnUrl = (
   kibanaReturnUrl: string,
@@ -282,9 +290,15 @@ const respondWithError = (
   return res.ok({
     headers: { 'content-type': 'text/html' },
     body: generateOAuthCallbackPage({
-      title: 'OAuth Authorization Failed',
-      heading: 'Authorization Failed',
-      message: 'You can close this window and try again.',
+      title: i18n.translate('xpack.actions.oauthCallback.page.errorTitle', {
+        defaultMessage: 'OAuth Authorization Failed',
+      }),
+      heading: i18n.translate('xpack.actions.oauthCallback.page.errorHeading', {
+        defaultMessage: 'Authorization Failed',
+      }),
+      message: i18n.translate('xpack.actions.oauthCallback.page.errorMessage', {
+        defaultMessage: 'You can close this window and try again.',
+      }),
       details,
       isSuccess: false,
       broadcast: connectorId
@@ -320,10 +334,17 @@ const respondWithSuccess = (
   return res.ok({
     headers: { 'content-type': 'text/html' },
     body: generateOAuthCallbackPage({
-      title: 'OAuth Authorization Successful',
-      heading: 'Authorization Successful',
-      message:
-        'Your connector has been authorized successfully. This window will close automatically.',
+      title: i18n.translate('xpack.actions.oauthCallback.page.successTitle', {
+        defaultMessage: 'OAuth Authorization Successful',
+      }),
+      heading: i18n.translate('xpack.actions.oauthCallback.page.successHeading', {
+        defaultMessage: 'Authorization Successful',
+      }),
+      message: i18n.translate('xpack.actions.oauthCallback.page.autoCloseMessage', {
+        defaultMessage:
+          'This window will close in {seconds, plural, one {# second} other {# seconds}}.',
+        values: { seconds: AUTO_CLOSE_DELAY_SECONDS },
+      }),
       isSuccess: true,
       autoClose: true,
       broadcast: {
@@ -396,28 +417,40 @@ export const oauthCallbackRoute = (
           return res.unauthorized({
             headers: { 'content-type': 'text/html' },
             body: generateOAuthCallbackPage({
-              title: 'Authorization Failed',
-              heading: 'Authentication Required',
-              message: 'User should be authenticated to complete OAuth callback.',
-              details: 'Please log in and try again.',
+              title: i18n.translate('xpack.actions.oauthCallback.page.authRequiredTitle', {
+                defaultMessage: 'Authorization Failed',
+              }),
+              heading: i18n.translate('xpack.actions.oauthCallback.page.authRequiredHeading', {
+                defaultMessage: 'Authentication Required',
+              }),
+              message: i18n.translate('xpack.actions.oauthCallback.page.authRequiredMessage', {
+                defaultMessage: 'You must be logged in to complete the OAuth authorization.',
+              }),
+              details: i18n.translate('xpack.actions.oauthCallback.page.authRequiredDetails', {
+                defaultMessage: 'Please log in and try again.',
+              }),
               isSuccess: false,
             }),
           });
         }
 
-        const { username, profile_uid: profileUid } = currentUser;
+        const { profile_uid: profileUid } = currentUser;
 
         if (!profileUid) {
           return respondWithError(res, {
-            details: 'Unable to retrieve Kibana user profile ID.',
+            details: i18n.translate('xpack.actions.oauthCallback.error.missingProfileUid', {
+              defaultMessage: 'Unable to retrieve Kibana user profile ID.',
+            }),
           });
         }
 
-        oauthRateLimiter.log(username, 'callback');
-        if (oauthRateLimiter.isRateLimited(username, 'callback')) {
-          routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);
+        oauthRateLimiter.log(profileUid, 'callback');
+        if (oauthRateLimiter.isRateLimited(profileUid, 'callback')) {
+          routeLogger.warn(`OAuth callback rate limit exceeded for user: ${profileUid}`);
           return respondWithError(res, {
-            details: 'Too many authorization attempts. Please wait before trying again.',
+            details: i18n.translate('xpack.actions.oauthCallback.error.rateLimited', {
+              defaultMessage: 'Too many authorization attempts. Please wait before trying again.',
+            }),
           });
         }
 
@@ -425,7 +458,9 @@ export const oauthCallbackRoute = (
 
         if (!stateParam) {
           return respondWithError(res, {
-            details: 'Missing required OAuth state parameter.',
+            details: i18n.translate('xpack.actions.oauthCallback.error.missingState', {
+              defaultMessage: 'Missing required OAuth state parameter.',
+            }),
           });
         }
 
@@ -440,18 +475,24 @@ export const oauthCallbackRoute = (
           }),
           logger: routeLogger,
         });
-        const oauthState = await oauthStateClient.get(stateParam, profileUid);
+        const oauthState = await oauthStateClient.get(stateParam);
         if (!oauthState) {
           return respondWithError(res, {
-            details:
-              'Invalid or expired state parameter. The authorization session may have timed out.',
+            details: i18n.translate('xpack.actions.oauthCallback.error.invalidState', {
+              defaultMessage:
+                'Invalid or expired state parameter. The authorization session may have timed out.',
+            }),
           });
         }
 
         const { connectorId: stateConnectorId, kibanaReturnUrl } = oauthState;
 
         if (error || !code) {
-          const providerError = error || 'Missing required OAuth authorization code';
+          const providerError =
+            error ||
+            i18n.translate('xpack.actions.oauthCallback.error.missingCode', {
+              defaultMessage: 'Missing required OAuth authorization code',
+            });
           const details = errorDescription
             ? `${providerError}\n\n${errorDescription}`
             : providerError;
@@ -591,7 +632,7 @@ const OAUTH_CALLBACK_SCRIPT_BODY = `(() => {
           fallback.style.display = 'block';
         }
       }, 100);
-    }, 3000);
+    }, ${AUTO_CLOSE_DELAY_SECONDS * 1000});
   }
 })();
 `;

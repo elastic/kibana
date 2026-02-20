@@ -129,7 +129,7 @@ export class OAuthStateClient {
   /**
    * Get and validate OAuth state by state parameter
    */
-  public async get(stateParam: string, createdBy?: string): Promise<OAuthState | null> {
+  public async get(stateParam: string): Promise<OAuthState | null> {
     try {
       const sanitisedStateParam = escapeQuotes(stateParam);
       const result = await this.unsecuredSavedObjectsClient.find<OAuthStateAttributes>({
@@ -146,12 +146,6 @@ export class OAuthStateClient {
       }
 
       const stateObject = result.saved_objects[0];
-
-      // Check if createdBy matches
-      if (createdBy && stateObject.attributes.createdBy !== createdBy) {
-        this.logger.warn(`OAuth state created by mismatch for state parameter: ${stateParam}.`);
-        return null;
-      }
 
       // Check if expired
       if (new Date(stateObject.attributes.expiresAt) < new Date()) {

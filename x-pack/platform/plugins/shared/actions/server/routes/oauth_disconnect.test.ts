@@ -8,16 +8,16 @@
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
-jest.mock('../lib/connector_token_client');
+jest.mock('../lib/user_connector_token_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
-const MockConnectorTokenClient = ConnectorTokenClient as jest.MockedClass<
-  typeof ConnectorTokenClient
+const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
+  typeof UserConnectorTokenClient
 >;
 
 const mockLogger = loggingSystemMock.create().get();
@@ -43,8 +43,15 @@ const createMockCoreSetup = () => ({
   ]),
 });
 
-const createMockContext = () => ({
+const createMockContext = (
+  currentUser: { profile_uid?: string } | null = { profile_uid: 'test-profile-uid' }
+) => ({
   core: Promise.resolve({
+    security: {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(currentUser),
+      },
+    },
     savedObjects: {
       getClient: jest.fn().mockReturnValue({}),
     },
@@ -65,7 +72,9 @@ describe('oauthDisconnectRoute', () => {
     (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
-    MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as never);
+    MockUserConnectorTokenClient.mockImplementation(
+      () => mockConnectorTokenClientInstance as never
+    );
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
@@ -78,7 +87,44 @@ describe('oauthDisconnectRoute', () => {
     registerRoute();
 
     const [config] = router.post.mock.calls[0];
-    expect(config.path).toBe('/api/actions/connector/{connectorId}/_oauth_disconnect');
+    expect(config.path).toBe('/internal/actions/connector/{connectorId}/_oauth_disconnect');
+  });
+
+  it('returns unauthorized when no current user', async () => {
+    const [, handler] = registerRoute();
+    const context = createMockContext(null);
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.unauthorized).toHaveBeenCalledWith({
+      body: {
+        message: 'User should be authenticated to disconnect OAuth authorization.',
+      },
+    });
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).not.toHaveBeenCalled();
+  });
+
+  it('returns error when profile UID is missing', async () => {
+    const [, handler] = registerRoute();
+    const context = createMockContext({});
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'Unable to retrieve Kibana user profile ID.',
+      },
+    });
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).not.toHaveBeenCalled();
   });
 
   it('returns 204 on successful disconnect', async () => {
@@ -128,6 +174,7 @@ describe('oauthDisconnectRoute', () => {
 
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
+      profileUid: 'test-profile-uid',
     });
   });
 
@@ -178,7 +225,7 @@ describe('oauthDisconnectRoute', () => {
     await expect(handler(context, req, res)).rejects.toThrow('Deletion failed');
   });
 
-  it('creates ConnectorTokenClient with the correct saved objects clients', async () => {
+  it('creates UserConnectorTokenClient with the correct saved objects clients', async () => {
     const mockEncryptedClient = { getDecryptedAsInternalUser: jest.fn() };
     const mockUnsecuredClient = { find: jest.fn() };
 
@@ -186,6 +233,11 @@ describe('oauthDisconnectRoute', () => {
 
     const mockContext = {
       core: Promise.resolve({
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ profile_uid: 'test-profile-uid' }),
+          },
+        },
         savedObjects: {
           getClient: jest.fn().mockReturnValue(mockUnsecuredClient),
         },
@@ -207,9 +259,9 @@ describe('oauthDisconnectRoute', () => {
     await handler(mockContext, req, res);
 
     expect(mockEncryptedSavedObjectsClient.getClient).toHaveBeenCalledWith({
-      includedHiddenTypes: ['connector_token'],
+      includedHiddenTypes: ['user_connector_token'],
     });
-    expect(MockConnectorTokenClient).toHaveBeenCalledWith({
+    expect(MockUserConnectorTokenClient).toHaveBeenCalledWith({
       encryptedSavedObjectsClient: mockEncryptedClient,
       unsecuredSavedObjectsClient: mockUnsecuredClient,
       logger: mockLogger,

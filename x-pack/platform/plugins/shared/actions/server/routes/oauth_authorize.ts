@@ -65,14 +65,21 @@ export const oauthAuthorizeRoute = (
               },
             });
           }
-          const { username, profile_uid } = currentUser;
+          const { profile_uid } = currentUser;
+
           if (!profile_uid) {
-            throw new Error('Unable to retrieve Kibana user profile ID.');
+            return res.customError({
+              statusCode: 500,
+              body: {
+                message: 'Unable to retrieve Kibana user profile ID.',
+              },
+            });
           }
-          oauthRateLimiter.log(username, 'authorize');
-          if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
+
+          oauthRateLimiter.log(profile_uid, 'authorize');
+          if (oauthRateLimiter.isRateLimited(profile_uid, 'authorize')) {
             routeLogger.warn(
-              `OAuth authorize rate limit exceeded for user: ${username}, connector: ${connectorId}`
+              `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
             );
             return res.customError({
               statusCode: 429,
@@ -143,7 +150,6 @@ export const oauthAuthorizeRoute = (
             connectorId,
             kibanaReturnUrl,
             spaceId,
-            createdBy: profile_uid,
           });
 
           const authorizationUrl = oauthService.buildAuthorizationUrl({

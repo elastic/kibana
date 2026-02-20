@@ -71,7 +71,10 @@ const createMockCoreSetup = (publicBaseUrl: string | undefined = KIBANA_URL) => 
 });
 
 const createMockContext = (
-  currentUser: { username: string } | null = { username: 'testuser' }
+  currentUser: { username: string; profile_uid?: string } | null = {
+    username: 'testuser',
+    profile_uid: 'test-profile-uid',
+  }
 ) => ({
   core: Promise.resolve({
     security: {
@@ -129,7 +132,7 @@ describe('oauthAuthorizeRoute', () => {
     expect(config.path).toBe('/internal/actions/connector/{connectorId}/_start_oauth_flow');
   });
 
-  it('throws when no current user', async () => {
+  it('returns unauthorized when no current user', async () => {
     const [, handler] = registerRoute();
     const context = createMockContext(null);
     const req = httpServerMock.createKibanaRequest({
@@ -140,14 +143,31 @@ describe('oauthAuthorizeRoute', () => {
 
     await handler(context, req, res);
 
-    expect(res.customError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: 500,
-        body: {
-          message: 'User should be authenticated to initiate OAuth authorization.',
-        },
-      })
-    );
+    expect(res.unauthorized).toHaveBeenCalledWith({
+      body: {
+        message: 'User should be authenticated to initiate OAuth authorization.',
+      },
+    });
+  });
+
+  it('returns error when profile UID is missing', async () => {
+    const [, handler] = registerRoute();
+    const context = createMockContext({ username: 'testuser' });
+    const req = httpServerMock.createKibanaRequest({
+      params: { connectorId: 'connector-1' },
+      body: {},
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'Unable to retrieve Kibana user profile ID.',
+      },
+    });
+    expect(mockRateLimiter.log).not.toHaveBeenCalled();
   });
 
   it('returns 429 when rate limited', async () => {
@@ -163,7 +183,7 @@ describe('oauthAuthorizeRoute', () => {
 
     await handler(context, req, res);
 
-    expect(mockRateLimiter.log).toHaveBeenCalledWith('testuser', 'authorize');
+    expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'authorize');
     expect(res.customError).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 429,

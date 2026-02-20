@@ -7,7 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 import { useKibana } from '../../../common';
-import { BASE_ACTION_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 
 export interface ConnectorOAuthDisconnectProps {
   connectorId: string;
@@ -36,7 +36,9 @@ export const useConnectorOAuthDisconnect = ({
   const { mutate: disconnect, isLoading: isDisconnecting } = useMutation<void, Error>({
     mutationFn: () =>
       http.post(
-        `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_oauth_disconnect`
+        `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
+          connectorId
+        )}/_oauth_disconnect`
       ),
     onSuccess: () => onSuccess?.(),
     onError: (error) => onError?.(error),

@@ -8,13 +8,13 @@
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH, type DisconnectOAuthPathParams } from '../../common';
+import { INTERNAL_BASE_ACTION_API_PATH, type DisconnectOAuthPathParams } from '../../common';
 import { disconnectOAuthPathParamsSchema } from '../../common/routes/connector/apis/oauth';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsPluginsStart } from '../plugin';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
 export const oauthDisconnectRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -24,7 +24,7 @@ export const oauthDisconnectRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_disconnect`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_disconnect`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'internal',
@@ -60,23 +60,42 @@ export const oauthDisconnectRoute = (
         const { connectorId }: DisconnectOAuthPathParams = req.params;
         const routeLogger = logger.get('oauth_disconnect');
 
+        const { security } = await context.core;
+        const currentUser = security.authc.getCurrentUser();
+        if (!currentUser) {
+          return res.unauthorized({
+            body: {
+              message: 'User should be authenticated to disconnect OAuth authorization.',
+            },
+          });
+        }
+        const { profile_uid: profileUid } = currentUser;
+        if (!profileUid) {
+          return res.customError({
+            statusCode: 500,
+            body: {
+              message: 'Unable to retrieve Kibana user profile ID.',
+            },
+          });
+        }
+
         // Verify the connector exists and the user has access via the actions client
         const actionsClient = (await context.actions).getActionsClient();
         await actionsClient.get({ id: connectorId });
 
         const core = await context.core;
         const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
-        const connectorTokenClient = new ConnectorTokenClient({
+        const userConnectorTokenClient = new UserConnectorTokenClient({
           encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-            includedHiddenTypes: ['connector_token'],
+            includedHiddenTypes: ['user_connector_token'],
           }),
           unsecuredSavedObjectsClient: core.savedObjects.getClient({
-            includedHiddenTypes: ['connector_token'],
+            includedHiddenTypes: ['user_connector_token'],
           }),
           logger: routeLogger,
         });
 
-        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+        await userConnectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
 
         routeLogger.info(`OAuth tokens deleted for connector: ${connectorId}`);
 

@@ -9,7 +9,7 @@ jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 jest.mock('../lib/oauth_state_client');
-jest.mock('../lib/connector_token_client');
+jest.mock('../lib/user_connector_token_client');
 jest.mock('../lib/request_oauth_authorization_code_token');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,14 +18,14 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthCallbackRoute } from './oauth_callback';
 import { OAuthStateClient } from '../lib/oauth_state_client';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 
 const KIBANA_URL = 'https://kibana.example.com';
 
 const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
-const MockConnectorTokenClient = ConnectorTokenClient as jest.MockedClass<
-  typeof ConnectorTokenClient
+const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
+  typeof UserConnectorTokenClient
 >;
 const mockRequestOAuthAuthorizationCodeToken =
   requestOAuthAuthorizationCodeToken as jest.MockedFunction<
@@ -81,7 +81,10 @@ const createMockCoreSetup = () => ({
 });
 
 const createMockContext = (
-  currentUser: { username: string } | null = { username: 'testuser' }
+  currentUser: { username: string; profile_uid?: string } | null = {
+    username: 'testuser',
+    profile_uid: 'test-profile-uid',
+  }
 ) => ({
   core: Promise.resolve({
     security: {
@@ -115,7 +118,9 @@ describe('oauthCallbackRoute', () => {
     });
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
-    MockConnectorTokenClient.mockImplementation(() => mockConnectorTokenClientInstance as never);
+    MockUserConnectorTokenClient.mockImplementation(
+      () => mockConnectorTokenClientInstance as never
+    );
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
@@ -153,6 +158,23 @@ describe('oauthCallbackRoute', () => {
     );
   });
 
+  it('returns error page when profile UID is missing', async () => {
+    const [, handler] = registerRoute();
+    const context = createMockContext({ username: 'testuser' });
+    const req = httpServerMock.createKibanaRequest({ query: { code: 'abc', state: 'xyz' } });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: { 'content-type': 'text/html' },
+        body: expect.stringContaining('Unable to retrieve Kibana user profile ID'),
+      })
+    );
+    expect(mockRateLimiter.log).not.toHaveBeenCalled();
+  });
+
   it('returns rate limit page when rate limited', async () => {
     mockRateLimiter.isRateLimited.mockReturnValue(true);
 
@@ -163,7 +185,7 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
-    expect(mockRateLimiter.log).toHaveBeenCalledWith('testuser', 'callback');
+    expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'callback');
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: { 'content-type': 'text/html' },
@@ -330,6 +352,7 @@ describe('oauthCallbackRoute', () => {
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       tokenType: 'access_token',
+      profileUid: 'test-profile-uid',
     });
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -338,6 +361,7 @@ describe('oauthCallbackRoute', () => {
       expiresIn: 3600,
       refreshTokenExpiresIn: undefined,
       tokenType: 'access_token',
+      profileUid: 'test-profile-uid',
     });
 
     // Verify state cleanup
