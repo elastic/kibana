@@ -309,6 +309,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
     },
+    trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;
 }
 
