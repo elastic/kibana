@@ -43,17 +43,12 @@ test.describe(
           await expect(pageObjects.ai4dsoc.alertsSummaryPrompt.first()).toBeVisible();
         });
 
-        test('should redirect from alerts to get started page', async ({
-          pageObjects,
-          page,
-        }) => {
+        test('should redirect from alerts to get started page', async ({ pageObjects, page }) => {
           await pageObjects.ai4dsoc.goto(ALERTS_URL);
           await expect(pageObjects.ai4dsoc.getStartedPage.first()).toBeVisible();
         });
 
-        test('should redirect from rules to get started page', async ({
-          pageObjects,
-        }) => {
+        test('should redirect from rules to get started page', async ({ pageObjects }) => {
           await pageObjects.ai4dsoc.goto(RULES_URL);
           await expect(pageObjects.ai4dsoc.getStartedPage.first()).toBeVisible();
         });

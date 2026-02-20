@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { test, expect, tags } from "../../../fixtures";
-import { deleteTimelines } from "../../../common/timeline_api_helpers";
-import { TIMELINES_URL } from "../../../common/urls";
+import { test, expect, tags } from '../../../fixtures';
+import { deleteTimelines } from '../../../common/timeline_api_helpers';
+import { TIMELINES_URL } from '../../../common/urls';
 
 test.describe(
-  "Timelines - Unsaved states",
+  'Timelines - Unsaved states',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     test.beforeEach(async ({ kbnClient, browserAuth, page, pageObjects }) => {
@@ -21,15 +21,15 @@ test.describe(
       await pageObjects.timeline.createNewTimeline();
     });
 
-    test("should show different timeline states", async ({ page, pageObjects }) => {
+    test('should show different timeline states', async ({ page, pageObjects }) => {
       await expect(pageObjects.timeline.timelinePanel.first()).toBeVisible();
-      const status = page.getByTestId("timeline-save-status");
+      const status = page.getByTestId('timeline-save-status');
       await expect(status.first()).toBeVisible();
-      await expect(status.first()).toContainText("Unsaved");
-      await pageObjects.timeline.addNameToTimelineAndSave("Test Timeline");
+      await expect(status.first()).toContainText('Unsaved');
+      await pageObjects.timeline.addNameToTimelineAndSave('Test Timeline');
       await page.waitForTimeout(2000);
-      await pageObjects.timeline.executeTimelineKQL("agent.name : *");
-      await expect(status.first()).toContainText("Unsaved changes");
+      await pageObjects.timeline.executeTimelineKQL('agent.name : *');
+      await expect(status.first()).toContainText('Unsaved changes');
     });
   }
 );

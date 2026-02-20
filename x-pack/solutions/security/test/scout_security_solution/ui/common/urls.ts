@@ -34,7 +34,8 @@ export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_URL =
   '/app/security/entity_analytics_asset_criticality';
-export const ENTITY_ANALYTICS_PRIV_MON_URL = '/app/security/entity_analytics_privileged_user_monitoring';
+export const ENTITY_ANALYTICS_PRIV_MON_URL =
+  '/app/security/entity_analytics_privileged_user_monitoring';
 export const ENTITY_ANALYTICS_THREAT_HUNTING_URL = '/app/security/entity_analytics_threat_hunting';
 
 // Investigations

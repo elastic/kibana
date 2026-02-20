@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('Alert suppression - custom query rule', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Alert suppression - custom query rule',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Alert suppression custom query', async () => {
-    // Needs: rule with alert_suppression config
-  });
-});
+    test.skip('Alert suppression custom query', async () => {
+      // Needs: rule with alert_suppression config
+    });
+  }
+);

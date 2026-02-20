@@ -44,8 +44,8 @@ test.describe(
     test.describe('Fields rendering', () => {
       test.beforeEach(async ({ page }) => {
         await page.testSubj.locator('show-field-browser').first().click();
-        await page
-          .testSubj.locator('fields-browser-container')
+        await page.testSubj
+          .locator('fields-browser-container')
           .first()
           .waitFor({ state: 'visible', timeout: 10_000 });
       });
@@ -56,10 +56,12 @@ test.describe(
       });
 
       test('displays all categories (by default)', async ({ page }) => {
-        const badges = page
-          .testSubj.locator('fields-browser-container')
+        const badges = page.testSubj
+          .locator('fields-browser-container')
           .locator('[data-test-subj="category-badges"]');
-        await expect(badges.first()).toHaveCount(0).catch(() => {});
+        await expect(badges.first())
+          .toHaveCount(0)
+          .catch(() => {});
       });
 
       test('displays only the default selected fields when "view selected" option is enabled', async ({
@@ -80,8 +82,8 @@ test.describe(
     test.describe('Events viewer fields behaviour', () => {
       test.beforeEach(async ({ page }) => {
         await page.testSubj.locator('show-field-browser').first().click();
-        await page
-          .testSubj.locator('fields-browser-container')
+        await page.testSubj
+          .locator('fields-browser-container')
           .first()
           .waitFor({ state: 'visible', timeout: 10_000 });
       });
@@ -91,12 +93,12 @@ test.describe(
       }) => {
         const filterInput = page.testSubj.locator('field-search').first();
         await filterInput.fill('host.geo.c');
-        const hostGeoCityCheckbox = page
-          .testSubj.locator('field-host.geo.city_name-checkbox')
+        const hostGeoCityCheckbox = page.testSubj
+          .locator('field-host.geo.city_name-checkbox')
           .first();
         await hostGeoCityCheckbox.click();
-        await page
-          .testSubj.locator('fields-browser-container')
+        await page.testSubj
+          .locator('fields-browser-container')
           .locator('[data-test-subj="close"]')
           .first()
           .click();
@@ -109,18 +111,20 @@ test.describe(
       }) => {
         const filterInput = page.testSubj.locator('field-search').first();
         await filterInput.fill('host.geo.c');
-        const hostGeoCountryCheckbox = page
-          .testSubj.locator('field-host.geo.country_name-checkbox')
+        const hostGeoCountryCheckbox = page.testSubj
+          .locator('field-host.geo.country_name-checkbox')
           .first();
         await hostGeoCountryCheckbox.click();
-        await page
-          .testSubj.locator('fields-browser-container')
+        await page.testSubj
+          .locator('fields-browser-container')
           .locator('[data-test-subj="close"]')
           .first()
           .click();
         await page.testSubj.locator('reset-fields').first().click();
         const hostGeoCountryHeader = page.testSubj.locator('header-cell-host.geo.country_name');
-        await expect(hostGeoCountryHeader.first()).toHaveCount(0).catch(() => {});
+        await expect(hostGeoCountryHeader.first())
+          .toHaveCount(0)
+          .catch(() => {});
       });
     });
 
@@ -130,7 +134,9 @@ test.describe(
       }) => {
         const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1';
         const serverSideEventCount = page.testSubj.locator('server-side-event-count');
-        await expect(serverSideEventCount.first()).toBeVisible({ timeout: 15_000 }).catch(() => {});
+        await expect(serverSideEventCount.first())
+          .toBeVisible({ timeout: 15_000 })
+          .catch(() => {});
         const kqlInput = page.testSubj.locator('queryInput').first();
         await kqlInput.fill(filterInput);
         await kqlInput.press('Enter');

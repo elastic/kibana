@@ -19,7 +19,10 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await resetRulesTableState(page);
       await deleteAlertsAndRules(apiServices);
-      await createRuleFromParams(kbnClient, getCustomQueryRuleParams({ rule_id: 'rule1', enabled: false }));
+      await createRuleFromParams(
+        kbnClient,
+        getCustomQueryRuleParams({ rule_id: 'rule1', enabled: false })
+      );
     });
 
     test('should allow selecting rules via checkbox', async ({ pageObjects }) => {
@@ -35,7 +38,8 @@ test.describe(
       await pageObjects.rulesManagementTable.waitForTableToLoad();
       await pageObjects.rulesManagementTable.selectRuleByName('New Rule Test');
       await pageObjects.rulesManagementTable.bulkActionsBtn.click();
-      const deleteBulkBtn = pageObjects.rulesManagementTable.page.testSubj.locator('deleteRuleBulk');
+      const deleteBulkBtn =
+        pageObjects.rulesManagementTable.page.testSubj.locator('deleteRuleBulk');
       await expect(deleteBulkBtn.first()).toBeVisible({ timeout: 5_000 });
     });
   }

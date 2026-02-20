@@ -51,7 +51,9 @@ test.describe(
       await pageObjects.hostRiskTab.navigateToHostRiskTab();
 
       await expect(page.getByTestId('toolbar-alerts-count').first()).toHaveText('1 alert');
-      await expect(page.getByTestId('dataGridRowCell').getByText('Endpoint Security').first()).toBeVisible();
+      await expect(
+        page.getByTestId('dataGridRowCell').getByText('Endpoint Security').first()
+      ).toBeVisible();
     });
 
     test('shows risk information overlay when button is clicked', async ({ page, pageObjects }) => {

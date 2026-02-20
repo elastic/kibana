@@ -7,10 +7,6 @@
 
 import { test, tags } from '../../../fixtures';
 
-test.describe.skip(
-  'Install prebuilt rules via Fleet',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.skip('installs prebuilt rules via Fleet', () => {});
-  }
-);
+test.describe.skip('Install prebuilt rules via Fleet', { tag: [...tags.stateful.classic] }, () => {
+  test.skip('installs prebuilt rules via Fleet', () => {});
+});

@@ -35,9 +35,7 @@ test.describe(
 
     test('renders page as expected', async ({ pageObjects }) => {
       await pageObjects.entityAnalyticsManagement.navigate();
-      await expect(pageObjects.entityAnalyticsManagement.pageTitle).toHaveText(
-        'Entity risk score'
-      );
+      await expect(pageObjects.entityAnalyticsManagement.pageTitle).toHaveText('Entity risk score');
     });
 
     test.describe('Risk preview', () => {
@@ -50,9 +48,9 @@ test.describe(
         );
         await pageObjects.entityAnalyticsManagement.navigate();
 
-        await expect(
-          pageObjects.entityAnalyticsManagement.riskPreviewError.first()
-        ).toContainText('Preview failed');
+        await expect(pageObjects.entityAnalyticsManagement.riskPreviewError.first()).toContainText(
+          'Preview failed'
+        );
 
         await page.route('**/internal/risk_score/preview', (route) =>
           route.fulfill({

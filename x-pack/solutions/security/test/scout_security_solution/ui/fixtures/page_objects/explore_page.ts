@@ -183,7 +183,6 @@ export class ExplorePage {
     return this.page.testSubj.locator('pagination-button-1');
   }
 
-
   get processNameField() {
     return this.page.testSubj.locator('processName');
   }

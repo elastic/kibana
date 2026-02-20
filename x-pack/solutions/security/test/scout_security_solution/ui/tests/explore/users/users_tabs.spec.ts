@@ -33,19 +33,21 @@ test.describe(
     test.describe('Users page tabs', () => {
       test('renders all users', async ({ pageObjects }) => {
         const totalUsers = 1;
-        const subtitle = pageObjects.explore.allUsersTable.locator(
-          pageObjects.explore.headerSubtitle
-        ).first();
+        const subtitle = pageObjects.explore.allUsersTable
+          .locator(pageObjects.explore.headerSubtitle)
+          .first();
         await expect(subtitle).toHaveText(`Showing: ${totalUsers} user`);
       });
 
       test('renders all authentications', async ({ pageObjects }) => {
         const totalUsers = 1;
         await pageObjects.explore.clickAuthenticationsTab();
-        await pageObjects.explore.authenticationsTable.first().waitFor({ state: 'visible', timeout: 15_000 });
-        const subtitle = pageObjects.explore.authenticationsTable.locator(
-          pageObjects.explore.headerSubtitle
-        ).first();
+        await pageObjects.explore.authenticationsTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
+        const subtitle = pageObjects.explore.authenticationsTable
+          .locator(pageObjects.explore.headerSubtitle)
+          .first();
         await expect(subtitle).toHaveText(`Showing: ${totalUsers} user`);
       });
 
@@ -61,14 +63,15 @@ test.describe(
         await expect(tabContent.first()).toBeVisible({ timeout: 15_000 });
       });
 
-      test.skip('renders users risk tab', { tag: [...tags.stateful.classic] }, async ({
-        pageObjects,
-        page,
-      }) => {
-        await pageObjects.explore.clickUserRiskTab();
-        const enableRiskButton = page.testSubj.locator('enable-risk-score');
-        await expect(enableRiskButton.first()).toBeVisible();
-      });
+      test.skip(
+        'renders users risk tab',
+        { tag: [...tags.stateful.classic] },
+        async ({ pageObjects, page }) => {
+          await pageObjects.explore.clickUserRiskTab();
+          const enableRiskButton = page.testSubj.locator('enable-risk-score');
+          await expect(enableRiskButton.first()).toBeVisible();
+        }
+      );
     });
 
     test.describe('User details tabs', () => {
@@ -77,9 +80,9 @@ test.describe(
           '/app/security/users/name/test/authentications'
         );
         const totalUsers = 1;
-        const subtitle = pageObjects.explore.authenticationsTable.locator(
-          pageObjects.explore.headerSubtitle
-        ).first();
+        const subtitle = pageObjects.explore.authenticationsTable
+          .locator(pageObjects.explore.headerSubtitle)
+          .first();
         await expect(subtitle).toHaveText(`Showing: ${totalUsers} host`);
       });
     });

@@ -18,14 +18,18 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await page.goto(HOSTS_ALL_URL);
       await pageObjects.timeline.openTimelineUsingToggle();
-      const searchContainer = page.locator('[data-test-subj="timeline-select-search-or-filter"] textarea').first();
+      const searchContainer = page
+        .locator('[data-test-subj="timeline-select-search-or-filter"] textarea')
+        .first();
       await searchContainer.fill(hostExistsQuery);
       await searchContainer.press('Enter');
       await page.waitForTimeout(2000);
     });
 
     test('should open inspect modal', async ({ page, pageObjects }) => {
-      const inspectBtn = page.locator('[data-test-subj="timeline-container"] [data-test-subj="inspect-empty-button"]').first();
+      const inspectBtn = page
+        .locator('[data-test-subj="timeline-container"] [data-test-subj="inspect-empty-button"]')
+        .first();
       await inspectBtn.waitFor({ state: 'visible', timeout: 10_000 });
       await inspectBtn.click();
       await expect(page.getByTestId('inspector-panel').first()).toBeVisible();

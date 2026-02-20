@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { test, expect, tags } from "../../../../fixtures";
-import { deleteAlertsAndRules } from "../../../../common/api_helpers";
-import { createRuleFromParams, findAllRules } from "../../../../common/rule_api_helpers";
-import { getCustomQueryRuleParams } from "../../../../common/rule_objects";
-import { resetRulesTableState } from "../../../../common/rule_api_helpers";
+import { test, expect, tags } from '../../../../fixtures';
+import { deleteAlertsAndRules } from '../../../../common/api_helpers';
+import { createRuleFromParams, findAllRules } from '../../../../common/rule_api_helpers';
+import { getCustomQueryRuleParams } from '../../../../common/rule_objects';
+import { resetRulesTableState } from '../../../../common/rule_api_helpers';
 
 const testRules = [
-  getCustomQueryRuleParams({ rule_id: "rule1", name: "Rule 1", enabled: false }),
-  getCustomQueryRuleParams({ rule_id: "rule2", name: "Rule 2", enabled: false }),
-  getCustomQueryRuleParams({ rule_id: "rule3", name: "Rule 3", enabled: false }),
+  getCustomQueryRuleParams({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
+  getCustomQueryRuleParams({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),
+  getCustomQueryRuleParams({ rule_id: 'rule3', name: 'Rule 3', enabled: false }),
 ];
 
-test.describe("Rule deletion", { tag: [...tags.stateful.classic] }, () => {
+test.describe('Rule deletion', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, apiServices, kbnClient, page }) => {
     await browserAuth.loginAsAdmin();
     await resetRulesTableState(page);
@@ -27,7 +27,7 @@ test.describe("Rule deletion", { tag: [...tags.stateful.classic] }, () => {
     await createRuleFromParams(kbnClient, testRules[2]);
   });
 
-  test("User can delete an individual rule", async ({ pageObjects, kbnClient }) => {
+  test('User can delete an individual rule', async ({ pageObjects, kbnClient }) => {
     await pageObjects.rulesManagementTable.goto();
     await pageObjects.rulesManagementTable.waitForTableToLoad();
     await pageObjects.rulesManagementTable.disableAutoRefresh();
@@ -45,13 +45,16 @@ test.describe("Rule deletion", { tag: [...tags.stateful.classic] }, () => {
     expect(resAfter.data.length).toBe(afterCount);
   });
 
-  test("User can delete multiple selected rules via a bulk action", async ({ pageObjects, kbnClient }) => {
+  test('User can delete multiple selected rules via a bulk action', async ({
+    pageObjects,
+    kbnClient,
+  }) => {
     await pageObjects.rulesManagementTable.goto();
     await pageObjects.rulesManagementTable.waitForTableToLoad();
     await pageObjects.rulesManagementTable.disableAutoRefresh();
 
     const initialCount = await pageObjects.rulesManagementTable.getRulesManagementTableRowCount();
-    await pageObjects.rulesManagementTable.selectRulesByName(["Rule 1", "Rule 2"]);
+    await pageObjects.rulesManagementTable.selectRulesByName(['Rule 1', 'Rule 2']);
     await pageObjects.rulesManagementTable.deleteSelectedRules();
 
     const afterCount = await pageObjects.rulesManagementTable.getRulesManagementTableRowCount();

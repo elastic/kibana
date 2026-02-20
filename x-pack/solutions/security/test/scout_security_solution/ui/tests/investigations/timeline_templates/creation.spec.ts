@@ -8,7 +8,6 @@
 import { test, expect, tags } from '../../../fixtures';
 import {
   createTimeline,
-  createTimelineTemplate,
   deleteTimelines,
   getDefaultTimeline,
 } from '../../../common/timeline_api_helpers';

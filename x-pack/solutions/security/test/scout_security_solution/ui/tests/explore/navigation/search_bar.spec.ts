@@ -16,7 +16,9 @@ test.describe.skip(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.explore.gotoWithTimeRange(EXPLORE_URLS.HOSTS_ALL);
-      await pageObjects.explore.allHostsTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+      await pageObjects.explore.allHostsTable
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('adds correctly a filter to the global search bar', async ({ page }) => {
@@ -27,7 +29,9 @@ test.describe.skip(
 
     test('auto suggests fields from the data view', async ({ pageObjects, page }) => {
       await pageObjects.explore.kqlInput.click();
-      await expect(page.testSubj.locator('suggestionListItem').first()).toBeVisible({ timeout: 5_000 });
+      await expect(page.testSubj.locator('suggestionListItem').first()).toBeVisible({
+        timeout: 5_000,
+      });
     });
   }
 );

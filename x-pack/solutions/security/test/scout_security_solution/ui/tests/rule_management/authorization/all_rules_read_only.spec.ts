@@ -7,12 +7,8 @@
 
 import { test, tags } from '../../../fixtures';
 
-test.describe.skip(
-  'All rules read only',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.skip('read only user cannot edit rules', () => {
-      // Requires createUsersAndRoles
-    });
-  }
-);
+test.describe.skip('All rules read only', { tag: [...tags.stateful.classic] }, () => {
+  test.skip('read only user cannot edit rules', () => {
+    // Requires createUsersAndRoles
+  });
+});

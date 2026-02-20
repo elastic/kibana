@@ -71,10 +71,10 @@ export async function createTimeline(
         title: timeline.title,
         savedQueryId: null,
         ...(timeline.dataViewId != null &&
-        timeline.indexNames != null && {
-          dataViewId: timeline.dataViewId,
-          indexNames: timeline.indexNames,
-        }),
+          timeline.indexNames != null && {
+            dataViewId: timeline.dataViewId,
+            indexNames: timeline.indexNames,
+          }),
       },
     },
     headers: {

@@ -7,10 +7,14 @@
 
 import { test, tags } from '../../../../fixtures';
 
-test.describe('Alerts index outdated callout', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.skip('displays alerts index outdated callout', async () => {
-    // Needs: outdated index setup
-  });
-});
+test.describe(
+  'Alerts index outdated callout',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.skip('displays alerts index outdated callout', async () => {
+      // Needs: outdated index setup
+    });
+  }
+);

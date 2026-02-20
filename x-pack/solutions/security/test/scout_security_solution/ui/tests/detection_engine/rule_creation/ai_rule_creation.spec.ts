@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('AI rule creation', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'AI rule creation',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('AI rule creation flow', async () => {
-    // Needs: AI rule creation URL, AI-specific flow
-  });
-});
+    test.skip('AI rule creation flow', async () => {
+      // Needs: AI rule creation URL, AI-specific flow
+    });
+  }
+);

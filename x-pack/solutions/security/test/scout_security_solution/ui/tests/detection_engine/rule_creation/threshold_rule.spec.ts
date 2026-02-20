@@ -10,18 +10,22 @@ import { deleteAlertsAndRules } from '../../../common/api_helpers';
 import { createRuleFromParams } from '../../../common/rule_api_helpers';
 import { getNewThresholdRule } from '../../../common/rule_objects';
 
-test.describe('Threshold rule - Rule Creation', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Threshold rule - Rule Creation',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test('Creates and enables a threshold rule', async ({ pageObjects, kbnClient }) => {
-    const rule = getNewThresholdRule({ rule_id: `threshold-${Date.now()}` });
-    const created = await createRuleFromParams(kbnClient, rule);
-    await pageObjects.ruleEdit.gotoRuleDetails(created.id);
-    await expect(pageObjects.ruleEdit.ruleNameHeader.first()).toContainText(rule.name);
-  });
-});
+    test('Creates and enables a threshold rule', async ({ pageObjects, kbnClient }) => {
+      const rule = getNewThresholdRule({ rule_id: `threshold-${Date.now()}` });
+      const created = await createRuleFromParams(kbnClient, rule);
+      await pageObjects.ruleEdit.gotoRuleDetails(created.id);
+      await expect(pageObjects.ruleEdit.ruleNameHeader.first()).toContainText(rule.name);
+    });
+  }
+);

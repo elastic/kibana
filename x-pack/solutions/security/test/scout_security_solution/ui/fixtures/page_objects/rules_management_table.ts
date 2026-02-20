@@ -53,7 +53,9 @@ export class RulesManagementTablePage {
     this.rulesEmptyPrompt = this.page.testSubj.locator('rulesEmptyPrompt');
     this.addElasticRulesBtn = this.page.testSubj.locator('addElasticRulesButton');
     this.tableSortColumnBtn = this.page.testSubj.locator('tableHeaderSortButton');
-    this.tablePerPagePopoverBtn = this.page.testSubj.locator('tablePaginationPopoverButton').first();
+    this.tablePerPagePopoverBtn = this.page.testSubj
+      .locator('tablePaginationPopoverButton')
+      .first();
   }
 
   async goto(): Promise<void> {
@@ -145,14 +147,17 @@ export class RulesManagementTablePage {
   async deleteFirstRule(): Promise<void> {
     await this.collapsedActionBtn.first().click();
     await this.page.testSubj.locator('deleteRuleAction').first().click();
-    await this.page.testSubj.locator('deleteRulesConfirmationModal').locator('confirmModalConfirmButton').first().click();
+    await this.page.testSubj
+      .locator('deleteRulesConfirmationModal')
+      .locator('confirmModalConfirmButton')
+      .first()
+      .click();
   }
 
   async deleteSelectedRules(): Promise<void> {
     await this.bulkActionsBtn.click();
     await this.page.testSubj.locator('deleteRuleBulk').first().click();
-    await this.page
-      .testSubj
+    await this.page.testSubj
       .locator('deleteRulesConfirmationModal')
       .locator('confirmModalConfirmButton')
       .first()
@@ -174,8 +179,7 @@ export class RulesManagementTablePage {
   async deleteSelectedRules(): Promise<void> {
     await this.bulkActionsBtn.click();
     await this.page.testSubj.locator('deleteRuleBulk').first().click();
-    await this.page
-      .testSubj
+    await this.page.testSubj
       .locator('deleteRulesConfirmationModal')
       .locator('confirmModalConfirmButton')
       .first()
@@ -194,7 +198,7 @@ export class RulesManagementTablePage {
     return this.ruleExecutionStatusBadge.filter({ hasText: status }).count();
   }
 
-    async waitForRuleToUpdate(): Promise<void> {
+  async waitForRuleToUpdate(): Promise<void> {
     const loader = this.page.testSubj.locator('ruleSwitchLoader');
     await loader.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
     await loader.waitFor({ state: 'hidden', timeout: 300_000 });

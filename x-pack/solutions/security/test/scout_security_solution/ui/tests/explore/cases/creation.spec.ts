@@ -7,8 +7,11 @@
 
 import { test, expect, tags } from '../../../fixtures';
 import { CASES_URL, OVERVIEW_URL } from '../../../common/urls';
-import { EXPLORE_URLS } from '../../../fixtures/page_objects';
-import { createTimeline, deleteTimelines, getDefaultTimeline } from '../../../common/timeline_api_helpers';
+import {
+  createTimeline,
+  deleteTimelines,
+  getDefaultTimeline,
+} from '../../../common/timeline_api_helpers';
 
 const testCase = {
   name: 'Scout case with timeline',
@@ -54,12 +57,17 @@ test.describe(
       const timelineOption = page.getByText(testCase.timeline.title).first();
       await timelineOption.click();
       await page.testSubj.locator('create-case-submit').first().click();
-      await page.testSubj.locator('case-view-title').first().waitFor({ state: 'visible', timeout: 10_000 });
+      await page.testSubj
+        .locator('case-view-title')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
 
       await expect(page.testSubj.locator('case-view-title').first()).toHaveText(testCase.name);
       await expect(page.testSubj.locator('case-view-status').first()).toHaveText('Open');
       await page.testSubj.locator('case-timeline-action').first().click();
-      await expect(page.testSubj.locator('timeline-title').first()).toContainText(testCase.timeline.title);
+      await expect(page.testSubj.locator('timeline-title').first()).toContainText(
+        testCase.timeline.title
+      );
 
       await pageObjects.explore.gotoWithTimeRange(OVERVIEW_URL);
       await expect(page.testSubj.locator('overview-case-name').first()).toHaveText(testCase.name);

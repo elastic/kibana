@@ -28,11 +28,17 @@ export class RuleEditPage {
   }
 
   async goToAlertsTab(): Promise<void> {
-    await this.page.getByRole('tab', { name: /alerts/i }).first().click();
+    await this.page
+      .getByRole('tab', { name: /alerts/i })
+      .first()
+      .click();
   }
 
   async goToExceptionsTab(): Promise<void> {
-    await this.page.getByRole('tab', { name: /exceptions/i }).first().click();
+    await this.page
+      .getByRole('tab', { name: /exceptions/i })
+      .first()
+      .click();
   }
 
   async goToClosedAlerts(): Promise<void> {

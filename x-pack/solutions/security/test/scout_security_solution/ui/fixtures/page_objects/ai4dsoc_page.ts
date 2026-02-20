@@ -63,7 +63,9 @@ export class Ai4dsocPage {
   }
 
   get attackDiscoveryFeature() {
-    return this.page.testSubj.locator('featureCategory_securitySolution_securitySolutionAttackDiscovery');
+    return this.page.testSubj.locator(
+      'featureCategory_securitySolution_securitySolutionAttackDiscovery'
+    );
   }
 
   timelineFeatureLocator() {
@@ -75,7 +77,9 @@ export class Ai4dsocPage {
   }
 
   siemMigrationsFeatureLocator() {
-    return this.page.testSubj.locator('featureCategory_securitySolution_securitySolutionSiemMigrations');
+    return this.page.testSubj.locator(
+      'featureCategory_securitySolution_securitySolutionSiemMigrations'
+    );
   }
 
   get assignToSpaceButton() {

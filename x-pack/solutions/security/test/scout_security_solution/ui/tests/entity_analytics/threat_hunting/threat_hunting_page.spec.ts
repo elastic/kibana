@@ -33,7 +33,9 @@ test.describe(
       await expect(pageObjects.entityAnalyticsThreatHunting.pageTitle.first()).toBeVisible({
         timeout: 60000,
       });
-      await expect(page.getByRole('heading', { name: 'Entity Threat Hunting' }).first()).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Entity Threat Hunting' }).first()
+      ).toBeVisible();
     });
 
     test('renders KQL search bar', async ({ page, pageObjects }) => {
@@ -72,9 +74,11 @@ test.describe(
         pageObjects.entityAnalyticsThreatHunting.threatHuntingEntitiesTable.first()
       ).toBeVisible({ timeout: 30000 });
       await expect(
-        page.locator(
-          '[data-test-subj="paginated-basic-table"], [data-test-subj="initialLoadingPanelPaginatedTable"]'
-        ).first()
+        page
+          .locator(
+            '[data-test-subj="paginated-basic-table"], [data-test-subj="initialLoadingPanelPaginatedTable"]'
+          )
+          .first()
       ).toBeVisible({ timeout: 30000 });
     });
   }

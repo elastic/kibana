@@ -10,16 +10,20 @@ import { deleteAlertsAndRules } from '../../../../common/api_helpers';
 import { createRuleFromParams } from '../../../../common/rule_api_helpers';
 import { getNewRule } from '../../../../common/rule_objects';
 
-test.describe('Alert tags', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-    await createRuleFromParams(kbnClient, getNewRule());
-  });
+test.describe(
+  'Alert tags',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+      await createRuleFromParams(kbnClient, getNewRule());
+    });
 
-  test.skip('adds and removes alert tags', async () => {
-    // Needs: waitForAlertsToPopulate, addAlertTagToNAlerts
-  });
-});
+    test.skip('adds and removes alert tags', async () => {
+      // Needs: waitForAlertsToPopulate, addAlertTagToNAlerts
+    });
+  }
+);

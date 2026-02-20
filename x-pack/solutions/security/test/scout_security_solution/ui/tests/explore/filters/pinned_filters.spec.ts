@@ -15,38 +15,36 @@ const DISCOVER_WITH_PINNED_FILTER_URL =
 
 const DATAVIEW = 'audit*';
 
-test.describe(
-  'ESS - pinned filters',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.beforeEach(async ({ browserAuth, pageObjects, kbnClient, apiServices }) => {
-      await apiServices.deleteDataView(DATAVIEW).catch(() => {});
-      await apiServices.createDataView(DATAVIEW).catch(() => {});
-      await browserAuth.loginAsAdmin();
-    });
+test.describe('ESS - pinned filters', { tag: [...tags.stateful.classic] }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects, kbnClient, apiServices }) => {
+    await apiServices.deleteDataView(DATAVIEW).catch(() => {});
+    await apiServices.createDataView(DATAVIEW).catch(() => {});
+    await browserAuth.loginAsAdmin();
+  });
 
-    test('show pinned filters on security', async ({ pageObjects, page }) => {
-      await pageObjects.explore.gotoUrl(DISCOVER_WITH_PINNED_FILTER_URL);
-      const filterItem = page.locator('[id^="popoverFor_filter"]').first();
-      await expect(filterItem.locator('.globalFilterItem-isPinned')).toHaveCount(1);
-      await pageObjects.explore.openKibanaNavigation();
-      await pageObjects.explore.navigateFromKibanaCollapsibleTo('Alerts');
-      const alertsFilter = page.locator('[id^="popoverFor_filter"]').first();
-      await expect(alertsFilter).toHaveText(/host\.name: test-host/);
-    });
+  test('show pinned filters on security', async ({ pageObjects, page }) => {
+    await pageObjects.explore.gotoUrl(DISCOVER_WITH_PINNED_FILTER_URL);
+    const filterItem = page.locator('[id^="popoverFor_filter"]').first();
+    await expect(filterItem.locator('.globalFilterItem-isPinned')).toHaveCount(1);
+    await pageObjects.explore.openKibanaNavigation();
+    await pageObjects.explore.navigateFromKibanaCollapsibleTo('Alerts');
+    const alertsFilter = page.locator('[id^="popoverFor_filter"]').first();
+    await expect(alertsFilter).toHaveText(/host\.name: test-host/);
+  });
 
-    test('does not show discover filters on security', async ({ pageObjects, page }) => {
-      await pageObjects.explore.gotoUrl(DISCOVER_WITH_FILTER_URL);
-      const filterItem = page.locator('[id^="popoverFor_filter"]').first();
-      await expect(filterItem).toBeVisible();
-      await pageObjects.explore.openKibanaNavigation();
-      await pageObjects.explore.navigateFromKibanaCollapsibleTo('Alerts');
-      await expect(page).toHaveURL(new RegExp(ALERTS_URL.replace(/\//g, '\\/')));
-      const filterAfterNav = page.locator('[id^="popoverFor_filter"]');
-      await expect(filterAfterNav.first()).toHaveCount(0).catch(() => {});
-    });
-  }
-);
+  test('does not show discover filters on security', async ({ pageObjects, page }) => {
+    await pageObjects.explore.gotoUrl(DISCOVER_WITH_FILTER_URL);
+    const filterItem = page.locator('[id^="popoverFor_filter"]').first();
+    await expect(filterItem).toBeVisible();
+    await pageObjects.explore.openKibanaNavigation();
+    await pageObjects.explore.navigateFromKibanaCollapsibleTo('Alerts');
+    await expect(page).toHaveURL(new RegExp(ALERTS_URL.replace(/\//g, '\\/')));
+    const filterAfterNav = page.locator('[id^="popoverFor_filter"]');
+    await expect(filterAfterNav.first())
+      .toHaveCount(0)
+      .catch(() => {});
+  });
+});
 
 test.describe(
   'SERVERLESS - pinned filters',
@@ -74,7 +72,9 @@ test.describe(
       await pageObjects.explore.navigateFromHeaderTo('solutionSideNavPanelLink-alerts');
       await expect(page).toHaveURL(new RegExp(ALERTS_URL.replace(/\//g, '\\/')));
       const filterAfterNav = page.locator('[id^="popoverFor_filter"]');
-      await expect(filterAfterNav.first()).toHaveCount(0).catch(() => {});
+      await expect(filterAfterNav.first())
+        .toHaveCount(0)
+        .catch(() => {});
     });
   }
 );

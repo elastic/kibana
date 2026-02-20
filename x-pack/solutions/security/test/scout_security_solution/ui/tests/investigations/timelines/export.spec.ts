@@ -6,7 +6,11 @@
  */
 
 import { test, expect, tags } from '../../../fixtures';
-import { createTimeline, deleteTimelines, getDefaultTimeline } from '../../../common/timeline_api_helpers';
+import {
+  createTimeline,
+  deleteTimelines,
+  getDefaultTimeline,
+} from '../../../common/timeline_api_helpers';
 import { TIMELINES_URL } from '../../../common/urls';
 
 test.describe(
@@ -20,7 +24,9 @@ test.describe(
       await page.goto(TIMELINES_URL);
     });
     test('should display timelines for export', async ({ page, pageObjects }) => {
-      await pageObjects.timeline.timelinesTable.first().waitFor({ state: 'visible', timeout: 10_000 });
+      await pageObjects.timeline.timelinesTable
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
       const rows = page.locator('[data-test-subj^="timeline-title-"]');
       await expect(rows.first()).toBeVisible({ timeout: 5000 });
     });

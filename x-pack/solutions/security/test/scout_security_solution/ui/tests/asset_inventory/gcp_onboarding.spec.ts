@@ -23,9 +23,7 @@ test.describe(
       await pageObjects.assetInventoryOnboarding.goto();
     });
 
-    test('should save a package policy with GCP Cloud Shell', async ({
-      pageObjects,
-    }) => {
+    test('should save a package policy with GCP Cloud Shell', async ({ pageObjects }) => {
       const po = pageObjects.assetInventoryOnboarding;
       await po.caiGcpTestIdInput().first().click();
 
@@ -46,9 +44,7 @@ test.describe(
       await expect(po.policyNameInput).toHaveValue(policyName);
     });
 
-    test('should save a package policy with credentials JSON', async ({
-      pageObjects,
-    }) => {
+    test('should save a package policy with credentials JSON', async ({ pageObjects }) => {
       const po = pageObjects.assetInventoryOnboarding;
       await po.caiGcpTestIdInput().first().click();
 

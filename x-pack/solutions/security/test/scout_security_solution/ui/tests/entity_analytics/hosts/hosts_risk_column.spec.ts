@@ -6,7 +6,6 @@
  */
 
 import { test, expect, tags } from '../../../fixtures';
-import { HOSTS_ALL_URL } from '../../../common/urls';
 
 test.describe(
   'All hosts table',
@@ -37,9 +36,7 @@ test.describe(
       await page.getByTestId('queryInput').first().fill('host.name: "siem-kibana"');
       await page.keyboard.press('Enter');
 
-      await expect(
-        page.getByTestId('tableHeaderCell_node.risk_4').first()
-      ).toBeVisible();
+      await expect(page.getByTestId('tableHeaderCell_node.risk_4').first()).toBeVisible();
       const firstRow = page.locator('.euiTableRow').first();
       await expect(firstRow.locator('.euiTableCellContent').nth(4)).toHaveText('Critical');
     });

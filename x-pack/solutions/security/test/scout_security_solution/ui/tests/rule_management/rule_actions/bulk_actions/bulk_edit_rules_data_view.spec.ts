@@ -7,12 +7,8 @@
 
 import { test, tags } from '../../../fixtures';
 
-test.describe.skip(
-  'Bulk edit rules data view',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.skip('bulk edit rule data view', () => {
-      // Requires data view setup
-    });
-  }
-);
+test.describe.skip('Bulk edit rules data view', { tag: [...tags.stateful.classic] }, () => {
+  test.skip('bulk edit rule data view', () => {
+    // Requires data view setup
+  });
+});

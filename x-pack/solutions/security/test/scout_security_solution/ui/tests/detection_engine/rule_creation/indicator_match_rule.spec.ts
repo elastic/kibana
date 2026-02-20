@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('Indicator match rule - Rule Creation', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Indicator match rule - Rule Creation',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Creates and enables an indicator match rule', async () => {
-    // Needs: threat_match rule type, threat_index, threat_mapping
-  });
-});
+    test.skip('Creates and enables an indicator match rule', async () => {
+      // Needs: threat_match rule type, threat_index, threat_mapping
+    });
+  }
+);

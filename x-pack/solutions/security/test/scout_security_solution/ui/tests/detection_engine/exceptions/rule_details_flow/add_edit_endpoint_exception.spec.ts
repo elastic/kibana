@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../../fixtures';
 import { deleteAlertsAndRules } from '../../../../common/api_helpers';
-import { createRuleFromParams } from '../../../../common/rule_api_helpers';
-import { getNewRule } from '../../../../common/rule_objects';
 
-test.describe('Add/edit endpoint exception from rule details', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Add/edit endpoint exception from rule details',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Add/edit endpoint exception', async () => {
-    // Needs: endpoint rule, endpoint exception list
-  });
-});
+    test.skip('Add/edit endpoint exception', async () => {
+      // Needs: endpoint rule, endpoint exception list
+    });
+  }
+);

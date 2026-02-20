@@ -7,12 +7,8 @@
 
 import { test, tags } from '../../../fixtures';
 
-test.describe.skip(
-  'Rule details - non default space',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.skip('rule details in custom space', () => {
-      // Requires space creation and rule in that space
-    });
-  }
-);
+test.describe.skip('Rule details - non default space', { tag: [...tags.stateful.classic] }, () => {
+  test.skip('rule details in custom space', () => {
+    // Requires space creation and rule in that space
+  });
+});

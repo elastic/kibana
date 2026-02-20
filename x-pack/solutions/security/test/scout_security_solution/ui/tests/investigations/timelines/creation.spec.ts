@@ -11,7 +11,7 @@ import {
   deleteTimelines,
   getDefaultTimeline,
 } from '../../../common/timeline_api_helpers';
-import { TIMELINES_URL, TIMELINE_TEMPLATES_URL, OVERVIEW_URL } from '../../../common/urls';
+import { TIMELINE_TEMPLATES_URL, OVERVIEW_URL } from '../../../common/urls';
 
 const mockTimeline = getDefaultTimeline();
 

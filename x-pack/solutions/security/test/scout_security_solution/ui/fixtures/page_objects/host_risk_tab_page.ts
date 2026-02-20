@@ -20,7 +20,9 @@ export class HostRiskTabPage {
   }
 
   get hostByRiskTableCell(): Locator {
-    return this.page.testSubj.locator('table-hostRisk-loading-false').locator('.euiTableCellContent');
+    return this.page.testSubj
+      .locator('table-hostRisk-loading-false')
+      .locator('.euiTableCellContent');
   }
 
   get hostByRiskTableFilter(): Locator {
@@ -40,8 +42,8 @@ export class HostRiskTabPage {
   }
 
   get hostByRiskTableNextPageButton(): Locator {
-    return this.page
-      .testSubj.locator('numberedPagination')
+    return this.page.testSubj
+      .locator('numberedPagination')
       .locator('[data-test-subj="pagination-button-next"]');
   }
 

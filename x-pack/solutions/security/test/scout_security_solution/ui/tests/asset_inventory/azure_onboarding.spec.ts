@@ -28,7 +28,9 @@ test.describe(
       const po = pageObjects.assetInventoryOnboarding;
       await po.caiAzureTestIdInput().first().click();
 
-      const policyName = await po.changePolicyName('asset_inventory-azure-organization-arm-template');
+      const policyName = await po.changePolicyName(
+        'asset_inventory-azure-organization-arm-template'
+      );
 
       await expect(po.caiAzureArmTemplateInput().first()).toBeChecked();
       await expect(po.saveButton.first()).toBeEnabled();
@@ -46,12 +48,20 @@ test.describe(
       const po = pageObjects.assetInventoryOnboarding;
       await po.caiAzureTestIdInput().first().click();
 
-      const policyName = await po.changePolicyName('asset_inventory-azure-organization-client-secret');
+      const policyName = await po.changePolicyName(
+        'asset_inventory-azure-organization-client-secret'
+      );
 
-      await po.azureCredentialsTypeSelector().first().selectOption('service_principal_with_client_secret');
+      await po
+        .azureCredentialsTypeSelector()
+        .first()
+        .selectOption('service_principal_with_client_secret');
       await page.locator('#azure\\.credentials\\.client_id').first().fill(AZURE_CLIENT_ID);
       await page.locator('#azure\\.credentials\\.tenant_id').first().fill(AZURE_TENANT_ID);
-      await page.locator('[data-test-subj="passwordInput-client-secret"]').first().fill(AZURE_CLIENT_SECRET);
+      await page
+        .locator('[data-test-subj="passwordInput-client-secret"]')
+        .first()
+        .fill(AZURE_CLIENT_SECRET);
       await expect(po.saveButton.first()).toBeEnabled();
       await po.saveButton.first().click();
       await po.addElasticAgentLaterButton.first().click();
@@ -72,17 +82,17 @@ test.describe(
       await pageObjects.assetInventoryOnboarding.goto();
     });
 
-    test('should save an organization package policy', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('should save an organization package policy', async ({ pageObjects, page }) => {
       const po = pageObjects.assetInventoryOnboarding;
       await po.caiAzureTestIdInput().first().click();
 
       await po.changePolicyName('asset_inventory-azure-agentless');
       await page.locator('#azure\\.credentials\\.client_id').first().fill(AZURE_CLIENT_ID);
       await page.locator('#azure\\.credentials\\.tenant_id').first().fill(AZURE_TENANT_ID);
-      await page.locator('[data-test-subj="passwordInput-client-secret"]').first().fill(AZURE_CLIENT_SECRET);
+      await page
+        .locator('[data-test-subj="passwordInput-client-secret"]')
+        .first()
+        .fill(AZURE_CLIENT_SECRET);
       await expect(po.saveButton.first()).toBeEnabled();
       await po.saveButton.first().click();
     });

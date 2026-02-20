@@ -9,8 +9,10 @@
 export const ALERTS_URL = '/app/security/alerts';
 
 /** Test subject selectors for CSP flyout insights */
-export const CSP_INSIGHT_VULNERABILITIES_TITLE = 'securitySolutionFlyoutInsightsVulnerabilitiesTitleLink';
-export const CSP_INSIGHT_VULNERABILITIES_TABLE = 'securitySolutionFlyoutVulnerabilitiesFindingsTable';
+export const CSP_INSIGHT_VULNERABILITIES_TITLE =
+  'securitySolutionFlyoutInsightsVulnerabilitiesTitleLink';
+export const CSP_INSIGHT_VULNERABILITIES_TABLE =
+  'securitySolutionFlyoutVulnerabilitiesFindingsTable';
 export const CSP_INSIGHT_MISCONFIGURATION_TITLE =
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink';
 export const CSP_INSIGHT_TAB_TITLE = 'securitySolutionFlyoutInsightInputsTab';

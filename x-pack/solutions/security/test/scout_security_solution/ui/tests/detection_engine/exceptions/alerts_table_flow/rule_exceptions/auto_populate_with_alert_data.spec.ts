@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../../../fixtures';
 import { deleteAlertsAndRules } from '../../../../../common/api_helpers';
-import { createRuleFromParams } from '../../../../../common/rule_api_helpers';
-import { getNewRule } from '../../../../../common/rule_objects';
 
-test.describe('Auto populate exception with alert data', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Auto populate exception with alert data',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Auto populate with alert data', async () => {
-    // Needs: alerts, add exception from alert - auto-populate fields
-  });
-});
+    test.skip('Auto populate with alert data', async () => {
+      // Needs: alerts, add exception from alert - auto-populate fields
+    });
+  }
+);

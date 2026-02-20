@@ -23,7 +23,7 @@ test.describe(
 
       const emptyState = page.getByTestId('tiIndicatorsEmptyState');
       const table = page.getByTestId('tiIndicatorsTable');
-      const hasData = await table.locator('tbody tr').count() > 0;
+      const hasData = (await table.locator('tbody tr').count()) > 0;
       if (!hasData) {
         await expect(emptyState.or(page.getByText('No results'))).toBeVisible();
       }

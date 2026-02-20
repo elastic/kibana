@@ -9,9 +9,7 @@ import type {
   QueryRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  DEFAULT_SECURITY_SOLUTION_INDEXES,
-} from '@kbn/scout-security/src/playwright/constants/detection_rules';
+import { DEFAULT_SECURITY_SOLUTION_INDEXES } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
 type RuleOverrides = Partial<QueryRuleCreateProps>;
 type ThresholdOverrides = Partial<ThresholdRuleCreateProps>;
@@ -37,9 +35,8 @@ export const getNewRule = (rewrites?: RuleOverrides): QueryRuleCreateProps => ({
   ...rewrites,
 });
 
-export const getCustomQueryRuleParams = (
-  rewrites?: RuleOverrides
-): QueryRuleCreateProps => getNewRule(rewrites);
+export const getCustomQueryRuleParams = (rewrites?: RuleOverrides): QueryRuleCreateProps =>
+  getNewRule(rewrites);
 
 export const getExistingRule = (rewrites?: RuleOverrides): QueryRuleCreateProps => ({
   type: 'query',
@@ -60,9 +57,7 @@ export const getExistingRule = (rewrites?: RuleOverrides): QueryRuleCreateProps 
   ...rewrites,
 });
 
-export const getNewOverrideRule = (
-  rewrites?: RuleOverrides
-): QueryRuleCreateProps => ({
+export const getNewOverrideRule = (rewrites?: RuleOverrides): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -89,9 +84,7 @@ export const getEditedRule = (rewrites?: RuleOverrides): QueryRuleCreateProps =>
     ...rewrites,
   });
 
-export const getNewThresholdRule = (
-  rewrites?: ThresholdOverrides
-): ThresholdRuleCreateProps => ({
+export const getNewThresholdRule = (rewrites?: ThresholdOverrides): ThresholdRuleCreateProps => ({
   type: 'threshold',
   query: 'host.name: *',
   index: getIndexPatterns(),

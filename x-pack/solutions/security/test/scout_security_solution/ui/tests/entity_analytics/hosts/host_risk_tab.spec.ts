@@ -40,15 +40,23 @@ test.describe(
     test('renders the table', async ({ page, pageObjects }) => {
       await page.getByTestId('queryInput').first().fill('host.name: "siem-kibana"');
       await page.keyboard.press('Enter');
-      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(4).first()).toHaveText('siem-kibana');
-      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(5).first()).toContainText('2021');
+      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(4).first()).toHaveText(
+        'siem-kibana'
+      );
+      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(5).first()).toContainText(
+        '2021'
+      );
       await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(6).first()).toHaveText('90.00');
-      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(7).first()).toHaveText('Critical');
+      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(7).first()).toHaveText(
+        'Critical'
+      );
     });
 
     test('filters the table', async ({ pageObjects }) => {
       await pageObjects.hostRiskTab.openRiskTableFilterAndSelectCritical();
-      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(3).first()).not.toHaveText('siem-kibana');
+      await expect(pageObjects.hostRiskTab.hostByRiskTableCell.nth(3).first()).not.toHaveText(
+        'siem-kibana'
+      );
       await pageObjects.hostRiskTab.removeCriticalFilterAndClose();
     });
 

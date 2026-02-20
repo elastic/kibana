@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('Gap scheduler errors callout', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Gap scheduler errors callout',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Gap scheduler errors callout', async () => {
-    // Needs: gap scheduler error state
-  });
-});
+    test.skip('Gap scheduler errors callout', async () => {
+      // Needs: gap scheduler error state
+    });
+  }
+);

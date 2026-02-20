@@ -49,7 +49,9 @@ export class RuleDetailsPage {
   async waitForPageToLoad(ruleName: string): Promise<void> {
     const spinner = this.page.testSubj.locator('pageContentSpinner');
     await spinner.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    await this.ruleNameHeader.filter({ hasText: ruleName }).waitFor({ state: 'visible', timeout: 30000 });
+    await this.ruleNameHeader
+      .filter({ hasText: ruleName })
+      .waitFor({ state: 'visible', timeout: 30000 });
     await spinner.waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
   }
 

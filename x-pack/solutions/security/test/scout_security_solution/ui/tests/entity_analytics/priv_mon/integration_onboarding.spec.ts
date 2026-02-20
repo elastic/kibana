@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, expect, tags } from '../../../fixtures';
+import { test, tags } from '../../../fixtures';
 
 test.describe(
   'Privileged User Monitoring - Integrations onboarding',

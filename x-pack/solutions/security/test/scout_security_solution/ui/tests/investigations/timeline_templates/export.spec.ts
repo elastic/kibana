@@ -6,7 +6,11 @@
  */
 
 import { test, expect, tags } from '../../../fixtures';
-import { createTimelineTemplate, deleteTimelines, getDefaultTimeline } from '../../../common/timeline_api_helpers';
+import {
+  createTimelineTemplate,
+  deleteTimelines,
+  getDefaultTimeline,
+} from '../../../common/timeline_api_helpers';
 import { TIMELINE_TEMPLATES_URL } from '../../../common/urls';
 
 test.describe(
@@ -20,7 +24,10 @@ test.describe(
       await page.goto(TIMELINE_TEMPLATES_URL);
     });
     test('should export timeline template', async ({ page }) => {
-      await page.getByTestId('custom-templates').first().waitFor({ state: 'visible', timeout: 10_000 });
+      await page
+        .getByTestId('custom-templates')
+        .first()
+        .waitFor({ state: 'visible', timeout: 10_000 });
       await page.getByTestId('custom-templates').first().click();
       const actionBtn = page.locator('[id$="-actions"]').first();
       if (await actionBtn.isVisible()) {

@@ -6,7 +6,6 @@
  */
 
 import { test, expect, tags } from '../../../../fixtures';
-import { GET_STARTED_URL_PATH } from '../../../../common/urls';
 
 test.describe(
   'SIEM Migrations - Rules onboarding',

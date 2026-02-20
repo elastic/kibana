@@ -7,31 +7,27 @@
 
 import { test, expect, tags } from '../../../fixtures';
 
-test.describe(
-  'Privileged User Monitoring - Page',
-  { tag: tags.stateful.classic },
-  () => {
-    test.beforeAll(async ({ esArchiver }) => {
-      await esArchiver.loadIfNeeded('linux_process');
-    });
+test.describe('Privileged User Monitoring - Page', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ esArchiver }) => {
+    await esArchiver.loadIfNeeded('linux_process');
+  });
 
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
 
-    test.afterAll(async ({ esArchiver }) => {
-      try {
-        await esArchiver.unload('linux_process');
-      } catch {
-        // Best-effort cleanup
-      }
-    });
+  test.afterAll(async ({ esArchiver }) => {
+    try {
+      await esArchiver.unload('linux_process');
+    } catch {
+      // Best-effort cleanup
+    }
+  });
 
-    test('renders page as expected', async ({ pageObjects }) => {
-      await pageObjects.entityAnalyticsPrivMon.navigate();
-      await expect(pageObjects.entityAnalyticsPrivMon.onboardingPanel.first()).toContainText(
-        'Privileged user monitoring'
-      );
-    });
-  }
-);
+  test('renders page as expected', async ({ pageObjects }) => {
+    await pageObjects.entityAnalyticsPrivMon.navigate();
+    await expect(pageObjects.entityAnalyticsPrivMon.onboardingPanel.first()).toContainText(
+      'Privileged user monitoring'
+    );
+  });
+});

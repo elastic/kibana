@@ -12,7 +12,14 @@ const EXCEPTION_LISTS_ITEMS_URL = '/api/exception_lists/items';
  * Create an exception list.
  */
 export async function createExceptionList(
-  kbnClient: { request: (opts: { method: string; path: string; body?: unknown; retries?: number }) => Promise<unknown> },
+  kbnClient: {
+    request: (opts: {
+      method: string;
+      path: string;
+      body?: unknown;
+      retries?: number;
+    }) => Promise<unknown>;
+  },
   params: { list_id: string; name: string; description: string; type: string }
 ): Promise<{ id: string; list_id: string }> {
   const response = await kbnClient.request<{ id: string; list_id: string }>({
@@ -28,7 +35,14 @@ export async function createExceptionList(
  * Create an exception list item.
  */
 export async function createExceptionListItem(
-  kbnClient: { request: (opts: { method: string; path: string; body?: unknown; retries?: number }) => Promise<unknown> },
+  kbnClient: {
+    request: (opts: {
+      method: string;
+      path: string;
+      body?: unknown;
+      retries?: number;
+    }) => Promise<unknown>;
+  },
   params: {
     list_id: string;
     item_id?: string;
@@ -58,7 +72,9 @@ export async function createExceptionListItem(
  * Delete an exception list.
  */
 export async function deleteExceptionList(
-  kbnClient: { request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown> },
+  kbnClient: {
+    request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown>;
+  },
   listId: string,
   namespaceType = 'single'
 ): Promise<void> {
@@ -76,9 +92,9 @@ export async function deleteExceptionList(
 /**
  * Get all exception lists and delete them.
  */
-export async function deleteAllExceptionLists(
-  kbnClient: { request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown> }
-): Promise<void> {
+export async function deleteAllExceptionLists(kbnClient: {
+  request: (opts: { method: string; path: string; retries?: number }) => Promise<unknown>;
+}): Promise<void> {
   try {
     const response = (await kbnClient.request({
       method: 'GET',

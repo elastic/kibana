@@ -77,15 +77,13 @@ test.describe(
   'Alert Host details expandable flyout - Vulnerabilities',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test.beforeEach(
-      async ({ browserAuth, apiServices, pageObjects, page }) => {
-        await deleteAlertsAndRules(apiServices);
-        await browserAuth.loginAsAdmin();
-        await createRule(apiServices, { name: `New Rule Test ${Date.now()}` });
-        await pageObjects.securityCommon.navigateToAlerts();
-        await pageObjects.securityCommon.waitForAlertsToPopulate();
-      }
-    );
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects, page }) => {
+      await deleteAlertsAndRules(apiServices);
+      await browserAuth.loginAsAdmin();
+      await createRule(apiServices, { name: `New Rule Test ${Date.now()}` });
+      await pageObjects.securityCommon.navigateToAlerts();
+      await pageObjects.securityCommon.waitForAlertsToPopulate();
+    });
 
     test('should not display Vulnerabilities preview under Insights Entities when it does not have Vulnerabilities Findings', async ({
       pageObjects,
@@ -98,38 +96,35 @@ test.describe(
       await expect(vulnerabilitiesTitle).not.toBeVisible();
     });
 
-    test.describe(
-      'Host name - Has Vulnerabilities findings but with different host name than the alerts',
-      () => {
-        test.beforeEach(async ({ esClient, pageObjects, page }) => {
-          await indexDocument(
-            esClient,
-            CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-            getMockVulnerability(false)
-          );
-          await page.reload();
-          await pageObjects.securityCommon.waitForAlertsToPopulate();
-          await pageObjects.securityCommon.expandFirstAlertHostFlyout();
-        });
+    test.describe('Host name - Has Vulnerabilities findings but with different host name than the alerts', () => {
+      test.beforeEach(async ({ esClient, pageObjects, page }) => {
+        await indexDocument(
+          esClient,
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+          getMockVulnerability(false)
+        );
+        await page.reload();
+        await pageObjects.securityCommon.waitForAlertsToPopulate();
+        await pageObjects.securityCommon.expandFirstAlertHostFlyout();
+      });
 
-        test.afterEach(async ({ esClient }) => {
-          try {
-            await deleteDataStream(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
-          } catch {
-            // Cleanup best-effort
-          }
-        });
+      test.afterEach(async ({ esClient }) => {
+        try {
+          await deleteDataStream(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+        } catch {
+          // Cleanup best-effort
+        }
+      });
 
-        test('should not display Vulnerabilities preview when host name does not match', async ({
-          pageObjects,
-        }) => {
-          const vulnerabilitiesTitle = pageObjects.securityCommon.testSubj(
-            CSP_INSIGHT_VULNERABILITIES_TITLE
-          );
-          await expect(vulnerabilitiesTitle).not.toBeVisible();
-        });
-      }
-    );
+      test('should not display Vulnerabilities preview when host name does not match', async ({
+        pageObjects,
+      }) => {
+        const vulnerabilitiesTitle = pageObjects.securityCommon.testSubj(
+          CSP_INSIGHT_VULNERABILITIES_TITLE
+        );
+        await expect(vulnerabilitiesTitle).not.toBeVisible();
+      });
+    });
 
     test.describe('Host name - Has Vulnerabilities findings', () => {
       test.beforeEach(async ({ esClient, pageObjects, page }) => {

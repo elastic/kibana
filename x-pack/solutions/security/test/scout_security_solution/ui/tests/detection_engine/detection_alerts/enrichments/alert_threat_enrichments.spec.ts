@@ -10,16 +10,20 @@ import { deleteAlertsAndRules } from '../../../../common/api_helpers';
 import { createRuleFromParams } from '../../../../common/rule_api_helpers';
 import { getNewRule } from '../../../../common/rule_objects';
 
-test.describe('Alert threat enrichments', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-    await createRuleFromParams(kbnClient, getNewRule());
-  });
+test.describe(
+  'Alert threat enrichments',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+      await createRuleFromParams(kbnClient, getNewRule());
+    });
 
-  test.skip('displays threat enrichments in alert flyout', async () => {
-    // Needs: indicator match rule with threat data, esArchiver
-  });
-});
+    test.skip('displays threat enrichments in alert flyout', async () => {
+      // Needs: indicator match rule with threat data, esArchiver
+    });
+  }
+);

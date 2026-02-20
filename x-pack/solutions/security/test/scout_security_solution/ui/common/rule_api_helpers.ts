@@ -52,9 +52,9 @@ export async function deleteAllRules(kbnClient: KbnClient): Promise<void> {
 /**
  * Reset rules table UI state (session storage) before navigation.
  */
-export async function resetRulesTableState(
-  page: { evaluate: (fn: () => void) => Promise<void> }
-): Promise<void> {
+export async function resetRulesTableState(page: {
+  evaluate: (fn: () => void) => Promise<void>;
+}): Promise<void> {
   await page.evaluate(() => {
     window.sessionStorage.clear();
   });

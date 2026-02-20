@@ -21,7 +21,9 @@ test.describe(
       test.beforeEach(async ({ browserAuth, pageObjects }) => {
         await browserAuth.loginAsAdmin();
         await pageObjects.explore.gotoWithTimeRange(EXPLORE_URLS.HOSTS_UNCOMMON);
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
       });
 
       test.afterAll(async ({ esArchiver }) => {
@@ -34,41 +36,71 @@ test.describe(
 
       test('pagination updates results and page number', async ({ pageObjects }) => {
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).toHaveAttribute('aria-current', 'page');
 
         const firstPageProcess = await pageObjects.explore.processNameField.first().textContent();
         await pageObjects.explore.goToTablePage(2);
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
 
         const secondPageProcess = await pageObjects.explore.processNameField.first().textContent();
         expect(firstPageProcess).not.toBe(secondPageProcess);
 
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).not.toHaveAttribute('aria-current', 'page');
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableSecondPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableSecondPage)
+            .first()
         ).toHaveAttribute('aria-current', 'page');
       });
 
-      test('pagination keeps track of page results when tabs change', async ({ pageObjects, page }) => {
+      test('pagination keeps track of page results when tabs change', async ({
+        pageObjects,
+        page,
+      }) => {
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).toHaveAttribute('aria-current', 'page');
 
         await pageObjects.explore.goToTablePage(2);
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
 
-        const expectedThirdPageResult = await pageObjects.explore.processNameField.first().textContent();
+        const expectedThirdPageResult = await pageObjects.explore.processNameField
+          .first()
+          .textContent();
         await pageObjects.explore.clickEventsTab();
-        await page.testSubj.locator('events-viewer-panel').first().waitFor({ state: 'visible', timeout: 15_000 });
-        await expect(pageObjects.explore.tableFirstPage.first()).toHaveAttribute('aria-current', 'page');
+        await page.testSubj
+          .locator('events-viewer-panel')
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
+        await expect(pageObjects.explore.tableFirstPage.first()).toHaveAttribute(
+          'aria-current',
+          'page'
+        );
 
         await pageObjects.explore.clickUncommonProcessesTab();
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
-        await expect(pageObjects.explore.tableSecondPage.first()).toHaveAttribute('aria-current', 'page');
-        const actualThirdPageResult = await pageObjects.explore.processNameField.first().textContent();
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
+        await expect(pageObjects.explore.tableSecondPage.first()).toHaveAttribute(
+          'aria-current',
+          'page'
+        );
+        const actualThirdPageResult = await pageObjects.explore.processNameField
+          .first()
+          .textContent();
         expect(expectedThirdPageResult).toBe(actualThirdPageResult);
       });
 
@@ -76,19 +108,29 @@ test.describe(
         pageObjects,
       }) => {
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).toHaveAttribute('aria-current', 'page');
 
         await pageObjects.explore.goToTablePage(2);
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).not.toHaveAttribute('aria-current', 'page');
 
         await pageObjects.explore.refreshPage();
-        await pageObjects.explore.uncommonProcessesTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.uncommonProcessesTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
         await expect(
-          pageObjects.explore.uncommonProcessesTable.locator(pageObjects.explore.tableFirstPage).first()
+          pageObjects.explore.uncommonProcessesTable
+            .locator(pageObjects.explore.tableFirstPage)
+            .first()
         ).toHaveAttribute('aria-current', 'page');
       });
     });
@@ -112,7 +154,9 @@ test.describe(
 
       test('reset all Hosts pagination when sorting column', async ({ pageObjects }) => {
         await pageObjects.explore.gotoWithTimeRange(EXPLORE_URLS.HOSTS_ALL);
-        await pageObjects.explore.allHostsTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.allHostsTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
         await pageObjects.explore.goToTablePage(2);
         await expect(
           pageObjects.explore.allHostsTable.locator(pageObjects.explore.tableFirstPage).first()
@@ -127,7 +171,9 @@ test.describe(
 
       test('reset all users pagination when sorting column', async ({ pageObjects }) => {
         await pageObjects.explore.gotoWithTimeRange(EXPLORE_URLS.USERS_ALL);
-        await pageObjects.explore.allUsersTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+        await pageObjects.explore.allUsersTable
+          .first()
+          .waitFor({ state: 'visible', timeout: 15_000 });
         await pageObjects.explore.goToTablePage(2);
         await expect(
           pageObjects.explore.allUsersTable.locator(pageObjects.explore.tableFirstPage).first()

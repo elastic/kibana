@@ -26,18 +26,13 @@ test.describe(
       }
     });
 
-    test('enables risk score followed by the store', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('enables risk score followed by the store', async ({ pageObjects, page }) => {
       const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
       await test.step('Navigate to dashboard and verify initial state', async () => {
         await dashboardPage.navigate();
         await expect(
-          dashboardPage.entityStoreEnablementPanel.getByText(
-            'Enable entity store and risk score'
-          )
+          dashboardPage.entityStoreEnablementPanel.getByText('Enable entity store and risk score')
         ).toBeVisible({ timeout: 30000 });
       });
 
@@ -52,9 +47,7 @@ test.describe(
 
       await test.step('Confirm enablement and verify success', async () => {
         await dashboardPage.confirmEntityStoreEnablement();
-        await expect(
-          page.getByText('Entities', { exact: false })
-        ).toBeVisible({ timeout: 30000 });
+        await expect(page.getByText('Entities', { exact: false })).toBeVisible({ timeout: 30000 });
       });
     });
   }

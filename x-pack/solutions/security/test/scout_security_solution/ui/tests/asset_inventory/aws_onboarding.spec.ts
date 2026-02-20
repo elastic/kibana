@@ -22,10 +22,7 @@ test.describe(
       await pageObjects.assetInventoryOnboarding.goto();
     });
 
-    test('should save a package policy with AWS Cloud Formation', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('should save a package policy with AWS Cloud Formation', async ({ pageObjects, page }) => {
       const po = pageObjects.assetInventoryOnboarding;
       const policyName = await po.changePolicyName('asset_inventory-cloudformation');
 
@@ -42,9 +39,7 @@ test.describe(
       await expect(po.policyNameInput).toHaveValue(policyName);
     });
 
-    test('should save a package policy with role ARNs', async ({
-      pageObjects,
-    }) => {
+    test('should save a package policy with role ARNs', async ({ pageObjects }) => {
       const po = pageObjects.assetInventoryOnboarding;
       const policyName = await po.changePolicyName('asset_inventory-role-arns');
       const arns = 'arn:aws:iam::123456789012:role/test-role';
@@ -62,9 +57,7 @@ test.describe(
       await expect(po.awsRoleArnInput().first()).toHaveValue(arns);
     });
 
-    test('should save a package policy with temporary keys', async ({
-      pageObjects,
-    }) => {
+    test('should save a package policy with temporary keys', async ({ pageObjects }) => {
       const po = pageObjects.assetInventoryOnboarding;
       const policyName = await po.changePolicyName('asset_inventory-temporary-keys');
 

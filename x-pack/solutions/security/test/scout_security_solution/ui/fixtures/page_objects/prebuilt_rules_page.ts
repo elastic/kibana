@@ -43,10 +43,10 @@ export class PrebuiltRulesPage {
   }
 
   getInstallRuleButton(ruleId: string): Locator {
-    return this.page.testSubj.locator("installSinglePrebuiltRuleButton-" + ruleId);
+    return this.page.testSubj.locator('installSinglePrebuiltRuleButton-' + ruleId);
   }
 
   getUpgradeRuleButton(ruleId: string): Locator {
-    return this.page.testSubj.locator("upgradeSinglePrebuiltRuleButton-" + ruleId);
+    return this.page.testSubj.locator('upgradeSinglePrebuiltRuleButton-' + ruleId);
   }
 }

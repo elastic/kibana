@@ -34,7 +34,9 @@ export class DetectionAlertsPage {
     this.takeActionPopoverBtn = this.page.testSubj.locator('selectedShowBulkActionsButton');
     this.addToNewCaseButton = this.page.testSubj.locator('attach-new-case');
     this.addToExistingCaseButton = this.page.testSubj.locator('attach-existing-case');
-    this.alertCheckbox = this.page.testSubj.locator('bulk-actions-row-cell').locator('.euiCheckbox__input');
+    this.alertCheckbox = this.page.testSubj
+      .locator('bulk-actions-row-cell')
+      .locator('.euiCheckbox__input');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.emptyAlertTable = this.page.testSubj.locator('alertsTableEmptyState');
     this.expandAlertBtn = this.page.testSubj.locator('expand-event');
@@ -51,8 +53,12 @@ export class DetectionAlertsPage {
   }
 
   async waitForAlertsToLoad(): Promise<void> {
-    await this.page.testSubj.locator('internalAlertsPageLoading').waitFor({ state: 'hidden', timeout: 60_000 });
-    await this.page.testSubj.locator('events-container-loading-false').waitFor({ state: 'visible', timeout: 60_000 });
+    await this.page.testSubj
+      .locator('internalAlertsPageLoading')
+      .waitFor({ state: 'hidden', timeout: 60_000 });
+    await this.page.testSubj
+      .locator('events-container-loading-false')
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async selectNumberOfAlerts(count: number): Promise<void> {

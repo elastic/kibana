@@ -16,7 +16,9 @@ test.describe(
       await pageObjects.siemMigrations.goto();
     });
     test('should display dashboards migration section', async ({ page }) => {
-      await expect(page.getByTestId('onboarding-siem-migrations-list').first()).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId('onboarding-siem-migrations-list').first()).toBeVisible({
+        timeout: 10_000,
+      });
     });
   }
 );

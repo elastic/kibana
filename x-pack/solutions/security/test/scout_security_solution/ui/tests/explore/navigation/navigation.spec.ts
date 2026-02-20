@@ -67,7 +67,9 @@ test.describe(
     });
 
     test('navigates to the CSP dashboard page', async ({ pageObjects, page }) => {
-      await pageObjects.explore.navigateFromHeaderTo('solutionSideNavPanelLink-cloud_security_posture');
+      await pageObjects.explore.navigateFromHeaderTo(
+        'solutionSideNavPanelLink-cloud_security_posture'
+      );
       await expect(page).toHaveURL(new RegExp(CSP_DASHBOARD_URL.replace(/\//g, '\\/')));
     });
 
@@ -107,7 +109,9 @@ test.describe(
     });
 
     test('navigates to the Indicators page', async ({ pageObjects, page }) => {
-      await pageObjects.explore.navigateFromHeaderTo('solutionSideNavPanelLink-threat_intelligence');
+      await pageObjects.explore.navigateFromHeaderTo(
+        'solutionSideNavPanelLink-threat_intelligence'
+      );
       await expect(page).toHaveURL(new RegExp(INDICATORS_URL.replace(/\//g, '\\/')));
     });
 
@@ -280,7 +284,9 @@ test.describe(
     });
 
     test('navigates to the Indicators page', async ({ pageObjects, page }) => {
-      await pageObjects.explore.navigateFromHeaderTo('solutionSideNavPanelLink-threat_intelligence');
+      await pageObjects.explore.navigateFromHeaderTo(
+        'solutionSideNavPanelLink-threat_intelligence'
+      );
       await expect(page).toHaveURL(new RegExp(INDICATORS_URL.replace(/\//g, '\\/')));
     });
 

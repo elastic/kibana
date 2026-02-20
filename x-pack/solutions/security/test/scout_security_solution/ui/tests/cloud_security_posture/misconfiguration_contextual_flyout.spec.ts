@@ -116,15 +116,13 @@ test.describe(
   'Alert Host details expandable flyout - Misconfiguration',
   { tag: tags.stateful.classic },
   () => {
-    test.beforeEach(
-      async ({ browserAuth, apiServices, pageObjects }) => {
-        await deleteAlertsAndRules(apiServices);
-        await browserAuth.loginAsAdmin();
-        await createRule(apiServices, { name: `New Rule Test ${Date.now()}` });
-        await pageObjects.securityCommon.navigateToAlerts();
-        await pageObjects.securityCommon.waitForAlertsToPopulate();
-      }
-    );
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
+      await deleteAlertsAndRules(apiServices);
+      await browserAuth.loginAsAdmin();
+      await createRule(apiServices, { name: `New Rule Test ${Date.now()}` });
+      await pageObjects.securityCommon.navigateToAlerts();
+      await pageObjects.securityCommon.waitForAlertsToPopulate();
+    });
 
     test.describe('Host name - Has misconfiguration findings', () => {
       test.beforeEach(async ({ esClient, pageObjects, page }) => {
@@ -167,39 +165,36 @@ test.describe(
       });
     });
 
-    test.describe(
-      'Host name - Has misconfiguration findings but host name is not the same as alert host name',
-      () => {
-        test.beforeEach(async ({ esClient, pageObjects, page }) => {
-          await putIndexMapping(esClient);
-          await indexDocument(
-            esClient,
-            CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX,
-            mockFindingHostName(false)
-          );
-          await page.reload();
-          await pageObjects.securityCommon.waitForAlertsToPopulate();
-          await pageObjects.securityCommon.expandFirstAlertHostFlyout();
-        });
+    test.describe('Host name - Has misconfiguration findings but host name is not the same as alert host name', () => {
+      test.beforeEach(async ({ esClient, pageObjects, page }) => {
+        await putIndexMapping(esClient);
+        await indexDocument(
+          esClient,
+          CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX,
+          mockFindingHostName(false)
+        );
+        await page.reload();
+        await pageObjects.securityCommon.waitForAlertsToPopulate();
+        await pageObjects.securityCommon.expandFirstAlertHostFlyout();
+      });
 
-        test.afterEach(async ({ esClient }) => {
-          try {
-            await deleteIndex(esClient, CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX);
-          } catch {
-            // Cleanup best-effort
-          }
-        });
+      test.afterEach(async ({ esClient }) => {
+        try {
+          await deleteIndex(esClient, CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX);
+        } catch {
+          // Cleanup best-effort
+        }
+      });
 
-        test('should not display Misconfiguration preview when host name does not match', async ({
-          pageObjects,
-        }) => {
-          const misconfigurationTitle = pageObjects.securityCommon.testSubj(
-            CSP_INSIGHT_MISCONFIGURATION_TITLE
-          );
-          await expect(misconfigurationTitle).not.toBeVisible();
-        });
-      }
-    );
+      test('should not display Misconfiguration preview when host name does not match', async ({
+        pageObjects,
+      }) => {
+        const misconfigurationTitle = pageObjects.securityCommon.testSubj(
+          CSP_INSIGHT_MISCONFIGURATION_TITLE
+        );
+        await expect(misconfigurationTitle).not.toBeVisible();
+      });
+    });
 
     test.describe('User name - Has misconfiguration findings', () => {
       test.beforeEach(async ({ esClient, pageObjects, page }) => {
@@ -242,38 +237,35 @@ test.describe(
       });
     });
 
-    test.describe(
-      'User name - Has misconfiguration findings but user name is not the same as alert user name',
-      () => {
-        test.beforeEach(async ({ esClient, pageObjects, page }) => {
-          await putIndexMapping(esClient);
-          await indexDocument(
-            esClient,
-            CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX,
-            mockFindingUserName(false)
-          );
-          await page.reload();
-          await pageObjects.securityCommon.waitForAlertsToPopulate();
-          await pageObjects.securityCommon.expandFirstAlertUserFlyout();
-        });
+    test.describe('User name - Has misconfiguration findings but user name is not the same as alert user name', () => {
+      test.beforeEach(async ({ esClient, pageObjects, page }) => {
+        await putIndexMapping(esClient);
+        await indexDocument(
+          esClient,
+          CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX,
+          mockFindingUserName(false)
+        );
+        await page.reload();
+        await pageObjects.securityCommon.waitForAlertsToPopulate();
+        await pageObjects.securityCommon.expandFirstAlertUserFlyout();
+      });
 
-        test.afterEach(async ({ esClient }) => {
-          try {
-            await deleteIndex(esClient, CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX);
-          } catch {
-            // Cleanup best-effort
-          }
-        });
+      test.afterEach(async ({ esClient }) => {
+        try {
+          await deleteIndex(esClient, CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX);
+        } catch {
+          // Cleanup best-effort
+        }
+      });
 
-        test('should not display Misconfiguration preview when user name does not match', async ({
-          pageObjects,
-        }) => {
-          const misconfigurationTitle = pageObjects.securityCommon.testSubj(
-            CSP_INSIGHT_MISCONFIGURATION_TITLE
-          );
-          await expect(misconfigurationTitle).not.toBeVisible();
-        });
-      }
-    );
+      test('should not display Misconfiguration preview when user name does not match', async ({
+        pageObjects,
+      }) => {
+        const misconfigurationTitle = pageObjects.securityCommon.testSubj(
+          CSP_INSIGHT_MISCONFIGURATION_TITLE
+        );
+        await expect(misconfigurationTitle).not.toBeVisible();
+      });
+    });
   }
 );

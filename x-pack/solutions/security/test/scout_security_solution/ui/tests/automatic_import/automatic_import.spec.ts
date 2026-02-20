@@ -15,9 +15,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test('should not have Automatic Import available', async ({
-      pageObjects,
-    }) => {
+    test('should not have Automatic Import available', async ({ pageObjects }) => {
       await pageObjects.automaticImport.gotoCreateIntegration();
       await expect(pageObjects.automaticImport.assistantButton).not.toBeAttached();
     });

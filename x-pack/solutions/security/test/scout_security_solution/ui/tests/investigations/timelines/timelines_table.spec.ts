@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { test, expect, tags } from "../../../fixtures";
-import { deleteTimelines } from "../../../common/timeline_api_helpers";
-import { TIMELINES_URL } from "../../../common/urls";
+import { test, expect, tags } from '../../../fixtures';
+import { deleteTimelines } from '../../../common/timeline_api_helpers';
+import { TIMELINES_URL } from '../../../common/urls';
 
 test.describe(
-  "Timelines - Table",
+  'Timelines - Table',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     test.beforeEach(async ({ kbnClient, browserAuth, page }) => {
@@ -19,7 +19,7 @@ test.describe(
       await page.goto(TIMELINES_URL);
     });
 
-    test("should display timelines table", async ({ pageObjects }) => {
+    test('should display timelines table', async ({ pageObjects }) => {
       await expect(pageObjects.timeline.timelinesTable.first()).toBeVisible({ timeout: 10_000 });
     });
   }

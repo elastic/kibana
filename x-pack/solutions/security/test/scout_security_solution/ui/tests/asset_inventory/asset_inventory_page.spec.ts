@@ -33,51 +33,52 @@ test.describe(
   }
 );
 
-test.describe(
-  'Asset Inventory page - user flyout',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    const indexName = 'logs-cba';
+test.describe('Asset Inventory page - user flyout', { tag: [...tags.stateful.classic] }, () => {
+  const indexName = 'logs-cba';
 
-    test.beforeAll(async ({ kbnClient, esClient }) => {
-      await postDataView(kbnClient, 'logs*', 'security-solution-default', 'security-solution-default');
-      await enableAssetInventory(kbnClient);
-      await enableAssetInventoryApiCall(kbnClient);
-      await createAssetInventoryMapping(esClient, indexName);
-      await createMockAsset(esClient, indexName);
-    });
+  test.beforeAll(async ({ kbnClient, esClient }) => {
+    await postDataView(
+      kbnClient,
+      'logs*',
+      'security-solution-default',
+      'security-solution-default'
+    );
+    await enableAssetInventory(kbnClient);
+    await enableAssetInventoryApiCall(kbnClient);
+    await createAssetInventoryMapping(esClient, indexName);
+    await createMockAsset(esClient, indexName);
+  });
 
-    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.assetInventory.goto();
-      await page.route('**/api/asset_inventory/status', async (route) => {
-        const response = await route.fetch();
-        const body = await response.json();
-        if (body.status === 'ready') {
-          return route.fulfill({ response });
-        }
-        return route.fulfill({
-          status: 200,
-          body: JSON.stringify({ status: 'ready' }),
-        });
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.assetInventory.goto();
+    await page.route('**/api/asset_inventory/status', async (route) => {
+      const response = await route.fetch();
+      const body = await response.json();
+      if (body.status === 'ready') {
+        return route.fulfill({ response });
+      }
+      return route.fulfill({
+        status: 200,
+        body: JSON.stringify({ status: 'ready' }),
       });
-      await page.reload();
-      await page.waitForTimeout(5000);
     });
+    await page.reload();
+    await page.waitForTimeout(5000);
+  });
 
-    test('should display All assets title', async ({ pageObjects }) => {
-      await expect(pageObjects.assetInventory.noPrivilegesBox.first()).not.toBeAttached();
-      await expect(pageObjects.assetInventory.allAssetsTitle.first()).toBeVisible();
-    });
+  test('should display All assets title', async ({ pageObjects }) => {
+    await expect(pageObjects.assetInventory.noPrivilegesBox.first()).not.toBeAttached();
+    await expect(pageObjects.assetInventory.allAssetsTitle.first()).toBeVisible();
+  });
 
-    test('renders data grid', async ({ pageObjects, page }) => {
-      await expect(pageObjects.assetInventory.dataGridColumnSelector.first()).toBeVisible();
-      await expect(pageObjects.assetInventory.dataGridSorting.first()).toBeVisible();
-      await expect(page.getByText('4 assets').first()).toBeVisible();
-      await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Name');
-      await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('ID');
-      await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Type');
-      await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Last Seen');
-    });
-  }
-);
+  test('renders data grid', async ({ pageObjects, page }) => {
+    await expect(pageObjects.assetInventory.dataGridColumnSelector.first()).toBeVisible();
+    await expect(pageObjects.assetInventory.dataGridSorting.first()).toBeVisible();
+    await expect(page.getByText('4 assets').first()).toBeVisible();
+    await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Name');
+    await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('ID');
+    await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Type');
+    await expect(pageObjects.assetInventory.dataGridHeader.first()).toContainText('Last Seen');
+  });
+});

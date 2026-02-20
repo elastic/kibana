@@ -268,9 +268,7 @@ export class EntityAnalyticsRiskInfoPage {
   }
 
   get riskInformationFlyoutHeader(): Locator {
-    return this.page.locator(
-      '[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader'
-    );
+    return this.page.locator('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader');
   }
 
   async openRiskInformationFlyout(): Promise<void> {

@@ -16,12 +16,7 @@ test.describe(
   'Create DataView runtime field',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    test('adds field to alert table', async ({
-      browserAuth,
-      apiServices,
-      page,
-      pageObjects,
-    }) => {
+    test('adds field to alert table', async ({ browserAuth, apiServices, page, pageObjects }) => {
       test.slow();
       await deleteAlertsAndRules(apiServices);
       await createRule(apiServices, { name: `Rule ${Date.now()}` });
@@ -38,7 +33,9 @@ test.describe(
       await page.getByTestId('fieldNameInput').fill(alertRuntimeField);
       await page.getByTestId('saveField').click();
 
-      await expect(page.getByTestId(`dataGridHeaderCell-${alertRuntimeField}`).first()).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByTestId(`dataGridHeaderCell-${alertRuntimeField}`).first()).toBeVisible(
+        { timeout: 10_000 }
+      );
     });
 
     test('adds field to timeline', async ({ browserAuth, page, pageObjects }) => {

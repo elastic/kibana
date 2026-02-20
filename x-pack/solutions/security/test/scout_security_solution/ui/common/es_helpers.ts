@@ -46,10 +46,7 @@ export async function indexDocument(
 /**
  * Delete a data stream.
  */
-export async function deleteDataStream(
-  esClient: EsClient,
-  dataStreamName: string
-): Promise<void> {
+export async function deleteDataStream(esClient: EsClient, dataStreamName: string): Promise<void> {
   try {
     await esClient.indices.deleteDataStream({ name: dataStreamName });
   } catch {

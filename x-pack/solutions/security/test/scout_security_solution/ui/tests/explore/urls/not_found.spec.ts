@@ -8,7 +8,6 @@
 import { test, expect, tags } from '../../../fixtures';
 import {
   ALERTS_URL,
-  CASES_URL,
   EXCEPTIONS_URL,
   RULES_MANAGEMENT_URL,
   TIMELINES_URL,

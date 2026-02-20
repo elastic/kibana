@@ -12,8 +12,8 @@ export class EntityAnalyticsAnomaliesPage {
   constructor(private readonly page: ScoutPage) {}
 
   get anomaliesTable(): Locator {
-    return this.page
-      .testSubj.locator('entity_analytics_anomalies')
+    return this.page.testSubj
+      .locator('entity_analytics_anomalies')
       .locator('#entityAnalyticsDashboardAnomaliesTable');
   }
 
@@ -34,8 +34,8 @@ export class EntityAnalyticsAnomaliesPage {
   }
 
   get nextPageButton(): Locator {
-    return this.page
-      .testSubj.locator('entity_analytics_anomalies')
+    return this.page.testSubj
+      .locator('entity_analytics_anomalies')
       .locator('[data-test-subj="pagination-button-next"]');
   }
 

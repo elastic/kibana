@@ -33,9 +33,7 @@ export async function createRule(
 /**
  * Delete all detection rules and alerts.
  */
-export async function deleteAlertsAndRules(
-  apiServices: SecurityApiServicesFixture
-): Promise<void> {
+export async function deleteAlertsAndRules(apiServices: SecurityApiServicesFixture): Promise<void> {
   try {
     await apiServices.detectionRule.deleteAll();
     await apiServices.detectionAlerts.deleteAll();

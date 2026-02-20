@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../../fixtures';
 import { deleteAlertsAndRules } from '../../../../common/api_helpers';
-import { createRuleFromParams } from '../../../../common/rule_api_helpers';
-import { getNewRule } from '../../../../common/rule_objects';
 
-test.describe('Manage exceptions', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Manage exceptions',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Manage exceptions', async () => {
-    // Needs: shared exception lists management
-  });
-});
+    test.skip('Manage exceptions', async () => {
+      // Needs: shared exception lists management
+    });
+  }
+);

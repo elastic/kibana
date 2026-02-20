@@ -63,9 +63,7 @@ test.describe(
       });
 
       test.describe('Asset criticality', () => {
-        test('should show asset criticality in the risk input panel', async ({
-          pageObjects,
-        }) => {
+        test('should show asset criticality in the risk input panel', async ({ pageObjects }) => {
           await pageObjects.securityCommon.waitForAlertsToPopulate();
           await pageObjects.securityCommon.expandFirstAlertUserFlyout();
           await pageObjects.entityAnalyticsFlyout.expandRiskInputsPanel();
@@ -81,9 +79,9 @@ test.describe(
           await expect(
             pageObjects.entityAnalyticsFlyout.assetCriticalitySelector.first()
           ).toContainText('Asset Criticality');
-          await expect(
-            pageObjects.entityAnalyticsFlyout.assetCriticalityButton.first()
-          ).toHaveText('Assign');
+          await expect(pageObjects.entityAnalyticsFlyout.assetCriticalityButton.first()).toHaveText(
+            'Assign'
+          );
         });
 
         test('should display asset criticality modal', async ({ pageObjects }) => {
@@ -123,9 +121,7 @@ test.describe(
     });
 
     test.describe('Host details', () => {
-      test('should display entity flyout and open risk input panel', async ({
-        pageObjects,
-      }) => {
+      test('should display entity flyout and open risk input panel', async ({ pageObjects }) => {
         await pageObjects.securityCommon.waitForAlertsToPopulate();
         await pageObjects.securityCommon.expandFirstAlertHostFlyout();
 
@@ -137,15 +133,13 @@ test.describe(
         await expect(pageObjects.entityAnalyticsFlyout.riskInputPanelHeader.first()).toBeVisible();
       });
 
-      test('should show asset criticality in the risk input panel', async ({
-        pageObjects,
-      }) => {
+      test('should show asset criticality in the risk input panel', async ({ pageObjects }) => {
         await pageObjects.securityCommon.waitForAlertsToPopulate();
         await pageObjects.securityCommon.expandFirstAlertHostFlyout();
         await pageObjects.entityAnalyticsFlyout.expandRiskInputsPanel();
-        await expect(
-          pageObjects.entityAnalyticsFlyout.assetCriticalityBadge.first()
-        ).toContainText('Extreme Impact');
+        await expect(pageObjects.entityAnalyticsFlyout.assetCriticalityBadge.first()).toContainText(
+          'Extreme Impact'
+        );
       });
 
       test('should display asset criticality accordion', async ({ pageObjects }) => {
@@ -155,9 +149,9 @@ test.describe(
         await expect(
           pageObjects.entityAnalyticsFlyout.assetCriticalitySelector.first()
         ).toContainText('Asset Criticality');
-        await expect(
-          pageObjects.entityAnalyticsFlyout.assetCriticalityButton.first()
-        ).toHaveText('Assign');
+        await expect(pageObjects.entityAnalyticsFlyout.assetCriticalityButton.first()).toHaveText(
+          'Assign'
+        );
       });
 
       test('should display asset criticality modal', async ({ pageObjects }) => {
@@ -175,9 +169,9 @@ test.describe(
         await pageObjects.securityCommon.expandFirstAlertHostFlyout();
         await pageObjects.entityAnalyticsFlyout.selectAssetCriticalityLevel('High Impact');
 
-        await expect(
-          pageObjects.entityAnalyticsFlyout.assetCriticalityLevel.first()
-        ).toContainText('High Impact');
+        await expect(pageObjects.entityAnalyticsFlyout.assetCriticalityLevel.first()).toContainText(
+          'High Impact'
+        );
       });
     });
   }

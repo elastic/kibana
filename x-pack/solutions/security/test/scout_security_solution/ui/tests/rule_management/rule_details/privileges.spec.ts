@@ -7,14 +7,10 @@
 
 import { test, tags } from '../../../fixtures';
 
-test.describe.skip(
-  'Rule details - privileges',
-  { tag: [...tags.stateful.classic] },
-  () => {
-    test.skip('rulesAll user can edit and delete rule', () => {
-      // Requires createUsersAndRoles with rulesAll, rulesRead
-    });
+test.describe.skip('Rule details - privileges', { tag: [...tags.stateful.classic] }, () => {
+  test.skip('rulesAll user can edit and delete rule', () => {
+    // Requires createUsersAndRoles with rulesAll, rulesRead
+  });
 
-    test.skip('rulesRead user cannot edit or delete rule', () => {});
-  }
-);
+  test.skip('rulesRead user cannot edit or delete rule', () => {});
+});

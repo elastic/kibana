@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('ES|QL rule - Rule Edit', {
-  tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'ES|QL rule - Rule Edit',
+  {
+    tag: [...tags.stateful.classic, ...tags.serverless.security.complete],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Edits ES|QL rule', async () => {
-    // Needs: ES|QL rule edit flow
-  });
-});
+    test.skip('Edits ES|QL rule', async () => {
+      // Needs: ES|QL rule edit flow
+    });
+  }
+);

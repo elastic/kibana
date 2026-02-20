@@ -7,18 +7,20 @@
 
 import { test, tags } from '../../../fixtures';
 import { deleteAlertsAndRules } from '../../../common/api_helpers';
-import { createRuleFromParams } from '../../../common/rule_api_helpers';
-import { getNewRule } from '../../../common/rule_objects';
 
-test.describe('Essentials license check rule form', {
-  tag: [...tags.serverless.security.essentials],
-}, () => {
-  test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
-    await browserAuth.loginAsAdmin();
-    await deleteAlertsAndRules(apiServices);
-  });
+test.describe(
+  'Essentials license check rule form',
+  {
+    tag: [...tags.serverless.security.essentials],
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, apiServices, kbnClient }) => {
+      await browserAuth.loginAsAdmin();
+      await deleteAlertsAndRules(apiServices);
+    });
 
-  test.skip('Essentials license check rule form', async () => {
-    // Needs: essentials tier
-  });
-});
+    test.skip('Essentials license check rule form', async () => {
+      // Needs: essentials tier
+    });
+  }
+);

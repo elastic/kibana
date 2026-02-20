@@ -19,11 +19,7 @@ test.describe(
       await deleteAlertsAndRules(apiServices);
     });
 
-    test('navigates to rule details from rules table', async ({
-      pageObjects,
-      page,
-      kbnClient,
-    }) => {
+    test('navigates to rule details from rules table', async ({ pageObjects, page, kbnClient }) => {
       await createRuleFromParams(
         kbnClient,
         getCustomQueryRuleParams({ rule_id: 'rule1', enabled: false })
