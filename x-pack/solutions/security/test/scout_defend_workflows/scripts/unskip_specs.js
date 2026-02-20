@@ -12,7 +12,11 @@ const ROOT = path.join(__dirname, '../ui/parallel_tests');
 /** Map path segments / filename hints to { route, testSubj }. */
 function getRouteAndSubj(relativePath) {
   const p = relativePath.replace(/\.spec\.ts$/, '');
-  if (p.includes('endpoint_list') || p.includes('endpoint_details') || p.includes('endpoint_alerts')) {
+  if (
+    p.includes('endpoint_list') ||
+    p.includes('endpoint_details') ||
+    p.includes('endpoint_alerts')
+  ) {
     return { route: 'DEFEND_WORKFLOWS_ROUTES.endpoints', testSubj: 'endpointPage' };
   }
   if (p.includes('policy') && !p.includes('experimental')) {
@@ -28,15 +32,31 @@ function getRouteAndSubj(relativePath) {
     return { route: 'DEFEND_WORKFLOWS_ROUTES.blocklist', testSubj: 'blocklistPage' };
   }
   if (p.includes('host_isolation') || p.includes('host_isolation_exceptions')) {
-    return { route: 'DEFEND_WORKFLOWS_ROUTES.hostIsolationExceptions', testSubj: 'hostIsolationExceptionsListPage' };
+    return {
+      route: 'DEFEND_WORKFLOWS_ROUTES.hostIsolationExceptions',
+      testSubj: 'hostIsolationExceptionsListPage',
+    };
   }
-  if (p.includes('response_actions') || p.includes('responder') || p.includes('isolate') || p.includes('automated_response')) {
-    return { route: 'DEFEND_WORKFLOWS_ROUTES.responseActionsHistory', testSubj: 'responseActionsPage' };
+  if (
+    p.includes('response_actions') ||
+    p.includes('responder') ||
+    p.includes('isolate') ||
+    p.includes('automated_response')
+  ) {
+    return {
+      route: 'DEFEND_WORKFLOWS_ROUTES.responseActionsHistory',
+      testSubj: 'responseActionsPage',
+    };
   }
   if (p.includes('artifact') || p.includes('endpoint_exceptions')) {
     return { route: 'DEFEND_WORKFLOWS_ROUTES.trustedApps', testSubj: 'trustedAppsListPage' };
   }
-  if (p.includes('rbac') || p.includes('serverless') || p.includes('tamper_protection') || p.includes('sentinelone')) {
+  if (
+    p.includes('rbac') ||
+    p.includes('serverless') ||
+    p.includes('tamper_protection') ||
+    p.includes('sentinelone')
+  ) {
     return { route: 'DEFEND_WORKFLOWS_ROUTES.policies', testSubj: 'policyListPage' };
   }
   return { route: 'DEFEND_WORKFLOWS_ROUTES.policies', testSubj: 'policyListPage' };
@@ -67,10 +87,15 @@ function unskipFile(filePath) {
     newTest
   );
 
-  if (!content.includes("from '@kbn/test-subj-selector'") && !content.includes('from "../../fixtures"')) {
+  if (
+    !content.includes("from '@kbn/test-subj-selector'") &&
+    !content.includes('from "../../fixtures"')
+  ) {
     content = content.replace(
       "import { spaceTest, tags } from '@kbn/scout-security';",
-      "import { subj as testSubjSelector } from '@kbn/test-subj-selector';\nimport { spaceTest, tags } from '@kbn/scout-security';\nimport { expect } from '@kbn/scout-security/ui';\nimport { DEFEND_WORKFLOWS_ROUTES } from '" + fixturesRel + "';"
+      "import { subj as testSubjSelector } from '@kbn/test-subj-selector';\nimport { spaceTest, tags } from '@kbn/scout-security';\nimport { expect } from '@kbn/scout-security/ui';\nimport { DEFEND_WORKFLOWS_ROUTES } from '" +
+        fixturesRel +
+        "';"
     );
   }
 
@@ -83,7 +108,11 @@ function walk(dir) {
   for (const e of entries) {
     const full = path.join(dir, e.name);
     if (e.isDirectory()) walk(full);
-    else if (e.name.endsWith('.spec.ts') && !e.name.includes('example') && e.name !== 'policy_list.spec.ts') {
+    else if (
+      e.name.endsWith('.spec.ts') &&
+      !e.name.includes('example') &&
+      e.name !== 'policy_list.spec.ts'
+    ) {
       if (unskipFile(full)) console.log('Unskipped:', path.relative(ROOT, full));
     }
   }
