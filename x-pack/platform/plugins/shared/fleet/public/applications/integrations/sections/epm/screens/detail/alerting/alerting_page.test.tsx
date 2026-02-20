@@ -306,9 +306,7 @@ describe('AlertingPage', () => {
         expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
       });
 
-      expect(
-        screen.queryByText('Idle data streams alerting available')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
 
     it('should not show callout when inactivity template exists', async () => {
@@ -354,9 +352,7 @@ describe('AlertingPage', () => {
         expect(screen.getByText('[System] Template')).toBeInTheDocument();
       });
 
-      expect(
-        screen.queryByText('Idle data streams alerting available')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
   });
 
