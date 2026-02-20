@@ -5,19 +5,47 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import { type ComposerQuery, esql } from '@kbn/esql-language';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRedirect } from '../../../../pages/link_to/use_asset_details_redirect';
 
+const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
+
+/** Fallback index pattern when infrastructure metric indices are not available. */
+const DEFAULT_METRICS_INDEX = 'metrics-*';
+
 type ExtractStrict<T, U extends T> = Extract<T, U>;
+type NodeTypeForLink = ExtractStrict<InventoryItemType, 'host' | 'container' | 'pod'>;
 
 interface MetricsNodeDetailsLinkProps {
   id: string;
   label: string;
-  nodeType: ExtractStrict<InventoryItemType, 'host' | 'container' | 'pod'>;
+  nodeType: NodeTypeForLink;
   timerange: { from: string; to: string };
+  isOtel?: boolean;
+  /** Infrastructure/metrics index pattern from settings; used for Discover ES|QL when isOtel is true. */
+  metricsIndices?: string;
+}
+
+/** Build an ES|QL query that filters by the given node type and entity id. */
+function getDiscoverEsqlQueryForNode(
+  nodeType: NodeTypeForLink,
+  entityId: string,
+  indexPattern: string
+): ComposerQuery {
+  const from = indexPattern || DEFAULT_METRICS_INDEX;
+  switch (nodeType) {
+    case 'container':
+      return esql`TS ${from} | WHERE container.id == ${entityId}`;
+    case 'pod':
+      return esql`TS ${from} | WHERE k8s.pod.uid == ${entityId}`;
+    default:
+      return esql`TS ${from}`;
+  }
 }
 
 export const MetricsNodeDetailsLink = ({
@@ -25,20 +53,71 @@ export const MetricsNodeDetailsLink = ({
   label,
   nodeType,
   timerange,
+  isOtel,
+  metricsIndices,
 }: MetricsNodeDetailsLinkProps) => {
+  const { share } = useKibanaContextForPlugin().services;
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
-  const linkProps = getAssetDetailUrl({
-    entityType: nodeType,
-    entityId: id,
-    search: {
-      name: label,
-      from: parse(timerange.from)?.valueOf(),
-      to: parse(timerange.to)?.valueOf(),
-    },
-  });
+
+  const redirectToDiscover = isOtel && nodeType !== 'host';
+
+  const linkProps = useMemo(() => {
+    if (redirectToDiscover) {
+      const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR_ID);
+      const esqlQuery = getDiscoverEsqlQueryForNode(
+        nodeType,
+        id,
+        metricsIndices ?? DEFAULT_METRICS_INDEX
+      );
+      const discoverParams = {
+        timeRange: { from: timerange.from, to: timerange.to },
+        query: {
+          esql: esqlQuery.toRequest().query,
+        },
+      };
+      const href = discoverLocator?.getRedirectUrl(discoverParams) ?? '#';
+      return {
+        href,
+        onClick: (e: React.MouseEvent) => {
+          if (discoverLocator) {
+            e.preventDefault();
+            discoverLocator.navigate(discoverParams);
+          }
+        },
+      };
+    }
+
+    const assetDetails = getAssetDetailUrl({
+      entityType: nodeType,
+      entityId: id,
+      search: {
+        name: label,
+        from: parse(timerange.from)?.valueOf(),
+        to: parse(timerange.to)?.valueOf(),
+      },
+      preferredSchema: isOtel ? 'semconv' : 'ecs',
+    });
+    return { href: assetDetails.href, onClick: assetDetails.onClick };
+  }, [
+    redirectToDiscover,
+    share?.url?.locators,
+    timerange.from,
+    timerange.to,
+    nodeType,
+    id,
+    label,
+    isOtel,
+    metricsIndices,
+    getAssetDetailUrl,
+  ]);
 
   return (
-    <EuiLink data-test-subj="infraMetricsNodeDetailsLinkLink" href={linkProps.href}>
+    // eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for programmatic navigation; href for "Open in new tab" and fallback
+    <EuiLink
+      data-test-subj="infraMetricsNodeDetailsLinkLink"
+      href={linkProps.href}
+      onClick={linkProps.onClick}
+    >
       {label}
     </EuiLink>
   );

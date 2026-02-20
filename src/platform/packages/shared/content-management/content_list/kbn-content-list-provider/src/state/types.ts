@@ -8,8 +8,8 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ContentListItem } from '../item';
 import type { ActiveFilters } from '../datasource';
+import type { ContentListItem } from '../item';
 
 /**
  * Action type constants for state reducer.
@@ -25,6 +25,8 @@ export const CONTENT_LIST_ACTIONS = {
   SET_PAGE_INDEX: 'SET_PAGE_INDEX',
   /** Set page size. */
   SET_PAGE_SIZE: 'SET_PAGE_SIZE',
+  SET_SELECTION: 'SET_SELECTION',
+  CLEAR_SELECTION: 'CLEAR_SELECTION',
 } as const;
 
 /**
@@ -71,6 +73,11 @@ export interface ContentListClientState {
     index: number;
     /** Current number of items per page. */
     size: number;
+  };
+  /** Selection state - IDs of currently selected items. */
+  selection: {
+    /** IDs of selected items. */
+    selectedIds: string[];
   };
 }
 
@@ -141,7 +148,9 @@ export type ContentListAction =
   | ClearFiltersAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
-  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } };
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_SELECTION; payload: { ids: string[] } }
+  | { type: typeof CONTENT_LIST_ACTIONS.CLEAR_SELECTION };
 
 /**
  * Context value provided by `ContentListStateProvider`.
