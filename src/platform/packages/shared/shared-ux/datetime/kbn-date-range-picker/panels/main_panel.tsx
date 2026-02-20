@@ -9,7 +9,8 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButtonIcon, EuiTab, EuiTabs, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
 import {
@@ -128,11 +129,18 @@ const SubPanelMenu = () => {
 
 export function MainPanel() {
   const { onPresetSave, timeRange } = useDateRangePickerContext();
+  const { euiTheme } = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
     if (timeRange.isInvalid || !onPresetSave) return;
     onPresetSave({ start: timeRange.start, end: timeRange.end, label: timeRange.value });
   }, [onPresetSave, timeRange]);
+
+  const stickyMenuStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    position: sticky;
+    bottom: 0;
+  `;
 
   // temporary dev-only flag to show the footer conditionally
   // TODO remove as we make progress and add content to it
@@ -144,7 +152,7 @@ export function MainPanel() {
         <PanelBodySection spacingSide="none">
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none">
+        <PanelBodySection spacingSide="none" css={stickyMenuStyles}>
           <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>
