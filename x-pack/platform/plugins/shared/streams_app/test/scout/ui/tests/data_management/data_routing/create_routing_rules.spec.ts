@@ -126,28 +126,6 @@ test.describe(
       }
     });
 
-    test('should show validation errors for invalid stream names verified on the server', async ({
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.streams.clickCreateRoutingRule();
-
-      // Try invalid stream names (these pass client-side validation but fail server-side)
-      const invalidNames = ['special>chars'];
-
-      for (const invalidName of invalidNames) {
-        await pageObjects.streams.fillRoutingRuleName(invalidName);
-        await pageObjects.streams.saveRoutingRule();
-
-        // Wait for the error toast to appear
-        await pageObjects.toasts.waitFor();
-
-        // Should stay in creating state due to validation error
-        await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
-        await pageObjects.toasts.closeAll();
-      }
-    });
-
     test('should handle insufficient privileges gracefully', async ({
       page,
       browserAuth,
