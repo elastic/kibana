@@ -46,8 +46,13 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Fixes rule execution failing due to null execution UUIDs [#252618]({{kib-pull}}252618).
 * Improves handling of 204 responses [#251090]({{kib-pull}}251090).
 
+**Connectivity**:
+* Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
+* Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
+
 **Dashboards and Visualizations**:
 * Fixes layer editor scrolling in the full Lens editor [#253247]({{kib-pull}}253247).
+* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
 
 **Data ingestion and Fleet**:
 * Fixes an issue where an agent rolled back after an upgrade could not be upgraded again in Fleet UI [#253850]({{kib-pull}}253850).
@@ -60,6 +65,10 @@ For the Elastic Observability 9.3.1 release information, refer to [Elastic Obser
 
 **Elastic Security solution**:
 For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
+* Fixes Stack Monitoring breadcrumb when in solution view [#249751]({{kib-pull}}249751).
 
 **Machine Learning**:
 * Fixes "today" and "this week" filters for Log Rate and Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
@@ -74,17 +83,9 @@ For the Elastic Security 9.3.1 release information, refer to [Elastic Security S
 * Fixes homepage throwing errors when license level is below Enterprise [#251484]({{kib-pull}}251484).
 * Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
 * Fixes links being visible on Search homepage when the user doesn't have access [#251437]({{kib-pull}}251437).
-* Fixes AI Connector form fields incorrectly resetting to default values when cleared with backspace [#251095]({{kib-pull}}251095).
-* Updates connector description terminology to reference "pre-configured AI connectors" [#250649]({{kib-pull}}250649).
-* Fixes `runtime_mappings` being ignored or overridden in Vega specs when defined in `data[].url.body` [#253560]({{kib-pull}}253560).
+
+**Workflows**:
 * Adds datemath support to the KQL evaluator [#252840]({{kib-pull}}252840).
-* Strips system-managed date fields from ingest pipelines before PUT requests [#252579]({{kib-pull}}252579).
-* Handles empty results in ES|QL rule execution [#250759]({{kib-pull}}250759).
-* Propagates ES|QL execution errors [#250605]({{kib-pull}}250605).
-* Updates the AI Insight UI description [#250137]({{kib-pull}}250137).
-* Fixes query sync on save and adds debounce for the preview chart [#249833]({{kib-pull}}249833).
-* Fixes Stack Monitoring breadcrumb when in solution view [#249751]({{kib-pull}}249751).
-* Disables editing of significant event queries [#249716]({{kib-pull}}249716).
 
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
