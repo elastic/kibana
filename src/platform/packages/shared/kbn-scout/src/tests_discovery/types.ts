@@ -10,10 +10,10 @@
 // Target type for filtering Playwright configs by deployment target
 import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
 
-export type TargetType = 'all' | 'mki' | 'ech';
+export type TargetType = 'all' | 'local' | 'local-stateful-only' | 'mki' | 'ech';
 
 // Valid target types
-export const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
+export const TARGET_TYPES: TargetType[] = ['all', 'local', 'local-stateful-only', 'mki', 'ech'];
 
 // Module discovery information used in regular CI pipelines with locally run servers
 export interface ModuleDiscoveryInfo {
