@@ -46,7 +46,7 @@ const areValidEsqlConversionItems = (
  * Either a successful conversion with the ES|QL query,
  * or a failure with a specific reason.
  */
-interface EsqlQuerySuccess {
+export interface EsqlQuerySuccess {
   success: true;
   esql: string;
   partialRows: boolean;
@@ -202,7 +202,6 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
     const wrapInTimeFilter =
       def.canReduceTimeRange &&
@@ -214,7 +213,7 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('reduced_time_range_not_supported');
     }
 
-    const esAggsId = `bucket_${index}_${aggId}`;
+    const esAggsId = def.getDefaultLabel(layer.columns[colId], layer.columns, indexPattern);
 
     const format =
       // 1. User-configured format in Lens (highest priority)
@@ -269,7 +268,7 @@ export function generateEsqlQuery(
       allParamObjects.push(rawResult.params);
     }
 
-    let metricESQL = `${esAggsId} = ${rawResult.template}`;
+    let metricESQL = `${toEsqlIdentifier(esAggsId)} = ${rawResult.template}`;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
@@ -488,3 +487,9 @@ export function generateEsqlQuery(
     return getEsqlQueryFailedResult('unknown');
   }
 }
+
+/** Converts a raw column name into a valid ES|QL identifier */
+const toEsqlIdentifier = (value: string) => {
+  const escaped = value.replace(/`/g, '``');
+  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(value) ? value : `\`${escaped}\``;
+};
