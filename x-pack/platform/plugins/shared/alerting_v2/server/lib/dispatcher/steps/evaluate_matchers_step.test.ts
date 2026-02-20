@@ -87,10 +87,69 @@ describe('evaluateMatchers', () => {
     expect(matched).toHaveLength(0);
   });
 
-  it('does not match when a matcher is set (non-catch-all)', () => {
-    const episode = createAlertEpisode({ rule_id: 'r1' });
+  it('does not match when KQL matcher evaluates to false', () => {
+    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
     const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
-    const policy = createNotificationPolicy({ id: 'p1', matcher: 'data.severity == "critical"' });
+    const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
+
+    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(0);
+  });
+
+  it('matches when KQL matcher evaluates to true', () => {
+    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
+
+    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+    expect(matched[0].episode).toBe(episode);
+    expect(matched[0].policy).toBe(policy);
+  });
+
+  it('matches with complex KQL using AND operator', () => {
+    const episode = createAlertEpisode({
+      rule_id: 'r1',
+      episode_status: 'active',
+      group_hash: 'critical-group',
+    });
+    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      matcher: 'episode_status: active and group_hash: critical-group',
+    });
+
+    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+  });
+
+  it('matches with complex KQL using OR operator', () => {
+    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'recovering' });
+    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      matcher: 'episode_status: active or episode_status: recovering',
+    });
+
+    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+  });
+
+  it('does not match when AND condition is partially met', () => {
+    const episode = createAlertEpisode({
+      rule_id: 'r1',
+      episode_status: 'active',
+      group_hash: 'normal-group',
+    });
+    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      matcher: 'episode_status: active and group_hash: critical-group',
+    });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 

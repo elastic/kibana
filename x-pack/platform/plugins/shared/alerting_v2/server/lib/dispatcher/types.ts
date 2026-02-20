@@ -54,9 +54,9 @@ export interface Rule {
 export interface NotificationPolicy {
   id: NotificationPolicyId;
   name: string;
-  /** CEL expression evaluated against the alert episode context.
+  /** KQL expression evaluated against the alert episode context.
    *  An empty matcher matches all episodes (catch-all). */
-  matcher?: string; // e.g. 'data.severity == "critical" && data.env != "dev"'
+  matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
   /** data.* fields used to group episodes into a single notification */
   groupBy: string[];
   /** Minimum interval between notifications for the same group */

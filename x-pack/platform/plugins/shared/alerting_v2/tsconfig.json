@@ -58,7 +58,8 @@
     "@kbn/workflows-management-plugin",
     "@kbn/std",
     "@kbn/core-http-server-utils",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/eval-kql"
   ],
   "exclude": ["target/**/*"]
 }

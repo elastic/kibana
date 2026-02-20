@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { evaluateKql } from '@kbn/eval-kql';
+
 import type {
   AlertEpisode,
   MatchedPair,
@@ -49,7 +51,10 @@ export function evaluateMatchers(
         continue;
       }
 
-      // TODO: Handle matcher evaluation here
+      const isMatch = evaluateKql(policy.matcher, episode);
+      if (isMatch) {
+        matched.push({ episode, policy });
+      }
     }
   }
 
