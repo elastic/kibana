@@ -86,7 +86,6 @@ import {
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
-  RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
@@ -213,16 +212,6 @@ export class Plugin
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
       keywords: ['alerts', 'rules'],
     },
   ];
