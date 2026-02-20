@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/sse-utils-client'
   - '@kbn/scout'
   - '@kbn/repo-info'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
