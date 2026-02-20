@@ -8,11 +8,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  type EsExecution,
-  NonTerminalExecutionStatuses,
-  TerminalExecutionStatuses,
-} from '@kbn/workflows';
+import type { EsExecution, EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
+import { NonTerminalExecutionStatuses, TerminalExecutionStatuses } from '@kbn/workflows/types/v1';
 import { WORKFLOWS_EXECUTION_STATE_INDEX } from '../../../common';
 
 export interface FindExecutionsOptions {
@@ -88,15 +85,15 @@ export class ExecutionStateRepository {
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
+        .filter((item) => item.create?.error)
         .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
+          id: item.create?._id,
+          error: item.create?.error,
+          status: item.create?.status,
         }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
+        `Failed to create ${erroredDocuments.length} step executions: ${JSON.stringify(
           erroredDocuments
         )}`
       );
@@ -159,7 +156,7 @@ export class ExecutionStateRepository {
    * where ALL documents (workflow + steps) are in terminal status.
    * This prevents deleting steps belonging to a workflow that still has active steps.
    */
-  public async deleteTerminalExecutionsOlderThan(olderThan: Date): Promise<void> {
+  public async deleteTerminalExecutions(olderThan: Date): Promise<void> {
     const activeRunIds = await this.getWorkflowRunIdsWithNonTerminalExecutions();
 
     await this.esClient.deleteByQuery({
@@ -178,6 +175,77 @@ export class ExecutionStateRepository {
         },
       },
     });
+  }
+
+  /**
+   * Searches workflow executions in hot storage with filtering, pagination, and optional field selection.
+   *
+   * When `fields` is provided, only those properties are fetched from Elasticsearch (`_source_includes`)
+   * and the return type is narrowed to `Pick<EsWorkflowExecution, K>` accordingly.
+   * When omitted, full documents are returned.
+   *
+   * Results are automatically scoped to `type: 'workflow'` documents.
+   */
+  public async searchWorkflowExecutions<K extends keyof EsWorkflowExecution>(params: {
+    filter: {
+      spaceId: string;
+      workflowId?: string;
+      triggeredBy?: string;
+      statuses?: ExecutionStatus[];
+      concurrencyGroupKey?: string;
+    };
+    pagination: {
+      size: number;
+      from: number;
+    };
+    fields?: K[];
+    sort?: Array<{ field: keyof EsWorkflowExecution; order: 'asc' | 'desc' }>;
+  }): Promise<{
+    results: Array<Pick<EsWorkflowExecution, K>>;
+    total: number;
+  }> {
+    const { filter, pagination } = params;
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { spaceId: filter.spaceId } },
+      { term: { type: 'workflow' } },
+    ];
+
+    if (filter.workflowId) {
+      filterClauses.push({ term: { workflowId: filter.workflowId } });
+    }
+
+    if (filter.triggeredBy) {
+      filterClauses.push({ term: { triggeredBy: filter.triggeredBy } });
+    }
+
+    if (filter.statuses) {
+      filterClauses.push({ terms: { status: filter.statuses } });
+    }
+
+    if (filter.concurrencyGroupKey) {
+      filterClauses.push({ term: { concurrencyGroupKey: filter.concurrencyGroupKey } });
+    }
+
+    const response = await this.esClient.search<EsExecution>({
+      index: this.indexName,
+      size: pagination.size,
+      from: pagination.from,
+      _source_includes: params.fields,
+      sort: params.sort?.map((sort) => ({ [sort.field]: sort.order })),
+      query: {
+        bool: {
+          filter: filterClauses, // Filter context = no scoring = faster
+        },
+      },
+    });
+
+    return {
+      results: response.hits.hits.map((hit) => hit._source as Pick<EsWorkflowExecution, K>),
+      total:
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? 0,
+    };
   }
 
   private async getWorkflowRunIdsWithNonTerminalExecutions(): Promise<string[]> {
@@ -201,113 +269,5 @@ export class ExecutionStateRepository {
       | undefined;
 
     return aggs?.active_runs?.buckets.map((b) => b.key) ?? [];
-  }
-
-  /**
-   * Retrieves non-terminal workflow execution IDs by concurrency group key.
-   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
-   * to make room for new executions.
-   *
-   * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
-   * Results are sorted by createdAt ascending (oldest first).
-   *
-   * @param concurrencyGroupKey - The concurrency group key to filter by.
-   * @param spaceId - The ID of the space associated with the workflow execution.
-   * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
-   * @param size - Optional limit on the number of results to return. Defaults to 5000.
-   * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
-   */
-  public async getRunningExecutionsByConcurrencyGroup(
-    concurrencyGroupKey: string,
-    spaceId: string,
-    excludeExecutionId?: string,
-    type?: 'workflow' | 'step',
-    size: number = 5000
-  ): Promise<string[]> {
-    const filterClauses: Array<Record<string, unknown>> = [
-      { term: { concurrencyGroupKey } },
-      { term: { spaceId } },
-      { term: { type } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
-      {
-        terms: {
-          status: NonTerminalExecutionStatuses,
-        },
-      },
-    ];
-
-    // Add exclusion as a nested bool query in filter context.
-    // We nest must_not inside a bool query within the filter array (rather than using
-    // a top-level must_not) to keep all clauses in the same filter context for consistency
-    // and optimal performance. The nested must_not is still in filter context (no scoring).
-    if (excludeExecutionId) {
-      filterClauses.push({
-        bool: {
-          must_not: [{ term: { id: excludeExecutionId } }],
-        },
-      });
-    }
-
-    const response = await this.esClient.search<Pick<EsExecution, 'id'>>({
-      index: this.indexName,
-      query: {
-        bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
-        },
-      },
-      _source: ['id'], // Only fetch ID field for efficiency
-      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
-      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
-    });
-
-    return response.hits.hits
-      .map((hit) => hit._source?.id ?? hit._id)
-      .filter((id): id is string => id !== undefined);
-  }
-
-  /**
-   * Retrieves running (non-terminal) workflow executions by workflow ID.
-   *
-   * Uses the same optimized query structure as hasRunningExecution() but returns the actual hits.
-   *
-   * @param workflowId - The ID of the workflow.
-   * @param spaceId - The ID of the space associated with the workflow execution.
-   * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
-   * @returns A promise that resolves to the list of search hits for running executions.
-   */
-  public async getRunningExecutionsByWorkflowId(
-    workflowId: string,
-    spaceId: string,
-    triggeredBy?: string,
-    type?: 'workflow' | 'step'
-  ) {
-    const filterClauses: Array<Record<string, unknown>> = [
-      { term: { workflowId } },
-      { term: { spaceId } },
-      { term: { type } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
-      {
-        terms: {
-          status: NonTerminalExecutionStatuses,
-        },
-      },
-    ];
-
-    if (triggeredBy) {
-      filterClauses.push({ term: { triggeredBy } });
-    }
-
-    const response = await this.esClient.search<EsExecution>({
-      index: this.indexName,
-      size: 1,
-      terminate_after: 1, // Stop after finding 1 match
-      query: {
-        bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
-        },
-      },
-    });
-
-    return response.hits.hits;
   }
 }

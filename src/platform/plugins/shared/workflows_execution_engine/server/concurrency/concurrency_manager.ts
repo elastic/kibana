@@ -8,7 +8,7 @@
  */
 
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -111,15 +111,19 @@ export class ConcurrencyManager {
 
     const strategy = concurrencySettings.strategy;
     const maxConcurrency = concurrencySettings.max ?? 1;
-
-    // Query for non-terminal execution IDs in the same concurrency group
-    const runningExecutionIds =
-      await this.executionStateRepository.getRunningExecutionsByConcurrencyGroup(
-        concurrencyGroupKey,
+    const searchResults = await this.executionStateRepository.searchWorkflowExecutions({
+      filter: {
         spaceId,
-        currentExecutionId,
-        'workflow'
-      );
+        concurrencyGroupKey,
+        statuses: [...NonTerminalExecutionStatuses],
+      },
+      pagination: { size: 1000, from: 0 },
+      fields: ['id'],
+      sort: [{ field: 'createdAt', order: 'asc' }],
+    });
+    const runningExecutionIds = searchResults.results
+      .map((result) => result.id)
+      .filter((id) => id !== currentExecutionId);
 
     const activeCount = runningExecutionIds.length;
 

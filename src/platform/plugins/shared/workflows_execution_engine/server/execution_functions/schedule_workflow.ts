@@ -11,7 +11,7 @@ import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 
 import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
@@ -47,17 +47,22 @@ export async function checkAndSkipIfExistingScheduledExecution(
   currentTaskInstance: ConcreteTaskInstance,
   logger: Logger
 ): Promise<boolean> {
-  // Check if there's already a scheduled workflow execution in non-terminal state
-  const runningExecutions = await executionStateRepository.getRunningExecutionsByWorkflowId(
-    workflow.id,
-    spaceId,
-    'scheduled',
-    'workflow'
-  );
+  const searchResults = await executionStateRepository.searchWorkflowExecutions({
+    filter: {
+      spaceId,
+      workflowId: workflow.id,
+      statuses: [...NonTerminalExecutionStatuses],
+      triggeredBy: 'scheduled',
+    },
+    pagination: { size: 1, from: 0 },
+    fields: ['id', 'taskRunAt'],
+  });
+  const runningExecutions = searchResults.results;
 
   // There's already a non-terminal scheduled execution - create SKIPPED execution
   if (runningExecutions.length > 0) {
-    const existingExecution = runningExecutions[0]?._source;
+    const existingExecution = runningExecutions[0];
+
     if (!existingExecution) {
       return false;
     }
@@ -67,8 +72,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       : null;
 
     // taskRunAt is stored in the execution document to link it to a specific scheduled run
-    const executionTaskRunAt = (existingExecution as EsWorkflowExecution & { taskRunAt?: string })
-      .taskRunAt;
+    const executionTaskRunAt = existingExecution.taskRunAt;
 
     // Execution is stale only if:
     // 1. Both taskRunAt values exist and are equal (same scheduled run)

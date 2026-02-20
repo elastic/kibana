@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import type { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
 
@@ -47,11 +47,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     executionStateRepository = {
       getExecutions: jest.fn(),
       getExecutionById: jest.fn(),
+      bulkCreate: jest.fn(),
       bulkUpsert: jest.fn(),
       bulkUpdate: jest.fn(),
-      bulkDelete: jest.fn(),
-      getRunningExecutionsByConcurrencyGroup: jest.fn(),
-      getRunningExecutionsByWorkflowId: jest.fn().mockResolvedValue([]),
+      deleteTerminalExecutions: jest.fn(),
+      searchWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
     } as unknown as jest.Mocked<ExecutionStateRepository>;
 
     logger = loggingSystemMock.create().get();
@@ -83,7 +83,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   describe('when no existing non-terminal scheduled execution exists', () => {
     it('should return false and not create a skipped execution', async () => {
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([]);
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -94,29 +94,30 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(executionStateRepository.getRunningExecutionsByWorkflowId).toHaveBeenCalledWith(
-        workflow.id,
-        spaceId,
-        'scheduled',
-        'workflow'
-      );
+      expect(executionStateRepository.searchWorkflowExecutions).toHaveBeenCalledWith({
+        filter: {
+          spaceId,
+          workflowId: workflow.id,
+          statuses: [...NonTerminalExecutionStatuses],
+          triggeredBy: 'scheduled',
+        },
+        pagination: { size: 1, from: 0 },
+        fields: ['id', 'taskRunAt'],
+      });
       expect(executionStateRepository.bulkUpsert).not.toHaveBeenCalled();
     });
   });
 
   describe('when existing non-terminal scheduled execution exists', () => {
     it('should create a SKIPPED execution and return true', async () => {
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.RUNNING,
-            triggeredBy: 'scheduled',
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -139,7 +140,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     });
 
     it('should not skip when only terminal status executions exist', async () => {
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([]);
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -158,18 +159,15 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     it('should mark execution as FAILED and proceed when taskRunAt matches AND attempts > 1 (stale execution from task recovery)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
 
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.PENDING,
-            triggeredBy: 'scheduled',
             taskRunAt: matchingRunAt,
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
 
@@ -198,18 +196,15 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     it('should skip (not mark as failed) when taskRunAt matches BUT attempts = 1 (first attempt, execution from this run)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
 
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.PENDING,
-            triggeredBy: 'scheduled',
             taskRunAt: matchingRunAt,
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const firstAttemptTaskInstance = createMockTaskInstance({ attempts: 1 });
 
@@ -233,18 +228,15 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     it('should skip when taskRunAt differs (legitimate concurrent execution from different scheduled run)', async () => {
       const differentRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
 
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.RUNNING,
-            triggeredBy: 'scheduled',
             taskRunAt: differentRunAt,
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -264,17 +256,14 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     });
 
     it('should skip when execution has no taskRunAt (legacy execution)', async () => {
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.RUNNING,
-            triggeredBy: 'scheduled',
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -290,18 +279,15 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     });
 
     it('should skip when current task has no runAt', async () => {
-      executionStateRepository.getRunningExecutionsByWorkflowId.mockResolvedValue([
-        {
-          _source: {
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [
+          {
             id: 'existing-execution-id',
-            workflowId: workflow.id,
-            spaceId,
-            status: ExecutionStatus.RUNNING,
-            triggeredBy: 'scheduled',
             taskRunAt: baseRunAt.toISOString(),
           },
-        },
-      ] as any);
+        ],
+        total: 1,
+      } as any);
 
       const taskInstanceWithoutRunAt = createMockTaskInstance({ runAt: undefined as any });
 

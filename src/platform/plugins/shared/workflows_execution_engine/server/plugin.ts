@@ -285,7 +285,7 @@ export class WorkflowsExecutionEnginePlugin
                   sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
                   olderThan: migrationOlderThan,
                 });
-                await executionStateRepository.deleteTerminalExecutionsOlderThan(cleanupOlderThan);
+                await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
                 logger.info(
                   `Scheduled workflow/step execution migration older than ${migrationOlderThan.toISOString()} and cleanup older than ${cleanupOlderThan.toISOString()}`
                 );
@@ -298,23 +298,7 @@ export class WorkflowsExecutionEnginePlugin
         },
       },
     });
-    // plugins.taskManager.registerTaskDefinitions({
-    //   'workflow:cleanup-executions': {
-    //     title: 'Cleanup Stale Executions from Hot Storage',
-    //     description:
-    //       'Deletes terminal workflow and step executions older than 3 days from hot storage (execution state)',
-    //     timeout: '10m',
-    //     maxAttempts: 3,
-    //     createTaskRunner: () => {
-    //       return {
-    //         run: async () => {
-    //           // TODO: implement cleanup logic
-    //           logger.info('workflow:cleanup-executions task triggered (not yet implemented)');
-    //         },
-    //       };
-    //     },
-    //   },
-    // });
+
     plugins.taskManager.registerTaskDefinitions({
       'workflow:scheduled': {
         title: 'Scheduled Workflow Execution',
@@ -559,19 +543,6 @@ export class WorkflowsExecutionEnginePlugin
         this.logger.error(`Failed to schedule execution migration task: ${err.message}`);
       });
 
-    // plugins.taskManager
-    //   .ensureScheduled({
-    //     id: 'workflow:cleanup-executions',
-    //     taskType: 'workflow:cleanup-executions',
-    //     schedule: { interval: '7d' },
-    //     params: {},
-    //     state: {},
-    //     scope: ['workflows'],
-    //   })
-    //   .catch((err: Error) => {
-    //     this.logger.error(`Failed to schedule execution cleanup task: ${err.message}`);
-    //   });
-
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
       coreStart,
@@ -599,9 +570,10 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
-
+      const workflowRunId = generateUuid();
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateUuid(),
+        id: workflowRunId,
+        workflowRunId,
         spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
