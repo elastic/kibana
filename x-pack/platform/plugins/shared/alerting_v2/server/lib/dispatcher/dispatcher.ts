@@ -6,17 +6,11 @@
  */
 
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server/workflows_management/workflows_management_api';
-import { inject, injectable } from 'inversify';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
+import { type LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
-import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
-import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { DispatcherPipeline } from './execution_pipeline';
 import {
   ApplySuppressionStep,
@@ -36,14 +30,13 @@ export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
 }
 
-@injectable()
 export class DispatcherService implements DispatcherServiceContract {
   private readonly pipeline: DispatcherPipeline;
 
   constructor(
-    @inject(QueryServiceInternalToken) queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) logger: LoggerServiceContract,
-    @inject(StorageServiceInternalToken) storageService: StorageServiceContract,
+    queryService: QueryServiceContract,
+    logger: LoggerServiceContract,
+    storageService: StorageServiceContract,
     workflowsManagement: WorkflowsManagementApi,
     rulesSavedObjectService: RulesSavedObjectServiceContract,
     notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
