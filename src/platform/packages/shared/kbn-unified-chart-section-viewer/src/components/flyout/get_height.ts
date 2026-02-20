@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DEFAULT_MARGIN_BOTTOM = 32;
+export const DEFAULT_MARGIN_BOTTOM = 16;
 
 // Calculates the height for a flyout content area
 export function calculateFlyoutContentHeight(
