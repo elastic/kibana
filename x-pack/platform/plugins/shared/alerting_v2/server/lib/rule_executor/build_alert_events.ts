@@ -12,7 +12,7 @@ import { stableStringify } from '@kbn/std';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
-import type { ActiveAlertGroupHash } from '../director/queries';
+import type { ActiveAlertGroupHash } from './queries';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');

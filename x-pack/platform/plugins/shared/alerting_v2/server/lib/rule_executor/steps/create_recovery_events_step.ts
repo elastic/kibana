@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { stableStringify } from '@kbn/std';
+import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
@@ -19,7 +20,7 @@ import {
   QueryServiceScopedToken,
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
-import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../../director/queries';
+import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { hasState, type StateWith } from '../type_guards';
 import type { RuleResponse } from '../../rules_client';
@@ -71,10 +72,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       return { type: 'continue', data: { alertEvents } };
     }
 
-    const recoveryType = rule.recovery_policy?.type ?? 'no_breach';
+    const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
 
     const recoveryEvents =
-      recoveryType === 'query'
+      recoveryType === recoveryPolicyType.query
         ? await this.buildQueryRecovery({ rule, input, activeGroupHashes })
         : this.buildNoBreachRecovery({ rule, input, alertEvents, activeGroupHashes });
 

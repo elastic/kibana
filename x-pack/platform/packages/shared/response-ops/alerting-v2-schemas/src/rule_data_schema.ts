@@ -80,9 +80,13 @@ const evaluationSchema = z
 
 /** Recovery policy (optional) */
 
+export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
+export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
+export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
+
 const recoveryPolicySchema = z
   .object({
-    type: z.enum(['query', 'no_breach']).describe('Recovery detection type.'),
+    type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
     query: z
       .object({
         base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
