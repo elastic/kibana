@@ -13,9 +13,13 @@ import type { SharedComponent } from './shared_component';
 
 export class IndexTemplateAutocompleteComponent extends ListComponent {
   constructor(name: string, parent?: SharedComponent) {
-    const provider = getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES);
-    const listGenerator = typeof provider === 'function' ? provider : () => [];
-    super(name, listGenerator, parent, true, true);
+    super(
+      name,
+      getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES),
+      parent,
+      true,
+      true
+    );
   }
 
   getContextKey(): string {
