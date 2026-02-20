@@ -70,6 +70,7 @@ import {
   preconfigurePackageInputs,
   updatePackageInputs,
   packagePolicyService,
+  getCompiledVersionsForAgentPolicy,
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
@@ -9535,5 +9536,85 @@ describe('compilePackagePolicyForVersions()', () => {
       // Should compile 9.3 and 9.4 - no duplicates
       expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
     });
+  });
+});
+
+describe('getCompiledVersionsForAgentPolicy()', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  it('returns empty array when feature flag is disabled', async () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: false,
+    } as any);
+    const soClient = savedObjectsClientMock.create();
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+    expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array when no package policies have inputs_for_versions', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: undefined },
+        },
+      ],
+      total: 1,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns the union of all inputs_for_versions keys across package policies', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: { inputs_for_versions: { '9.1': [], '8.18': [] } },
+        },
+        {
+          id: 'pp-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          // 8.18 appears in both — should be deduplicated
+          attributes: { inputs_for_versions: { '8.18': [], '9.3': [] } },
+        },
+      ],
+      total: 2,
+      per_page: 100,
+      page: 1,
+    } as any);
+
+    const result = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(result).toHaveLength(3);
+    expect(result).toEqual(expect.arrayContaining(['9.1', '8.18', '9.3']));
   });
 });
