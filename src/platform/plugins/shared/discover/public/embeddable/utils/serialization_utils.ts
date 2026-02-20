@@ -57,7 +57,7 @@ export const deserializeState = async ({
     // ignore the time range from the tab - only global time range + panel time range matter
     const runtimeSavedSearchState = isSelectedTabDeleted
       ? savedObjectOverride
-      : omit(resolvedTab, 'timeRange');
+      : { ...omit(resolvedTab, 'timeRange'), ...savedObjectOverride };
 
     return {
       ...runtimeSavedSearchState,

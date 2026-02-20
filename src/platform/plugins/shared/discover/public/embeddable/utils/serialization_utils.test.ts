@@ -132,8 +132,8 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.title).toEqual('test panel title');
-      // For a valid/default tab, attributes come from the resolved tab
-      expect(deserializedState.sort).toEqual([['order_date', 'desc']]);
+      // For a valid/default tab, dashboard overrides win on top of resolved tab attributes
+      expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
       expect(deserializedState.tabs).toEqual(sessionTabs);
@@ -230,8 +230,8 @@ describe('Serialization utils', () => {
         serializedState,
         discoverServices: discoverServiceMock,
       });
-      // For a valid tab, attributes come from tab-2
-      expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
+      // For a valid tab, dashboard overrides should win on top of tab-2 attributes
+      expect(deserializedState.columns).toEqual(['custom-col']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
   });

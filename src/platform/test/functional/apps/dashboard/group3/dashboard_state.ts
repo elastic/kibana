@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(headers[2]).to.be('agent');
     });
 
-    it('Saved search with column changes will update when the saved object changes', async () => {
+    it('Saved search with column changes will not update when the saved object changes', async () => {
       await dashboard.switchToEditMode();
       await discover.removeHeaderColumn('bytes');
       await dashboard.saveDashboard('Has local edits');
@@ -163,10 +163,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       const headers = await discover.getColumnHeaders();
-      expect(headers.length).to.be(4);
-      expect(headers[1]).to.be('bytes');
-      expect(headers[2]).to.be('agent');
-      expect(headers[3]).to.be('clientip');
+      expect(headers.length).to.be(2);
+      expect(headers[1]).to.be('agent');
     });
 
     const getUrlFromShare = async () => {
