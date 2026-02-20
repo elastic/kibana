@@ -8,6 +8,8 @@ import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
-  testDir: Path.resolve(__dirname, '../../../evals'),
-  timeout: 30 * 60_000,
+  testDir: Path.resolve(__dirname),
+  // The default Playwright test timeout (5m) is too low for some connector/model combinations.
+  // Keep this high enough to avoid spurious timeouts, and use CI step timeouts to bound runtime.
+  timeout: 20 * 60_000, // 20 minutes
 });

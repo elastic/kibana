@@ -47,7 +47,6 @@ packages:
     # so they don't rerun alongside plugin/package Scout tests discovered later.
     - kbn-scout
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
-    - kbn-evals-suite-agent-builder # Evaluation suite is run in dedicated eval pipelines, but Scout config must be registered for discovery validation
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
