@@ -71,7 +71,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'logs.branch_a.child1.nested',
         upsertRequest({
           queries: [
-            { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+            {
+              id: 'my-error-query',
+              title: 'error query',
+              kql: { query: 'message: ERROR' },
+              esql: {
+                query:
+                  'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+              },
+            },
           ],
         })
       );
@@ -253,6 +261,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: 'my-error-query',
             title: 'error query',
             kql: { query: 'message: ERROR' },
+            esql: {
+              query:
+                'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -497,6 +509,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: 'my-error-query',
             title: 'error query',
             kql: { query: 'message: ERROR' },
+            esql: {
+              query:
+                'FROM logs.branch_c.nested,logs.branch_c.nested.* | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -748,7 +764,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 ...emptyAssets,
                 queries: [
-                  { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+                  {
+                    id: 'my-error-query',
+                    title: 'error query',
+                    kql: { query: 'message: ERROR' },
+                    esql: {
+                      query:
+                        'FROM logs.branch_a.child1.nested,logs.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
+                    },
+                  },
                 ],
               },
             },
