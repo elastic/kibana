@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   type EuiBasicTableColumn,
@@ -19,10 +19,11 @@ import {
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { useGroupedData } from '../../../hooks/use_grouped_data';
-import type { GroupByOptions, FilterOptions } from '../../../types';
+import { GroupByOptions, type FilterOptions } from '../../../types';
 import { GroupPanelStyle } from './styles';
 import { GroupByHeaderButton } from './group_header_button';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../types';
+import { ServiceDescription } from './service_description';
 
 export interface GroupedEndpointsTablesProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -40,6 +41,13 @@ export const GroupedEndpointsTables = ({
   columns,
 }: GroupedEndpointsTablesProps) => {
   const groupedEndpoints = useGroupedData(inferenceEndpoints, groupBy, filterOptions, searchKey);
+  const tableColumns = useMemo(() => {
+    switch (groupBy) {
+      case GroupByOptions.Service:
+        return columns.filter((col) => col?.id !== 'service-column');
+    }
+    return columns;
+  }, [columns, groupBy]);
 
   if (inferenceEndpoints.length === 0 || groupedEndpoints.length === 0) {
     // No data after filters / search key
@@ -75,7 +83,12 @@ export const GroupedEndpointsTables = ({
             buttonProps={{
               paddingSize: 'm',
             }}
-            buttonContent={<GroupByHeaderButton data={groupedData} />}
+            buttonContent={<GroupByHeaderButton data={groupedData} groupBy={groupBy} />}
+            extraAction={
+              groupBy === GroupByOptions.Service ? (
+                <ServiceDescription service={groupedData.groupId} />
+              ) : undefined
+            }
             data-test-subj={`${groupedData.groupId}-accordion`}
             initialIsOpen
             paddingSize="none"
@@ -85,7 +98,7 @@ export const GroupedEndpointsTables = ({
               data-test-subj={`${groupedData.groupId}-table`}
               itemId="inference_id"
               items={groupedData.endpoints}
-              columns={columns}
+              columns={tableColumns}
               pagination={
                 groupedData.endpoints.length > INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES[0]
                   ? {

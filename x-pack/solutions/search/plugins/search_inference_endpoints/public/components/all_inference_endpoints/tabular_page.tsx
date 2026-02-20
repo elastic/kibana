@@ -60,9 +60,11 @@ const initializeGroupBy = (): GroupByOptions => {
   const params = new URLSearchParams(window.location.search);
   const groupByParam = params.get('groupBy') ?? '';
 
-  switch (groupByParam) {
+  switch (groupByParam.toLowerCase()) {
     case GroupByOptions.None:
       return GroupByOptions.None;
+    case GroupByOptions.Service:
+      return GroupByOptions.Service;
     case GroupByOptions.Model:
     default:
       return GroupByOptions.Model;
