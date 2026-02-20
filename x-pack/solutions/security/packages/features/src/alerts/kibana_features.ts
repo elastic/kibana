@@ -82,14 +82,7 @@ export const getAlertsBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
         insightsAndAlerting: ['triggersActions'], // Access to the stack alerts management UI
       },
       ui: [ALERTS_UI_READ, ALERTS_UI_EDIT],
-      api: [
-        'rac',
-        // TODO: should it be able to initialize the security solution
-        INITIALIZE_SECURITY_SOLUTION,
-        ALERTS_API_ALL,
-        ALERTS_API_READ,
-        USERS_API_READ,
-      ],
+      api: ['rac', INITIALIZE_SECURITY_SOLUTION, ALERTS_API_ALL, ALERTS_API_READ, USERS_API_READ],
     },
     read: {
       app: [ALERTS_FEATURE_ID, 'kibana', 'securitySolution'],
