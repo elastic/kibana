@@ -460,6 +460,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
       );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_scout.yml')
+      );
     }
 
     if (
