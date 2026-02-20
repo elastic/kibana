@@ -25,14 +25,19 @@ export interface QueryData {
 }
 
 const SAMPLE_EVENTS_COUNT = 5;
-const CURRENT_WINDOW_MINUTES = 15;
 
 export async function collectQueryData({
   query,
   esClient,
+  from,
+  to,
 }: {
   query: Query;
   esClient: ElasticsearchClient;
+  /** Start of the time range to filter the query (ISO 8601). */
+  from: string;
+  /** End of the time range to filter the query (ISO 8601). */
+  to: string;
 }): Promise<QueryData | undefined> {
   const ruleId = getRuleIdFromQueryLink(query);
 
@@ -46,8 +51,8 @@ export async function collectQueryData({
             {
               range: {
                 '@timestamp': {
-                  gte: `now-${CURRENT_WINDOW_MINUTES}m`,
-                  lte: 'now',
+                  gte: from,
+                  lte: to,
                 },
               },
             },

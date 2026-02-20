@@ -35,8 +35,10 @@ export async function getChangedQueryIdsByStream({
   queryClient: QueryClient;
   esClient: ElasticsearchClient;
   streamNames: string[];
-  from: Date;
-  to: Date;
+  /** Start of the time range (ISO 8601). Elasticsearch accepts this for date range gte/lte. */
+  from: string;
+  /** End of the time range (ISO 8601). Elasticsearch accepts this for date range gte/lte. */
+  to: string;
   signal: AbortSignal;
 }): Promise<Map<string, Set<string>>> {
   const queryLinks = await queryClient.getQueryLinks(streamNames);
@@ -69,8 +71,8 @@ export async function getChangedQueryIdsByStream({
             {
               range: {
                 '@timestamp': {
-                  gte: from.toISOString(),
-                  lte: to.toISOString(),
+                  gte: from,
+                  lte: to,
                 },
               },
             },
@@ -86,7 +88,7 @@ export async function getChangedQueryIdsByStream({
               date_histogram: {
                 field: '@timestamp',
                 fixed_interval: CHANGE_POINT_BUCKET_INTERVAL,
-                extended_bounds: { min: from.toISOString(), max: to.toISOString() },
+                extended_bounds: { min: from, max: to },
               },
             },
             change_points: {

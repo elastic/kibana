@@ -24,6 +24,8 @@ export async function generateStreamInsights({
   signal,
   logger,
   changedQueryIds,
+  from,
+  to,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -33,6 +35,10 @@ export async function generateStreamInsights({
   logger: Logger;
   /** Query IDs for this stream that had a change point; only these queries are used for insights. */
   changedQueryIds: Set<string>;
+  /** Start of the time range to filter Elasticsearch queries (ISO 8601). */
+  from: string;
+  /** End of the time range to filter Elasticsearch queries (ISO 8601). */
+  to: string;
 }): Promise<InsightsResult> {
   const allQueries = await queryClient.getAssets(stream.name);
   const queries = allQueries.filter((q) => changedQueryIds.has(q.query.id));
@@ -42,6 +48,8 @@ export async function generateStreamInsights({
       collectQueryData({
         query,
         esClient,
+        from,
+        to,
       })
     )
   );

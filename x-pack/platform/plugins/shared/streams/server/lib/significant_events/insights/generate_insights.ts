@@ -18,8 +18,6 @@ import { extractInsightsFromResponse } from './extract_insights_from_response';
 import { generateStreamInsights } from './generate_stream_insights';
 import { getChangedQueryIdsByStream } from './get_changed_query_ids_by_stream';
 
-const CHANGE_POINT_TIME_RANGE_MINUTES = 15;
-
 export async function generateInsights({
   streamsClient,
   queryClient,
@@ -28,6 +26,8 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  from,
+  to,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -36,6 +36,10 @@ export async function generateInsights({
   signal: AbortSignal;
   logger: Logger;
   streamNames?: string[];
+  /** Start of the time range to filter all Elasticsearch queries (ISO 8601). */
+  from: string;
+  /** End of the time range to filter all Elasticsearch queries (ISO 8601). */
+  to: string;
 }): Promise<InsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -44,8 +48,6 @@ export async function generateInsights({
     streams = allStreams.filter((s) => streamNamesSet.has(s.name));
   }
 
-  const to = new Date();
-  const from = new Date(to.getTime() - CHANGE_POINT_TIME_RANGE_MINUTES * 60 * 1000);
   const changedQueryIdsByStream = await getChangedQueryIdsByStream({
     queryClient,
     esClient,
@@ -75,6 +77,8 @@ export async function generateInsights({
           signal,
           logger,
           changedQueryIds: changedQueryIdsForStream,
+          from,
+          to,
         });
         return {
           streamName: stream.name,
