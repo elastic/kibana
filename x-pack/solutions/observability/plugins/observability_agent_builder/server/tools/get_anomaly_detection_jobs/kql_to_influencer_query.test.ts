@@ -25,6 +25,22 @@ function nestedTerm(fieldName: string, fieldValue?: string) {
   };
 }
 
+function nestedWildcard(fieldName: string, fieldValue: string) {
+  return {
+    nested: {
+      path: 'influencers',
+      query: {
+        bool: {
+          filter: [
+            { term: { 'influencers.influencer_field_name': fieldName } },
+            { wildcard: { 'influencers.influencer_field_values': fieldValue } },
+          ],
+        },
+      },
+    },
+  };
+}
+
 describe('kqlToInfluencerQuery', () => {
   describe('returns undefined for empty input', () => {
     it.each([undefined, '', '  ', '\t\n'])('when input is %j', (input) => {
@@ -162,12 +178,12 @@ describe('kqlToInfluencerQuery', () => {
   });
 
   describe('wildcard value', () => {
-    it('passes the wildcard pattern as the influencer field value', () => {
+    it('uses a wildcard query for the influencer field value', () => {
       const result = kqlToInfluencerQuery('service.name: front*');
 
       expect(result).toEqual({
         bool: {
-          should: [nestedTerm('service.name', 'front*')],
+          should: [nestedWildcard('service.name', 'front*')],
           minimum_should_match: 1,
         },
       });

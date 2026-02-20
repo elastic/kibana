@@ -60,6 +60,15 @@ function rewriteDslToInfluencerQuery(dsl: QueryDslQueryContainer): QueryDslQuery
     return dsl;
   }
 
+  const valueFilter: QueryDslQueryContainer[] = [];
+  if (extracted.value !== undefined) {
+    valueFilter.push(
+      extracted.isWildcard
+        ? { wildcard: { 'influencers.influencer_field_values': extracted.value } }
+        : { term: { 'influencers.influencer_field_values': extracted.value } }
+    );
+  }
+
   return {
     nested: {
       path: 'influencers',
@@ -67,9 +76,7 @@ function rewriteDslToInfluencerQuery(dsl: QueryDslQueryContainer): QueryDslQuery
         bool: {
           filter: [
             { term: { 'influencers.influencer_field_name': extracted.field } },
-            ...(extracted.value !== undefined
-              ? [{ term: { 'influencers.influencer_field_values': extracted.value } }]
-              : []),
+            ...valueFilter,
           ],
         },
       },
@@ -79,7 +86,7 @@ function rewriteDslToInfluencerQuery(dsl: QueryDslQueryContainer): QueryDslQuery
 
 function extractFieldAndValue(
   dsl: QueryDslQueryContainer
-): { field: string; value?: string } | undefined {
+): { field: string; value?: string; isWildcard?: boolean } | undefined {
   if (dsl.match) {
     const [field] = Object.keys(dsl.match);
     const clause = (dsl.match as Record<string, unknown>)[field];
@@ -101,13 +108,17 @@ function extractFieldAndValue(
   if (dsl.wildcard) {
     const [field] = Object.keys(dsl.wildcard);
     const clause = (dsl.wildcard as Record<string, unknown>)[field];
-    return { field, value: String(typeof clause === 'object' ? (clause as any).value : clause) };
+    return {
+      field,
+      value: String(typeof clause === 'object' ? (clause as any).value : clause),
+      isWildcard: true,
+    };
   }
   if (dsl.query_string) {
     const qs = dsl.query_string;
     const field = Array.isArray(qs.fields) ? qs.fields[0] : undefined;
     if (field && qs.query) {
-      return { field, value: String(qs.query) };
+      return { field, value: String(qs.query), isWildcard: true };
     }
   }
   return undefined;
