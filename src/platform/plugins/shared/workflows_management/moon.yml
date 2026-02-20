@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/sse-utils-client'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
