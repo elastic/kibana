@@ -41,6 +41,9 @@
     "@kbn/controls-schemas",
     "@kbn/kql",
     "@kbn/inspector-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/actions-plugin",
   ],
   "exclude": [
     "target/**/*",
