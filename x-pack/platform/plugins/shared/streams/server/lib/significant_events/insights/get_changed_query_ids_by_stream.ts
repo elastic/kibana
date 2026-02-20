@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { get, isArray, keyBy } from 'lodash';
 import type { QueryClient } from '../../streams/assets/query/query_client';
+import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 
 const ALERTS_INDEX = '.alerts-streams.alerts-default';
 const CHANGE_POINT_BUCKET_INTERVAL = '30s';
@@ -43,7 +44,7 @@ export async function getChangedQueryIdsByStream({
     return new Map();
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (link) => link.query.id);
+  const queryLinkByRuleId = keyBy(queryLinks, (link) => getRuleIdFromQueryLink(link));
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await esClient.search<
