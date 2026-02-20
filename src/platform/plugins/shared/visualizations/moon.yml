@@ -82,7 +82,6 @@ dependsOn:
   - '@kbn/core-execution-context-common'
   - '@kbn/core-mount-utils-browser'
   - '@kbn/search-response-warnings'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/content-management-utils'
   - '@kbn/react-hooks'
   - '@kbn/presentation-panel-plugin'
