@@ -20,7 +20,6 @@ import {
   getEndpointManagementPageMap,
   openConsoleFromEndpointList,
   openConsoleHelpPanel,
-  openRowActionMenu,
   visitEndpointList,
   visitFleetAgentList,
 } from '../../../screens';

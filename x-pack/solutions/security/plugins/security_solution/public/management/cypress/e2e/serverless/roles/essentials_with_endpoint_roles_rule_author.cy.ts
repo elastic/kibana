@@ -16,7 +16,6 @@ import {
   ensurePolicyListPageAuthzAccess,
   ensureFleetPermissionDeniedScreen,
   getEndpointManagementPageMap,
-  getNoPrivilegesPage,
   visitFleetAgentList,
 } from '../../../screens';
 

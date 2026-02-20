@@ -18,7 +18,6 @@ import {
 } from '../../../screens';
 
 const allPages = getEndpointManagementPageList();
-const pageById = getEndpointManagementPageMap();
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon - t1/t2 analyst',
