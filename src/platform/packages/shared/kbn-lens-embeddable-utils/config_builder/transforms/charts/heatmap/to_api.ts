@@ -37,6 +37,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: legend.maxLines,
       size: legend.legendSize,
+      should_truncate: legend.shouldTruncate,
     }),
   };
 }
