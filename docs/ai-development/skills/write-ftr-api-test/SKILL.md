@@ -1,11 +1,20 @@
 ---
 name: write-ftr-api-test
-description: Generate an FTR API integration test for a Kibana API endpoint with service injection, describe/it structure, supertest assertions, and cleanup
+description: Generate an FTR or Scout API test for a Kibana API endpoint; aligns with existing .agent/skills (ftr-testing, scout-api-testing)
 ---
 
-# Write FTR API test for a Kibana endpoint
+# Write FTR or Scout API test for a Kibana endpoint
 
 Use this skill when the user wants an API integration test for a specific HTTP endpoint (e.g. "add an FTR test for GET /api/my_plugin/status" or "write API test for the new export route").
+
+## Coordination with existing Kibana skills
+
+If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-builder-planning-mode` or a branch that ships them), **prefer those skills** for full conventions:
+
+- **ftr-testing** — FTR structure, loadTestFile, configs, services, `.buildkite/ftr_*_configs.yml`.
+- **scout-api-testing** — Scout API tests: `apiTest`, `apiClient`, `requestAuth`/`samlAuth`, `apiServices`; paths `test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`; package by module (`@kbn/scout`, `@kbn/scout-oblt`, etc.); assertions from `@kbn/scout/api`; tags required for CI.
+
+**When to use which:** For **new** API tests, if the module already has Scout API tests (`<module-root>/test/scout*/api/`), use **Scout** and follow the **scout-api-testing** skill (run scaffold with `node scripts/scout.js generate --path <moduleRoot> --type api` if needed). Otherwise use **FTR** API (steps below). When in doubt, check for existing `test/scout*/api/` in the plugin; if present, use Scout.
 
 ## Inputs
 
@@ -13,7 +22,7 @@ Use this skill when the user wants an API integration test for a specific HTTP e
 - **Plugin or test suite** — which FTR config/suite this test belongs to (e.g. `test/api_integration/apis/my_plugin`)
 - **Scenarios to cover** — e.g. 200 success, 400 validation, 404, auth required; and any setup/teardown (e.g. create a saved object then delete it)
 
-## Steps
+## Steps (FTR API — use when module does not use Scout API)
 
 1. **Locate the right FTR config and test layout.** Find the API integration tests for this plugin or area (e.g. under `test/api_integration/` or `x-pack/test/api_integration`). Note the config file (e.g. `config.js`) and how services are loaded.
 
@@ -42,3 +51,7 @@ Use this skill when the user wants an API integration test for a specific HTTP e
 4. **Stability:** Run the new test twice (or in a small batch) to reduce the chance of flakiness; fix any intermittent failures.
 
 After validation, report: test file path, scenarios covered, and that type-check, lint, and FTR API run pass.
+
+## If using Scout API instead
+
+- Follow the **scout-api-testing** skill in `.agent/skills/scout-api-testing/SKILL.md`: paths under `test/scout*/api/tests/`, `apiTest.describe`, `requestAuth`/`samlAuth` for auth, `apiClient` for requests, `expect` from `@kbn/scout/api` (or module Scout package), `apiServices` for setup/teardown. Run with `node scripts/scout.js run-tests --stateful --testFiles <path>`.

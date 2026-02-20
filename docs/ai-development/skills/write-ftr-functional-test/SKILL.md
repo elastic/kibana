@@ -1,19 +1,30 @@
 ---
 name: write-ftr-functional-test
-description: Generate an FTR functional (UI) test with page objects, testSubjects, retry-aware assertions
+description: Generate an FTR or Scout UI test for a Kibana UI workflow; aligns with existing .agent/skills (ftr-testing, scout-ui-testing, scout-migrate-from-ftr)
 ---
 
-# Write FTR functional test for a Kibana UI workflow
+# Write FTR or Scout UI test for a Kibana UI workflow
 
 Use this skill when the user wants a functional (UI) test for a Kibana app or workflow (e.g. "add a functional test for the X page" or "test that clicking Y does Z").
+
+## Coordination with existing Kibana skills
+
+If the Kibana repo (or worktree) has **`.agent/skills/`** (e.g. under `agent-builder-planning-mode` or a branch that ships them), **prefer those skills** for full conventions:
+
+- **ftr-testing** — FTR structure, loadTestFile, getService/getPageObjects, configs, services (testSubjects, retry, esArchiver, browser).
+- **scout-ui-testing** — Scout UI (Playwright): `test`/`spaceTest`, page objects, `browserAuth`, **tags required**; paths `test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`; package by module (`@kbn/scout`, `@kbn/scout-oblt`, etc.); assertions from `@kbn/scout/ui`; EUI wrappers, a11y checks.
+- **scout-migrate-from-ftr** — When migrating existing FTR UI tests to Scout (decide UI vs API, map services to fixtures, split loadTestFile).
+- **scout-create-scaffold** — Generate Scout scaffold: `node scripts/scout.js generate --path <moduleRoot> --type ui` (or `both`).
+
+**When to use which:** For **new** UI tests, if the module already has Scout UI tests (`<module-root>/test/scout*/ui/`), use **Scout** and follow the **scout-ui-testing** skill (and **scout-create-scaffold** if the scaffold is missing). Otherwise use **FTR** (steps below). For **migrating** an existing FTR test to Scout, use **scout-migrate-from-ftr** and its required sub-skills. When in doubt, check for existing `test/scout*/ui/` in the plugin; if present, use Scout.
 
 ## Inputs
 
 - **App or workflow** — e.g. "Dashboard save flow", "Uptime overview filters"
-- **Test location** — which FTR config and folder (e.g. `test/functional/apps/dashboard`, or `x-pack/solutions/observability/test/functional/apps/uptime`)
+- **Test location** — which FTR config and folder (e.g. `test/functional/apps/dashboard`, or `x-pack/solutions/observability/test/functional/apps/uptime`), or Scout path `test/scout*/ui/tests/` / `parallel_tests/`
 - **Scenarios** — what to assert (e.g. "page loads", "filter applies", "save button creates saved object")
 
-## Steps
+## Steps (FTR UI — use when module does not use Scout UI)
 
 1. **Locate the right FTR config and test layout.** Find the functional test suite for this app (e.g. under `test/functional/` or `x-pack/.../test/functional/`). Note the config file (e.g. `config.base.ts`) and how tests receive `FtrProviderContext` (e.g. `export default ({ getPageObjects, getService }: FtrProviderContext) => { ... }`).
 
@@ -41,3 +52,7 @@ Use this skill when the user wants a functional (UI) test for a Kibana app or wo
 3. **Run the FTR functional suite** that includes this test (e.g. the app’s functional config). Ensure the new test passes. Re-run once more to reduce flakiness; fix any intermittent failures (e.g. add waits or narrow scope).
 
 After validation, report: test file path, scenarios covered, and that type-check, lint, and the functional test run pass.
+
+## If using Scout UI instead
+
+- Follow the **scout-ui-testing** skill in `.agent/skills/scout-ui-testing/SKILL.md`: paths under `test/scout*/ui/tests/` (sequential) or `ui/parallel_tests/` (parallel with `spaceTest`); import `test` or `spaceTest` from local fixtures; **tags are required** (e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`); use `browserAuth` for auth; put UI actions in page objects; use `page.testSubj.locator(...)`; optional `page.checkA11y()`. Run with `node scripts/scout.js run-tests --stateful --testFiles <path>`. For new modules, run **scout-create-scaffold** first: `node scripts/scout.js generate --path <moduleRoot> --type ui`.
