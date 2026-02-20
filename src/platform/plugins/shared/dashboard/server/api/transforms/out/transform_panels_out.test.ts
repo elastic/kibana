@@ -38,7 +38,7 @@ describe('transformPanelsOut', () => {
             "x": 0,
             "y": 0,
           },
-          "type": "DASHBOARD_MARKDOWN",
+          "type": "markdown",
           "uid": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
         },
         Object {
@@ -57,7 +57,7 @@ describe('transformPanelsOut', () => {
                 "x": 0,
                 "y": 0,
               },
-              "type": "DASHBOARD_MARKDOWN",
+              "type": "markdown",
               "uid": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
             },
           ],

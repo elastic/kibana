@@ -106,7 +106,7 @@ describe('upsertMarkdownPanel', () => {
     expect(result.changedPanel).toBeDefined();
     expect(result.panels).toHaveLength(2);
     expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       rawConfig: { content: '# Summary' },
     });
   });
@@ -114,7 +114,7 @@ describe('upsertMarkdownPanel', () => {
   it('updates existing markdown panel content in place', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old summary' },
       },
@@ -128,12 +128,12 @@ describe('upsertMarkdownPanel', () => {
     const result = upsertMarkdownPanel(existingPanels, '# New summary');
 
     expect(result.changedPanel).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       panelId: 'markdown-1',
       rawConfig: { content: '# New summary' },
     });
     expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       panelId: 'markdown-1',
       rawConfig: { content: '# New summary' },
     });
@@ -143,7 +143,7 @@ describe('upsertMarkdownPanel', () => {
   it('does not change panels when markdown content is unchanged', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Summary' },
       },
