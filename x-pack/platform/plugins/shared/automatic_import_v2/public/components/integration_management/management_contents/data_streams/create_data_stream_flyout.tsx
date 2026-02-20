@@ -126,8 +126,8 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
-  // React Query has a cache but needs to integration ID to find it.
-  const { integration } = useGetIntegrationById(currentIntegrationId);
+
+  const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
@@ -157,7 +157,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       })),
     ];
 
-    // Filter Indices logic here
     return rawOptions.filter((option) => option.value !== '' && !option.value?.startsWith('.'));
   }, [indices]);
 
@@ -282,6 +281,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       ...(formData.logo ? { logo: formData.logo } : {}),
       dataStreams: [newDataStream],
     });
+
+    refetchIntegration();
+    onClose();
   }, [
     formData,
     createUpdateIntegrationMutation,
@@ -291,6 +293,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     logSample,
     selectedIndex,
     uploadedFileName,
+    refetchIntegration,
+    onClose,
   ]);
 
   return (

@@ -34,15 +34,12 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     null
   );
   const deleteModalTitleId = useGeneratedHtmlId();
-  const [sortField, setSortField] = useState<keyof DataStreamResponse>('title');
+  const [sortField, setSortField] = useState<keyof DataStreamResponse | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const sorting: EuiTableSortingType<DataStreamResponse> = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
+  const sorting: EuiTableSortingType<DataStreamResponse> = sortField
+    ? { sort: { field: sortField, direction: sortDirection } }
+    : { sort: undefined };
 
   const onTableChange = ({ sort }: Criteria<DataStreamResponse>) => {
     if (sort) {
@@ -52,6 +49,9 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   };
 
   const sortedItems = useMemo(() => {
+    if (!sortField) {
+      return items;
+    }
     return [...items].sort((a, b) => {
       const aValue = a[sortField];
       const bValue = b[sortField];
