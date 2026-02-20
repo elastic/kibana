@@ -16,10 +16,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
 import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
-import { formatMillisecondsInUnit, getRelativeBoundsInMs } from '../utils';
+import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { getRelativeBoundsInMs } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 
@@ -75,18 +75,7 @@ export const DownsampleIntervalField = ({
             const currentValue = String(valueField.value ?? '');
             const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
 
-            let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
-              timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
-            const canShowNonDefaultUnit =
-              currentUnit === 'ms' || currentUnit === 'micros' || currentUnit === 'nanos';
-            if (canShowNonDefaultUnit) {
-              // Preserve and display known non-default units that can appear in ILM policies.
-              // We still only *offer* `d/h/m/s` by default.
-              unitOptions = [
-                ...unitOptions,
-                { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
-              ];
-            }
+            const unitOptions = getUnitSelectOptions(timeUnitOptions, currentUnit);
 
             const showInvalid = isEnabled && isInvalid;
             const showError = isEnabled ? errorMessage : null;
@@ -96,6 +85,11 @@ export const DownsampleIntervalField = ({
               phaseName as DownsamplePhase,
               getPhaseDownsampleIntervalMs
             );
+            const { min, max } = getBoundsHelpTextValues({
+              lowerBoundMs,
+              upperBoundMs,
+              unit: currentUnit,
+            });
 
             const helpText =
               upperBoundMs === undefined
@@ -103,7 +97,7 @@ export const DownsampleIntervalField = ({
                     'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound',
                     {
                       defaultMessage: 'Must be larger than {min} based on current configuration.',
-                      values: { min: formatMillisecondsInUnit(lowerBoundMs, currentUnit) },
+                      values: { min },
                     }
                   )
                 : i18n.translate(
@@ -112,8 +106,8 @@ export const DownsampleIntervalField = ({
                       defaultMessage:
                         'Must be larger than {min} and smaller than {max} based on current configuration.',
                       values: {
-                        min: formatMillisecondsInUnit(lowerBoundMs, currentUnit),
-                        max: formatMillisecondsInUnit(upperBoundMs, currentUnit),
+                        min,
+                        max,
                       },
                     }
                   );
@@ -136,6 +130,12 @@ export const DownsampleIntervalField = ({
                       compressed
                       min={0}
                       fullWidth
+                      aria-label={i18n.translate(
+                        'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel',
+                        {
+                          defaultMessage: 'Downsample interval value',
+                        }
+                      )}
                       value={currentValue}
                       disabled={!isEnabled}
                       isInvalid={showInvalid}

@@ -188,6 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           it('add field button is enabled', async () => {
             await pageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+            await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
             await pageObjects.searchIndexDetailsPage.expectAddFieldToBeEnabled();
           });
           it('edit settings button is enabled', async () => {

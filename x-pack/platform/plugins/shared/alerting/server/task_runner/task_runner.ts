@@ -273,6 +273,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     apiKey,
+    uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
@@ -318,6 +319,7 @@ export class TaskRunner<
       ruleRunMetricsStore,
       spaceId,
       isServerless: this.context.isServerless,
+      shouldGrantUiam: this.context.shouldGrantUiam,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
@@ -363,6 +365,7 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
