@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { EuiFieldTextProps } from '@elastic/eui';
@@ -103,6 +103,14 @@ const validateTimeoutValue = (value: string | number | undefined): ValidationSta
   return { isValid: true };
 };
 
+const getDefaultRunScriptConfiguration = () => {
+  return {
+    linux: { scriptId: '', scriptInput: '', timeout: undefined },
+    macos: { scriptId: '', scriptInput: '', timeout: undefined },
+    windows: { scriptId: '', scriptInput: '', timeout: undefined },
+  };
+};
+
 export interface RunscriptConfigProps {
   basePath: string;
   disabled: boolean;
@@ -118,11 +126,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
 
     const fieldConfig: FieldConfig<AutomatedRunScriptConfig> = useMemo(() => {
       const config: FieldConfig<AutomatedRunScriptConfig> = {
-        defaultValue: {
-          linux: { scriptId: '', scriptInput: '', timeout: undefined },
-          macos: { scriptId: '', scriptInput: '', timeout: undefined },
-          windows: { scriptId: '', scriptInput: '', timeout: undefined },
-        },
+        defaultValue: getDefaultRunScriptConfiguration(),
         validations: [
           {
             validator: ({ value }) => {
@@ -199,6 +203,21 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     const getTestId = useTestIdGenerator(dataTestSubj);
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
 
+    // Why are we checking that `field.value` is actually a RunScript configuration?
+    // There is an issue with the form framework (`es-ui-shared-plugin/static/forms/*`) when removing items (response actions)
+    // from the form. The `<UseField>` component does not properly handle the removal of items from the form when an item
+    // that precedes the current one is removed - the form data becomes invalid and seems to inherit properties from
+    // the removed item and drops other runscript specific form data.
+    // Example:
+    // If we have a `kill-process` response action (item 0) followed by a `runscript` response action (item 1), when
+    // the `kill-process` action is removed from the form, the `runscript` form data is dropped and the form becomes
+    // invalid, causing the entire page to crash.
+    // The work-around here, after having no luck finding a solution, is to check the `value` and if it is not a runscript
+    // config, then initialize it in `useEffect()` further below. NOTE however, that the prior form values will be lost ☹️
+    const valueIsRunScriptConfig = useMemo(() => {
+      return value.linux && value.macos && value.windows;
+    }, [value]);
+
     type RunscriptOsValidationState = Record<SupportedHostOsType, ValidationState>;
     const [osValidationState, setOsValidationState] = useState<RunscriptOsValidationState>({
       linux: { isValid: true },
@@ -222,7 +241,13 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
       [field.path, fieldOnChange]
     );
 
-    if (!userHasRunScriptAuthz) {
+    useEffect(() => {
+      if (!valueIsRunScriptConfig) {
+        emitUseFieldChange(getDefaultRunScriptConfiguration());
+      }
+    }, [emitUseFieldChange, valueIsRunScriptConfig]);
+
+    if (!userHasRunScriptAuthz || !valueIsRunScriptConfig) {
       return null;
     }
 
