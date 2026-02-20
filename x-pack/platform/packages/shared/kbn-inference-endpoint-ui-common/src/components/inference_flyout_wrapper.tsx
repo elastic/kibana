@@ -39,7 +39,7 @@ const formDeserializer = (data: InferenceEndpoint): InferenceEndpoint => {
     ...restProviderConfig
   } = providerConfig || {};
 
-  if (maxAllocations || restProviderConfig?.headers) {
+  if (maxAllocations || restConfig?.headers) {
     const { headers, ...restConfigNoHeaders } = restConfig;
 
     return {
