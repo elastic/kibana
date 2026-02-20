@@ -7,7 +7,6 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -87,12 +86,11 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      const internalClient = savedObjects.createInternalRepository([
-        RULE_SAVED_OBJECT_TYPE,
-      ]) as unknown as SavedObjectsClientContract;
+      const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
       return new RulesSavedObjectService(() => internalClient, spaces);
     })
     .inSingletonScope();
+
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
   bind(NotificationPolicySavedObjectServiceInternalToken)
     .toDynamicValue(({ get }) => {
@@ -100,7 +98,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-      ]) as unknown as SavedObjectsClientContract;
+      ]);
       return new NotificationPolicySavedObjectService(() => internalClient, spaces);
     })
     .inSingletonScope();
