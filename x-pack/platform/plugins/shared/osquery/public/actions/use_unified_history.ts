@@ -19,6 +19,7 @@ interface UseUnifiedHistoryConfig {
   pageSize?: number;
   actionsCursor?: string;
   scheduledCursor?: string;
+  scheduledOffset?: number;
   kuery?: string;
   sourceFilters?: string;
   skip?: boolean;
@@ -28,6 +29,7 @@ export const useUnifiedHistory = ({
   pageSize = 20,
   actionsCursor,
   scheduledCursor,
+  scheduledOffset,
   kuery,
   sourceFilters,
   skip = false,
@@ -36,7 +38,7 @@ export const useUnifiedHistory = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<UnifiedHistoryResponse, Error>(
-    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, actionsCursor, scheduledCursor, kuery, sourceFilters }],
+    [UNIFIED_HISTORY_QUERY_KEY, { pageSize, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters }],
     () =>
       http.get<UnifiedHistoryResponse>('/internal/osquery/history', {
         version: API_VERSIONS.internal.v1,
@@ -45,6 +47,7 @@ export const useUnifiedHistory = ({
           ...(kuery ? { kuery } : {}),
           ...(actionsCursor ? { actionsCursor } : {}),
           ...(scheduledCursor ? { scheduledCursor } : {}),
+          ...(scheduledOffset != null ? { scheduledOffset } : {}),
           ...(sourceFilters ? { sourceFilters } : {}),
         },
       }),

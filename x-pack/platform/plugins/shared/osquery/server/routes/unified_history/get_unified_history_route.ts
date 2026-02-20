@@ -99,6 +99,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               scheduledCursor: schema.maybe(schema.string()),
               kuery: schema.maybe(schema.string()),
               sourceFilters: schema.maybe(schema.string()), // comma-separated: live,rule,scheduled
+              scheduledOffset: schema.number({ defaultValue: 0, min: 0 }),
             }),
           },
         },
@@ -112,7 +113,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const { pageSize, cursor, actionsCursor, scheduledCursor, kuery, sourceFilters: sourceFiltersRaw } = request.query;
+          const { pageSize, cursor, actionsCursor, scheduledCursor, scheduledOffset, kuery, sourceFilters: sourceFiltersRaw } = request.query;
 
           // Parse source filters — when undefined, all sources are included
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
@@ -296,7 +297,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           const packLookup = buildPackLookup(packSOs);
 
-          const scheduledRows: UnifiedHistoryRow[] = scheduledBuckets.map((bucket) => {
+          // Map all buckets to rows, then apply the offset to skip already-consumed ones.
+          // The offset-based approach avoids the timestamp-collision gap: when many
+          // executions share the same timestamp, `lte:` re-includes them and the offset
+          // skips the ones already shown on previous pages.
+          const allScheduledRows: UnifiedHistoryRow[] = scheduledBuckets.map((bucket) => {
             const scheduleId = bucket.key[0];
             const executionCount = bucket.key[1];
             const packContext = packLookup.get(scheduleId);
@@ -319,12 +324,17 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             };
           });
 
+          const scheduledRows = allScheduledRows.slice(scheduledOffset);
+
           const allMerged = [...filteredLiveRows, ...scheduledRows].sort(
             (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           );
 
           const hasMore = allMerged.length > pageSize;
           const merged = allMerged.slice(0, pageSize);
+
+          // Count how many scheduled rows were consumed on this page
+          const scheduledConsumedOnPage = merged.filter((r) => r.rowType === 'scheduled').length;
 
           // Compute per-source cursors from the last consumed item of each type
           let nextActionsCursorValue: string | undefined;
@@ -340,6 +350,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             if (nextActionsCursorValue && nextScheduledCursorValue) break;
           }
 
+          // The next scheduled offset = current offset + rows consumed on this page.
+          // The scheduled cursor uses `lte:` so the same ES buckets are re-fetched,
+          // and the offset skips the ones already shown.
+          const nextScheduledOffsetValue = scheduledOffset + scheduledConsumedOnPage;
+
           // Unified cursor for backward compat
           const lastItem = merged[merged.length - 1];
           const nextCursor = hasMore && lastItem ? lastItem.timestamp : undefined;
@@ -349,6 +364,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             nextCursor,
             nextActionsCursor: hasMore ? nextActionsCursorValue : undefined,
             nextScheduledCursor: hasMore ? nextScheduledCursorValue : undefined,
+            nextScheduledOffset: hasMore ? nextScheduledOffsetValue : undefined,
             hasMore,
           };
 

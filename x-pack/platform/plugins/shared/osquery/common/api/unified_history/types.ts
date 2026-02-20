@@ -33,5 +33,6 @@ export interface UnifiedHistoryResponse {
   nextCursor?: string;
   nextActionsCursor?: string;
   nextScheduledCursor?: string;
+  nextScheduledOffset?: number;
   hasMore: boolean;
 }

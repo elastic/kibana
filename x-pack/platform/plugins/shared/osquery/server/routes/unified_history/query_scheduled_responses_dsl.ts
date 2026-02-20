@@ -35,7 +35,7 @@ export const buildScheduledResponsesQuery = ({
 
   if (cursor) {
     filters.push({
-      range: { '@timestamp': { lt: cursor } },
+      range: { '@timestamp': { lte: cursor } },
     });
   }
 
@@ -51,7 +51,7 @@ export const buildScheduledResponsesQuery = ({
         scheduled_executions: {
           multi_terms: {
             terms: [{ field: 'schedule_id' }, { field: 'schedule_execution_count' }],
-            size: pageSize,
+            size: Math.max(pageSize, 1000),
             order: { max_timestamp: 'desc' as const },
           },
           aggs: {

@@ -65,6 +65,7 @@ HistoryDetailsButton.displayName = 'HistoryDetailsButton';
 interface CursorState {
   actionsCursor?: string;
   scheduledCursor?: string;
+  scheduledOffset?: number;
 }
 
 const UnifiedHistoryTableComponent = () => {
@@ -110,6 +111,7 @@ const UnifiedHistoryTableComponent = () => {
     pageSize,
     actionsCursor: currentCursors?.actionsCursor,
     scheduledCursor: currentCursors?.scheduledCursor,
+    scheduledOffset: currentCursors?.scheduledOffset,
     kuery: activeKuery,
     sourceFilters: activeSourceFilters,
   });
@@ -125,10 +127,11 @@ const UnifiedHistoryTableComponent = () => {
         {
           actionsCursor: data.nextActionsCursor,
           scheduledCursor: data.nextScheduledCursor,
+          scheduledOffset: data.nextScheduledOffset,
         },
       ]);
     }
-  }, [data?.nextActionsCursor, data?.nextScheduledCursor]);
+  }, [data?.nextActionsCursor, data?.nextScheduledCursor, data?.nextScheduledOffset]);
 
   const handlePrevPage = useCallback(() => {
     setCursorStack((prev) => prev.slice(0, -1));
