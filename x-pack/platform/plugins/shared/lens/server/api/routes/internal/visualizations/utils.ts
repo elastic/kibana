@@ -24,7 +24,7 @@ export function getLensInternalRequestConfig(
   request: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
   const chartType = builder.getType(request);
-  const useApiFormat = builder.isSupported(chartType);
+  const useApiFormat = builder.isEnabled && builder.isSupported(chartType);
 
   if (useApiFormat) {
     const config = request as LensApiSchemaType;

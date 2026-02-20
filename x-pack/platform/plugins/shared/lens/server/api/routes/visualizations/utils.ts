@@ -6,7 +6,7 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
 import type {
@@ -21,9 +21,8 @@ import type {
  */
 export function getLensRequestConfig(
   builder: LensConfigBuilder,
-  request: LensCreateRequestBody | LensUpdateRequestBody
+  config: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
-  const config = request as LensApiSchemaType;
   const attributes = builder.fromAPIFormat(config);
 
   return {
