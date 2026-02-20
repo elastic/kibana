@@ -22,7 +22,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Get Lens visualization',
     description: 'Get a Lens visualization from id.',

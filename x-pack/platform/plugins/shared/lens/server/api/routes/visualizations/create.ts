@@ -25,7 +25,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const createRoute = router.post({
     path: `${LENS_VIS_API_PATH}/{id?}`,
-    access: 'public',
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',

@@ -23,7 +23,7 @@ export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
 
-export const LENS_API_VERSION = '2023-10-31';
+export const LENS_API_VERSION = '1'; // to be public in 9.4
 export const LENS_INTERNAL_API_VERSION = '1';
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';

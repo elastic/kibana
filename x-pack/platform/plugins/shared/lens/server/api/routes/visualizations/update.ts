@@ -25,7 +25,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Update Lens visualization',
     description: 'Update an existing Lens visualization.',

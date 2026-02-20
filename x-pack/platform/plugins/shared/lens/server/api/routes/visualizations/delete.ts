@@ -18,7 +18,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const deleteRoute = router.delete({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'public',
+    access: 'internal', // to go public in 9.4
     enableQueryVersion: true,
     summary: 'Delete Lens visualization',
     description: 'Delete a Lens visualization by id.',
