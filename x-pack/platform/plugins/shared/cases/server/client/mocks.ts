@@ -35,6 +35,7 @@ import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
+import type { TemplatesSubClient } from './templates/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -42,6 +43,7 @@ import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createUnifiedAttachmentTypeRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -53,6 +55,7 @@ import {
   createLicensingServiceMock,
   createUserActionServiceMock,
   createNotificationServiceMock,
+  createTemplatesServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 
@@ -135,6 +138,20 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   });
 };
 
+type TemplatesSubClientMock = jest.Mocked<TemplatesSubClient>;
+
+const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
+  return lazyObject({
+    getAllTemplates: jest.fn(),
+    getTemplate: jest.fn(),
+    createTemplate: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -149,6 +166,7 @@ export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
+  templates: TemplatesSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -158,6 +176,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
+    templates: createTemplatesSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -208,6 +227,7 @@ export const createCasesClientMockArgs = () => {
       userActionService: createUserActionServiceMock(),
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
+      templatesService: createTemplatesServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
@@ -222,6 +242,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -258,6 +279,7 @@ export const createCasesClientFactoryMockArgs = () => {
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
   };
 };
 

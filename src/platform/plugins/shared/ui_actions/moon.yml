@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-mount'
   - '@kbn/std'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod
@@ -38,6 +39,7 @@ tags:
 fileGroups:
   src:
     - public/**/*
+    - common/**/*
     - '!target/**/*'
 tasks:
   jest:

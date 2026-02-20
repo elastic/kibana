@@ -13,29 +13,21 @@ UI Actions plugins provides API to manage **triggers** and **actions**.
 
 In general this plugin provides:
 
-* Creating custom functionality (actions).
-* Creating custom user interaction events (triggers).
-* Attaching and detaching actions to triggers.
-* Emitting trigger events.
-* Executing actions attached to a given trigger.
-* Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+- Creating custom functionality (actions).
+- Creating custom user interaction events (triggers).
+- Attaching and detaching actions to triggers.
+- Emitting trigger events.
+- Executing actions attached to a given trigger.
+- Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 ## Basic usage [_basic_usage]
 
-To get started, first you need to know a trigger you will attach your actions to. You can either pick an existing one, or register your own one:
+To get started, first you need to know a trigger you will attach your actions to. See `src/platform/plugins/shared/ui_actions/common/trigger_ids.ts` for a list of available triggers.
+
+Now, when user clicks on a UI element you need to "trigger" your trigger and provide some context data:
 
 ```typescript
-plugins.uiActions.registerTrigger({
-  id: 'MY_APP_PIE_CHART_CLICK',
-  title: 'Pie chart click',
-  description: 'When user clicks on a pie chart slice.',
-});
-```
-
-Now, when user clicks on a pie slice you need to "trigger" your trigger and provide some context data:
-
-```typescript
-plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
+plugins.uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
   /* Custom context data. */
 });
 ```
@@ -50,14 +42,11 @@ plugins.uiActions.registerAction({
     // Do something.
   },
 });
-plugins.uiActions.attachAction('MY_APP_PIE_CHART_CLICK', 'DO_SOMETHING');
+plugins.uiActions.attachAction('VALUE_CLICK_TRIGGER', 'DO_SOMETHING');
 ```
 
-Now your `DO_SOMETHING` action will automatically execute when `MY_APP_PIE_CHART_CLICK` trigger is triggered; or, if more than one compatible action is attached to that trigger, user will be presented with a context menu popup to select one action to execute.
-
+Now your `DO_SOMETHING` action will automatically execute when `VALUE_CLICK_TRIGGER` trigger is triggered; or, if more than one compatible action is attached to that trigger, user will be presented with a context menu popup to select one action to execute.
 
 ## Examples [_examples_9]
 
-[ui_action examples](https://github.com/elastic/kibana/blob/main/examples/ui_action_examples/README.md)
-
-
+[TODO: Recreate a new UI action example once the new post-trigger registry paradigm is finalized]

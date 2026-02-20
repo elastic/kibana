@@ -75,7 +75,6 @@ it(`#setup returns exposed services`, () => {
 
   const authorizationService = new AuthorizationService();
   const getClusterClient = () => Promise.resolve(mockClusterClient);
-  const getUiamService = jest.fn();
   const authz = authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
@@ -86,7 +85,6 @@ it(`#setup returns exposed services`, () => {
     packageVersion: 'some-version',
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
-    getUiamService,
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
   });
@@ -97,7 +95,6 @@ it(`#setup returns exposed services`, () => {
   expect(checkPrivilegesFactory).toHaveBeenCalledWith(
     authz.actions,
     getClusterClient,
-    getUiamService,
     authz.applicationName
   );
 
@@ -154,7 +151,6 @@ describe('#start', () => {
       getSpacesService: jest
         .fn()
         .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
-      getUiamService: jest.fn(),
       getCurrentUser: jest.fn(),
       customBranding: mockCoreSetup.customBranding,
     });
@@ -227,7 +223,6 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     getSpacesService: jest
       .fn()
       .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
-    getUiamService: jest.fn(),
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
   });

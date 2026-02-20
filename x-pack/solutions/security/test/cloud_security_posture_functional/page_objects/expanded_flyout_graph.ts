@@ -102,6 +102,16 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     return nodes[0];
   }
 
+  async assertNodeExists(nodeId: string): Promise<void> {
+    await this.waitGraphIsLoaded();
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    await graph.scrollIntoView();
+    const nodes = await graph.findAllByCssSelector(
+      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
+    );
+    expect(nodes.length).to.be(1);
+  }
+
   async clickOnNodeExpandButton(
     nodeId: string,
     popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
@@ -194,7 +204,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async addFilter(filter: Filter): Promise<void> {
+    await this.showSearchBar();
     await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > addFilter`);
+    await this.testSubjects.existOrFail('filter-0', { timeout: 5000 });
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
