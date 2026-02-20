@@ -49,6 +49,31 @@ describe('transformEnhancementsOut', () => {
     `);
   });
 
+  test('should convert dashboard drilldown event with VALUE_CLICK_TRIGGER', () => {
+    const state = {
+      enhancements: {
+        dynamicActions: {
+          events: [
+            {
+              action: {
+                config: {
+                  openInNewTab: false,
+                  useCurrentDateRange: true,
+                  useCurrentFilters: true,
+                },
+                factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
+                name: 'Go to Dashboard',
+              },
+              eventId: '8aeddba7-a7ed-42e2-988e-794c8435028d',
+              triggers: ['VALUE_CLICK_TRIGGER'],
+            },
+          ],
+        },
+      },
+    };
+    expect(transformEnhancementsOut(state).drilldowns?.[0].trigger).toBe('FILTER_TRIGGER');
+  });
+
   test('should convert discover drilldown event', () => {
     const state = {
       enhancements: {

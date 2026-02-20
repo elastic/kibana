@@ -157,6 +157,7 @@ export function EditPolicyModal({
               }}
               color="subdued"
               data-test-subj="editPolicyModal-affectedResourcesList"
+              tabIndex={0}
             >
               <EuiFlexGroup direction="column" gutterSize="s">
                 {affectedResources.map((resource) => (
