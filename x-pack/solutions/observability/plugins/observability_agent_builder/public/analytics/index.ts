@@ -10,12 +10,12 @@ import {
   insightFailedEventSchema,
   insightFeedbackEventSchema,
   insightResponseGeneratedEventSchema,
-} from './schemas/insight_feedback';
+} from './schemas/ai_insight_events';
 import type {
   InsightFailedEvent,
   InsightFeedbackEvent,
   InsightResponseGeneratedEvent,
-} from './schemas/insight_feedback';
+} from './schemas/ai_insight_events';
 import type { ObservabilityAgentBuilderTelemetryEventType } from './telemetry_event_type';
 
 export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
@@ -56,4 +56,4 @@ export type {
   InsightFeedbackEvent,
   InsightResponseGeneratedEvent,
   InsightType,
-} from './schemas/insight_feedback';
+} from './schemas/ai_insight_events';
