@@ -664,11 +664,13 @@ describe('discover responsive sidebar', function () {
     const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }) as DataDocuments$,
     };
     const { user } = await renderComponent(propsWithPicker, {}, services);
     // open flyout
-    const fieldsButtons = await screen.findAllByRole('button', { name: /fields/i });
-    await user.click(fieldsButtons[fieldsButtons.length - 1]);
+    await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
 
     // open data view picker
     await user.click(await screen.findByTestId('dataView-switch-link'));
@@ -690,11 +692,13 @@ describe('discover responsive sidebar', function () {
     const propsWithPicker: TestWrapperProps = {
       ...props,
       fieldListVariant: 'button-and-flyout-always',
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }) as DataDocuments$,
     };
     const { user } = await renderComponent(propsWithPicker, {}, services);
     // open flyout
-    const fieldsButtons = await screen.findAllByRole('button', { name: /fields/i });
-    await user.click(fieldsButtons[fieldsButtons.length - 1]);
+    await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
 
     // open data view picker
     await user.click(await screen.findByTestId('dataView-switch-link'));
@@ -717,8 +721,7 @@ describe('discover responsive sidebar', function () {
         undefined
       );
 
-      const fieldsButtons = await screen.findAllByRole('button', { name: /fields/i });
-      await user.click(fieldsButtons[fieldsButtons.length - 1]);
+      await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
 
       expect(screen.queryByTestId('custom-data-view-picker')).not.toBeInTheDocument();
     });
@@ -734,8 +737,7 @@ describe('discover responsive sidebar', function () {
         undefined
       );
 
-      const fieldsButtons = await screen.findAllByRole('button', { name: /fields/i });
-      await user.click(fieldsButtons[fieldsButtons.length - 1]);
+      await user.click(await screen.findByTestId('discover-sidebar-fields-button'));
 
       expect(await screen.findByTestId('custom-data-view-picker')).toBeInTheDocument();
     });
