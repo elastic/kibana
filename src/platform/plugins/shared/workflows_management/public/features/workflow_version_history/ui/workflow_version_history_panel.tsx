@@ -280,6 +280,9 @@ const getPanelStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) =>
       minWidth: 0,
     },
   }),
+  versionEntryCardSelected: css({
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
+  }),
 });
 
 const restoreConfirmTitle = i18n.translate('workflows.versionHistory.restoreConfirmTitle', {
@@ -410,8 +413,9 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
             <>
               {hasUnsavedChanges && (
                 <div
-                  css={styles.currentVersionCard}
+                  css={[styles.currentVersionCard, styles.versionEntryCardSelected]}
                   data-test-subj="workflowVersionHistoryCurrentVersion"
+                  data-selected="true"
                 >
                   <EuiFlexGroup
                     alignItems="center"
@@ -466,15 +470,22 @@ export const WorkflowVersionHistoryPanel = React.memo<WorkflowVersionHistoryPane
                 />
               ) : (
                 <>
-                  {data.items.map((item) => (
-                    <div
-                      key={item.event?.id ?? item['@timestamp'] ?? Math.random()}
-                      css={styles.versionEntryCard}
-                      data-test-subj="workflowVersionHistoryEntry"
-                    >
-                      <VersionHistoryListItem item={item} onRestoreRequest={onRestoreRequest} />
-                    </div>
-                  ))}
+                  {data.items.map((item, index) => {
+                    const isLatestVersion = !hasUnsavedChanges && index === 0;
+                    return (
+                      <div
+                        key={item.event?.id ?? item['@timestamp'] ?? Math.random()}
+                        css={[
+                          styles.versionEntryCard,
+                          isLatestVersion && styles.versionEntryCardSelected,
+                        ]}
+                        data-test-subj="workflowVersionHistoryEntry"
+                        data-selected={isLatestVersion || undefined}
+                      >
+                        <VersionHistoryListItem item={item} onRestoreRequest={onRestoreRequest} />
+                      </div>
+                    );
+                  })}
                   {historyStartedLabel && (
                     <div
                       css={styles.versionEntryCard}
