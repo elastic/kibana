@@ -52,7 +52,7 @@ import type {
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { generateExecutionTaskScope } from './utils';
+import { generateExecutionTaskScope, parseDuration } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
@@ -270,12 +270,9 @@ export class WorkflowsExecutionEnginePlugin
                 const executionStateRepository = new ExecutionStateRepository(
                   coreStart.elasticsearch.client.asInternalUser
                 );
-                const migrationOlderThan = new Date(
-                  Date.now() - config.executionHistory.migration.olderThan.asMilliseconds()
-                );
-                const cleanupOlderThan = new Date(
-                  Date.now() - config.executionHistory.cleanup.olderThan.asMilliseconds()
-                );
+                const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
+                const migrationOlderThan = new Date(Date.now() - intervalMs);
+                const cleanupOlderThan = new Date(Date.now() - intervalMs * 2);
 
                 await workflowExecutionRepository.reindexCompletedWorkflowExecutionsFrom({
                   sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
@@ -533,8 +530,7 @@ export class WorkflowsExecutionEnginePlugin
       .ensureScheduled({
         id: 'workflow:migrate-executions',
         taskType: 'workflow:migrate-executions',
-        // schedule: { interval: '1d' },
-        schedule: { interval: '1m' },
+        schedule: { interval: this.config.executionHistory.lifecycleInterval },
         params: {},
         state: {},
         scope: ['workflows'],

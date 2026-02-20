@@ -33,12 +33,7 @@ const configSchema = schema.object({
     },
   }),
   executionHistory: schema.object({
-    migration: schema.object({
-      olderThan: schema.duration({ defaultValue: '1d' }),
-    }),
-    cleanup: schema.object({
-      olderThan: schema.duration({ defaultValue: '3d' }),
-    }),
+    lifecycleInterval: schema.string({ defaultValue: '1d' }),
   }),
 });
 

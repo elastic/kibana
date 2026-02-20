@@ -129,20 +129,20 @@ Between migration and cleanup, the same execution may temporarily exist in both 
 
 ### Automated Migration
 
-A scheduled Task Manager task handles migration from hot to cold storage:
+A single scheduled Task Manager task handles both migration and cleanup from hot to cold storage. Both thresholds are derived from a single configurable lifecycle interval (default: `1d`):
 
-- **Frequency**: Runs daily (configurable via Task Manager scheduling).
-- **Migration step**: Reindexes terminal (completed, failed, cancelled, skipped) workflow and step executions older than a configurable threshold (default: 1 day) from the execution state index to the respective data streams. Uses ES `reindex` API with `op_type: 'create'` and `conflicts: 'proceed'` for idempotency.
-- **Cleanup step**: Deletes terminal executions older than a separate configurable threshold (default: 3 days) from the execution state index. Only deletes executions belonging to workflow runs where ALL documents (workflow + steps) are in terminal status, preventing partial deletion of still-active workflow runs.
+- **Frequency**: Runs on the configured `lifecycleInterval` (default: daily).
+- **Migration step**: Reindexes terminal (completed, failed, cancelled, skipped) workflow and step executions older than `1 × lifecycleInterval` from the execution state index to the respective data streams. Uses ES `reindex` API with `op_type: 'create'` and `conflicts: 'proceed'` for idempotency.
+- **Cleanup step**: Deletes terminal executions older than `2 × lifecycleInterval` from the execution state index. Only deletes executions belonging to workflow runs where ALL documents (workflow + steps) are in terminal status, preventing partial deletion of still-active workflow runs.
 
-The gap between migration threshold (1 day) and cleanup threshold (3 days) provides a safety buffer — data has multiple migration windows before cleanup considers it for deletion.
+The 2x multiplier guarantees that data has at least one full migration window before cleanup considers it for deletion. Both thresholds are derived from the single `lifecycleInterval` setting to prevent misconfiguration (e.g., cleanup running before migration).
 
 ### Failure Recovery
 
 The migration process is designed to be safe against partial failures at any point:
 
 - **Reindex is idempotent**: The `conflicts: 'proceed'` option means re-running migration for already-migrated documents is a no-op. If the task is interrupted and retried, it simply skips documents that already exist in cold storage.
-- **Cleanup is independent and conservative**: Cleanup only deletes documents older than the cleanup threshold (default: 3 days), which is significantly larger than the migration threshold (default: 1 day). Even if migration fails for an entire day, cleanup will not delete un-migrated data because those documents haven't aged past the cleanup threshold yet.
+- **Cleanup is independent and conservative**: Cleanup only deletes documents older than `2 × lifecycleInterval`, which is always larger than the migration threshold (`1 × lifecycleInterval`). Even if migration fails for one cycle, cleanup will not delete un-migrated data because those documents haven't aged past the cleanup threshold yet.
 - **No transactional coupling**: Migration and cleanup are separate operations within the same task. If reindex succeeds but cleanup fails (or vice versa), the system remains in a consistent state — at worst, data exists in both tiers temporarily, which is handled by deduplication in queries.
 
 ### Multi-Node Safety
@@ -155,10 +155,11 @@ All execution documents carry a `spaceId` field, and all queries — both in hot
 
 ### Configuration
 
-Two configurable duration thresholds are exposed in `kibana.yml`:
+A single configurable interval controls the entire execution history lifecycle in `kibana.yml`:
 
-- `workflowsExecutionEngine.executionHistory.migration.olderThan` (default: `1d`): Age threshold for migrating terminal executions to history data streams.
-- `workflowsExecutionEngine.executionHistory.cleanup.olderThan` (default: `3d`): Age threshold for deleting terminal executions from hot storage.
+- `workflowsExecutionEngine.executionHistory.lifecycleInterval` (default: `1d`): Controls how often the lifecycle task runs, and derives both the migration threshold (`1 × interval`) and the cleanup threshold (`2 × interval`). For example, with the default `1d`: the task runs daily, migrates terminal executions older than 1 day, and cleans up terminal executions older than 2 days.
+
+This single-knob design eliminates the risk of misconfiguration (e.g., setting cleanup to run before migration) while keeping the operational model simple. The 2x multiplier between migration and cleanup is hardcoded as a safety invariant.
 
 ## Key Changes
 
@@ -274,4 +275,4 @@ The migration task should provide visibility into its health and effectiveness. 
 ## Risks and Open Questions
 
 - **Data stream mapping evolution**: Adding or changing mapped fields requires bumping the data stream version. Fields not explicitly mapped are stored in `_source` but not indexed (not searchable).
-- **Tuning migration and cleanup thresholds**: The migration age threshold, cleanup age threshold, and task schedule frequency need to be balanced for production workloads. Too aggressive migration/cleanup could impact hot storage performance during reindex; too conservative could let the execution state index grow unnecessarily. The current defaults (migrate after 1 day, clean up after 3 days, run daily) are a starting point, but optimal values will depend on execution volume, cluster size, and observability requirements. All thresholds are configurable.
+- **Tuning the lifecycle interval**: The `lifecycleInterval` controls both how often the task runs and how long data stays in hot storage. Too aggressive (e.g., `1h`) could cause frequent reindex operations impacting cluster performance; too conservative (e.g., `7d`) could let the execution state index grow unnecessarily. The default (`1d`) is a starting point, but optimal values will depend on execution volume and cluster size.
