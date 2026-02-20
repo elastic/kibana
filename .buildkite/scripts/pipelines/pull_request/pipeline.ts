@@ -256,6 +256,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
+        /^x-pack\/solutions\/security\/test\/scout_defend_workflows/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
       ])) ||
