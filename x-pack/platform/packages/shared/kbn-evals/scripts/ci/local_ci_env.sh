@@ -45,6 +45,7 @@ TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$CONFIG_JSON")"
 TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$CONFIG_JSON")"
 
 TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$CONFIG_JSON")"
+GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$CONFIG_JSON")"
 
 if [[ -z "$LITELLM_BASE_URL" || -z "$LITELLM_VIRTUAL_KEY" ]]; then
   die "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
@@ -62,6 +63,7 @@ export EVALUATIONS_ES_URL
 export EVALUATIONS_ES_API_KEY
 export TRACING_ES_URL
 export TRACING_ES_API_KEY
+export GCS_CREDENTIALS
 if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
   export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
 fi
@@ -118,6 +120,11 @@ if [[ -n "${TRACING_EXPORTERS:-}" ]]; then
   echo "  TRACING_EXPORTERS=<set (JSON array)>"
 else
   echo "  TRACING_EXPORTERS=<empty>"
+fi
+if [[ -n "${GCS_CREDENTIALS:-}" ]]; then
+  echo "  GCS_CREDENTIALS=<set (service account JSON)>"
+else
+  echo "  GCS_CREDENTIALS=<empty>"
 fi
 echo "  Generated connectors: $CONNECTOR_COUNT"
 
