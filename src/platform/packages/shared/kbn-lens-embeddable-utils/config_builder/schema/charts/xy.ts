@@ -291,7 +291,13 @@ const xySharedSettings = {
           }
         ),
       ],
-      { meta: { id: 'xyLegend', description: 'Legend configuration for XY chart' } }
+      {
+        meta: {
+          id: 'xyLegend',
+          title: 'XY Chart Legend',
+          description: 'Legend configuration for XY chart',
+        },
+      }
     )
   ),
 
@@ -360,7 +366,13 @@ const xySharedSettings = {
         left: schema.maybe(yAxisSchema),
         right: schema.maybe(yAxisSchema),
       },
-      { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
+      {
+        meta: {
+          id: 'xyAxis',
+          title: 'XY Axis',
+          description: 'Axis configuration for X, left Y, and right Y axes',
+        },
+      }
     )
   ),
   decorations: schema.maybe(decorationsSchema),
@@ -397,6 +409,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyLayerNoESQL',
+      title: 'XY Layer (DSL)',
       description: 'Data layer for standard queries with metrics and buckets',
     },
   }
@@ -431,7 +444,11 @@ const xyDataLayerSchemaESQL = schema.object(
     x: schema.maybe(esqlColumnSchema),
   },
   {
-    meta: { id: 'xyLayerESQL', description: 'Data layer for ES|QL queries with column references' },
+    meta: {
+      id: 'xyLayerESQL',
+      title: 'XY Layer (ES|QL)',
+      description: 'Data layer for ES|QL queries with column references',
+    },
   }
 );
 
@@ -517,6 +534,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyReferenceLineLayerNoESQL',
+      title: 'XY Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
     },
   }
@@ -537,7 +555,11 @@ const referenceLineLayerSchemaESQL = schema.object(
     }),
   },
   {
-    meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
+    meta: {
+      id: 'xyReferenceLineLayerESQL',
+      title: 'XY Reference Line Layer (ES|QL)',
+      description: 'Reference line layer for ES|QL queries',
+    },
   }
 );
 
@@ -693,6 +715,7 @@ const annotationLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationLayerNoESQL',
+      title: 'XY Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
     },
   }
@@ -725,7 +748,7 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { id: 'xyChart', description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChart', title: 'XY Chart', description: 'Complete XY chart configuration' } }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;

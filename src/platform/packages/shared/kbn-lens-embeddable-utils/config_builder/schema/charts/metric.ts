@@ -40,7 +40,7 @@ const compareToSchemaShared = schema.object(
       schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
     ),
   },
-  { meta: { id: 'metricChartCompareToShared' } }
+  { meta: { id: 'metricChartCompareToShared', title: 'Metric Compare To Shared' } }
 );
 
 const barBackgroundChartSchema = schema.object({
@@ -73,13 +73,19 @@ export const complementaryVizSchemaESQL = schema.oneOf([
        */
       goal_value: esqlColumnSchema,
     },
-    { meta: { id: 'metricComplementaryBar' } }
+    { meta: { id: 'metricComplementaryBar', title: 'Metric Complementary Bar' } }
   ),
   schema.object(
     {
       type: schema.literal('trend'),
     },
-    { meta: { id: 'metricComplementaryTrend', description: 'Trend complementary viz' } }
+    {
+      meta: {
+        id: 'metricComplementaryTrend',
+        title: 'Metric Complementary Trend',
+        description: 'Trend complementary viz',
+      },
+    }
   ),
 ]);
 
@@ -138,7 +144,7 @@ const metricStatePrimaryMetricOptionsSchema = {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
         value: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
       },
-      meta: { id: 'metricPrimaryMetricAlignments' },
+      meta: { id: 'metricPrimaryMetricAlignments', title: 'Metric Primary Metric Alignments' },
     }
   ),
   /**
@@ -165,7 +171,13 @@ const metricStatePrimaryMetricOptionsSchema = {
           defaultValue: LENS_METRIC_STATE_DEFAULTS.iconAlign,
         }),
       },
-      { meta: { id: 'metricIconConfig', description: 'Icon configuration for primary metric' } }
+      {
+        meta: {
+          id: 'metricIconConfig',
+          title: 'Metric Icon Configuration',
+          description: 'Icon configuration for primary metric',
+        },
+      }
     )
   ),
   /**
@@ -197,13 +209,13 @@ const metricStateSecondaryMetricOptionsSchema = {
           to: schema.literal('baseline'),
           baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
         },
-        { meta: { id: 'metricCompareToBaseline' } }
+        { meta: { id: 'metricCompareToBaseline', title: 'Metric Compare To Baseline' } }
       ),
       compareToSchemaShared.extends(
         {
           to: schema.literal('primary'),
         },
-        { meta: { id: 'metricCompareToPrimary' } }
+        { meta: { id: 'metricCompareToPrimary', title: 'Metric Compare To Primary' } }
       ),
     ])
   ),
@@ -320,7 +332,7 @@ export const esqlMetricState = schema.object({
 });
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
-  meta: { id: 'metricChart' },
+  meta: { id: 'metricChart', title: 'Metric Chart' },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
