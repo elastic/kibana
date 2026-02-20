@@ -19,6 +19,8 @@ interface ViewResultsInDiscoverActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
@@ -26,11 +28,17 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   buttonType,
   endDate,
   startDate,
+  scheduleId,
+  executionCount,
 }) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover_v2;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
+  const isScheduled = !!(scheduleId && executionCount != null);
+  const { data: logsDataView } = useLogsDataView({
+    skip: !actionId && !isScheduled,
+    checkOnly: true,
+  });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
@@ -38,23 +46,56 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
 
+      const filters = isScheduled
+        ? [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'schedule_id',
+                params: { query: scheduleId },
+              },
+              query: { match_phrase: { schedule_id: scheduleId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'osquery_meta.schedule_execution_count',
+                params: { query: executionCount },
+              },
+              query: {
+                match_phrase: { 'osquery_meta.schedule_execution_count': executionCount },
+              },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ]
+        : [
+            {
+              meta: {
+                index: logsDataView.id,
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'action_id',
+                params: { query: actionId },
+              },
+              query: { match_phrase: { action_id: actionId } },
+              $state: { store: FilterStateStore.APP_STATE },
+            },
+          ];
+
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
-        filters: [
-          {
-            meta: {
-              index: logsDataView.id,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
-            },
-            query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
+        filters,
         refreshInterval: {
           pause: true,
           value: 0,
@@ -76,7 +117,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView]);
+  }, [actionId, endDate, startDate, locator, logsDataView, isScheduled, scheduleId, executionCount]);
 
   if (!discoverPermissions.show) {
     return null;
@@ -97,7 +138,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         aria-label={VIEW_IN_DISCOVER}
         href={discoverUrl}
         target="_blank"
-        isDisabled={!actionId || !discoverUrl.length}
+        isDisabled={(!actionId && !isScheduled) || !discoverUrl.length}
       />
     </EuiToolTip>
   );

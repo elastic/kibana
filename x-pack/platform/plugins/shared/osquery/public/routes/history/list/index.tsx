@@ -24,7 +24,6 @@ const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 const HistoryPageComponent = () => {
-  console.log('here');
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   useBreadcrumbs('history');
 

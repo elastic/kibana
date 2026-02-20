@@ -8,8 +8,9 @@
 import type { FactoryQueryTypes } from '../../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 
-import { allActions, actionDetails, actionResults } from './actions';
+import { allActions, actionDetails, actionResults, scheduledActionResults } from './actions';
 import { allResults } from './results';
+import { scheduledResults } from './results/scheduled_results';
 
 import type { OsqueryFactory } from './types';
 
@@ -18,4 +19,6 @@ export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQue
   [OsqueryQueries.actionDetails]: actionDetails,
   [OsqueryQueries.actionResults]: actionResults,
   [OsqueryQueries.results]: allResults,
+  [OsqueryQueries.scheduledActionResults]: scheduledActionResults,
+  [OsqueryQueries.scheduledResults]: scheduledResults,
 };

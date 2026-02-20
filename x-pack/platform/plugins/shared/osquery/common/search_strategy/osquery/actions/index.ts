@@ -91,3 +91,31 @@ export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];
 }
+
+export interface ScheduledActionResultsRequestOptions extends RequestOptionsPaginated {
+  scheduleId: string;
+  executionCount: number;
+}
+
+export interface ScheduledActionResultsStrategyResponse
+  extends IKibanaSearchResponse<
+    estypes.SearchResponse<
+      object,
+      {
+        aggs: {
+          responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
+            rows_count: estypes.AggregationsSumAggregate;
+            responses: {
+              buckets: Array<{
+                key: string;
+                doc_count: number;
+              }>;
+            };
+          };
+        };
+      }
+    >
+  > {
+  edges: ActionResultEdges;
+  inspect?: Maybe<Inspect>;
+}

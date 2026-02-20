@@ -14,9 +14,6 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import { packSavedObjectType } from '../../../common/types';
-import type { PackSavedObject } from '../../common/types';
 import { OsqueryQueries, Direction } from '../../../common/search_strategy';
 import type {
   ScheduledActionResultsRequestOptions,
@@ -24,14 +21,18 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
-export const getScheduledExecutionDetailsRoute = (
+/**
+ * Returns agent-level action response data for a scheduled execution,
+ * mirroring the response shape of GET /api/osquery/action_results/{actionId}.
+ */
+export const getScheduledActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
   osqueryContext: OsqueryAppContext
 ) => {
   router.versioned
     .get({
       access: 'internal',
-      path: '/internal/osquery/history/scheduled/{scheduleId}/{executionCount}',
+      path: '/internal/osquery/scheduled_results/{scheduleId}/{executionCount}',
       security: {
         authz: {
           requiredPrivileges: [`${PLUGIN_ID}-read`],
@@ -47,6 +48,13 @@ export const getScheduledExecutionDetailsRoute = (
               scheduleId: schema.string(),
               executionCount: schema.number(),
             }),
+            query: schema.object({
+              page: schema.maybe(schema.number()),
+              pageSize: schema.maybe(schema.number()),
+              sort: schema.maybe(schema.string()),
+              sortOrder: schema.maybe(schema.string()),
+              kuery: schema.maybe(schema.string()),
+            }),
           },
         },
       },
@@ -55,38 +63,12 @@ export const getScheduledExecutionDetailsRoute = (
 
         try {
           const { scheduleId, executionCount } = request.params;
-
-          // 1. Look up pack context to find packName, queryId, queryText
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-          const packResults = await spaceScopedClient.find<PackSavedObject>({
-            type: packSavedObjectType,
-            perPage: 1000,
-          });
-
-          let packName: string | undefined;
-          let queryId: string | undefined;
-          let queryText: string | undefined;
-
-          for (const packSO of packResults.saved_objects) {
-            const queries = packSO.attributes.queries ?? [];
-            const matchingQuery = queries.find(
-              (q: { schedule_id?: string }) => q.schedule_id === scheduleId
-            );
-            if (matchingQuery) {
-              packName = packSO.attributes.name;
-              queryId = matchingQuery.id;
-              queryText = matchingQuery.query;
-              break;
-            }
-          }
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
 
           const search = await context.search;
 
-          // 2. Fetch stats via aggregations (size: 1 just for timestamp)
-          const actionRes = await lastValueFrom(
+          const res = await lastValueFrom(
             search.search<
               ScheduledActionResultsRequestOptions,
               ScheduledActionResultsStrategyResponse
@@ -95,41 +77,39 @@ export const getScheduledExecutionDetailsRoute = (
                 scheduleId,
                 executionCount,
                 factoryQueryType: OsqueryQueries.scheduledActionResults,
-                pagination: generateTablePaginationOptions(0, 1),
+                pagination: generateTablePaginationOptions(page, pageSize),
                 sort: {
-                  direction: Direction.desc,
-                  field: '@timestamp',
+                  direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                  field: request.query.sort ?? '@timestamp',
                 },
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
           );
 
-          const responseAgg = actionRes.rawResponse?.aggregations?.aggs?.responses_by_action_id;
+          const responseAgg = res.rawResponse?.aggregations?.aggs.responses_by_action_id;
           const totalResponded = responseAgg?.doc_count ?? 0;
-          const totalRows = responseAgg?.rows_count?.value ?? 0;
-          const aggsBuckets = responseAgg?.responses?.buckets;
-          const successCount =
-            aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-          const errorCount =
-            aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
+          const totalRowCount = responseAgg?.rows_count?.value ?? 0;
+          const aggsBuckets = responseAgg?.responses.buckets;
 
-          const timestamp =
-            actionRes.edges.length > 0
-              ? ((actionRes.edges[0]._source ?? {}) as Record<string, unknown>)['@timestamp']
-              : undefined;
+          const aggregations = {
+            totalRowCount,
+            totalResponded,
+            successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+            failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+            pending: 0,
+          };
+
+          const totalPages = Math.ceil(totalResponded / pageSize);
 
           return response.ok({
             body: {
-              scheduleId,
-              executionCount,
-              packName,
-              queryText: queryText ?? '',
-              timestamp,
-              agentCount: totalResponded,
-              successCount,
-              errorCount,
-              totalRows,
+              edges: res.edges,
+              total: totalResponded,
+              currentPage: page,
+              pageSize,
+              totalPages,
+              aggregations,
             },
           });
         } catch (err) {

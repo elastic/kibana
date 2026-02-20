@@ -25,3 +25,14 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   sort: SortField[];
   integrationNamespaces?: string[];
 }
+
+export interface ScheduledResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
+  scheduleId: string;
+  executionCount: number;
+  sort: SortField[];
+}
+
+export interface ScheduledResultsStrategyResponse extends IEsSearchResponse {
+  edges: ResultEdges;
+  inspect?: Maybe<Inspect>;
+}

@@ -27,6 +27,8 @@ interface ViewResultsInLensActionProps {
   endDate?: string;
   startDate?: string;
   mode?: string;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
@@ -35,10 +37,16 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   endDate,
   startDate,
   mode,
+  scheduleId,
+  executionCount,
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
+  const isScheduled = !!(scheduleId && executionCount != null);
+  const { data: logsDataView } = useLogsDataView({
+    skip: !actionId && !isScheduled,
+    checkOnly: true,
+  });
 
   const handleClick = useCallback(
     (event: any) => {
@@ -53,7 +61,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId),
+            attributes: getLensAttributes(logsDataView, actionId, undefined, scheduleId, executionCount),
           },
           {
             openInNewTab: true,
@@ -62,10 +70,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
         );
       }
     },
-    [actionId, endDate, lensService, logsDataView, mode, startDate]
+    [actionId, endDate, lensService, logsDataView, mode, startDate, scheduleId, executionCount]
   );
 
-  const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
+  const isDisabled = useMemo(
+    () => (!actionId && !isScheduled) || !logsDataView,
+    [actionId, isScheduled, logsDataView]
+  );
 
   if (!isLensAvailable) {
     return null;
@@ -95,8 +106,11 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 function getLensAttributes(
   logsDataView: LogsDataView,
   actionId?: string,
-  agentIds?: string[]
+  agentIds?: string[],
+  scheduleId?: string,
+  executionCount?: number
 ): TypedLensByValueInput['attributes'] {
+  const isScheduled = !!(scheduleId && executionCount != null);
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
     columns: {
@@ -184,25 +198,52 @@ function getLensAttributes(
         },
       },
       filters: [
-        {
-          $state: { store: FilterStateStore.APP_STATE },
-          meta: {
-            index: 'filter-index-pattern-0',
-            negate: false,
-            alias: null,
-            disabled: false,
-            params: {
-              query: actionId,
-            },
-            type: 'phrase',
-            key: 'action_id',
-          },
-          query: {
-            match_phrase: {
-              action_id: actionId,
-            },
-          },
-        },
+        ...(isScheduled
+          ? [
+              {
+                $state: { store: FilterStateStore.APP_STATE },
+                meta: {
+                  index: 'filter-index-pattern-0',
+                  negate: false,
+                  alias: null,
+                  disabled: false,
+                  params: { query: scheduleId },
+                  type: 'phrase',
+                  key: 'schedule_id',
+                },
+                query: { match_phrase: { schedule_id: scheduleId } },
+              },
+              {
+                $state: { store: FilterStateStore.APP_STATE },
+                meta: {
+                  index: 'filter-index-pattern-0',
+                  negate: false,
+                  alias: null,
+                  disabled: false,
+                  params: { query: executionCount },
+                  type: 'phrase',
+                  key: 'osquery_meta.schedule_execution_count',
+                },
+                query: {
+                  match_phrase: { 'osquery_meta.schedule_execution_count': executionCount },
+                },
+              },
+            ]
+          : [
+              {
+                $state: { store: FilterStateStore.APP_STATE },
+                meta: {
+                  index: 'filter-index-pattern-0',
+                  negate: false,
+                  alias: null,
+                  disabled: false,
+                  params: { query: actionId },
+                  type: 'phrase',
+                  key: 'action_id',
+                },
+                query: { match_phrase: { action_id: actionId } },
+              },
+            ]),
         ...(agentIdsQuery
           ? [
               {
