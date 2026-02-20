@@ -10,7 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { registerStreamsUsageCollector } from './streams_usage_collector';
-import { createStreamsStorageClient } from '../../streams/storage/streams_storage_client';
+import { createStreamsStorageClient } from '../../stream_management/storage/streams_storage_client';
 import type { StreamsUsageReader } from './streams_usage_collector';
 
 /**

@@ -11,7 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { hasChangedRetention, hasProcessingSteps, hasFieldOverrides } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
-import { getErrorMessage } from '../../streams/errors/parse_error';
+import { getErrorMessage } from '../../errors/parse_error';
 
 // Reader abstraction to hide storage/client specifics from the collector
 export interface StreamsUsageReader {

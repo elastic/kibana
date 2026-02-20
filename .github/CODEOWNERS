@@ -1703,13 +1703,28 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-presentation-team @elastic/obs-exploration-team
 
-## Streams parts owned by Logs UX
-/x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-onboarding-team
-/x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-onboarding-team
-/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+## Streams parts owned by obs-onboarding-team
+/x-pack/platform/plugins/shared/streams/server/lib/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams/server/routes/internal/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams/server/routes/public/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/public/hooks/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/public/components/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/packages/shared/kbn-streams-ai/src/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/packages/shared/kbn-streams-schema/src/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/stream_management/ @elastic/obs-onboarding-team
+
+# Streams parts owned by obs-sig-events-team
+/x-pack/platform/plugins/shared/streams/server/lib/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams/server/routes/public/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams_app/public/components/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/packages/shared/kbn-streams-ai/src/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/packages/shared/kbn-streams-schema/src/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/sig_events/ @elastic/obs-sig-events-team
 
 # Streams parts owned by Kibana Management
-x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling/ @elastic/kibana-management
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1854,11 +1869,16 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 
 # Streams
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/obs-sig-events-team  @elastic/obs-onboarding-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/stream_management/ @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
-
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/ @elastic/obs-sig-events-team @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/sig_events/ @elastic/obs-sig-events-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/stream_management/ @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/sig_events/ @elastic/obs-sig-events-team
 
 ### END Observability Plugins
 

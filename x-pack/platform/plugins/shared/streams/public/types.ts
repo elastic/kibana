@@ -11,7 +11,10 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { StreamsRepositoryClient } from './api';
 import type { StreamsPublicConfig } from '../common/config';
-import type { EnableStreamsResponse, DisableStreamsResponse } from '../server/lib/streams/client';
+import type {
+  EnableStreamsResponse,
+  DisableStreamsResponse,
+} from '../server/lib/stream_management/client';
 
 export interface StreamsNavigationStatus {
   status: 'enabled' | 'disabled';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTimeUnitLabel } from '../../helpers/format_size_units';
+import { getTimeUnitLabel } from '../../../../stream_management/data_management/stream_detail_lifecycle/helpers/format_size_units';
 import type { TimeUnit } from './time_unit_types';
 
 export const TIME_UNIT_OPTIONS: ReadonlyArray<{ value: TimeUnit; text: string }> = [

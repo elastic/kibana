@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { crudRoutes } from './streams/crud/route';
-import { enablementRoutes } from './streams/enablement/route';
-import { managementRoutes } from './streams/management/route';
-import { internalSchemaRoutes } from './internal/streams/schema/route';
-import { internalProcessingRoutes } from './internal/streams/processing/route';
-import { ingestRoutes } from './streams/ingest/route';
-import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
-import { queryStreamRoutes } from './streams/query/route';
-import { contentRoutes } from './content/route';
-import { internalCrudRoutes } from './internal/streams/crud/route';
-import { internalManagementRoutes } from './internal/streams/management/route';
-import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
-import { internalPromptsRoutes } from './internal/streams/prompts/route';
-import { internalSignificantEventsRoutes } from './internal/streams/significant_events/route';
-import { significantEventsRoutes } from './streams/significant_events/route';
-import { queryRoutes } from './queries/route';
-import { failureStoreRoutes } from './internal/streams/failure_store/route';
-import { internalIngestRoutes } from './internal/streams/ingest/route';
-import { connectorRoutes } from './internal/connectors/route';
-import { docCountsRoutes } from './streams/doc_counts/route';
-import { attachmentRoutes } from './attachments/route';
-import { internalAttachmentRoutes } from './internal/attachments/route';
-import { internalDescriptionGenerationRoutes } from './internal/streams/description_generation/route';
-import { featureRoutes as internalFeatureRoutes } from './internal/streams/features/route';
-import { internalInsightsRoutes } from './internal/streams/insights/route';
-import { internalTasksRoutes } from './internal/streams/tasks/route';
-import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
-import { internalQueriesRoutes } from './internal/streams/queries/route';
+import { crudRoutes } from './public/stream_management/crud/route';
+import { enablementRoutes } from './public/stream_management/enablement/route';
+import { managementRoutes } from './public/stream_management/management/route';
+import { internalSchemaRoutes } from './internal/stream_management/schema/route';
+import { internalProcessingRoutes } from './internal/stream_management/processing/route';
+import { ingestRoutes } from './public/stream_management/ingest/route';
+import { internalLifecycleRoutes } from './internal/stream_management/lifecycle/route';
+import { queryStreamRoutes } from './public/sig_events/query/route';
+import { contentRoutes } from './public/stream_management/content/route';
+import { internalCrudRoutes } from './internal/stream_management/crud/route';
+import { internalManagementRoutes } from './internal/stream_management/management/route';
+import { systemRoutes as internalSystemsRoutes } from './internal/sig_events/systems/route';
+import { internalPromptsRoutes } from './internal/sig_events/prompts/route';
+import { internalSignificantEventsRoutes } from './internal/sig_events/significant_events/route';
+import { significantEventsRoutes } from './public/sig_events/significant_events/route';
+import { queryRoutes } from './public/sig_events/queries/route';
+import { failureStoreRoutes } from './internal/stream_management/failure_store/route';
+import { internalIngestRoutes } from './internal/stream_management/ingest/route';
+import { connectorRoutes } from './internal/stream_management/connectors/route';
+import { docCountsRoutes } from './public/stream_management/doc_counts/route';
+import { attachmentRoutes } from './public/stream_management/attachments/route';
+import { internalAttachmentRoutes } from './internal/stream_management/attachments/route';
+import { internalDescriptionGenerationRoutes } from './internal/sig_events/description_generation/route';
+import { featureRoutes as internalFeatureRoutes } from './internal/sig_events/features/route';
+import { internalInsightsRoutes } from './internal/sig_events/insights/route';
+import { internalTasksRoutes } from './internal/sig_events/tasks/route';
+import { internalOnboardingRoutes } from './internal/sig_events/onboarding/route';
+import { internalQueriesRoutes } from './internal/sig_events/queries/route';
 
 export const streamsRouteRepository = {
   // internal APIs

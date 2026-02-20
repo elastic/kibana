@@ -11,8 +11,8 @@ import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom'
 import { errors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import type { StreamsRouteHandlerResources } from './types';
-import { StatusError } from '../lib/streams/errors/status_error';
-import { AggregateStatusError } from '../lib/streams/errors/aggregate_status_error';
+import { StatusError } from '../lib/errors/status_error';
+import { AggregateStatusError } from '../lib/errors/aggregate_status_error';
 
 const createPlainStreamsServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();
 
