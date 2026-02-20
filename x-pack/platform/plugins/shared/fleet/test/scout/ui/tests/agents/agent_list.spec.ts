@@ -28,7 +28,12 @@ const POLICIES = [
 
 test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ kbnClient, esClient }) => {
-    await deleteDocsByQuery(esClient, '.fleet-agents', { match_all: {} }, { ignoreUnavailable: true });
+    await deleteDocsByQuery(
+      esClient,
+      '.fleet-agents',
+      { match_all: {} },
+      { ignoreUnavailable: true }
+    );
     await cleanupAgentPolicies(kbnClient);
     await setupFleetServer(kbnClient, esClient, '8.1.0');
 
@@ -50,7 +55,12 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
 
   test.afterAll(async ({ kbnClient, esClient }) => {
     try {
-      await deleteDocsByQuery(esClient, '.fleet-agents', { match_all: {} }, { ignoreUnavailable: true });
+      await deleteDocsByQuery(
+        esClient,
+        '.fleet-agents',
+        { match_all: {} },
+        { ignoreUnavailable: true }
+      );
       await cleanupAgentPolicies(kbnClient);
     } catch {
       // Ignore
@@ -60,10 +70,20 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.route('**/api/fleet/agents/setup', (route) =>
-      route.fulfill({ status: 200, body: JSON.stringify({ isReady: true, missing_optional_features: [], missing_requirements: [] }) })
+      route.fulfill({
+        status: 200,
+        body: JSON.stringify({
+          isReady: true,
+          missing_optional_features: [],
+          missing_requirements: [],
+        }),
+      })
     );
     await page.route('**/api/fleet/setup', (route) =>
-      route.fulfill({ status: 200, body: JSON.stringify({ isInitialized: true, nonFatalErrors: [] }) })
+      route.fulfill({
+        status: 200,
+        body: JSON.stringify({ isInitialized: true, nonFatalErrors: [] }),
+      })
     );
     await page.route('**/api/fleet/agents_status', (route) =>
       route.fulfill({
@@ -88,26 +108,34 @@ test.describe('View agents list', { tag: [...tags.stateful.classic] }, () => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).fill('agent.id: "agent-1"');
     await page.keyboard.press('Enter');
-    await expect(page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')).toBeVisible();
+    await expect(
+      page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')
+    ).toBeVisible();
   });
 
   test('should only show agents with upgrade available after click', async ({ page }) => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
-    await expect(page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')).toBeVisible();
+    await expect(
+      page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')
+    ).toBeVisible();
   });
 
   test('should filter on single policy (no results)', async ({ page }) => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
     await page.getByText('Agent policy 4').first().click();
-    await expect(page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('No agents found')).toBeVisible();
+    await expect(
+      page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('No agents found')
+    ).toBeVisible();
   });
 
   test('should filter on single policy', async ({ page }) => {
     await page.goto('/app/fleet/agents');
     await page.testSubj.locator(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
     await page.getByText('Agent policy 1').first().click();
-    await expect(page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')).toBeVisible();
+    await expect(
+      page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).getByText('agent-1')
+    ).toBeVisible();
   });
 });

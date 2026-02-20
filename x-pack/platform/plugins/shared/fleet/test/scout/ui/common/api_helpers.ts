@@ -48,9 +48,15 @@ export async function createAgentPolicy(
   return response.data?.item ?? response.item;
 }
 
-export async function deleteAgentPolicy(kbnClient: any, id: string, spaceId?: string): Promise<void> {
+export async function deleteAgentPolicy(
+  kbnClient: any,
+  id: string,
+  spaceId?: string
+): Promise<void> {
   try {
-    const path = spaceId ? `/s/${spaceId}/api/fleet/agent_policies/delete` : '/api/fleet/agent_policies/delete';
+    const path = spaceId
+      ? `/s/${spaceId}/api/fleet/agent_policies/delete`
+      : '/api/fleet/agent_policies/delete';
     await kbnClient.request({
       method: 'POST',
       path,
@@ -61,10 +67,7 @@ export async function deleteAgentPolicy(kbnClient: any, id: string, spaceId?: st
   }
 }
 
-export async function cleanupAgentPolicies(
-  kbnClient: any,
-  spaceId?: string
-): Promise<void> {
+export async function cleanupAgentPolicies(kbnClient: any, spaceId?: string): Promise<void> {
   try {
     const path = spaceId
       ? `/s/${spaceId}/api/fleet/agent_policies?withAgentCount=true`
@@ -96,7 +99,10 @@ export async function createDownloadSource(
 
 export async function cleanupDownloadSources(kbnClient: any): Promise<void> {
   try {
-    const response = await kbnClient.request({ method: 'GET', path: '/api/fleet/agent_download_sources' });
+    const response = await kbnClient.request({
+      method: 'GET',
+      path: '/api/fleet/agent_download_sources',
+    });
     const items = response.data?.items ?? response.items ?? [];
     const nonDefault = items.filter((ds: any) => !ds.is_default);
 
@@ -115,7 +121,12 @@ export async function cleanupDownloadSources(kbnClient: any): Promise<void> {
   }
 }
 
-export async function insertDoc(esClient: any, index: string, doc: any, id?: string): Promise<void> {
+export async function insertDoc(
+  esClient: any,
+  index: string,
+  doc: any,
+  id?: string
+): Promise<void> {
   await esClient.index({
     index,
     document: doc,
@@ -155,9 +166,10 @@ export async function installTestPackage(
   version: string = 'latest'
 ): Promise<any> {
   // Fleet EPM install: POST /api/fleet/epm/packages/{name}/{version}
-  const path = version === 'latest'
-    ? `/api/fleet/epm/packages/${pkgName}`
-    : `/api/fleet/epm/packages/${pkgName}/${version}`;
+  const path =
+    version === 'latest'
+      ? `/api/fleet/epm/packages/${pkgName}`
+      : `/api/fleet/epm/packages/${pkgName}/${version}`;
   const response = await kbnClient.request({
     method: 'POST',
     path,
@@ -179,12 +191,7 @@ export async function installTestPackageFromZip(
   const pathModule = await import('path');
   const fs = await import('fs').then((m) => m.promises);
   const resolvedPath =
-    zipPath ??
-    pathModule.resolve(
-      __dirname,
-      '../../../../cypress/packages',
-      `${pkgName}.zip`
-    );
+    zipPath ?? pathModule.resolve(__dirname, '../../../../cypress/packages', `${pkgName}.zip`);
   const zipContent = await fs.readFile(resolvedPath);
   const response = await kbnClient.request({
     method: 'POST',
@@ -202,7 +209,9 @@ export async function uninstallTestPackage(
   version?: string
 ): Promise<void> {
   try {
-    const path = version ? `/api/fleet/epm/packages/${pkgName}/${version}` : `/api/fleet/epm/packages/${pkgName}`;
+    const path = version
+      ? `/api/fleet/epm/packages/${pkgName}/${version}`
+      : `/api/fleet/epm/packages/${pkgName}`;
     await kbnClient.request({
       method: 'DELETE',
       path,

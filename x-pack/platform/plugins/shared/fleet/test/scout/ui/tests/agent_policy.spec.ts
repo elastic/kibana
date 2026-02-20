@@ -9,10 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import {
-  setupFleetServer,
-  createAgentPolicy,
-} from '../common/api_helpers';
+import { setupFleetServer, createAgentPolicy } from '../common/api_helpers';
 import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../common/selectors';
 
 test.describe('Edit agent policy', { tag: [...tags.stateful.classic] }, () => {

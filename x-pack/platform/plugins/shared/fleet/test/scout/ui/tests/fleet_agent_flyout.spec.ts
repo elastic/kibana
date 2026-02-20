@@ -29,7 +29,12 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
 
   test.afterAll(async ({ kbnClient, esClient }) => {
     try {
-      await deleteDocsByQuery(esClient, '.fleet-agents', { match: { 'agent.id': 'scout-agent-1' } }, { ignoreUnavailable: true });
+      await deleteDocsByQuery(
+        esClient,
+        '.fleet-agents',
+        { match: { 'agent.id': 'scout-agent-1' } },
+        { ignoreUnavailable: true }
+      );
       await cleanupAgentPolicies(kbnClient);
     } catch {
       // Ignore
@@ -43,15 +48,21 @@ test.describe('Add agent flyout', { tag: [...tags.stateful.classic] }, () => {
   test('should show add agent flyout with Fleet Server already set up', async ({ page }) => {
     await page.gotoApp('fleet');
     await page.testSubj.locator('addAgentButton').click();
-    await page.testSubj.locator(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED).waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj
+      .locator(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED)
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.testSubj.locator(AGENT_FLYOUT.POLICY_DROPDOWN)).toBeVisible();
   });
 
   test('should show incoming data confirmed after enrollment', async ({ page }) => {
     await page.gotoApp('fleet');
     await page.testSubj.locator('addAgentButton').click();
-    await page.testSubj.locator(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED).waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj
+      .locator(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED)
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await page.testSubj.locator(AGENT_FLYOUT.CONFIRM_AGENT_ENROLLMENT_BUTTON).click();
-    await expect(page.testSubj.locator(AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT)).toBeVisible({ timeout: 30_000 });
+    await expect(page.testSubj.locator(AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT)).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });

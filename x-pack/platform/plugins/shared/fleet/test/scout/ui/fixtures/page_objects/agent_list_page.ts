@@ -13,7 +13,9 @@ export class AgentListPage {
 
   async navigateTo() {
     await this.page.gotoApp('fleet');
-    await this.page.testSubj.locator(FLEET_AGENT_LIST_PAGE.TABLE).waitFor({ state: 'visible', timeout: 20_000 });
+    await this.page.testSubj
+      .locator(FLEET_AGENT_LIST_PAGE.TABLE)
+      .waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getTable() {

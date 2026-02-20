@@ -10,7 +10,6 @@ import {
   POLICY_EDITOR,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   ADD_PACKAGE_POLICY_BTN,
-  PACKAGE_POLICY_TABLE_LINK,
 } from '../../common/selectors';
 
 export class PackagePolicyPage {

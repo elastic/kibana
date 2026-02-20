@@ -9,10 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import {
-  createAgentPolicy,
-  cleanupAgentPolicies,
-} from '../common/api_helpers';
+import { createAgentPolicy, cleanupAgentPolicies } from '../common/api_helpers';
 import { ENROLLMENT_TOKENS, CONFIRM_MODAL } from '../common/selectors';
 
 test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () => {
@@ -37,7 +34,10 @@ test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () =
     await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
     await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).clear();
     await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).fill('New Token');
-    await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD).locator('input').fill('Agent policy 1');
+    await page.testSubj
+      .locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_SELECT_FIELD)
+      .locator('input')
+      .fill('Agent policy 1');
     await page.getByRole('option').filter({ hasText: 'Agent policy 1' }).first().click();
     await page.testSubj.locator(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
@@ -50,11 +50,23 @@ test.describe('Enrollment token page', { tag: [...tags.stateful.classic] }, () =
     await page.goto('/app/fleet/enrollment-tokens');
     await expect(page.testSubj.locator(ENROLLMENT_TOKENS.LIST_TABLE).locator('tr')).toHaveCount(2);
     await page.testSubj.locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().click();
-    await expect(page.locator('.euiPanel').getByText(/Are you sure you want to revoke/).first()).toBeVisible();
-    await page.getByRole('button', { name: 'Revoke enrollment token' }).first().click({ force: true });
+    await expect(
+      page
+        .locator('.euiPanel')
+        .getByText(/Are you sure you want to revoke/)
+        .first()
+    ).toBeVisible();
+    await page
+      .getByRole('button', { name: 'Revoke enrollment token' })
+      .first()
+      .click({ force: true });
 
     await expect(
-      page.testSubj.locator(ENROLLMENT_TOKENS.LIST_TABLE).locator('.euiTableRow').first().locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN)
+      page.testSubj
+        .locator(ENROLLMENT_TOKENS.LIST_TABLE)
+        .locator('.euiTableRow')
+        .first()
+        .locator(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN)
     ).not.toBeVisible();
   });
 });

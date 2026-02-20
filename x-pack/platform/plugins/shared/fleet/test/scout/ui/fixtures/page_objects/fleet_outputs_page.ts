@@ -47,7 +47,9 @@ export class FleetOutputsPage {
   }
 
   getKafkaAuthUsernamePasswordOption() {
-    return this.page.testSubj.locator(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION);
+    return this.page.testSubj.locator(
+      SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION
+    );
   }
 
   getKafkaUsernameInput() {

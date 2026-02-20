@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
@@ -28,7 +27,10 @@ test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => 
     try {
       await installTestPackageFromZip(kbnClient, INPUT_TEST_PACKAGE);
     } catch (e) {
-      test.skip(true, `Test package ${INPUT_TEST_PACKAGE}.zip not found - run from Fleet Cypress env`);
+      test.skip(
+        true,
+        `Test package ${INPUT_TEST_PACKAGE}.zip not found - run from Fleet Cypress env`
+      );
     }
     await createAgentPolicy(kbnClient, 'Test input package policy', {
       id: 'test-input-package-policy',
@@ -54,7 +56,10 @@ test.describe('Input packages real', { tag: [...tags.stateful.classic] }, () => 
     await page.goto(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/overview`);
     await page.testSubj.locator(ADD_INTEGRATION_POLICY_BTN).click();
     await page.testSubj.locator(POLICY_EDITOR.POLICY_NAME_INPUT).fill('input-package-policy');
-    await page.testSubj.locator('multiTextInput-paths').locator('[data-test-subj="multiTextInputRow-0"]').fill('/var/log/test.log');
+    await page.testSubj
+      .locator('multiTextInput-paths')
+      .locator('[data-test-subj="multiTextInputRow-0"]')
+      .fill('/var/log/test.log');
     await page.testSubj.locator(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   });
 });

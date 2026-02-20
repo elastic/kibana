@@ -54,7 +54,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
       await pageObjects.fleetHome.navigateTo();
       await pageObjects.fleetHome.waitForPageToLoad();
       await pageObjects.fleetHome.getAddFleetServerHeader().click();
-      await page.testSubj.locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON)
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('Get started with fleet', async ({ page }) => {
@@ -70,7 +72,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
       await hostInput.fill('https://localhost:8220');
       await page.testSubj.locator(GENERATE_FLEET_SERVER_POLICY_BUTTON).click();
       await page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON).scrollIntoViewIfNeeded();
-      await expect(page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON)).toBeVisible({ timeout: 15_000 });
+      await expect(page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON)).toBeVisible({
+        timeout: 15_000,
+      });
     });
   });
 
@@ -79,7 +83,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
       await pageObjects.fleetHome.navigateTo();
       await pageObjects.fleetHome.waitForPageToLoad();
       await pageObjects.fleetHome.getAddFleetServerHeader().click();
-      await page.testSubj.locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON)
+        .waitFor({ state: 'visible', timeout: 15_000 });
       await page.testSubj.locator(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
     });
 
@@ -98,7 +104,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
     test('Generate service token', async ({ page }) => {
       await page.testSubj.locator(ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON).click();
       await page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON).scrollIntoViewIfNeeded();
-      await expect(page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON)).toBeVisible({ timeout: 15_000 });
+      await expect(page.testSubj.locator(PLATFORM_TYPE_LINUX_BUTTON)).toBeVisible({
+        timeout: 15_000,
+      });
     });
   });
 
@@ -106,7 +114,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
     test.beforeEach(async ({ pageObjects, page }) => {
       await pageObjects.fleetHome.navigateTo();
       await pageObjects.fleetHome.navigateToAgentPoliciesTab();
-      await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON)
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('Agent Table', async ({ page }) => {
@@ -115,25 +125,38 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
 
     test('Create Policy Flyout', async ({ page }) => {
       await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).click();
-      await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE)
+        .waitFor({ state: 'visible', timeout: 15_000 });
       await page.testSubj.locator(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).fill('testName');
-      await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.ADVANCED_OPTIONS_TOGGLE).click();
-      await page.testSubj.locator('defaultNamespaceHeader').waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.ADVANCED_OPTIONS_TOGGLE)
+        .click();
+      await page.testSubj
+        .locator('defaultNamespaceHeader')
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('Agent Table After Adding Another Agent', async ({ page }) => {
       await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).click();
-      await page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE)
+        .waitFor({ state: 'visible', timeout: 15_000 });
       await page.testSubj.locator(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).fill('testName');
       await page.testSubj.locator(AGENT_POLICY_FLYOUT_CREATE_BUTTON).click();
-      await page.getByRole('link', { name: /testName/ }).first().waitFor({ state: 'visible', timeout: 15_000 });
+      await page
+        .getByRole('link', { name: /testName/ })
+        .first()
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
   });
 
   test.describe('Enrollment Tokens', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/app/fleet/enrollment-tokens');
-      await page.testSubj.locator('tableHeaderCell_name_0').waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator('tableHeaderCell_name_0')
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
 
     test('Enrollment Tokens Table', async ({ page }) => {
@@ -142,13 +165,17 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
 
     test('Create Enrollment Token Modal', async ({ page }) => {
       await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
-      await page.testSubj.locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD).waitFor({ state: 'visible', timeout: 15_000 });
+      await page.testSubj
+        .locator(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD)
+        .waitFor({ state: 'visible', timeout: 15_000 });
     });
   });
 
   test.describe('Uninstall Tokens', () => {
     test.beforeAll(async ({ kbnClient }) => {
-      const policy = await createAgentPolicy(kbnClient, 'Agent policy for A11y test', { id: 'agent-policy-a11y' });
+      const policy = await createAgentPolicy(kbnClient, 'Agent policy for A11y test', {
+        id: 'agent-policy-a11y',
+      });
       policyIdA11y = policy.id;
     });
 
@@ -166,7 +193,9 @@ test.describe('Home page A11y', { tag: [...tags.stateful.classic] }, () => {
     });
 
     test('Uninstall Tokens Table', async ({ page }) => {
-      await expect(page.testSubj.locator(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).first()).toBeVisible();
+      await expect(
+        page.testSubj.locator(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).first()
+      ).toBeVisible();
     });
 
     test('Uninstall Command Flyout', async ({ page }) => {

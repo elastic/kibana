@@ -52,7 +52,8 @@ export const ADD_AGENT_POLICY_BTN = 'createAgentPolicyButton';
 
 export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
-export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON = 'fleetServerGenerateServiceTokenBtn';
+export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
+  'fleetServerGenerateServiceTokenBtn';
 export const CREATE_FLEET_SERVER_POLICY_BTN = 'createFleetServerPolicyBtn';
 
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';

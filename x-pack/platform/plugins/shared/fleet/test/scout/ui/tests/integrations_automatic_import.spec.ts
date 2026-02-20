@@ -9,11 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import {
-  ASSISTANT_BUTTON,
-  UPLOAD_PACKAGE_LINK,
-  BUTTON_FOOTER_NEXT,
-} from '../common/selectors';
+import { ASSISTANT_BUTTON, UPLOAD_PACKAGE_LINK } from '../common/selectors';
 
 test.describe('Integrations automatic import', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {

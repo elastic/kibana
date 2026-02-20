@@ -34,6 +34,8 @@ test.describe('Integrations real', { tag: [...tags.stateful.classic] }, () => {
   test('should search for integrations', async ({ page }) => {
     await page.goto('/app/integrations');
     await page.testSubj.locator(INTEGRATIONS_SEARCHBAR.INPUT).fill('nginx');
-    await expect(page.testSubj.locator(getIntegrationCard('nginx'))).toBeVisible({ timeout: 10_000 });
+    await expect(page.testSubj.locator(getIntegrationCard('nginx'))).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
@@ -47,8 +46,7 @@ test.describe('Package policy', { tag: [...tags.stateful.classic] }, () => {
     await descInput.fill('Updated description');
 
     const updatePromise = page.waitForResponse(
-      (res) =>
-        res.url().includes('/api/fleet/package_policies') && res.request().method() === 'PUT'
+      (res) => res.url().includes('/api/fleet/package_policies') && res.request().method() === 'PUT'
     );
     await page.getByRole('button', { name: 'Save integration' }).first().click();
     await updatePromise;

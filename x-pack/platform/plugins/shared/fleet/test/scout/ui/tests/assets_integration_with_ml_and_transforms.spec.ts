@@ -14,28 +14,32 @@ import { ASSETS_PAGE } from '../common/selectors';
 
 const LMD_PACKAGE = 'lmd';
 
-test.describe('Assets integration with ML and transforms', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
-    await installTestPackage(kbnClient, LMD_PACKAGE, 'latest');
-  });
+test.describe(
+  'Assets integration with ML and transforms',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    test.beforeAll(async ({ kbnClient }) => {
+      await installTestPackage(kbnClient, LMD_PACKAGE, 'latest');
+    });
 
-  test.afterAll(async ({ kbnClient }) => {
-    try {
-      await uninstallTestPackage(kbnClient, LMD_PACKAGE);
-    } catch {
-      // Ignore
-    }
-  });
+    test.afterAll(async ({ kbnClient }) => {
+      try {
+        await uninstallTestPackage(kbnClient, LMD_PACKAGE);
+      } catch {
+        // Ignore
+      }
+    });
 
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-  });
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+    });
 
-  test('should display integration assets including ML and transforms', async ({ page }) => {
-    await page.goto(`/app/integrations/detail/${LMD_PACKAGE}/overview`);
-    await page.testSubj.locator(ASSETS_PAGE.TAB).click();
-    await expect(
-      page.testSubj.locator(ASSETS_PAGE.getButtonId('index_templates'))
-    ).toBeVisible({ timeout: 15_000 });
-  });
-});
+    test('should display integration assets including ML and transforms', async ({ page }) => {
+      await page.goto(`/app/integrations/detail/${LMD_PACKAGE}/overview`);
+      await page.testSubj.locator(ASSETS_PAGE.TAB).click();
+      await expect(page.testSubj.locator(ASSETS_PAGE.getButtonId('index_templates'))).toBeVisible({
+        timeout: 15_000,
+      });
+    });
+  }
+);

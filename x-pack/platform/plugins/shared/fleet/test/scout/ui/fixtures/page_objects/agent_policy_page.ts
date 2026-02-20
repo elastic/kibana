@@ -23,12 +23,16 @@ export class AgentPolicyPage {
   async navigateToPolicies() {
     await this.page.gotoApp('fleet');
     await this.page.testSubj.locator('fleet-agent-policies-tab').click();
-    await this.page.testSubj.locator(AGENT_POLICIES_TABLE).waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page.testSubj
+      .locator(AGENT_POLICIES_TABLE)
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async navigateToPolicySettings(policyId: string) {
     await this.page.goto(`/app/fleet/policies/${policyId}/settings`);
-    await this.page.testSubj.locator(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB).waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page.testSubj
+      .locator(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB)
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   getCreateAgentPolicyButton() {
@@ -69,7 +73,9 @@ export class AgentPolicyPage {
 
   async createAgentPolicy(name: string, options?: { uncheckSystemMonitoring?: boolean }) {
     await this.getCreateFlyoutButton().click();
-    await this.page.testSubj.locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE).waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page.testSubj
+      .locator(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.TITLE)
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await this.getNameField().fill(name);
     if (options?.uncheckSystemMonitoring) {
       await this.getSystemMonitoringCheckbox().uncheck();

@@ -24,16 +24,22 @@ test.describe('Fleet startup', { tag: [...tags.stateful.classic] }, () => {
     await page.gotoApp('fleet');
     await page.testSubj.locator('fleet-agent-policies-tab').click();
     await page.testSubj.locator('createAgentPolicyButton').click();
-    await page.testSubj.locator('createAgentPolicyNameField').waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj
+      .locator('createAgentPolicyNameField')
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await page.testSubj.locator('createAgentPolicyNameField').fill(`Test policy ${Date.now()}`);
     await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
-    await expect(page.getByRole('link', { name: /Test policy/ }).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('link', { name: /Test policy/ }).first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('should create Fleet Server policy', async ({ page }) => {
     await page.gotoApp('fleet');
     await page.testSubj.locator('fleetServerLanding.addFleetServerButton').click();
-    await page.testSubj.locator('fleetServerFlyoutTab-quickStart').waitFor({ state: 'visible', timeout: 15_000 });
+    await page.testSubj
+      .locator('fleetServerFlyoutTab-quickStart')
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await expect(page.testSubj.locator('createPolicyBtn')).toBeVisible();
   });
 });

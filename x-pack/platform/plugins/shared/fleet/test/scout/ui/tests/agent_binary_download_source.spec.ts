@@ -52,12 +52,16 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     await expect(
       page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.HOST).first()
     ).toContainText('https://artifacts.elastic.co/downloads/');
-    await expect(page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE).first()).toBeVisible();
+    await expect(
+      page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.DEFAULT_VALUE).first()
+    ).toBeVisible();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE_ACTIONS.EDIT).first().click();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).clear();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).fill('New Name');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).clear();
-    await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).fill('https://edited-default-host.co');
+    await page.testSubj
+      .locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT)
+      .fill('https://edited-default-host.co');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.SUBMIT_BUTTON).click();
     await page.testSubj.locator(CONFIRM_MODAL.CONFIRM_BUTTON).click();
   });
@@ -71,7 +75,9 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).clear();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).fill('New Host');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).clear();
-    await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).fill('https://new-test-host.co');
+    await page.testSubj
+      .locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT)
+      .fill('https://new-test-host.co');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.SUBMIT_BUTTON).click();
     await expect(page.testSubj.locator(AGENT_BINARY_SOURCES_TABLE).locator('tr')).toHaveCount(3);
 
@@ -79,7 +85,9 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).clear();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.NAME_INPUT).fill('New Default Host');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).clear();
-    await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT).fill('https://new-default-host.co');
+    await page.testSubj
+      .locator(AGENT_BINARY_SOURCES_FLYOUT.HOST_INPUT)
+      .fill('https://new-default-host.co');
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.IS_DEFAULT_SWITCH).click();
     await page.testSubj.locator(AGENT_BINARY_SOURCES_FLYOUT.SUBMIT_BUTTON).click();
   });
@@ -101,8 +109,8 @@ test.describe('Agent binary download source section', { tag: [...tags.stateful.c
 
     await browserAuth.loginAsAdmin();
     await page.goto('/app/fleet/policies/new-agent-policy/settings');
-    await expect(
-      page.testSubj.locator(AGENT_POLICY_FORM.DOWNLOAD_SOURCE_SELECT)
-    ).toContainText('Custom Host');
+    await expect(page.testSubj.locator(AGENT_POLICY_FORM.DOWNLOAD_SOURCE_SELECT)).toContainText(
+      'Custom Host'
+    );
   });
 });

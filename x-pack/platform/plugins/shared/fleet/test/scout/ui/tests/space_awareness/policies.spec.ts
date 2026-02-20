@@ -9,11 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../../fixtures';
-import {
-  enableSpaceAwareness,
-  createSpace,
-  cleanupAgentPolicies,
-} from '../../common/api_helpers';
+import { enableSpaceAwareness, createSpace, cleanupAgentPolicies } from '../../common/api_helpers';
 import {
   ADD_AGENT_POLICY_BTN,
   AGENT_POLICIES_TABLE,
@@ -51,10 +47,14 @@ test.describe('Space aware policies creation', { tag: [...tags.stateful.classic]
 
   test('the created policy should not be visible in the default space', async ({ page }) => {
     await page.goto('/app/fleet/policies');
-    await expect(page.testSubj.locator(AGENT_POLICIES_TABLE).getByText(NO_AGENT_POLICIES)).toBeVisible();
+    await expect(
+      page.testSubj.locator(AGENT_POLICIES_TABLE).getByText(NO_AGENT_POLICIES)
+    ).toBeVisible();
   });
 
-  test('should allow to update that policy to belong to both test and default space', async ({ page }) => {
+  test('should allow to update that policy to belong to both test and default space', async ({
+    page,
+  }) => {
     await page.goto('/s/test/app/fleet/policies');
     await page.testSubj.locator(AGENT_POLICIES_TABLE).getByText(POLICY_NAME).click();
     await page.testSubj.locator(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB).click();

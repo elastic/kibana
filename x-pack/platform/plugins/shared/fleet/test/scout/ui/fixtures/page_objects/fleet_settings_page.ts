@@ -7,7 +7,6 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import {
-  SETTINGS_TAB,
   SETTINGS_FLEET_SERVER_HOST_HEADING,
   SETTINGS_SAVE_BTN,
   CONFIRM_MODAL,
@@ -23,7 +22,9 @@ export class FleetSettingsPage {
   async navigateTo() {
     await this.page.gotoApp('fleet');
     await this.page.testSubj.locator('fleet-settings-tab').click();
-    await this.page.testSubj.locator(SETTINGS_FLEET_SERVER_HOST_HEADING).waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page.testSubj
+      .locator(SETTINGS_FLEET_SERVER_HOST_HEADING)
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   async navigateToOutputs() {

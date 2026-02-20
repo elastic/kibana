@@ -16,7 +16,10 @@ test.describe('Agentless policy', { tag: [...tags.stateful.classic] }, () => {
     await browserAuth.loginAsAdmin();
   });
 
-  test('should not show Add integration button for agentless policy', async ({ page, kbnClient }) => {
+  test('should not show Add integration button for agentless policy', async ({
+    page,
+    kbnClient,
+  }) => {
     await page.route('**/api/fleet/agent_policies/**', async (route) => {
       const url = route.request().url();
       if (url.includes('policy-1') && route.request().method() === 'GET') {

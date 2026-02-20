@@ -21,7 +21,9 @@ export class AgentFlyoutPage {
   async openFromLanding() {
     await this.page.gotoApp('fleet');
     await this.page.testSubj.locator(LANDING_PAGE_ADD_FLEET_SERVER_BUTTON).click();
-    await this.page.testSubj.locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON).waitFor({ state: 'visible', timeout: 15_000 });
+    await this.page.testSubj
+      .locator(AGENT_FLYOUT.QUICK_START_TAB_BUTTON)
+      .waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   getQuickStartTab() {

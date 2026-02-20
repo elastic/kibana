@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
-import { CONFIRM_MODAL } from '../common/selectors';
 
 test.describe('Install assets', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
