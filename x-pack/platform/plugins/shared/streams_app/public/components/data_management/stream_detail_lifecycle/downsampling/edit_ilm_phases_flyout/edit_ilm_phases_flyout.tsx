@@ -45,6 +45,7 @@ export const EditIlmPhasesFlyout = ({
   onChange,
   onSave,
   onClose,
+  onChangeDebounceMs = 250,
   isSaving,
   canCreateRepository = false,
   searchableSnapshotRepositories = [],
@@ -108,22 +109,46 @@ export const EditIlmPhasesFlyout = ({
 
   const { onFieldErrorsChange, tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData);
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
+  const pendingOnChangeOutputRef = useRef<IlmPolicyPhases | null>(null);
+  const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
       const next = data.format();
 
       if (isEqual(next, lastEmittedOutputRef.current)) return;
-      lastEmittedOutputRef.current = next;
 
-      onChange(next);
+      pendingOnChangeOutputRef.current = next;
+      if (pendingOnChangeTimeoutRef.current) {
+        clearTimeout(pendingOnChangeTimeoutRef.current);
+      }
+
+      pendingOnChangeTimeoutRef.current = setTimeout(() => {
+        pendingOnChangeTimeoutRef.current = null;
+        const toEmit = pendingOnChangeOutputRef.current;
+        pendingOnChangeOutputRef.current = null;
+        if (!toEmit) return;
+        if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
+        lastEmittedOutputRef.current = toEmit;
+        onChangeRef.current(toEmit);
+      }, onChangeDebounceMs);
     });
 
     return () => {
+      if (pendingOnChangeTimeoutRef.current) {
+        clearTimeout(pendingOnChangeTimeoutRef.current);
+        pendingOnChangeTimeoutRef.current = null;
+      }
+      pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, onChange]);
+  }, [form, onChangeDebounceMs]);
 
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
 

@@ -35,17 +35,7 @@ import {
 } from './form';
 import { DslStepsFlyoutArrayView } from './sections';
 import { useStyles } from './use_styles';
-
-export interface EditDslStepsFlyoutProps {
-  initialSteps: IngestStreamLifecycleDSL;
-  selectedStepIndex: number | undefined;
-  setSelectedStepIndex: (index: number | undefined) => void;
-  onChange: (next: IngestStreamLifecycleDSL) => void;
-  onSave: (next: IngestStreamLifecycleDSL) => void;
-  onClose: () => void;
-  isSaving?: boolean;
-  'data-test-subj'?: string;
-}
+import type { EditDslStepsFlyoutProps } from './types';
 
 const FragmentFormWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;
 
@@ -59,6 +49,7 @@ export const EditDslStepsFlyout = ({
   onChange,
   onSave,
   onClose,
+  onChangeDebounceMs = 250,
   isSaving,
   'data-test-subj': dataTestSubjProp,
 }: EditDslStepsFlyoutProps) => {
@@ -139,7 +130,7 @@ export const EditDslStepsFlyout = ({
         if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
         lastEmittedOutputRef.current = toEmit;
         onChangeRef.current(toEmit);
-      }, 0);
+      }, onChangeDebounceMs);
     });
 
     return () => {
@@ -150,7 +141,7 @@ export const EditDslStepsFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form]);
+  }, [form, onChangeDebounceMs]);
 
   const hasFormErrors = form.getErrors().length > 0;
   const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;

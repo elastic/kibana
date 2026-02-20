@@ -47,7 +47,7 @@ const renderFlyout = (
   };
   const onSelectedStepIndexChange = jest.fn();
 
-  render(
+  const { unmount } = render(
     <Wrapper
       initialSteps={initialSteps}
       onClose={onClose}
@@ -66,6 +66,7 @@ const renderFlyout = (
     onSave,
     initialSteps,
     onSelectedStepIndexChange,
+    unmount,
     setSelectedStepIndex: (index: number | undefined) => {
       act(() => {
         if (!setSelectedStepIndexRef.current) {
@@ -115,6 +116,7 @@ const Wrapper = ({
         onClose={onClose}
         onChange={onChange}
         onSave={onSave}
+        onChangeDebounceMs={0}
         {...props}
       />
     </>
@@ -437,6 +439,109 @@ describe('EditDslStepsFlyout', () => {
           ],
         },
       });
+    });
+
+    it('debounces rapid user edits into a single onChange', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        renderFlyout({
+          onChange,
+          onChangeDebounceMs: 100,
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '30d', fixed_interval: '1h' }],
+            },
+          },
+        });
+
+        // Flush initial mount work.
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const panel = withinStep(0);
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '1' },
+        });
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '2' },
+        });
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '3' },
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          jest.advanceTimersByTime(99);
+        });
+        expect(onChange).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          jest.advanceTimersByTime(1);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenLastCalledWith({
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '30d', fixed_interval: '3h' }],
+          },
+        });
+
+        // Intermediate edits should clear the previous pending debounce timer.
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it('cleans up a pending debounced onChange on unmount', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        const { unmount } = renderFlyout({
+          onChange,
+          onChangeDebounceMs: 100,
+          initialSteps: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '30d', fixed_interval: '1h' }],
+            },
+          },
+        });
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const panel = withinStep(0);
+        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+          target: { value: '2' },
+        });
+
+        unmount();
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+          jest.advanceTimersByTime(100);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
     });
   });
 });

@@ -94,13 +94,14 @@ const renderFlyout = (
           onClose={onClose}
           onChange={onChange}
           onSave={onSave}
+          onChangeDebounceMs={0}
           {...props}
         />
       </>
     );
   };
 
-  render(<Wrapper />);
+  const { unmount } = render(<Wrapper />);
 
   return {
     onClose,
@@ -108,6 +109,7 @@ const renderFlyout = (
     onSave,
     initialPhases,
     onSelectedPhaseChange,
+    unmount,
     setSelectedPhase: (phase: PhaseName | undefined) => {
       act(() => {
         if (!setSelectedPhaseRef.current) {
@@ -660,6 +662,104 @@ describe('EditIlmPhasesFlyout', () => {
 
       fireEvent.click(removeButton);
       expect(getTab('delete')).toBeInTheDocument();
+    });
+  });
+
+  describe('onChange emission', () => {
+    it('debounces rapid user edits into a single onChange', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        renderFlyout(
+          {
+            onChange,
+            onChangeDebounceMs: 100,
+            initialPhases: {
+              hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+              warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            },
+          },
+          { initialSelectedPhase: 'warm' }
+        );
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const warmPanel = withinPhase('warm');
+        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+          target: { value: '1' },
+        });
+        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+          target: { value: '2' },
+        });
+        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+          target: { value: '3' },
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+
+        await act(async () => {
+          jest.advanceTimersByTime(100);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenLastCalledWith({
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
+        });
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it('cleans up a pending debounced onChange on unmount', async () => {
+      jest.useFakeTimers();
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+      try {
+        const onChange = jest.fn();
+        const { unmount } = renderFlyout(
+          {
+            onChange,
+            onChangeDebounceMs: 100,
+            initialPhases: {
+              hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+              warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            },
+          },
+          { initialSelectedPhase: 'warm' }
+        );
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+        });
+        onChange.mockClear();
+        clearTimeoutSpy.mockClear();
+
+        const warmPanel = withinPhase('warm');
+        fireEvent.change(warmPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+          target: { value: '10' },
+        });
+
+        unmount();
+
+        await act(async () => {
+          jest.runOnlyPendingTimers();
+          jest.advanceTimersByTime(100);
+        });
+
+        expect(onChange).toHaveBeenCalledTimes(0);
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        jest.useRealTimers();
+      }
     });
   });
 });
