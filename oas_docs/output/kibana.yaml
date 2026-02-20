@@ -63918,9 +63918,11 @@ paths:
                                   - type: object
                                     properties:
                                       id:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       title:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                     required:
@@ -63938,6 +63940,7 @@ paths:
                                           filter:
                                             $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
                                           name:
+                                            description: A non-empty string.
                                             minLength: 1
                                             type: string
                                           type:
@@ -64037,9 +64040,11 @@ paths:
                                   - type: object
                                     properties:
                                       id:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       title:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                     required:
@@ -64057,6 +64062,7 @@ paths:
                                           filter:
                                             $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
                                           name:
+                                            description: A non-empty string.
                                             minLength: 1
                                             type: string
                                           type:
@@ -64161,9 +64167,11 @@ paths:
                                   - type: object
                                     properties:
                                       id:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       title:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                     required:
@@ -64181,6 +64189,7 @@ paths:
                                           filter:
                                             $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
                                           name:
+                                            description: A non-empty string.
                                             minLength: 1
                                             type: string
                                           type:
@@ -64280,9 +64289,11 @@ paths:
                                   - type: object
                                     properties:
                                       id:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       title:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                     required:
@@ -64300,6 +64311,7 @@ paths:
                                           filter:
                                             $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
                                           name:
+                                            description: A non-empty string.
                                             minLength: 1
                                             type: string
                                           type:
@@ -64404,9 +64416,11 @@ paths:
                               - type: object
                                 properties:
                                   id:
+                                    description: A non-empty string.
                                     minLength: 1
                                     type: string
                                   title:
+                                    description: A non-empty string.
                                     minLength: 1
                                     type: string
                                 required:
@@ -64424,6 +64438,7 @@ paths:
                                       filter:
                                         $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
                                       name:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       type:
@@ -64667,6 +64682,7 @@ paths:
                                               type: object
                                               properties:
                                                 data_retention:
+                                                  description: A non-empty string.
                                                   minLength: 1
                                                   type: string
                                           required:
@@ -64694,6 +64710,7 @@ paths:
                                       type: object
                                       properties:
                                         data_retention:
+                                          description: A non-empty string.
                                           minLength: 1
                                           type: string
                                         downsample:
@@ -64701,9 +64718,11 @@ paths:
                                             type: object
                                             properties:
                                               after:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                               fixed_interval:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                             required:
@@ -64718,6 +64737,7 @@ paths:
                                       type: object
                                       properties:
                                         policy:
+                                          description: A non-empty string.
                                           minLength: 1
                                           type: string
                                       required:
@@ -64788,6 +64808,7 @@ paths:
                                           - type: object
                                             properties:
                                               format:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                               type:
@@ -64827,6 +64848,7 @@ paths:
                                     type: object
                                     properties:
                                       destination:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       status:
@@ -64876,6 +64898,7 @@ paths:
                                               type: object
                                               properties:
                                                 data_retention:
+                                                  description: A non-empty string.
                                                   minLength: 1
                                                   type: string
                                           required:
@@ -64903,6 +64926,7 @@ paths:
                                       type: object
                                       properties:
                                         data_retention:
+                                          description: A non-empty string.
                                           minLength: 1
                                           type: string
                                         downsample:
@@ -64910,9 +64934,11 @@ paths:
                                             type: object
                                             properties:
                                               after:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                               fixed_interval:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                             required:
@@ -64927,6 +64953,7 @@ paths:
                                       type: object
                                       properties:
                                         policy:
+                                          description: A non-empty string.
                                           minLength: 1
                                           type: string
                                       required:
@@ -64997,6 +65024,7 @@ paths:
                                           - type: object
                                             properties:
                                               format:
+                                                description: A non-empty string.
                                                 minLength: 1
                                                 type: string
                                               type:
@@ -65292,9 +65320,11 @@ paths:
                               - type: object
                                 properties:
                                   id:
+                                    description: A non-empty string.
                                     minLength: 1
                                     type: string
                                   title:
+                                    description: A non-empty string.
                                     minLength: 1
                                     type: string
                                 required:
@@ -65312,6 +65342,7 @@ paths:
                                       filter:
                                         $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_7___schema0'
                                       name:
+                                        description: A non-empty string.
                                         minLength: 1
                                         type: string
                                       type:
@@ -65448,6 +65479,7 @@ paths:
                     filter:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_6___schema0'
                     name:
+                      description: A non-empty string.
                       minLength: 1
                       type: string
                     type:
@@ -65468,6 +65500,7 @@ paths:
                 severity_score:
                   type: number
                 title:
+                  description: A non-empty string.
                   minLength: 1
                   type: string
               required:
@@ -77290,6 +77323,7 @@ components:
                 patterns:
                   description: Grok patterns applied in order to extract fields
                   items:
+                    description: A non-empty string.
                     minLength: 1
                     type: string
                   minItems: 1
@@ -77357,6 +77391,7 @@ components:
                 formats:
                   description: Accepted input date formats, tried in order
                   items:
+                    description: A non-empty string.
                     minLength: 1
                     type: string
                   type: array
@@ -77425,6 +77460,7 @@ components:
                   description: Human-readable notes about this processor step
                   type: string
                 expression:
+                  description: A non-empty string.
                   minLength: 1
                   type: string
                 ignore_failure:
@@ -77675,6 +77711,7 @@ components:
                 patterns:
                   description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
                   items:
+                    description: A non-empty string.
                     minLength: 1
                     type: string
                   minItems: 1
