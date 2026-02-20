@@ -21,6 +21,7 @@ import {
   streamlangDSLSchema,
   type StreamlangDSL,
 } from '@kbn/streamlang/types/streamlang';
+import { DeepStrict } from '@kbn/zod-helpers';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -82,7 +83,8 @@ export const streamEnrichmentMachine = setup({
     /* Validation actions */
     computeValidation: assign(({ context }) => {
       // First, check for schema errors (Zod parsing)
-      const parseResult = streamlangDSLSchema.safeParse(context.nextStreamlangDSL);
+      // Use DeepStrict to catch excess keys, matching server-side validation behavior
+      const parseResult = DeepStrict(streamlangDSLSchema).safeParse(context.nextStreamlangDSL);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
