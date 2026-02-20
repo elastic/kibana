@@ -10,9 +10,10 @@ import * as EssHeaders from '@kbn/test-suites-xpack-security/security_solution_c
 import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import type { SiemVersion } from '../../common/constants';
-import { SIEM_VERSIONS } from '../../common/constants';
 
-describe('Navigation RBAC', () => {
+const VERSIONS_TO_TEST: readonly SiemVersion[] = ['siemV5'];
+
+describe('Navigation RBAC (siem v5 + serverless)', () => {
   const isServerless = Cypress.env('IS_SERVERLESS');
 
   const Selectors = isServerless ? ServerlessHeaders : EssHeaders;
@@ -40,7 +41,7 @@ describe('Navigation RBAC', () => {
       name: 'Trusted devices',
       privilegePrefix: 'trusted_devices_',
       selector: Selectors.TRUSTED_DEVICES,
-      siemVersions: ['siemV3', 'siemV4', 'siemV5'], // Only available starting siemV3
+      siemVersions: ['siemV3', 'siemV4', 'siemV5'],
     },
     {
       name: 'Event filters',
@@ -69,7 +70,7 @@ describe('Navigation RBAC', () => {
   };
 
   describe('ESS - using custom roles', { tags: ['@ess'] }, () => {
-    for (const siemVersion of SIEM_VERSIONS) {
+    for (const siemVersion of VERSIONS_TO_TEST) {
       describe(siemVersion, () => {
         const pages = getPagesForSiemVersion(siemVersion);
 
@@ -136,7 +137,6 @@ describe('Navigation RBAC', () => {
     it('without access to any of the subpages, none of those should be displayed', () => {
       login(ROLE.detections_admin);
       loadPage('/app/security');
-      // assets should be missing, checking that assets link and more button is missing
       cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
       cy.get(MenuButtonSelector).should('not.exist');
 
@@ -149,12 +149,11 @@ describe('Navigation RBAC', () => {
       login(ROLE.soc_manager);
       loadPage('/app/security');
       ServerlessHeaders.showMoreItems();
-      cy.get(MenuButtonSelector).click(); // click "Assets" to open the menu
-      cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
+      cy.get(MenuButtonSelector).click();
+      cy.get(allPages[0].selector).click();
 
       for (const page of allPages) {
         if (page.selector !== Selectors.TRUSTED_DEVICES) {
-          // Skip Trusted Devices for now — soc_manager does not yet have the required privilege in controller (MKI would fail otherwise).
           cy.get(page.selector);
         }
       }

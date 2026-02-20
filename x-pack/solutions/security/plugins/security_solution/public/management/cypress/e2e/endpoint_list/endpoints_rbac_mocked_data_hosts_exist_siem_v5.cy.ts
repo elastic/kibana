@@ -11,12 +11,14 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
-import { SIEM_VERSIONS } from '../../common/constants';
+import type { SiemVersion } from '../../common/constants';
 
-describe('Endpoints page RBAC - some hosts are enrolled', { tags: ['@ess'] }, () => {
+const VERSIONS_TO_TEST: readonly SiemVersion[] = ['siemV5'];
+
+describe('Endpoints page RBAC - some hosts are enrolled (siem v5)', { tags: ['@ess'] }, () => {
   const PRIVILEGES = ['none', 'read', 'all'] as const;
 
-  for (const siemVersion of SIEM_VERSIONS) {
+  for (const siemVersion of VERSIONS_TO_TEST) {
     describe(siemVersion, () => {
       let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
 
@@ -35,7 +37,6 @@ describe('Endpoints page RBAC - some hosts are enrolled', { tags: ['@ess'] }, ()
       });
 
       beforeEach(() => {
-        // if there is a request towards this API, it should return 200
         cy.intercept(PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN, (req) => {
           req.on('response', (res) => {
             expect(res.statusCode).to.equal(200);

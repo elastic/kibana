@@ -9,9 +9,12 @@ import { APP_ENDPOINTS_PATH, SECURITY_FEATURE_ID } from '../../../../../common/c
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import { SIEM_VERSIONS } from '../../common/constants';
+import type { SiemVersion } from '../../common/constants';
+
+const VERSIONS_TO_TEST: readonly SiemVersion[] = ['siemV5'];
 
 describe(
-  'Endpoints page RBAC - neither Defend policy nor hosts are present',
+  'Endpoints page RBAC - neither Defend policy nor hosts are present (siem v5)',
   { tags: ['@ess'] },
   () => {
     const PRIVILEGES = ['none', 'read', 'all'] as const;
@@ -20,7 +23,7 @@ describe(
       expect(SIEM_VERSIONS.at(-1)).to.equal(SECURITY_FEATURE_ID);
     });
 
-    for (const siemVersion of SIEM_VERSIONS) {
+    for (const siemVersion of VERSIONS_TO_TEST) {
       describe(siemVersion, () => {
         for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
           describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
