@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import type { PartialThreeWayRuleDiff } from '../model';
 

@@ -46,7 +46,7 @@ export const deleteAllConversations = async ({
   await countDownTest(
     async () => {
       const { data, total } = await conversationApis.find({
-        query: { page: 1, per_page: 100 },
+        query: { page: 1, per_page: 100, is_owner: false },
         kibanaSpace,
       });
 

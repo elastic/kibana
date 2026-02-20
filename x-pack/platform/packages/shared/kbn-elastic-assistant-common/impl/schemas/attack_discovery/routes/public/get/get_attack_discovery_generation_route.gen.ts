@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../common_attributes.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';

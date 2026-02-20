@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
   EqlRuleCreateProps,

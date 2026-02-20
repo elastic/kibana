@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../common_attributes.gen';
 import { AlertSummaryResponse } from './bulk_crud_alert_summary_route.gen';

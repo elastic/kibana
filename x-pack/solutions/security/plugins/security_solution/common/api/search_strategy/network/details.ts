@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const networkDetailsSchema = requestBasicOptionsSchema.extend({
-  ip: z.string().ip(),
+  ip: z.ipv4().or(z.ipv6()),
   factoryQueryType: z.literal(NetworkQueries.details),
 });
 

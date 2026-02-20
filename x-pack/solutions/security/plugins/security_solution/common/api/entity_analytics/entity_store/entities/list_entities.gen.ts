@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType, InspectQuery } from '../common.gen';
 import { Entity } from './common.gen';

@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
 export const MonitoringEntitySourceType = z.enum(['index', 'entity_analytics_integration']);

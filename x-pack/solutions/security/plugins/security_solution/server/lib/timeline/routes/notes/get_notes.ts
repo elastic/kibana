@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,

@@ -137,7 +137,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             assistantContext,
           });
           if (
-            insightType === DefendInsightType.Enum.policy_response_failure &&
+            insightType === DefendInsightType.enum.policy_response_failure &&
             !isPolicyResponseFailureEnabled
           ) {
             throw new InvalidDefendInsightTypeError();

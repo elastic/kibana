@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z, ZodType } from '@kbn/zod/v4';
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
 import { stringifyZodError } from './stringify_zod_error';
+
+interface ZodSafeParseable<Output = any> {
+  safeParse(
+    data: unknown
+  ): { success: true; data: Output } | { success: false; error: { issues: unknown[] } };
+}
 
 /**
  * Zod validation factory for Kibana route's request validation.
@@ -36,14 +41,14 @@ import { stringifyZodError } from './stringify_zod_error';
  *     },
  * ```
  */
-export function buildRouteValidationWithZod<ZodSchema extends ZodType>(
-  schema: ZodSchema
-): RouteValidationFunction<z.output<ZodSchema>> {
+export function buildRouteValidationWithZod<Output>(
+  schema: ZodSafeParseable<Output>
+): RouteValidationFunction<Output> {
   return (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
     const decoded = schema.safeParse(inputValue);
 
     return decoded.success
       ? validationResult.ok(decoded.data)
-      : validationResult.badRequest(stringifyZodError(decoded.error));
+      : validationResult.badRequest(stringifyZodError(decoded.error as any));
   };
 }

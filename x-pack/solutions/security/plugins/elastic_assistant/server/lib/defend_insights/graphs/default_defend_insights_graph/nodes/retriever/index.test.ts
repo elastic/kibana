@@ -15,7 +15,7 @@ import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
 import { getRetrieveAnonymizedEventsNode } from '.';
 
-const insightType = DefendInsightType.Enum.incompatible_antivirus;
+const insightType = DefendInsightType.enum.incompatible_antivirus;
 const initialGraphState: DefendInsightsGraphState = {
   insights: null,
   prompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,

@@ -25,7 +25,7 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import type {
   BuildingBlockType,
   RuleResponse,

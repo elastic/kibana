@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { configSchema } from './schemas';
 import type { InitialBenchConfig } from './types';
 

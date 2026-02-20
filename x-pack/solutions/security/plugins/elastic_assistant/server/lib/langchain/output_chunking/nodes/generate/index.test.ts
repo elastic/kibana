@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import type { ZodType } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
 

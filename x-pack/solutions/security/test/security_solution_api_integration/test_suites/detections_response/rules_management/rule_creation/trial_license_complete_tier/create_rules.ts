@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
           const ruleParams = getThresholdRuleParams();
           const { body } = await detectionsApi
             .createRule({
-              // @ts-expect-error we are testing the invalid payload
+              // we are testing the invalid payload
               body: omit(ruleParams, 'threshold'),
             })
             .expect(400);
@@ -473,7 +473,6 @@ export default ({ getService }: FtrProviderContext) => {
             .createRule({
               body: {
                 ...getCustomQueryRuleParams(),
-                // @ts-expect-error type system doesn't allow to use the legacy format as params for getCustomQueryRuleParams()
                 investigation_fields: ['host.name'],
               },
             })

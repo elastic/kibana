@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';

@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../common_attributes.gen';
 import { ConversationResponse } from './common_attributes.gen';

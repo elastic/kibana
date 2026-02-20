@@ -100,7 +100,7 @@ describe('runDefendInsightsEvaluations', () => {
       graphs,
       langSmithApiKey,
       logger,
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
     });
 
     expect(graphs[0].graph.invoke).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ describe('runDefendInsightsEvaluations', () => {
       graphs,
       langSmithApiKey,
       logger,
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
     });
 
     expect(logger.error).toHaveBeenCalledWith(

@@ -28,6 +28,6 @@ const parseJsonPreprocessor = (value: any, ctx: z.RefinementCtx) => {
   return value;
 };
 
-export const Coerced = (objSchema: z.ZodType) => {
+export const Coerced = <T extends z.ZodType>(objSchema: T) => {
   return z.preprocess(parseJsonPreprocessor, objSchema);
 };

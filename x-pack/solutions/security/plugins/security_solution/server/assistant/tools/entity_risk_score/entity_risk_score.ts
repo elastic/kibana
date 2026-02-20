@@ -6,7 +6,7 @@
  */
 
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   getAnonymizedValue,
   getRawDataOrDefault,

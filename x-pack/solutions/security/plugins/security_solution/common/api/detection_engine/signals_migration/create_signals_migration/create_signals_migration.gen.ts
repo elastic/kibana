@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
 export const AlertsReindexOptions = z.object({

@@ -71,7 +71,7 @@ export const WorkflowInsightsResults = ({
     } else if (results?.length) {
       return results.flatMap((insight, index) => {
         switch (insight.type) {
-          case DefendInsightType.Enum.incompatible_antivirus:
+          case DefendInsightType.enum.incompatible_antivirus:
             return (
               <WorkflowInsightsIncompatibleAntivirusResult
                 insight={insight}
@@ -79,7 +79,7 @@ export const WorkflowInsightsResults = ({
                 endpointId={endpointId}
               />
             );
-          case DefendInsightType.Enum.policy_response_failure:
+          case DefendInsightType.enum.policy_response_failure:
             return <WorkflowInsightsPolicyResponseFailureResult insight={insight} index={index} />;
           default:
             return null;
