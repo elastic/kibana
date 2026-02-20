@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Alert as LegacyAlert } from '../../../alert/alert';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { buildOngoingAlert } from './build_ongoing_alert';
 import type { AlertRuleData } from '../../types';
 import {
@@ -1157,7 +1158,7 @@ for (const flattened of [true, false]) {
                 snapshotValue: 'critical',
               },
             ],
-          },
+          } as unknown as Alert,
           legacyAlert: firstLegacyAlert,
           rule: alertRule,
           ruleData: {

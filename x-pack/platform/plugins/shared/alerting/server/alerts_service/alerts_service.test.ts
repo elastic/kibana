@@ -3124,13 +3124,15 @@ describe('Alerts Service', () => {
             })
           );
           const updateByQueryParams = clusterClient.updateByQuery.mock.calls[0][0];
-          expect(updateByQueryParams.query.bool.must).toEqual(
+          const must = (updateByQueryParams.query as NonNullable<typeof updateByQueryParams.query>)
+            .bool!.must;
+          expect(must).toEqual(
             expect.arrayContaining([
               { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
               { term: { 'kibana.alert.instance.id': 'alert-1' } },
             ])
           );
-          expect(updateByQueryParams.query.bool.must).not.toEqual(
+          expect(must).not.toEqual(
             expect.arrayContaining([{ term: { 'kibana.alert.status': 'active' } }])
           );
         });
