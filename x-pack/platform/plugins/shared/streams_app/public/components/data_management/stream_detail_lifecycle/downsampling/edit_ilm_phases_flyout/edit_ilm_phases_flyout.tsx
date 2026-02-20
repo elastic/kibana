@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiToolTip,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -214,6 +215,38 @@ export const EditIlmPhasesFlyout = ({
     }
   }, [enabledPhases, ensurePhaseEnabledWithDefaults, isMetaReady, selectedPhase, setSelectedPhase]);
 
+  const hasFormErrors = form.getErrors().length > 0;
+  const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
+  const isSaveDisabled = isSaveDisabledDueToInvalid || form.isSubmitting;
+
+  const renderSaveButton = () => {
+    const button = (
+      <EuiButton
+        fill
+        isLoading={Boolean(isSaving) || form.isSubmitting}
+        data-test-subj={`${dataTestSubj}SaveButton`}
+        onClick={() => form.submit()}
+        disabled={isSaveDisabled}
+      >
+        {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
+          defaultMessage: 'Save',
+        })}
+      </EuiButton>
+    );
+
+    return isSaveDisabledDueToInvalid ? (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.editIlmPhasesFlyout.saveDisabledTooltip', {
+          defaultMessage: 'Fix the form errors before saving.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  };
+
   return (
     <EuiFlyout
       type="push"
@@ -298,19 +331,7 @@ export const EditIlmPhasesFlyout = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={Boolean(isSaving) || form.isSubmitting}
-              data-test-subj={`${dataTestSubj}SaveButton`}
-              onClick={() => form.submit()}
-              disabled={(form.isSubmitted && form.isValid === false) || form.isSubmitting}
-            >
-              {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

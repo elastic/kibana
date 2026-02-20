@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import {
@@ -151,6 +152,38 @@ export const EditDslStepsFlyout = ({
     };
   }, [form]);
 
+  const hasFormErrors = form.getErrors().length > 0;
+  const isSaveDisabledDueToInvalid = form.isValid === false || hasFormErrors;
+  const isSaveDisabled = isSaveDisabledDueToInvalid || form.isSubmitting;
+
+  const renderSaveButton = () => {
+    const button = (
+      <EuiButton
+        fill
+        isLoading={Boolean(isSaving) || form.isSubmitting}
+        data-test-subj={`${dataTestSubj}SaveButton`}
+        onClick={() => form.submit()}
+        disabled={isSaveDisabled}
+      >
+        {i18n.translate('xpack.streams.editDslStepsFlyout.save', {
+          defaultMessage: 'Save',
+        })}
+      </EuiButton>
+    );
+
+    return isSaveDisabledDueToInvalid ? (
+      <EuiToolTip
+        content={i18n.translate('xpack.streams.editDslStepsFlyout.saveDisabledTooltip', {
+          defaultMessage: 'Fix the form errors before saving.',
+        })}
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  };
+
   return (
     <EuiFlyout
       type="push"
@@ -204,19 +237,7 @@ export const EditDslStepsFlyout = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={Boolean(isSaving) || form.isSubmitting}
-              data-test-subj={`${dataTestSubj}SaveButton`}
-              onClick={() => form.submit()}
-              disabled={(form.isSubmitted && form.isValid === false) || form.isSubmitting}
-            >
-              {i18n.translate('xpack.streams.editDslStepsFlyout.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
