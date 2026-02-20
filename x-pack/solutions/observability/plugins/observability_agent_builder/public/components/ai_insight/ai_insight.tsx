@@ -40,6 +40,7 @@ import {
   ObservabilityAgentBuilderTelemetryEventType,
   reportTelemetryEvent,
   type InsightType,
+  type InsightFailedEvent,
 } from '../../analytics';
 
 export interface AiInsightResponse {
@@ -107,6 +108,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
+      if (!connectorInfo) return;
       reportTelemetryEvent(analytics, {
         type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback,
         payload: { feedback, insightType, connector: connectorInfo },
