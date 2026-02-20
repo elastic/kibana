@@ -4,13 +4,14 @@
 openapi: 3.0.0
 info:
   title: Watchlist Management API
-  version: "2026-01-28"
+  version: "2023-10-31"
 
 paths:
   /api/entity_analytics/watchlists/{id}:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
+      x-state: Technical Preview
       operationId: GetWatchlist
       summary: Get a watchlist by ID
       parameters:
