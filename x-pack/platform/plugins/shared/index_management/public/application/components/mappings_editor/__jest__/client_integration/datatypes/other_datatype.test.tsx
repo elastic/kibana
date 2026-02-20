@@ -23,7 +23,8 @@ jest.mock('../../../../component_templates/component_templates_context', () => (
 }));
 
 const onChangeHandler = jest.fn();
-describe('Mappings editor: other datatype', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253594
+describe.skip('Mappings editor: other datatype', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

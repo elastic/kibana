@@ -9,6 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { Parser, validateQuery } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand } from '@kbn/esql-language';
 import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
+import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
 import type { ElasticsearchAction } from '../execution_plan/types';
@@ -224,7 +225,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
           errors.push(...errorMessages.map((msg) => new Error(`ES|QL syntax error: ${msg}`)));
         }
       } catch (error) {
-        errors.push(new Error(`Failed to validate ES|QL query: ${error.message}`));
+        errors.push(new Error(`Failed to validate ES|QL query: ${getErrorMessage(error)}`));
       }
 
       // Validate the ES|QL query can be executed (basic test with LIMIT 0)
@@ -234,11 +235,9 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
           format: 'json',
         });
       } catch (error) {
-        if (error.message) {
-          errors.push(new Error(`ES|QL query execution validation failed: ${error.message}`));
-        } else {
-          errors.push(new Error('ES|QL query execution validation failed'));
-        }
+        errors.push(
+          new Error(`ES|QL query execution validation failed: ${getErrorMessage(error)}`)
+        );
       }
 
       // Validate that child query streams reference their parent stream's data source

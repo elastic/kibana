@@ -57,7 +57,12 @@ export async function identifyFeatures({
       }))
       .filter((feature) => {
         const result = baseFeatureSchema.safeParse(feature);
-        return result.success;
+        if (!result.success) {
+          return false;
+        }
+
+        // ensure that the feature has at least one stable identifying property
+        return Object.keys(feature.properties).length > 0;
       }),
     (feature) => feature.id
   );
