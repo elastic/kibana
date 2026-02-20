@@ -66,120 +66,265 @@ pivot:
     regression:
     security:
 
+  # Labels that trigger the highlight flag (accepts string or list)
+  # String form: highlight: ">highlight, >release-highlight"
+  # List form:
+  # highlight:
+  #   - ">highlight"
+  #   - ">release-highlight"
+
   # Area definitions with labels
   # Keys are area display names, values are label strings
   # Multiple labels can be comma-separated
   areas:
     "Agent Builder": "feature:agent-builder"
-    Alerting: "Feature:Alerting, Team:Alerting Services, Feature:Actions, Team:ResponseOps, Team:Cases, Feature:Cases"
+    Alerting:
+      - "Feature:Alerting"
+      - "Team:Alerting Services"
+      - "Feature:Actions"
+      - "Team:ResponseOps"
+      - "Team:Cases"
+      - "Feature:Cases"
     Connectivity: "Feature:Actions/ConnectorTypes"
-    "Dashboards and Visualizations": "Feature:Dashboard, Feature:Drilldowns, Project:TimeToVisualize, Team:Presentation, Feature:Lens, Feature:Timelion, Feature:TSVB, Feature:Coordinate Map, Feature:Region Map, Feature:Vega, Feature:Gauge Vis, Feature:Tagcloud, Feature:Vis Loader, Feature:Vislib, Feature:Vis Editor, Feature:Aggregations, Feature:Input Control, Feature:Visualizations, Feature:Markdown, Feature:Data Table, Feature:Heatmap, Feature:Pie Chart, Feature:XYAxis, Feature:Graph, Feature:MetricVis, Team:Visualizations, Feature:Canvas, Feature:Maps"
-    "Data ingestion and Fleet": "Team:Fleet, Feature:Fleet, Ingest, Feature:Ingest Node Pipelines"
-    "Data management": "Feature:Data Views, Feature:Index Management, Feature:FieldFormatters, Feature:ILM, Feature:Transforms"
-    "Developer tools": "Feature:Console, Feature:Dev Tools, Feature:Inspector"
-    Discover: "Feature:Discover, Team:DataDiscovery, Feature:BackgroundSearch, Feature:DiscoverTabs, Feature:UnifiedDataTable, Feature:UnifiedDocViewer, Feature:UnifiedFieldList"
-    "ES|QL editor": "Team:ESQL, Feature:ESQL Editor"
-    "Kibana platform": "Team:SharedUX, Team:Design, Feature:Add Data, Feature:Home, EUI, Feature:license, Feature:watcher, Feature:Kibana Management, Feature:Snapshot and Restore, Team:Stack Management, Feature:CCR, Feature:Upgrade Assistant, Team:Monitoring, Feature:Telemetry, Feature:Stack Monitoring, Team:Operations, Kibana UI, Feature:Header, Team:Core, Feature:Plugins, Project:i18n, Feature:Saved Objects, Team:Security, Feature:Security/Spaces, Feature:users and roles, Feature:Security/Authentication, Feature:Security/Authorization, Feature:Security/Feature Controls, Feature:Query Bar, Feature:Courier, Feature:Filters, Feature:Timepicker, Feature:Highlight, Feature:KQL, Feature:Rollups, Feature:Chrome, Feature:http, Feature:OAS, Feature:logging"
-    "Machine learning": ":ml, Feature:Anomaly Detection, Feature:Data Frames, Feature:File Data Viz, Feature:ml-results, Feature:Data Frame Analytics, Feature:Inference UI, Feature:ML/AIOps"
-    Sharing and reporting: "Feature:Embedding, Feature:SharingURLs, Feature:Reporting, Team:Reporting Services"
-    Workflows: "Feature:Workflows, Team:One Workflow" 
-    "Elastic Observability solution": "Feature:Observability Home, Feature:SLO, Team:obs-ux-management, Team:Obs AI Assistant, Team:obs-ux-infra_services, Team:obs-ux-logs, Team:obs-knowledge, Team:obs-entities, ci:project-deploy-observability, Feature:Uptime, Team:uptime, Team:apm, Team:APM, Feature:Metrics UI, Team:logs-metrics-ui, Feature:Logs UI, Feature:Infra UI, Feature:Service Maps, Feature:Streams"
-    "Elastic Security solution": "Team:SIEM, Team:SecuritySolution, Team: SecuritySolution, Team:Endpoint Response, Team:Entity Analytics, Team:Security Generative AI, Team:Threat Hunting, Team:Threat Hunting:Explore, Team:Threat Hunting:Investigations, Team:Detections and Resp, Team:Asset Management, Team:Onboarding and Lifecycle Mgt, Team:Security Solution Platform, Team:Detection Alerts, Team: CTI, Team:Threat Hunting:Cases, Team:Cloud Security, Team:Detection Engine, Team:Defend Workflows, Team:Detection Rules, Team:Security-Scalability, Feature:Timeline, Feature:Detection Rules, Feature:Detection Alerts, Feature:Entity Analytics, Feature:Rule Exceptions, Feature:AutomaticImport"
-    "Elasticsearch solution": "Team:Search, Feature:Search Profiler, Team:Elasticsearch UI, Feature:Search, Project:AsyncSearch"
+    "Dashboards and Visualizations":
+      - "Feature:Dashboard"
+      - "Feature:Drilldowns"
+      - "Project:TimeToVisualize"
+      - "Team:Presentation"
+      - "Feature:Lens"
+      - "Feature:Timelion"
+      - "Feature:TSVB"
+      - "Feature:Coordinate Map"
+      - "Feature:Region Map"
+      - "Feature:Vega"
+      - "Feature:Gauge Vis"
+      - "Feature:Tagcloud"
+      - "Feature:Vis Loader"
+      - "Feature:Vislib"
+      - "Feature:Vis Editor"
+      - "Feature:Aggregations"
+      - "Feature:Input Control"
+      - "Feature:Visualizations"
+      - "Feature:Markdown"
+      - "Feature:Data Table"
+      - "Feature:Heatmap"
+      - "Feature:Pie Chart"
+      - "Feature:XYAxis"
+      - "Feature:Graph"
+      - "Feature:MetricVis"
+      - "Team:Visualizations"
+      - "Feature:Canvas"
+      - "Feature:Maps"
+    "Data ingestion and Fleet":
+      - "Team:Fleet"
+      - "Feature:Fleet"
+      - "Ingest"
+      - "Feature:Ingest Node Pipelines"
+    "Data management":
+      - "Feature:Data Views"
+      - "Feature:Index Management"
+      - "Feature:FieldFormatters"
+      - "Feature:ILM"
+      - "Feature:Transforms"
+    "Developer tools":
+      - "Feature:Console"
+      - "Feature:Dev Tools"
+      - "Feature:Inspector"
+    Discover:
+      - "Feature:Discover"
+      - "Team:DataDiscovery"
+      - "Feature:BackgroundSearch"
+      - "Feature:DiscoverTabs"
+      - "Feature:UnifiedDataTable"
+      - "Feature:UnifiedDocViewer"
+      - "Feature:UnifiedFieldList"
+    "ES|QL editor":
+      - "Team:ESQL"
+      - "Feature:ESQL Editor"
+    "Kibana platform":
+      - "Team:SharedUX"
+      - "Team:Design"
+      - "Feature:Add Data"
+      - "Feature:Home"
+      - "EUI"
+      - "Feature:license"
+      - "Feature:watcher"
+      - "Feature:Kibana Management"
+      - "Feature:Snapshot and Restore"
+      - "Team:Stack Management"
+      - "Feature:CCR"
+      - "Feature:Upgrade Assistant"
+      - "Team:Monitoring"
+      - "Feature:Telemetry"
+      - "Feature:Stack Monitoring"
+      - "Team:Operations"
+      - "Kibana UI"
+      - "Feature:Header"
+      - "Team:Core"
+      - "Feature:Plugins"
+      - "Project:i18n"
+      - "Feature:Saved Objects"
+      - "Team:Security"
+      - "Feature:Security/Spaces"
+      - "Feature:users and roles"
+      - "Feature:Security/Authentication"
+      - "Feature:Security/Authorization"
+      - "Feature:Security/Feature Controls"
+      - "Feature:Query Bar"
+      - "Feature:Courier"
+      - "Feature:Filters"
+      - "Feature:Timepicker"
+      - "Feature:Highlight"
+      - "Feature:KQL"
+      - "Feature:Rollups"
+      - "Feature:Chrome"
+      - "Feature:http"
+      - "Feature:OAS"
+      - "Feature:logging"
+    "Machine learning":
+      - ":ml"
+      - "Feature:Anomaly Detection"
+      - "Feature:Data Frames"
+      - "Feature:File Data Viz"
+      - "Feature:ml-results"
+      - "Feature:Data Frame Analytics"
+      - "Feature:Inference UI"
+      - "Feature:ML/AIOps"
+    "Sharing and reporting":
+      - "Feature:Embedding"
+      - "Feature:SharingURLs"
+      - "Feature:Reporting"
+      - "Team:Reporting Services"
+    Workflows:
+      - "Feature:Workflows"
+      - "Team:One Workflow" 
+    "Elastic Observability solution":
+      - "Feature:Observability Home"
+      - "Feature:SLO"
+      - "Team:obs-ux-management"
+      - "Team:Obs AI Assistant"
+      - "Team:obs-ux-infra_services"
+      - "Team:obs-ux-logs"
+      - "Team:obs-knowledge"
+      - "Team:obs-entities"
+      - "ci:project-deploy-observability"
+      - "Feature:Uptime"
+      - "Team:uptime"
+      - "Team:apm"
+      - "Team:APM"
+      - "Feature:Metrics UI"
+      - "Team:logs-metrics-ui"
+      - "Feature:Logs UI"
+      - "Feature:Infra UI"
+      - "Feature:Service Maps"
+      - "Feature:Streams"
+    "Elastic Security solution":
+      - "Team:SIEM"
+      - "Team:SecuritySolution"
+      - "Team: SecuritySolution"
+      - "Team:Endpoint Response"
+      - "Team:Entity Analytics"
+      - "Team:Security Generative AI"
+      - "Team:Threat Hunting"
+      - "Team:Threat Hunting:Explore"
+      - "Team:Threat Hunting:Investigations"
+      - "Team:Detections and Resp"
+      - "Team:Asset Management"
+      - "Team:Onboarding and Lifecycle Mgt"
+      - "Team:Security Solution Platform"
+      - "Team:Detection Alerts"
+      - "Team: CTI"
+      - "Team:Threat Hunting:Cases"
+      - "Team:Cloud Security"
+      - "Team:Detection Engine"
+      - "Team:Defend Workflows"
+      - "Team:Detection Rules"
+      - "Team:Security-Scalability"
+      - "Feature:Timeline"
+      - "Feature:Detection Rules"
+      - "Feature:Detection Alerts"
+      - "Feature:Entity Analytics"
+      - "Feature:Rule Exceptions"
+      - "Feature:AutomaticImport"
+    "Elasticsearch solution":
+      - "Team:Search"
+      - "Feature:Search Profiler"
+      - "Team:Elasticsearch UI"
+      - "Feature:Search"
+      - "Project:AsyncSearch"
 
-# Block configuration - combined create and publish blockers
-block:
-  # Global labels that block changelog creation for all products (comma-separated string)
-  # create: ">non-issue, >test"
+# Rules configuration — controls which PRs create changelogs and which entries are published.
+# All list-like fields (exclude, include, exclude_types, etc.) accept BOTH forms:
+#   - Comma-separated string: "value1, value2, value3"
+#   - YAML list: [value1, value2, value3]
+#
+# Global match default for multi-valued fields (labels, areas).
+#   any (default) = match if ANY item matches the list
+#   all           = match only if ALL items match the list
+# Inherited by create, publish, and all product overrides.
+rules:
+  # match: any
 
-  # Block changelog entries from publishing based on entry type or area
-  # publish:
-  #   types:
-  #     - deprecation
-  #     - known-issue
-  #   areas:
+  # Create — controls which PRs generate changelog entries.
+  #   exclude: block PRs with these labels (string or list)
+  #   include: only create changelogs for PRs with these labels (string or list)
+  # Cannot specify both.
+  #
+  create:
+    exclude: "release_note:skip, reverted, backport"
+  #   # Or equivalently:
+  #   # exclude:
+  #   #   - ">non-issue"
+  #   #   - ">test"
+  #   # match: any
+  #   products:
+  #     'elasticsearch, kibana':
+  #       exclude: ">test"
+  #     'cloud-serverless':
+  #       exclude: "ILM"
+
+  # Publish — controls which entries appear in rendered output.
+  #   exclude_types / include_types (string or list)
+  #   exclude_areas / include_areas (string or list)
+  # Cannot mix exclude_ and include_ for the same field.
+  #
+  # match_areas inherits from rules.match if not specified.
+  #
+  publish:
+  #   # match_areas: any
+  #   exclude_types: "deprecation, known-issue"
+  #   # Or equivalently:
+  #   # exclude_types:
+  #   #   - deprecation
+  #   #   - known-issue
+  #   exclude_areas:
   #     - "Internal"
-  # Product-specific overrides (override global blockers, don't merge)
-  # Dictionary key can be a single product ID or comma-separated product IDs
-  product:
-    'kibana':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
+    products:
+      'cloud-serverless':
+        exclude_types:
           - docs
-        areas:
+      'kibana':
+        exclude_types:
+          - docs
+        # Exclude changelogs that have only one or both of the following areas:
+        match_areas: all
+        exclude_areas:
          - "Elastic Observability solution"
          - "Elastic Security solution"
-    'cloud-serverless':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        # TBD: Are there areas to block?
-        # areas:
-        #   - Monitoring
-        types:
+      'observability':
+        exclude_types:
           - docs
-    'observability':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
-          - docs
-        areas:
-        # Block every area except the observability solution
-          - Alerting
-          - "Beats management"
-          - Canvas
-          - "Dashboards and Visualizations"
-          - "Data ingestion and Fleet"
-          - Discover
-          - "ES|QL"
-          # - "Elastic Observability solution"
-          - "Elastic Security solution"
-          - "Kibana platform"
-          - "Kibana security"
-          - "Kibana UI"
-          - Logstash
-          - "Machine learning"
-          - Management
-          - Maps
-          - Monitoring
-          - Operations
-          - Platform
-          - QA  
-          - "Querying and filtering"
-          - Reporting
-          - Search
-          - Sharing
-    'security':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
-          - docs
-        areas:
-          # Block every area except the security solution
-          - Alerting
-          - "Beats management"
-          - Canvas
-          - "Dashboards and Visualizations"
-          - "Data ingestion and Fleet"
-          - Discover
-          - "ES|QL"
+        # Include changelogs that have (at least) the following areas:
+        match_areas: any
+        include_areas:
           - "Elastic Observability solution"
-          # - "Elastic Security solution"
-          - "Kibana platform"
-          - "Kibana security"
-          - "Kibana UI"
-          - Logstash
-          - "Machine learning"
-          - Management
-          - Maps
-          - Monitoring
-          - Operations
-          - Platform
-          - QA  
-          - "Querying and filtering"
-          - Reporting
-          - Search
-          - Sharing
+      'security':
+        exclude_types:
+          - docs
+        # Include changelogs that have (at least) the following areas:
+        match_areas: any
+        include_areas:
+          - "Elastic Security solution"   
 
 # Bundle configuration (profiles and defaults)
 bundle:
