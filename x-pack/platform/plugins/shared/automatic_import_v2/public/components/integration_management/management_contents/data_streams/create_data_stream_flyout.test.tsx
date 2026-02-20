@@ -54,6 +54,7 @@ const mockUseFetchIndices = useFetchIndices as jest.Mock;
 const mockUseValidateIndex = useValidateIndex as jest.Mock;
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as jest.Mock;
+const mockRefetch = jest.fn();
 
 const mockServices = coreMock.createStart();
 
@@ -108,12 +109,13 @@ describe('CreateDataStreamFlyout', () => {
       clearValidationError: mockClearValidationError,
     });
 
+    mockRefetch.mockClear();
     mockUseGetIntegrationById.mockReturnValue({
       integration: undefined,
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     });
 
     mockUseCreateUpdateIntegration.mockReturnValue({
@@ -357,6 +359,19 @@ describe('CreateDataStreamFlyout', () => {
       // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
+  });
+
+  describe('refetch after creation', () => {
+    it('should get refetch function from useGetIntegrationById hook', () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      expect(mockUseGetIntegrationById).toHaveBeenCalled();
     });
   });
 });
