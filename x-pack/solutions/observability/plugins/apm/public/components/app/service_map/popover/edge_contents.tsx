@@ -7,6 +7,7 @@
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -50,15 +51,6 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
     targetData && SPAN_DESTINATION_SERVICE_RESOURCE in targetData
       ? targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
       : undefined;
-  const discoverQueryParams =
-    sourceServiceName && dependencyName && rangeFrom && rangeTo
-      ? {
-          rangeFrom,
-          rangeTo,
-          serviceName: sourceServiceName,
-          dependencyName,
-        }
-      : undefined;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -91,7 +83,7 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
       <EuiFlexItem>
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
-      {discoverQueryParams && (
+      {sourceServiceName && dependencyName && (
         <>
           <EuiSpacer size="s" />
           <EuiFlexItem>
@@ -99,15 +91,18 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
               dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
               variant="outlinedButton"
               indexType="traces"
-              rangeFrom={discoverQueryParams.rangeFrom}
-              rangeTo={discoverQueryParams.rangeTo}
+              label={i18n.translate('xpack.apm.serviceMap.edgeContents.viewTracesLabel', {
+                defaultMessage: 'View traces',
+              })}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
               indexSettings={indexSettings}
               indexSettingsStatus={indexSettingsStatus}
               queryParams={{
                 kuery,
-                serviceName: discoverQueryParams.serviceName,
+                serviceName: sourceServiceName,
                 environment,
-                dependencyName: discoverQueryParams.dependencyName,
+                dependencyName,
               }}
             />
           </EuiFlexItem>
