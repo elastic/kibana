@@ -35,16 +35,13 @@ import {
 } from '../../../state/settings/actions';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
 
-const MIN_SYNC_INTERVAL = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-const MAX_SYNC_INTERVAL = MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-
 export const AdvancedSettingsForm = () => {
   const dispatch = useDispatch();
 
   const { settings, loading } = useSelector(selectDynamicSettings);
 
   const [syncInterval, setSyncInterval] = useState<number>(
-    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ?? MIN_SYNC_INTERVAL
+    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ?? MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
   );
 
   const canEdit: boolean =
@@ -75,8 +72,8 @@ export const AdvancedSettingsForm = () => {
 
   const isFormDirty = !isEqual(syncInterval, settings?.privateLocationsSyncInterval);
   const isFormValid =
-    syncInterval >= MIN_SYNC_INTERVAL &&
-    syncInterval <= MAX_SYNC_INTERVAL &&
+    syncInterval >= MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
+    syncInterval <= MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL &&
     Number.isInteger(syncInterval);
 
   return (
@@ -122,7 +119,10 @@ export const AdvancedSettingsForm = () => {
               ? i18n.translate('xpack.synthetics.settings.advanced.syncInterval.error', {
                   defaultMessage:
                     'Sync interval must be a whole number between {min} and {max} minutes.',
-                  values: { min: MIN_SYNC_INTERVAL, max: MAX_SYNC_INTERVAL },
+                  values: {
+                    min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+                    max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+                  },
                 })
               : undefined
           }
@@ -131,8 +131,8 @@ export const AdvancedSettingsForm = () => {
             isInvalid={!isFormValid}
             data-test-subj="syntheticsSyncIntervalField"
             value={syncInterval}
-            min={MIN_SYNC_INTERVAL}
-            max={MAX_SYNC_INTERVAL}
+            min={MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}
+            max={MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL}
             step={1}
             disabled={isDisabled}
             isLoading={loading}
@@ -152,7 +152,7 @@ export const AdvancedSettingsForm = () => {
               setSyncInterval(
                 settings?.privateLocationsSyncInterval ??
                   DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ??
-                  MIN_SYNC_INTERVAL
+                  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
               );
             }}
             flush="left"
