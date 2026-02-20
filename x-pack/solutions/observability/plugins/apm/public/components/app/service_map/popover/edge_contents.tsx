@@ -34,7 +34,7 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const { offset, comparisonEnabled, rangeFrom, rangeTo } = query;
+  const { offset, comparisonEnabled, rangeFrom, rangeTo, kuery } = query;
 
   const isEdgeSelection = isEdge(selection);
   const { indexSettings, indexSettingsStatus } = useApmIndexSettingsContext();
@@ -104,7 +104,9 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
               indexSettings={indexSettings}
               indexSettingsStatus={indexSettingsStatus}
               queryParams={{
+                kuery,
                 serviceName: discoverQueryParams.serviceName,
+                environment,
                 dependencyName: discoverQueryParams.dependencyName,
               }}
             />
